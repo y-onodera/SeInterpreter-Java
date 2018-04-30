@@ -23,7 +23,7 @@ import org.openqa.selenium.WebElement;
 public class SetElementNotSelected implements StepType {
 	@Override
 	public boolean run(TestRun ctx) {
-		WebElement e = ctx.locator("locator").find(ctx);
+		WebElement e = ctx.locator().find(ctx);
 		if (e.isSelected()) { e.click(); }
 		return true;
 	}

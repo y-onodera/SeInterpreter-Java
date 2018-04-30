@@ -16,10 +16,13 @@
 package com.sebuilder.interpreter.factory;
 
 import com.sebuilder.interpreter.Script;
+import com.sebuilder.interpreter.SeInterpreterTestListener;
 import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.webdriverfactory.WebDriverFactory;
+
 import java.util.HashMap;
 import java.util.Map;
+
 import org.apache.commons.logging.Log;
 
 /**
@@ -28,68 +31,32 @@ import org.apache.commons.logging.Log;
  * @author jkowalczyk
  */
 public class TestRunFactory {
-	private int implicitlyWaitDriverTimeout = -1;
-	private int pageLoadDriverTimeout = -1;
+    private int implicitlyWaitDriverTimeout = -1;
+    private int pageLoadDriverTimeout = -1;
 
-	public int getImplicitlyWaitDriverTimeout() { return implicitlyWaitDriverTimeout; }
-	public void setImplicitlyWaitDriverTimeout(int implicitlyWaitDriverTimeout) { this.implicitlyWaitDriverTimeout = implicitlyWaitDriverTimeout; }
+    public void setImplicitlyWaitDriverTimeout(int implicitlyWaitDriverTimeout) {
+        this.implicitlyWaitDriverTimeout = implicitlyWaitDriverTimeout;
+    }
 
-	public int getPageLoadDriverTimeout() { return pageLoadDriverTimeout; }
-	public void setPageLoadDriverTimeout(int pageLoadDriverTimeout) { this.pageLoadDriverTimeout = pageLoadDriverTimeout; }
+    public void setPageLoadDriverTimeout(int pageLoadDriverTimeout) {
+        this.pageLoadDriverTimeout = pageLoadDriverTimeout;
+    }
 
-	/**
-	 * @param script
-	 * @return A TestRun for the script
-	 */
-	public TestRun createTestRun(Script script) {
-		return new TestRun(script, implicitlyWaitDriverTimeout, pageLoadDriverTimeout);
-	}
-	
-	/**
-	 * @param script
-	 * @param initialVars
-	 * @return A TestRun for the script
-	 */
-	public TestRun createTestRun(Script script, Map<String, String> initialVars) {
-		return new TestRun(script, implicitlyWaitDriverTimeout, pageLoadDriverTimeout, initialVars);
-	}
-
-	/**
-	 * @param script
-	 * @param log
-	 * @param webDriverFactory
-	 * @param webDriverConfig
-	 * @return A new instance of TestRun
-	 */
-	public TestRun createTestRun(Script script, Log log, WebDriverFactory webDriverFactory, HashMap<String, String> webDriverConfig) {
-		return new TestRun(script, log, webDriverFactory, webDriverConfig, implicitlyWaitDriverTimeout, pageLoadDriverTimeout);
-	}
-	
-	/**
-	 * @param script
-	 * @param log
-	 * @param webDriverFactory
-	 * @param webDriverConfig
-	 * @param initialVars
-	 * @return A new instance of TestRun
-	 */
-	public TestRun createTestRun(Script script, Log log, WebDriverFactory webDriverFactory, HashMap<String, String> webDriverConfig, Map<String, String> initialVars) {
-		return new TestRun(script, log, webDriverFactory, webDriverConfig, implicitlyWaitDriverTimeout, pageLoadDriverTimeout, initialVars);
-	}
-	
-	/**
-	 * @param script
-	 * @param log
-	 * @param webDriverFactory
-	 * @param webDriverConfig
-	 * @param initialVars
-	 * @param previousRun
-	 * @return A new instance of TestRun, using the previous run's driver and vars if available.
-	 */
-	public TestRun createTestRun(Script script, Log log, WebDriverFactory webDriverFactory, HashMap<String, String> webDriverConfig, Map<String, String> initialVars, TestRun previousRun) {
-		if (script.usePreviousDriverAndVars && previousRun != null && previousRun.driver() != null) {
-			return new TestRun(script, log, previousRun, implicitlyWaitDriverTimeout, pageLoadDriverTimeout, initialVars);
-		}
-		return new TestRun(script, log, webDriverFactory, webDriverConfig, implicitlyWaitDriverTimeout, pageLoadDriverTimeout, initialVars);
-	}
+    /**
+     * @param script
+     * @param log
+     * @param webDriverFactory
+     * @param webDriverConfig
+     * @param initialVars
+     * @param previousRun
+     * @param seInterpreterTestListener
+     * @return A new instance of TestRun, using the previous run's driver and vars if available.
+     */
+    public TestRun createTestRun(Script script, Log log, WebDriverFactory webDriverFactory, HashMap<String, String> webDriverConfig, Map<String, String> initialVars, TestRun previousRun, SeInterpreterTestListener seInterpreterTestListener) {
+        if (script.usePreviousDriverAndVars && previousRun != null && previousRun.driver() != null) {
+            initialVars.putAll(previousRun.vars());
+            return new TestRun(script, log, previousRun.driver(), implicitlyWaitDriverTimeout, pageLoadDriverTimeout, initialVars, seInterpreterTestListener);
+        }
+        return new TestRun(script, log, webDriverFactory, webDriverConfig, implicitlyWaitDriverTimeout, pageLoadDriverTimeout, initialVars, seInterpreterTestListener);
+    }
 }

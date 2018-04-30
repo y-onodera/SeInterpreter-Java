@@ -23,7 +23,7 @@ import org.openqa.selenium.interactions.Actions;
 public class ReleaseElement implements StepType {
 	@Override
 	public boolean run(TestRun ctx) {
-		new Actions(ctx.driver()).release(ctx.locator("locator").find(ctx)).build().perform();
+		new Actions(ctx.driver()).release(ctx.locator().find(ctx)).build().perform();
 		return true;
 	}
 }

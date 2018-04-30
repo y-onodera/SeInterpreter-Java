@@ -22,7 +22,7 @@ import com.sebuilder.interpreter.TestRun;
 public class ClickElement implements StepType {
 	@Override
 	public boolean run(TestRun ctx) {
-		ctx.locator("locator").find(ctx).click();
+		ctx.locator().find(ctx).click();
 		return true;
 	}
 }

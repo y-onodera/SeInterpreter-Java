@@ -23,7 +23,7 @@ import org.openqa.selenium.interactions.Actions;
 public class MouseOverElement implements StepType {
 	@Override
 	public boolean run(TestRun ctx) {
-		new Actions(ctx.driver()).moveToElement(ctx.locator("locator").find(ctx)).build().perform();
+		new Actions(ctx.driver()).moveToElement(ctx.locator().find(ctx)).build().perform();
 		return true;
 	}
 }

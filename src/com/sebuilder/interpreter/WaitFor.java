@@ -30,13 +30,20 @@ public class WaitFor implements StepType {
 	@Override
 	public boolean run(TestRun ctx) {
 		int maxWaitMs = 60000; // qqDPS Eventually get this from somewhere.
+		if(ctx.containsKey("maxWait")){
+			maxWaitMs = Integer.parseInt(ctx.string("maxWait"));
+		}
+		int intervalMs = 500; // qqDPS Eventually get this from somewhere.
+		if(ctx.containsKey("interval")){
+			intervalMs = Integer.parseInt(ctx.string("interval"));
+		}
 		long stopBy = System.currentTimeMillis() + maxWaitMs;
 		boolean result;
 		// NB: If the step is negated, a result of "true"  means that we haven't succeeded yet.
 		//     If the step is normal,  a result of "false" means that we haven't succeeded yet.
 		while ((result = test(ctx)) == ctx.currentStep().negated && System.currentTimeMillis() < stopBy) {
 			try {
-				Thread.sleep(500);
+				Thread.sleep(intervalMs);
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}

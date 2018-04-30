@@ -24,7 +24,7 @@ public class DragAndDropToElement implements StepType {
 	@Override
 	public boolean run(TestRun ctx) {
 		new Actions(ctx.driver()).dragAndDrop(
-				ctx.locator("locator").find(ctx),
+				ctx.locator().find(ctx),
 				ctx.locator("locator2").find(ctx)).build().perform();
 		return true;
 	}

@@ -18,6 +18,7 @@ package com.sebuilder.interpreter.factory;
 
 import com.sebuilder.interpreter.DataSource;
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,12 +66,10 @@ public class DataSourceFactory {
 			}
 			if (c != null) {
 				try {
-					Object o = c.newInstance();
+					Object o = c.getDeclaredConstructor().newInstance();
 					sourcesMap.put(sourceName, (DataSource) o);
-				} catch (InstantiationException ie) {
+				} catch (InstantiationException | IllegalAccessException |NoSuchMethodException | InvocationTargetException ie) {
 					throw new RuntimeException(c.getName() + " could not be instantiated.", ie);
-				} catch (IllegalAccessException iae) {
-					throw new RuntimeException(c.getName() + " could not be instantiated.", iae);
 				} catch (ClassCastException cce) {
 					throw new RuntimeException(c.getName() + " does not extend DataSource.", cce);
 				}

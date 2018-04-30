@@ -22,7 +22,7 @@ import com.sebuilder.interpreter.TestRun;
 public class AnswerAlert implements StepType {
 	@Override
 	public boolean run(TestRun ctx) {
-		ctx.driver().switchTo().alert().sendKeys(ctx.string("text"));
+		ctx.driver().switchTo().alert().sendKeys(ctx.text());
 		ctx.driver().switchTo().alert().accept();
 		return true;
 	}

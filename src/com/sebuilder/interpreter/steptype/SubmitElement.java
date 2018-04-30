@@ -22,7 +22,7 @@ import com.sebuilder.interpreter.TestRun;
 public class SubmitElement implements StepType {
 	@Override
 	public boolean run(TestRun ctx) {
-		ctx.locator("locator").find(ctx).submit();
+		ctx.locator().find(ctx).submit();
 		return true;
 	}
 }

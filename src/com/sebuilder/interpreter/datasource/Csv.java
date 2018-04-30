@@ -17,6 +17,7 @@
 package com.sebuilder.interpreter.datasource;
 
 import au.com.bytecode.opencsv.CSVReader;
+import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.DataSource;
 import static com.sebuilder.interpreter.datasource.Utils.findFile;
 import java.io.BufferedReader;
@@ -38,9 +39,10 @@ public class Csv implements DataSource {
 	public List<Map<String, String>> getData(Map<String, String> config, File relativeTo) {
 		ArrayList<Map<String, String>> data = new ArrayList<Map<String, String>>();
 		File f = findFile(relativeTo, config.get("path"));
+		String charsetName = Context.getInstance().getDataSourceEncording();
 		BufferedReader r = null;
 		try {
-			r = new BufferedReader(new InputStreamReader(new FileInputStream(f), "UTF-8"));
+			r = new BufferedReader(new InputStreamReader(new FileInputStream(f), charsetName));
 			CSVReader csvR = new CSVReader(r);
 			String[] keys = csvR.readNext();
 			if (keys != null) {

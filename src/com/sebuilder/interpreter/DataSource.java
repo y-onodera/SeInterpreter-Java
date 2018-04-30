@@ -26,5 +26,5 @@ import java.util.Map;
  * @author zarkonnen
  */
 public interface DataSource {
-	public List<Map<String, String>> getData(Map<String, String> config, File relativeTo);
+	 List<Map<String, String>> getData(Map<String, String> config, File relativeTo);
 }

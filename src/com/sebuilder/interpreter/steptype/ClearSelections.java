@@ -23,7 +23,7 @@ import org.openqa.selenium.support.ui.Select;
 public class ClearSelections implements StepType {
 	@Override
 	public boolean run(TestRun ctx) {
-		new Select(ctx.locator("locator").find(ctx)).deselectAll();
+		new Select(ctx.locator().find(ctx)).deselectAll();
 		return true;
 	}
 }

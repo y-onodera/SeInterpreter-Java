@@ -18,10 +18,12 @@ package com.sebuilder.interpreter;
 
 import com.sebuilder.interpreter.factory.TestRunFactory;
 import com.sebuilder.interpreter.webdriverfactory.WebDriverFactory;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -36,108 +38,40 @@ import org.json.JSONObject;
  * @author zarkonnen
  */
 public class Script {
-	public ArrayList<Step> steps = new ArrayList<Step>();
-	public TestRunFactory testRunFactory = new TestRunFactory();
-	public List<Map<String, String>> dataRows;
-	public String name = "Script";
-	public boolean usePreviousDriverAndVars = false;
-	public boolean closeDriver = true;
+    public ArrayList<Step> steps = new ArrayList<>();
+    public TestRunFactory testRunFactory = new TestRunFactory();
+    public List<Map<String, String>> dataRows;
+    public String name = "Script";
+    public boolean usePreviousDriverAndVars = false;
+    public boolean closeDriver = true;
 
-	public Script() {
-		// By default there is one empty data row.
-		dataRows = new ArrayList<Map<String, String>>(1);
-		dataRows.add(new HashMap<String, String>());
-	}
+    public Script() {
+        // By default there is one empty data row.
+        dataRows = new ArrayList<>(1);
+        dataRows.add(new HashMap<>());
+    }
 
-	/**
-	 * @return A TestRun object that can be iterated to run the script step by
-	 * step.
-	 */
-	public TestRun start() {
-		return testRunFactory.createTestRun(this);
-	}
+    public TestRun createTestRun(Log log, WebDriverFactory wdf, HashMap<String, String> driverConfig, Map<String, String> data, TestRun lastRun, SeInterpreterTestListener seInterpreterTestListener) {
+        return testRunFactory.createTestRun(this, log, wdf, driverConfig, data, lastRun, seInterpreterTestListener);
+    }
 
-	/**
-	 * @param log Logger to log to.
-	 * @param webDriverFactory Factory for the WebDriver to use for playback.
-	 * @param webDriverConfig Configuration for the factory/WebDriver.
-	 * @return A TestRun object that can be iterated to run the script step by
-	 * step.
-	 */
-	public TestRun start(Log log, WebDriverFactory webDriverFactory, HashMap<String, String> webDriverConfig) {
-		return testRunFactory.createTestRun(this, log, webDriverFactory, webDriverConfig);
-	}
-	
-	/**
-	 * @param log Logger to log to.
-	 * @param webDriverFactory Factory for the WebDriver to use for playback.
-	 * @param webDriverConfig Configuration for the factory/WebDriver.
-	 * @param initialVars Initial variables for data-driven playback.
-	 * @return A TestRun object that can be iterated to run the script step by
-	 * step.
-	 */
-	public TestRun start(Log log, WebDriverFactory webDriverFactory, HashMap<String, String> webDriverConfig, Map<String, String> initialVars) {
-		return testRunFactory.createTestRun(this, log, webDriverFactory, webDriverConfig, initialVars);
-	}
+    @Override
+    public String toString() {
+        try {
+            return toJSON().toString(4);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-	/**
-	 * Runs the script.
-	 *
-	 * @return Whether the run succeeded or failed.
-	 * @throws RuntimeException If the script encountered a problem, including a
-	 * failed Assertion or timed-out Wait.
-	 */
-	public boolean run() {
-		return start().finish();
-	}
+    public JSONObject toJSON() throws JSONException {
+        JSONObject o = new JSONObject();
+        JSONArray stepsA = new JSONArray();
+        for (Step s : steps) {
+            stepsA.put(s.toJSON());
+        }
+        o.put("steps", stepsA);
+        return o;
+    }
 
-	/**
-	 * Runs the script.
-	 *
-	 * @param log Logger to log to.
-	 * @param webDriverFactory Factory for the WebDriver to use for playback.
-	 * @param webDriverConfig Configuration for the factory/WebDriver.
-	 * @return Whether the run succeeded or failed.
-	 * @throws RuntimeException If the script encountered a problem, including a
-	 * failed Assertion or timed-out Wait.
-	 */
-	public boolean run(Log log, WebDriverFactory webDriverFactory, HashMap<String, String> webDriverConfig) {
-		return start(log, webDriverFactory, webDriverConfig).finish();
-	}
-	
-	/**
-	 * Runs the script.
-	 *
-	 * @param log Logger to log to.
-	 * @param webDriverFactory Factory for the WebDriver to use for playback.
-	 * @param webDriverConfig Configuration for the factory/WebDriver.
-	 * @param initialVars Initial variables for data-driven playback.
-	 * @return Whether the run succeeded or failed.
-	 * @throws RuntimeException If the script encountered a problem, including a
-	 * failed Assertion or timed-out Wait.
-	 */
-	public boolean run(Log log, WebDriverFactory webDriverFactory, HashMap<String, String> webDriverConfig, Map<String, String> initialVars) {
-		return start(log, webDriverFactory, webDriverConfig).finish();
-	}
-
-	@Override
-	public String toString() {
-		try {
-			return toJSON().toString(4);
-		} catch (JSONException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	public JSONObject toJSON() throws JSONException {
-		JSONObject o = new JSONObject();
-		o.put("seleniumVersion", "2");
-		o.put("formatVersion", 1);
-		JSONArray stepsA = new JSONArray();
-		for (Step s : steps) {
-			stepsA.put(s.toJSON());
-		}
-		o.put("steps", stepsA);
-		return o;
-	}
 }

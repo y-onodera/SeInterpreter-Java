@@ -22,15 +22,16 @@ package com.sebuilder.interpreter;
  * @author zarkonnen
  */
 public interface Getter {
+
 	/**
 	 * @param ctx Current test run.
 	 * @return The value this getter gets, eg the page title.
 	 */
-	public String get(TestRun ctx);
+	 String get(TestRun ctx);
 	
 	/**
 	 * @return The name of the parameter to compare the result of the get to, or null if the get
 	 *         returns a boolean "true"/"false".
 	 */
-	public String cmpParamName();
+	 String cmpParamName();
 }
