@@ -31,14 +31,14 @@ import org.apache.commons.logging.Log;
  * @author jkowalczyk
  */
 public class TestRunFactory {
-    private int implicitlyWaitDriverTimeout = -1;
-    private int pageLoadDriverTimeout = -1;
+    private Long implicitlyWaitDriverTimeout = Long.valueOf(-1);
+    private Long pageLoadDriverTimeout = Long.valueOf(-1);
 
-    public void setImplicitlyWaitDriverTimeout(int implicitlyWaitDriverTimeout) {
+    public void setImplicitlyWaitDriverTimeout(Long implicitlyWaitDriverTimeout) {
         this.implicitlyWaitDriverTimeout = implicitlyWaitDriverTimeout;
     }
 
-    public void setPageLoadDriverTimeout(int pageLoadDriverTimeout) {
+    public void setPageLoadDriverTimeout(Long pageLoadDriverTimeout) {
         this.pageLoadDriverTimeout = pageLoadDriverTimeout;
     }
 
@@ -54,7 +54,6 @@ public class TestRunFactory {
      */
     public TestRun createTestRun(Script script, Log log, WebDriverFactory webDriverFactory, HashMap<String, String> webDriverConfig, Map<String, String> initialVars, TestRun previousRun, SeInterpreterTestListener seInterpreterTestListener) {
         if (script.usePreviousDriverAndVars && previousRun != null && previousRun.driver() != null) {
-            initialVars.putAll(previousRun.vars());
             return new TestRun(script, log, previousRun.driver(), implicitlyWaitDriverTimeout, pageLoadDriverTimeout, initialVars, seInterpreterTestListener);
         }
         return new TestRun(script, log, webDriverFactory, webDriverConfig, implicitlyWaitDriverTimeout, pageLoadDriverTimeout, initialVars, seInterpreterTestListener);

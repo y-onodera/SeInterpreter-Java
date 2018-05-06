@@ -28,6 +28,8 @@ import org.json.JSONException;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -61,9 +63,9 @@ public class SeInterpreter {
                     System.exit(1);
                 }
                 if (s.startsWith("--implicitlyWait")) {
-                    trf.setImplicitlyWaitDriverTimeout(Integer.parseInt(kv[1]));
+                    trf.setImplicitlyWaitDriverTimeout(Long.valueOf(kv[1]));
                 } else if (s.startsWith("--pageLoadTimeout")) {
-                    trf.setPageLoadDriverTimeout(Integer.parseInt(kv[1]));
+                    trf.setPageLoadDriverTimeout(Long.valueOf(kv[1]));
                 } else if (s.startsWith("--stepTypePackage")) {
                     stf.setPrimaryPackage(kv[1]);
                 } else if (s.startsWith("--driver.")) {
@@ -128,7 +130,10 @@ public class SeInterpreter {
     private void runScript(Log log, Script script) {
         int i = 1;
         for (Map<String, String> data : script.dataRows) {
-            seInterpreterTestListener.openTestSuite(script.name.replace(".json", "") + ".row" + String.valueOf(i), new Hashtable<>(data));
+            Path currentDir = Paths.get(".").toAbsolutePath();
+            Path executeScript = Paths.get(script.name);
+            String normalizePath = currentDir.relativize(executeScript).normalize().toString();
+            seInterpreterTestListener.openTestSuite(normalizePath.replace(".json", "") + "_row" + String.valueOf(i), new Hashtable<>(data));
             this.runScript(log, script, data, seInterpreterTestListener);
             seInterpreterTestListener.closeTestSuite();
             i++;

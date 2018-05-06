@@ -48,8 +48,8 @@ public class TestRun {
             RemoteWebDriver driver,
             WebDriverFactory webDriverFactory,
             HashMap<String, String> webDriverConfig,
-            int implicitlyWaitDriverTimeout,
-            int pageLoadDriverTimeout,
+            Long implicitlyWaitDriverTimeout,
+            Long pageLoadDriverTimeout,
             Map<String, String> initialVars,
             SeInterpreterTestListener seInterpreterTestListener) {
         this.script = script;
@@ -69,8 +69,8 @@ public class TestRun {
             Log log,
             WebDriverFactory webDriverFactory,
             HashMap<String, String> webDriverConfig,
-            int implicitlyWaitDriverTimeout,
-            int pageLoadDriverTimeout,
+            Long implicitlyWaitDriverTimeout,
+            Long pageLoadDriverTimeout,
             Map<String, String> initialVars, SeInterpreterTestListener seInterpreterTestListener) {
         this(script, log, null, webDriverFactory, webDriverConfig, implicitlyWaitDriverTimeout, pageLoadDriverTimeout, initialVars, seInterpreterTestListener);
     }
@@ -79,10 +79,28 @@ public class TestRun {
             Script script,
             Log log,
             RemoteWebDriver driver,
-            int implicitlyWaitDriverTimeout,
-            int pageLoadDriverTimeout,
+            Long implicitlyWaitDriverTimeout,
+            Long pageLoadDriverTimeout,
             Map<String, String> initialVars, SeInterpreterTestListener seInterpreterTestListener) {
         this(script, log, driver, null, null, implicitlyWaitDriverTimeout, pageLoadDriverTimeout, initialVars, seInterpreterTestListener);
+    }
+
+    /**
+     *
+     * @param script
+     * @return
+     */
+    public TestRun createTestRun(Script script) {
+        return new TestRun(script
+                , this.log
+                , this.driver
+                , null
+                , null
+                , null
+                , null
+                , null
+                , this.listener
+        );
     }
 
     /**
@@ -309,11 +327,11 @@ public class TestRun {
      * @param implicitlyWaitDriverTimeout
      * @param pageLoadDriverTimeout
      */
-    private void setTimeouts(int implicitlyWaitDriverTimeout, int pageLoadDriverTimeout) {
-        if (implicitlyWaitDriverTimeout > 0) {
+    private void setTimeouts(Long implicitlyWaitDriverTimeout, Long pageLoadDriverTimeout) {
+        if (implicitlyWaitDriverTimeout != null &&implicitlyWaitDriverTimeout > 0) {
             this.implicitlyWaitDriverTimeout = Long.valueOf(implicitlyWaitDriverTimeout);
         }
-        if (pageLoadDriverTimeout > 0) {
+        if (pageLoadDriverTimeout != null &&pageLoadDriverTimeout > 0) {
             this.pageLoadDriverTimeout = Long.valueOf(pageLoadDriverTimeout);
         }
     }

@@ -48,9 +48,13 @@ public class SeInterpreterTestListener {
 
     public boolean openTestSuite(String name, Hashtable<?, ?> property) {
         suite = new JUnitTest();
-        suite.setName(name);
+        suite.setName(name.replace("\\",".").replace("/",".").replaceAll("^\\.+",""));
         suite.setProperties(property);
         suite.setRunTime(new Date().getTime());
+        test = null;
+        runTest = 0;
+        error = 0;
+        failed = 0;
         try {
             this.formatter.setOutput(new FileOutputStream(new File(this.resultDir, "TEST-SeBuilder-" + suite.getName() + "-result.xml")));
             this.formatter.startTestSuite(suite);
@@ -84,12 +88,13 @@ public class SeInterpreterTestListener {
 
     public void closeTestSuite() {
         suite.setCounts(runTest, failed, error);
+        suite.setRunTime(new Date().getTime() - suite.getRunTime());
         this.formatter.endTestSuite(suite);
     }
 
     public void aggregateResult() {
         try {
-            new File(this.resultDir,"TEST-SeBuilder-result.xml").createNewFile();
+            new File(this.resultDir, "TEST-SeBuilder-result.xml").createNewFile();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
