@@ -1,5 +1,7 @@
 package com.sebuilder.interpreter;
 
+import java.io.File;
+
 public class Context {
     private static Context ourInstance = new Context();
 
@@ -18,7 +20,11 @@ public class Context {
     /**
      *
      */
-    private String screenShotDirectory = "screenshot";
+    private String screenShotOutputDirectory = "screenshot";
+    /**
+     *
+     */
+    private String resultOutputDirectory = "result";
 
     private Context() {
     }
@@ -59,15 +65,24 @@ public class Context {
      *
      * @return
      */
-    public String getScreenShotDirectory() {
-        return screenShotDirectory;
+    public File getScreenShotOutputDirectory() {
+        return new File(this.getResultOutputDirectory(),screenShotOutputDirectory);
     }
 
     /**
      *
      * @param screenShotOutput
      */
-    public void setScreenShotOutput(String screenShotOutput) {
-        this.screenShotDirectory = screenShotOutput;
+    public void setScreenShotOutputDirectory(String screenShotOutput) {
+        this.screenShotOutputDirectory = screenShotOutput;
     }
+
+    public File getResultOutputDirectory() {
+        return new File(resultOutputDirectory);
+    }
+
+    public void setResultOutputDirectory(String aResultOutputDirectory) {
+        this.resultOutputDirectory = aResultOutputDirectory;
+    }
+
 }

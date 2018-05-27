@@ -61,17 +61,6 @@ public class SeInterpreter extends CommandLineRunner {
         this.paths.add(s);
     }
 
-    @Override
-    protected void configureOption(String s, String[] kv) {
-        if (s.startsWith("--datasource.encoding")) {
-            Context.getInstance().setDataSourceEncording(kv[1]);
-        } else if (s.startsWith("--datasource.directory")) {
-            Context.getInstance().setDataSourceDirectory(kv[1]);
-        } else if (s.startsWith("--screenshotoutput")) {
-            Context.getInstance().setScreenShotOutput(kv[1]);
-        }
-    }
-
     private void runScripts() throws IOException, JSONException {
         this.seInterpreterTestListener.cleanResult();
         for (String path : this.paths) {
@@ -79,7 +68,6 @@ public class SeInterpreter extends CommandLineRunner {
         }
         this.seInterpreterTestListener.aggregateResult();
     }
-
 
     private void runScripts(String path) throws IOException, JSONException {
         for (Script script : this.sf.parse(new File(path))) {

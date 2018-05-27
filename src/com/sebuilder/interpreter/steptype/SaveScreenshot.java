@@ -16,6 +16,7 @@
 
 package com.sebuilder.interpreter.steptype;
 
+import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
 
@@ -36,7 +37,7 @@ public class SaveScreenshot implements StepType {
                 .shootingStrategy(getStrategy(ctx))
                 .takeScreenshot(ctx.driver());
 
-        File file = new File(ctx.string("file"));
+        File file = new File(Context.getInstance().getScreenShotOutputDirectory(), ctx.string("file"));
         try {
             ImageIO.write(screenshot.getImage(), "PNG", file);
             return file.exists();

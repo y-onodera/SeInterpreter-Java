@@ -99,7 +99,7 @@ public class SeInterpreterREPL extends CommandLineRunner {
         List<Script> result = Lists.newArrayList();
         try {
             result = sf.parse(new File(file));
-        } catch (IOException | JSONException e) {
+        } catch (IOException | JSONException | RuntimeException e) {
             this.log.error(e);
         }
         return result;

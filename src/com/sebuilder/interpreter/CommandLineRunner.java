@@ -52,7 +52,15 @@ public abstract class CommandLineRunner {
                     } catch (InstantiationException | IllegalAccessException e) {
                         log.fatal("Could not instantiate WebDriverFactory " + "com.sebuilder.interpreter.webdriverfactory." + kv[1], e);
                     }
-                } else {
+                } else if (s.startsWith("--datasource.encoding")) {
+                    Context.getInstance().setDataSourceEncording(kv[1]);
+                } else if (s.startsWith("--datasource.directory")) {
+                    Context.getInstance().setDataSourceDirectory(kv[1]);
+                } else if (s.startsWith("--screenshotoutput")) {
+                    Context.getInstance().setScreenShotOutputDirectory(kv[1]);
+                }  else if (s.startsWith("--resultoutput")) {
+                    Context.getInstance().setResultOutputDirectory(kv[1]);
+                }else {
                     configureOption(s, kv);
                 }
             } else {
