@@ -19,6 +19,7 @@ package com.sebuilder.interpreter;
 import com.sebuilder.interpreter.factory.TestRunFactory;
 import com.sebuilder.interpreter.webdriverfactory.WebDriverFactory;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -44,6 +45,7 @@ public class Script {
     public String name = "Script";
     public boolean usePreviousDriverAndVars = false;
     public boolean closeDriver = true;
+    public File relativePath;
 
     public Script() {
         // By default there is one empty data row.
@@ -53,6 +55,14 @@ public class Script {
 
     public TestRun createTestRun(Log log, WebDriverFactory wdf, HashMap<String, String> driverConfig, Map<String, String> data, TestRun lastRun, SeInterpreterTestListener seInterpreterTestListener) {
         return testRunFactory.createTestRun(this, log, wdf, driverConfig, data, lastRun, seInterpreterTestListener);
+    }
+
+    /**
+     * @param scripts
+     */
+    public void stateTakeOver() {
+        this.closeDriver = false;
+        this.usePreviousDriverAndVars = true;
     }
 
     @Override

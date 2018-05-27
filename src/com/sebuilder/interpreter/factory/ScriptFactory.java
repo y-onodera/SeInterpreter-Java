@@ -15,6 +15,7 @@
  */
 package com.sebuilder.interpreter.factory;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.sebuilder.interpreter.Locator;
 import com.sebuilder.interpreter.Script;
@@ -60,17 +61,41 @@ public class ScriptFactory {
     }
 
     /**
-     * @param f
-     * @return A new instance of script
+     * @param f A File pointing to a JSON file describing a script or suite.
+     * @return A list of scripts, ready to run.
+     * @throws IOException   If anything goes wrong with interpreting the JSON, or
+     *                       with the Reader.
+     * @throws JSONException If the JSON can't be parsed.
      */
-    public Script create(File f) {
-        Script script = new Script();
-        script.testRunFactory = testRunFactory;
-        if (f != null) {
-            script.name = f.getPath();
+    public List<Script> parse(File f) throws IOException, JSONException {
+        try (BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(f), "UTF-8"))) {
+            return parse(r, f);
         }
-        return script;
     }
+
+    /**
+     * @param reader     A Reader pointing to a JSON stream describing a script or suite.
+     * @param sourceFile Optionally. the file the JSON was loaded from.
+     * @return A list of scripts, ready to run.
+     * @throws IOException   If anything goes wrong with interpreting the JSON, or
+     *                       with the Reader.
+     * @throws JSONException If the JSON can't be parsed.
+     */
+    public List<Script> parse(Reader reader, File sourceFile) throws IOException, JSONException {
+        return parse(new JSONObject(new JSONTokener(reader)), sourceFile);
+    }
+
+    /**
+     * @param jsonString A JSON string describing a script or suite.
+     * @return A script, ready to run.
+     * @throws IOException   If anything goes wrong with interpreting the JSON, or
+     *                       with the Reader.
+     * @throws JSONException If the JSON can't be parsed.
+     */
+    public Script parse(String jsonString) throws IOException, JSONException {
+        return parse(new JSONObject(new JSONTokener(jsonString)), null).get(0);
+    }
+
 
     /**
      * @param o          A JSONObject describing a script or a suite.
@@ -81,9 +106,8 @@ public class ScriptFactory {
     public List<Script> parse(JSONObject o, File sourceFile) throws IOException {
         if (o.optString("type", "script").equals("suite")) {
             return parseSuite(o, sourceFile);
-        } else {
-            return parseScript(o, sourceFile);
         }
+        return parseScript(o, sourceFile);
     }
 
     /**
@@ -94,15 +118,30 @@ public class ScriptFactory {
      */
     public List<Script> parseScript(JSONObject o, File f) throws IOException {
         try {
-            JSONArray stepsA = o.getJSONArray("steps");
             Script script = this.create(f);
+            JSONArray stepsA = o.getJSONArray("steps");
             parseStep(script, stepsA);
-            parseData(o, f, script);
+            parseData(o, script);
             return Lists.newArrayList(script);
         } catch (JSONException e) {
             throw new IOException("Could not parse script.", e);
         }
     }
+
+    /**
+     * @param f
+     * @return A new instance of script
+     */
+    private Script create(File f) {
+        Script script = new Script();
+        script.testRunFactory = testRunFactory;
+        if (f != null) {
+            script.name = f.getPath();
+            script.relativePath = f.getAbsoluteFile().getParentFile();
+        }
+        return script;
+    }
+
 
     /**
      * @param script
@@ -177,11 +216,10 @@ public class ScriptFactory {
 
     /**
      * @param o
-     * @param f
      * @param script
      * @throws JSONException
      */
-    private void parseData(JSONObject o, File f, Script script) throws JSONException {
+    private void parseData(JSONObject o, Script script) throws JSONException {
         if (!o.has("data")) {
             return;
         }
@@ -195,8 +233,7 @@ public class ScriptFactory {
                 config.put(key, cfg.getString(key));
             }
         }
-        File relativePath = f.getAbsoluteFile().getParentFile();
-        script.dataRows = dataSourceFactory.getData(sourceName, config, relativePath);
+        script.dataRows = dataSourceFactory.getData(sourceName, config, script.relativePath);
     }
 
     /**
@@ -230,9 +267,17 @@ public class ScriptFactory {
         JSONArray scriptLocations = o.getJSONArray("scripts");
         for (int i = 0; i < scriptLocations.length(); i++) {
             JSONObject script = scriptLocations.getJSONObject(i);
-            String where = script.getString("where");
-            // TODO handle 'where' types other than 'local'
             String path = script.getString("path");
+            String where = script.getString("where");
+            if (!Strings.isNullOrEmpty(where)) {
+                File wherePath = new File(where, path);
+                if (wherePath.exists()) {
+                    scripts.addAll(parse(wherePath));
+                    continue;
+                } else {
+                    throw new IOException("Script file " + wherePath.toString() + " not found.");
+                }
+            }
             File f = new File(path);
             if (f.exists()) {
                 scripts.addAll(parse(f));
@@ -253,47 +298,11 @@ public class ScriptFactory {
      */
     private void shareState(ArrayList<Script> scripts) {
         for (Script s : scripts) {
-            s.closeDriver = false;
-            s.usePreviousDriverAndVars = true;
+            s.stateTakeOver();
         }
         scripts.get(0).usePreviousDriverAndVars = false;
         scripts.get(scripts.size() - 1).closeDriver = true;
     }
 
-    /**
-     * @param jsonString A JSON string describing a script or suite.
-     * @param sourceFile Optionally. the file the JSON was loaded from.
-     * @return A script, ready to run.
-     * @throws IOException   If anything goes wrong with interpreting the JSON, or
-     *                       with the Reader.
-     * @throws JSONException If the JSON can't be parsed.
-     */
-    public List<Script> parse(String jsonString, File sourceFile) throws IOException, JSONException {
-        return parse(new JSONObject(new JSONTokener(jsonString)), sourceFile);
-    }
 
-    /**
-     * @param reader     A Reader pointing to a JSON stream describing a script or suite.
-     * @param sourceFile Optionally. the file the JSON was loaded from.
-     * @return A list of scripts, ready to run.
-     * @throws IOException   If anything goes wrong with interpreting the JSON, or
-     *                       with the Reader.
-     * @throws JSONException If the JSON can't be parsed.
-     */
-    public List<Script> parse(Reader reader, File sourceFile) throws IOException, JSONException {
-        return parse(new JSONObject(new JSONTokener(reader)), sourceFile);
-    }
-
-    /**
-     * @param f A File pointing to a JSON file describing a script or suite.
-     * @return A list of scripts, ready to run.
-     * @throws IOException   If anything goes wrong with interpreting the JSON, or
-     *                       with the Reader.
-     * @throws JSONException If the JSON can't be parsed.
-     */
-    public List<Script> parse(File f) throws IOException, JSONException {
-        try (BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(f), "UTF-8"))) {
-            return parse(r, f);
-        }
-    }
 }

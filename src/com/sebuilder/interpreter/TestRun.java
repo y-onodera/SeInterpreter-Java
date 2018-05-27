@@ -18,6 +18,7 @@ package com.sebuilder.interpreter;
 
 import com.sebuilder.interpreter.webdriverfactory.WebDriverFactory;
 import org.apache.commons.logging.Log;
+import org.junit.Assert;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
@@ -86,7 +87,6 @@ public class TestRun {
     }
 
     /**
-     *
      * @param script
      * @return
      */
@@ -288,12 +288,12 @@ public class TestRun {
             return false;
         }
         // In all other cases, we throw an exception to stop the run.
-        throw new RuntimeException(currentStep() + " failed.");
+        throw new AssertionError(currentStep() + " failed.");
     }
 
-    private boolean processTestError(Exception e) {
+    private boolean processTestError(Throwable e) {
         listener.addError(e);
-        throw new RuntimeException(currentStep() + " failed.", e);
+        throw new AssertionError(currentStep() + " failed.", e);
     }
 
     private boolean runTest() {
@@ -328,10 +328,10 @@ public class TestRun {
      * @param pageLoadDriverTimeout
      */
     private void setTimeouts(Long implicitlyWaitDriverTimeout, Long pageLoadDriverTimeout) {
-        if (implicitlyWaitDriverTimeout != null &&implicitlyWaitDriverTimeout > 0) {
+        if (implicitlyWaitDriverTimeout != null && implicitlyWaitDriverTimeout > 0) {
             this.implicitlyWaitDriverTimeout = Long.valueOf(implicitlyWaitDriverTimeout);
         }
-        if (pageLoadDriverTimeout != null &&pageLoadDriverTimeout > 0) {
+        if (pageLoadDriverTimeout != null && pageLoadDriverTimeout > 0) {
             this.pageLoadDriverTimeout = Long.valueOf(pageLoadDriverTimeout);
         }
     }
