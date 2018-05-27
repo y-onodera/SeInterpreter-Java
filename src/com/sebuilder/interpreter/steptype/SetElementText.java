@@ -31,13 +31,23 @@ public class SetElementText implements StepType {
         WebElement el = ctx.locator().find(ctx);
         el.click();
         el.clear();
-        if (ctx.containsKey(HALF_WIDTH) && Boolean.parseBoolean(ctx.string(HALF_WIDTH))) {
-            ctx.driver().executeScript("arguments[0].value = arguments[1]", el, ctx.text());
+        String input = ctx.text();
+        if (isIncludeHalfWidhText(input)) {
+            ctx.driver().executeScript("arguments[0].value = arguments[1]", el, input);
         } else {
-            el.sendKeys(ctx.text());
+            el.sendKeys(input);
             el.sendKeys(Keys.TAB);
         }
         return true;
     }
 
+    private boolean isIncludeHalfWidhText(String input) {
+        return input.chars().anyMatch(i -> isHalfWidth((char) i));
+    }
+
+    private boolean isHalfWidth(char c) {
+        return '\u0000' <= c && c <= '\u00FF'
+                || '\uFF61' <= c && c <= '\uFFDC'
+                || '\uFFE8' <= c && c <= '\uFFEE';
+    }
 }
