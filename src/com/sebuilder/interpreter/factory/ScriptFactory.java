@@ -136,8 +136,13 @@ public class ScriptFactory {
         Script script = new Script();
         script.testRunFactory = testRunFactory;
         if (f != null) {
-            script.name = f.getPath();
+            script.name = f.getName();
+            script.path = f.getPath();
             script.relativePath = f.getAbsoluteFile().getParentFile();
+        } else {
+            script.name = "System_in";
+            script.path = null;
+            script.relativePath = null;
         }
         return script;
     }

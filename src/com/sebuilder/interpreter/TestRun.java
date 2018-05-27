@@ -18,7 +18,6 @@ package com.sebuilder.interpreter;
 
 import com.sebuilder.interpreter.webdriverfactory.WebDriverFactory;
 import org.apache.commons.logging.Log;
-import org.junit.Assert;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
@@ -101,6 +100,13 @@ public class TestRun {
                 , null
                 , this.listener
         );
+    }
+
+    public String testName() {
+        if (script.path == null) {
+            return script.name;
+        }
+        return script.name.substring(0, script.name.indexOf(".")) + vars.get(DataSource.ROW_NUMBER);
     }
 
     /**
@@ -246,7 +252,7 @@ public class TestRun {
         boolean result;
         try {
             result = runTest();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             return processTestError(e);
         }
         if (!result) {

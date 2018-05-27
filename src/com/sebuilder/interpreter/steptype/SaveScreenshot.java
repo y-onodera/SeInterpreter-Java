@@ -31,13 +31,18 @@ import ru.yandex.qatools.ashot.shooting.ShootingStrategy;
 import javax.imageio.ImageIO;
 
 public class SaveScreenshot implements StepType {
+
     @Override
     public boolean run(TestRun ctx) {
         Screenshot screenshot = new AShot()
                 .shootingStrategy(getStrategy(ctx))
                 .takeScreenshot(ctx.driver());
 
-        File file = new File(Context.getInstance().getScreenShotOutputDirectory(), ctx.string("file"));
+        File outputDir = new File(Context.getInstance().getScreenShotOutputDirectory(), ctx.testName());
+        if (!outputDir.exists()) {
+            outputDir.mkdirs();
+        }
+        File file = new File(outputDir, ctx.string("file"));
         try {
             ImageIO.write(screenshot.getImage(), "PNG", file);
             return file.exists();

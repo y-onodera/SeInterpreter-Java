@@ -78,10 +78,11 @@ public class SeInterpreter extends CommandLineRunner {
     private void runScript(Script script) {
         int i = 1;
         for (Map<String, String> data : script.dataRows) {
+            data.put(DataSource.ROW_NUMBER, String.valueOf(i));
             Path currentDir = Paths.get(".").toAbsolutePath();
-            Path executeScript = Paths.get(script.name);
+            Path executeScript = Paths.get(script.path);
             String normalizePath = currentDir.relativize(executeScript).normalize().toString();
-            this.seInterpreterTestListener.openTestSuite(normalizePath.replace(".json", "") + "_row" + String.valueOf(i), new Hashtable<>(data));
+            this.seInterpreterTestListener.openTestSuite(normalizePath.replace(".json", "") + "_rowNumber" + String.valueOf(i), new Hashtable<>(data));
             this.runScript(script, data, this.seInterpreterTestListener);
             this.seInterpreterTestListener.closeTestSuite();
             i++;

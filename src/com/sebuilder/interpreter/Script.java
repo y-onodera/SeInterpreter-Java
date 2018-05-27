@@ -42,10 +42,11 @@ public class Script {
     public ArrayList<Step> steps = new ArrayList<>();
     public TestRunFactory testRunFactory = new TestRunFactory();
     public List<Map<String, String>> dataRows;
-    public String name = "Script";
+    public String path = "scriptPath";
+    public String name = "scriptName";
+    public File relativePath;
     public boolean usePreviousDriverAndVars = false;
     public boolean closeDriver = true;
-    public File relativePath;
 
     public Script() {
         // By default there is one empty data row.
@@ -58,7 +59,7 @@ public class Script {
     }
 
     /**
-     * @param scripts
+     *
      */
     public void stateTakeOver() {
         this.closeDriver = false;

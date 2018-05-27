@@ -78,7 +78,16 @@ public class SeInterpreterREPL extends CommandLineRunner {
 
     private void execute(Script script) {
         script.stateTakeOver();
-        lastRun = script.createTestRun(this.log, wdf, driverConfig, new HashMap<>(), lastRun, seInterpreterTestListener);
+        int i = 1;
+        for (Map<String, String> data : script.dataRows) {
+            data.put(DataSource.ROW_NUMBER, String.valueOf(i));
+            execute(script, data);
+            i++;
+        }
+    }
+
+    private void execute(Script script, Map<String, String> data) {
+        lastRun = script.createTestRun(this.log, wdf, driverConfig, data, lastRun, seInterpreterTestListener);
         if (this.driver == null) {
             this.driver = lastRun.driver();
         }
