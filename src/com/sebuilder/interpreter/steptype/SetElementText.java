@@ -34,6 +34,7 @@ public class SetElementText implements StepType {
         String input = ctx.text();
         if (isIncludeHalfWidhText(input)) {
             ctx.driver().executeScript("arguments[0].value = arguments[1]", el, input);
+            el.sendKeys(Keys.TAB);
         } else {
             el.sendKeys(input);
             el.sendKeys(Keys.TAB);
@@ -46,8 +47,6 @@ public class SetElementText implements StepType {
     }
 
     private boolean isHalfWidth(char c) {
-        return '\u0000' <= c && c <= '\u00FF'
-                || '\uFF61' <= c && c <= '\uFFDC'
-                || '\uFFE8' <= c && c <= '\uFFEE';
+        return '\uFF65' <= c && c <= '\uFF9F';
     }
 }
