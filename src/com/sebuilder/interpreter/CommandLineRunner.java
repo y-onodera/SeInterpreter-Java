@@ -27,6 +27,7 @@ public abstract class CommandLineRunner {
             log.info("Usage: [--driver=<drivername] [--driver.<configkey>=<configvalue>...] [--implicitlyWait=<ms>] [--pageLoadTimeout=<ms>] [--stepTypePackage=<package name>] <script path>...");
             System.exit(0);
         }
+        preSetUp();
         sf.setStepTypeFactory(stf);
         sf.setTestRunFactory(trf);
         for (String s : args) {
@@ -67,6 +68,9 @@ public abstract class CommandLineRunner {
                 configureOption(s);
             }
         }
+    }
+
+    protected void preSetUp() {
     }
 
     protected void configureOption(String s, String[] kv) {

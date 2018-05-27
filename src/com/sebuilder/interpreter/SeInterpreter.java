@@ -35,7 +35,7 @@ import java.util.Map;
  * @author zarkonnen
  */
 public class SeInterpreter extends CommandLineRunner {
-    private ArrayList<String> paths = new ArrayList<>();
+    private ArrayList<String> paths;
 
     public SeInterpreter(String[] args, Log log) {
         super(args, log);
@@ -54,6 +54,11 @@ public class SeInterpreter extends CommandLineRunner {
             log.fatal("Run error.", e);
             System.exit(1);
         }
+    }
+
+    @Override
+    protected void preSetUp() {
+        paths = new ArrayList<>();
     }
 
     @Override
