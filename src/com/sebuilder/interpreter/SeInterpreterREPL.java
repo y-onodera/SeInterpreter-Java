@@ -69,10 +69,10 @@ public class SeInterpreterREPL extends CommandLineRunner {
     }
 
     private void tearDownREPL() {
+        this.seInterpreterTestListener.aggregateResult();
         if (this.driver != null) {
             this.driver.quit();
         }
-        this.seInterpreterTestListener.aggregateResult();
     }
 
     private void execute(Script script) {
