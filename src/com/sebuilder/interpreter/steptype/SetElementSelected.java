@@ -16,16 +16,15 @@
 
 package com.sebuilder.interpreter.steptype;
 
-import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
-public class SetElementSelected extends ExportableStep {
+public class SetElementSelected implements ConditionalStep,Exportable {
     @Override
-    public boolean run(TestRun ctx) {
+    public boolean doRun(TestRun ctx) {
         WebElement e = ctx.locator().find(ctx);
         if (ctx.containsKey("check") && !Boolean.parseBoolean(ctx.string("check"))) {
             if (e.isSelected()) {
@@ -40,7 +39,7 @@ public class SetElementSelected extends ExportableStep {
     }
 
     @Override
-    protected void addElement(RemoteWebDriver driver, WebElement element, JSONObject step) throws JSONException {
+    public void addElement(RemoteWebDriver driver, WebElement element, JSONObject step) throws JSONException {
         step.put("check", "true");
     }
 }

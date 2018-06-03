@@ -16,13 +16,12 @@
 
 package com.sebuilder.interpreter.steptype;
 
-import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
 import org.openqa.selenium.interactions.Actions;
 
-public class ClickAndHoldElement implements StepType {
+public class ClickAndHoldElement implements ConditionalStep {
 	@Override
-	public boolean run(TestRun ctx) {
+	public boolean doRun(TestRun ctx) {
 		new Actions(ctx.driver()).clickAndHold(ctx.locator().find(ctx)).build().perform();
 		return true;
 	}

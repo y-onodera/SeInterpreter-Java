@@ -20,9 +20,9 @@ import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
 import org.openqa.selenium.interactions.Actions;
 
-public class DragAndDropToElement implements StepType {
+public class DragAndDropToElement implements ConditionalStep {
 	@Override
-	public boolean run(TestRun ctx) {
+	public boolean doRun(TestRun ctx) {
 		new Actions(ctx.driver()).dragAndDrop(
 				ctx.locator().find(ctx),
 				ctx.locator("locator2").find(ctx)).build().perform();

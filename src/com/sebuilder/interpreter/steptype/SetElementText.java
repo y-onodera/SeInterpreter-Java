@@ -16,18 +16,18 @@
 
 package com.sebuilder.interpreter.steptype;
 
-import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
+import com.sebuilder.interpreter.WaitFor;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
-public class SetElementText extends ExportableStep implements StepType {
+public class SetElementText implements ConditionalStep, Exportable {
 
     @Override
-    public boolean run(TestRun ctx) {
+    public boolean doRun(TestRun ctx) {
         WebElement el = ctx.locator().find(ctx);
         el.click();
         el.clear();
@@ -43,7 +43,7 @@ public class SetElementText extends ExportableStep implements StepType {
     }
 
     @Override
-    protected void addElement(RemoteWebDriver driver, WebElement element, JSONObject step) throws JSONException {
+    public void addElement(RemoteWebDriver driver, WebElement element, JSONObject step) throws JSONException {
         step.put("text", element.getText());
     }
 

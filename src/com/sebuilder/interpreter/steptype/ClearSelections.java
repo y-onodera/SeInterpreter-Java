@@ -16,13 +16,12 @@
 
 package com.sebuilder.interpreter.steptype;
 
-import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
 import org.openqa.selenium.support.ui.Select;
 
-public class ClearSelections implements StepType {
+public class ClearSelections implements ConditionalStep {
 	@Override
-	public boolean run(TestRun ctx) {
+	public boolean doRun(TestRun ctx) {
 		new Select(ctx.locator().find(ctx)).deselectAll();
 		return true;
 	}

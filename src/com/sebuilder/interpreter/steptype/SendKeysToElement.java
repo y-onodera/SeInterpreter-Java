@@ -16,13 +16,12 @@
 
 package com.sebuilder.interpreter.steptype;
 
-import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
 import org.openqa.selenium.WebElement;
 
-public class SendKeysToElement implements StepType {
+public class SendKeysToElement implements ConditionalStep {
 	@Override
-	public boolean run(TestRun ctx) {
+	public boolean doRun(TestRun ctx) {
 		WebElement el = ctx.locator().find(ctx);
 		el.sendKeys(ctx.string("text"));
 		return true;

@@ -18,10 +18,10 @@ package com.sebuilder.interpreter.steptype;
 
 import com.sebuilder.interpreter.TestRun;
 
-public class ClickElement extends ExportableStep {
+public class ClickElement implements ConditionalStep, Exportable {
 
     @Override
-    public boolean run(TestRun ctx) {
+    public boolean doRun(TestRun ctx) {
         ctx.locator().find(ctx).click();
         return true;
     }

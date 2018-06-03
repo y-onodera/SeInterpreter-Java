@@ -16,14 +16,19 @@
 
 package com.sebuilder.interpreter.steptype;
 
-import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
+import com.sebuilder.interpreter.WaitFor;
 import org.openqa.selenium.interactions.Actions;
 
-public class MouseOverElement implements StepType {
+public class MouseOverElement implements ConditionalStep {
 	@Override
-	public boolean run(TestRun ctx) {
+	public boolean doRun(TestRun ctx) {
 		new Actions(ctx.driver()).moveToElement(ctx.locator().find(ctx)).build().perform();
 		return true;
+	}
+
+	@Override
+	public WaitFor waitForReady() {
+		return new WaitFor(new ElementVisible());
 	}
 }

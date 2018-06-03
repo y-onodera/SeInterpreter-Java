@@ -1,6 +1,5 @@
 package com.sebuilder.interpreter.steptype;
 
-import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -8,7 +7,6 @@ import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.openqa.selenium.Cookie;
@@ -21,7 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
 
-public class FileDownload implements StepType {
+public class FileDownload implements ConditionalStep {
 
     /**
      * Perform the action this step consists of.
@@ -31,7 +29,7 @@ public class FileDownload implements StepType {
      * should return false. Other failures should throw a RuntimeException.
      */
     @Override
-    public boolean run(TestRun ctx) {
+    public boolean doRun(TestRun ctx) {
         WebElement el = ctx.locator().find(ctx);
         try {
             downloadFile(ctx,el.getAttribute("href"),ctx.string("filepath"));

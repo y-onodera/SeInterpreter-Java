@@ -16,13 +16,12 @@
 
 package com.sebuilder.interpreter.steptype;
 
-import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
 import org.openqa.selenium.WebElement;
 
-public class SetElementNotSelected implements StepType {
+public class SetElementNotSelected implements ConditionalStep {
 	@Override
-	public boolean run(TestRun ctx) {
+	public boolean doRun(TestRun ctx) {
 		WebElement e = ctx.locator().find(ctx);
 		if (e.isSelected()) { e.click(); }
 		return true;

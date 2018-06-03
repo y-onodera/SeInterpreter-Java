@@ -16,12 +16,11 @@
 
 package com.sebuilder.interpreter.steptype;
 
-import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
 
-public class SubmitElement implements StepType {
+public class SubmitElement implements ConditionalStep {
 	@Override
-	public boolean run(TestRun ctx) {
+	public boolean doRun(TestRun ctx) {
 		ctx.locator().find(ctx).submit();
 		return true;
 	}
