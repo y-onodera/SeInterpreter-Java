@@ -2,6 +2,9 @@ package com.sebuilder.interpreter.steptype;
 
 import com.sebuilder.interpreter.Getter;
 import com.sebuilder.interpreter.TestRun;
+import org.openqa.selenium.WebElement;
+
+import java.util.List;
 
 public class ElementEnable implements Getter {
 
@@ -11,7 +14,11 @@ public class ElementEnable implements Getter {
      */
     @Override
     public String get(TestRun ctx) {
-        return "" + ctx.locator().findElements(ctx).get(0).isEnabled();
+        List<WebElement> result = ctx.locator().findElements(ctx);
+        if (result.size() == 0) {
+            return "false";
+        }
+        return "" + result.get(0).isEnabled();
     }
 
     /**

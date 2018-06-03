@@ -2,6 +2,10 @@ package com.sebuilder.interpreter.steptype;
 
 import com.sebuilder.interpreter.Getter;
 import com.sebuilder.interpreter.TestRun;
+import com.sebuilder.interpreter.WebElements;
+import org.openqa.selenium.WebElement;
+
+import java.util.List;
 
 public class ElementVisible implements Getter {
 
@@ -11,7 +15,11 @@ public class ElementVisible implements Getter {
      */
     @Override
     public String get(TestRun ctx) {
-        return "" + ctx.locator().findElements(ctx).get(0).isDisplayed();
+        List<WebElement> result = ctx.locator().findElements(ctx);
+        if (result.size() == 0) {
+            return "false";
+        }
+        return "" + result.get(0).isDisplayed();
     }
 
     /**
