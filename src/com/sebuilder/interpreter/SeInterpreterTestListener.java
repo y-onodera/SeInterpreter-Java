@@ -11,7 +11,9 @@ import org.apache.tools.ant.taskdefs.optional.junit.JUnitTest;
 import org.apache.tools.ant.taskdefs.optional.junit.XMLJUnitResultFormatter;
 import org.apache.tools.ant.taskdefs.optional.junit.XMLResultAggregator;
 import org.apache.tools.ant.types.FileSet;
+import org.apache.tools.ant.types.selectors.FilenameSelector;
 
+import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -111,7 +113,6 @@ public class SeInterpreterTestListener {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        final File outputHtml = new File(resultDir, "html");
         XMLResultAggregator aggregator = new XMLResultAggregator();
         aggregator.setProject(project);
         aggregator.setTodir(resultDir);
@@ -121,10 +122,14 @@ public class SeInterpreterTestListener {
         fs.createInclude().setName("TEST-SeBuilder-*-result.xml");
         aggregator.addFileSet(fs);
         AggregateTransformer transformer = aggregator.createReport();
-        transformer.setTodir(outputHtml);
+        transformer.setTodir(resultDir);
         AggregateTransformer.Format noFrame = new AggregateTransformer.Format();
         noFrame.setValue(AggregateTransformer.NOFRAMES);
         transformer.setFormat(noFrame);
         aggregator.execute();
+        Delete delete = new Delete();
+        delete.setProject(project);
+        delete.addFileset(fs);
+        delete.execute();
     }
 }

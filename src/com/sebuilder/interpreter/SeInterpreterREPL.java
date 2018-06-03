@@ -12,6 +12,7 @@ import java.util.*;
 
 public class SeInterpreterREPL extends CommandLineRunner {
     private RemoteWebDriver driver;
+    private int execCount = 1;
 
     public SeInterpreterREPL(String[] args, Log log) {
         super(args, log);
@@ -36,7 +37,6 @@ public class SeInterpreterREPL extends CommandLineRunner {
 
     private void setupREPL() {
         this.seInterpreterTestListener.cleanResult();
-        this.seInterpreterTestListener.openTestSuite("REPL", new Hashtable<>());
     }
 
     private void runningREPL() {
@@ -72,11 +72,11 @@ public class SeInterpreterREPL extends CommandLineRunner {
         if (this.driver != null) {
             this.driver.quit();
         }
-        this.seInterpreterTestListener.closeTestSuite();
         this.seInterpreterTestListener.aggregateResult();
     }
 
     private void execute(Script script) {
+        this.seInterpreterTestListener.openTestSuite("com.sebuilder.interpreter.REPL_EXEC" + execCount++, new Hashtable<>());
         script.stateTakeOver();
         int i = 1;
         for (Map<String, String> data : script.dataRows) {
@@ -84,13 +84,11 @@ public class SeInterpreterREPL extends CommandLineRunner {
             execute(script, data);
             i++;
         }
+        this.seInterpreterTestListener.closeTestSuite();
     }
 
     private void execute(Script script, Map<String, String> data) {
         lastRun = script.createTestRun(this.log, wdf, driverConfig, data, lastRun, seInterpreterTestListener);
-        if (this.driver == null) {
-            this.driver = lastRun.driver();
-        }
         while (lastRun.hasNext()) {
             try {
                 if (lastRun.next()) {
@@ -101,6 +99,9 @@ public class SeInterpreterREPL extends CommandLineRunner {
             } catch (AssertionError e) {
                 this.log.error("error " + lastRun.currentStep().toPrettyString(), e);
             }
+        }
+        if (this.driver == null) {
+            this.driver = lastRun.driver();
         }
     }
 

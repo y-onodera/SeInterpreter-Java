@@ -25,12 +25,15 @@ public class Context {
      *
      */
     private String resultOutputDirectory = "result";
+    /**
+     *
+     */
+    private String templateOutputDirectory = "template";
 
     private Context() {
     }
 
     /**
-     *
      * @return
      */
     public String getDataSourceEncording() {
@@ -38,7 +41,6 @@ public class Context {
     }
 
     /**
-     *
      * @param dataSourceEncording
      */
     public void setDataSourceEncording(String dataSourceEncording) {
@@ -46,7 +48,6 @@ public class Context {
     }
 
     /**
-     *
      * @return
      */
     public String getDataSourceDirectory() {
@@ -54,7 +55,6 @@ public class Context {
     }
 
     /**
-     *
      * @param dataSourceDirectory
      */
     public void setDataSourceDirectory(String dataSourceDirectory) {
@@ -62,15 +62,17 @@ public class Context {
     }
 
     /**
-     *
      * @return
      */
     public File getScreenShotOutputDirectory() {
-        return new File(this.getResultOutputDirectory(),screenShotOutputDirectory);
+        File result = new File(this.getResultOutputDirectory(), this.screenShotOutputDirectory);
+        if (!result.exists()) {
+            result.mkdirs();
+        }
+        return new File(this.getResultOutputDirectory(), screenShotOutputDirectory);
     }
 
     /**
-     *
      * @param screenShotOutput
      */
     public void setScreenShotOutputDirectory(String screenShotOutput) {
@@ -85,4 +87,15 @@ public class Context {
         this.resultOutputDirectory = aResultOutputDirectory;
     }
 
+    public File getTemplateOutputDirectory() {
+        File result = new File(this.getResultOutputDirectory(), this.templateOutputDirectory);
+        if (!result.exists()) {
+            result.mkdirs();
+        }
+        return result;
+    }
+
+    public void setTemplateOutputDirectory(String aTemplateOutputDirectory) {
+        this.templateOutputDirectory = aTemplateOutputDirectory;
+    }
 }

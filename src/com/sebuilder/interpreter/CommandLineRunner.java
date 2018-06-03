@@ -59,9 +59,11 @@ public abstract class CommandLineRunner {
                     Context.getInstance().setDataSourceDirectory(kv[1]);
                 } else if (s.startsWith("--screenshotoutput")) {
                     Context.getInstance().setScreenShotOutputDirectory(kv[1]);
-                }  else if (s.startsWith("--resultoutput")) {
+                } else if (s.startsWith("--templateoutput")) {
+                    Context.getInstance().setTemplateOutputDirectory(kv[1]);
+                } else if (s.startsWith("--resultoutput")) {
                     Context.getInstance().setResultOutputDirectory(kv[1]);
-                }else {
+                } else {
                     configureOption(s, kv);
                 }
             } else {

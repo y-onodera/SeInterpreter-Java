@@ -18,13 +18,13 @@ package com.sebuilder.interpreter.steptype;
 
 import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
-import org.openqa.selenium.JavascriptExecutor;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.remote.RemoteWebDriver;
 
-public class SetElementText implements StepType {
-
-    public static final String HALF_WIDTH = "half-width";
+public class SetElementText extends ExportableStep implements StepType {
 
     @Override
     public boolean run(TestRun ctx) {
@@ -42,6 +42,11 @@ public class SetElementText implements StepType {
         return true;
     }
 
+    @Override
+    protected void addElement(RemoteWebDriver driver, WebElement element, JSONObject step) throws JSONException {
+        step.put("text", element.getText());
+    }
+
     private boolean isIncludeHalfWidhText(String input) {
         return input.chars().anyMatch(i -> isHalfWidth((char) i));
     }
@@ -49,4 +54,5 @@ public class SetElementText implements StepType {
     private boolean isHalfWidth(char c) {
         return '\uFF65' <= c && c <= '\uFF9F';
     }
+
 }

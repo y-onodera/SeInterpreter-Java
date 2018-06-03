@@ -18,9 +18,12 @@ package com.sebuilder.interpreter.steptype;
 
 import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.remote.RemoteWebDriver;
 
-public class SetElementSelected implements StepType {
+public class SetElementSelected extends ExportableStep {
     @Override
     public boolean run(TestRun ctx) {
         WebElement e = ctx.locator().find(ctx);
@@ -34,5 +37,10 @@ public class SetElementSelected implements StepType {
             e.click();
         }
         return true;
+    }
+
+    @Override
+    protected void addElement(RemoteWebDriver driver, WebElement element, JSONObject step) throws JSONException {
+        step.put("check", "true");
     }
 }

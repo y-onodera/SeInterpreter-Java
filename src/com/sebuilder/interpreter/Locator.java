@@ -18,9 +18,12 @@ package com.sebuilder.interpreter;
 
 import java.util.List;
 
+import com.google.common.base.Strings;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.remote.RemoteWebDriver;
 
 /**
  * A Selenium locator.
@@ -44,6 +47,22 @@ public class Locator {
     public Locator(Locator l) {
         type = l.type;
         value = l.value;
+    }
+
+    public static JSONObject toJson(RemoteWebDriver driver, WebElement element) throws JSONException {
+        String id = element.getAttribute("id");
+        if (!Strings.isNullOrEmpty(id)) {
+            return getJsonObject("id", id);
+        }
+        if ("option".equals(element.getTagName())) {
+            WebElement parent = element.findElement(By.xpath(".."));
+            if (parent.getTagName().equals("select") && !Strings.isNullOrEmpty(parent.getAttribute("id"))) {
+                return getJsonObject("xpath", String.format("//select[@id='%s']/option[@value='%s']", parent.getAttribute("id"), element.getAttribute("value")));
+            }
+        } else if ("a".equals(element.getTagName())) {
+            return getJsonObject("link text", element.getText());
+        }
+        return getJsonObject("xpath", WebElements.toXpath(driver, element));
     }
 
     public WebElement find(TestRun ctx) {
@@ -72,6 +91,13 @@ public class Locator {
 
     public String toPrettyString() {
         return type.name().toLowerCase() + ":" + value;
+    }
+
+    private static JSONObject getJsonObject(String xpath, String s) throws JSONException {
+        JSONObject retVal = new JSONObject();
+        retVal.put("type", xpath);
+        retVal.put("value", s);
+        return retVal;
     }
 
     public enum Type {
