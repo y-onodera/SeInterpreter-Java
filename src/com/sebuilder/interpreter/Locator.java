@@ -34,9 +34,22 @@ public class Locator {
     public Type type;
     public String value;
 
-    public Locator(Type type, String value) {
-        this.type = type;
-        this.value = value;
+    public static Locator of(RemoteWebDriver driver, WebElement element) {
+        String id = element.getAttribute("id");
+        if ("option".equals(element.getTagName())) {
+            WebElement parent = element.findElement(By.xpath(".."));
+            String parentAttribute = parent.getAttribute("id");
+            if (parent.getTagName().equals("select") && !Strings.isNullOrEmpty(parentAttribute)) {
+                String value = element.getAttribute("value");
+                return new Locator("xpath", String.format("//select[@id='%s']/option[@value='%s']", parentAttribute, value));
+            }
+        }
+        if (!Strings.isNullOrEmpty(id)) {
+            return new Locator("id", id);
+        } else if ("a".equals(element.getTagName())) {
+            return new Locator("link text", element.getText());
+        }
+        return new Locator("xpath", WebElements.toXpath(driver, element));
     }
 
     public Locator(String type, String value) {
@@ -45,59 +58,36 @@ public class Locator {
     }
 
     public Locator(Locator l) {
-        type = l.type;
-        value = l.value;
-    }
-
-    public static JSONObject toJson(RemoteWebDriver driver, WebElement element) throws JSONException {
-        String id = element.getAttribute("id");
-        if (!Strings.isNullOrEmpty(id)) {
-            return getJsonObject("id", id);
-        }
-        if ("option".equals(element.getTagName())) {
-            WebElement parent = element.findElement(By.xpath(".."));
-            if (parent.getTagName().equals("select") && !Strings.isNullOrEmpty(parent.getAttribute("id"))) {
-                return getJsonObject("xpath", String.format("//select[@id='%s']/option[@value='%s']", parent.getAttribute("id"), element.getAttribute("value")));
-            }
-        } else if ("a".equals(element.getTagName())) {
-            return getJsonObject("link text", element.getText());
-        }
-        return getJsonObject("xpath", WebElements.toXpath(driver, element));
+        this.type = l.type;
+        this.value = l.value;
     }
 
     public WebElement find(TestRun ctx) {
-        return type.find(value, ctx);
+        return this.type.find(this.value, ctx);
     }
 
     public List<WebElement> findElements(TestRun ctx) {
-        return type.findElements(value, ctx);
+        return this.type.findElements(this.value, ctx);
     }
 
     public JSONObject toJSON() throws JSONException {
         JSONObject o = new JSONObject();
-        o.put("type", type.toString());
-        o.put("value", value);
+        o.put("type", this.type.toString());
+        o.put("value", this.value);
         return o;
     }
 
     @Override
     public String toString() {
         try {
-            return toJSON().toString();
+            return this.toJSON().toString();
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
     }
 
     public String toPrettyString() {
-        return type.name().toLowerCase() + ":" + value;
-    }
-
-    private static JSONObject getJsonObject(String xpath, String s) throws JSONException {
-        JSONObject retVal = new JSONObject();
-        retVal.put("type", xpath);
-        retVal.put("value", s);
-        return retVal;
+        return this.type.name().toLowerCase() + ":" + this.value;
     }
 
     public enum Type {
@@ -163,7 +153,7 @@ public class Locator {
 
         @Override
         public String toString() {
-            return name().toLowerCase().replace("_", " ");
+            return this.name().toLowerCase().replace("_", " ");
         }
 
         public static Type ofName(String name) {

@@ -16,10 +16,9 @@
 
 package com.sebuilder.interpreter.steptype;
 
+import com.sebuilder.interpreter.ExportResource;
+import com.sebuilder.interpreter.Exportable;
 import com.sebuilder.interpreter.TestRun;
-import com.sebuilder.interpreter.WaitFor;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -32,7 +31,7 @@ public class SetElementText implements ConditionalStep, Exportable {
         el.click();
         el.clear();
         String input = ctx.text();
-        if (isIncludeHalfWidhText(input)) {
+        if (isIncludeHalfWidthText(input)) {
             ctx.driver().executeScript("arguments[0].value = arguments[1]", el, input);
             el.sendKeys(Keys.TAB);
         } else {
@@ -43,11 +42,15 @@ public class SetElementText implements ConditionalStep, Exportable {
     }
 
     @Override
-    public void addElement(RemoteWebDriver driver, WebElement element, JSONObject step) throws JSONException {
-        step.put("text", element.getText());
+    public void addElement(ExportResource.Builder builder, RemoteWebDriver driver, WebElement element) {
+        String text = element.getText();
+        if (text.isEmpty()) {
+            text = element.getAttribute("value");
+        }
+        builder.stepOption("text", text);
     }
 
-    private boolean isIncludeHalfWidhText(String input) {
+    private boolean isIncludeHalfWidthText(String input) {
         return input.chars().anyMatch(i -> isHalfWidth((char) i));
     }
 

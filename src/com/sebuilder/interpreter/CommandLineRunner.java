@@ -6,52 +6,66 @@ import com.sebuilder.interpreter.factory.TestRunFactory;
 import com.sebuilder.interpreter.webdriverfactory.Firefox;
 import com.sebuilder.interpreter.webdriverfactory.WebDriverFactory;
 import org.apache.commons.logging.Log;
+import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 
 public abstract class CommandLineRunner {
     protected static WebDriverFactory DEFAULT_DRIVER_FACTORY = new Firefox();
-    protected ScriptFactory sf = new ScriptFactory();
-    protected StepTypeFactory stf = new StepTypeFactory();
-    protected TestRunFactory trf = new TestRunFactory();
-    protected HashMap<String, String> driverConfig = new HashMap<>();
-    protected WebDriverFactory wdf = DEFAULT_DRIVER_FACTORY;
-    protected TestRun lastRun = null;
-    protected SeInterpreterTestListener seInterpreterTestListener = new SeInterpreterTestListener();
+    protected ScriptFactory sf;
+    protected StepTypeFactory stf;
+    protected TestRunFactory trf;
+    protected HashMap<String, String> driverConfig;
+    protected WebDriverFactory wdf;
+    protected TestRun lastRun;
+    protected SeInterpreterTestListener seInterpreterTestListener;
     protected Log log;
+    protected RemoteWebDriver driver;
 
     protected CommandLineRunner(String[] args, Log log) {
         this.log = log;
+        this.sf = new ScriptFactory();
+        this.stf = new StepTypeFactory();
+        this.trf = new TestRunFactory();
+        this.driverConfig = new HashMap<>();
+        this.wdf = DEFAULT_DRIVER_FACTORY;
+        this.seInterpreterTestListener = new SeInterpreterTestListener(this.log);
+        setUp(args);
+    }
+
+    protected void setUp(String[] args) {
+        this.log.info("setUp start");
         if (args.length == 0) {
             log.info("Usage: [--driver=<drivername] [--driver.<configkey>=<configvalue>...] [--implicitlyWait=<ms>] [--pageLoadTimeout=<ms>] [--stepTypePackage=<package name>] <script path>...");
             System.exit(0);
         }
         preSetUp();
-        sf.setStepTypeFactory(stf);
-        sf.setTestRunFactory(trf);
+        this.lastRun = null;
+        this.sf.setStepTypeFactory(this.stf);
+        this.sf.setTestRunFactory(this.trf);
         for (String s : args) {
             if (s.startsWith("--")) {
                 String[] kv = s.split("=", 2);
                 if (kv.length < 2) {
-                    log.fatal("Driver configuration option \"" + s + "\" is not of the form \"--driver=<name>\" or \"--driver.<key>=<value\".");
+                    this.log.fatal("Driver configuration option \"" + s + "\" is not of the form \"--driver=<name>\" or \"--driver.<key>=<value\".");
                     System.exit(1);
                 }
                 if (s.startsWith("--implicitlyWait")) {
-                    trf.setImplicitlyWaitDriverTimeout(Long.valueOf(kv[1]));
+                    this.trf.setImplicitlyWaitDriverTimeout(Long.valueOf(kv[1]));
                 } else if (s.startsWith("--pageLoadTimeout")) {
-                    trf.setPageLoadDriverTimeout(Long.valueOf(kv[1]));
+                    this.trf.setPageLoadDriverTimeout(Long.valueOf(kv[1]));
                 } else if (s.startsWith("--stepTypePackage")) {
-                    stf.setPrimaryPackage(kv[1]);
+                    this.stf.setPrimaryPackage(kv[1]);
                 } else if (s.startsWith("--driver.")) {
-                    driverConfig.put(kv[0].substring("--driver.".length()), kv[1]);
+                    this.driverConfig.put(kv[0].substring("--driver.".length()), kv[1]);
                 } else if (s.startsWith("--driver")) {
                     try {
-                        wdf = (WebDriverFactory) Class.forName("com.sebuilder.interpreter.webdriverfactory." + kv[1]).getDeclaredConstructor().newInstance();
+                        this.wdf = (WebDriverFactory) Class.forName("com.sebuilder.interpreter.webdriverfactory." + kv[1]).getDeclaredConstructor().newInstance();
                     } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
-                        log.fatal("Unknown WebDriverFactory: " + "com.sebuilder.interpreter.webdriverfactory." + kv[1], e);
+                        this.log.fatal("Unknown WebDriverFactory: " + "com.sebuilder.interpreter.webdriverfactory." + kv[1], e);
                     } catch (InstantiationException | IllegalAccessException e) {
-                        log.fatal("Could not instantiate WebDriverFactory " + "com.sebuilder.interpreter.webdriverfactory." + kv[1], e);
+                        this.log.fatal("Could not instantiate WebDriverFactory " + "com.sebuilder.interpreter.webdriverfactory." + kv[1], e);
                     }
                 } else if (s.startsWith("--datasource.encoding")) {
                     Context.getInstance().setDataSourceEncording(kv[1]);
@@ -70,6 +84,7 @@ public abstract class CommandLineRunner {
                 configureOption(s);
             }
         }
+        this.log.info("setUp finish");
     }
 
     protected void preSetUp() {

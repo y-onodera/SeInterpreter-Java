@@ -205,9 +205,7 @@ public class ScriptFactory {
 
     private void configureStepSubElement(Script script, JSONObject stepO, Step step, String key) throws JSONException {
         if (key.equals("locator")) {
-            step.locatorParams.put(key, new Locator(
-                    stepO.getJSONObject(key).getString("type"),
-                    stepO.getJSONObject(key).getString("value")));
+            step.locatorParams.put(key, new Locator(stepO.getJSONObject(key).getString("type"), stepO.getJSONObject(key).getString("value")));
         } else if (key.equals("until")) {
             this.parseStep(script, stepO.getJSONObject(key));
         } else if (key.equals("actions")) {
@@ -239,6 +237,9 @@ public class ScriptFactory {
             }
         }
         script.dataRows = dataSourceFactory.getData(sourceName, config, script.relativePath);
+        if (data.optBoolean("shareState", true)) {
+            this.shareState(Lists.newArrayList(script));
+        }
     }
 
     /**
@@ -250,8 +251,8 @@ public class ScriptFactory {
     public List<Script> parseSuite(JSONObject o, File suiteFile) throws IOException {
         try {
             ArrayList<Script> scripts = collectScripts(o, suiteFile);
-            boolean shareState = o.optBoolean("shareState", false);
-            if (shareState && scripts.size() > 1) {
+            boolean shareState = o.optBoolean("shareState", true);
+            if (shareState) {
                 shareState(scripts);
             }
             return scripts;
@@ -273,9 +274,8 @@ public class ScriptFactory {
         for (int i = 0; i < scriptLocations.length(); i++) {
             JSONObject script = scriptLocations.getJSONObject(i);
             String path = script.getString("path");
-            String where = script.getString("where");
-            if (!Strings.isNullOrEmpty(where)) {
-                File wherePath = new File(where, path);
+            if (script.has("where") && Strings.isNullOrEmpty(script.getString("where"))) {
+                File wherePath = new File(script.getString("where"), path);
                 if (wherePath.exists()) {
                     scripts.addAll(parse(wherePath));
                     continue;
@@ -305,9 +305,5 @@ public class ScriptFactory {
         for (Script s : scripts) {
             s.stateTakeOver();
         }
-        scripts.get(0).usePreviousDriverAndVars = false;
-        scripts.get(scripts.size() - 1).closeDriver = true;
     }
-
-
 }

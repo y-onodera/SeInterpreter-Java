@@ -3,6 +3,7 @@ package com.sebuilder.interpreter;
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;
 import junit.framework.TestCase;
+import org.apache.commons.logging.Log;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.Delete;
 import org.apache.tools.ant.taskdefs.Mkdir;
@@ -19,19 +20,24 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class SeInterpreterTestListener {
     private final Project project;
     private final File resultDir;
     private final XMLJUnitResultFormatter formatter;
     private JUnitTest suite;
-    private Test test;
+    private TestCase test;
     private int runTest;
     private int error;
     private int failed;
+    private Log log;
 
-    public SeInterpreterTestListener() {
+    public SeInterpreterTestListener(Log aLog) {
+        this.log = aLog;
         this.project = new Project();
         this.project.setName("se-interpreter");
         this.project.setBaseDir(new File("."));
@@ -46,6 +52,7 @@ public class SeInterpreterTestListener {
     }
 
     public void cleanResult() {
+        this.log.info("clean up result folder");
         // delete old result
         Delete delete = new Delete();
         delete.setProject(project);
@@ -61,10 +68,18 @@ public class SeInterpreterTestListener {
         mkdir.execute();
     }
 
-    public boolean openTestSuite(String name, Hashtable<?, ?> property) {
+    public boolean openTestSuite(String name, Map<String, String> aProperty) {
+        String testName = name.replace("\\", ".").replace("/", ".").replaceAll("^\\.+", "");
+        this.log.info("open suite:" + testName);
         suite = new JUnitTest();
-        suite.setName(name.replace("\\", ".").replace("/", ".").replaceAll("^\\.+", ""));
-        suite.setProperties(property);
+        suite.setName(testName);
+        suite.setProperties(new Hashtable<String, String>(
+                aProperty.entrySet()
+                        .stream()
+                        .collect(Collectors.toMap(
+                                entry -> entry.getKey().replace("'", "\\'")
+                                , entry -> entry.getValue())
+                        )));
         suite.setRunTime(new Date().getTime());
         test = null;
         runTest = 0;
@@ -80,6 +95,7 @@ public class SeInterpreterTestListener {
     }
 
     public void startTest(String testName) {
+        this.log.info("start test:" + testName);
         runTest++;
         test = new TestCase(testName) {
         };
@@ -87,27 +103,33 @@ public class SeInterpreterTestListener {
     }
 
     public void addError(Throwable throwable) {
+        this.log.info("result error:" + this.test.getName());
+        this.log.error(throwable);
         error++;
-        formatter.addFailure(test, throwable);
-
+        formatter.addError(test, throwable);
     }
 
     public void addFailure(String message) {
+        this.log.info("result failure:" + this.test.getName());
+        this.log.info("cause :" + message);
         failed++;
         formatter.addFailure(test, new AssertionFailedError(message));
     }
 
     public void endTest() {
+        this.log.info("result success:" + this.test.getName());
         formatter.endTest(test);
     }
 
     public void closeTestSuite() {
+        this.log.info("close suite:" + this.suite.getName());
         suite.setCounts(runTest, failed, error);
         suite.setRunTime(new Date().getTime() - suite.getRunTime());
         this.formatter.endTestSuite(suite);
     }
 
     public void aggregateResult() {
+        this.log.info("aggregate test result");
         try {
             new File(this.resultDir, "TEST-SeBuilder-result.xml").createNewFile();
         } catch (IOException e) {

@@ -16,6 +16,7 @@
 
 package com.sebuilder.interpreter.steptype;
 
+import com.sebuilder.interpreter.Exportable;
 import com.sebuilder.interpreter.TestRun;
 
 public class ClickElement implements ConditionalStep, Exportable {

@@ -36,6 +36,7 @@ import java.util.Map;
  */
 public class SeInterpreter extends CommandLineRunner {
     private ArrayList<String> paths;
+    private boolean closeDriver;
 
     public SeInterpreter(String[] args, Log log) {
         super(args, log);
@@ -71,6 +72,9 @@ public class SeInterpreter extends CommandLineRunner {
         for (String path : this.paths) {
             this.runScripts(path);
         }
+        if (driver != null && closeDriver) {
+            driver.quit();
+        }
         this.seInterpreterTestListener.aggregateResult();
     }
 
@@ -87,7 +91,7 @@ public class SeInterpreter extends CommandLineRunner {
             Path currentDir = Paths.get(".").toAbsolutePath();
             Path executeScript = Paths.get(script.path);
             String normalizePath = currentDir.relativize(executeScript).normalize().toString();
-            this.seInterpreterTestListener.openTestSuite(normalizePath.replace(".json", "") + "_rowNumber" + String.valueOf(i), new Hashtable<>(data));
+            this.seInterpreterTestListener.openTestSuite(normalizePath.replace(".json", "") + "_rowNumber" + String.valueOf(i), data);
             this.runScript(script, data, this.seInterpreterTestListener);
             this.seInterpreterTestListener.closeTestSuite();
             i++;
@@ -104,6 +108,16 @@ public class SeInterpreter extends CommandLineRunner {
             }
         } catch (Exception e) {
             this.log.info(script.name + " failed", e);
+        }
+        if (!script.closeDriver) {
+            if (lastRun != null) {
+                this.driver = lastRun.driver();
+            }
+            this.closeDriver = true;
+        } else {
+            this.lastRun = null;
+            this.driver = null;
+            this.closeDriver = false;
         }
     }
 }

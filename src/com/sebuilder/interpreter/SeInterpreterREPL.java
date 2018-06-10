@@ -4,14 +4,12 @@ import com.google.common.collect.Lists;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
-import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
 public class SeInterpreterREPL extends CommandLineRunner {
-    private RemoteWebDriver driver;
     private int execCount = 1;
 
     public SeInterpreterREPL(String[] args, Log log) {
@@ -30,9 +28,9 @@ public class SeInterpreterREPL extends CommandLineRunner {
     }
 
     private void run() {
-        setupREPL();
-        runningREPL();
-        tearDownREPL();
+        this.setupREPL();
+        this.runningREPL();
+        this.tearDownREPL();
     }
 
     private void setupREPL() {
@@ -48,19 +46,19 @@ public class SeInterpreterREPL extends CommandLineRunner {
             if (line.equals("exit")) {
                 break;
             } else if (!commandInput && line.startsWith("@")) {
-                List<Script> scripts = loadScript(line.substring(1));
+                List<Script> scripts = this.loadScript(line.substring(1));
                 scripts.forEach(script -> execute(script));
             } else if (!commandInput && line.startsWith("{")) {
-                input = startScript();
+                input = this.startScript();
                 input.append(line);
                 commandInput = true;
             } else if (commandInput && line.equals("/")) {
-                closeScript(input);
+                this.closeScript(input);
                 commandInput = false;
-                Script script = toScript(input.toString());
+                Script script = this.toScript(input.toString());
                 input = null;
                 if (script != null) {
-                    execute(script);
+                    this.execute(script);
                 }
             } else if (commandInput) {
                 input.append(line);
@@ -76,39 +74,38 @@ public class SeInterpreterREPL extends CommandLineRunner {
     }
 
     private void execute(Script script) {
-        this.seInterpreterTestListener.openTestSuite("com.sebuilder.interpreter.REPL_EXEC" + execCount++, new Hashtable<>());
+        String suiteName = "com.sebuilder.interpreter.REPL_EXEC" + this.execCount++;
         script.stateTakeOver();
         int i = 1;
         for (Map<String, String> data : script.dataRows) {
+            this.seInterpreterTestListener.openTestSuite(suiteName + "_row_" + i, data);
             data.put(DataSource.ROW_NUMBER, String.valueOf(i));
-            execute(script, data);
+            this.execute(script, data);
+            this.seInterpreterTestListener.closeTestSuite();
             i++;
         }
-        this.seInterpreterTestListener.closeTestSuite();
     }
 
     private void execute(Script script, Map<String, String> data) {
-        lastRun = script.createTestRun(this.log, wdf, driverConfig, data, lastRun, seInterpreterTestListener);
-        while (lastRun.hasNext()) {
+        this.log.info("start execute script");
+        this.lastRun = script.createTestRun(this.log, this.wdf, this.driverConfig, data, this.lastRun, this.seInterpreterTestListener);
+        while (this.lastRun.hasNext()) {
             try {
-                if (lastRun.next()) {
-                    this.log.info(lastRun.currentStep().toPrettyString() + " succeeded");
-                } else {
-                    this.log.info(lastRun.currentStep().toPrettyString() + " failed");
-                }
-            } catch (AssertionError e) {
-                this.log.error("error " + lastRun.currentStep().toPrettyString(), e);
+                this.lastRun.next();
+            } catch (AssertionError error) {
+                // nothing to do;
             }
         }
         if (this.driver == null) {
-            this.driver = lastRun.driver();
+            this.driver = this.lastRun.driver();
         }
+        this.log.info("finish execute script");
     }
 
     private List<Script> loadScript(String file) {
         List<Script> result = Lists.newArrayList();
         try {
-            result = sf.parse(new File(file));
+            result = this.sf.parse(new File(file));
         } catch (IOException | JSONException | RuntimeException e) {
             this.log.error(e);
         }
@@ -116,24 +113,28 @@ public class SeInterpreterREPL extends CommandLineRunner {
     }
 
     private Script toScript(String cmdInput) {
+        this.log.info("start parse input");
         Script result = null;
         try {
-            result = sf.parse(cmdInput);
+            result = this.sf.parse(cmdInput);
         } catch (IOException | JSONException e) {
             this.log.error(e);
         }
         if (result == null) {
             this.log.error("invalid input:" + cmdInput);
         }
+        this.log.info("finish parse input");
         return result;
     }
 
     private StringBuilder startScript() {
+        this.log.info("start input accept");
         return new StringBuilder().append("{\"steps\":[");
     }
 
     private void closeScript(StringBuilder script) {
         script.append("]}");
+        this.log.info("finish input accept");
     }
 
 }

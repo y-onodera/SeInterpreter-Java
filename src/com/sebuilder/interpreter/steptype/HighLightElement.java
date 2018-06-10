@@ -1,11 +1,7 @@
 package com.sebuilder.interpreter.steptype;
 
 import com.google.common.collect.Maps;
-import com.sebuilder.interpreter.Locator;
-import com.sebuilder.interpreter.StepType;
-import com.sebuilder.interpreter.TestRun;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.sebuilder.interpreter.*;
 import org.openqa.selenium.WebElement;
 
 import java.util.Map;
@@ -81,13 +77,8 @@ public class HighLightElement implements StepType {
             if (isChangeOutline(element)) {
                 originalOutline = (String) ctx.driver().executeScript("return arguments[0].style.outline;", element);
             }
-            try {
-                JSONObject json = Locator.toJson(ctx.driver(), element);
-                Locator locator = new Locator(json.getString("type"), json.getString("value"));
-                cache.put(locator, new BackupStyle(originalBorder, originalOutline));
-            } catch (JSONException e) {
-                ctx.log().error(e);
-            }
+            Locator locator = Locator.of(ctx.driver(), element);
+            cache.put(locator, new BackupStyle(originalBorder, originalOutline));
         }
 
     }

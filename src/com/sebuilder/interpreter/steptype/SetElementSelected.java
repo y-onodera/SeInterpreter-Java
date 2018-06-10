@@ -16,9 +16,9 @@
 
 package com.sebuilder.interpreter.steptype;
 
+import com.sebuilder.interpreter.ExportResource;
+import com.sebuilder.interpreter.Exportable;
 import com.sebuilder.interpreter.TestRun;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
@@ -39,7 +39,7 @@ public class SetElementSelected implements ConditionalStep,Exportable {
     }
 
     @Override
-    public void addElement(RemoteWebDriver driver, WebElement element, JSONObject step) throws JSONException {
-        step.put("check", "true");
+    public void addElement(ExportResource.Builder builder, RemoteWebDriver driver, WebElement element)  {
+        builder.stepOption("check", String.valueOf(element.isSelected()));
     }
 }
