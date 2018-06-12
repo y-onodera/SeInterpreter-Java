@@ -69,13 +69,16 @@ public class SeInterpreter extends CommandLineRunner {
 
     private void runScripts() throws IOException, JSONException {
         this.seInterpreterTestListener.cleanResult();
-        for (String path : this.paths) {
-            this.runScripts(path);
+        try {
+            for (String path : this.paths) {
+                this.runScripts(path);
+            }
+        } finally {
+            if (driver != null && closeDriver) {
+                driver.quit();
+            }
+            this.seInterpreterTestListener.aggregateResult();
         }
-        if (driver != null && closeDriver) {
-            driver.quit();
-        }
-        this.seInterpreterTestListener.aggregateResult();
     }
 
     private void runScripts(String path) throws IOException, JSONException {
@@ -106,7 +109,7 @@ public class SeInterpreter extends CommandLineRunner {
             } else {
                 this.log.info(script.name + " failed");
             }
-        } catch (Exception e) {
+        } catch (AssertionError e) {
             this.log.info(script.name + " failed", e);
         }
         if (!script.closeDriver) {

@@ -21,16 +21,19 @@ public class SeInterpreterREPL extends CommandLineRunner {
         SeInterpreterREPL interpreter = new SeInterpreterREPL(args, log);
         try {
             interpreter.run();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.fatal("Run error.", e);
             System.exit(1);
         }
     }
 
     private void run() {
-        this.setupREPL();
-        this.runningREPL();
-        this.tearDownREPL();
+        try {
+            this.setupREPL();
+            this.runningREPL();
+        } finally {
+            this.tearDownREPL();
+        }
     }
 
     private void setupREPL() {
@@ -67,10 +70,10 @@ public class SeInterpreterREPL extends CommandLineRunner {
     }
 
     private void tearDownREPL() {
-        this.seInterpreterTestListener.aggregateResult();
         if (this.driver != null) {
             this.driver.quit();
         }
+        this.seInterpreterTestListener.aggregateResult();
     }
 
     private void execute(Script script) {
@@ -106,7 +109,7 @@ public class SeInterpreterREPL extends CommandLineRunner {
         List<Script> result = Lists.newArrayList();
         try {
             result = this.sf.parse(new File(file));
-        } catch (IOException | JSONException | RuntimeException e) {
+        } catch (Throwable e) {
             this.log.error(e);
         }
         return result;
@@ -117,7 +120,7 @@ public class SeInterpreterREPL extends CommandLineRunner {
         Script result = null;
         try {
             result = this.sf.parse(cmdInput);
-        } catch (IOException | JSONException e) {
+        } catch (Throwable e) {
             this.log.error(e);
         }
         if (result == null) {
