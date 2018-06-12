@@ -95,6 +95,10 @@ public class StepTypeFactory {
                     className = className.substring("store".length());
                     rawStepType = false;
                 }
+                if (name.startsWith("print") && !name.equals("print")) {
+                    className = className.substring("print".length());
+                    rawStepType = false;
+                }
                 if (name.equals("retry")) {
                     return new Retry();
                 }
@@ -120,6 +124,8 @@ public class StepTypeFactory {
                         typesMap.put(name, new WaitFor((Getter) o));
                     } else if (name.startsWith("store") && !name.equals("store")) {
                         typesMap.put(name, new Store((Getter) o));
+                    } else if (name.startsWith("print") && !name.equals("print")) {
+                        typesMap.put(name, new Print((Getter) o));
                     } else {
                         typesMap.put(name, (StepType) o);
                     }
