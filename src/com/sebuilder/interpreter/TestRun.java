@@ -60,6 +60,10 @@ public class TestRun {
         if (initialVars != null) {
             vars.putAll(initialVars);
         }
+        vars.put("_resultDir", Context.getInstance().getResultOutputDirectory().getPath());
+        vars.put("_dataSourceDir", Context.getInstance().getDataSourceDirectory());
+        vars.put("_screenShotDir", Context.getInstance().getScreenShotOutputDirectory().getPath());
+        vars.put("_templateDir", Context.getInstance().getTemplateOutputDirectory().getPath());
         this.listener = seInterpreterTestListener;
         setTimeouts(implicitlyWaitDriverTimeout, pageLoadDriverTimeout);
     }
