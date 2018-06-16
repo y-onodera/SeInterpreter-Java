@@ -102,6 +102,9 @@ public class StepTypeFactory {
                 if (name.equals("retry")) {
                     return new Retry();
                 }
+                if (name.equals("loop")) {
+                    return new Loop();
+                }
                 Class<?> c = null;
                 try {
                     c = Class.forName(primaryPackage + "." + className);
