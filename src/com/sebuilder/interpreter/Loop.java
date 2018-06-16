@@ -11,10 +11,19 @@ public class Loop implements StepType {
     @Override
     public boolean run(TestRun ctx) {
         boolean success = true;
+        int actions = Integer.valueOf(ctx.string("subStep"));
         int count = Integer.valueOf(ctx.string("count"));
         for (int i = 0; i < count; i++) {
-            ctx.currentStep().stringParams.put("_index", String.valueOf(i + 1));
-            success = next(ctx) && success;
+            ctx.vars().put("_index", String.valueOf(i + 1));
+            for (int exec = 0; exec < actions; exec++) {
+                success = next(ctx) && success;
+            }
+            if (!success) {
+                return false;
+            }
+            if (i + 1 < count) {
+                ctx.backStepIndex(actions);
+            }
         }
         return success;
     }
