@@ -8,6 +8,7 @@ import org.openqa.selenium.WebElement;
 import ru.yandex.qatools.ashot.coordinates.Coords;
 import ru.yandex.qatools.ashot.shooting.ShootingStrategy;
 import ru.yandex.qatools.ashot.shooting.ViewportPastingDecorator;
+import ru.yandex.qatools.ashot.util.InnerScript;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -64,6 +65,16 @@ public class SelectedViewportPastingDecorator extends ViewportPastingDecorator {
         }
         graphics.dispose();
         return finalImage;
+    }
+
+    @Override
+    public int getFullWidth(WebDriver driver) {
+        return  ((Number) JavascriptExecutor.class.cast(driver).executeScript("return document.documentElement.clientWidth || document.getElementsByTagName('body')[0].clientWidth;",  new Object[0])).intValue();
+    }
+
+    @Override
+    public int getWindowHeight(WebDriver driver) {
+        return  ((Number) JavascriptExecutor.class.cast(driver).executeScript("return document.documentElement.clientHeight || document.getElementsByTagName('body')[0].clientHeight;",  new Object[0])).intValue();
     }
 
     protected WebElement targetWebElement() {
