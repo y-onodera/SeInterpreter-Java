@@ -1,5 +1,6 @@
 package com.sebuilder.interpreter.steptype;
 
+import com.google.common.base.Charsets;
 import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.TestRun;
 import org.apache.http.HttpEntity;
@@ -14,7 +15,6 @@ import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.HTTP;
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -74,7 +74,7 @@ public class FileDownload implements ConditionalStep {
                 .forEach(element -> {
                     params.add(new BasicNameValuePair(element.getAttribute("name"), element.getAttribute("value")));
                 });
-        httpPost.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));
+        httpPost.setEntity(new UrlEncodedFormEntity(params, Charsets.UTF_8));
         HttpResponse response = httpClient.execute(httpPost);
         downLoadFile(ctx, outputFilePath, response);
     }
