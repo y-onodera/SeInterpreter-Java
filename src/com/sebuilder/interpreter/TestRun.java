@@ -60,10 +60,12 @@ public class TestRun {
         if (initialVars != null) {
             vars.putAll(initialVars);
         }
-        vars.put("_resultDir", Context.getInstance().getResultOutputDirectory().getPath());
+        vars.put("_resultDir", Context.getInstance().getResultOutputDirectory().getAbsolutePath());
         vars.put("_dataSourceDir", Context.getInstance().getDataSourceDirectory());
-        vars.put("_screenShotDir", Context.getInstance().getScreenShotOutputDirectory().getPath());
-        vars.put("_templateDir", Context.getInstance().getTemplateOutputDirectory().getPath());
+        vars.put("_screenShotDir", Context.getInstance().getScreenShotOutputDirectory().getAbsolutePath());
+        vars.put("_templateDir", Context.getInstance().getTemplateOutputDirectory().getAbsolutePath());
+        vars.put("_downloadDir", Context.getInstance().getDownloadDirectory().getAbsolutePath());
+        vars.put("_testName", this.testName());
         this.listener = seInterpreterTestListener;
         setTimeouts(implicitlyWaitDriverTimeout, pageLoadDriverTimeout);
     }
