@@ -54,8 +54,8 @@ public class Context {
     /**
      * @return
      */
-    public String getDataSourceDirectory() {
-        return dataSourceDirectory;
+    public File getDataSourceDirectory() {
+        return new File(dataSourceDirectory);
     }
 
     /**

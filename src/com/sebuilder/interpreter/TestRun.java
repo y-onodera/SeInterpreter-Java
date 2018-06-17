@@ -61,7 +61,7 @@ public class TestRun {
             vars.putAll(initialVars);
         }
         vars.put("_resultDir", Context.getInstance().getResultOutputDirectory().getAbsolutePath());
-        vars.put("_dataSourceDir", Context.getInstance().getDataSourceDirectory());
+        vars.put("_dataSourceDir", Context.getInstance().getDataSourceDirectory().getAbsolutePath());
         vars.put("_screenShotDir", Context.getInstance().getScreenShotOutputDirectory().getAbsolutePath());
         vars.put("_templateDir", Context.getInstance().getTemplateOutputDirectory().getAbsolutePath());
         vars.put("_downloadDir", Context.getInstance().getDownloadDirectory().getAbsolutePath());
