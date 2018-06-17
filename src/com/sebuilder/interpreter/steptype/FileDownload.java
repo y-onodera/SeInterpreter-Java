@@ -1,14 +1,20 @@
 package com.sebuilder.interpreter.steptype;
 
+import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.TestRun;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.cookie.BasicClientCookie;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -17,6 +23,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Set;
 
 public class FileDownload implements ConditionalStep {
@@ -30,9 +37,16 @@ public class FileDownload implements ConditionalStep {
      */
     @Override
     public boolean doRun(TestRun ctx) {
+        if (ctx.containsKey("post")) {
+            return post(ctx);
+        }
+        return get(ctx);
+    }
+
+    public boolean get(TestRun ctx) {
         WebElement el = ctx.locator().find(ctx);
         try {
-            downloadFile(ctx,el.getAttribute("href"),ctx.string("filepath"));
+            getDownloadFile(ctx, el.getAttribute("href"), ctx.string("filepath"));
         } catch (IOException e) {
             ctx.log().error(e);
             return false;
@@ -40,17 +54,47 @@ public class FileDownload implements ConditionalStep {
         return true;
     }
 
-    public  void downloadFile(TestRun ctx,String downloadUrl, String outputFilePath) throws IOException {
-        CookieStore cookieStore = seleniumCookiesToCookieStore(ctx.driver());
-        HttpClient httpClient = HttpClientBuilder.create()
-                .setDefaultCookieStore(cookieStore)
-                .build();
+    public boolean post(TestRun ctx) {
+        try {
+            postDownloadFile(ctx, ctx.string("post"), ctx.string("filepath"));
+        } catch (IOException e) {
+            ctx.log().error(e);
+            return false;
+        }
+        return true;
+    }
+
+    public void postDownloadFile(TestRun ctx, String downloadUrl, String outputFilePath) throws IOException {
+        HttpClient httpClient = getHttpClient(ctx);
+        HttpPost httpPost = new HttpPost(downloadUrl);
+        ArrayList<NameValuePair> params = new ArrayList<NameValuePair>();
+        ctx.locator()
+                .findElements(ctx)
+                .stream()
+                .forEach(element -> {
+                    params.add(new BasicNameValuePair(element.getAttribute("name"), element.getAttribute("value")));
+                });
+        httpPost.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));
+        HttpResponse response = httpClient.execute(httpPost);
+        downLoadFile(ctx, outputFilePath, response);
+    }
+
+    public void getDownloadFile(TestRun ctx, String downloadUrl, String outputFilePath) throws IOException {
+        HttpClient httpClient = getHttpClient(ctx);
         HttpGet httpGet = new HttpGet(downloadUrl);
         HttpResponse response = httpClient.execute(httpGet);
+        downLoadFile(ctx, outputFilePath, response);
+    }
+
+    public void downLoadFile(TestRun ctx, String outputFilePath, HttpResponse response) throws IOException {
         HttpEntity entity = response.getEntity();
         if (entity != null) {
-            File outputFile = new File(outputFilePath);
-            try(InputStream inputStream = entity.getContent();FileOutputStream fileOutputStream = new FileOutputStream(outputFile);) {
+            File parentDir = new File(Context.getInstance().getDownloadDirectory(), ctx.testName());
+            if (!parentDir.exists()) {
+                parentDir.mkdirs();
+            }
+            File outputFile = new File(parentDir, outputFilePath);
+            try (InputStream inputStream = entity.getContent(); FileOutputStream fileOutputStream = new FileOutputStream(outputFile);) {
                 int read;
                 byte[] bytes = new byte[1024];
                 while ((read = inputStream.read(bytes)) != -1) {
@@ -58,6 +102,13 @@ public class FileDownload implements ConditionalStep {
                 }
             }
         }
+    }
+
+    public HttpClient getHttpClient(TestRun ctx) {
+        CookieStore cookieStore = seleniumCookiesToCookieStore(ctx.driver());
+        return HttpClientBuilder.create()
+                .setDefaultCookieStore(cookieStore)
+                .build();
     }
 
     /**

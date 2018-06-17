@@ -77,6 +77,8 @@ public abstract class CommandLineRunner {
                     Context.getInstance().setTemplateOutputDirectory(kv[1]);
                 } else if (s.startsWith("--resultoutput")) {
                     Context.getInstance().setResultOutputDirectory(kv[1]);
+                } else if (s.startsWith("--downloadoutput")) {
+                    Context.getInstance().setDownloadDirectory(kv[1]);
                 } else {
                     configureOption(s, kv);
                 }

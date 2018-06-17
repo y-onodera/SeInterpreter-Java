@@ -29,6 +29,10 @@ public class Context {
      *
      */
     private String templateOutputDirectory = "template";
+    /**
+     *
+     */
+    private String downloadDirectory = "download";
 
     private Context() {
     }
@@ -97,5 +101,17 @@ public class Context {
 
     public void setTemplateOutputDirectory(String aTemplateOutputDirectory) {
         this.templateOutputDirectory = aTemplateOutputDirectory;
+    }
+
+    public File getDownloadDirectory() {
+        File result = new File(this.getResultOutputDirectory(), this.downloadDirectory);
+        if (!result.exists()) {
+            result.mkdirs();
+        }
+        return result;
+    }
+
+    public void setDownloadDirectory(String downloadDirectory) {
+        this.downloadDirectory = downloadDirectory;
     }
 }
