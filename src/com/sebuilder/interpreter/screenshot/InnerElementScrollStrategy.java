@@ -1,7 +1,6 @@
 package com.sebuilder.interpreter.screenshot;
 
 import com.google.common.collect.Maps;
-import com.sebuilder.interpreter.Locator;
 import com.sebuilder.interpreter.TestRun;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;

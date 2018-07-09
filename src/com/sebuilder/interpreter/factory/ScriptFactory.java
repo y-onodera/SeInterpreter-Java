@@ -17,7 +17,6 @@ package com.sebuilder.interpreter.factory;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.sebuilder.interpreter.Locator;
 import com.sebuilder.interpreter.Script;
 import com.sebuilder.interpreter.Step;
