@@ -17,6 +17,7 @@ package com.sebuilder.interpreter.factory;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.sebuilder.interpreter.Locator;
 import com.sebuilder.interpreter.Script;
 import com.sebuilder.interpreter.Step;
@@ -27,10 +28,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import com.sebuilder.interpreter.StepType;
 import org.json.JSONArray;
@@ -223,8 +221,12 @@ public class ScriptFactory {
      * @throws JSONException
      */
     private void parseData(JSONObject o, Script script) throws JSONException {
+        script.dataRows = createData(o, script.relativePath);
+    }
+
+    private List<Map<String, String>> createData(JSONObject o, File relativePath) throws JSONException {
         if (!o.has("data")) {
-            return;
+            return Lists.newArrayList(new HashMap<>());
         }
         JSONObject data = o.getJSONObject("data");
         String sourceName = data.getString("source");
@@ -236,10 +238,7 @@ public class ScriptFactory {
                 config.put(key, cfg.getString(key));
             }
         }
-        script.dataRows = dataSourceFactory.getData(sourceName, config, script.relativePath);
-        if (data.optBoolean("shareState", true)) {
-            this.shareState(Lists.newArrayList(script));
-        }
+        return dataSourceFactory.getData(sourceName, config, relativePath);
     }
 
     /**
@@ -253,7 +252,7 @@ public class ScriptFactory {
             ArrayList<Script> scripts = collectScripts(o, suiteFile);
             boolean shareState = o.optBoolean("shareState", true);
             if (shareState) {
-                shareState(scripts);
+                shareState(scripts, this.createData(o, null).get(0));
             }
             return scripts;
         } catch (JSONException e) {
@@ -300,10 +299,11 @@ public class ScriptFactory {
 
     /**
      * @param scripts
+     * @param aShareInputs
      */
-    private void shareState(ArrayList<Script> scripts) {
+    private void shareState(ArrayList<Script> scripts, Map<String, String> aShareInputs) {
         for (Script s : scripts) {
-            s.stateTakeOver();
+            s.stateTakeOver(aShareInputs);
         }
     }
 }

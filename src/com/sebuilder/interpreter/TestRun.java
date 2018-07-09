@@ -32,43 +32,15 @@ import java.util.concurrent.TimeUnit;
  */
 public class TestRun {
     private Script script;
-    private HashMap<String, String> vars = new HashMap<String, String>();
+    private HashMap<String, String> vars = new HashMap<>();
     private int stepIndex = -1;
     private RemoteWebDriver driver;
     private Log log;
     private WebDriverFactory webDriverFactory = SeInterpreter.DEFAULT_DRIVER_FACTORY;
-    private HashMap<String, String> webDriverConfig = new HashMap<String, String>();
+    private HashMap<String, String> webDriverConfig = new HashMap<>();
     private Long implicitlyWaitDriverTimeout;
     private Long pageLoadDriverTimeout;
     private SeInterpreterTestListener listener;
-
-    public TestRun(
-            Script script,
-            Log log,
-            RemoteWebDriver driver,
-            WebDriverFactory webDriverFactory,
-            HashMap<String, String> webDriverConfig,
-            Long implicitlyWaitDriverTimeout,
-            Long pageLoadDriverTimeout,
-            Map<String, String> initialVars,
-            SeInterpreterTestListener seInterpreterTestListener) {
-        this.script = script;
-        this.log = log;
-        this.driver = driver;
-        this.webDriverFactory = webDriverFactory;
-        this.webDriverConfig = webDriverConfig;
-        if (initialVars != null) {
-            vars.putAll(initialVars);
-        }
-        vars.put("_resultDir", Context.getInstance().getResultOutputDirectory().getAbsolutePath());
-        vars.put("_dataSourceDir", Context.getInstance().getDataSourceDirectory().getAbsolutePath());
-        vars.put("_screenShotDir", Context.getInstance().getScreenShotOutputDirectory().getAbsolutePath());
-        vars.put("_templateDir", Context.getInstance().getTemplateOutputDirectory().getAbsolutePath());
-        vars.put("_downloadDir", Context.getInstance().getDownloadDirectory().getAbsolutePath());
-        vars.put("_testName", this.testName());
-        this.listener = seInterpreterTestListener;
-        setTimeouts(implicitlyWaitDriverTimeout, pageLoadDriverTimeout);
-    }
 
     public TestRun(
             Script script,
@@ -91,6 +63,35 @@ public class TestRun {
         this(script, log, driver, null, null, implicitlyWaitDriverTimeout, pageLoadDriverTimeout, initialVars, seInterpreterTestListener);
     }
 
+    public TestRun(
+            Script script,
+            Log log,
+            RemoteWebDriver driver,
+            WebDriverFactory webDriverFactory,
+            HashMap<String, String> webDriverConfig,
+            Long implicitlyWaitDriverTimeout,
+            Long pageLoadDriverTimeout,
+            Map<String, String> initialVars,
+            SeInterpreterTestListener seInterpreterTestListener) {
+        this.script = script;
+        this.log = log;
+        this.driver = driver;
+        this.webDriverFactory = webDriverFactory;
+        this.webDriverConfig = webDriverConfig;
+        if (initialVars != null) {
+            vars.putAll(initialVars);
+        }
+        this.listener = seInterpreterTestListener;
+        setTimeouts(implicitlyWaitDriverTimeout, pageLoadDriverTimeout);
+        vars.put("_resultDir", Context.getInstance().getResultOutputDirectory().getAbsolutePath());
+        vars.put("_dataSourceDir", Context.getInstance().getDataSourceDirectory().getAbsolutePath());
+        vars.put("_screenShotDir", Context.getInstance().getScreenShotOutputDirectory().getAbsolutePath());
+        vars.put("_templateDir", Context.getInstance().getTemplateOutputDirectory().getAbsolutePath());
+        vars.put("_downloadDir", Context.getInstance().getDownloadDirectory().getAbsolutePath());
+        vars.put("_suiteName", this.suiteName());
+        vars.put("_scriptName", this.scriptName());
+    }
+
     /**
      * @param script
      * @return
@@ -108,11 +109,19 @@ public class TestRun {
         );
     }
 
-    public String testName() {
+    public String scriptName() {
         if (script.path == null) {
             return script.name;
         }
         return script.name.substring(0, script.name.indexOf(".")) + vars.get(DataSource.ROW_NUMBER);
+    }
+
+    public String suiteName() {
+        return this.listener.suiteName();
+    }
+
+    public String testName() {
+        return this.listener.testName();
     }
 
     /**

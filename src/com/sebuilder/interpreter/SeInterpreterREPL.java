@@ -3,10 +3,8 @@ package com.sebuilder.interpreter;
 import com.google.common.collect.Lists;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONException;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
 
 public class SeInterpreterREPL extends CommandLineRunner {
@@ -78,7 +76,7 @@ public class SeInterpreterREPL extends CommandLineRunner {
 
     private void execute(Script script) {
         String suiteName = "com.sebuilder.interpreter.REPL_EXEC" + this.execCount++;
-        script.stateTakeOver();
+        script.stateTakeOver(new HashMap<>());
         int i = 1;
         for (Map<String, String> data : script.dataRows) {
             this.seInterpreterTestListener.openTestSuite(suiteName + "_row_" + i, data);

@@ -16,6 +16,7 @@
 
 package com.sebuilder.interpreter;
 
+import com.google.common.collect.Maps;
 import com.sebuilder.interpreter.factory.TestRunFactory;
 import com.sebuilder.interpreter.webdriverfactory.WebDriverFactory;
 
@@ -47,6 +48,7 @@ public class Script {
     public File relativePath;
     public boolean usePreviousDriverAndVars = false;
     public boolean closeDriver = true;
+    public Map<String, String> shareInputs = Maps.newHashMap();
 
     public Script() {
         // By default there is one empty data row.
@@ -55,15 +57,21 @@ public class Script {
     }
 
     public TestRun createTestRun(Log log, WebDriverFactory wdf, HashMap<String, String> driverConfig, Map<String, String> data, TestRun lastRun, SeInterpreterTestListener seInterpreterTestListener) {
+        for (Map.Entry<String, String> entry : this.shareInputs.entrySet()) {
+            if (!data.containsKey(entry.getKey())) {
+                data.put(entry.getKey(), entry.getValue());
+            }
+        }
         return testRunFactory.createTestRun(this, log, wdf, driverConfig, data, lastRun, seInterpreterTestListener);
     }
 
     /**
      *
      */
-    public void stateTakeOver() {
+    public void stateTakeOver(Map<String, String> aShareInputs) {
         this.closeDriver = false;
         this.usePreviousDriverAndVars = true;
+        this.shareInputs = aShareInputs;
     }
 
     @Override

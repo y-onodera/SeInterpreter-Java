@@ -89,12 +89,8 @@ public class FileDownload implements ConditionalStep {
     public void downLoadFile(TestRun ctx, String outputFilePath, HttpResponse response) throws IOException {
         HttpEntity entity = response.getEntity();
         if (entity != null) {
-            File parentDir = new File(Context.getInstance().getDownloadDirectory(), ctx.testName());
-            if (!parentDir.exists()) {
-                parentDir.mkdirs();
-            }
-            File outputFile = new File(parentDir, outputFilePath);
-            try (InputStream inputStream = entity.getContent(); FileOutputStream fileOutputStream = new FileOutputStream(outputFile);) {
+            File outputFile = new File(Context.getInstance().getDownloadDirectory(), ctx.suiteName() + "_" + ctx.scriptName() + "_" + outputFilePath);
+            try (InputStream inputStream = entity.getContent(); FileOutputStream fileOutputStream = new FileOutputStream(outputFile)) {
                 int read;
                 byte[] bytes = new byte[1024];
                 while ((read = inputStream.read(bytes)) != -1) {

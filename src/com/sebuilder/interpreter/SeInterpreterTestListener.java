@@ -154,4 +154,12 @@ public class SeInterpreterTestListener {
         delete.addFileset(fs);
         delete.execute();
     }
+
+    public String testName() {
+        return this.test.getName();
+    }
+
+    public String suiteName() {
+        return this.suite.getName();
+    }
 }

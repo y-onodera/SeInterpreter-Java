@@ -19,14 +19,12 @@ package com.sebuilder.interpreter.steptype;
 import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
+import com.sebuilder.interpreter.screenshot.InnerElementScrollStrategy;
+import com.sebuilder.interpreter.screenshot.Page;
+import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.io.File;
 import java.io.IOException;
-
-import ru.yandex.qatools.ashot.AShot;
-import ru.yandex.qatools.ashot.Screenshot;
-import ru.yandex.qatools.ashot.shooting.ShootingStrategies;
-import ru.yandex.qatools.ashot.shooting.ShootingStrategy;
 
 import javax.imageio.ImageIO;
 
@@ -34,31 +32,17 @@ public class SaveScreenshot implements StepType {
 
     @Override
     public boolean run(TestRun ctx) {
-        Screenshot screenshot = new AShot()
-                .shootingStrategy(getStrategy(ctx))
-                .takeScreenshot(ctx.driver());
-
-        File outputDir = new File(Context.getInstance().getScreenShotOutputDirectory(), ctx.testName());
-        if (!outputDir.exists()) {
-            outputDir.mkdirs();
-        }
-        File file = new File(outputDir, ctx.string("file"));
+        RemoteWebDriver wd = ctx.driver();
+        wd.switchTo().defaultContent();
+        wd.manage().window().maximize();
+        Page target = new Page(ctx, 100, new InnerElementScrollStrategy(wd));
         try {
-            ImageIO.write(screenshot.getImage(), "PNG", file);
+            File file = new File(Context.getInstance().getScreenShotOutputDirectory(), ctx.suiteName() + "_" + ctx.scriptName() + "_" + ctx.string("file"));
+            ImageIO.write(target.getFinalImage(), "PNG", file);
             return file.exists();
         } catch (IOException e) {
             ctx.log().error(e);
             return false;
         }
-    }
-
-    private ShootingStrategy getStrategy(TestRun ctx) {
-        if (ctx.currentStep().locatorParams.containsKey("locator")) {
-            if (ctx.containsKey("onlySelected")) {
-                return new OnlySelectedViewportPastingDecorator(ShootingStrategies.simple(), ctx).withScrollTimeout(100);
-            }
-            return new SelectedViewportPastingDecorator(ShootingStrategies.simple(), ctx).withScrollTimeout(100);
-        }
-        return ShootingStrategies.viewportPasting(100);
     }
 }
