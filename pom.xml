@@ -25,19 +25,6 @@
            </developer>
        </developers>
 
-    <scm>
-        <connection>scm:git:git://github.com/rossrowe/se-builder.git</connection>
-        <developerConnection>scm:git:git@github.com:rossrowe/se-builder.git</developerConnection>
-        <url>git@github.com:rossrowe/se-builder.git</url>
-    </scm>
-
-    <distributionManagement>
-        <repository>
-            <id>cloudbees-private-release-repository</id>
-            <url>dav:https://repository-saucelabs.forge.cloudbees.com/release</url>
-        </repository>
-    </distributionManagement>
-
     <dependencies>
         <dependency>
             <groupId>org.apache.ant</groupId>
@@ -73,7 +60,6 @@
     </dependencies>
 
     <build>
-		<sourceDirectory>${basedir}/src</sourceDirectory>
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
