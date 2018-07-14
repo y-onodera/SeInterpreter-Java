@@ -19,7 +19,7 @@ package com.sebuilder.interpreter.steptype;
 import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
-import com.sebuilder.interpreter.screenshot.InnerElementScrollStrategy;
+import com.sebuilder.interpreter.screenshot.LocatorInnerScrollElementHandler;
 import com.sebuilder.interpreter.screenshot.Page;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
@@ -35,7 +35,7 @@ public class SaveScreenshot implements StepType {
         RemoteWebDriver wd = ctx.driver();
         wd.switchTo().defaultContent();
         wd.manage().window().maximize();
-        Page target = new Page(ctx, 100, new InnerElementScrollStrategy(wd));
+        Page target = new Page(ctx, 100, new LocatorInnerScrollElementHandler(wd));
         try {
             File file = new File(Context.getInstance().getScreenShotOutputDirectory(), ctx.suiteName() + "_" + ctx.scriptName() + "_" + ctx.string("file"));
             ImageIO.write(target.getFinalImage(), "PNG", file);
