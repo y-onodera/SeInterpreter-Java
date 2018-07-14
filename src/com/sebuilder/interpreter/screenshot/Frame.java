@@ -7,7 +7,7 @@ import java.awt.image.BufferedImage;
 
 public class Frame extends InnerElement {
 
-    public Frame(Printable parentPage, int pointY, WebElement element, int scrollableHeight, int viewportHeight, InnerElementScrollStrategy innerElementScrollStrategy) {
+    public Frame(Printable parentPage, int pointY, WebElement element, int scrollableHeight, int viewportHeight, LocatorInnerScrollElementHandler innerElementScrollStrategy) {
         super(parentPage, pointY, element, scrollableHeight, viewportHeight, innerElementScrollStrategy);
     }
 

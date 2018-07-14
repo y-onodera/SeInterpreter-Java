@@ -10,30 +10,14 @@ import java.util.SortedMap;
 public abstract class AbstractPrintable implements Printable {
     private final TestRun ctx;
     private final long scrollTimeout;
-    private int scrollableHeight;
-    private int viewportHeight;
     private SortedMap<Integer, InnerElement> innerScrollableElement;
     private int innerScrollHeight;
     private int printedHeight;
 
-    protected AbstractPrintable(TestRun ctx, long scrollTimeout, InnerElementScrollStrategy innerElementScrollStrategy) {
-        this(ctx, scrollTimeout, 0, 0, innerElementScrollStrategy);
-    }
-
-    protected AbstractPrintable(TestRun ctx, long scrollTimeout, int scrollableHeight, int viewportHeight, InnerElementScrollStrategy innerElementScrollStrategy) {
+    protected AbstractPrintable(TestRun ctx, long scrollTimeout, InnerScrollElementHandler innerScrollElementHandler) {
         this.ctx = ctx;
         this.scrollTimeout = scrollTimeout;
-        if (scrollableHeight == 0) {
-            this.scrollableHeight = this.getFullHeight();
-        } else {
-            this.scrollableHeight = scrollableHeight;
-        }
-        if (viewportHeight == 0) {
-            this.viewportHeight = this.getWindowHeight();
-        } else {
-            this.viewportHeight = viewportHeight;
-        }
-        this.innerScrollableElement = innerElementScrollStrategy.printTarget(this);
+        this.innerScrollableElement = innerScrollElementHandler.handleTarget(this);
         this.innerScrollHeight = this.innerScrollableElement
                 .values()
                 .stream()
@@ -42,11 +26,9 @@ public abstract class AbstractPrintable implements Printable {
                         , (sum1, sum2) -> sum1 + sum2);
     }
 
-    protected AbstractPrintable(TestRun ctx, long scrollTimeout, int scrollableHeight, int viewportHeight) {
+    protected AbstractPrintable(TestRun ctx, long scrollTimeout) {
         this.ctx = ctx;
         this.scrollTimeout = scrollTimeout;
-        this.scrollableHeight = scrollableHeight;
-        this.viewportHeight = viewportHeight;
         this.innerScrollableElement = Maps.newTreeMap();
         this.innerScrollHeight = 0;
     }
@@ -59,16 +41,6 @@ public abstract class AbstractPrintable implements Printable {
     @Override
     public TestRun getCtx() {
         return ctx;
-    }
-
-    @Override
-    public int getViewportHeight() {
-        return viewportHeight;
-    }
-
-    @Override
-    public int getScrollableHeight() {
-        return scrollableHeight;
     }
 
     @Override

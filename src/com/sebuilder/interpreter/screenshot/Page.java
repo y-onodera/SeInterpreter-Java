@@ -7,12 +7,16 @@ import java.awt.image.BufferedImage;
 
 public class Page extends AbstractPrintable {
     private int pageWidth;
+    private int scrollableHeight;
+    private int viewportHeight;
     private int printedImageHeight;
     private BufferedImage finalImage;
     private Graphics2D graphics;
 
-    public Page(TestRun ctx, long scrollTimeout, InnerElementScrollStrategy innerElementScrollStrategy) {
-        super(ctx, scrollTimeout, innerElementScrollStrategy);
+    public Page(TestRun ctx, long scrollTimeout, InnerScrollElementHandler innerScrollElementHandler) {
+        super(ctx, scrollTimeout, innerScrollElementHandler);
+        this.scrollableHeight = this.getFullHeight();
+        this.viewportHeight = this.getWindowHeight();
         int imageHeight = this.getScrollableHeight() + this.getInnerScrollHeight();
         this.finalImage = new BufferedImage(this.getWindowWidth(), imageHeight, BufferedImage.TYPE_3BYTE_BGR);
         this.graphics = this.finalImage.createGraphics();
@@ -27,6 +31,16 @@ public class Page extends AbstractPrintable {
             this.graphics.dispose();
             return finalImage;
         }
+    }
+
+    @Override
+    public int getViewportHeight() {
+        return viewportHeight;
+    }
+
+    @Override
+    public int getScrollableHeight() {
+        return scrollableHeight;
     }
 
     @Override

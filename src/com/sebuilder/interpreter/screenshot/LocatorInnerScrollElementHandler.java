@@ -2,6 +2,7 @@ package com.sebuilder.interpreter.screenshot;
 
 import com.google.common.collect.Maps;
 import com.sebuilder.interpreter.TestRun;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -10,7 +11,7 @@ import java.util.List;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-public class InnerElementScrollStrategy implements VerticalSurvey {
+public class LocatorInnerScrollElementHandler implements VerticalSurvey, InnerScrollElementHandler {
     private final RemoteWebDriver driver;
 
     @Override
@@ -18,11 +19,12 @@ public class InnerElementScrollStrategy implements VerticalSurvey {
         return driver;
     }
 
-    public InnerElementScrollStrategy(RemoteWebDriver driver) {
+    public LocatorInnerScrollElementHandler(RemoteWebDriver driver) {
         this.driver = driver;
     }
 
-    public TreeMap<Integer, InnerElement> printTarget(Printable parent) {
+    @Override
+    public TreeMap<Integer, InnerElement> handleTarget(Printable parent) {
         TreeMap<Integer, InnerElement> innerPrintableElement = Maps.newTreeMap();
         handleFrame(parent, innerPrintableElement);
         handleScrollableTag(parent, innerPrintableElement, parent.getCtx());
@@ -33,8 +35,9 @@ public class InnerElementScrollStrategy implements VerticalSurvey {
         RemoteWebDriver wd = getWebDriver();
         List<WebElement> frames = wd.findElementsByTagName("iframe");
         for (WebElement targetFrame : frames) {
-            int pointY = targetFrame.getLocation().getY();
             int viewportHeight = Integer.parseInt(targetFrame.getAttribute("clientHeight"));
+            int border = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('border-top-width'));", targetFrame)).intValue();
+            int pointY = targetFrame.getLocation().getY() + border;
             wd.switchTo().frame(targetFrame);
             int scrollableHeight = this.getFullHeight();
             Frame printableFrame = new Frame(parent, pointY, targetFrame, scrollableHeight, viewportHeight, this);
@@ -57,16 +60,27 @@ public class InnerElementScrollStrategy implements VerticalSurvey {
                     return scrollHeight > clientHeight;
                 })
                 .filter(element -> {
-                    String overflow = element.getCssValue("overflow");
-                    return "auto".equals(overflow) || "scroll".equals(overflow) || ("visible".equals(overflow) && element.getTagName().equals("textarea"));
+                    if (isScrollable(element, element.getCssValue("overflow"))) {
+                        return true;
+                    }
+                    return isScrollable(element, element.getCssValue("overflow-y"));
                 })
                 .collect(Collectors.toList());
         for (WebElement targetDiv : divs) {
-            int divViewportHeight = Integer.parseInt(targetDiv.getAttribute("clientHeight"));
+            int clientHeight = Integer.valueOf(targetDiv.getAttribute("clientHeight"));
+            int border = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('border-top-width'));", targetDiv)).intValue();
+            int paddingTop = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-top'));", targetDiv)).intValue();
+            int paddingBottom = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-bottom'));", targetDiv)).intValue();
+            int height = clientHeight - paddingTop - paddingBottom;
             Point framePoint = targetDiv.getLocation();
-            int pointY = framePoint.getY();
-            int scrollableDivHeight = Integer.valueOf(targetDiv.getAttribute("scrollHeight"));
-            innerPrintableElement.put(pointY, new ScrollableTag(parent, pointY, targetDiv, scrollableDivHeight, divViewportHeight));
+            int pointY = framePoint.getY() + border + paddingTop;
+            int scrollableDivHeight = Integer.valueOf(targetDiv.getAttribute("scrollHeight")) - paddingTop - paddingBottom - border * 2;
+            ScrollableTag tag = new ScrollableTag(parent, pointY, targetDiv, scrollableDivHeight, height);
+            innerPrintableElement.put(tag.getPointY(), tag);
         }
+    }
+
+    boolean isScrollable(WebElement element, String overflow) {
+        return "auto".equals(overflow) || "scroll".equals(overflow) || ("visible".equals(overflow) && element.getTagName().equals("textarea"));
     }
 }

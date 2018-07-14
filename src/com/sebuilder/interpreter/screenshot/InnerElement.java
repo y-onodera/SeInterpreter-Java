@@ -7,23 +7,28 @@ import java.awt.image.BufferedImage;
 public abstract class InnerElement extends AbstractPrintable {
 
     private final Printable parent;
-
     private final int pointY;
-
+    private int scrollableHeight;
+    private int viewportHeight;
     private final WebElement element;
 
-    public InnerElement(Printable parentPage, int pointY, WebElement element, int scrollableHeight, int viewportHeight, InnerElementScrollStrategy innerElementScrollStrategy) {
-        super(parentPage.getCtx(), parentPage.scrollTimeout(), scrollableHeight, viewportHeight, innerElementScrollStrategy);
+    public InnerElement(Printable parentPage, int pointY, WebElement element, int scrollableHeight, int viewportHeight, InnerScrollElementHandler innerScrollElementHandler) {
+        super(parentPage.getCtx(), parentPage.scrollTimeout(), innerScrollElementHandler);
+        this.scrollableHeight = scrollableHeight;
+        this.viewportHeight = viewportHeight;
         this.parent = parentPage;
         this.pointY = pointY;
         this.element = element;
     }
 
-    public InnerElement(Printable parentPage, int pointY, WebElement element, int scrollableHeight, int viewportHeight) {
-        super(parentPage.getCtx(), parentPage.scrollTimeout(), scrollableHeight, viewportHeight);
-        this.parent = parentPage;
-        this.pointY = pointY;
-        this.element = element;
+    @Override
+    public int getViewportHeight() {
+        return viewportHeight;
+    }
+
+    @Override
+    public int getScrollableHeight() {
+        return scrollableHeight;
     }
 
     @Override

@@ -5,7 +5,7 @@ import org.openqa.selenium.WebElement;
 public class ScrollableTag extends InnerElement {
 
     public ScrollableTag(Printable parentPage, int pointY, WebElement element, int scrollableHeight, int viewportHeight) {
-        super(parentPage, pointY, element, scrollableHeight, viewportHeight);
+        super(parentPage, pointY, element, scrollableHeight, viewportHeight,InnerScrollElementHandler.ignoreInnerScroll);
     }
 
     @Override
