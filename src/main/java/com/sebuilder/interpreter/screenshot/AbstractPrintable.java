@@ -26,13 +26,6 @@ public abstract class AbstractPrintable implements Printable {
                         , (sum1, sum2) -> sum1 + sum2);
     }
 
-    protected AbstractPrintable(TestRun ctx, long scrollTimeout) {
-        this.ctx = ctx;
-        this.scrollTimeout = scrollTimeout;
-        this.innerScrollableElement = Maps.newTreeMap();
-        this.innerScrollHeight = 0;
-    }
-
     @Override
     public long scrollTimeout() {
         return this.scrollTimeout;
@@ -102,6 +95,9 @@ public abstract class AbstractPrintable implements Printable {
         if (this.isMoveScrollTopTo(this.getPrintedHeight())) {
             this.scrollVertically(this.getPrintedHeight());
             return 0;
+        }
+        if (this.getViewportHeight() >= this.getScrollableHeight()) {
+            return this.getPrintedHeight();
         }
         this.scrollVertically(this.getScrollableHeight() - this.getViewportHeight());
         return this.getPrintedHeight() - (this.getScrollableHeight() - this.getViewportHeight());

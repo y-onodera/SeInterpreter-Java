@@ -69,18 +69,18 @@ public class LocatorInnerScrollElementHandler implements VerticalSurvey, InnerSc
         for (WebElement targetDiv : divs) {
             int clientHeight = Integer.valueOf(targetDiv.getAttribute("clientHeight"));
             int border = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('border-top-width'));", targetDiv)).intValue();
-            int paddingTop = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-top'));", targetDiv)).intValue();
-            int paddingBottom = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-bottom'));", targetDiv)).intValue();
-            int height = clientHeight - paddingTop - paddingBottom;
+            int paddingTop = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-top') || document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding'));", targetDiv)).intValue();
+            int paddingBottom = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-bottom') || document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding'));", targetDiv)).intValue();
+            int height = clientHeight - paddingTop - paddingBottom - border * 2;
             Point framePoint = targetDiv.getLocation();
-            int pointY = framePoint.getY() + border + paddingTop;
+            int pointY = framePoint.getY() + paddingTop + border;
             int scrollableDivHeight = Integer.valueOf(targetDiv.getAttribute("scrollHeight")) - paddingTop - paddingBottom - border * 2;
             ScrollableTag tag = new ScrollableTag(parent, pointY, targetDiv, scrollableDivHeight, height);
             innerPrintableElement.put(tag.getPointY(), tag);
         }
     }
 
-    boolean isScrollable(WebElement element, String overflow) {
+    private boolean isScrollable(WebElement element, String overflow) {
         return "auto".equals(overflow) || "scroll".equals(overflow) || ("visible".equals(overflow) && element.getTagName().equals("textarea"));
     }
 }
