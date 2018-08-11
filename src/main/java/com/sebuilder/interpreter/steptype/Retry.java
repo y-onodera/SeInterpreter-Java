@@ -1,6 +1,12 @@
-package com.sebuilder.interpreter;
+package com.sebuilder.interpreter.steptype;
 
-public class Loop implements StepType {
+
+import com.sebuilder.interpreter.StepType;
+import com.sebuilder.interpreter.TestRun;
+
+public class Retry implements StepType {
+
+
     /**
      * Perform the action this step consists of.
      *
@@ -12,24 +18,22 @@ public class Loop implements StepType {
     public boolean run(TestRun ctx) {
         boolean success = true;
         int actions = Integer.valueOf(ctx.string("subStep"));
-        int count = Integer.valueOf(ctx.string("count"));
-        for (int i = 0; i < count; i++) {
-            ctx.vars().put("_index", String.valueOf(i + 1));
-            for (int exec = 0; exec < actions; exec++) {
+        while (!next(ctx)) {
+            for (int i = 0; i < actions; i++) {
                 success = next(ctx) && success;
             }
             if (!success) {
                 return false;
             }
-            if (i + 1 < count) {
-                ctx.backStepIndex(actions);
-            }
+            ctx.backStepIndex(actions + 1);
         }
-        return success;
+        ctx.forwardStepIndex(actions);
+        return true;
     }
 
     private boolean next(TestRun ctx) {
         ctx.toNextStepIndex();
         return ctx.currentStep().type.run(ctx);
     }
+
 }

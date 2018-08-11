@@ -16,7 +16,8 @@
 package com.sebuilder.interpreter.factory;
 
 import com.sebuilder.interpreter.*;
-import com.sebuilder.interpreter.Retry;
+import com.sebuilder.interpreter.steptype.Retry;
+import com.sebuilder.interpreter.steptype.Loop;
 
 import java.util.HashMap;
 
@@ -100,10 +101,12 @@ public class StepTypeFactory {
                     rawStepType = false;
                 }
                 if (name.equals("retry")) {
-                    return new Retry();
+                    className ="Retry";
+                    rawStepType = false;
                 }
                 if (name.equals("loop")) {
-                    return new Loop();
+                    className ="Loop";
+                    rawStepType = false;
                 }
                 Class<?> c = null;
                 try {
@@ -139,7 +142,6 @@ public class StepTypeFactory {
                             + (rawStepType ? "StepType" : "Getter") + ".", cce);
                 }
             }
-
             return typesMap.get(name);
         } catch (Exception e) {
             throw new RuntimeException("Step type \"" + name + "\" is not implemented.", e);

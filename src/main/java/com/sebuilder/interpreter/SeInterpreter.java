@@ -18,6 +18,8 @@ package com.sebuilder.interpreter;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONException;
 
 import java.io.File;
@@ -37,12 +39,12 @@ public class SeInterpreter extends CommandLineRunner {
     private ArrayList<String> paths;
     private boolean closeDriver;
 
-    public SeInterpreter(String[] args, Log log) {
+    public SeInterpreter(String[] args, Logger log) {
         super(args, log);
     }
 
     public static void main(String[] args) {
-        Log log = LogFactory.getFactory().getInstance(SeInterpreter.class);
+        Logger log = LogManager.getLogger(SeInterpreter.class);
         SeInterpreter interpreter = new SeInterpreter(args, log);
         if (interpreter.paths.isEmpty()) {
             log.info("Configuration successful but no paths to scripts specified. Exiting.");

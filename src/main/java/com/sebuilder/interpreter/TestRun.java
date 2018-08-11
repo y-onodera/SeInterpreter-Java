@@ -17,7 +17,7 @@
 package com.sebuilder.interpreter;
 
 import com.sebuilder.interpreter.webdriverfactory.WebDriverFactory;
-import org.apache.commons.logging.Log;
+import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
@@ -35,7 +35,7 @@ public class TestRun {
     private HashMap<String, String> vars = new HashMap<>();
     private int stepIndex = -1;
     private RemoteWebDriver driver;
-    private Log log;
+    private Logger log;
     private WebDriverFactory webDriverFactory = SeInterpreter.DEFAULT_DRIVER_FACTORY;
     private HashMap<String, String> webDriverConfig = new HashMap<>();
     private Long implicitlyWaitDriverTimeout;
@@ -44,7 +44,7 @@ public class TestRun {
 
     public TestRun(
             Script script,
-            Log log,
+            Logger log,
             WebDriverFactory webDriverFactory,
             HashMap<String, String> webDriverConfig,
             Long implicitlyWaitDriverTimeout,
@@ -55,7 +55,7 @@ public class TestRun {
 
     public TestRun(
             Script script,
-            Log log,
+            Logger log,
             RemoteWebDriver driver,
             Long implicitlyWaitDriverTimeout,
             Long pageLoadDriverTimeout,
@@ -65,7 +65,7 @@ public class TestRun {
 
     public TestRun(
             Script script,
-            Log log,
+            Logger log,
             RemoteWebDriver driver,
             WebDriverFactory webDriverFactory,
             HashMap<String, String> webDriverConfig,
@@ -134,7 +134,7 @@ public class TestRun {
     /**
      * @return The logger being used.
      */
-    public Log log() {
+    public Logger log() {
         return log;
     }
 

@@ -23,7 +23,7 @@ import com.sebuilder.interpreter.webdriverfactory.WebDriverFactory;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Factory to create a TestRun objects from a script.
@@ -52,7 +52,7 @@ public class TestRunFactory {
      * @param seInterpreterTestListener
      * @return A new instance of TestRun, using the previous run's driver and vars if available.
      */
-    public TestRun createTestRun(Script script, Log log, WebDriverFactory webDriverFactory, HashMap<String, String> webDriverConfig, Map<String, String> initialVars, TestRun previousRun, SeInterpreterTestListener seInterpreterTestListener) {
+    public TestRun createTestRun(Script script, Logger log, WebDriverFactory webDriverFactory, HashMap<String, String> webDriverConfig, Map<String, String> initialVars, TestRun previousRun, SeInterpreterTestListener seInterpreterTestListener) {
         if (script.usePreviousDriverAndVars && previousRun != null && previousRun.driver() != null) {
             return new TestRun(script, log, previousRun.driver(), implicitlyWaitDriverTimeout, pageLoadDriverTimeout, initialVars, seInterpreterTestListener);
         }

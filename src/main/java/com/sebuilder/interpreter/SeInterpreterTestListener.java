@@ -2,7 +2,7 @@ package com.sebuilder.interpreter;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
-import org.apache.commons.logging.Log;
+import org.apache.logging.log4j.Logger;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.Delete;
 import org.apache.tools.ant.taskdefs.Mkdir;
@@ -29,9 +29,9 @@ public class SeInterpreterTestListener {
     private int runTest;
     private int error;
     private int failed;
-    private Log log;
+    private Logger log;
 
-    public SeInterpreterTestListener(Log aLog) {
+    public SeInterpreterTestListener(Logger aLog) {
         this.log = aLog;
         this.project = new Project();
         this.project.setName("se-interpreter");
@@ -156,5 +156,9 @@ public class SeInterpreterTestListener {
 
     public String suiteName() {
         return this.suite.getName();
+    }
+
+    public int getRunTest() {
+        return runTest;
     }
 }

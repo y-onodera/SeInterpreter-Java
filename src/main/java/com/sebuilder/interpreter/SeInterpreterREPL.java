@@ -1,8 +1,8 @@
 package com.sebuilder.interpreter;
 
 import com.google.common.collect.Lists;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.util.*;
@@ -10,12 +10,12 @@ import java.util.*;
 public class SeInterpreterREPL extends CommandLineRunner {
     private int execCount = 1;
 
-    public SeInterpreterREPL(String[] args, Log log) {
+    public SeInterpreterREPL(String[] args, Logger log) {
         super(args, log);
     }
 
     public static void main(String[] args) {
-        Log log = LogFactory.getFactory().getInstance(SeInterpreterREPL.class);
+        Logger log = LogManager.getLogger(SeInterpreterREPL.class);
         SeInterpreterREPL interpreter = new SeInterpreterREPL(args, log);
         try {
             interpreter.run();
@@ -25,7 +25,7 @@ public class SeInterpreterREPL extends CommandLineRunner {
         }
     }
 
-    private void run() {
+    public void run() {
         try {
             this.setupREPL();
             this.runningREPL();
@@ -34,11 +34,11 @@ public class SeInterpreterREPL extends CommandLineRunner {
         }
     }
 
-    private void setupREPL() {
+    public void setupREPL() {
         this.seInterpreterTestListener.cleanResult();
     }
 
-    private void runningREPL() {
+    public void runningREPL() {
         final Scanner scanner = new Scanner(System.in);
         StringBuilder input = null;
         boolean commandInput = false;
@@ -67,14 +67,39 @@ public class SeInterpreterREPL extends CommandLineRunner {
         }
     }
 
-    private void tearDownREPL() {
+    public void tearDownREPL() {
         if (this.driver != null) {
             this.driver.quit();
         }
         this.seInterpreterTestListener.aggregateResult();
     }
 
-    private void execute(Script script) {
+    public List<Script> loadScript(String file) {
+        List<Script> result = Lists.newArrayList();
+        try {
+            result = this.sf.parse(new File(file));
+        } catch (Throwable e) {
+            this.log.error(e);
+        }
+        return result;
+    }
+
+    public Script toScript(String cmdInput) {
+        this.log.info("start parse input");
+        Script result = null;
+        try {
+            result = this.sf.parse(cmdInput);
+        } catch (Throwable e) {
+            this.log.error(e);
+        }
+        if (result == null) {
+            this.log.error("invalid input:" + cmdInput);
+        }
+        this.log.info("finish parse input");
+        return result;
+    }
+
+    public void execute(Script script) {
         String suiteName = "com.sebuilder.interpreter.REPL_EXEC" + this.execCount++;
         script.stateTakeOver(new HashMap<>());
         int i = 1;
@@ -101,31 +126,6 @@ public class SeInterpreterREPL extends CommandLineRunner {
             this.driver = this.lastRun.driver();
         }
         this.log.info("finish execute script");
-    }
-
-    private List<Script> loadScript(String file) {
-        List<Script> result = Lists.newArrayList();
-        try {
-            result = this.sf.parse(new File(file));
-        } catch (Throwable e) {
-            this.log.error(e);
-        }
-        return result;
-    }
-
-    private Script toScript(String cmdInput) {
-        this.log.info("start parse input");
-        Script result = null;
-        try {
-            result = this.sf.parse(cmdInput);
-        } catch (Throwable e) {
-            this.log.error(e);
-        }
-        if (result == null) {
-            this.log.error("invalid input:" + cmdInput);
-        }
-        this.log.info("finish parse input");
-        return result;
     }
 
     private StringBuilder startScript() {

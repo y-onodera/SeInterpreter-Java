@@ -5,7 +5,7 @@ import com.sebuilder.interpreter.factory.StepTypeFactory;
 import com.sebuilder.interpreter.factory.TestRunFactory;
 import com.sebuilder.interpreter.webdriverfactory.Firefox;
 import com.sebuilder.interpreter.webdriverfactory.WebDriverFactory;
-import org.apache.commons.logging.Log;
+import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.lang.reflect.InvocationTargetException;
@@ -20,10 +20,10 @@ public abstract class CommandLineRunner {
     protected WebDriverFactory wdf;
     protected TestRun lastRun;
     protected SeInterpreterTestListener seInterpreterTestListener;
-    protected Log log;
+    protected Logger log;
     protected RemoteWebDriver driver;
 
-    protected CommandLineRunner(String[] args, Log log) {
+    protected CommandLineRunner(String[] args, Logger log) {
         this.log = log;
         this.sf = new ScriptFactory();
         this.stf = new StepTypeFactory();
@@ -51,15 +51,15 @@ public abstract class CommandLineRunner {
                     this.log.fatal("Driver configuration option \"" + s + "\" is not of the form \"--driver=<name>\" or \"--driver.<key>=<value\".");
                     System.exit(1);
                 }
-                if (s.startsWith("--implicitlyWait")) {
+                if (s.startsWith(CommandLineArgument.IMPLICITLY_WAIT.key())) {
                     this.trf.setImplicitlyWaitDriverTimeout(Long.valueOf(kv[1]));
-                } else if (s.startsWith("--pageLoadTimeout")) {
+                } else if (s.startsWith(CommandLineArgument.PAGE_LOAD_TIMEOUT.key())) {
                     this.trf.setPageLoadDriverTimeout(Long.valueOf(kv[1]));
-                } else if (s.startsWith("--stepTypePackage")) {
+                } else if (s.startsWith(CommandLineArgument.STEP_TYPE_PACKAGE.key())) {
                     this.stf.setPrimaryPackage(kv[1]);
-                } else if (s.startsWith("--driver.")) {
-                    this.driverConfig.put(kv[0].substring("--driver.".length()), kv[1]);
-                } else if (s.startsWith("--driver")) {
+                } else if (s.startsWith(CommandLineArgument.DRIVER_CONFIG_PREFIX.key())) {
+                    this.driverConfig.put(kv[0].substring(CommandLineArgument.DRIVER_CONFIG_PREFIX.key().length()), kv[1]);
+                } else if (s.startsWith(CommandLineArgument.DRIVER.key())) {
                     try {
                         this.wdf = (WebDriverFactory) Class.forName("com.sebuilder.interpreter.webdriverfactory." + kv[1]).getDeclaredConstructor().newInstance();
                     } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
@@ -67,17 +67,17 @@ public abstract class CommandLineRunner {
                     } catch (InstantiationException | IllegalAccessException e) {
                         this.log.fatal("Could not instantiate WebDriverFactory " + "com.sebuilder.interpreter.webdriverfactory." + kv[1], e);
                     }
-                } else if (s.startsWith("--datasource.encoding")) {
+                } else if (s.startsWith(CommandLineArgument.DATASOURCE_ENCODING.key())) {
                     Context.getInstance().setDataSourceEncording(kv[1]);
-                } else if (s.startsWith("--datasource.directory")) {
+                } else if (s.startsWith(CommandLineArgument.DATASOURCE_DIRECTORY.key())) {
                     Context.getInstance().setDataSourceDirectory(kv[1]);
-                } else if (s.startsWith("--screenshotoutput")) {
+                } else if (s.startsWith(CommandLineArgument.SCREENSHOT_OUTPUT.key())) {
                     Context.getInstance().setScreenShotOutputDirectory(kv[1]);
-                } else if (s.startsWith("--templateoutput")) {
+                } else if (s.startsWith(CommandLineArgument.TEMPLATE_OUTPUT.key())) {
                     Context.getInstance().setTemplateOutputDirectory(kv[1]);
-                } else if (s.startsWith("--resultoutput")) {
+                } else if (s.startsWith(CommandLineArgument.RESULT_OUTPUT.key())) {
                     Context.getInstance().setResultOutputDirectory(kv[1]);
-                } else if (s.startsWith("--downloadoutput")) {
+                } else if (s.startsWith(CommandLineArgument.DOWNLOAD_OUTPUT.key())) {
                     Context.getInstance().setDownloadDirectory(kv[1]);
                 } else {
                     configureOption(s, kv);
@@ -96,5 +96,9 @@ public abstract class CommandLineRunner {
     }
 
     protected void configureOption(String s) {
+    }
+
+    public void setSeInterpreterTestListener(SeInterpreterTestListener seInterpreterTestListener) {
+        this.seInterpreterTestListener = seInterpreterTestListener;
     }
 }
