@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.*?>
+<AnchorPane id="ancorSeInterpleter" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+            minWidth="-Infinity" prefHeight="500.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.sebuilder.interpreter.javafx.controller.SeInterpreterController">
+    <children>
+        <BorderPane id="borderSeInterpleter" layoutX="-1.0" prefHeight="500.0" prefWidth="600.0"
+                    AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                    AnchorPane.topAnchor="0.0">
+            <top>
+                <fx:include source="seleniumbuildermenu.fxml"/>
+            </top>
+            <left>
+                <fx:include source="seleniumbuilderscriptview.fxml"/>
+            </left>
+            <center>
+                <fx:include source="seleniumbuilderscriptbody.fxml"/>
+            </center>
+            <bottom>
+                <TextArea fx:id="textAreaScriptLog" prefHeight="75.0" BorderPane.alignment="CENTER"/>
+            </bottom>
+        </BorderPane>
+    </children>
+</AnchorPane>

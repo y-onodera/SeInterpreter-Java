@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.AnchorPane?>
+<AnchorPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.sebuilder.interpreter.javafx.controller.StepViewController">
+    <children>
+        <TableView id="tableViewScriptBody" fx:id="tableViewScriptBody" prefHeight="400.0" prefWidth="500.0"
+                   stylesheets="@../css/steptable.css">
+            <columns>
+                <TableColumn id="tableColumnScriptBodyNo" fx:id="tableColumnScriptBodyNo" maxWidth="-1.0"
+                             minWidth="30.0" prefWidth="-1.0" style="-fx-alignment: CENTER_RIGHT;" text="No"/>
+                <TableColumn id="tableColumnScriptBodyStep" fx:id="tableColumnScriptBodyStep" maxWidth="-1.0"
+                             minWidth="470.0" prefWidth="-1.0" text="step"/>
+            </columns>
+            <contextMenu>
+                <ContextMenu>
+                    <items>
+                        <MenuItem mnemonicParsing="false" text="add"/>
+                        <MenuItem mnemonicParsing="false" onAction="#handleStepDelete" text="delete"/>
+                        <MenuItem mnemonicParsing="false" onAction="#handleStepEdit" text="edit"/>
+                    </items>
+                </ContextMenu>
+            </contextMenu>
+        </TableView>
+    </children>
+</AnchorPane>
