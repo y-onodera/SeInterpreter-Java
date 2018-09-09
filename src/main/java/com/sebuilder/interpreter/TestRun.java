@@ -280,14 +280,15 @@ public class TestRun {
      *
      */
     public void forwardStepIndex(int count) {
-        stepIndex = stepIndex + count;
+        this.listener.skipTestIndex(count);
+        this.stepIndex = this.stepIndex + count;
     }
 
     /**
      *
      */
     public void backStepIndex(int count) {
-        stepIndex = stepIndex - count;
+        this.forwardStepIndex(count * -1);
     }
 
     /**
@@ -297,46 +298,51 @@ public class TestRun {
         this.forwardStepIndex(1);
     }
 
-    private boolean processTestSuccess() {
-        listener.endTest();
+    public boolean runTest() {
+        this.toNextStepIndex();
+        this.startTest();
+        return this.currentStep().type.run(this);
+    }
+
+    public void startTest() {
+        this.listener.startTest(currentStep().name != null ? currentStep().name : currentStep().toPrettyString());
+    }
+
+    public boolean processTestSuccess() {
+        this.listener.endTest();
         return true;
     }
 
-    private boolean processTestFailure() {
-        listener.addFailure(currentStep() + " failed.");
+    public boolean processTestFailure() {
+        this.listener.addFailure(this.currentStep() + " failed.");
         // If a verify failed, we just note this but continue.
-        if (currentStep().type instanceof Verify) {
+        if (this.currentStep().type instanceof Verify) {
             return false;
         }
         // In all other cases, we throw an exception to stop the run.
-        throw new AssertionError(currentStep() + " failed.");
+        throw new AssertionError(this.currentStep() + " failed.");
     }
 
-    private boolean processTestError(Throwable e) {
-        listener.addError(e);
-        throw new AssertionError(currentStep() + " failed.", e);
+    public boolean processTestError(Throwable e) {
+        this.listener.addError(e);
+        throw new AssertionError(this.currentStep() + " failed.", e);
     }
 
-    private boolean runTest() {
-        this.toNextStepIndex();
-        listener.startTest(currentStep().name != null ? currentStep().name : currentStep().toPrettyString());
-        return currentStep().type.run(this);
-    }
 
     /**
      * Initialises remoteWebDriver by invoking factory and set timeouts when
      * needed
      */
     private void initRemoteWebDriver() {
-        if (driver == null) {
-            log.debug("Initialising driver.");
+        if (this.driver == null) {
+            this.log.debug("Initialising driver.");
             try {
-                driver = webDriverFactory.make(webDriverConfig);
-                if (implicitlyWaitDriverTimeout != null) {
-                    driver.manage().timeouts().implicitlyWait(implicitlyWaitDriverTimeout, TimeUnit.SECONDS);
+                this.driver = this.webDriverFactory.make(this.webDriverConfig);
+                if (this.implicitlyWaitDriverTimeout != null) {
+                    this.driver.manage().timeouts().implicitlyWait(this.implicitlyWaitDriverTimeout, TimeUnit.SECONDS);
                 }
-                if (pageLoadDriverTimeout != null) {
-                    driver.manage().timeouts().pageLoadTimeout(pageLoadDriverTimeout, TimeUnit.SECONDS);
+                if (this.pageLoadDriverTimeout != null) {
+                    this.driver.manage().timeouts().pageLoadTimeout(this.pageLoadDriverTimeout, TimeUnit.SECONDS);
                 }
             } catch (Exception e) {
                 throw new RuntimeException("Test run failed: unable to create driver.", e);

@@ -15,24 +15,24 @@ public class SeInterpreterTestGUIListener extends SeInterpreterTestListener {
     @Override
     public void startTest(String testName) {
         super.startTest(testName);
-        EventBus.publish(new HandleStepResultEvent(this.getRunTest(),Result.START));
+        EventBus.publish(new HandleStepResultEvent(this.getStepNo(), Result.START));
     }
 
     @Override
     public void addError(Throwable throwable) {
-        EventBus.publish(new HandleStepResultEvent(this.getRunTest(),Result.ERROR));
+        EventBus.publish(new HandleStepResultEvent(this.getStepNo(), Result.ERROR));
         super.addError(throwable);
     }
 
     @Override
     public void addFailure(String message) {
-        EventBus.publish(new HandleStepResultEvent(this.getRunTest(),Result.FAILURE));
+        EventBus.publish(new HandleStepResultEvent(this.getStepNo(), Result.FAILURE));
         super.addFailure(message);
     }
 
     @Override
     public void endTest() {
-        EventBus.publish(new HandleStepResultEvent(this.getRunTest(),Result.SUCCESS));
+        EventBus.publish(new HandleStepResultEvent(this.getStepNo(), Result.SUCCESS));
         super.endTest();
     }
 }

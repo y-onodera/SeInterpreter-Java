@@ -35,6 +35,7 @@ public class SeInterpreterApplication extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
+        System.setProperty("log4j.configurationFile", "log4j2-gui.xml");
         stage.setTitle("SeInterpreter");
         Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getClassLoader().getResource("fxml/seleniumbuilder.fxml")));
         Scene scene = new Scene(root);
@@ -129,15 +130,15 @@ public class SeInterpreterApplication extends Application {
             this.repl = null;
         }
 
+        public void quit() {
+            this.stop = true;
+        }
+
         private void setUp() {
             String[] args = new String[]{CommandLineArgument.DRIVER.getArgument("Chrome")};
             this.repl = new SeInterpreterREPL(args, log);
             this.repl.setSeInterpreterTestListener(new SeInterpreterTestGUIListener(log));
             this.repl.setupREPL();
-        }
-
-        public void quit() {
-            this.stop = true;
         }
     }
 

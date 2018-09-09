@@ -25,6 +25,12 @@
             </Policies>
             <DefaultRolloverStrategy max="3"/>
         </RollingFile>
+        <!-- GUIに出力する設定 -->
+        <TextAreaAppender name="JavaFXLogger">
+            <PatternLayout>
+                <pattern>${format1}</pattern>
+            </PatternLayout>
+        </TextAreaAppender>
     </Appenders>
 
     <Loggers>
@@ -32,6 +38,7 @@
         <Root level="info">
             <AppenderRef ref="Console"/>
             <AppenderRef ref="logfile001"/>
+            <AppenderRef ref="JavaFXLogger"/>
         </Root>
     </Loggers>
 </Configuration>

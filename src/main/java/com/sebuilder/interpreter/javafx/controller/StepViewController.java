@@ -5,9 +5,9 @@ import com.sebuilder.interpreter.Script;
 import com.sebuilder.interpreter.Step;
 import com.sebuilder.interpreter.javafx.EventBus;
 import com.sebuilder.interpreter.javafx.Result;
+import com.sebuilder.interpreter.javafx.event.ReportErrorEvent;
 import com.sebuilder.interpreter.javafx.event.script.HandleStepResultEvent;
 import com.sebuilder.interpreter.javafx.event.script.RefreshStepViewEvent;
-import com.sebuilder.interpreter.javafx.event.ReportErrorEvent;
 import com.sebuilder.interpreter.javafx.event.script.ResetStepResutEvent;
 import com.sebuilder.interpreter.javafx.event.script.ScriptReloadEvent;
 import javafx.beans.property.IntegerProperty;
@@ -28,6 +28,7 @@ import javafx.stage.Stage;
 import javafx.util.Callback;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 
 public class StepViewController {
@@ -87,7 +88,6 @@ public class StepViewController {
         dialog.setResizable(false);
         dialog.setTitle("edit step");
         dialog.show();
-
     }
 
     @Subscribe
@@ -106,8 +106,11 @@ public class StepViewController {
 
     @Subscribe
     public void handleRunStepResult(HandleStepResultEvent event) {
-        ScriptBody target = this.tableViewScriptBody.getItems().get(event.getStepNo() - 1);
-        target.setRunningResult(event.getResult().name());
+        List<ScriptBody> bodies = this.tableViewScriptBody.getItems();
+        if (bodies.size() >= event.getStepNo()) {
+            ScriptBody target = bodies.get(event.getStepNo() - 1);
+            target.setRunningResult(event.getResult().name());
+        }
         this.tableViewScriptBody.refresh();
     }
 

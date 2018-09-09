@@ -13,19 +13,33 @@ public class Loop implements StepType {
      */
     @Override
     public boolean run(TestRun ctx) {
+        ctx.processTestSuccess();
         boolean success = true;
         int actions = Integer.valueOf(ctx.string("subStep"));
         int count = Integer.valueOf(ctx.string("count"));
         for (int i = 0; i < count; i++) {
-            ctx.vars().put("_index", String.valueOf(i + 1));
-            for (int exec = 0; exec < actions; exec++) {
-                success = next(ctx) && success;
-            }
+            success = runOneStep(ctx, success, actions, i);
             if (!success) {
                 return false;
             }
             if (i + 1 < count) {
+                ctx.processTestSuccess();
                 ctx.backStepIndex(actions);
+            }
+        }
+        return success;
+    }
+
+    public boolean runOneStep(TestRun ctx, boolean success, int actions, int i) {
+        ctx.vars().put("_index", String.valueOf(i + 1));
+        for (int exec = 0; exec < actions; exec++) {
+            success = next(ctx) && success;
+            if (exec != actions - 1) {
+                if (success) {
+                    ctx.processTestSuccess();
+                } else {
+                    ctx.processTestFailure();
+                }
             }
         }
         return success;
@@ -33,6 +47,7 @@ public class Loop implements StepType {
 
     private boolean next(TestRun ctx) {
         ctx.toNextStepIndex();
+        ctx.startTest();
         return ctx.currentStep().type.run(ctx);
     }
 }

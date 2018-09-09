@@ -11,6 +11,7 @@ import org.apache.tools.ant.taskdefs.optional.junit.JUnitTest;
 import org.apache.tools.ant.taskdefs.optional.junit.XMLJUnitResultFormatter;
 import org.apache.tools.ant.taskdefs.optional.junit.XMLResultAggregator;
 import org.apache.tools.ant.types.FileSet;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -26,6 +27,7 @@ public class SeInterpreterTestListener {
     private final XMLJUnitResultFormatter formatter;
     private JUnitTest suite;
     private TestCase test;
+    private int stepNo;
     private int runTest;
     private int error;
     private int failed;
@@ -44,6 +46,7 @@ public class SeInterpreterTestListener {
         this.runTest = 0;
         this.error = 0;
         this.failed = 0;
+        this.stepNo = 0;
     }
 
     public void cleanResult() {
@@ -66,20 +69,21 @@ public class SeInterpreterTestListener {
     public boolean openTestSuite(String name, Map<String, String> aProperty) {
         String testName = name.replace("\\", ".").replace("/", ".").replaceAll("^\\.+", "");
         this.log.info("open suite:" + testName);
-        suite = new JUnitTest();
-        suite.setName(testName);
-        suite.setProperties(new Hashtable<String, String>(
+        this.suite = new JUnitTest();
+        this.suite.setName(testName);
+        this.suite.setProperties(new Hashtable<String, String>(
                 aProperty.entrySet()
                         .stream()
                         .collect(Collectors.toMap(
                                 entry -> entry.getKey().replace("'", "\\'")
                                 , entry -> entry.getValue())
                         )));
-        suite.setRunTime(new Date().getTime());
-        test = null;
-        runTest = 0;
-        error = 0;
-        failed = 0;
+        this.suite.setRunTime(new Date().getTime());
+        this.test = null;
+        this.runTest = 0;
+        this.error = 0;
+        this.failed = 0;
+        this.stepNo = 0;
         try {
             this.formatter.setOutput(new FileOutputStream(new File(this.resultDir, "TEST-SeBuilder-" + suite.getName() + "-result.xml")));
             this.formatter.startTestSuite(suite);
@@ -91,36 +95,36 @@ public class SeInterpreterTestListener {
 
     public void startTest(String testName) {
         this.log.info("start test:" + testName);
-        runTest++;
-        test = new TestCase(testName) {
+        this.runTest++;
+        this.test = new TestCase(testName) {
         };
-        formatter.startTest(test);
+        this.formatter.startTest(this.test);
     }
 
     public void addError(Throwable throwable) {
         this.log.info("result error:" + this.test.getName());
         this.log.error(throwable);
-        error++;
-        formatter.addError(test, throwable);
+        this.error++;
+        this.formatter.addError(this.test, throwable);
     }
 
     public void addFailure(String message) {
         this.log.info("result failure:" + this.test.getName());
         this.log.info("cause :" + message);
-        failed++;
-        formatter.addFailure(test, new AssertionFailedError(message));
+        this.failed++;
+        this.formatter.addFailure(this.test, new AssertionFailedError(message));
     }
 
     public void endTest() {
         this.log.info("result success:" + this.test.getName());
-        formatter.endTest(test);
+        this.formatter.endTest(this.test);
     }
 
     public void closeTestSuite() {
         this.log.info("close suite:" + this.suite.getName());
-        suite.setCounts(runTest, failed, error);
-        suite.setRunTime(new Date().getTime() - suite.getRunTime());
-        this.formatter.endTestSuite(suite);
+        this.suite.setCounts(this.runTest, this.failed, this.error);
+        this.suite.setRunTime(new Date().getTime() - this.suite.getRunTime());
+        this.formatter.endTestSuite(this.suite);
     }
 
     public void aggregateResult() {
@@ -131,21 +135,21 @@ public class SeInterpreterTestListener {
             throw new RuntimeException(e);
         }
         XMLResultAggregator aggregator = new XMLResultAggregator();
-        aggregator.setProject(project);
-        aggregator.setTodir(resultDir);
+        aggregator.setProject(this.project);
+        aggregator.setTodir(this.resultDir);
         aggregator.setTofile("TEST-SeBuilder-result.xml");
         FileSet fs = new FileSet();
         fs.setDir(this.resultDir);
         fs.createInclude().setName("TEST-SeBuilder-*-result.xml");
         aggregator.addFileSet(fs);
         AggregateTransformer transformer = aggregator.createReport();
-        transformer.setTodir(resultDir);
+        transformer.setTodir(this.resultDir);
         AggregateTransformer.Format noFrame = new AggregateTransformer.Format();
         noFrame.setValue(AggregateTransformer.NOFRAMES);
         transformer.setFormat(noFrame);
         aggregator.execute();
         Delete delete = new Delete();
-        delete.setProject(project);
+        delete.setProject(this.project);
         delete.addFileset(fs);
         delete.execute();
     }
@@ -158,7 +162,16 @@ public class SeInterpreterTestListener {
         return this.suite.getName();
     }
 
-    public int getRunTest() {
-        return runTest;
+    public void skipTestIndex(int count) {
+        this.stepNo = this.stepNo + count;
     }
+
+    public int getStepNo() {
+        return this.stepNo;
+    }
+
+    public int getRunTest() {
+        return this.runTest;
+    }
+
 }
