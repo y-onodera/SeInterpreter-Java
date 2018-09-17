@@ -51,7 +51,7 @@ public class SetElementSelected implements ConditionalStep, Exportable, LocatorH
     public void supplementSerialized(JSONObject o) throws JSONException {
         LocatorHolder.super.supplementSerialized(o);
         if (!o.has("check")) {
-            o.put("check", "false");
+            o.put("check", "true");
         }
     }
 }
