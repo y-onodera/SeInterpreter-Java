@@ -48,7 +48,7 @@ public class ExportTemplate implements StepType {
     @Override
     public void supplementSerialized(JSONObject o) throws JSONException {
         if (!o.has("datasource")) {
-            o.put("datasource", "false");
+            o.put("datasource", "");
         }
         if (!o.has("file")) {
             o.put("file", "");
