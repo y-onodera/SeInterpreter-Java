@@ -20,6 +20,7 @@ import com.sebuilder.interpreter.javafx.event.view.RefreshScriptViewEvent;
 import com.sebuilder.interpreter.javafx.event.view.RefreshStepEditViewEvent;
 import com.sebuilder.interpreter.javafx.event.view.RefreshStepViewEvent;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -60,7 +61,7 @@ public class SeInterpreterApplication extends Application {
         stage.show();
         EventBus.registSubscriber(this);
         EventBus.publish(new ScriptResetEvent());
-        new Thread(new SeInterpreterRunner(this.queue)).start();
+        new Thread(new SeInterpreterRunner(this)).start();
     }
 
     @Override
@@ -160,15 +161,16 @@ public class SeInterpreterApplication extends Application {
     }
 
     @Subscribe
-    public void browserOpern(BrowserOpenEvent event) {
-        this.queue.add((SeInterpreterRunner runner) -> runner.browserOpern());
+    public void browserOpern(BrowserOpenEvent event) throws IOException, JSONException {
+        Script dummy = this.templateScript();
+        this.queue.add((SeInterpreterRunner runner) -> runner.browserRunScript(dummy));
     }
 
     @Subscribe
     public void browserExportScriptTemplate(LoadTemplateEvent event) {
         this.queue.add((SeInterpreterRunner runner) -> {
-            com.sebuilder.interpreter.Script export = runner.browserExportScriptTemplate();
-            EventBus.publish(new AddNewScriptEvent(export));
+            Script export = runner.browserExportScriptTemplate();
+            Platform.runLater(() -> EventBus.publish(new AddNewScriptEvent(export)));
         });
     }
 
@@ -222,8 +224,8 @@ public class SeInterpreterApplication extends Application {
 
         private Logger log = LogManager.getLogger(SeInterpreterRunner.class);
 
-        public SeInterpreterRunner(Queue<Consumer<SeInterpreterRunner>> queue) {
-            this.queue = queue;
+        public SeInterpreterRunner(SeInterpreterApplication seInterpreterApplication) {
+            this.queue = seInterpreterApplication.queue;
         }
 
         @Override
@@ -236,16 +238,11 @@ public class SeInterpreterApplication extends Application {
                         this.log.info("operation recieve");
                         operation.accept(this);
                     } catch (Throwable ex) {
-                        // prevent thread dead
+                        this.log.error(ex);
                     }
                 }
             }
             this.log.info("stop running");
-        }
-
-        public void browserOpern() {
-            Script get = this.repl.toScript("{\"steps\":[" + "{\"type\":\"get\",\"url\":\"https://www.google.com\"}" + "]}");
-            this.repl.execute(get);
         }
 
         public Script browserExportScriptTemplate() {
@@ -256,7 +253,7 @@ public class SeInterpreterApplication extends Application {
             return this.repl.loadScript(exported.getAbsolutePath()).get(0);
         }
 
-        public void browserRunScript(com.sebuilder.interpreter.Script currentDisplay) {
+        public void browserRunScript(Script currentDisplay) {
             if (this.repl == null) {
                 this.setUp();
             }
