@@ -17,9 +17,10 @@
 package com.sebuilder.interpreter.steptype;
 
 import com.sebuilder.interpreter.Getter;
+import com.sebuilder.interpreter.LocatorHolder;
 import com.sebuilder.interpreter.TestRun;
 
-public class Text implements Getter {
+public class Text implements Getter, LocatorHolder {
     @Override
     public String get(TestRun ctx) {
         return ctx.locator().find(ctx).getText();

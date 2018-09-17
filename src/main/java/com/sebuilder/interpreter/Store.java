@@ -16,6 +16,9 @@
 
 package com.sebuilder.interpreter;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Generic Store that wraps a getter.
  *
@@ -36,5 +39,19 @@ public class Store implements StepType {
         }
         ctx.vars().put(ctx.string("variable"), value);
         return true;
+    }
+
+    @Override
+    public void supplementSerialized(JSONObject o) throws JSONException {
+        if (!o.has("regex")) {
+            o.put("regex", "");
+        }
+        if (!o.has("replacement")) {
+            o.put("replacement", "");
+        }
+        if (!o.has("variable")) {
+            o.put("variable", "");
+        }
+        getter.supplementSerialized(o);
     }
 }

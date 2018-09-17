@@ -18,6 +18,8 @@ package com.sebuilder.interpreter.steptype;
 
 import com.sebuilder.interpreter.Getter;
 import com.sebuilder.interpreter.TestRun;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class CookieByName implements Getter {
     @Override
@@ -28,5 +30,12 @@ public class CookieByName implements Getter {
     @Override
     public String cmpParamName() {
         return "value";
+    }
+
+    @Override
+    public void supplementSerialized(JSONObject o) throws JSONException {
+        if (!o.has("name")) {
+            o.put("name", "");
+        }
     }
 }

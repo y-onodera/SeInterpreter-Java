@@ -17,9 +17,10 @@
 package com.sebuilder.interpreter.steptype;
 
 import com.sebuilder.interpreter.Getter;
+import com.sebuilder.interpreter.LocatorHolder;
 import com.sebuilder.interpreter.TestRun;
 
-public class ElementValue implements Getter {
+public class ElementValue implements Getter, LocatorHolder {
     @Override
     public String get(TestRun ctx) {
         return ctx.locator().find(ctx).getAttribute("value");
@@ -29,4 +30,5 @@ public class ElementValue implements Getter {
     public String cmpParamName() {
         return "value";
     }
+
 }

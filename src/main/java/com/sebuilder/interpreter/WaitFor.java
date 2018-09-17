@@ -16,6 +16,9 @@
 
 package com.sebuilder.interpreter;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Generic Wait that wraps a getter.
  * @author zarkonnen
@@ -50,7 +53,23 @@ public class WaitFor implements StepType {
 		}
 		return result != ctx.currentStep().negated;
 	}
-	
+
+    @Override
+    public void supplementSerialized(JSONObject o) throws JSONException {
+        if (!o.has("maxWait")) {
+            o.put("maxWait", "60000");
+        }
+        if (!o.has("interval")) {
+            o.put("interval", "500");
+        }
+        getter.supplementSerialized(o);
+        if (getter.cmpParamName() != null) {
+            if (!o.has(getter.cmpParamName())) {
+                o.put(getter.cmpParamName(), "");
+            }
+        }
+    }
+
 	private boolean test(TestRun ctx) {
 		String got = getter.get(ctx);
 		return getter.cmpParamName() == null

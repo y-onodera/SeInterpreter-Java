@@ -2,6 +2,7 @@ package com.sebuilder.interpreter.steptype;
 
 import com.google.common.base.Charsets;
 import com.sebuilder.interpreter.Context;
+import com.sebuilder.interpreter.LocatorHolder;
 import com.sebuilder.interpreter.TestRun;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -15,6 +16,8 @@ import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -26,7 +29,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Set;
 
-public class FileDownload implements ConditionalStep {
+public class FileDownload implements ConditionalStep, LocatorHolder {
 
     /**
      * Perform the action this step consists of.
@@ -78,6 +81,25 @@ public class FileDownload implements ConditionalStep {
         HttpResponse response = httpClient.execute(httpPost);
         downLoadFile(ctx, outputFilePath, response);
     }
+
+    @Override
+    public void supplementSerialized(JSONObject o) throws JSONException {
+        LocatorHolder.super.supplementSerialized(o);
+        if (!o.has("name")) {
+            o.put("name", "");
+        }
+        if (!o.has("value")) {
+            o.put("value", "");
+        }
+        if (!o.has("filepath")) {
+            o.put("filepath", "");
+        }
+        if (!o.has("post")) {
+            o.put("post", "");
+        }
+    }
+
+
 
     public void getDownloadFile(TestRun ctx, String downloadUrl, String outputFilePath) throws IOException {
         HttpClient httpClient = getHttpClient(ctx);

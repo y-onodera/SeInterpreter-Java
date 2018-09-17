@@ -1,11 +1,11 @@
-package com.sebuilder.interpreter.javafx.event.script;
+package com.sebuilder.interpreter.javafx.event.file;
 
 import java.io.File;
 
-public class ScriptSaveEvent {
+public class FileLoadEvent {
     private final File file;
 
-    public ScriptSaveEvent(File file) {
+    public FileLoadEvent(File file) {
         this.file = file;
     }
 

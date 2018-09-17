@@ -18,6 +18,8 @@ package com.sebuilder.interpreter.steptype;
 
 import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class SwitchToWindowByTitle implements StepType {
 	@Override
@@ -31,4 +33,12 @@ public class SwitchToWindowByTitle implements StepType {
 		}
 		return false;
 	}
+
+    @Override
+    public void supplementSerialized(JSONObject o) throws JSONException {
+        if (!o.has("title")) {
+            o.put("title", "");
+        }
+    }
+
 }

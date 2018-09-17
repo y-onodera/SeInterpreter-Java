@@ -2,6 +2,8 @@ package com.sebuilder.interpreter.steptype;
 
 import com.sebuilder.interpreter.Getter;
 import com.sebuilder.interpreter.TestRun;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class Variable implements Getter {
     /**
@@ -11,8 +13,8 @@ public class Variable implements Getter {
     @Override
     public String get(TestRun ctx) {
         String variableName = ctx.string("variable");
-        ctx.currentStep().stringParams.put("text","${" + variableName + "}");
-        return ctx.string("text");
+        ctx.currentStep().stringParams.put("text", "${" + variableName + "}");
+        return ctx.text();
     }
 
     /**
@@ -22,5 +24,15 @@ public class Variable implements Getter {
     @Override
     public String cmpParamName() {
         return "value";
+    }
+
+    @Override
+    public void supplementSerialized(JSONObject o) throws JSONException {
+        if (!o.has("variable")) {
+            o.put("variable", "");
+        }
+        if (!o.has("text")) {
+            o.put("text", "");
+        }
     }
 }

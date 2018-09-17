@@ -26,7 +26,7 @@
                         <MenuItem id="menuRunScript" fx:id="menuBrowserRunScript" mnemonicParsing="false"
                                   onAction="#handleBrowserRunScript" text="Run Script"/>
                         <MenuItem id="menuRunCreateTemplate" fx:id="menuBrowserCreateTemplate" mnemonicParsing="false"
-                                  text="Create Template"/>
+                                  onAction="#handleBrowserCreateTemplate" text="Create Template"/>
                         <MenuItem fx:id="menuBrowserClose" mnemonicParsing="false" onAction="#handleBrowserClose"
                                   text="Close"/>
                         <MenuItem fx:id="menuBrowserSetting" mnemonicParsing="false" onAction="#handleBrowserSetting"

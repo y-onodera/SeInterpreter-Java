@@ -18,6 +18,8 @@ package com.sebuilder.interpreter.steptype;
 
 import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class Print implements StepType {
 	@Override
@@ -25,4 +27,12 @@ public class Print implements StepType {
 		ctx.log().info(ctx.string("text"));
 		return true;
 	}
+
+    @Override
+    public void supplementSerialized(JSONObject o) throws JSONException {
+        if (!o.has("text")) {
+            o.put("text", "");
+        }
+    }
+
 }

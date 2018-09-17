@@ -18,15 +18,24 @@ package com.sebuilder.interpreter.steptype;
 
 import com.sebuilder.interpreter.Getter;
 import com.sebuilder.interpreter.TestRun;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class TextPresent implements Getter {
     @Override
     public String get(TestRun ctx) {
-        return "" + ctx.driver().findElementByTagName("html").getText().contains(ctx.string("text"));
+        return "" + ctx.driver().findElementByTagName("html").getText().contains(ctx.text());
     }
 
     @Override
     public String cmpParamName() {
         return null;
+    }
+
+    @Override
+    public void supplementSerialized(JSONObject o) throws JSONException {
+        if (!o.has("text")) {
+            o.put("text", "");
+        }
     }
 }

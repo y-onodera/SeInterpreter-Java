@@ -1,13 +1,16 @@
 package com.sebuilder.interpreter.steptype;
 
 import com.google.common.collect.Maps;
-import com.sebuilder.interpreter.*;
+import com.sebuilder.interpreter.Locator;
+import com.sebuilder.interpreter.LocatorHolder;
+import com.sebuilder.interpreter.StepType;
+import com.sebuilder.interpreter.TestRun;
 import org.openqa.selenium.WebElement;
 
 import java.util.Map;
 import java.util.Objects;
 
-public class HighLightElement implements StepType {
+public class HighLightElement implements StepType, LocatorHolder {
     /**
      * Perform the action this step consists of.
      *

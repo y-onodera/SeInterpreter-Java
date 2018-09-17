@@ -2,13 +2,14 @@ package com.sebuilder.interpreter.javafx.controller;
 
 
 import com.sebuilder.interpreter.javafx.EventBus;
-import com.sebuilder.interpreter.javafx.event.ReportErrorEvent;
 import com.sebuilder.interpreter.javafx.event.browser.BrowserCloseEvent;
 import com.sebuilder.interpreter.javafx.event.browser.BrowserOpenEvent;
-import com.sebuilder.interpreter.javafx.event.browser.BrowserRunScriptEvent;
-import com.sebuilder.interpreter.javafx.event.script.RefreshScriptViewEvent;
-import com.sebuilder.interpreter.javafx.event.script.ResetStepResutEvent;
-import com.sebuilder.interpreter.javafx.event.script.ScriptSaveEvent;
+import com.sebuilder.interpreter.javafx.event.browser.LoadTemplateEvent;
+import com.sebuilder.interpreter.javafx.event.file.FileLoadEvent;
+import com.sebuilder.interpreter.javafx.event.file.FileSaveEvent;
+import com.sebuilder.interpreter.javafx.event.replay.ResetStepResultEvent;
+import com.sebuilder.interpreter.javafx.event.replay.RunEvent;
+import com.sebuilder.interpreter.javafx.event.script.ScriptResetEvent;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -31,8 +32,8 @@ public class MenuController {
 
     @FXML
     void handleScriptNew(ActionEvent event) {
-        EventBus.publish(new ResetStepResutEvent());
-        this.openFile(null);
+        EventBus.publish(new ResetStepResultEvent());
+        EventBus.publish(new ScriptResetEvent());
     }
 
     @FXML
@@ -44,9 +45,8 @@ public class MenuController {
         stage.initOwner(paneSeInterpreterMenu.getScene().getWindow());
         File file = fileChooser.showOpenDialog(stage);
         if (file != null) {
-            openFile(file);
+            EventBus.publish(new FileLoadEvent(file));
         }
-        EventBus.publish(new ResetStepResutEvent());
     }
 
     @FXML
@@ -56,26 +56,32 @@ public class MenuController {
         fileSave.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("select target script", ".json"));
         File file = fileSave.showSaveDialog(paneSeInterpreterMenu.getScene().getWindow());
         if (file != null) {
-            saveFile(file);
+            EventBus.publish(new FileSaveEvent(file));
         }
     }
 
     @FXML
     void handleBrowserOpen(ActionEvent event) {
-        EventBus.publish(new ResetStepResutEvent());
+        EventBus.publish(new ResetStepResultEvent());
         EventBus.publish(new BrowserOpenEvent());
     }
 
     @FXML
     void handleBrowserRunScript(ActionEvent event) {
-        EventBus.publish(new ResetStepResutEvent());
-        EventBus.publish(new BrowserRunScriptEvent());
+        EventBus.publish(new ResetStepResultEvent());
+        EventBus.publish(new RunEvent());
     }
 
     @FXML
     void handleBrowserClose(ActionEvent event) {
-        EventBus.publish(new ResetStepResutEvent());
+        EventBus.publish(new ResetStepResultEvent());
         EventBus.publish(new BrowserCloseEvent());
+    }
+
+    @FXML
+    void handleBrowserCreateTemplate(ActionEvent event) {
+        EventBus.publish(new ResetStepResultEvent());
+        EventBus.publish(new LoadTemplateEvent());
     }
 
     @FXML
@@ -94,16 +100,6 @@ public class MenuController {
     @FXML
     void initialize() {
         assert paneSeInterpreterMenu != null : "fx:id=\"paneSeInterpreterMenu\" was not injected: check your FXML file 'seleniumbuildermenu.fxml'.";
-    }
-
-    private void saveFile(File file) {
-        EventBus.publish(new ScriptSaveEvent(file));
-    }
-
-    private void openFile(File file) {
-        ReportErrorEvent.publishIfExecuteThrowsException(() -> {
-            EventBus.publish(new RefreshScriptViewEvent(file));
-        });
     }
 
 }

@@ -6,10 +6,11 @@ import com.sebuilder.interpreter.Step;
 import com.sebuilder.interpreter.javafx.EventBus;
 import com.sebuilder.interpreter.javafx.Result;
 import com.sebuilder.interpreter.javafx.event.ReportErrorEvent;
-import com.sebuilder.interpreter.javafx.event.script.HandleStepResultEvent;
-import com.sebuilder.interpreter.javafx.event.script.RefreshStepViewEvent;
-import com.sebuilder.interpreter.javafx.event.script.ResetStepResutEvent;
-import com.sebuilder.interpreter.javafx.event.script.ScriptReloadEvent;
+import com.sebuilder.interpreter.javafx.event.replay.HandleStepResultEvent;
+import com.sebuilder.interpreter.javafx.event.replay.ResetStepResultEvent;
+import com.sebuilder.interpreter.javafx.event.script.StepDeleteEvent;
+import com.sebuilder.interpreter.javafx.event.script.StepLoadEvent;
+import com.sebuilder.interpreter.javafx.event.view.RefreshStepViewEvent;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -58,10 +59,10 @@ public class StepViewController {
                         super.updateItem(item, empty);
                         if (item != null) {
                             for (Result result : Result.values()) {
-                                getStyleClass().remove(result.name().toLowerCase());
+                                this.getStyleClass().remove(result.name().toLowerCase());
                             }
                             if (item.getRunningResult() != null) {
-                                getStyleClass().add(item.getRunningResult().toLowerCase());
+                                this.getStyleClass().add(item.getRunningResult().toLowerCase());
                             }
                         }
                     }
@@ -73,39 +74,34 @@ public class StepViewController {
 
     @FXML
     void handleStepDelete(ActionEvent event) {
-        ScriptBody item = tableViewScriptBody.getSelectionModel().getSelectedItem();
-        tableViewScriptBody.getItems().remove(item);
+        ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
+        EventBus.publish(new StepDeleteEvent(item.noProperty().intValue() - 1));
+    }
+
+    @FXML
+    void handleStepAdd(ActionEvent event) throws IOException {
+        Stage dialog = initStepEditDialog("add");
+        dialog.setResizable(true);
+        dialog.show();
     }
 
     @FXML
     void handleStepEdit(ActionEvent event) throws IOException {
-        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getClassLoader().getResource("fxml/seleniumbuilderstepedit.fxml")));
-        Scene scene = new Scene(root);
-        Stage dialog = new Stage();
-        dialog.setScene(scene);
-        dialog.initOwner(tableViewScriptBody.getScene().getWindow());
-        dialog.initModality(Modality.WINDOW_MODAL);
-        dialog.setResizable(false);
-        dialog.setTitle("edit step");
+        Stage dialog = initStepEditDialog("change");
+        dialog.setResizable(true);
         dialog.show();
+        ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
+        EventBus.publish(new StepLoadEvent(item.no.intValue()));
     }
 
     @Subscribe
     public void refreshTable(RefreshStepViewEvent event) {
-        ReportErrorEvent.publishIfExecuteThrowsException(() -> {
-            int no = 1;
-            this.tableViewScriptBody.getItems().clear();
-            Script script = event.getScript();
-            for (Step step : script.steps) {
-                ScriptBody row = new ScriptBody(no++, step.toPrettyString(), null);
-                this.tableViewScriptBody.getItems().add(row);
-            }
-            EventBus.publish(new ScriptReloadEvent(script));
-        });
+        Script script = event.getScript();
+        this.refleshTable(script);
     }
 
     @Subscribe
-    public void handleRunStepResult(HandleStepResultEvent event) {
+    public void handleStepResult(HandleStepResultEvent event) {
         List<ScriptBody> bodies = this.tableViewScriptBody.getItems();
         if (bodies.size() >= event.getStepNo()) {
             ScriptBody target = bodies.get(event.getStepNo() - 1);
@@ -115,11 +111,37 @@ public class StepViewController {
     }
 
     @Subscribe
-    public void resetRunStepResult(ResetStepResutEvent event) {
+    public void resetRunStepResult(ResetStepResultEvent event) {
         for (ScriptBody target : this.tableViewScriptBody.getItems()) {
             target.setRunningResult("");
         }
         this.tableViewScriptBody.refresh();
+    }
+
+    private Stage initStepEditDialog(String action) throws IOException {
+        FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(getClass().getClassLoader().getResource("fxml/seleniumbuilderstepedit.fxml")));
+        Parent root = loader.load();
+        Scene scene = new Scene(root);
+        Stage dialog = new Stage();
+        dialog.setScene(scene);
+        dialog.initOwner(tableViewScriptBody.getScene().getWindow());
+        dialog.initModality(Modality.WINDOW_MODAL);
+        dialog.setTitle("edit step");
+        StepEditController controller = loader.getController();
+        ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
+        controller.init(dialog, item.no.intValue() - 1, action);
+        return dialog;
+    }
+
+    private void refleshTable(Script aScript) {
+        ReportErrorEvent.publishIfExecuteThrowsException(() -> {
+            int no = 1;
+            this.tableViewScriptBody.getItems().clear();
+            for (Step step : aScript.steps) {
+                ScriptBody row = new ScriptBody(no++, step.toPrettyString(), null);
+                this.tableViewScriptBody.getItems().add(row);
+            }
+        });
     }
 
     public static class ScriptBody {
@@ -140,19 +162,19 @@ public class StepViewController {
         }
 
         public IntegerProperty noProperty() {
-            return no;
+            return this.no;
         }
 
         public StringProperty stepProperty() {
-            return step;
+            return this.step;
         }
 
         public StringProperty runningResultProperty() {
-            return runningResult;
+            return this.runningResult;
         }
 
         public String getRunningResult() {
-            return runningResult.get();
+            return this.runningResult.get();
         }
 
         public void setRunningResult(String runningResult) {

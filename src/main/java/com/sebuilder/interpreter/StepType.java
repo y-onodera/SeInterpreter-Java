@@ -22,7 +22,7 @@ package com.sebuilder.interpreter;
  *
  * @author zarkonnen
  */
-public interface StepType {
+public interface StepType extends JSONSerializable {
 
     /**
      * Perform the action this step consists of.
@@ -32,5 +32,4 @@ public interface StepType {
      * should return false. Other failures should throw a RuntimeException.
      */
     boolean run(TestRun ctx);
-
 }

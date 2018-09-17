@@ -16,6 +16,9 @@
 
 package com.sebuilder.interpreter;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Generic Verify that wraps a getter.
  * @author zarkonnen
@@ -35,4 +38,14 @@ public class Verify implements StepType {
 				: ctx.string(getter.cmpParamName()).equals(got);
 		return result != ctx.currentStep().isNegated();
 	}
+
+    @Override
+    public void supplementSerialized(JSONObject o) throws JSONException {
+        getter.supplementSerialized(o);
+        if (getter.cmpParamName() != null) {
+            if (!o.has(getter.cmpParamName())) {
+                o.put(getter.cmpParamName(), "");
+            }
+        }
+    }
 }

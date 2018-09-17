@@ -1,13 +1,13 @@
 package com.sebuilder.interpreter.steptype;
 
 import com.sebuilder.interpreter.Getter;
+import com.sebuilder.interpreter.LocatorHolder;
 import com.sebuilder.interpreter.TestRun;
-import com.sebuilder.interpreter.WebElements;
 import org.openqa.selenium.WebElement;
 
 import java.util.List;
 
-public class ElementVisible implements Getter {
+public class ElementVisible implements Getter, LocatorHolder {
 
     /**
      * @param ctx Current test run.

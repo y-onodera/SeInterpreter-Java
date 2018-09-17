@@ -21,12 +21,13 @@ import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.screenshot.LocatorInnerScrollElementHandler;
 import com.sebuilder.interpreter.screenshot.Page;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
+import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
-
-import javax.imageio.ImageIO;
 
 public class SaveScreenshot implements StepType {
 
@@ -43,6 +44,13 @@ public class SaveScreenshot implements StepType {
         } catch (IOException e) {
             ctx.log().error(e);
             return false;
+        }
+    }
+
+    @Override
+    public void supplementSerialized(JSONObject o) throws JSONException {
+        if (!o.has("file")) {
+            o.put("file", "");
         }
     }
 }

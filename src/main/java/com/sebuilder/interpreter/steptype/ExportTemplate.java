@@ -3,11 +3,16 @@ package com.sebuilder.interpreter.steptype;
 import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
 import com.google.common.io.Files;
-import com.sebuilder.interpreter.*;
+import com.sebuilder.interpreter.Context;
+import com.sebuilder.interpreter.ExportResource;
+import com.sebuilder.interpreter.StepType;
+import com.sebuilder.interpreter.TestRun;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.openqa.selenium.By;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.nio.charset.Charset;
 
 public class ExportTemplate implements StepType {
@@ -37,6 +42,16 @@ public class ExportTemplate implements StepType {
         } catch (JSONException | IOException  e) {
             ctx.log().error(e);
             return false;
+        }
+    }
+
+    @Override
+    public void supplementSerialized(JSONObject o) throws JSONException {
+        if (!o.has("datasource")) {
+            o.put("datasource", "false");
+        }
+        if (!o.has("file")) {
+            o.put("file", "");
         }
     }
 

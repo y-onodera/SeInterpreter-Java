@@ -3,7 +3,7 @@ package com.sebuilder.interpreter.javafx.application;
 import com.sebuilder.interpreter.SeInterpreterTestListener;
 import com.sebuilder.interpreter.javafx.EventBus;
 import com.sebuilder.interpreter.javafx.Result;
-import com.sebuilder.interpreter.javafx.event.script.HandleStepResultEvent;
+import com.sebuilder.interpreter.javafx.event.replay.HandleStepResultEvent;
 import org.apache.logging.log4j.Logger;
 
 public class SeInterpreterTestGUIListener extends SeInterpreterTestListener {

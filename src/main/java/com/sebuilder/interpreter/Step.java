@@ -15,11 +15,11 @@
  */
 package com.sebuilder.interpreter;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A Selenium 2 step.
@@ -99,6 +99,8 @@ public class Step {
             o.put("type", "waitFor" + ((WaitFor) type).getter.getClass().getSimpleName());
         } else if (type instanceof Store) {
             o.put("type", "store" + ((Store) type).getter.getClass().getSimpleName());
+        } else if (type instanceof Print) {
+            o.put("type", "print" + ((Print) type).getter.getClass().getSimpleName());
         } else {
             o.put("type", type.getClass().getSimpleName());
         }
@@ -110,6 +112,12 @@ public class Step {
             o.put(le.getKey(), le.getValue().toJSON());
         }
 
+        return o;
+    }
+
+    public JSONObject toFullJSON() throws JSONException {
+        JSONObject o = this.toJSON();
+        this.type.supplementSerialized(o);
         return o;
     }
 }

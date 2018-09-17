@@ -16,6 +16,9 @@
 
 package com.sebuilder.interpreter;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Generic Assert that wraps a getter.
  *
@@ -35,5 +38,15 @@ public class Assert implements StepType {
                 ? Boolean.parseBoolean(got)
                 : ctx.string(getter.cmpParamName()).equals(got);
         return result != ctx.currentStep().isNegated();
+    }
+
+    @Override
+    public void supplementSerialized(JSONObject o) throws JSONException {
+        getter.supplementSerialized(o);
+        if (getter.cmpParamName() != null) {
+            if (!o.has(getter.cmpParamName())) {
+                o.put(getter.cmpParamName(), "");
+            }
+        }
     }
 }

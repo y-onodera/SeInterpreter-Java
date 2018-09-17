@@ -19,17 +19,16 @@ package com.sebuilder.interpreter;
 import com.google.common.collect.Maps;
 import com.sebuilder.interpreter.factory.TestRunFactory;
 import com.sebuilder.interpreter.webdriverfactory.WebDriverFactory;
+import org.apache.logging.log4j.Logger;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.logging.log4j.Logger;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * A Selenium 2 script. To create and run a test, instantiate a Script object,
@@ -74,6 +73,39 @@ public class Script {
         this.shareInputs = aShareInputs;
     }
 
+    public Script removeStep(int stepIndex) {
+        Script newScript = cloneExcludeStep();
+        for (int i = 0, j = this.steps.size(); i < j; i++) {
+            if (i != stepIndex) {
+                newScript.steps.add(this.steps.get(i));
+            }
+        }
+        return newScript;
+    }
+
+    public Script addStep(int stepIndex, Step newStep) {
+        Script newScript = cloneExcludeStep();
+        for (int i = 0, j = this.steps.size(); i < j; i++) {
+            newScript.steps.add(this.steps.get(i));
+            if (i == stepIndex) {
+                newScript.steps.add(newStep);
+            }
+        }
+        return newScript;
+    }
+
+    public Script replaceStep(int stepIndex, Step newStep) {
+        Script newScript = cloneExcludeStep();
+        for (int i = 0, j = this.steps.size(); i < j; i++) {
+            if (i != stepIndex) {
+                newScript.steps.add(this.steps.get(i));
+            } else {
+                newScript.steps.add(newStep);
+            }
+        }
+        return newScript;
+    }
+
     @Override
     public String toString() {
         try {
@@ -92,5 +124,19 @@ public class Script {
         o.put("steps", stepsA);
         return o;
     }
+
+    private Script cloneExcludeStep() {
+        Script newScript = new Script();
+        newScript.testRunFactory = this.testRunFactory;
+        newScript.dataRows = this.dataRows;
+        newScript.path = this.path;
+        newScript.name = this.name;
+        newScript.relativePath = this.relativePath;
+        newScript.usePreviousDriverAndVars = this.usePreviousDriverAndVars;
+        newScript.closeDriver = this.closeDriver;
+        newScript.shareInputs = this.shareInputs;
+        return newScript;
+    }
+
 
 }

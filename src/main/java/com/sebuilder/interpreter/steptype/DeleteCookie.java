@@ -18,6 +18,8 @@ package com.sebuilder.interpreter.steptype;
 
 import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.openqa.selenium.Cookie;
 
 public class DeleteCookie implements StepType {
@@ -29,4 +31,12 @@ public class DeleteCookie implements StepType {
 		}
 		return true;
 	}
+
+    @Override
+    public void supplementSerialized(JSONObject o) throws JSONException {
+        if (!o.has("name")) {
+            o.put("name", "");
+        }
+    }
+
 }

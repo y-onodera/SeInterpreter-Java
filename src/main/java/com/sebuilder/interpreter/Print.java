@@ -1,5 +1,8 @@
 package com.sebuilder.interpreter;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class Print implements StepType {
     public final Getter getter;
 
@@ -12,5 +15,10 @@ public class Print implements StepType {
         String value = getter.get(ctx);
         ctx.log().info(value);
         return true;
+    }
+
+    @Override
+    public void supplementSerialized(JSONObject o) throws JSONException {
+        getter.supplementSerialized(o);
     }
 }

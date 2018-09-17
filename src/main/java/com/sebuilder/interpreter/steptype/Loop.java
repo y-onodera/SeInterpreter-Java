@@ -2,6 +2,8 @@ package com.sebuilder.interpreter.steptype;
 
 import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class Loop implements StepType {
     /**
@@ -43,6 +45,16 @@ public class Loop implements StepType {
             }
         }
         return success;
+    }
+
+    @Override
+    public void supplementSerialized(JSONObject o) throws JSONException {
+        if (!o.has("subStep")) {
+            o.put("subStep", "");
+        }
+        if (!o.has("count")) {
+            o.put("count", "");
+        }
     }
 
     private boolean next(TestRun ctx) {

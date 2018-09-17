@@ -18,6 +18,8 @@ package com.sebuilder.interpreter.steptype;
 
 import com.sebuilder.interpreter.Getter;
 import com.sebuilder.interpreter.TestRun;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class Eval implements Getter {
     @Override
@@ -29,5 +31,12 @@ public class Eval implements Getter {
     @Override
     public String cmpParamName() {
         return "value";
+    }
+
+    @Override
+    public void supplementSerialized(JSONObject o) throws JSONException {
+        if (!o.has("script")) {
+            o.put("script", "return true;");
+        }
     }
 }

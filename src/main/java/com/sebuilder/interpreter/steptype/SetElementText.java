@@ -18,12 +18,15 @@ package com.sebuilder.interpreter.steptype;
 
 import com.sebuilder.interpreter.ExportResource;
 import com.sebuilder.interpreter.Exportable;
+import com.sebuilder.interpreter.LocatorHolder;
 import com.sebuilder.interpreter.TestRun;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
-public class SetElementText implements ConditionalStep, Exportable {
+public class SetElementText implements ConditionalStep, Exportable, LocatorHolder {
 
     @Override
     public boolean doRun(TestRun ctx) {
@@ -48,6 +51,14 @@ public class SetElementText implements ConditionalStep, Exportable {
             text = element.getAttribute("value");
         }
         builder.stepOption("text", text);
+    }
+
+    @Override
+    public void supplementSerialized(JSONObject o) throws JSONException {
+        LocatorHolder.super.supplementSerialized(o);
+        if (!o.has("text")) {
+            o.put("text", "");
+        }
     }
 
     private boolean isIncludeHalfWidthText(String input) {

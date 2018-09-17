@@ -17,9 +17,12 @@
 package com.sebuilder.interpreter.steptype;
 
 import com.sebuilder.interpreter.Getter;
+import com.sebuilder.interpreter.LocatorHolder;
 import com.sebuilder.interpreter.TestRun;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-public class ElementStyle implements Getter {
+public class ElementStyle implements Getter, LocatorHolder {
     @Override
     public String get(TestRun ctx) {
         return ctx.locator().find(ctx).getCssValue(ctx.string("propertyName"));
@@ -28,5 +31,13 @@ public class ElementStyle implements Getter {
     @Override
     public String cmpParamName() {
         return "value";
+    }
+
+    @Override
+    public void supplementSerialized(JSONObject o) throws JSONException {
+        LocatorHolder.super.supplementSerialized(o);
+        if (!o.has("propertyName")) {
+            o.put("propertyName", "");
+        }
     }
 }

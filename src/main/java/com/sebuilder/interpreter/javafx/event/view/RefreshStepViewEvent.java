@@ -1,4 +1,4 @@
-package com.sebuilder.interpreter.javafx.event.script;
+package com.sebuilder.interpreter.javafx.event.view;
 
 import com.sebuilder.interpreter.Script;
 

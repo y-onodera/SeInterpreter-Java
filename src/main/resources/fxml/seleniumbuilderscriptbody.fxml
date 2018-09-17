@@ -16,7 +16,7 @@
             <contextMenu>
                 <ContextMenu>
                     <items>
-                        <MenuItem mnemonicParsing="false" text="add"/>
+                        <MenuItem mnemonicParsing="false" onAction="#handleStepAdd" text="add"/>
                         <MenuItem mnemonicParsing="false" onAction="#handleStepDelete" text="delete"/>
                         <MenuItem mnemonicParsing="false" onAction="#handleStepEdit" text="edit"/>
                     </items>
