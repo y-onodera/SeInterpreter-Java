@@ -8,6 +8,7 @@ import com.sebuilder.interpreter.javafx.Result;
 import com.sebuilder.interpreter.javafx.event.ReportErrorEvent;
 import com.sebuilder.interpreter.javafx.event.replay.HandleStepResultEvent;
 import com.sebuilder.interpreter.javafx.event.replay.ResetStepResultEvent;
+import com.sebuilder.interpreter.javafx.event.replay.RunStepEvent;
 import com.sebuilder.interpreter.javafx.event.script.StepDeleteEvent;
 import com.sebuilder.interpreter.javafx.event.script.StepLoadEvent;
 import com.sebuilder.interpreter.javafx.event.view.RefreshStepViewEvent;
@@ -79,6 +80,13 @@ public class StepViewController {
     }
 
     @FXML
+    public void handleStepInsert(ActionEvent actionEvent) throws IOException {
+        Stage dialog = initStepEditDialog("insert");
+        dialog.setResizable(true);
+        dialog.show();
+    }
+
+    @FXML
     void handleStepAdd(ActionEvent event) throws IOException {
         Stage dialog = initStepEditDialog("add");
         dialog.setResizable(true);
@@ -91,8 +99,27 @@ public class StepViewController {
         dialog.setResizable(true);
         dialog.show();
         ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
-        EventBus.publish(new StepLoadEvent(item.no.intValue()));
+        EventBus.publish(new StepLoadEvent(item.no.intValue() - 1));
     }
+
+    @FXML
+    public void handleRunStep(ActionEvent actionEvent) {
+        ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
+        EventBus.publish(new RunStepEvent(i -> item.no.intValue() - 1 == i.intValue(), i -> i + item.no.intValue() - 1));
+    }
+
+    @FXML
+    public void handleRunFromHere(ActionEvent actionEvent) {
+        ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
+        EventBus.publish(new RunStepEvent(i -> item.no.intValue() - 1 <= i.intValue(), i -> i + item.no.intValue() - 1));
+    }
+
+    @FXML
+    public void handleRunToHere(ActionEvent actionEvent) {
+        ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
+        EventBus.publish(new RunStepEvent(i -> item.no.intValue() - 1 >= i.intValue(), i -> i));
+    }
+
 
     @Subscribe
     public void refreshTable(RefreshStepViewEvent event) {

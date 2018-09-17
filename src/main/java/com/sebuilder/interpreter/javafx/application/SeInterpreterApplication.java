@@ -15,6 +15,7 @@ import com.sebuilder.interpreter.javafx.event.file.FileLoadEvent;
 import com.sebuilder.interpreter.javafx.event.file.FileSaveEvent;
 import com.sebuilder.interpreter.javafx.event.replay.HighLightTargetElementEvent;
 import com.sebuilder.interpreter.javafx.event.replay.RunEvent;
+import com.sebuilder.interpreter.javafx.event.replay.RunStepEvent;
 import com.sebuilder.interpreter.javafx.event.script.*;
 import com.sebuilder.interpreter.javafx.event.view.RefreshScriptViewEvent;
 import com.sebuilder.interpreter.javafx.event.view.RefreshStepEditViewEvent;
@@ -39,6 +40,7 @@ import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class SeInterpreterApplication extends Application {
 
@@ -141,6 +143,8 @@ public class SeInterpreterApplication extends Application {
         Step newStep = script.steps.get(0);
         if (event.getEditAction().equals("change")) {
             this.currentDisplay = this.currentDisplay.replaceStep(event.getStepIndex(), newStep);
+        } else if (event.getEditAction().equals("insert")) {
+            this.currentDisplay = this.currentDisplay.insertStep(event.getStepIndex(), newStep);
         } else {
             this.currentDisplay = this.currentDisplay.addStep(event.getStepIndex(), newStep);
         }
@@ -156,14 +160,14 @@ public class SeInterpreterApplication extends Application {
 
     @Subscribe
     public void loadStep(StepLoadEvent event) {
-        Step step = this.currentDisplay.steps.get(event.getStepIndex() - 1);
+        Step step = this.currentDisplay.steps.get(event.getStepIndex());
         EventBus.publish(RefreshStepEditViewEvent.change(step));
     }
 
     @Subscribe
     public void browserOpern(BrowserOpenEvent event) throws IOException, JSONException {
         Script dummy = this.templateScript();
-        this.queue.add((SeInterpreterRunner runner) -> runner.browserRunScript(dummy));
+        this.queue.add((SeInterpreterRunner runner) -> runner.browserRunScript(dummy, log -> new SeInterpreterTestListener(log)));
     }
 
     @Subscribe
@@ -187,7 +191,20 @@ public class SeInterpreterApplication extends Application {
         steps.put(step);
         json.putOpt("steps", steps);
         Script script = new ScriptFactory().parse(json, null).get(0);
-        this.queue.add((SeInterpreterRunner runner) -> runner.browserRunScript(script));
+        this.queue.add((SeInterpreterRunner runner) -> runner.browserRunScript(script, log -> new SeInterpreterTestListener(log)));
+    }
+
+    @Subscribe
+    public void browserRunStep(RunStepEvent event) {
+        this.queue.add((SeInterpreterRunner runner) -> {
+            runner.browserRunScript(this.currentDisplay.removeStep(event.getFilter())
+                    , log -> new SeInterpreterTestGUIListener(log) {
+                        @Override
+                        public int getStepNo() {
+                            return event.getStepNoFunction().apply(super.getStepNo());
+                        }
+                    });
+        });
     }
 
     @Subscribe
@@ -248,16 +265,20 @@ public class SeInterpreterApplication extends Application {
         public Script browserExportScriptTemplate() {
             String fileName = "exportedBrowserTemplate" + this.exportCount++ + ".json";
             Script get = this.repl.toScript("{\"steps\":[" + "{\"type\":\"exportTemplate\",\"file\":\"" + fileName + "\"}" + "]}");
-            this.repl.execute(get);
+            this.repl.execute(get, new SeInterpreterTestListener(this.log));
             File exported = new File(Context.getInstance().getTemplateOutputDirectory(), fileName);
             return this.repl.loadScript(exported.getAbsolutePath()).get(0);
         }
 
         public void browserRunScript(Script currentDisplay) {
+            this.browserRunScript(currentDisplay, log -> new SeInterpreterTestGUIListener(log));
+        }
+
+        public void browserRunScript(Script currentDisplay, Function<Logger, SeInterpreterTestListener> listenerFactory) {
             if (this.repl == null) {
                 this.setUp();
             }
-            this.repl.execute(currentDisplay);
+            this.repl.execute(currentDisplay, listenerFactory.apply(this.log));
         }
 
         public void browserClose() {

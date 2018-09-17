@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 /**
  * A Selenium 2 script. To create and run a test, instantiate a Script object,
@@ -74,11 +75,26 @@ public class Script {
     }
 
     public Script removeStep(int stepIndex) {
+        return removeStep(i -> i.intValue() != stepIndex);
+    }
+
+    public Script removeStep(Predicate<Number> filter) {
         Script newScript = cloneExcludeStep();
         for (int i = 0, j = this.steps.size(); i < j; i++) {
-            if (i != stepIndex) {
+            if (filter.test(i)) {
                 newScript.steps.add(this.steps.get(i));
             }
+        }
+        return newScript;
+    }
+
+    public Script insertStep(int stepIndex, Step newStep) {
+        Script newScript = cloneExcludeStep();
+        for (int i = 0, j = this.steps.size(); i < j; i++) {
+            if (i == stepIndex) {
+                newScript.steps.add(newStep);
+            }
+            newScript.steps.add(this.steps.get(i));
         }
         return newScript;
     }
@@ -137,6 +153,5 @@ public class Script {
         newScript.shareInputs = this.shareInputs;
         return newScript;
     }
-
 
 }

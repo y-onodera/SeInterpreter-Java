@@ -204,7 +204,7 @@ public class StepEditController {
                 }
                 if (key.startsWith("locator")) {
                     row = this.addLocator(json, row, key, false);
-                } else if (key.equals("negated") || key.equals("check") || key.equals("datasource")) {
+                } else if (key.equals("negated") || key.equals("post")) {
                     row = addCheckBox(json, row, key);
                 } else {
                     row = addTextBox(json, row, key);

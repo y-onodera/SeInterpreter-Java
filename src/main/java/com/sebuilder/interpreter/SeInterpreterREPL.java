@@ -5,7 +5,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
 
 public class SeInterpreterREPL extends CommandLineRunner {
     private int execCount = 1;
@@ -100,21 +103,25 @@ public class SeInterpreterREPL extends CommandLineRunner {
     }
 
     public void execute(Script script) {
+        this.execute(script, this.seInterpreterTestListener);
+    }
+
+    public void execute(Script script, SeInterpreterTestListener seInterpreterTestListener) {
         String suiteName = "com.sebuilder.interpreter.REPL_EXEC" + this.execCount++;
         script.stateTakeOver(new HashMap<>());
         int i = 1;
         for (Map<String, String> data : script.dataRows) {
-            this.seInterpreterTestListener.openTestSuite(suiteName + "_row_" + i, data);
+            seInterpreterTestListener.openTestSuite(suiteName + "_row_" + i, data);
             data.put(DataSource.ROW_NUMBER, String.valueOf(i));
-            this.execute(script, data);
-            this.seInterpreterTestListener.closeTestSuite();
+            this.execute(script, data, seInterpreterTestListener);
+            seInterpreterTestListener.closeTestSuite();
             i++;
         }
     }
 
-    private void execute(Script script, Map<String, String> data) {
+    private void execute(Script script, Map<String, String> data, SeInterpreterTestListener seInterpreterTestListener) {
         this.log.info("start execute script");
-        this.lastRun = script.createTestRun(this.log, this.wdf, this.driverConfig, data, this.lastRun, this.seInterpreterTestListener);
+        this.lastRun = script.createTestRun(this.log, this.wdf, this.driverConfig, data, this.lastRun, seInterpreterTestListener);
         while (this.lastRun.hasNext()) {
             try {
                 this.lastRun.next();

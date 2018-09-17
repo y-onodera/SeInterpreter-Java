@@ -16,9 +16,13 @@
             <contextMenu>
                 <ContextMenu>
                     <items>
+                        <MenuItem mnemonicParsing="false" onAction="#handleStepInsert" text="insert"/>
                         <MenuItem mnemonicParsing="false" onAction="#handleStepAdd" text="add"/>
                         <MenuItem mnemonicParsing="false" onAction="#handleStepDelete" text="delete"/>
                         <MenuItem mnemonicParsing="false" onAction="#handleStepEdit" text="edit"/>
+                        <MenuItem mnemonicParsing="false" onAction="#handleRunStep" text="run step"/>
+                        <MenuItem mnemonicParsing="false" onAction="#handleRunFromHere" text="run from Here"/>
+                        <MenuItem mnemonicParsing="false" onAction="#handleRunToHere" text="run to Here"/>
                     </items>
                 </ContextMenu>
             </contextMenu>
