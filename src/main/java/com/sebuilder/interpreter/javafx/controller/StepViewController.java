@@ -6,9 +6,9 @@ import com.sebuilder.interpreter.Step;
 import com.sebuilder.interpreter.javafx.EventBus;
 import com.sebuilder.interpreter.javafx.Result;
 import com.sebuilder.interpreter.javafx.event.ReportErrorEvent;
-import com.sebuilder.interpreter.javafx.event.replay.HandleStepResultEvent;
-import com.sebuilder.interpreter.javafx.event.replay.ResetStepResultEvent;
 import com.sebuilder.interpreter.javafx.event.replay.RunStepEvent;
+import com.sebuilder.interpreter.javafx.event.replay.StepResultResetEvent;
+import com.sebuilder.interpreter.javafx.event.replay.StepResultSetEvent;
 import com.sebuilder.interpreter.javafx.event.script.StepDeleteEvent;
 import com.sebuilder.interpreter.javafx.event.script.StepLoadEvent;
 import com.sebuilder.interpreter.javafx.event.view.RefreshStepViewEvent;
@@ -128,7 +128,7 @@ public class StepViewController {
     }
 
     @Subscribe
-    public void handleStepResult(HandleStepResultEvent event) {
+    public void handleStepResult(StepResultSetEvent event) {
         List<ScriptBody> bodies = this.tableViewScriptBody.getItems();
         if (bodies.size() >= event.getStepNo()) {
             ScriptBody target = bodies.get(event.getStepNo() - 1);
@@ -138,7 +138,7 @@ public class StepViewController {
     }
 
     @Subscribe
-    public void resetRunStepResult(ResetStepResultEvent event) {
+    public void resetRunStepResult(StepResultResetEvent event) {
         for (ScriptBody target : this.tableViewScriptBody.getItems()) {
             target.setRunningResult("");
         }

@@ -1,11 +1,11 @@
 package com.sebuilder.interpreter.javafx.event.script;
 
 
-public class SelectScriptEvent {
+public class ScriptSelectEvent {
 
     private final String scriptName;
 
-    public SelectScriptEvent(String scriptName) {
+    public ScriptSelectEvent(String scriptName) {
         this.scriptName = scriptName;
     }
 
