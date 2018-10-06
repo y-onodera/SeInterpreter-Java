@@ -74,6 +74,23 @@ public class Script {
         this.shareInputs = aShareInputs;
     }
 
+    public Script associateWith(File target) {
+        Script newScript = cloneExcludeStep();
+        for (int i = 0, j = this.steps.size(); i < j; i++) {
+            newScript.steps.add(this.steps.get(i));
+        }
+        if (target != null) {
+            newScript.name = target.getName();
+            newScript.path = target.getPath();
+            newScript.relativePath = target.getAbsoluteFile().getParentFile();
+        } else {
+            newScript.name = "System_in";
+            newScript.path = null;
+            newScript.relativePath = null;
+        }
+        return newScript;
+    }
+
     public Script removeStep(int stepIndex) {
         return removeStep(i -> i.intValue() != stepIndex);
     }

@@ -9,12 +9,16 @@
             <menus>
                 <Menu id="menuTest" fx:id="menuScript" mnemonicParsing="false" text="Script">
                     <items>
-                        <MenuItem id="menuTestAdd" fx:id="menuScriptNew" mnemonicParsing="false"
-                                  onAction="#handleScriptNew" text="New"/>
                         <MenuItem id="menuTestOpenFile" fx:id="menuScriptOpenFile" mnemonicParsing="false"
                                   onAction="#handleScriptOpenFile" text="Open File"/>
+                        <MenuItem id="menuTestNew" fx:id="menuScriptNew" mnemonicParsing="false"
+                                  onAction="#handleScriptNew" text="Reset"/>
+                        <MenuItem id="menuTestAdd" fx:id="menuScriptAdd" mnemonicParsing="false"
+                                  onAction="#handleScriptAdd" text="Add"/>
                         <MenuItem id="menuTestSave" fx:id="menuScriptSave" mnemonicParsing="false"
                                   onAction="#handleScriptSave" text="Save"/>
+                        <MenuItem id="menuTestSaveAs" fx:id="menuScriptSaveAs" mnemonicParsing="false"
+                                  onAction="#handleScriptSaveAs" text="Save As"/>
                     </items>
                 </Menu>
                 <Menu id="menuRun" fx:id="menuBrowser" mnemonicParsing="false" text="Browser">
@@ -22,7 +26,7 @@
                         <MenuItem fx:id="menuBrowserOpen" mnemonicParsing="false" onAction="#handleBrowserOpen"
                                   text="Open"/>
                         <MenuItem id="menuRunSuite" fx:id="menuBrowser0RunSuite" mnemonicParsing="false"
-                                  text="Run Suite"/>
+                                  onAction="#handleBrowserRunSuite" text="Run Suite"/>
                         <MenuItem id="menuRunScript" fx:id="menuBrowserRunScript" mnemonicParsing="false"
                                   onAction="#handleBrowserRunScript" text="Run Script"/>
                         <MenuItem id="menuRunCreateTemplate" fx:id="menuBrowserCreateTemplate" mnemonicParsing="false"

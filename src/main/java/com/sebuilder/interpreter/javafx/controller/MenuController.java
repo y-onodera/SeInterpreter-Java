@@ -1,15 +1,20 @@
 package com.sebuilder.interpreter.javafx.controller;
 
 
+import com.google.common.eventbus.Subscribe;
 import com.sebuilder.interpreter.javafx.EventBus;
 import com.sebuilder.interpreter.javafx.event.browser.BrowserCloseEvent;
 import com.sebuilder.interpreter.javafx.event.browser.BrowserOpenEvent;
-import com.sebuilder.interpreter.javafx.event.browser.LoadTemplateEvent;
 import com.sebuilder.interpreter.javafx.event.file.FileLoadEvent;
+import com.sebuilder.interpreter.javafx.event.file.FileSaveAsEvent;
 import com.sebuilder.interpreter.javafx.event.file.FileSaveEvent;
-import com.sebuilder.interpreter.javafx.event.replay.ResetStepResultEvent;
 import com.sebuilder.interpreter.javafx.event.replay.RunEvent;
+import com.sebuilder.interpreter.javafx.event.replay.RunSuiteEvent;
+import com.sebuilder.interpreter.javafx.event.replay.StepResultResetEvent;
+import com.sebuilder.interpreter.javafx.event.replay.TemplateLoadEvent;
+import com.sebuilder.interpreter.javafx.event.script.ScriptAddEvent;
 import com.sebuilder.interpreter.javafx.event.script.ScriptResetEvent;
+import com.sebuilder.interpreter.javafx.event.view.OpenScriptSaveChooserEvent;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -31,9 +36,21 @@ public class MenuController {
     private Pane paneSeInterpreterMenu;
 
     @FXML
+    void initialize() {
+        assert paneSeInterpreterMenu != null : "fx:id=\"paneSeInterpreterMenu\" was not injected: check your FXML file 'seleniumbuildermenu.fxml'.";
+        EventBus.registSubscriber(this);
+    }
+
+    @FXML
     void handleScriptNew(ActionEvent event) {
-        EventBus.publish(new ResetStepResultEvent());
+        EventBus.publish(new StepResultResetEvent());
         EventBus.publish(new ScriptResetEvent());
+    }
+
+    @FXML
+    void handleScriptAdd(ActionEvent event) {
+        EventBus.publish(new StepResultResetEvent());
+        EventBus.publish(new ScriptAddEvent());
     }
 
     @FXML
@@ -51,37 +68,53 @@ public class MenuController {
 
     @FXML
     void handleScriptSave(ActionEvent event) {
+        EventBus.publish(new FileSaveEvent());
+    }
+
+    @Subscribe
+    public void scriptSaveAs(OpenScriptSaveChooserEvent event) {
+        this.handleScriptSaveAs(null);
+    }
+
+    @FXML
+    void handleScriptSaveAs(ActionEvent event) {
         FileChooser fileSave = new FileChooser();
         fileSave.setTitle("Close Resource File");
         fileSave.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("select target script", ".json"));
         File file = fileSave.showSaveDialog(paneSeInterpreterMenu.getScene().getWindow());
         if (file != null) {
-            EventBus.publish(new FileSaveEvent(file));
+            EventBus.publish(new FileSaveAsEvent(file));
         }
     }
 
     @FXML
     void handleBrowserOpen(ActionEvent event) {
-        EventBus.publish(new ResetStepResultEvent());
+        EventBus.publish(new StepResultResetEvent());
         EventBus.publish(new BrowserOpenEvent());
     }
 
     @FXML
+    void handleBrowserRunSuite(ActionEvent event) {
+        EventBus.publish(new StepResultResetEvent());
+        EventBus.publish(new RunSuiteEvent());
+    }
+
+    @FXML
     void handleBrowserRunScript(ActionEvent event) {
-        EventBus.publish(new ResetStepResultEvent());
+        EventBus.publish(new StepResultResetEvent());
         EventBus.publish(new RunEvent());
     }
 
     @FXML
     void handleBrowserClose(ActionEvent event) {
-        EventBus.publish(new ResetStepResultEvent());
+        EventBus.publish(new StepResultResetEvent());
         EventBus.publish(new BrowserCloseEvent());
     }
 
     @FXML
     void handleBrowserCreateTemplate(ActionEvent event) {
-        EventBus.publish(new ResetStepResultEvent());
-        EventBus.publish(new LoadTemplateEvent());
+        EventBus.publish(new StepResultResetEvent());
+        EventBus.publish(new TemplateLoadEvent());
     }
 
     @FXML
@@ -95,11 +128,6 @@ public class MenuController {
         dialog.setResizable(false);
         dialog.setTitle("edit browser setting");
         dialog.show();
-    }
-
-    @FXML
-    void initialize() {
-        assert paneSeInterpreterMenu != null : "fx:id=\"paneSeInterpreterMenu\" was not injected: check your FXML file 'seleniumbuildermenu.fxml'.";
     }
 
 }

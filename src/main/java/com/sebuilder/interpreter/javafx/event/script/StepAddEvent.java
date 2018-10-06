@@ -1,10 +1,10 @@
 package com.sebuilder.interpreter.javafx.event.script;
 
-public class SelectNewStepEvent {
+public class StepAddEvent {
 
     private final String stepType;
 
-    public SelectNewStepEvent(String stepType) {
+    public StepAddEvent(String stepType) {
         this.stepType = stepType;
     }
 

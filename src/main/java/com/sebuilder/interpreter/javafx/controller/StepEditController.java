@@ -6,8 +6,8 @@ import com.google.common.eventbus.Subscribe;
 import com.sebuilder.interpreter.Step;
 import com.sebuilder.interpreter.javafx.EventBus;
 import com.sebuilder.interpreter.javafx.event.ReportErrorEvent;
-import com.sebuilder.interpreter.javafx.event.replay.HighLightTargetElementEvent;
-import com.sebuilder.interpreter.javafx.event.script.SelectNewStepEvent;
+import com.sebuilder.interpreter.javafx.event.replay.ElementHighLightEvent;
+import com.sebuilder.interpreter.javafx.event.script.StepAddEvent;
 import com.sebuilder.interpreter.javafx.event.script.StepEditEvent;
 import com.sebuilder.interpreter.javafx.event.view.RefreshStepEditViewEvent;
 import javafx.event.ActionEvent;
@@ -184,7 +184,7 @@ public class StepEditController {
         }
         this.selectedStepType = this.stepTypeSelect.getSelectionModel().getSelectedItem();
         this.clearInputFields();
-        EventBus.publish(new SelectNewStepEvent(stepType));
+        EventBus.publish(new StepAddEvent(stepType));
     }
 
     @Subscribe
@@ -258,7 +258,7 @@ public class StepEditController {
             TextField text = resetLocatorText(json, locator, defaultLocator);
             Button button = new Button("find");
             button.setOnAction(ae -> {
-                EventBus.publish(new HighLightTargetElementEvent(select.getSelectionModel().getSelectedItem(), text.getText()));
+                EventBus.publish(new ElementHighLightEvent(select.getSelectionModel().getSelectedItem(), text.getText()));
             });
             this.stepEditGrid.add(text, 1, row);
             this.stepEditGrid.add(button, 2, row++);

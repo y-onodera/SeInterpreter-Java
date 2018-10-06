@@ -1,13 +1,11 @@
 package com.sebuilder.interpreter.javafx.controller;
 
-import com.google.common.collect.Maps;
 import com.google.common.eventbus.Subscribe;
 import com.sebuilder.interpreter.Script;
 import com.sebuilder.interpreter.javafx.EventBus;
 import com.sebuilder.interpreter.javafx.event.ReportErrorEvent;
-import com.sebuilder.interpreter.javafx.event.replay.ResetStepResultEvent;
-import com.sebuilder.interpreter.javafx.event.script.AddNewScriptEvent;
-import com.sebuilder.interpreter.javafx.event.script.SelectScriptEvent;
+import com.sebuilder.interpreter.javafx.event.replay.StepResultResetEvent;
+import com.sebuilder.interpreter.javafx.event.script.ScriptSelectEvent;
 import com.sebuilder.interpreter.javafx.event.view.RefreshScriptViewEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.MultipleSelectionModel;
@@ -29,20 +27,11 @@ public class ScriptViewController {
 
     @Subscribe
     public void showScriptView(RefreshScriptViewEvent aEvent) {
-        EventBus.publish(new ResetStepResultEvent());
+        EventBus.publish(new StepResultResetEvent());
         TreeItem<String> root = new TreeItem<>(aEvent.getFileName());
         root.setExpanded(true);
         this.treeViewScriptName.setRoot(root);
         this.refleshScriptView(aEvent.getScripts());
-    }
-
-    @Subscribe
-    public void addScript(AddNewScriptEvent aEvent) {
-        EventBus.publish(new ResetStepResultEvent());
-        LinkedHashMap<String, Script> scripts = Maps.newLinkedHashMap();
-        Script script = aEvent.getScript();
-        scripts.put(script.name, script);
-        this.refleshScriptView(scripts);
     }
 
     private void refleshScriptView(LinkedHashMap<String, Script> scripts) {
@@ -56,14 +45,14 @@ public class ScriptViewController {
                     .selectedItemProperty()
                     .addListener((observable, oldValue, newValue) -> {
                         if (newValue != null) {
-                            EventBus.publish(new SelectScriptEvent(newValue.getValue()));
+                            EventBus.publish(new ScriptSelectEvent(newValue.getValue()));
                         }
                     });
             MultipleSelectionModel msm = this.treeViewScriptName.getSelectionModel();
             TreeItem<String> lastItem = this.treeViewScriptName.getRoot().getChildren().get(scripts.size() - 1);
             int row = this.treeViewScriptName.getRow(lastItem);
             msm.select(row);
-            EventBus.publish(new SelectScriptEvent(lastItem.getValue()));
+            EventBus.publish(new ScriptSelectEvent(lastItem.getValue()));
         });
     }
 

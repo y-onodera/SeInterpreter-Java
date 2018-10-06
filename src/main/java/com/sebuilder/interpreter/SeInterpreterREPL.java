@@ -6,7 +6,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -50,8 +49,8 @@ public class SeInterpreterREPL extends CommandLineRunner {
             if (line.equals("exit")) {
                 break;
             } else if (!commandInput && line.startsWith("@")) {
-                List<Script> scripts = this.loadScript(line.substring(1));
-                scripts.forEach(script -> execute(script));
+                this.loadScript(line.substring(1))
+                        .forEach(script -> execute(script));
             } else if (!commandInput && line.startsWith("{")) {
                 input = this.startScript();
                 input.append(line);
@@ -77,8 +76,8 @@ public class SeInterpreterREPL extends CommandLineRunner {
         this.seInterpreterTestListener.aggregateResult();
     }
 
-    public List<Script> loadScript(String file) {
-        List<Script> result = Lists.newArrayList();
+    public Iterable<Script> loadScript(String file) {
+        Iterable<Script> result = Lists.newArrayList();
         try {
             result = this.sf.parse(new File(file));
         } catch (Throwable e) {

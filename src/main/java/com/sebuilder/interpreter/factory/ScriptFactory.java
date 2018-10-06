@@ -17,23 +17,14 @@ package com.sebuilder.interpreter.factory;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.sebuilder.interpreter.Locator;
-import com.sebuilder.interpreter.Script;
-import com.sebuilder.interpreter.Step;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.util.*;
-
-import com.sebuilder.interpreter.StepType;
+import com.sebuilder.interpreter.*;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+
+import java.io.*;
+import java.util.*;
 
 /**
  * Factory to create Script objects from a string, a reader or JSONObject.
@@ -57,6 +48,28 @@ public class ScriptFactory {
         this.dataSourceFactory = dataSourceFactory;
     }
 
+    public Script template(String stepType) throws JSONException, IOException {
+        return this.parse("{\"steps\":[{\"type\":\"" + stepType + "\"}]}");
+    }
+
+    public Script open(String url) throws JSONException, IOException {
+        return this.parse("{\"steps\":[" + "{\"type\":\"get\",\"url\":\"" + url + "\"}" + "]}");
+    }
+
+    public Script highLightElement(String locatorType, String value) throws JSONException, IOException {
+        JSONObject json = new JSONObject();
+        JSONArray steps = new JSONArray();
+        JSONObject step = new JSONObject();
+        JSONObject locator = new JSONObject();
+        locator.put("type", locatorType);
+        locator.put("value", value);
+        step.put("type", "highLightElement");
+        step.putOpt("locator", locator);
+        steps.put(step);
+        json.putOpt("steps", steps);
+        return this.parseScript(json, null).iterator().next();
+    }
+
     /**
      * @param f A File pointing to a JSON file describing a script or suite.
      * @return A list of scripts, ready to run.
@@ -64,7 +77,7 @@ public class ScriptFactory {
      *                       with the Reader.
      * @throws JSONException If the JSON can't be parsed.
      */
-    public List<Script> parse(File f) throws IOException, JSONException {
+    public Iterable<Script> parse(File f) throws IOException, JSONException {
         try (BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(f), "UTF-8"))) {
             return parse(r, f);
         }
@@ -78,7 +91,7 @@ public class ScriptFactory {
      *                       with the Reader.
      * @throws JSONException If the JSON can't be parsed.
      */
-    public List<Script> parse(Reader reader, File sourceFile) throws IOException, JSONException {
+    public Iterable<Script> parse(Reader reader, File sourceFile) throws IOException, JSONException {
         return parse(new JSONObject(new JSONTokener(reader)), sourceFile);
     }
 
@@ -90,7 +103,7 @@ public class ScriptFactory {
      * @throws JSONException If the JSON can't be parsed.
      */
     public Script parse(String jsonString) throws IOException, JSONException {
-        return parse(new JSONObject(new JSONTokener(jsonString)), null).get(0);
+        return parse(new JSONObject(new JSONTokener(jsonString)), null).iterator().next();
     }
 
 
@@ -100,7 +113,7 @@ public class ScriptFactory {
      * @return A script, ready to run.
      * @throws IOException If anything goes wrong with interpreting the JSON.
      */
-    public List<Script> parse(JSONObject o, File sourceFile) throws IOException {
+    public Iterable<Script> parse(JSONObject o, File sourceFile) throws IOException {
         if (o.optString("type", "script").equals("suite")) {
             return parseSuite(o, sourceFile);
         }
@@ -132,16 +145,7 @@ public class ScriptFactory {
     private Script create(File f) {
         Script script = new Script();
         script.testRunFactory = testRunFactory;
-        if (f != null) {
-            script.name = f.getName();
-            script.path = f.getPath();
-            script.relativePath = f.getAbsoluteFile().getParentFile();
-        } else {
-            script.name = "System_in";
-            script.path = null;
-            script.relativePath = null;
-        }
-        return script;
+        return script.associateWith(f);
     }
 
 
@@ -246,14 +250,14 @@ public class ScriptFactory {
      * @return
      * @throws IOException
      */
-    public List<Script> parseSuite(JSONObject o, File suiteFile) throws IOException {
+    public Suite parseSuite(JSONObject o, File suiteFile) throws IOException {
         try {
             ArrayList<Script> scripts = collectScripts(o, suiteFile);
             boolean shareState = o.optBoolean("shareState", true);
             if (shareState) {
                 shareState(scripts, this.createData(o, null).get(0));
             }
-            return scripts;
+            return new Suite(suiteFile, scripts, shareState);
         } catch (JSONException e) {
             throw new IOException("Could not parse suite.", e);
         }
@@ -275,7 +279,7 @@ public class ScriptFactory {
             if (script.has("where") && Strings.isNullOrEmpty(script.getString("where"))) {
                 File wherePath = new File(script.getString("where"), path);
                 if (wherePath.exists()) {
-                    scripts.addAll(parse(wherePath));
+                    parse(wherePath).forEach(it -> scripts.add(it));
                     continue;
                 } else {
                     throw new IOException("Script file " + wherePath.toString() + " not found.");
@@ -283,11 +287,11 @@ public class ScriptFactory {
             }
             File f = new File(path);
             if (f.exists()) {
-                scripts.addAll(parse(f));
+                parse(f).forEach(it -> scripts.add(it));
             } else {
                 f = new File(suiteFile.getAbsoluteFile().getParentFile(), path);
                 if (f.exists()) {
-                    scripts.addAll(parse(f));
+                    parse(f).forEach(it -> scripts.add(it));
                 } else {
                     throw new IOException("Script file " + path + " not found.");
                 }
@@ -305,4 +309,5 @@ public class ScriptFactory {
             s.stateTakeOver(aShareInputs);
         }
     }
+
 }
