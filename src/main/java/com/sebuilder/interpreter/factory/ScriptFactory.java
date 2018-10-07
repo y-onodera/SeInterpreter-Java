@@ -24,7 +24,10 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import java.io.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Factory to create Script objects from a string, a reader or JSONObject.
@@ -145,6 +148,7 @@ public class ScriptFactory {
     private Script create(File f) {
         Script script = new Script();
         script.testRunFactory = testRunFactory;
+        script.dataSourceFactory = this.dataSourceFactory;
         return script.associateWith(f);
     }
 
@@ -224,12 +228,8 @@ public class ScriptFactory {
      * @throws JSONException
      */
     private void parseData(JSONObject o, Script script) throws JSONException {
-        script.dataRows = createData(o, script.relativePath);
-    }
-
-    private List<Map<String, String>> createData(JSONObject o, File relativePath) throws JSONException {
         if (!o.has("data")) {
-            return Lists.newArrayList(new HashMap<>());
+            return;
         }
         JSONObject data = o.getJSONObject("data");
         String sourceName = data.getString("source");
@@ -241,8 +241,9 @@ public class ScriptFactory {
                 config.put(key, cfg.getString(key));
             }
         }
-        return dataSourceFactory.getData(sourceName, config, relativePath);
+        script.setDataSource(this.dataSourceFactory.getDataSource(sourceName), config);
     }
+
 
     /**
      * @param o
@@ -255,7 +256,7 @@ public class ScriptFactory {
             ArrayList<Script> scripts = collectScripts(o, suiteFile);
             boolean shareState = o.optBoolean("shareState", true);
             if (shareState) {
-                shareState(scripts, this.createData(o, null).get(0));
+                shareState(scripts);
             }
             return new Suite(suiteFile, scripts, shareState);
         } catch (JSONException e) {
@@ -302,11 +303,10 @@ public class ScriptFactory {
 
     /**
      * @param scripts
-     * @param aShareInputs
      */
-    private void shareState(ArrayList<Script> scripts, Map<String, String> aShareInputs) {
+    private void shareState(ArrayList<Script> scripts) {
         for (Script s : scripts) {
-            s.stateTakeOver(aShareInputs);
+            s.stateTakeOver();
         }
     }
 

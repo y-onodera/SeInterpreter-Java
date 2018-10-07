@@ -1,5 +1,6 @@
 package com.sebuilder.interpreter.javafx.controller;
 
+import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.javafx.EventBus;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -30,6 +31,12 @@ public class ScriptSettingController {
         assert datasourceSearchButton != null : "fx:id=\"datasourceSearchButton\" was not injected: check your FXML file 'seleniumbuilderbrowsersetting.fxml'.";
         assert editButton != null : "fx:id=\"editButton\" was not injected: check your FXML file 'seleniumbuilderbrowsersetting.fxml'.";
 
+        if (Context.getInstance().getDataSourceDirectory().exists()) {
+            this.datasourceText.setText(Context.getInstance().getDataSourceDirectory().getAbsolutePath());
+        } else {
+            this.datasourceText.setText(Context.getInstance().getBaseDirectory().getAbsolutePath());
+        }
+
         EventBus.registSubscriber(this);
     }
 
@@ -37,7 +44,7 @@ public class ScriptSettingController {
     void datasourceSearch(ActionEvent event) {
         DirectoryChooser directoryChooser = new DirectoryChooser();
         directoryChooser.setTitle("Open Resource File");
-        directoryChooser.setInitialDirectory(this.currentDir);
+        directoryChooser.setInitialDirectory(new File(this.datasourceText.getText()));
         Stage stage = new Stage();
         stage.initOwner(this.datasourceText.getScene().getWindow());
         File file = directoryChooser.showDialog(stage);
@@ -46,6 +53,7 @@ public class ScriptSettingController {
 
     @FXML
     void settingEdit(ActionEvent event) {
+        Context.getInstance().setDataSourceDirectory(this.datasourceText.getText());
         this.datasourceText.getScene().getWindow().hide();
     }
 

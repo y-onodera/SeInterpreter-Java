@@ -16,8 +16,6 @@
 
 package com.sebuilder.interpreter;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONException;
@@ -90,7 +88,7 @@ public class SeInterpreter extends CommandLineRunner {
 
     private void runScript(Script script) {
         int i = 1;
-        for (Map<String, String> data : script.dataRows) {
+        for (Map<String, String> data : script.loadData()) {
             data.put(DataSource.ROW_NUMBER, String.valueOf(i));
             Path currentDir = Paths.get(".").toAbsolutePath();
             Path executeScript = Paths.get(script.path);

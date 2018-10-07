@@ -167,7 +167,7 @@ public class SeInterpreterApplication extends Application {
         String browserName = event.getSelectedBrowser();
         String driverPath = event.getDriverPath();
         this.queue.add((runner) -> {
-            runner.reloadBrowserSetting(browserName, driverPath);
+            runner.reloadSetting(browserName, driverPath);
         });
         this.browserOpern(new BrowserOpenEvent());
     }
@@ -175,13 +175,13 @@ public class SeInterpreterApplication extends Application {
     @Subscribe
     public void browserOpern(BrowserOpenEvent event) throws IOException, JSONException {
         Script dummy = this.templateScript();
-        this.queue.add((runner) -> runner.browserRunScript(dummy, log -> new SeInterpreterTestListener(log)));
+        this.queue.add((runner) -> runner.runScript(dummy, log -> new SeInterpreterTestListener(log)));
     }
 
     @Subscribe
     public void browserExportScriptTemplate(TemplateLoadEvent event) {
         this.queue.add((runner) -> {
-            Script export = runner.browserExportScriptTemplate();
+            Script export = runner.exportScriptTemplate();
             Platform.runLater(() -> EventBus.publish(new ScriptAddEvent(export)));
         });
     }
@@ -189,13 +189,13 @@ public class SeInterpreterApplication extends Application {
     @Subscribe
     public void highLightElement(ElementHighLightEvent event) throws IOException, JSONException {
         Script script = getScriptFactory().highLightElement(event.getLocator(), event.getValue());
-        this.queue.add((runner) -> runner.browserRunScript(script, log -> new SeInterpreterTestListener(log)));
+        this.queue.add((runner) -> runner.runScript(script, log -> new SeInterpreterTestListener(log)));
     }
 
     @Subscribe
     public void browserRunStep(RunStepEvent event) {
         this.queue.add((runner) -> {
-            runner.browserRunScript(this.currentDisplay.removeStep(event.getFilter())
+            runner.runScript(this.currentDisplay.removeStep(event.getFilter())
                     , log -> new SeInterpreterTestGUIListener(log) {
                         @Override
                         public int getStepNo() {
@@ -207,17 +207,17 @@ public class SeInterpreterApplication extends Application {
 
     @Subscribe
     public void browserRunScript(RunEvent event) {
-        this.queue.add((runner) -> runner.browserRunScript(this.currentDisplay));
+        this.queue.add((runner) -> runner.runScript(this.currentDisplay));
     }
 
     @Subscribe
     public void browserRunSuite(RunSuiteEvent event) {
-        this.queue.add((runner) -> runner.browserRunSuite(this.suite));
+        this.queue.add((runner) -> runner.runSuite(this.suite));
     }
 
     @Subscribe
     public void browserClose(BrowserCloseEvent event) {
-        this.queue.add((runner) -> runner.browserClose());
+        this.queue.add((runner) -> runner.close());
     }
 
     protected ScriptFactory getScriptFactory() {

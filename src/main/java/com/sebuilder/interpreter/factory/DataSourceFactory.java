@@ -17,6 +17,7 @@
 package com.sebuilder.interpreter.factory;
 
 import com.sebuilder.interpreter.DataSource;
+
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
@@ -45,8 +46,17 @@ public class DataSourceFactory {
 	 * Lazily loaded map of data sources.
 	 */
 	private final HashMap<String, DataSource> sourcesMap = new HashMap<String, DataSource>();
-	
+
 	public List<Map<String, String>> getData(String sourceName, Map<String, String> config, File relativeToFile) {
+		return getDataSource(sourceName).getData(config, relativeToFile);
+	}
+
+	public DataSource getDataSource(String sourceName) {
+		this.loadDataSource(sourceName);
+		return sourcesMap.get(sourceName);
+	}
+
+	private void loadDataSource(String sourceName) {
 		if (!sourcesMap.containsKey(sourceName)) {
 			String className = sourceName.substring(0, 1).toUpperCase() + sourceName.substring(1).toLowerCase();
 			Class c = null;
@@ -75,7 +85,5 @@ public class DataSourceFactory {
 				}
 			}
 		}
-		
-		return sourcesMap.get(sourceName).getData(config, relativeToFile);
 	}
 }

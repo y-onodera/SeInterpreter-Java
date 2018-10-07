@@ -41,23 +41,27 @@ public class SeInterpreterRunner implements Runnable {
                 }
             }
         }
+        if (this.isOpen()) {
+            this.close();
+            ;
+        }
         this.log.info("stop running");
     }
 
-    public void reloadBrowserSetting(String browserName, String driverPath) {
-        if (this.isBrowserOpen()) {
-            this.browserClose();
+    public void reloadSetting(String browserName, String driverPath) {
+        if (this.isOpen()) {
+            this.close();
         }
         this.setUp();
         this.repl.reloadBrowserSetting(browserName, driverPath);
     }
 
-    public boolean isBrowserOpen() {
+    public boolean isOpen() {
         return this.repl != null;
     }
 
-    public Script browserExportScriptTemplate() {
-        if (!this.isBrowserOpen()) {
+    public Script exportScriptTemplate() {
+        if (!this.isOpen()) {
             this.setUp();
         }
         String fileName = "exportedBrowserTemplate" + this.exportCount++ + ".json";
@@ -67,26 +71,26 @@ public class SeInterpreterRunner implements Runnable {
         return this.repl.loadScript(exported.getAbsolutePath()).iterator().next();
     }
 
-    public void browserRunScript(Script currentDisplay) {
-        this.browserRunScript(currentDisplay, log -> new SeInterpreterTestGUIListener(log));
+    public void runScript(Script currentDisplay) {
+        this.runScript(currentDisplay, log -> new SeInterpreterTestGUIListener(log));
     }
 
-    public void browserRunScript(Script currentDisplay, Function<Logger, SeInterpreterTestListener> listenerFactory) {
-        if (!this.isBrowserOpen()) {
+    public void runScript(Script currentDisplay, Function<Logger, SeInterpreterTestListener> listenerFactory) {
+        if (!this.isOpen()) {
             this.setUp();
         }
         this.repl.execute(currentDisplay, listenerFactory.apply(this.log));
     }
 
-    public void browserRunSuite(Suite suite) {
+    public void runSuite(Suite suite) {
         suite.forEach(it -> {
             EventBus.publish(new ScriptSelectEvent(it.name));
-            this.browserRunScript(it);
+            this.runScript(it);
         });
     }
 
-    public void browserClose() {
-        if (!this.isBrowserOpen()) {
+    public void close() {
+        if (!this.isOpen()) {
             return;
         }
         this.repl.tearDownREPL();

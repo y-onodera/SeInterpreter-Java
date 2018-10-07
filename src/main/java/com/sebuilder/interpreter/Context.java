@@ -1,6 +1,7 @@
 package com.sebuilder.interpreter;
 
 import java.io.File;
+import java.nio.file.Paths;
 
 public class Context {
     private static Context ourInstance = new Context();
@@ -34,7 +35,13 @@ public class Context {
      */
     private String downloadDirectory = "download";
 
+    private final File baseDirectory = Paths.get(".").toAbsolutePath().normalize().toFile();
+
     private Context() {
+    }
+
+    public File getBaseDirectory() {
+        return baseDirectory;
     }
 
     /**

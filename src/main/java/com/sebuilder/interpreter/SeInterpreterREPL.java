@@ -5,7 +5,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -107,9 +106,9 @@ public class SeInterpreterREPL extends CommandLineRunner {
 
     public void execute(Script script, SeInterpreterTestListener seInterpreterTestListener) {
         String suiteName = "com.sebuilder.interpreter.REPL_EXEC" + this.execCount++;
-        script.stateTakeOver(new HashMap<>());
+        script.stateTakeOver();
         int i = 1;
-        for (Map<String, String> data : script.dataRows) {
+        for (Map<String, String> data : script.loadData()) {
             seInterpreterTestListener.openTestSuite(suiteName + "_row_" + i, data);
             data.put(DataSource.ROW_NUMBER, String.valueOf(i));
             this.execute(script, data, seInterpreterTestListener);

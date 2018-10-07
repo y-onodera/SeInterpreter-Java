@@ -16,7 +16,9 @@
 
 package com.sebuilder.interpreter;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.sebuilder.interpreter.factory.DataSourceFactory;
 import com.sebuilder.interpreter.factory.TestRunFactory;
 import com.sebuilder.interpreter.webdriverfactory.WebDriverFactory;
 import org.apache.logging.log4j.Logger;
@@ -42,18 +44,26 @@ import java.util.function.Predicate;
 public class Script {
     public ArrayList<Step> steps = new ArrayList<>();
     public TestRunFactory testRunFactory = new TestRunFactory();
-    public List<Map<String, String>> dataRows;
+    public DataSourceFactory dataSourceFactory = new DataSourceFactory();
     public String path = "scriptPath";
     public String name = "scriptName";
     public File relativePath;
     public boolean usePreviousDriverAndVars = false;
     public boolean closeDriver = true;
     public Map<String, String> shareInputs = Maps.newHashMap();
+    public DataSource dataSource;
+    public Map<String, String> dataSourceConfig;
 
-    public Script() {
-        // By default there is one empty data row.
-        dataRows = new ArrayList<>(1);
-        dataRows.add(new HashMap<>());
+    public void setDataSource(DataSource dataSource, HashMap<String, String> config) {
+        this.dataSource = dataSource;
+        this.dataSourceConfig = config;
+    }
+
+    public List<Map<String, String>> loadData() {
+        if (dataSource == null) {
+            return Lists.newArrayList(new HashMap<>());
+        }
+        return dataSource.getData(dataSourceConfig, relativePath);
     }
 
     public TestRun createTestRun(Logger log, WebDriverFactory wdf, HashMap<String, String> driverConfig, Map<String, String> data, TestRun lastRun, SeInterpreterTestListener seInterpreterTestListener) {
@@ -68,10 +78,9 @@ public class Script {
     /**
      *
      */
-    public void stateTakeOver(Map<String, String> aShareInputs) {
+    public void stateTakeOver() {
         this.closeDriver = false;
         this.usePreviousDriverAndVars = true;
-        this.shareInputs = aShareInputs;
     }
 
     public Script associateWith(File target) {
@@ -155,13 +164,23 @@ public class Script {
             stepsA.put(s.toJSON());
         }
         o.put("steps", stepsA);
+        if (this.dataSource != null) {
+            JSONObject data = new JSONObject();
+            final String sourceName = this.dataSource.getClass().getSimpleName().toLowerCase();
+            data.put("source", sourceName);
+            JSONObject configs = new JSONObject();
+            configs.put(sourceName, this.dataSourceConfig);
+            data.put("configs", configs);
+            o.put("data", data);
+        }
         return o;
     }
 
     private Script cloneExcludeStep() {
         Script newScript = new Script();
         newScript.testRunFactory = this.testRunFactory;
-        newScript.dataRows = this.dataRows;
+        newScript.dataSource = this.dataSource;
+        newScript.dataSourceConfig = this.dataSourceConfig;
         newScript.path = this.path;
         newScript.name = this.name;
         newScript.relativePath = this.relativePath;
