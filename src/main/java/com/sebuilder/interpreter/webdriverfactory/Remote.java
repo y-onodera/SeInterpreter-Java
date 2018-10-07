@@ -16,11 +16,12 @@
 
 package com.sebuilder.interpreter.webdriverfactory;
 
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.RemoteWebDriver;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
-import org.openqa.selenium.remote.DesiredCapabilities;
-import org.openqa.selenium.remote.RemoteWebDriver;
 
 public class Remote implements WebDriverFactory {
 	/**
@@ -41,4 +42,9 @@ public class Remote implements WebDriverFactory {
 				? new RemoteWebDriver(new DesiredCapabilities(caps))
 				: new RemoteWebDriver(url, new DesiredCapabilities(caps)); 
 	}
+
+    @Override
+    public void setDriverPath(String driverPath) {
+
+    }
 }

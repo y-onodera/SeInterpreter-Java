@@ -13,6 +13,7 @@ import com.sebuilder.interpreter.javafx.EventBus;
 import com.sebuilder.interpreter.javafx.event.ReportErrorEvent;
 import com.sebuilder.interpreter.javafx.event.browser.BrowserCloseEvent;
 import com.sebuilder.interpreter.javafx.event.browser.BrowserOpenEvent;
+import com.sebuilder.interpreter.javafx.event.browser.BrowserSettingEvent;
 import com.sebuilder.interpreter.javafx.event.file.FileLoadEvent;
 import com.sebuilder.interpreter.javafx.event.file.FileSaveAsEvent;
 import com.sebuilder.interpreter.javafx.event.file.FileSaveEvent;
@@ -162,6 +163,16 @@ public class SeInterpreterApplication extends Application {
     }
 
     @Subscribe
+    public void browserSetting(BrowserSettingEvent event) throws IOException, JSONException {
+        String browserName = event.getSelectedBrowser();
+        String driverPath = event.getDriverPath();
+        this.queue.add((runner) -> {
+            runner.reloadBrowserSetting(browserName, driverPath);
+        });
+        this.browserOpern(new BrowserOpenEvent());
+    }
+
+    @Subscribe
     public void browserOpern(BrowserOpenEvent event) throws IOException, JSONException {
         Script dummy = this.templateScript();
         this.queue.add((runner) -> runner.browserRunScript(dummy, log -> new SeInterpreterTestListener(log)));
@@ -233,4 +244,5 @@ public class SeInterpreterApplication extends Application {
             Files.asCharSink(target, Charsets.UTF_8).write(content);
         });
     }
+
 }

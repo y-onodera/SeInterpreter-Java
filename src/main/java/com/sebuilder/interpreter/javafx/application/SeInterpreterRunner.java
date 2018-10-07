@@ -44,8 +44,20 @@ public class SeInterpreterRunner implements Runnable {
         this.log.info("stop running");
     }
 
+    public void reloadBrowserSetting(String browserName, String driverPath) {
+        if (this.isBrowserOpen()) {
+            this.browserClose();
+        }
+        this.setUp();
+        this.repl.reloadBrowserSetting(browserName, driverPath);
+    }
+
+    public boolean isBrowserOpen() {
+        return this.repl != null;
+    }
+
     public Script browserExportScriptTemplate() {
-        if (this.repl == null) {
+        if (!this.isBrowserOpen()) {
             this.setUp();
         }
         String fileName = "exportedBrowserTemplate" + this.exportCount++ + ".json";
@@ -60,7 +72,7 @@ public class SeInterpreterRunner implements Runnable {
     }
 
     public void browserRunScript(Script currentDisplay, Function<Logger, SeInterpreterTestListener> listenerFactory) {
-        if (this.repl == null) {
+        if (!this.isBrowserOpen()) {
             this.setUp();
         }
         this.repl.execute(currentDisplay, listenerFactory.apply(this.log));
@@ -74,7 +86,7 @@ public class SeInterpreterRunner implements Runnable {
     }
 
     public void browserClose() {
-        if (this.repl == null) {
+        if (!this.isBrowserOpen()) {
             return;
         }
         this.repl.tearDownREPL();

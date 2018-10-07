@@ -16,8 +16,9 @@
 
 package com.sebuilder.interpreter.webdriverfactory;
 
-import java.util.HashMap;
 import org.openqa.selenium.remote.RemoteWebDriver;
+
+import java.util.HashMap;
 
 public interface WebDriverFactory {
 	/**
@@ -25,4 +26,6 @@ public interface WebDriverFactory {
 	 * @return A RemoteWebDriver of the type produced by this factory.
 	 */
 	public RemoteWebDriver make(HashMap<String, String> config) throws Exception;
+
+	void setDriverPath(String driverPath);
 }

@@ -16,14 +16,15 @@
 
 package com.sebuilder.interpreter.webdriverfactory;
 
-import java.io.File;
-import java.util.HashMap;
 import org.openqa.selenium.firefox.FirefoxBinary;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
+
+import java.io.File;
+import java.util.HashMap;
 
 public class Firefox implements WebDriverFactory {
 	/**
@@ -35,19 +36,27 @@ public class Firefox implements WebDriverFactory {
 	 * @return A FirefoxDriver.
 	 */
 	@Override
-	public RemoteWebDriver make(HashMap<String, String> config) {
-		FirefoxBinary fb = config.containsKey("binary")
-				? new FirefoxBinary(new File(config.get("binary")))
-				: new FirefoxBinary();
-		FirefoxProfile fp = config.containsKey("profile")
-				? new FirefoxProfile(new File(config.get("profile")))
-				: new FirefoxProfile();
-		HashMap<String, String> caps = new HashMap<String, String>(config);
-		DesiredCapabilities capabilities = new DesiredCapabilities(caps);
-		capabilities.setCapability(FirefoxDriver.BINARY, fb);
-		capabilities.setCapability(FirefoxDriver.PROFILE, fp);
-		FirefoxOptions option = new FirefoxOptions(capabilities);
-		FirefoxDriver result = new FirefoxDriver(option);
-		return result;
-	}
+    public RemoteWebDriver make(HashMap<String, String> config) {
+        FirefoxBinary fb = config.containsKey("binary")
+                ? new FirefoxBinary(new File(config.get("binary")))
+                : new FirefoxBinary();
+        FirefoxProfile fp = config.containsKey("profile")
+                ? new FirefoxProfile(new File(config.get("profile")))
+                : new FirefoxProfile();
+        fp.setPreference("marionette", "true");
+
+        HashMap<String, String> caps = new HashMap<String, String>(config);
+        DesiredCapabilities capabilities = new DesiredCapabilities(caps);
+        capabilities.setCapability(FirefoxDriver.BINARY, fb);
+        capabilities.setCapability(FirefoxDriver.PROFILE, fp);
+        FirefoxOptions option = new FirefoxOptions(capabilities);
+        FirefoxDriver result = new FirefoxDriver(option);
+        return result;
+    }
+
+    @Override
+    public void setDriverPath(String driverPath) {
+        System.setProperty("webdriver.gecko.driver", driverPath);
+    }
+
 }

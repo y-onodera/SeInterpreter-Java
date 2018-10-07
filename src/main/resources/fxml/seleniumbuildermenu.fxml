@@ -19,6 +19,8 @@
                                   onAction="#handleScriptSave" text="Save"/>
                         <MenuItem id="menuTestSaveAs" fx:id="menuScriptSaveAs" mnemonicParsing="false"
                                   onAction="#handleScriptSaveAs" text="Save As"/>
+                        <MenuItem fx:id="menuScriptSetting" mnemonicParsing="false" onAction="#handleScriptSetting"
+                                  text="Setting"/>
                     </items>
                 </Menu>
                 <Menu id="menuRun" fx:id="menuBrowser" mnemonicParsing="false" text="Browser">

@@ -34,6 +34,15 @@ public abstract class CommandLineRunner {
         setUp(args);
     }
 
+    public void setSeInterpreterTestListener(SeInterpreterTestListener seInterpreterTestListener) {
+        this.seInterpreterTestListener = seInterpreterTestListener;
+    }
+
+    public void reloadBrowserSetting(String browserName, String driverPath) {
+        this.resetDriverFactory(browserName);
+        this.wdf.setDriverPath(driverPath);
+    }
+
     protected void setUp(String[] args) {
         this.log.info("setUp start");
         if (args.length == 0) {
@@ -60,13 +69,7 @@ public abstract class CommandLineRunner {
                 } else if (s.startsWith(CommandLineArgument.DRIVER_CONFIG_PREFIX.key())) {
                     this.driverConfig.put(kv[0].substring(CommandLineArgument.DRIVER_CONFIG_PREFIX.key().length()), kv[1]);
                 } else if (s.startsWith(CommandLineArgument.DRIVER.key())) {
-                    try {
-                        this.wdf = (WebDriverFactory) Class.forName("com.sebuilder.interpreter.webdriverfactory." + kv[1]).getDeclaredConstructor().newInstance();
-                    } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
-                        this.log.fatal("Unknown WebDriverFactory: " + "com.sebuilder.interpreter.webdriverfactory." + kv[1], e);
-                    } catch (InstantiationException | IllegalAccessException e) {
-                        this.log.fatal("Could not instantiate WebDriverFactory " + "com.sebuilder.interpreter.webdriverfactory." + kv[1], e);
-                    }
+                    resetDriverFactory(kv[1]);
                 } else if (s.startsWith(CommandLineArgument.DATASOURCE_ENCODING.key())) {
                     Context.getInstance().setDataSourceEncording(kv[1]);
                 } else if (s.startsWith(CommandLineArgument.DATASOURCE_DIRECTORY.key())) {
@@ -98,7 +101,14 @@ public abstract class CommandLineRunner {
     protected void configureOption(String s) {
     }
 
-    public void setSeInterpreterTestListener(SeInterpreterTestListener seInterpreterTestListener) {
-        this.seInterpreterTestListener = seInterpreterTestListener;
+    protected void resetDriverFactory(String s) {
+        try {
+            this.wdf = (WebDriverFactory) Class.forName("com.sebuilder.interpreter.webdriverfactory." + s).getDeclaredConstructor().newInstance();
+        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
+            this.log.fatal("Unknown WebDriverFactory: " + "com.sebuilder.interpreter.webdriverfactory." + s, e);
+        } catch (InstantiationException | IllegalAccessException e) {
+            this.log.fatal("Could not instantiate WebDriverFactory " + "com.sebuilder.interpreter.webdriverfactory." + s, e);
+        }
     }
+
 }

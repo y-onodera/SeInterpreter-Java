@@ -35,6 +35,13 @@ public class MenuController {
     @FXML
     private Pane paneSeInterpreterMenu;
 
+    @Subscribe
+    public void scriptSaveAs(OpenScriptSaveChooserEvent event) {
+        this.handleScriptSaveAs(null);
+    }
+
+    private Stage dialog;
+
     @FXML
     void initialize() {
         assert paneSeInterpreterMenu != null : "fx:id=\"paneSeInterpreterMenu\" was not injected: check your FXML file 'seleniumbuildermenu.fxml'.";
@@ -71,11 +78,6 @@ public class MenuController {
         EventBus.publish(new FileSaveEvent());
     }
 
-    @Subscribe
-    public void scriptSaveAs(OpenScriptSaveChooserEvent event) {
-        this.handleScriptSaveAs(null);
-    }
-
     @FXML
     void handleScriptSaveAs(ActionEvent event) {
         FileChooser fileSave = new FileChooser();
@@ -85,6 +87,19 @@ public class MenuController {
         if (file != null) {
             EventBus.publish(new FileSaveAsEvent(file));
         }
+    }
+
+    @FXML
+    void handleScriptSetting(ActionEvent event) throws IOException {
+        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getClassLoader().getResource("fxml/seleniumbuilderscriptsetting.fxml")));
+        Scene scene = new Scene(root);
+        Stage dialog = new Stage();
+        dialog.setScene(scene);
+        dialog.initOwner(paneSeInterpreterMenu.getScene().getWindow());
+        dialog.initModality(Modality.WINDOW_MODAL);
+        dialog.setResizable(false);
+        dialog.setTitle("edit script setting");
+        dialog.show();
     }
 
     @FXML
@@ -119,14 +134,19 @@ public class MenuController {
 
     @FXML
     void handleBrowserSetting(ActionEvent event) throws IOException {
-        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getClassLoader().getResource("fxml/seleniumbuilderbrowsersetting.fxml")));
-        Scene scene = new Scene(root);
-        Stage dialog = new Stage();
-        dialog.setScene(scene);
-        dialog.initOwner(paneSeInterpreterMenu.getScene().getWindow());
-        dialog.initModality(Modality.WINDOW_MODAL);
-        dialog.setResizable(false);
-        dialog.setTitle("edit browser setting");
+        if (dialog == null) {
+            FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(getClass().getClassLoader().getResource("fxml/seleniumbuilderbrowsersetting.fxml")));
+            Parent root = loader.load();
+            BrowserSettingController controller = loader.getController();
+            controller.init("Chrome", System.getProperty("webdriver.chrome.driver"));
+            Scene scene = new Scene(root);
+            dialog = new Stage();
+            dialog.setScene(scene);
+            dialog.initOwner(paneSeInterpreterMenu.getScene().getWindow());
+            dialog.initModality(Modality.WINDOW_MODAL);
+            dialog.setResizable(false);
+            dialog.setTitle("edit browser setting");
+        }
         dialog.show();
     }
 
