@@ -102,7 +102,7 @@ public class SeInterpreterRunner implements Runnable {
     }
 
     private void setUp() {
-        String[] args = new String[]{CommandLineArgument.DRIVER.getArgument("Chrome")};
+        String[] args = new String[]{CommandLineArgument.DRIVER.getArgument(Context.getInstance().getBrowser())};
         this.repl = new SeInterpreterREPL(args, log);
         this.repl.setSeInterpreterTestListener(new SeInterpreterTestGUIListener(log));
         this.repl.setupREPL();

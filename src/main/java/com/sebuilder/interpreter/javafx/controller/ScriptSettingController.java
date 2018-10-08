@@ -36,12 +36,11 @@ public class ScriptSettingController {
         } else {
             this.datasourceText.setText(Context.getInstance().getBaseDirectory().getAbsolutePath());
         }
-
         EventBus.registSubscriber(this);
     }
 
     @FXML
-    void datasourceSearch(ActionEvent event) {
+    void dataSourceSearch(ActionEvent event) {
         DirectoryChooser directoryChooser = new DirectoryChooser();
         directoryChooser.setTitle("Open Resource File");
         directoryChooser.setInitialDirectory(new File(this.datasourceText.getText()));

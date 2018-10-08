@@ -3,13 +3,14 @@ package com.sebuilder.interpreter;
 import java.io.File;
 import java.nio.file.Paths;
 
-public class Context {
-    private static Context ourInstance = new Context();
+public enum Context {
+    INSTANCE;
 
     public static Context getInstance() {
-        return ourInstance;
+        return INSTANCE;
     }
 
+    private final File baseDirectory = Paths.get(".").toAbsolutePath().normalize().toFile();
     /**
      *
      */
@@ -35,10 +36,8 @@ public class Context {
      */
     private String downloadDirectory = "download";
 
-    private final File baseDirectory = Paths.get(".").toAbsolutePath().normalize().toFile();
 
-    private Context() {
-    }
+    private String browser = "Chrome";
 
     public File getBaseDirectory() {
         return baseDirectory;
@@ -120,5 +119,13 @@ public class Context {
 
     public void setDownloadDirectory(String downloadDirectory) {
         this.downloadDirectory = downloadDirectory;
+    }
+
+    public String getBrowser() {
+        return this.browser;
+    }
+
+    public void setBrowser(String browser) {
+        this.browser = browser;
     }
 }

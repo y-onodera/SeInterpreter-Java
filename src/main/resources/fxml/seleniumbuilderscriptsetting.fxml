@@ -23,7 +23,7 @@
                             <children>
                                 <Label text="datasource dir" GridPane.rowIndex="2"/>
                                 <TextField fx:id="datasourceText" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-                                <Button fx:id="datasourceSearchButton" onAction="#datasourceSearch"
+                                <Button fx:id="datasourceSearchButton" onAction="#dataSourceSearch"
                                         mnemonicParsing="false" text="search" GridPane.columnIndex="2"
                                         GridPane.rowIndex="2"/>
                             </children>

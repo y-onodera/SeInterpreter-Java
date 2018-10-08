@@ -102,6 +102,7 @@ public abstract class CommandLineRunner {
     }
 
     protected void resetDriverFactory(String s) {
+        Context.getInstance().setBrowser(s);
         try {
             this.wdf = (WebDriverFactory) Class.forName("com.sebuilder.interpreter.webdriverfactory." + s).getDeclaredConstructor().newInstance();
         } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
