@@ -17,17 +17,19 @@
 package com.sebuilder.interpreter.datasource;
 
 import com.sebuilder.interpreter.DataSource;
-import static com.sebuilder.interpreter.datasource.Utils.findFile;
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.xml.parsers.DocumentBuilderFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+
+import static com.sebuilder.interpreter.datasource.Utils.findFile;
 
 /**
  * XML data source compatible with the standard IDE approach.
@@ -45,6 +47,7 @@ public class Xml implements DataSource {
 				Node rowN = rows.item(i);
 				NamedNodeMap attributes = rowN.getAttributes();
 				Map<String, String> row = new HashMap<String, String>();
+                row.put(DataSource.ROW_NUMBER, String.valueOf(i + 1));
 				for (int j = 0; j < attributes.getLength(); j++) {
 					row.put(attributes.item(j).getNodeName(), attributes.item(j).getNodeValue());
 				}

@@ -72,10 +72,18 @@ public class SeInterpreterRunner implements Runnable {
     }
 
     public void runScript(Script currentDisplay) {
+        this.runScript(new TestRunBuilder(currentDisplay));
+    }
+
+    public void runScript(TestRunBuilder currentDisplay) {
         this.runScript(currentDisplay, log -> new SeInterpreterTestGUIListener(log));
     }
 
     public void runScript(Script currentDisplay, Function<Logger, SeInterpreterTestListener> listenerFactory) {
+        this.runScript(new TestRunBuilder(currentDisplay), listenerFactory);
+    }
+
+    public void runScript(TestRunBuilder currentDisplay, Function<Logger, SeInterpreterTestListener> listenerFactory) {
         if (!this.isOpen()) {
             this.setUp();
         }
@@ -83,8 +91,8 @@ public class SeInterpreterRunner implements Runnable {
     }
 
     public void runSuite(Suite suite) {
-        suite.forEach(it -> {
-            EventBus.publish(new ScriptSelectEvent(it.name));
+        suite.getTestRuns().forEach(it -> {
+            EventBus.publish(new ScriptSelectEvent(it.name()));
             this.runScript(it);
         });
     }

@@ -1,5 +1,6 @@
 package com.sebuilder.interpreter;
 
+import com.google.common.base.Strings;
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 import org.apache.logging.log4j.Logger;
@@ -67,7 +68,11 @@ public class SeInterpreterTestListener {
     }
 
     public boolean openTestSuite(String name, Map<String, String> aProperty) {
-        String testName = name.replace("\\", ".").replace("/", ".").replaceAll("^\\.+", "");
+        String baseName = name;
+        if (!Strings.isNullOrEmpty(aProperty.get(DataSource.ROW_NUMBER))) {
+            baseName = name + "_rowNumber" + aProperty.get(DataSource.ROW_NUMBER);
+        }
+        String testName = baseName.replace("\\", ".").replace("/", ".").replaceAll("^\\.+", "");
         this.log.info("open suite:" + testName);
         this.suite = new JUnitTest();
         this.suite.setName(testName);

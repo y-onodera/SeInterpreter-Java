@@ -33,7 +33,6 @@ import java.util.concurrent.TimeUnit;
 public class TestRun {
     private Script script;
     private HashMap<String, String> vars = new HashMap<>();
-    private int stepIndex = -1;
     private RemoteWebDriver driver;
     private Logger log;
     private WebDriverFactory webDriverFactory = SeInterpreter.DEFAULT_DRIVER_FACTORY;
@@ -41,6 +40,9 @@ public class TestRun {
     private Long implicitlyWaitDriverTimeout;
     private Long pageLoadDriverTimeout;
     private SeInterpreterTestListener listener;
+    private Map<Script, Script> scriptChain = new HashMap<>();
+    private int stepIndex = -1;
+    private boolean chainRun;
 
     public TestRun(
             Script script,
@@ -49,8 +51,18 @@ public class TestRun {
             HashMap<String, String> webDriverConfig,
             Long implicitlyWaitDriverTimeout,
             Long pageLoadDriverTimeout,
-            Map<String, String> initialVars, SeInterpreterTestListener seInterpreterTestListener) {
-        this(script, log, null, webDriverFactory, webDriverConfig, implicitlyWaitDriverTimeout, pageLoadDriverTimeout, initialVars, seInterpreterTestListener);
+            Map<String, String> initialVars, SeInterpreterTestListener seInterpreterTestListener,
+            Map<Script, Script> scriptChain) {
+        this(script
+                , log
+                , null
+                , webDriverFactory
+                , webDriverConfig
+                , implicitlyWaitDriverTimeout
+                , pageLoadDriverTimeout
+                , initialVars
+                , seInterpreterTestListener
+                , scriptChain);
     }
 
     public TestRun(
@@ -59,8 +71,18 @@ public class TestRun {
             RemoteWebDriver driver,
             Long implicitlyWaitDriverTimeout,
             Long pageLoadDriverTimeout,
-            Map<String, String> initialVars, SeInterpreterTestListener seInterpreterTestListener) {
-        this(script, log, driver, null, null, implicitlyWaitDriverTimeout, pageLoadDriverTimeout, initialVars, seInterpreterTestListener);
+            Map<String, String> initialVars, SeInterpreterTestListener seInterpreterTestListener,
+            Map<Script, Script> scriptChain) {
+        this(script
+                , log
+                , driver
+                , null
+                , null
+                , implicitlyWaitDriverTimeout
+                , pageLoadDriverTimeout
+                , initialVars
+                , seInterpreterTestListener
+                , scriptChain);
     }
 
     public TestRun(
@@ -72,7 +94,9 @@ public class TestRun {
             Long implicitlyWaitDriverTimeout,
             Long pageLoadDriverTimeout,
             Map<String, String> initialVars,
-            SeInterpreterTestListener seInterpreterTestListener) {
+            SeInterpreterTestListener seInterpreterTestListener,
+            Map<Script, Script> scriptChain
+    ) {
         this.script = script;
         this.log = log;
         this.driver = driver;
@@ -82,38 +106,23 @@ public class TestRun {
             vars.putAll(initialVars);
         }
         this.listener = seInterpreterTestListener;
-        setTimeouts(implicitlyWaitDriverTimeout, pageLoadDriverTimeout);
-        vars.put("_resultDir", Context.getInstance().getResultOutputDirectory().getAbsolutePath());
-        vars.put("_dataSourceDir", Context.getInstance().getDataSourceDirectory().getAbsolutePath());
-        vars.put("_screenShotDir", Context.getInstance().getScreenShotOutputDirectory().getAbsolutePath());
-        vars.put("_templateDir", Context.getInstance().getTemplateOutputDirectory().getAbsolutePath());
-        vars.put("_downloadDir", Context.getInstance().getDownloadDirectory().getAbsolutePath());
-        vars.put("_suiteName", this.suiteName());
-        vars.put("_scriptName", this.scriptName());
-    }
-
-    /**
-     * @param script
-     * @return
-     */
-    public TestRun createTestRun(Script script) {
-        return new TestRun(script
-                , this.log
-                , this.driver
-                , null
-                , null
-                , null
-                , null
-                , null
-                , this.listener
-        );
+        this.setTimeouts(implicitlyWaitDriverTimeout, pageLoadDriverTimeout);
+        this.vars.put("_resultDir", Context.getInstance().getResultOutputDirectory().getAbsolutePath());
+        this.vars.put("_dataSourceDir", Context.getInstance().getDataSourceDirectory().getAbsolutePath());
+        this.vars.put("_screenShotDir", Context.getInstance().getScreenShotOutputDirectory().getAbsolutePath());
+        this.vars.put("_templateDir", Context.getInstance().getTemplateOutputDirectory().getAbsolutePath());
+        this.vars.put("_downloadDir", Context.getInstance().getDownloadDirectory().getAbsolutePath());
+        this.vars.put("_suiteName", this.suiteName());
+        this.vars.put("_scriptName", this.scriptName());
+        this.scriptChain.putAll(scriptChain);
+        this.chainRun = this.scriptChain.containsKey(this.script);
     }
 
     public String scriptName() {
-        if (script.path == null) {
-            return script.name;
+        if (this.script.path == null) {
+            return this.script.name;
         }
-        return script.name.substring(0, script.name.indexOf(".")) + vars.get(DataSource.ROW_NUMBER);
+        return this.script.name.substring(0, this.script.name.indexOf(".")) + this.vars.get(DataSource.ROW_NUMBER);
     }
 
     public String suiteName() {
@@ -128,28 +137,35 @@ public class TestRun {
      * @return The driver instance being used.
      */
     public RemoteWebDriver driver() {
-        return driver;
+        return this.driver;
     }
 
     /**
      * @return The logger being used.
      */
     public Logger log() {
-        return log;
+        return this.log;
+    }
+
+    /**
+     * @return The listener being used.
+     */
+    public SeInterpreterTestListener getListener() {
+        return this.listener;
     }
 
     /**
      * @return The HashMap of variables.
      */
     public HashMap<String, String> vars() {
-        return vars;
+        return this.vars;
     }
 
     /**
      * @return The step that is being/has just been executed.
      */
     public Step currentStep() {
-        return script.steps.get(stepIndex);
+        return this.script.steps.get(this.stepIndex);
     }
 
     /**
@@ -174,10 +190,9 @@ public class TestRun {
      * @return The parameter's value.
      */
     public String string(String paramName) {
-        String s = currentStep().stringParams.get(paramName);
+        String s = this.currentStep().stringParams.get(paramName);
         if (s == null) {
-            throw new RuntimeException("Missing parameter \"" + paramName + "\" at step #" +
-                    (stepIndex + 1) + ".");
+            throw new RuntimeException("Missing parameter \"" + paramName + "\" at step #" + (this.stepIndex + 1) + ".");
         }
         // Sub special keys using the !{keyname} syntax.
         for (Keys k : Keys.values()) {
@@ -204,13 +219,12 @@ public class TestRun {
      * @return The parameter's value.
      */
     public Locator locator(String paramName) {
-        Locator l = new Locator(currentStep().locatorParams.get(paramName));
+        Locator l = this.currentStep().locatorParams.get(paramName);
         if (l == null) {
-            throw new RuntimeException("Missing parameter \"" + paramName + "\" at step #" +
-                    (stepIndex + 1) + ".");
+            throw new RuntimeException("Missing parameter \"" + paramName + "\" at step #" + (this.stepIndex + 1) + ".");
         }
         // This kind of variable substitution makes for short code, but it's inefficient.
-        for (Map.Entry<String, String> v : vars.entrySet()) {
+        for (Map.Entry<String, String> v : this.vars.entrySet()) {
             l.value = l.value.replace("${" + v.getKey() + "}", v.getValue());
         }
         return l;
@@ -226,33 +240,24 @@ public class TestRun {
     public boolean finish() {
         boolean success = true;
         try {
-            while (hasNext()) {
-                success = next() && success;
+            while (this.hasNext()) {
+                success = this.next() && success;
             }
         } catch (RuntimeException e) {
             // If the script terminates, the driver will be closed automatically.
-            if (script.closeDriver) {
-                try {
-                    driver.quit();
-                } catch (Exception e2) {
-                }
-                driver = null;
-            }
+            this.quit();
             throw e;
         }
         return success;
     }
 
-
     /**
      * @return True if there is another step to execute.
      */
     public boolean hasNext() {
-        boolean hasNext = stepIndex < script.steps.size() - 1;
-        if (!hasNext && driver != null && script.closeDriver) {
-            log.debug("Quitting driver.");
-            driver.quit();
-            driver = null;
+        boolean hasNext = this.stepRest() || this.chainRun;
+        if (!hasNext && this.driver != null) {
+            this.quit();
         }
         return hasNext;
     }
@@ -263,24 +268,28 @@ public class TestRun {
      * @return True on success.
      */
     public boolean next() {
-        initRemoteWebDriver();
+        if (!this.stepRest() && this.chainRun) {
+            this.chainRun = false;
+            return this.chainRun(this.scriptChain.get(this.script));
+        }
+        this.initRemoteWebDriver();
         boolean result;
         try {
-            result = runTest();
+            result = this.runTest();
         } catch (Throwable e) {
-            return processTestError(e);
+            return this.processTestError(e);
         }
         if (!result) {
-            return processTestFailure();
+            return this.processTestFailure();
         }
-        return processTestSuccess();
+        return this.processTestSuccess();
     }
 
     /**
      *
      */
     public void forwardStepIndex(int count) {
-        this.listener.skipTestIndex(count);
+        this.getListener().skipTestIndex(count);
         this.stepIndex = this.stepIndex + count;
     }
 
@@ -305,16 +314,16 @@ public class TestRun {
     }
 
     public void startTest() {
-        this.listener.startTest(currentStep().name != null ? currentStep().name : currentStep().toPrettyString());
+        this.getListener().startTest(currentStep().name != null ? this.currentStep().name : this.currentStep().toPrettyString());
     }
 
     public boolean processTestSuccess() {
-        this.listener.endTest();
+        this.getListener().endTest();
         return true;
     }
 
     public boolean processTestFailure() {
-        this.listener.addFailure(this.currentStep() + " failed.");
+        this.getListener().addFailure(this.currentStep() + " failed.");
         // If a verify failed, we just note this but continue.
         if (this.currentStep().type instanceof Verify) {
             return false;
@@ -324,7 +333,7 @@ public class TestRun {
     }
 
     public boolean processTestError(Throwable e) {
-        this.listener.addError(e);
+        this.getListener().addError(e);
         throw new AssertionError(this.currentStep() + " failed.", e);
     }
 
@@ -356,11 +365,51 @@ public class TestRun {
      */
     private void setTimeouts(Long implicitlyWaitDriverTimeout, Long pageLoadDriverTimeout) {
         if (implicitlyWaitDriverTimeout != null && implicitlyWaitDriverTimeout > 0) {
-            this.implicitlyWaitDriverTimeout = Long.valueOf(implicitlyWaitDriverTimeout);
+            this.implicitlyWaitDriverTimeout = implicitlyWaitDriverTimeout;
         }
         if (pageLoadDriverTimeout != null && pageLoadDriverTimeout > 0) {
-            this.pageLoadDriverTimeout = Long.valueOf(pageLoadDriverTimeout);
+            this.pageLoadDriverTimeout = pageLoadDriverTimeout;
         }
+    }
+
+    private void quit() {
+        if (this.script.closeDriver()) {
+            this.log.debug("Quitting driver.");
+            try {
+                this.driver.quit();
+            } catch (Exception e2) {
+                //
+            }
+            this.driver = null;
+        }
+    }
+
+    private boolean stepRest() {
+        return this.stepIndex < this.script.steps.size() - 1;
+    }
+
+    private TestRun createChainRun(Script chainTo, Map<String, String> data) {
+        return new TestRun(chainTo
+                , this.log
+                , this.driver
+                , this.webDriverFactory
+                , this.webDriverConfig
+                , this.implicitlyWaitDriverTimeout
+                , this.pageLoadDriverTimeout
+                , data
+                , this.listener
+                , this.scriptChain);
+    }
+
+    private boolean chainRun(Script chainTo) {
+        boolean success = true;
+        for (Map<String, String> data : chainTo.loadData()) {
+            TestRun testRun = createChainRun(chainTo, data);
+            if (!testRun.finish()) {
+                return false;
+            }
+        }
+        return success;
     }
 
 }

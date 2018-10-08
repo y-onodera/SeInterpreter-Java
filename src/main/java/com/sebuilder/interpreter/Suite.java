@@ -1,16 +1,17 @@
 package com.sebuilder.interpreter;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.sebuilder.interpreter.factory.ScriptFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Suite implements Iterable<Script> {
 
@@ -18,29 +19,37 @@ public class Suite implements Iterable<Script> {
 
     private String path;
 
-    private LinkedHashMap<String, Script> scripts = Maps.newLinkedHashMap();
+    private ArrayList<Script> scripts = Lists.newArrayList();
+
+    private Map<Script, Script> scriptChains = Maps.newHashMap();
 
     private final boolean shareState;
 
     public Suite() {
-        this(null, new ArrayList<>(), true);
+        this(new ArrayList<>());
     }
 
-    public Suite(Iterable<Script> aScripts, boolean shareState) {
-        this(null, aScripts, shareState);
+    public Suite(Script script) {
+        this(Lists.newArrayList(script));
     }
 
-    public Suite(File file, ScriptFactory scriptFactory) throws IOException, JSONException {
-        this(file, scriptFactory.parse(file), true);
+    public Suite(Iterable<Script> aScripts) {
+        this(null, aScripts, Maps.newHashMap(), true);
     }
 
-    public Suite(File suiteFile, Iterable<Script> aScripts, boolean shareState) {
+    public Suite(File suiteFile, Iterable<Script> aScripts, Map<Script, Script> scriptChains, boolean shareState) {
         if (suiteFile != null) {
             this.name = suiteFile.getName();
             this.path = suiteFile.getAbsolutePath();
         }
-        aScripts.forEach(it -> scripts.put(it.name, it));
         this.shareState = shareState;
+        for (Script it : aScripts) {
+            scripts.add(it);
+            if (shareState) {
+                it.stateTakeOver();
+            }
+        }
+        this.scriptChains.putAll(scriptChains);
     }
 
     public String getName() {
@@ -48,33 +57,53 @@ public class Suite implements Iterable<Script> {
     }
 
     public Script get(String scriptName) {
-        return this.scripts.get(scriptName);
+        return this.scripts.stream()
+                .filter(it -> it.name().equals(scriptName))
+                .findFirst()
+                .orElse(null);
     }
 
     @Override
     public Iterator<Script> iterator() {
-        return this.scripts.values().iterator();
+        return this.scripts.iterator();
+    }
+
+    public List<TestRunBuilder> getTestRuns() {
+        return this.scripts
+                .stream()
+                .filter(it -> !scriptChains.containsValue(it))
+                .map(it -> new TestRunBuilder(it).addChain(scriptChains))
+                .collect(Collectors.toList());
     }
 
     public void add(Script aScript) {
-        this.scripts.put(aScript.name, aScript);
+        this.scripts.add(aScript);
     }
 
     public void replace(Script aScript) {
-        this.scripts.replace(aScript.name, aScript);
+        ArrayList newScripts = Lists.newArrayList();
+        for (Script script : this.scripts) {
+            if (script.name.equals(aScript.name)) {
+                newScripts.add(aScript);
+            } else {
+                newScripts.add(script);
+            }
+        }
+        this.scripts.clear();
+        this.scripts.addAll(newScripts);
     }
 
     public void replace(String oldName, Script newValue) {
-        LinkedHashMap<String, Script> newMap = Maps.newLinkedHashMap();
-        this.scripts.entrySet().forEach(it -> {
-            if (it.getKey().equals(oldName)) {
-                newMap.put(newValue.name, newValue);
+        ArrayList newScripts = Lists.newArrayList();
+        for (Script script : this.scripts) {
+            if (script.name.equals(oldName)) {
+                newScripts.add(newValue);
             } else {
-                newMap.put(it.getKey(), it.getValue());
+                newScripts.add(script);
             }
-        });
+        }
         this.scripts.clear();
-        this.scripts.putAll(newMap);
+        this.scripts.addAll(newScripts);
     }
 
     @Override
@@ -89,10 +118,29 @@ public class Suite implements Iterable<Script> {
     public JSONObject toJSON() throws JSONException {
         JSONObject o = new JSONObject();
         JSONArray scriptsA = new JSONArray();
-        for (Script s : this.scripts.values()) {
-            JSONObject scriptPath = new JSONObject();
-            scriptPath.put("path", s.path);
-            scriptsA.put(scriptPath);
+        JSONArray chain = null;
+        for (Script s : this.scripts) {
+            if (this.scriptChains.containsKey(s) && !this.scriptChains.containsValue(s)) {
+                chain = new JSONArray();
+                JSONObject scriptPath = new JSONObject();
+                scriptPath.put("path", s.path);
+                chain.put(scriptPath);
+            } else if (this.scriptChains.containsKey(s) && this.scriptChains.containsValue(s)) {
+                JSONObject scriptPath = new JSONObject();
+                scriptPath.put("path", s.path);
+                chain.put(scriptPath);
+            } else if (!this.scriptChains.containsKey(s) && this.scriptChains.containsValue(s)) {
+                JSONObject scriptPath = new JSONObject();
+                scriptPath.put("path", s.path);
+                chain.put(scriptPath);
+                JSONObject scriptPaths = new JSONObject();
+                scriptPaths.put("paths", chain);
+                scriptsA.put(scriptPaths);
+            } else {
+                JSONObject scriptPath = new JSONObject();
+                scriptPath.put("path", s.path);
+                scriptsA.put(scriptPath);
+            }
         }
         o.put("type", "suite");
         o.put("scripts", scriptsA);

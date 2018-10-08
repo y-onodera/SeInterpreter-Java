@@ -22,8 +22,6 @@ import org.json.JSONException;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -34,7 +32,9 @@ import java.util.Map;
  * @author zarkonnen
  */
 public class SeInterpreter extends CommandLineRunner {
+
     private ArrayList<String> paths;
+
     private boolean closeDriver;
 
     public SeInterpreter(String[] args, Logger log) {
@@ -81,37 +81,32 @@ public class SeInterpreter extends CommandLineRunner {
     }
 
     private void runScripts(String path) throws IOException, JSONException {
-        for (Script script : this.sf.parse(new File(path))) {
+        Suite suite = this.sf.parse(new File(path));
+        for (TestRunBuilder script : suite.getTestRuns()) {
             this.runScript(script);
         }
     }
 
-    private void runScript(Script script) {
-        int i = 1;
+    private void runScript(TestRunBuilder script) {
         for (Map<String, String> data : script.loadData()) {
-            data.put(DataSource.ROW_NUMBER, String.valueOf(i));
-            Path currentDir = Paths.get(".").toAbsolutePath();
-            Path executeScript = Paths.get(script.path);
-            String normalizePath = currentDir.relativize(executeScript).normalize().toString();
-            this.seInterpreterTestListener.openTestSuite(normalizePath.replace(".json", "") + "_rowNumber" + String.valueOf(i), data);
+            this.seInterpreterTestListener.openTestSuite(script.name(), data);
             this.runScript(script, data, this.seInterpreterTestListener);
             this.seInterpreterTestListener.closeTestSuite();
-            i++;
         }
     }
 
-    private void runScript(Script script, Map<String, String> data, SeInterpreterTestListener seInterpreterTestListener) {
+    private void runScript(TestRunBuilder script, Map<String, String> data, SeInterpreterTestListener seInterpreterTestListener) {
         try {
-            this.lastRun = script.createTestRun(this.log, this.wdf, this.driverConfig, data, this.lastRun, seInterpreterTestListener);
+            this.lastRun = script.createTestRun(this.trf, this.log, this.wdf, this.driverConfig, data, this.lastRun, seInterpreterTestListener);
             if (this.lastRun.finish()) {
-                this.log.info(script.name + " succeeded");
+                this.log.info(script.name() + " succeeded");
             } else {
-                this.log.info(script.name + " failed");
+                this.log.info(script.name() + " failed");
             }
         } catch (AssertionError e) {
-            this.log.info(script.name + " failed", e);
+            this.log.info(script.name() + " failed", e);
         }
-        if (!script.closeDriver) {
+        if (!script.closeDriver()) {
             if (lastRun != null) {
                 this.driver = lastRun.driver();
             }

@@ -1,7 +1,6 @@
 package com.sebuilder.interpreter.javafx.application;
 
 import com.google.common.base.Charsets;
-import com.google.common.collect.Lists;
 import com.google.common.eventbus.Subscribe;
 import com.google.common.io.Files;
 import com.sebuilder.interpreter.Script;
@@ -71,7 +70,7 @@ public class SeInterpreterApplication extends Application {
     @Subscribe
     public void reset(ScriptResetEvent event) {
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
-            this.suite = new Suite(Lists.newArrayList(templateScript()), true);
+            this.suite = new Suite(templateScript());
             this.resetSuite(this.suite);
         });
     }
@@ -80,7 +79,7 @@ public class SeInterpreterApplication extends Application {
     public void scriptReLoad(FileLoadEvent event) {
         File file = event.getFile();
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
-            Suite newSuite = new Suite(file, getScriptFactory());
+            Suite newSuite = getScriptFactory().parse(file);
             this.resetSuite(newSuite);
         });
 

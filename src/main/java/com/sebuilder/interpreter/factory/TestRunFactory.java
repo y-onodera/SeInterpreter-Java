@@ -19,11 +19,10 @@ import com.sebuilder.interpreter.Script;
 import com.sebuilder.interpreter.SeInterpreterTestListener;
 import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.webdriverfactory.WebDriverFactory;
+import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import org.apache.logging.log4j.Logger;
 
 /**
  * Factory to create a TestRun objects from a script.
@@ -31,7 +30,9 @@ import org.apache.logging.log4j.Logger;
  * @author jkowalczyk
  */
 public class TestRunFactory {
+
     private Long implicitlyWaitDriverTimeout = Long.valueOf(-1);
+
     private Long pageLoadDriverTimeout = Long.valueOf(-1);
 
     public void setImplicitlyWaitDriverTimeout(Long implicitlyWaitDriverTimeout) {
@@ -52,10 +53,11 @@ public class TestRunFactory {
      * @param seInterpreterTestListener
      * @return A new instance of TestRun, using the previous run's driver and vars if available.
      */
-    public TestRun createTestRun(Script script, Logger log, WebDriverFactory webDriverFactory, HashMap<String, String> webDriverConfig, Map<String, String> initialVars, TestRun previousRun, SeInterpreterTestListener seInterpreterTestListener) {
+    public TestRun createTestRun(Script script, Logger log, WebDriverFactory webDriverFactory, HashMap<String, String> webDriverConfig, Map<String, String> initialVars, TestRun previousRun, SeInterpreterTestListener seInterpreterTestListener, Map<Script, Script> scriptChain) {
         if (script.usePreviousDriverAndVars && previousRun != null && previousRun.driver() != null) {
-            return new TestRun(script, log, previousRun.driver(), implicitlyWaitDriverTimeout, pageLoadDriverTimeout, initialVars, seInterpreterTestListener);
+            return new TestRun(script, log, previousRun.driver(), this.implicitlyWaitDriverTimeout, this.pageLoadDriverTimeout, initialVars, seInterpreterTestListener, scriptChain);
         }
-        return new TestRun(script, log, webDriverFactory, webDriverConfig, implicitlyWaitDriverTimeout, pageLoadDriverTimeout, initialVars, seInterpreterTestListener);
+        return new TestRun(script, log, webDriverFactory, webDriverConfig, this.implicitlyWaitDriverTimeout, this.pageLoadDriverTimeout, initialVars, seInterpreterTestListener, scriptChain);
     }
+
 }

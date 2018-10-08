@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.sebuilder.interpreter.factory;
+package com.sebuilder.interpreter.datasource;
 
 import com.sebuilder.interpreter.DataSource;
 

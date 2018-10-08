@@ -101,25 +101,26 @@ public class SeInterpreterREPL extends CommandLineRunner {
     }
 
     public void execute(Script script) {
-        this.execute(script, this.seInterpreterTestListener);
+        this.execute(new TestRunBuilder(script), this.seInterpreterTestListener);
     }
 
     public void execute(Script script, SeInterpreterTestListener seInterpreterTestListener) {
-        String suiteName = "com.sebuilder.interpreter.REPL_EXEC" + this.execCount++;
         script.stateTakeOver();
-        int i = 1;
+        this.execute(new TestRunBuilder(script), seInterpreterTestListener);
+    }
+
+    public void execute(TestRunBuilder script, SeInterpreterTestListener seInterpreterTestListener) {
+        String suiteName = "com.sebuilder.interpreter.REPL_EXEC" + this.execCount++;
         for (Map<String, String> data : script.loadData()) {
-            seInterpreterTestListener.openTestSuite(suiteName + "_row_" + i, data);
-            data.put(DataSource.ROW_NUMBER, String.valueOf(i));
+            seInterpreterTestListener.openTestSuite(suiteName, data);
             this.execute(script, data, seInterpreterTestListener);
             seInterpreterTestListener.closeTestSuite();
-            i++;
         }
     }
 
-    private void execute(Script script, Map<String, String> data, SeInterpreterTestListener seInterpreterTestListener) {
+    private void execute(TestRunBuilder script, Map<String, String> data, SeInterpreterTestListener seInterpreterTestListener) {
         this.log.info("start execute script");
-        this.lastRun = script.createTestRun(this.log, this.wdf, this.driverConfig, data, this.lastRun, seInterpreterTestListener);
+        this.lastRun = script.createTestRun(trf, this.log, this.wdf, this.driverConfig, data, this.lastRun, seInterpreterTestListener);
         while (this.lastRun.hasNext()) {
             try {
                 this.lastRun.next();

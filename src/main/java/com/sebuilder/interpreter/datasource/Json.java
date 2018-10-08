@@ -17,22 +17,17 @@
 package com.sebuilder.interpreter.datasource;
 
 import com.sebuilder.interpreter.DataSource;
-
-import static com.sebuilder.interpreter.datasource.Utils.findFile;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.json.JSONTokener;
+import static com.sebuilder.interpreter.datasource.Utils.findFile;
 
 /**
  * JSON-based data source.
@@ -50,6 +45,7 @@ public class Json implements DataSource {
             for (int i = 0; i < a.length(); i++) {
                 JSONObject rowO = a.getJSONObject(i);
                 Map<String, String> row = new HashMap<>();
+                row.put(DataSource.ROW_NUMBER, String.valueOf(i + 1));
                 for (Iterator<String> it = rowO.keys(); it.hasNext(); ) {
                     String key = it.next();
                     row.put(key, rowO.getString(key));

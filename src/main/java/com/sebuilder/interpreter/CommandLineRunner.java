@@ -52,7 +52,6 @@ public abstract class CommandLineRunner {
         preSetUp();
         this.lastRun = null;
         this.sf.setStepTypeFactory(this.stf);
-        this.sf.setTestRunFactory(this.trf);
         for (String s : args) {
             if (s.startsWith("--")) {
                 String[] kv = s.split("=", 2);

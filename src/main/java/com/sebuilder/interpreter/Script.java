@@ -18,10 +18,7 @@ package com.sebuilder.interpreter;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.sebuilder.interpreter.factory.DataSourceFactory;
-import com.sebuilder.interpreter.factory.TestRunFactory;
-import com.sebuilder.interpreter.webdriverfactory.WebDriverFactory;
-import org.apache.logging.log4j.Logger;
+import com.sebuilder.interpreter.datasource.DataSourceFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -43,44 +40,48 @@ import java.util.function.Predicate;
  */
 public class Script {
     public ArrayList<Step> steps = new ArrayList<>();
-    public TestRunFactory testRunFactory = new TestRunFactory();
     public DataSourceFactory dataSourceFactory = new DataSourceFactory();
     public String path = "scriptPath";
     public String name = "scriptName";
-    public File relativePath;
+    private File relativePath;
     public boolean usePreviousDriverAndVars = false;
-    public boolean closeDriver = true;
-    public Map<String, String> shareInputs = Maps.newHashMap();
-    public DataSource dataSource;
-    public Map<String, String> dataSourceConfig;
+    private boolean closeDriver = true;
+    private Map<String, String> shareInputs = Maps.newHashMap();
+    private DataSource dataSource;
+    private Map<String, String> dataSourceConfig;
+    private Script chainScript;
 
     public void setDataSource(DataSource dataSource, HashMap<String, String> config) {
         this.dataSource = dataSource;
         this.dataSourceConfig = config;
     }
 
-    public List<Map<String, String>> loadData() {
-        if (dataSource == null) {
-            return Lists.newArrayList(new HashMap<>());
-        }
-        return dataSource.getData(dataSourceConfig, relativePath);
-    }
-
-    public TestRun createTestRun(Logger log, WebDriverFactory wdf, HashMap<String, String> driverConfig, Map<String, String> data, TestRun lastRun, SeInterpreterTestListener seInterpreterTestListener) {
-        for (Map.Entry<String, String> entry : this.shareInputs.entrySet()) {
-            if (!data.containsKey(entry.getKey())) {
-                data.put(entry.getKey(), entry.getValue());
-            }
-        }
-        return testRunFactory.createTestRun(this, log, wdf, driverConfig, data, lastRun, seInterpreterTestListener);
-    }
-
-    /**
-     *
-     */
     public void stateTakeOver() {
         this.closeDriver = false;
         this.usePreviousDriverAndVars = true;
+    }
+
+    public boolean closeDriver() {
+        return this.closeDriver;
+    }
+
+    public String name() {
+        return this.name;
+    }
+
+    public List<Map<String, String>> loadData() {
+        if (this.dataSource == null) {
+            return Lists.newArrayList(new HashMap<>());
+        }
+        return this.dataSource.getData(this.dataSourceConfig, this.relativePath);
+    }
+
+    public void chainTo(Script script) {
+        this.chainScript = script;
+    }
+
+    public boolean hasChain() {
+        return this.chainScript != null;
     }
 
     public Script associateWith(File target) {
@@ -178,7 +179,6 @@ public class Script {
 
     private Script cloneExcludeStep() {
         Script newScript = new Script();
-        newScript.testRunFactory = this.testRunFactory;
         newScript.dataSource = this.dataSource;
         newScript.dataSourceConfig = this.dataSourceConfig;
         newScript.path = this.path;
@@ -188,6 +188,14 @@ public class Script {
         newScript.closeDriver = this.closeDriver;
         newScript.shareInputs = this.shareInputs;
         return newScript;
+    }
+
+    private void addShareInputs(Map<String, String> data) {
+        for (Map.Entry<String, String> entry : this.shareInputs.entrySet()) {
+            if (!data.containsKey(entry.getKey())) {
+                data.put(entry.getKey(), entry.getValue());
+            }
+        }
     }
 
 }
