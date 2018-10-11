@@ -30,8 +30,8 @@ public abstract class CommandLineRunner {
         this.trf = new TestRunFactory();
         this.driverConfig = new HashMap<>();
         this.wdf = DEFAULT_DRIVER_FACTORY;
-        this.seInterpreterTestListener = new SeInterpreterTestListener(this.log);
         setUp(args);
+        this.seInterpreterTestListener = new SeInterpreterTestListener(this.log);
     }
 
     public void setSeInterpreterTestListener(SeInterpreterTestListener seInterpreterTestListener) {

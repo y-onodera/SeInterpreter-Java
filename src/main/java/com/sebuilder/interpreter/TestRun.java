@@ -107,6 +107,7 @@ public class TestRun {
         }
         this.listener = seInterpreterTestListener;
         this.setTimeouts(implicitlyWaitDriverTimeout, pageLoadDriverTimeout);
+        this.vars.put("_baseDir", Context.getInstance().getBaseDirectory().getAbsolutePath());
         this.vars.put("_resultDir", Context.getInstance().getResultOutputDirectory().getAbsolutePath());
         this.vars.put("_dataSourceDir", Context.getInstance().getDataSourceDirectory().getAbsolutePath());
         this.vars.put("_screenShotDir", Context.getInstance().getScreenShotOutputDirectory().getAbsolutePath());

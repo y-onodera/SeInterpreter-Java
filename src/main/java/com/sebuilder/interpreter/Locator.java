@@ -16,14 +16,14 @@
 
 package com.sebuilder.interpreter;
 
-import java.util.List;
-
 import com.google.common.base.Strings;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
+
+import java.util.List;
 
 /**
  * A Selenium locator.
@@ -60,6 +60,10 @@ public class Locator {
     public Locator(Locator l) {
         this.type = l.type;
         this.value = l.value;
+    }
+
+    public Locator copy() {
+        return new Locator(this);
     }
 
     public WebElement find(TestRun ctx) {

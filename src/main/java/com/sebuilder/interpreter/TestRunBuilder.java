@@ -43,7 +43,7 @@ public class TestRunBuilder {
     }
 
     public TestRun createTestRun(TestRunFactory testRunFactory, Logger log, WebDriverFactory wdf, HashMap<String, String> driverConfig, Map<String, String> data, TestRun lastRun, SeInterpreterTestListener seInterpreterTestListener) {
-        return testRunFactory.createTestRun(this.script, log, wdf, driverConfig, data, lastRun, seInterpreterTestListener, this.scriptChain);
+        return testRunFactory.createTestRun(this.script.copy(), log, wdf, driverConfig, data, lastRun, seInterpreterTestListener, this.scriptChain);
     }
 
 }

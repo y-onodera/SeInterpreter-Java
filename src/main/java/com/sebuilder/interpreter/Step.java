@@ -50,6 +50,15 @@ public class Step {
         this.type = type;
     }
 
+    public Step copy() {
+        Step newStep = new Step(this.type);
+        newStep.negated = this.negated;
+        newStep.name = this.name;
+        this.stringParams.entrySet().forEach(it -> newStep.stringParams.put(it.getKey(), it.getValue()));
+        this.locatorParams.entrySet().forEach(it -> newStep.locatorParams.put(it.getKey(), it.getValue().copy()));
+        return newStep;
+    }
+
     @Override
     public String toString() {
         try {
@@ -120,4 +129,5 @@ public class Step {
         this.type.supplementSerialized(o);
         return o;
     }
+
 }

@@ -49,7 +49,6 @@ public class Script {
     private Map<String, String> shareInputs = Maps.newHashMap();
     private DataSource dataSource;
     private Map<String, String> dataSourceConfig;
-    private Script chainScript;
 
     public void setDataSource(DataSource dataSource, HashMap<String, String> config) {
         this.dataSource = dataSource;
@@ -76,14 +75,6 @@ public class Script {
         return this.dataSource.getData(this.dataSourceConfig, this.relativePath);
     }
 
-    public void chainTo(Script script) {
-        this.chainScript = script;
-    }
-
-    public boolean hasChain() {
-        return this.chainScript != null;
-    }
-
     public Script associateWith(File target) {
         Script newScript = cloneExcludeStep();
         for (int i = 0, j = this.steps.size(); i < j; i++) {
@@ -97,6 +88,27 @@ public class Script {
             newScript.name = "System_in";
             newScript.path = null;
             newScript.relativePath = null;
+        }
+        return newScript;
+    }
+
+    private Script cloneExcludeStep() {
+        Script newScript = new Script();
+        newScript.dataSource = this.dataSource;
+        newScript.dataSourceConfig = this.dataSourceConfig;
+        newScript.path = this.path;
+        newScript.name = this.name;
+        newScript.relativePath = this.relativePath;
+        newScript.usePreviousDriverAndVars = this.usePreviousDriverAndVars;
+        newScript.closeDriver = this.closeDriver;
+        newScript.shareInputs = this.shareInputs;
+        return newScript;
+    }
+
+    public Script copy() {
+        Script newScript = this.cloneExcludeStep();
+        for (int i = 0, j = this.steps.size(); i < j; i++) {
+            newScript.steps.add(this.steps.get(i).copy());
         }
         return newScript;
     }
@@ -175,27 +187,6 @@ public class Script {
             o.put("data", data);
         }
         return o;
-    }
-
-    private Script cloneExcludeStep() {
-        Script newScript = new Script();
-        newScript.dataSource = this.dataSource;
-        newScript.dataSourceConfig = this.dataSourceConfig;
-        newScript.path = this.path;
-        newScript.name = this.name;
-        newScript.relativePath = this.relativePath;
-        newScript.usePreviousDriverAndVars = this.usePreviousDriverAndVars;
-        newScript.closeDriver = this.closeDriver;
-        newScript.shareInputs = this.shareInputs;
-        return newScript;
-    }
-
-    private void addShareInputs(Map<String, String> data) {
-        for (Map.Entry<String, String> entry : this.shareInputs.entrySet()) {
-            if (!data.containsKey(entry.getKey())) {
-                data.put(entry.getKey(), entry.getValue());
-            }
-        }
     }
 
 }
