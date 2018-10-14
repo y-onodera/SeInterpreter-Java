@@ -17,8 +17,6 @@
 package com.sebuilder.interpreter;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.sebuilder.interpreter.datasource.DataSourceFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -28,7 +26,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * A Selenium 2 script. To create and run a test, instantiate a Script object,
@@ -39,25 +39,38 @@ import java.util.function.Predicate;
  * @author zarkonnen
  */
 public class Script {
-    public ArrayList<Step> steps = new ArrayList<>();
-    public DataSourceFactory dataSourceFactory = new DataSourceFactory();
-    public String path = "scriptPath";
-    public String name = "scriptName";
-    private File relativePath;
-    public boolean usePreviousDriverAndVars = false;
-    private boolean closeDriver = true;
-    private Map<String, String> shareInputs = Maps.newHashMap();
-    private DataSource dataSource;
-    private Map<String, String> dataSourceConfig;
+    public ArrayList<Step> steps;
+    public final String path;
+    public final String name;
+    public final File relativePath;
+    public final boolean usePreviousDriverAndVars;
+    public final boolean closeDriver;
+    public final Map<String, String> shareInputs;
+    public final DataSource dataSource;
+    public final Map<String, String> dataSourceConfig;
 
-    public void setDataSource(DataSource dataSource, HashMap<String, String> config) {
+    public Script(ArrayList<Step> steps
+            , String path
+            , String name
+            , File relativePath
+            , boolean usePreviousDriverAndVars
+            , boolean closeDriver
+            , Map<String, String> shareInputs
+            , DataSource dataSource
+            , Map<String, String> dataSourceConfig) {
+        this.steps = steps;
+        this.path = path;
+        this.name = name;
+        this.relativePath = relativePath;
+        this.usePreviousDriverAndVars = usePreviousDriverAndVars;
+        this.closeDriver = closeDriver;
+        this.shareInputs = shareInputs;
         this.dataSource = dataSource;
-        this.dataSourceConfig = config;
+        this.dataSourceConfig = dataSourceConfig;
     }
 
-    public void stateTakeOver() {
-        this.closeDriver = false;
-        this.usePreviousDriverAndVars = true;
+    public ScriptBuilder builder() {
+        return new ScriptBuilder(this);
     }
 
     public boolean closeDriver() {
@@ -75,42 +88,27 @@ public class Script {
         return this.dataSource.getData(this.dataSourceConfig, this.relativePath);
     }
 
-    public Script associateWith(File target) {
-        Script newScript = cloneExcludeStep();
-        for (int i = 0, j = this.steps.size(); i < j; i++) {
-            newScript.steps.add(this.steps.get(i));
-        }
-        if (target != null) {
-            newScript.name = target.getName();
-            newScript.path = target.getPath();
-            newScript.relativePath = target.getAbsoluteFile().getParentFile();
-        } else {
-            newScript.name = "System_in";
-            newScript.path = null;
-            newScript.relativePath = null;
-        }
-        return newScript;
+    public Script reusePreviousDriverAndVars() {
+        return this.builder()
+                .reusePreviousDriverAndVars()
+                .createScript();
     }
 
-    private Script cloneExcludeStep() {
-        Script newScript = new Script();
-        newScript.dataSource = this.dataSource;
-        newScript.dataSourceConfig = this.dataSourceConfig;
-        newScript.path = this.path;
-        newScript.name = this.name;
-        newScript.relativePath = this.relativePath;
-        newScript.usePreviousDriverAndVars = this.usePreviousDriverAndVars;
-        newScript.closeDriver = this.closeDriver;
-        newScript.shareInputs = this.shareInputs;
-        return newScript;
+    public Script editStep(Function<ArrayList<Step>, ArrayList<Step>> converter) {
+        return this.replaceStep(converter.apply(this.steps));
+    }
+
+    public Script filterStep(Predicate<Step> filter) {
+        return this.editStep(it -> it.stream()
+                .filter(filter)
+                .collect(Collectors.toCollection(ArrayList::new))
+        );
     }
 
     public Script copy() {
-        Script newScript = this.cloneExcludeStep();
-        for (int i = 0, j = this.steps.size(); i < j; i++) {
-            newScript.steps.add(this.steps.get(i).copy());
-        }
-        return newScript;
+        return this.editStep((ArrayList<Step> it) -> it.stream()
+                .map(step -> step.copy())
+                .collect(Collectors.toCollection(ArrayList::new)));
     }
 
     public Script removeStep(int stepIndex) {
@@ -118,47 +116,59 @@ public class Script {
     }
 
     public Script removeStep(Predicate<Number> filter) {
-        Script newScript = cloneExcludeStep();
-        for (int i = 0, j = this.steps.size(); i < j; i++) {
-            if (filter.test(i)) {
-                newScript.steps.add(this.steps.get(i));
-            }
-        }
-        return newScript;
+        return this.editStep(it -> {
+                    final ArrayList<Step> newSteps = new ArrayList<>();
+                    for (int i = 0, j = this.steps.size(); i < j; i++) {
+                        if (filter.test(i)) {
+                            newSteps.add(this.steps.get(i));
+                        }
+                    }
+                    return newSteps;
+                }
+        );
     }
 
     public Script insertStep(int stepIndex, Step newStep) {
-        Script newScript = cloneExcludeStep();
-        for (int i = 0, j = this.steps.size(); i < j; i++) {
-            if (i == stepIndex) {
-                newScript.steps.add(newStep);
-            }
-            newScript.steps.add(this.steps.get(i));
-        }
-        return newScript;
+        return this.editStep(it -> {
+                    final ArrayList<Step> newSteps = new ArrayList<>();
+                    for (int i = 0, j = this.steps.size(); i < j; i++) {
+                        if (i == stepIndex) {
+                            newSteps.add(newStep);
+                        }
+                        newSteps.add(this.steps.get(i));
+                    }
+                    return newSteps;
+                }
+        );
     }
 
     public Script addStep(int stepIndex, Step newStep) {
-        Script newScript = cloneExcludeStep();
-        for (int i = 0, j = this.steps.size(); i < j; i++) {
-            newScript.steps.add(this.steps.get(i));
-            if (i == stepIndex) {
-                newScript.steps.add(newStep);
-            }
-        }
-        return newScript;
+        return this.editStep(it -> {
+                    final ArrayList<Step> newSteps = new ArrayList<>();
+                    for (int i = 0, j = this.steps.size(); i < j; i++) {
+                        newSteps.add(this.steps.get(i));
+                        if (i == stepIndex) {
+                            newSteps.add(newStep);
+                        }
+                    }
+                    return newSteps;
+                }
+        );
     }
 
     public Script replaceStep(int stepIndex, Step newStep) {
-        Script newScript = cloneExcludeStep();
-        for (int i = 0, j = this.steps.size(); i < j; i++) {
-            if (i != stepIndex) {
-                newScript.steps.add(this.steps.get(i));
-            } else {
-                newScript.steps.add(newStep);
-            }
-        }
-        return newScript;
+        return this.editStep(it -> {
+                    final ArrayList<Step> newSteps = new ArrayList<>();
+                    for (int i = 0, j = this.steps.size(); i < j; i++) {
+                        if (i != stepIndex) {
+                            newSteps.add(this.steps.get(i));
+                        } else {
+                            newSteps.add(newStep);
+                        }
+                    }
+                    return newSteps;
+                }
+        );
     }
 
     @Override
@@ -187,6 +197,12 @@ public class Script {
             o.put("data", data);
         }
         return o;
+    }
+
+    private Script replaceStep(ArrayList<Step> newStep) {
+        return new ScriptBuilder(this)
+                .setSteps(newStep)
+                .createScript();
     }
 
 }

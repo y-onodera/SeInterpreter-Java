@@ -15,8 +15,8 @@
  */
 package com.sebuilder.interpreter.factory;
 
+import com.google.common.base.Strings;
 import com.sebuilder.interpreter.*;
-import com.sebuilder.interpreter.datasource.DataSourceFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,7 +24,6 @@ import org.json.JSONTokener;
 
 import java.io.*;
 import java.util.HashMap;
-import java.util.Iterator;
 
 /**
  * Factory to create Script objects from a string, a reader or JSONObject.
@@ -37,8 +36,16 @@ public class ScriptFactory {
 
     private DataSourceFactory dataSourceFactory = new DataSourceFactory();
 
+    public StepTypeFactory getStepTypeFactory() {
+        return this.stepTypeFactory;
+    }
+
     public void setStepTypeFactory(StepTypeFactory stepTypeFactory) {
         this.stepTypeFactory = stepTypeFactory;
+    }
+
+    public DataSourceFactory getDataSourceFactory() {
+        return dataSourceFactory;
     }
 
     public void setDataSourceFactory(DataSourceFactory dataSourceFactory) {
@@ -75,7 +82,18 @@ public class ScriptFactory {
      * @throws JSONException If the JSON can't be parsed.
      */
     public Script parse(String jsonString) throws IOException, JSONException {
-        return this.parse(new JSONObject(new JSONTokener(jsonString)), null).iterator().next();
+        return this.parse(new JSONObject(new JSONTokener(jsonString)));
+    }
+
+    /**
+     * @param json A JSON string describing a script or suite.
+     * @return A script, ready to run.
+     * @throws IOException   If anything goes wrong with interpreting the JSON, or
+     *                       with the Reader.
+     * @throws JSONException If the JSON can't be parsed.
+     */
+    public Script parse(JSONObject json) throws IOException {
+        return this.parse(json, null).iterator().next();
     }
 
     /**
@@ -123,11 +141,11 @@ public class ScriptFactory {
      * @throws IOException If anything goes wrong with interpreting the JSON.
      */
     public Suite parseSuite(JSONObject o, File suiteFile) throws IOException {
+        SuiteBuilder builder = new SuiteBuilder(suiteFile)
+                .setShareState(o.optBoolean("shareState", true));
         try {
-            return new SuiteBuilder(this, suiteFile)
-                    .setShareState(o.optBoolean("shareState", true))
-                    .addScripts(o)
-                    .createSuite();
+            this.loadScripts(o, builder);
+            return builder.createSuite();
         } catch (JSONException e) {
             throw new IOException("Could not parse suite.", e);
         }
@@ -141,10 +159,7 @@ public class ScriptFactory {
      */
     public Suite parseScript(JSONObject o, File f) throws IOException {
         try {
-            Script script = this.create(f);
-            JSONArray stepsA = o.getJSONArray("steps");
-            this.parseStep(script, stepsA);
-            this.parseData(o, script);
+            Script script = this.create(o, f);
             return new Suite(script);
         } catch (JSONException e) {
             throw new IOException("Could not parse script.", e);
@@ -155,126 +170,73 @@ public class ScriptFactory {
      * @param saveTo file script save to
      * @return A new instance of script
      */
-    private Script create(File saveTo) {
-        Script script = new Script();
-        script.dataSourceFactory = this.dataSourceFactory;
-        return script.associateWith(saveTo);
+    private Script create(JSONObject o, File saveTo) throws JSONException {
+        DataSource dataSource = this.dataSourceFactory.getDataSource(o);
+        HashMap<String, String> config = this.dataSourceFactory.getDataSourceConfig(o);
+        Script script = new ScriptBuilder()
+                .setSteps(this.getStepTypeFactory().parseStep(o))
+                .associateWith(saveTo)
+                .setDataSource(dataSource, config)
+                .createScript();
+        return script;
     }
 
-
-    /**
-     * @param script script step set to
-     * @param stepsA json object step load from
-     * @throws JSONException If anything goes wrong with interpreting the JSON.
-     */
-    private void parseStep(Script script, JSONArray stepsA) throws JSONException {
-        for (int i = 0; i < stepsA.length(); i++) {
-            this.parseStep(script, stepsA.getJSONObject(i));
-        }
-    }
-
-    /**
-     * @param script script step set to
-     * @param stepO  json object step load from
-     * @throws JSONException If anything goes wrong with interpreting the JSON.
-     */
-    private void parseStep(Script script, JSONObject stepO) throws JSONException {
-        Step step = this.createStep(stepO);
-        script.steps.add(step);
-        this.configureStep(script, stepO, step);
-    }
-
-    /**
-     * @param stepO json object step load from
-     * @return A new instance of step
-     * @throws JSONException If anything goes wrong with interpreting the JSON.
-     */
-    private Step createStep(JSONObject stepO) throws JSONException {
-        StepType type = this.stepTypeFactory.getStepTypeOfName(stepO.getString("type"));
-        Step step = new Step(type);
-        step.negated = stepO.optBoolean("negated", false);
-        step.name = stepO.optString("step_name", null);
-        return step;
-    }
-
-    /**
-     * @param script script step belong with
-     * @param stepO  json object step configuration load from
-     * @param step   step configuration to
-     * @throws JSONException If anything goes wrong with interpreting the JSON.
-     */
-    private void configureStep(Script script, JSONObject stepO, Step step) throws JSONException {
-        JSONArray keysA = stepO.names();
-        for (int j = 0; j < keysA.length(); j++) {
-            this.configureStep(script, stepO, step, keysA.getString(j));
-        }
-    }
-
-    /**
-     * @param script script step belong with
-     * @param stepO  json object step configuration load from
-     * @param step   step configuration to
-     * @param key    configuration key
-     * @throws JSONException If anything goes wrong with interpreting the JSON.
-     */
-    private void configureStep(Script script, JSONObject stepO, Step step, String key) throws JSONException {
-        if (key.equals("type") || key.equals("negated")) {
-            return;
-        }
-        if (stepO.optJSONObject(key) != null) {
-            this.configureStepSubElement(script, stepO, step, key);
-        } else if (key.equals("actions")) {
-            this.configureStepSubElement(script, stepO, step, key);
-        } else {
-            step.stringParams.put(key, stepO.getString(key));
-        }
-    }
-
-    /**
-     * @param script script step belong with
-     * @param stepO  json object step configuration load from
-     * @param step   step configuration to
-     * @param key    configuration key
-     * @throws JSONException If anything goes wrong with interpreting the JSON.
-     */
-    private void configureStepSubElement(Script script, JSONObject stepO, Step step, String key) throws JSONException {
-        switch (key) {
-            case "locator":
-                step.locatorParams.put(key, new Locator(stepO.getJSONObject(key).getString("type"), stepO.getJSONObject(key).getString("value")));
-                break;
-            case "until":
-                this.parseStep(script, stepO.getJSONObject(key));
-                break;
-            case "actions":
-                JSONArray actions = stepO.getJSONArray(key);
-                step.stringParams.put("subStep", String.valueOf(actions.length()));
-                for (int i = 0, j = actions.length(); i < j; i++) {
-                    this.parseStep(script, actions.getJSONObject(i));
-                }
-                break;
-            default:
-        }
-    }
-
-    /**
-     * @param o      json object dataSource configuration load from
-     * @param script dataSource set to
-     * @throws JSONException If anything goes wrong with interpreting the JSON.
-     */
-    private void parseData(JSONObject o, Script script) throws JSONException {
-        if (!o.has("data")) {
-            return;
-        }
-        JSONObject data = o.getJSONObject("data");
-        String sourceName = data.getString("source");
-        HashMap<String, String> config = new HashMap<String, String>();
-        if (data.has("configs") && data.getJSONObject("configs").has(sourceName)) {
-            JSONObject cfg = data.getJSONObject("configs").getJSONObject(sourceName);
-            for (Iterator<String> it = cfg.keys(); it.hasNext(); ) {
-                String key = it.next();
-                config.put(key, cfg.getString(key));
+    private void loadScripts(JSONObject o, SuiteBuilder builder) throws IOException, JSONException {
+        JSONArray scriptLocations = o.getJSONArray("scripts");
+        for (int i = 0; i < scriptLocations.length(); i++) {
+            JSONObject script = scriptLocations.getJSONObject(i);
+            if (script.has("path")) {
+                builder.addScripts(this.loadScript(script, builder.getSuiteFile()));
+            } else if (script.has("paths")) {
+                JSONArray scriptArrays = script.getJSONArray("paths");
+                this.loadScriptChain(scriptArrays, builder);
             }
         }
-        script.setDataSource(this.dataSourceFactory.getDataSource(sourceName), config);
     }
+
+    /**
+     * @param script A JSONObject describing a script or a suite where load from.
+     * @return Script loaded from file
+     * @throws JSONException If anything goes wrong with interpreting the JSON.
+     * @throws IOException   If script file not found.
+     */
+    private Suite loadScript(JSONObject script, File suiteFile) throws JSONException, IOException {
+        String path = script.getString("path");
+        if (script.has("where") && Strings.isNullOrEmpty(script.getString("where"))) {
+            File wherePath = new File(script.getString("where"), path);
+            return this.loadScriptIfExists(wherePath);
+        }
+        File f = new File(path);
+        if (!f.exists()) {
+            f = new File(suiteFile.getAbsoluteFile().getParentFile(), path);
+        }
+        return this.loadScriptIfExists(f);
+    }
+
+    private void loadScriptChain(JSONArray scriptArrays, SuiteBuilder builder) throws JSONException, IOException {
+        Script lastLoad = null;
+        for (int j = 0; j < scriptArrays.length(); j++) {
+            for (Script loaded : this.loadScript(scriptArrays.getJSONObject(j), builder.getSuiteFile())) {
+                if (lastLoad != null) {
+                    builder.addScriptChain(lastLoad, loaded);
+                }
+                builder.addScript(loaded);
+                lastLoad = loaded;
+            }
+        }
+    }
+
+    /**
+     * @param wherePath file script load from
+     * @return Script loaded from file
+     * @throws IOException   If script file not found.
+     * @throws JSONException If anything goes wrong with interpreting the JSON.
+     */
+    private Suite loadScriptIfExists(File wherePath) throws IOException, JSONException {
+        if (wherePath.exists()) {
+            return this.parse(wherePath);
+        }
+        throw new IOException("Script file " + wherePath.toString() + " not found.");
+    }
+
 }

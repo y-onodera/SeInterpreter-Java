@@ -3,10 +3,7 @@ package com.sebuilder.interpreter.javafx.application;
 import com.google.common.base.Charsets;
 import com.google.common.eventbus.Subscribe;
 import com.google.common.io.Files;
-import com.sebuilder.interpreter.Script;
-import com.sebuilder.interpreter.SeInterpreterTestListener;
-import com.sebuilder.interpreter.Step;
-import com.sebuilder.interpreter.Suite;
+import com.sebuilder.interpreter.*;
 import com.sebuilder.interpreter.factory.ScriptFactory;
 import com.sebuilder.interpreter.javafx.EventBus;
 import com.sebuilder.interpreter.javafx.event.ReportErrorEvent;
@@ -91,7 +88,7 @@ public class SeInterpreterApplication extends Application {
         if (newScript == null) {
             newScript = this.templateScript();
         }
-        this.suite.add(newScript);
+        this.suite = this.suite.add(newScript);
         this.resetSuite(this.suite);
     }
 
@@ -106,7 +103,7 @@ public class SeInterpreterApplication extends Application {
     @Subscribe
     public void deleteStep(StepDeleteEvent event) {
         this.currentDisplay = this.currentDisplay.removeStep(event.getStepIndex());
-        this.suite.replace(this.currentDisplay);
+        this.suite = this.suite.replace(this.currentDisplay);
         EventBus.publish(new RefreshStepViewEvent(this.currentDisplay));
     }
 
@@ -116,7 +113,7 @@ public class SeInterpreterApplication extends Application {
         JSONArray steps = new JSONArray();
         steps.put(event.getStepSource());
         json.putOpt("steps", steps);
-        Script script = getScriptFactory().parse(json, null).iterator().next();
+        Script script = getScriptFactory().parse(json);
         Step newStep = script.steps.get(0);
         if (event.getEditAction().equals("change")) {
             this.currentDisplay = this.currentDisplay.replaceStep(event.getStepIndex(), newStep);
@@ -125,7 +122,7 @@ public class SeInterpreterApplication extends Application {
         } else {
             this.currentDisplay = this.currentDisplay.addStep(event.getStepIndex(), newStep);
         }
-        this.suite.replace(this.currentDisplay);
+        this.suite = this.suite.replace(this.currentDisplay);
         EventBus.publish(new RefreshStepViewEvent(this.currentDisplay));
     }
 
@@ -155,8 +152,10 @@ public class SeInterpreterApplication extends Application {
     public void scriptSave(FileSaveAsEvent event) {
         File target = event.getFile();
         String oldName = this.currentDisplay.name;
-        this.currentDisplay = this.currentDisplay.associateWith(target);
-        this.suite.replace(oldName, this.currentDisplay);
+        this.currentDisplay = new ScriptBuilder(this.currentDisplay)
+                .associateWith(target)
+                .createScript();
+        this.suite = this.suite.replace(oldName, this.currentDisplay);
         this.saveCurrentDisplay(target);
         this.resetSuite(this.suite);
     }
@@ -225,7 +224,6 @@ public class SeInterpreterApplication extends Application {
 
     private Script templateScript() throws IOException, JSONException {
         Script templateScript = getScriptFactory().open("https://www.google.com");
-        templateScript.name = "new script";
         return templateScript;
     }
 

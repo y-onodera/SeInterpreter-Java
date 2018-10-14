@@ -1,8 +1,8 @@
-package com.sebuilder.interpreter;
+package com.sebuilder.interpreter.application;
 
+import com.sebuilder.interpreter.*;
 import com.sebuilder.interpreter.factory.ScriptFactory;
 import com.sebuilder.interpreter.factory.StepTypeFactory;
-import com.sebuilder.interpreter.factory.TestRunFactory;
 import com.sebuilder.interpreter.webdriverfactory.Firefox;
 import com.sebuilder.interpreter.webdriverfactory.WebDriverFactory;
 import org.apache.logging.log4j.Logger;
@@ -10,28 +10,43 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
+import java.util.Map;
 
 public abstract class CommandLineRunner {
     protected static WebDriverFactory DEFAULT_DRIVER_FACTORY = new Firefox();
     protected ScriptFactory sf;
     protected StepTypeFactory stf;
-    protected TestRunFactory trf;
     protected HashMap<String, String> driverConfig;
     protected WebDriverFactory wdf;
     protected TestRun lastRun;
     protected SeInterpreterTestListener seInterpreterTestListener;
     protected Logger log;
     protected RemoteWebDriver driver;
+    protected Long implicitlyWaitTime;
+    protected Long pageLoadWaitTime;
 
     protected CommandLineRunner(String[] args, Logger log) {
         this.log = log;
         this.sf = new ScriptFactory();
         this.stf = new StepTypeFactory();
-        this.trf = new TestRunFactory();
         this.driverConfig = new HashMap<>();
         this.wdf = DEFAULT_DRIVER_FACTORY;
+        this.implicitlyWaitTime = Long.valueOf(-1);
+        this.pageLoadWaitTime = Long.valueOf(-1);
         setUp(args);
         this.seInterpreterTestListener = new SeInterpreterTestListener(this.log);
+    }
+
+    public Long getImplicitlyWaitTime() {
+        return this.implicitlyWaitTime;
+    }
+
+    public Long getPageLoadWaitTime() {
+        return this.pageLoadWaitTime;
+    }
+
+    public TestRunBuilder createTestRunBuilder(Script script) {
+        return new TestRunBuilder(script);
     }
 
     public void setSeInterpreterTestListener(SeInterpreterTestListener seInterpreterTestListener) {
@@ -60,9 +75,9 @@ public abstract class CommandLineRunner {
                     System.exit(1);
                 }
                 if (s.startsWith(CommandLineArgument.IMPLICITLY_WAIT.key())) {
-                    this.trf.setImplicitlyWaitDriverTimeout(Long.valueOf(kv[1]));
+                    this.implicitlyWaitTime = Long.valueOf(kv[1]);
                 } else if (s.startsWith(CommandLineArgument.PAGE_LOAD_TIMEOUT.key())) {
-                    this.trf.setPageLoadDriverTimeout(Long.valueOf(kv[1]));
+                    this.pageLoadWaitTime = Long.valueOf(kv[1]);
                 } else if (s.startsWith(CommandLineArgument.STEP_TYPE_PACKAGE.key())) {
                     this.stf.setPrimaryPackage(kv[1]);
                 } else if (s.startsWith(CommandLineArgument.DRIVER_CONFIG_PREFIX.key())) {
@@ -89,6 +104,17 @@ public abstract class CommandLineRunner {
             }
         }
         this.log.info("setUp finish");
+    }
+
+    protected TestRun getTestRun(TestRunBuilder script, Map<String, String> data, SeInterpreterTestListener seInterpreterTestListener) {
+        return script.createTestRun(this.log
+                , this.wdf
+                , this.driverConfig
+                , this.implicitlyWaitTime
+                , this.pageLoadWaitTime
+                , data
+                , this.lastRun
+                , seInterpreterTestListener);
     }
 
     protected void preSetUp() {

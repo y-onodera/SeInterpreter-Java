@@ -1,6 +1,9 @@
-package com.sebuilder.interpreter;
+package com.sebuilder.interpreter.application;
 
 import com.google.common.collect.Lists;
+import com.sebuilder.interpreter.Script;
+import com.sebuilder.interpreter.SeInterpreterTestListener;
+import com.sebuilder.interpreter.TestRunBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -100,27 +103,30 @@ public class SeInterpreterREPL extends CommandLineRunner {
         return result;
     }
 
+    public TestRunBuilder createTestRunBuilder(Script script) {
+        return super.createTestRunBuilder(script.reusePreviousDriverAndVars());
+    }
+
     public void execute(Script script) {
-        this.execute(new TestRunBuilder(script), this.seInterpreterTestListener);
+        this.execute(createTestRunBuilder(script), this.seInterpreterTestListener);
     }
 
     public void execute(Script script, SeInterpreterTestListener seInterpreterTestListener) {
-        script.stateTakeOver();
-        this.execute(new TestRunBuilder(script), seInterpreterTestListener);
+        this.execute(createTestRunBuilder(script), seInterpreterTestListener);
     }
 
-    public void execute(TestRunBuilder script, SeInterpreterTestListener seInterpreterTestListener) {
+    public void execute(TestRunBuilder testRunBuilder, SeInterpreterTestListener seInterpreterTestListener) {
         String suiteName = "com.sebuilder.interpreter.REPL_EXEC" + this.execCount++;
-        for (Map<String, String> data : script.loadData()) {
+        for (Map<String, String> data : testRunBuilder.loadData()) {
             seInterpreterTestListener.openTestSuite(suiteName, data);
-            this.execute(script, data, seInterpreterTestListener);
+            this.execute(testRunBuilder, data, seInterpreterTestListener);
             seInterpreterTestListener.closeTestSuite();
         }
     }
 
-    private void execute(TestRunBuilder script, Map<String, String> data, SeInterpreterTestListener seInterpreterTestListener) {
-        this.log.info("start execute script");
-        this.lastRun = script.createTestRun(trf, this.log, this.wdf, this.driverConfig, data, this.lastRun, seInterpreterTestListener);
+    private void execute(TestRunBuilder testRunBuilder, Map<String, String> data, SeInterpreterTestListener seInterpreterTestListener) {
+        this.log.info("start execute testRunBuilder");
+        this.lastRun = this.getTestRun(testRunBuilder, data, seInterpreterTestListener);
         while (this.lastRun.hasNext()) {
             try {
                 this.lastRun.next();
@@ -131,7 +137,7 @@ public class SeInterpreterREPL extends CommandLineRunner {
         if (this.driver == null) {
             this.driver = this.lastRun.driver();
         }
-        this.log.info("finish execute script");
+        this.log.info("finish execute testRunBuilder");
     }
 
     private StringBuilder startScript() {

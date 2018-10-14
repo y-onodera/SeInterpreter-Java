@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-package com.sebuilder.interpreter.datasource;
+package com.sebuilder.interpreter.factory;
 
+import com.google.common.collect.Maps;
 import com.sebuilder.interpreter.DataSource;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -30,7 +34,12 @@ import java.util.Map;
  */
 public class DataSourceFactory {
 	public static final String DEFAULT_DATA_SOURCE_PACKAGE = "com.sebuilder.interpreter.datasource";
-	
+
+    /**
+     * Lazily loaded map of data sources.
+     */
+    private final HashMap<String, DataSource> sourcesMap = new HashMap<String, DataSource>();
+
 	private String customDataSourcePackage = null;
 
 	public String getCustomDataSourcePackage() {
@@ -41,20 +50,40 @@ public class DataSourceFactory {
 	public void setCustomDataSourcePackage(String customDataSourcePackage) {
 		this.customDataSourcePackage = customDataSourcePackage;
 	}
-	
-	/**
-	 * Lazily loaded map of data sources.
-	 */
-	private final HashMap<String, DataSource> sourcesMap = new HashMap<String, DataSource>();
 
-	public List<Map<String, String>> getData(String sourceName, Map<String, String> config, File relativeToFile) {
-		return getDataSource(sourceName).getData(config, relativeToFile);
-	}
+    public List<Map<String, String>> getData(String sourceName, Map<String, String> config, File relativeToFile) {
+        return getDataSource(sourceName).getData(config, relativeToFile);
+    }
 
-	public DataSource getDataSource(String sourceName) {
-		this.loadDataSource(sourceName);
-		return sourcesMap.get(sourceName);
-	}
+    public DataSource getDataSource(JSONObject o) throws JSONException {
+        if (!o.has("data")) {
+            return null;
+        }
+        JSONObject data = o.getJSONObject("data");
+        return this.getDataSource(data.getString("source"));
+    }
+
+    public DataSource getDataSource(String sourceName) {
+        this.loadDataSource(sourceName);
+        return sourcesMap.get(sourceName);
+    }
+
+    public HashMap<String, String> getDataSourceConfig(JSONObject o) throws JSONException {
+        if (!o.has("data")) {
+            return Maps.newHashMap();
+        }
+        JSONObject data = o.getJSONObject("data");
+        String sourceName = data.getString("source");
+        HashMap<String, String> config = new HashMap<>();
+        if (data.has("configs") && data.getJSONObject("configs").has(sourceName)) {
+            JSONObject cfg = data.getJSONObject("configs").getJSONObject(sourceName);
+            for (Iterator<String> it = cfg.keys(); it.hasNext(); ) {
+                String key = it.next();
+                config.put(key, cfg.getString(key));
+            }
+        }
+        return config;
+    }
 
 	private void loadDataSource(String sourceName) {
 		if (!sourcesMap.containsKey(sourceName)) {
@@ -84,6 +113,7 @@ public class DataSourceFactory {
 					throw new RuntimeException(c.getName() + " does not extend DataSource.", cce);
 				}
 			}
-		}
+        }
 	}
+
 }

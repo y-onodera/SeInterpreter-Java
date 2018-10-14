@@ -1,4 +1,4 @@
-package com.sebuilder.interpreter;
+package com.sebuilder.interpreter.application;
 
 public enum CommandLineArgument {
 

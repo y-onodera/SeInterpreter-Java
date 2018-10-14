@@ -1,6 +1,8 @@
 package com.sebuilder.interpreter.javafx.application;
 
 import com.sebuilder.interpreter.*;
+import com.sebuilder.interpreter.application.CommandLineArgument;
+import com.sebuilder.interpreter.application.SeInterpreterREPL;
 import com.sebuilder.interpreter.javafx.EventBus;
 import com.sebuilder.interpreter.javafx.event.script.ScriptSelectEvent;
 import org.apache.logging.log4j.LogManager;
@@ -43,7 +45,6 @@ public class SeInterpreterRunner implements Runnable {
         }
         if (this.isOpen()) {
             this.close();
-            ;
         }
         this.log.info("stop running");
     }
@@ -72,7 +73,10 @@ public class SeInterpreterRunner implements Runnable {
     }
 
     public void runScript(Script currentDisplay) {
-        this.runScript(new TestRunBuilder(currentDisplay));
+        if (!this.isOpen()) {
+            this.setUp();
+        }
+        this.runScript(repl.createTestRunBuilder(currentDisplay));
     }
 
     public void runScript(TestRunBuilder currentDisplay) {
@@ -80,7 +84,10 @@ public class SeInterpreterRunner implements Runnable {
     }
 
     public void runScript(Script currentDisplay, Function<Logger, SeInterpreterTestListener> listenerFactory) {
-        this.runScript(new TestRunBuilder(currentDisplay), listenerFactory);
+        if (!this.isOpen()) {
+            this.setUp();
+        }
+        this.runScript(this.repl.createTestRunBuilder(currentDisplay), listenerFactory);
     }
 
     public void runScript(TestRunBuilder currentDisplay, Function<Logger, SeInterpreterTestListener> listenerFactory) {
@@ -91,8 +98,11 @@ public class SeInterpreterRunner implements Runnable {
     }
 
     public void runSuite(Suite suite) {
+        if (!this.isOpen()) {
+            this.setUp();
+        }
         suite.getTestRuns().forEach(it -> {
-            EventBus.publish(new ScriptSelectEvent(it.name()));
+            EventBus.publish(new ScriptSelectEvent(it.getScriptFileName()));
             this.runScript(it);
         });
     }

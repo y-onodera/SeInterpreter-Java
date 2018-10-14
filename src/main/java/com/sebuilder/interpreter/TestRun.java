@@ -35,7 +35,7 @@ public class TestRun {
     private HashMap<String, String> vars = new HashMap<>();
     private RemoteWebDriver driver;
     private Logger log;
-    private WebDriverFactory webDriverFactory = SeInterpreter.DEFAULT_DRIVER_FACTORY;
+    private WebDriverFactory webDriverFactory;
     private HashMap<String, String> webDriverConfig = new HashMap<>();
     private Long implicitlyWaitDriverTimeout;
     private Long pageLoadDriverTimeout;
@@ -389,19 +389,6 @@ public class TestRun {
         return this.stepIndex < this.script.steps.size() - 1;
     }
 
-    private TestRun createChainRun(Script chainTo, Map<String, String> data) {
-        return new TestRun(chainTo
-                , this.log
-                , this.driver
-                , this.webDriverFactory
-                , this.webDriverConfig
-                , this.implicitlyWaitDriverTimeout
-                , this.pageLoadDriverTimeout
-                , data
-                , this.listener
-                , this.scriptChain);
-    }
-
     private boolean chainRun(Script chainTo) {
         boolean success = true;
         for (Map<String, String> data : chainTo.loadData()) {
@@ -411,6 +398,19 @@ public class TestRun {
             }
         }
         return success;
+    }
+
+    private TestRun createChainRun(Script chainTo, Map<String, String> data) {
+        return new TestRunBuilder(chainTo)
+                .addChain(this.scriptChain)
+                .createTestRun(this.log
+                        , this.webDriverFactory
+                        , this.webDriverConfig
+                        , this.implicitlyWaitDriverTimeout
+                        , this.pageLoadDriverTimeout
+                        , data
+                        , this
+                        , this.listener);
     }
 
 }

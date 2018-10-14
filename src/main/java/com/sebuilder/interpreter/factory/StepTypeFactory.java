@@ -16,9 +16,11 @@
 package com.sebuilder.interpreter.factory;
 
 import com.sebuilder.interpreter.*;
-import com.sebuilder.interpreter.steptype.Retry;
-import com.sebuilder.interpreter.steptype.Loop;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -70,6 +72,19 @@ public class StepTypeFactory {
      * package.
      */
     private final HashMap<String, StepType> typesMap = new HashMap<String, StepType>();
+
+    /**
+     * @param o json object step load from
+     * @throws JSONException If anything goes wrong with interpreting the JSON.
+     */
+    public ArrayList<Step> parseStep(JSONObject o) throws JSONException {
+        JSONArray stepsA = o.getJSONArray("steps");
+        ArrayList<Step> steps = new ArrayList<>();
+        for (int i = 0; i < stepsA.length(); i++) {
+            this.parseStep(steps, stepsA.getJSONObject(i));
+        }
+        return steps;
+    }
 
     /**
      * @param name
@@ -147,4 +162,84 @@ public class StepTypeFactory {
             throw new RuntimeException("Step type \"" + name + "\" is not implemented.", e);
         }
     }
+
+    /**
+     * @param stepO json object step load from
+     * @throws JSONException If anything goes wrong with interpreting the JSON.
+     */
+    private void parseStep(ArrayList<Step> steps, JSONObject stepO) throws JSONException {
+        Step step = this.createStep(stepO);
+        steps.add(step);
+        this.configureStep(steps, stepO, step);
+    }
+
+    /**
+     * @param stepO json object step load from
+     * @return A new instance of step
+     * @throws JSONException If anything goes wrong with interpreting the JSON.
+     */
+    private Step createStep(JSONObject stepO) throws JSONException {
+        StepType type = this.getStepTypeOfName(stepO.getString("type"));
+        Step step = new Step(type);
+        step.negated = stepO.optBoolean("negated", false);
+        step.name = stepO.optString("step_name", null);
+        return step;
+    }
+
+    /**
+     * @param stepO json object step configuration load from
+     * @param step  step configuration to
+     * @throws JSONException If anything goes wrong with interpreting the JSON.
+     */
+    private void configureStep(ArrayList<Step> steps, JSONObject stepO, Step step) throws JSONException {
+        JSONArray keysA = stepO.names();
+        for (int j = 0; j < keysA.length(); j++) {
+            this.configureStep(steps, stepO, step, keysA.getString(j));
+        }
+    }
+
+    /**
+     * @param stepO json object step configuration load from
+     * @param step  step configuration to
+     * @param key   configuration key
+     * @throws JSONException If anything goes wrong with interpreting the JSON.
+     */
+    private void configureStep(ArrayList<Step> steps, JSONObject stepO, Step step, String key) throws JSONException {
+        if (key.equals("type") || key.equals("negated")) {
+            return;
+        }
+        if (stepO.optJSONObject(key) != null) {
+            this.configureStepSubElement(steps, stepO, step, key);
+        } else if (key.equals("actions")) {
+            this.configureStepSubElement(steps, stepO, step, key);
+        } else {
+            step.stringParams.put(key, stepO.getString(key));
+        }
+    }
+
+    /**
+     * @param stepO json object step configuration load from
+     * @param step  step configuration to
+     * @param key   configuration key
+     * @throws JSONException If anything goes wrong with interpreting the JSON.
+     */
+    private void configureStepSubElement(ArrayList<Step> steps, JSONObject stepO, Step step, String key) throws JSONException {
+        switch (key) {
+            case "locator":
+                step.locatorParams.put(key, new Locator(stepO.getJSONObject(key).getString("type"), stepO.getJSONObject(key).getString("value")));
+                break;
+            case "until":
+                this.parseStep(steps, stepO.getJSONObject(key));
+                break;
+            case "actions":
+                JSONArray actions = stepO.getJSONArray(key);
+                step.stringParams.put("subStep", String.valueOf(actions.length()));
+                for (int i = 0, j = actions.length(); i < j; i++) {
+                    this.parseStep(steps, actions.getJSONObject(i));
+                }
+                break;
+            default:
+        }
+    }
+
 }

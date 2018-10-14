@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-package com.sebuilder.interpreter;
+package com.sebuilder.interpreter.application;
 
+import com.sebuilder.interpreter.SeInterpreterTestListener;
+import com.sebuilder.interpreter.Suite;
+import com.sebuilder.interpreter.TestRunBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONException;
@@ -87,26 +90,26 @@ public class SeInterpreter extends CommandLineRunner {
         }
     }
 
-    private void runScript(TestRunBuilder script) {
-        for (Map<String, String> data : script.loadData()) {
-            this.seInterpreterTestListener.openTestSuite(script.name(), data);
-            this.runScript(script, data, this.seInterpreterTestListener);
+    private void runScript(TestRunBuilder testRunBuilder) {
+        for (Map<String, String> data : testRunBuilder.loadData()) {
+            this.seInterpreterTestListener.openTestSuite(testRunBuilder.getScriptName(), data);
+            this.runScript(testRunBuilder, data, this.seInterpreterTestListener);
             this.seInterpreterTestListener.closeTestSuite();
         }
     }
 
-    private void runScript(TestRunBuilder script, Map<String, String> data, SeInterpreterTestListener seInterpreterTestListener) {
+    private void runScript(TestRunBuilder testRunBuilder, Map<String, String> data, SeInterpreterTestListener seInterpreterTestListener) {
         try {
-            this.lastRun = script.createTestRun(this.trf, this.log, this.wdf, this.driverConfig, data, this.lastRun, seInterpreterTestListener);
+            this.lastRun = getTestRun(testRunBuilder, data, seInterpreterTestListener);
             if (this.lastRun.finish()) {
-                this.log.info(script.name() + " succeeded");
+                this.log.info(testRunBuilder.getScriptName() + " succeeded");
             } else {
-                this.log.info(script.name() + " failed");
+                this.log.info(testRunBuilder.getScriptName() + " failed");
             }
         } catch (AssertionError e) {
-            this.log.info(script.name() + " failed", e);
+            this.log.info(testRunBuilder.getScriptName() + " failed", e);
         }
-        if (!script.closeDriver()) {
+        if (!testRunBuilder.closeDriver()) {
             if (lastRun != null) {
                 this.driver = lastRun.driver();
             }
@@ -117,4 +120,5 @@ public class SeInterpreter extends CommandLineRunner {
             this.closeDriver = false;
         }
     }
+
 }

@@ -7,10 +7,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Suite implements Iterable<Script> {
@@ -23,6 +20,10 @@ public class Suite implements Iterable<Script> {
 
     private Map<Script, Script> scriptChains = Maps.newHashMap();
 
+    private DataSource dataSource;
+
+    private Map<String, String> dataSourceConfig;
+
     private final boolean shareState;
 
     public Suite() {
@@ -33,23 +34,34 @@ public class Suite implements Iterable<Script> {
         this(Lists.newArrayList(script));
     }
 
-    public Suite(Iterable<Script> aScripts) {
+    public Suite(ArrayList<Script> aScripts) {
         this(null, aScripts, Maps.newHashMap(), true);
     }
 
-    public Suite(File suiteFile, Iterable<Script> aScripts, Map<Script, Script> scriptChains, boolean shareState) {
+    public Suite(File suiteFile, ArrayList<Script> aScripts, Map<Script, Script> scriptChains, boolean shareState) {
         if (suiteFile != null) {
             this.name = suiteFile.getName();
             this.path = suiteFile.getAbsolutePath();
         }
         this.shareState = shareState;
-        for (Script it : aScripts) {
-            scripts.add(it);
-            if (shareState) {
-                it.stateTakeOver();
-            }
-        }
+        this.scripts.addAll(aScripts);
         this.scriptChains.putAll(scriptChains);
+    }
+
+    public void setDataSource(DataSource dataSource, Map<String, String> config) {
+        this.dataSource = dataSource;
+        this.dataSourceConfig = config;
+    }
+
+    public List<Map<String, String>> loadData() {
+        if (this.dataSource == null) {
+            return Lists.newArrayList(new HashMap<>());
+        }
+        return this.dataSource.getData(this.dataSourceConfig, null);
+    }
+
+    public String getPath() {
+        return path;
     }
 
     public String getName() {
@@ -68,42 +80,36 @@ public class Suite implements Iterable<Script> {
         return this.scripts.iterator();
     }
 
+    public Map<Script, Script> getScriptChains() {
+        return Maps.newHashMap(scriptChains);
+    }
+
+    public boolean isShareState() {
+        return shareState;
+    }
+
     public List<TestRunBuilder> getTestRuns() {
         return this.scripts
                 .stream()
                 .filter(it -> !scriptChains.containsValue(it))
-                .map(it -> new TestRunBuilder(it).addChain(scriptChains))
+                .map(it -> new TestRunBuilder(it).addChain(this.scriptChains))
                 .collect(Collectors.toList());
     }
 
-    public void add(Script aScript) {
-        this.scripts.add(aScript);
+    public Suite add(Script aScript) {
+        return new SuiteBuilder(this)
+                .addScript(aScript)
+                .createSuite();
     }
 
-    public void replace(Script aScript) {
-        ArrayList newScripts = Lists.newArrayList();
-        for (Script script : this.scripts) {
-            if (script.name.equals(aScript.name)) {
-                newScripts.add(aScript);
-            } else {
-                newScripts.add(script);
-            }
-        }
-        this.scripts.clear();
-        this.scripts.addAll(newScripts);
+    public Suite replace(Script aScript) {
+        return this.replace(aScript.name, aScript);
     }
 
-    public void replace(String oldName, Script newValue) {
-        ArrayList newScripts = Lists.newArrayList();
-        for (Script script : this.scripts) {
-            if (script.name.equals(oldName)) {
-                newScripts.add(newValue);
-            } else {
-                newScripts.add(script);
-            }
-        }
-        this.scripts.clear();
-        this.scripts.addAll(newScripts);
+    public Suite replace(String oldName, Script newValue) {
+        return new SuiteBuilder(this)
+                .replace(oldName, newValue)
+                .createSuite();
     }
 
     @Override
