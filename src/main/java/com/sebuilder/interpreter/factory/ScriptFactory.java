@@ -160,7 +160,7 @@ public class ScriptFactory {
     public Suite parseScript(JSONObject o, File f) throws IOException {
         try {
             Script script = this.create(o, f);
-            return new Suite(script);
+            return new SuiteBuilder(script).createSuite();
         } catch (JSONException e) {
             throw new IOException("Could not parse script.", e);
         }

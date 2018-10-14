@@ -14,6 +14,17 @@ public class SuiteBuilder {
     private final Map<Script, Script> scriptChains;
     private boolean shareState = true;
 
+    public SuiteBuilder(Script script) {
+        this(Lists.newArrayList(script));
+    }
+
+    public SuiteBuilder(ArrayList<Script> aScripts) {
+        this.suiteFile = null;
+        this.scripts = aScripts;
+        this.scriptChains = Maps.newHashMap();
+    }
+
+
     public SuiteBuilder(File suiteFile) {
         this.suiteFile = suiteFile;
         this.scripts = new ArrayList<>();

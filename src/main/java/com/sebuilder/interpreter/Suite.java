@@ -26,22 +26,13 @@ public class Suite implements Iterable<Script> {
 
     private final boolean shareState;
 
-    public Suite() {
-        this(new ArrayList<>());
-    }
-
-    public Suite(Script script) {
-        this(Lists.newArrayList(script));
-    }
-
-    public Suite(ArrayList<Script> aScripts) {
-        this(null, aScripts, Maps.newHashMap(), true);
-    }
-
     public Suite(File suiteFile, ArrayList<Script> aScripts, Map<Script, Script> scriptChains, boolean shareState) {
         if (suiteFile != null) {
             this.name = suiteFile.getName();
             this.path = suiteFile.getAbsolutePath();
+        } else {
+            this.name = "New_Suite";
+            this.path = null;
         }
         this.shareState = shareState;
         this.scripts.addAll(aScripts);

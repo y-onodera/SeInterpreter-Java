@@ -53,7 +53,7 @@ public class ScriptBuilder {
             this.path = target.getPath();
             this.relativePath = target.getAbsoluteFile().getParentFile();
         } else {
-            this.name = "System_in";
+            this.name = "New_Script";
             this.path = null;
             this.relativePath = null;
         }

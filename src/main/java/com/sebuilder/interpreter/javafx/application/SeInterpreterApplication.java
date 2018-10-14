@@ -67,7 +67,7 @@ public class SeInterpreterApplication extends Application {
     @Subscribe
     public void reset(ScriptResetEvent event) {
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
-            this.suite = new Suite(templateScript());
+            this.suite = new SuiteBuilder(this.templateScript()).createSuite();
             this.resetSuite(this.suite);
         });
     }
