@@ -40,7 +40,7 @@ public class SeInterpreterApplication extends Application {
 
     private Suite suite;
 
-    private com.sebuilder.interpreter.Script currentDisplay;
+    private Script currentDisplay;
 
     private Queue<Consumer<SeInterpreterRunner>> queue = new LinkedBlockingDeque<>();
 
@@ -51,7 +51,7 @@ public class SeInterpreterApplication extends Application {
         Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getClassLoader().getResource("fxml/seleniumbuilder.fxml")));
         Scene scene = new Scene(root);
         stage.setScene(scene);
-        stage.setResizable(false);
+        stage.setResizable(true);
         stage.show();
         EventBus.registSubscriber(this);
         EventBus.publish(new ScriptResetEvent());
@@ -89,6 +89,19 @@ public class SeInterpreterApplication extends Application {
             newScript = this.templateScript();
         }
         this.suite = this.suite.add(newScript);
+        this.resetSuite(this.suite);
+    }
+
+    @Subscribe
+    public void insertScript(ScriptInsertEvent event) throws IOException, JSONException {
+        Script newScript = this.templateScript();
+        this.suite = this.suite.insert(this.currentDisplay, newScript);
+        this.resetSuite(this.suite);
+    }
+
+    @Subscribe
+    public void deleteScript(ScriptDeleteEvent event) throws IOException, JSONException {
+        this.suite = this.suite.delete(this.currentDisplay);
         this.resetSuite(this.suite);
     }
 

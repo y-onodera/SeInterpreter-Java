@@ -1,38 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.*?>
-<?import javafx.scene.layout.Pane?>
-<Pane id="paneSeInterpreterMenu" fx:id="paneSeInterpreterMenu" xmlns="http://javafx.com/javafx/8"
-      xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sebuilder.interpreter.javafx.controller.MenuController">
+<?import javafx.scene.layout.*?>
+<AnchorPane id="paneSeInterpreterMenu" fx:id="paneSeInterpreterMenu" xmlns="http://javafx.com/javafx/8"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.sebuilder.interpreter.javafx.controller.MenuController">
     <children>
-        <MenuBar id="menuBar" fx:id="menuBar" minWidth="600.0">
+        <MenuBar id="menuBar" fx:id="menuBar" minWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                 AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <menus>
-                <Menu id="menuTest" fx:id="menuScript" mnemonicParsing="false" text="Script">
+                <Menu id="menuScript" fx:id="menuScript" mnemonicParsing="false" text="Script">
                     <items>
                         <MenuItem id="menuTestOpenFile" fx:id="menuScriptOpenFile" mnemonicParsing="false"
                                   onAction="#handleScriptOpenFile" text="Open File"/>
+                        <MenuItem id="menuRunCreateTemplate" fx:id="menuScriptCreateTemplate" mnemonicParsing="false"
+                                  onAction="#handleScriptCreateTemplate" text="Export Template To Suite"/>
                         <MenuItem id="menuTestNew" fx:id="menuScriptNew" mnemonicParsing="false"
-                                  onAction="#handleScriptNew" text="Reset"/>
-                        <MenuItem id="menuTestAdd" fx:id="menuScriptAdd" mnemonicParsing="false"
-                                  onAction="#handleScriptAdd" text="Add"/>
-                        <MenuItem id="menuTestSave" fx:id="menuScriptSave" mnemonicParsing="false"
-                                  onAction="#handleScriptSave" text="Save"/>
-                        <MenuItem id="menuTestSaveAs" fx:id="menuScriptSaveAs" mnemonicParsing="false"
-                                  onAction="#handleScriptSaveAs" text="Save As"/>
-                        <MenuItem fx:id="menuScriptSetting" mnemonicParsing="false" onAction="#handleScriptSetting"
+                                  onAction="#handleScriptNew" text="Create New Suite"/>
+                    </items>
+                </Menu>
+                <Menu id="menuReplay" fx:id="menuReplay" mnemonicParsing="false" text="Replay">
+                    <items>
+                        <MenuItem id="menuRunSuite" fx:id="menuBrowser0RunSuite" mnemonicParsing="false"
+                                  onAction="#handleReplaySuite" text="Run Suite"/>
+                        <MenuItem id="menuRunScript" fx:id="menuBrowserRunScript" mnemonicParsing="false"
+                                  onAction="#handleReplayScript" text="Run Script"/>
+                        <MenuItem fx:id="menuReplaySetting" mnemonicParsing="false" onAction="#handleReplaySetting"
                                   text="Setting"/>
                     </items>
                 </Menu>
-                <Menu id="menuRun" fx:id="menuBrowser" mnemonicParsing="false" text="Browser">
+                <Menu id="menuBrowser" fx:id="menuBrowser" mnemonicParsing="false" text="Browser">
                     <items>
                         <MenuItem fx:id="menuBrowserOpen" mnemonicParsing="false" onAction="#handleBrowserOpen"
                                   text="Open"/>
-                        <MenuItem id="menuRunSuite" fx:id="menuBrowser0RunSuite" mnemonicParsing="false"
-                                  onAction="#handleBrowserRunSuite" text="Run Suite"/>
-                        <MenuItem id="menuRunScript" fx:id="menuBrowserRunScript" mnemonicParsing="false"
-                                  onAction="#handleBrowserRunScript" text="Run Script"/>
-                        <MenuItem id="menuRunCreateTemplate" fx:id="menuBrowserCreateTemplate" mnemonicParsing="false"
-                                  onAction="#handleBrowserCreateTemplate" text="Create Template"/>
                         <MenuItem fx:id="menuBrowserClose" mnemonicParsing="false" onAction="#handleBrowserClose"
                                   text="Close"/>
                         <MenuItem fx:id="menuBrowserSetting" mnemonicParsing="false" onAction="#handleBrowserSetting"
@@ -42,4 +42,4 @@
             </menus>
         </MenuBar>
     </children>
-</Pane>
+</AnchorPane>

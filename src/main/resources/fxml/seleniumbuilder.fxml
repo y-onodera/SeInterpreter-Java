@@ -20,7 +20,13 @@
                 <fx:include source="seleniumbuilderscriptbody.fxml"/>
             </center>
             <bottom>
-                <TextArea fx:id="textAreaScriptLog" prefHeight="75.0" BorderPane.alignment="CENTER"/>
+                <AnchorPane BorderPane.alignment="CENTER">
+                    <children>
+                        <TextArea fx:id="textAreaScriptLog" prefHeight="75.0" prefWidth="600.0" maxHeight="Infinity"
+                                  AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                                  AnchorPane.topAnchor="0.0"/>
+                    </children>
+                </AnchorPane>
             </bottom>
         </BorderPane>
     </children>

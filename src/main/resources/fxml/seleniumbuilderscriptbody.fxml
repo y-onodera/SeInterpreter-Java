@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.*?>
-<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.*?>
 <AnchorPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.sebuilder.interpreter.javafx.controller.StepViewController">
     <children>
-        <TableView id="tableViewScriptBody" fx:id="tableViewScriptBody" prefHeight="400.0" prefWidth="500.0"
-                   stylesheets="@../css/steptable.css">
+        <TableView id="tableViewScriptBody" fx:id="tableViewScriptBody" stylesheets="@../css/steptable.css"
+                   AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                   AnchorPane.topAnchor="0.0">
             <columns>
-                <TableColumn id="tableColumnScriptBodyNo" fx:id="tableColumnScriptBodyNo" maxWidth="-1.0"
-                             minWidth="30.0" prefWidth="-1.0" style="-fx-alignment: CENTER_RIGHT;" text="No"/>
-                <TableColumn id="tableColumnScriptBodyStep" fx:id="tableColumnScriptBodyStep" maxWidth="-1.0"
-                             minWidth="470.0" prefWidth="-1.0" text="step"/>
+                <TableColumn id="tableColumnScriptBodyNo" fx:id="tableColumnScriptBodyNo" maxWidth="30.0"
+                             minWidth="30.0" prefWidth="30.0" style="-fx-alignment: CENTER_RIGHT;" text="No"/>
+                <TableColumn id="tableColumnScriptBodyStep" fx:id="tableColumnScriptBodyStep" maxWidth="Infinity"
+                             minWidth="470.0" prefWidth="470.0" text="step"/>
             </columns>
             <contextMenu>
                 <ContextMenu>

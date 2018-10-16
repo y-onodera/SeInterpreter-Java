@@ -1,17 +1,27 @@
 package com.sebuilder.interpreter.javafx.controller;
 
 import com.google.common.eventbus.Subscribe;
+import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.Script;
 import com.sebuilder.interpreter.javafx.EventBus;
 import com.sebuilder.interpreter.javafx.event.ReportErrorEvent;
+import com.sebuilder.interpreter.javafx.event.file.FileSaveAsEvent;
+import com.sebuilder.interpreter.javafx.event.file.FileSaveEvent;
 import com.sebuilder.interpreter.javafx.event.replay.StepResultResetEvent;
+import com.sebuilder.interpreter.javafx.event.script.ScriptAddEvent;
+import com.sebuilder.interpreter.javafx.event.script.ScriptDeleteEvent;
+import com.sebuilder.interpreter.javafx.event.script.ScriptInsertEvent;
 import com.sebuilder.interpreter.javafx.event.script.ScriptSelectEvent;
+import com.sebuilder.interpreter.javafx.event.view.OpenScriptSaveChooserEvent;
 import com.sebuilder.interpreter.javafx.event.view.RefreshScriptViewEvent;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.MultipleSelectionModel;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import javafx.stage.FileChooser;
 
+import java.io.File;
 import java.util.LinkedHashMap;
 
 public class ScriptViewController {
@@ -33,6 +43,47 @@ public class ScriptViewController {
         this.treeViewScriptName.setRoot(root);
         this.refleshScriptView(aEvent.getScripts());
     }
+
+    @Subscribe
+    public void scriptSaveAs(OpenScriptSaveChooserEvent event) {
+        this.handleScriptSaveAs(null);
+    }
+
+    @FXML
+    void handleScriptInsert(ActionEvent event) {
+        EventBus.publish(new StepResultResetEvent());
+        EventBus.publish(new ScriptInsertEvent());
+    }
+
+    @FXML
+    void handleScriptAdd(ActionEvent event) {
+        EventBus.publish(new StepResultResetEvent());
+        EventBus.publish(new ScriptAddEvent());
+    }
+
+    @FXML
+    void handleScriptDelete(ActionEvent event) {
+        EventBus.publish(new StepResultResetEvent());
+        EventBus.publish(new ScriptDeleteEvent());
+    }
+
+    @FXML
+    void handleScriptSave(ActionEvent event) {
+        EventBus.publish(new FileSaveEvent());
+    }
+
+    @FXML
+    void handleScriptSaveAs(ActionEvent event) {
+        FileChooser fileSave = new FileChooser();
+        fileSave.setTitle("Close Resource File");
+        fileSave.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("select target script", ".json"));
+        fileSave.setInitialDirectory(Context.getInstance().getBaseDirectory());
+        File file = fileSave.showSaveDialog(treeViewScriptName.getScene().getWindow());
+        if (file != null) {
+            EventBus.publish(new FileSaveAsEvent(file));
+        }
+    }
+
 
     private void refleshScriptView(LinkedHashMap<String, Script> scripts) {
         this.treeViewScriptName.getRoot().getChildren().clear();

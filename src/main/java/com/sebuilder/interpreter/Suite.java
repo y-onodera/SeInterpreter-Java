@@ -87,9 +87,20 @@ public class Suite implements Iterable<Script> {
                 .collect(Collectors.toList());
     }
 
+    public Suite insert(Script aScript, Script newScript) {
+        return new SuiteBuilder(this).insertScript(aScript, newScript)
+                .createSuite();
+    }
+
     public Suite add(Script aScript) {
         return new SuiteBuilder(this)
                 .addScript(aScript)
+                .createSuite();
+    }
+
+    public Suite delete(Script aScript) {
+        return new SuiteBuilder(this)
+                .deleteScript(aScript)
                 .createSuite();
     }
 

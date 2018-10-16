@@ -56,8 +56,18 @@ public class SuiteBuilder {
         return this;
     }
 
+    public SuiteBuilder insertScript(Script aScript, Script newScript) {
+        this.scripts.add(this.scripts.indexOf(aScript), newScript);
+        return this;
+    }
+
     public SuiteBuilder addScript(Script s) {
         this.scripts.add(s);
+        return this;
+    }
+
+    public SuiteBuilder deleteScript(Script aScript) {
+        this.scripts.remove(aScript);
         return this;
     }
 
