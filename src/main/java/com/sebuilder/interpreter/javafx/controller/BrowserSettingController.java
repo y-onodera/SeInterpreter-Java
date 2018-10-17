@@ -71,7 +71,10 @@ public class BrowserSettingController {
         Stage stage = new Stage();
         stage.initOwner(this.driverText.getScene().getWindow());
         File file = fileChooser.showOpenDialog(stage);
-        this.driverText.setText(file.getAbsolutePath());
+        if (file != null && file.exists()) {
+            this.parentDir = file.getParentFile().getAbsoluteFile();
+            this.driverText.setText(file.getAbsolutePath());
+        }
     }
 
     @FXML
@@ -104,7 +107,11 @@ public class BrowserSettingController {
             driverName = "geckodriver.exe";
         }
         if (parentDir == null || !parentDir.exists()) {
-            this.parentDir = new File(Context.getInstance().getBaseDirectory(), "exe/").getAbsoluteFile();
+            File driverParent = new File(Context.getInstance().getBaseDirectory(), "exe/");
+            if (!driverParent.exists()) {
+                driverParent = Context.getInstance().getBaseDirectory();
+            }
+            this.parentDir = driverParent.getAbsoluteFile();
         }
         this.driverText.setText(new File(parentDir, driverName).getAbsolutePath());
     }

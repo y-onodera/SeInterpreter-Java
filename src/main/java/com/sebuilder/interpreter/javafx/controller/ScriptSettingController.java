@@ -47,7 +47,9 @@ public class ScriptSettingController {
         Stage stage = new Stage();
         stage.initOwner(this.datasourceText.getScene().getWindow());
         File file = directoryChooser.showDialog(stage);
-        this.datasourceText.setText(file.getAbsolutePath());
+        if (file != null && file.exists()) {
+            this.datasourceText.setText(file.getAbsolutePath());
+        }
     }
 
     @FXML
