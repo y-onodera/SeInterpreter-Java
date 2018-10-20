@@ -15,8 +15,6 @@
                     <items>
                         <MenuItem id="menuTestOpenFile" fx:id="menuScriptOpenFile" mnemonicParsing="false"
                                   onAction="#handleScriptOpenFile" text="Open File"/>
-                        <MenuItem id="menuRunCreateTemplate" fx:id="menuScriptCreateTemplate" mnemonicParsing="false"
-                                  onAction="#handleScriptCreateTemplate" text="Export Template To Suite"/>
                         <MenuItem id="menuTestNew" fx:id="menuScriptNew" mnemonicParsing="false"
                                   onAction="#handleScriptNew" text="Create New Suite"/>
                     </items>

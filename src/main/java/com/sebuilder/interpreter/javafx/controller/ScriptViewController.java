@@ -8,6 +8,7 @@ import com.sebuilder.interpreter.javafx.event.ReportErrorEvent;
 import com.sebuilder.interpreter.javafx.event.file.FileSaveAsEvent;
 import com.sebuilder.interpreter.javafx.event.file.FileSaveEvent;
 import com.sebuilder.interpreter.javafx.event.replay.StepResultResetEvent;
+import com.sebuilder.interpreter.javafx.event.replay.TemplateLoadEvent;
 import com.sebuilder.interpreter.javafx.event.script.ScriptAddEvent;
 import com.sebuilder.interpreter.javafx.event.script.ScriptDeleteEvent;
 import com.sebuilder.interpreter.javafx.event.script.ScriptInsertEvent;
@@ -59,6 +60,12 @@ public class ScriptViewController {
     void handleScriptAdd(ActionEvent event) {
         EventBus.publish(new StepResultResetEvent());
         EventBus.publish(new ScriptAddEvent());
+    }
+
+    @FXML
+    void handleScriptCreateTemplate(ActionEvent event) {
+        EventBus.publish(new StepResultResetEvent());
+        EventBus.publish(new TemplateLoadEvent());
     }
 
     @FXML
