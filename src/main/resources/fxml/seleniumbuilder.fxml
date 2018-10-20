@@ -1,33 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.*?>
-<AnchorPane id="ancorSeInterpleter" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-            minWidth="-Infinity" prefHeight="500.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.sebuilder.interpreter.javafx.controller.SeInterpreterController">
-    <children>
-        <BorderPane id="borderSeInterpleter" layoutX="-1.0" prefHeight="500.0" prefWidth="600.0"
-                    AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                    AnchorPane.topAnchor="0.0">
-            <top>
-                <fx:include source="seleniumbuildermenu.fxml"/>
-            </top>
-            <left>
-                <fx:include source="seleniumbuilderscriptview.fxml"/>
-            </left>
-            <center>
-                <fx:include source="seleniumbuilderscriptbody.fxml"/>
-            </center>
-            <bottom>
-                <AnchorPane BorderPane.alignment="CENTER">
-                    <children>
-                        <TextArea fx:id="textAreaScriptLog" prefHeight="75.0" prefWidth="600.0" maxHeight="Infinity"
-                                  AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                                  AnchorPane.topAnchor="0.0"/>
-                    </children>
-                </AnchorPane>
-            </bottom>
-        </BorderPane>
-    </children>
-</AnchorPane>
+<SplitPane id="ancorSeInterpleter" dividerPositions="0.85" maxHeight="-Infinity" maxWidth="-Infinity"
+           minHeight="-Infinity" minWidth="-Infinity" orientation="VERTICAL" prefHeight="500.0" prefWidth="600.0"
+           xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.sebuilder.interpreter.javafx.controller.SeInterpreterController">
+    <items>
+        <AnchorPane>
+            <children>
+                <BorderPane id="borderSeInterpleter"
+                            minHeight="0" maxHeight="Infinity" prefHeight="425.0"
+                            prefWidth="600.0"
+                            AnchorPane.bottomAnchor="0.0"
+                            AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                            AnchorPane.topAnchor="0.0">
+                    <top>
+                        <fx:include source="seleniumbuildermenu.fxml"/>
+                    </top>
+                    <center>
+                        <SplitPane dividerPositions="0.2">
+                            <items>
+                                <fx:include source="seleniumbuilderscriptview.fxml"/>
+                                <fx:include source="seleniumbuilderscriptbody.fxml"/>
+                            </items>
+                        </SplitPane>
+                    </center>
+                </BorderPane>
+            </children>
+        </AnchorPane>
+        <AnchorPane>
+            <children>
+                <TextArea fx:id="textAreaScriptLog"
+                          maxHeight="Infinity" minHeight="0" prefHeight="75.0"
+                          prefWidth="598.0"
+                          AnchorPane.bottomAnchor="0.0"
+                          AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                          AnchorPane.topAnchor="0.0"/>
+            </children>
+        </AnchorPane>
+    </items>
+</SplitPane>

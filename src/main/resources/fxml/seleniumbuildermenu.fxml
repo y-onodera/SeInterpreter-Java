@@ -6,8 +6,10 @@
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.sebuilder.interpreter.javafx.controller.MenuController">
     <children>
-        <MenuBar id="menuBar" fx:id="menuBar" minWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                 AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <MenuBar id="menuBar" fx:id="menuBar" prefWidth="Infinity"
+                 AnchorPane.bottomAnchor="0.0"
+                 AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                 AnchorPane.topAnchor="0.0">
             <menus>
                 <Menu id="menuScript" fx:id="menuScript" mnemonicParsing="false" text="Script">
                     <items>

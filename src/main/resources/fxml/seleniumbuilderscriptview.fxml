@@ -5,9 +5,12 @@
 <AnchorPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.sebuilder.interpreter.javafx.controller.ScriptViewController">
     <children>
-        <TreeView id="treeViewScriptName" fx:id="treeViewScriptName" prefHeight="400.0" prefWidth="100.0"
-                  maxWidth="Infinity" minWidth="NaN" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                  AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <TreeView id="treeViewScriptName" fx:id="treeViewScriptName"
+                  prefWidth="120.0" maxWidth="Infinity" minWidth="0"
+                  minHeight="0" maxHeight="Infinity" prefHeight="425.0"
+                  AnchorPane.bottomAnchor="0.0"
+                  AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                  AnchorPane.topAnchor="0.0">
             <contextMenu>
                 <ContextMenu>
                     <items>
