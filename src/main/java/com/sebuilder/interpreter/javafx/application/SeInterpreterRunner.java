@@ -1,10 +1,11 @@
 package com.sebuilder.interpreter.javafx.application;
 
-import com.sebuilder.interpreter.*;
+import com.sebuilder.interpreter.Context;
+import com.sebuilder.interpreter.Script;
+import com.sebuilder.interpreter.SeInterpreterTestListener;
+import com.sebuilder.interpreter.Suite;
 import com.sebuilder.interpreter.application.CommandLineArgument;
 import com.sebuilder.interpreter.application.SeInterpreterREPL;
-import com.sebuilder.interpreter.javafx.EventBus;
-import com.sebuilder.interpreter.javafx.event.script.ScriptSelectEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -36,7 +37,7 @@ public class SeInterpreterRunner implements Runnable {
             Consumer<SeInterpreterRunner> operation = this.queue.poll();
             if (operation != null) {
                 try {
-                    this.log.info("operation recieve");
+                    this.log.info("operation recieve:" + operation);
                     operation.accept(this);
                 } catch (Throwable ex) {
                     this.log.error(ex);
@@ -53,7 +54,6 @@ public class SeInterpreterRunner implements Runnable {
         if (this.isOpen()) {
             this.close();
         }
-        this.setUp();
         this.repl.reloadBrowserSetting(browserName, driverPath);
     }
 
@@ -65,21 +65,22 @@ public class SeInterpreterRunner implements Runnable {
         if (!this.isOpen()) {
             this.setUp();
         }
-        String fileName = "exportedBrowserTemplate" + this.exportCount++ + ".json";
+        String fileName = "Template" + this.exportCount++ + ".json";
         Script get = this.repl.toScript("{\"steps\":[" + "{\"type\":\"exportTemplate\",\"file\":\"" + fileName + "\"}" + "]}");
-        this.repl.execute(get, new SeInterpreterTestListener(this.log));
-        File exported = new File(Context.getInstance().getTemplateOutputDirectory(), fileName);
+        SeInterpreterTestListener listener = new SeInterpreterTestListener(this.log);
+        this.repl.execute(get, listener);
+        File exported = new File(listener.getTemplateOutputDirectory(), fileName);
         return this.repl.loadScript(exported.getAbsolutePath()).iterator().next();
     }
 
-    public void runScript(Script currentDisplay) {
+    public void runSuite(Suite suite) {
         if (!this.isOpen()) {
             this.setUp();
         }
-        this.runScript(repl.createTestRunBuilder(currentDisplay));
+        this.repl.execute(suite, new SeInterpreterTestGUIListener(this.log));
     }
 
-    public void runScript(TestRunBuilder currentDisplay) {
+    public void runScript(Script currentDisplay) {
         this.runScript(currentDisplay, log -> new SeInterpreterTestGUIListener(log));
     }
 
@@ -87,24 +88,7 @@ public class SeInterpreterRunner implements Runnable {
         if (!this.isOpen()) {
             this.setUp();
         }
-        this.runScript(this.repl.createTestRunBuilder(currentDisplay), listenerFactory);
-    }
-
-    public void runScript(TestRunBuilder currentDisplay, Function<Logger, SeInterpreterTestListener> listenerFactory) {
-        if (!this.isOpen()) {
-            this.setUp();
-        }
         this.repl.execute(currentDisplay, listenerFactory.apply(this.log));
-    }
-
-    public void runSuite(Suite suite) {
-        if (!this.isOpen()) {
-            this.setUp();
-        }
-        suite.getTestRuns().forEach(it -> {
-            EventBus.publish(new ScriptSelectEvent(it.getScriptFileName()));
-            this.runScript(it);
-        });
     }
 
     public void close() {
@@ -112,7 +96,6 @@ public class SeInterpreterRunner implements Runnable {
             return;
         }
         this.repl.tearDownREPL();
-        this.repl = null;
     }
 
     public void quit() {
@@ -120,10 +103,11 @@ public class SeInterpreterRunner implements Runnable {
     }
 
     private void setUp() {
-        String[] args = new String[]{CommandLineArgument.DRIVER.getArgument(Context.getInstance().getBrowser())};
-        this.repl = new SeInterpreterREPL(args, log);
-        this.repl.setSeInterpreterTestListener(new SeInterpreterTestGUIListener(log));
-        this.repl.setupREPL();
+        if (this.repl == null) {
+            String[] args = new String[]{CommandLineArgument.DRIVER.getArgument(Context.getInstance().getBrowser())};
+            this.repl = new SeInterpreterREPL(args, log);
+            this.repl.setUpREPL();
+        }
     }
 
 }

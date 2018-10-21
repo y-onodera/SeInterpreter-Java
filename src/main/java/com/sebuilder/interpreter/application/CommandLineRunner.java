@@ -34,7 +34,6 @@ public abstract class CommandLineRunner {
         this.implicitlyWaitTime = Long.valueOf(-1);
         this.pageLoadWaitTime = Long.valueOf(-1);
         setUp(args);
-        this.seInterpreterTestListener = new SeInterpreterTestListener(this.log);
     }
 
     public Long getImplicitlyWaitTime() {
@@ -58,7 +57,7 @@ public abstract class CommandLineRunner {
         this.wdf.setDriverPath(driverPath);
     }
 
-    protected void setUp(String[] args) {
+    public void setUp(String[] args) {
         this.log.info("setUp start");
         if (args.length == 0) {
             log.info("Usage: [--driver=<drivername] [--driver.<configkey>=<configvalue>...] [--implicitlyWait=<ms>] [--pageLoadTimeout=<ms>] [--stepTypePackage=<package name>] <script path>...");
@@ -103,6 +102,7 @@ public abstract class CommandLineRunner {
                 configureOption(s);
             }
         }
+        this.seInterpreterTestListener = new SeInterpreterTestListener(this.log);
         this.log.info("setUp finish");
     }
 
@@ -136,5 +136,4 @@ public abstract class CommandLineRunner {
             this.log.fatal("Could not instantiate WebDriverFactory " + "com.sebuilder.interpreter.webdriverfactory." + s, e);
         }
     }
-
 }

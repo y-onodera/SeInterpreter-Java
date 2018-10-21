@@ -39,13 +39,12 @@ import java.util.stream.Collectors;
  * @author zarkonnen
  */
 public class Script {
-    public ArrayList<Step> steps;
+    public final ArrayList<Step> steps;
     public final String path;
     public final String name;
     public final File relativePath;
     public final boolean usePreviousDriverAndVars;
     public final boolean closeDriver;
-    public final Map<String, String> shareInputs;
     public final DataSource dataSource;
     public final Map<String, String> dataSourceConfig;
 
@@ -55,7 +54,6 @@ public class Script {
             , File relativePath
             , boolean usePreviousDriverAndVars
             , boolean closeDriver
-            , Map<String, String> shareInputs
             , DataSource dataSource
             , Map<String, String> dataSourceConfig) {
         this.steps = steps;
@@ -64,7 +62,6 @@ public class Script {
         this.relativePath = relativePath;
         this.usePreviousDriverAndVars = usePreviousDriverAndVars;
         this.closeDriver = closeDriver;
-        this.shareInputs = shareInputs;
         this.dataSource = dataSource;
         this.dataSourceConfig = dataSourceConfig;
     }
@@ -201,7 +198,8 @@ public class Script {
 
     private Script replaceStep(ArrayList<Step> newStep) {
         return new ScriptBuilder(this)
-                .setSteps(newStep)
+                .clearStep()
+                .addSteps(newStep)
                 .createScript();
     }
 

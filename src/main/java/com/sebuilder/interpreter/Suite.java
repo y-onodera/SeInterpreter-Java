@@ -12,47 +12,53 @@ import java.util.stream.Collectors;
 
 public class Suite implements Iterable<Script> {
 
-    private String name;
+    private final String name;
 
-    private String path;
+    private final String path;
 
-    private ArrayList<Script> scripts = Lists.newArrayList();
+    private final File relativePath;
 
-    private Map<Script, Script> scriptChains = Maps.newHashMap();
+    private final ArrayList<Script> scripts = Lists.newArrayList();
 
-    private DataSource dataSource;
+    private final Map<Script, Script> scriptChains = Maps.newHashMap();
 
-    private Map<String, String> dataSourceConfig;
+    private final DataSource dataSource;
+
+    private final Map<String, String> dataSourceConfig;
 
     private final boolean shareState;
 
-    public Suite(File suiteFile, ArrayList<Script> aScripts, Map<Script, Script> scriptChains, boolean shareState) {
+    public Suite(File suiteFile
+            , ArrayList<Script> aScripts
+            , Map<Script, Script> scriptChains
+            , DataSource dataSource
+            , Map<String, String> config
+            , boolean shareState) {
         if (suiteFile != null) {
             this.name = suiteFile.getName();
             this.path = suiteFile.getAbsolutePath();
+            this.relativePath = suiteFile.getParentFile().getAbsoluteFile();
         } else {
             this.name = "New_Suite";
             this.path = null;
+            this.relativePath = null;
         }
+        this.dataSource = dataSource;
+        this.dataSourceConfig = config;
         this.shareState = shareState;
         this.scripts.addAll(aScripts);
         this.scriptChains.putAll(scriptChains);
-    }
-
-    public void setDataSource(DataSource dataSource, Map<String, String> config) {
-        this.dataSource = dataSource;
-        this.dataSourceConfig = config;
     }
 
     public List<Map<String, String>> loadData() {
         if (this.dataSource == null) {
             return Lists.newArrayList(new HashMap<>());
         }
-        return this.dataSource.getData(this.dataSourceConfig, null);
+        return this.dataSource.getData(this.dataSourceConfig, this.relativePath);
     }
 
     public String getPath() {
-        return path;
+        return this.path;
     }
 
     public String getName() {
@@ -72,18 +78,47 @@ public class Suite implements Iterable<Script> {
     }
 
     public Map<Script, Script> getScriptChains() {
-        return Maps.newHashMap(scriptChains);
+        return Maps.newHashMap(this.scriptChains);
     }
 
     public boolean isShareState() {
-        return shareState;
+        return this.shareState;
+    }
+
+    public Map<String, String> getDataSourceConfig() {
+        return Maps.newHashMap(this.dataSourceConfig);
+    }
+
+    public DataSource getDataSource() {
+        return this.dataSource;
     }
 
     public List<TestRunBuilder> getTestRuns() {
-        return this.scripts
+        final String suiteName;
+        if (this.path != null && name.contains(".")) {
+            suiteName = name.substring(0, name.lastIndexOf("."));
+        } else {
+            suiteName = this.name;
+        }
+        return this.loadData()
                 .stream()
-                .filter(it -> !scriptChains.containsValue(it))
-                .map(it -> new TestRunBuilder(it).addChain(this.scriptChains))
+                .flatMap(it -> {
+                    String rowNum = it.get(DataSource.ROW_NUMBER);
+                    it.remove(DataSource.ROW_NUMBER);
+                    final String prefix;
+                    if (rowNum != null) {
+                        prefix = suiteName + "_" + rowNum;
+                    } else {
+                        prefix = suiteName;
+                    }
+                    return this.scripts
+                            .stream()
+                            .filter(script -> !scriptChains.containsValue(script))
+                            .map(script -> new TestRunBuilder(script)
+                                    .addChain(this.scriptChains)
+                                    .addTestRunNamePrefix(prefix + "_")
+                                    .setShareInput(it));
+                })
                 .collect(Collectors.toList());
     }
 
@@ -149,6 +184,15 @@ public class Suite implements Iterable<Script> {
                 scriptPath.put("path", s.path);
                 scriptsA.put(scriptPath);
             }
+        }
+        if (this.dataSource != null) {
+            JSONObject data = new JSONObject();
+            final String sourceName = this.dataSource.getClass().getSimpleName().toLowerCase();
+            data.put("source", sourceName);
+            JSONObject configs = new JSONObject();
+            configs.put(sourceName, this.dataSourceConfig);
+            data.put("configs", configs);
+            o.put("share", data);
         }
         o.put("type", "suite");
         o.put("scripts", scriptsA);

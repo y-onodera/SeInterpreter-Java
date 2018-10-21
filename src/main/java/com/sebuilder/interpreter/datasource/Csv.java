@@ -36,7 +36,7 @@ import static com.sebuilder.interpreter.datasource.Utils.findFile;
 public class Csv implements DataSource {
     @Override
     public List<Map<String, String>> getData(Map<String, String> config, File relativeTo) {
-        ArrayList<Map<String, String>> data = new ArrayList<Map<String, String>>();
+        ArrayList<Map<String, String>> data = new ArrayList<>();
         File f = findFile(relativeTo, config.get("path"));
         String charsetName = Context.getInstance().getDataSourceEncording();
         BufferedReader r = null;

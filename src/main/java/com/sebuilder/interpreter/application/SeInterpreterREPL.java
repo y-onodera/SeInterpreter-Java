@@ -1,9 +1,7 @@
 package com.sebuilder.interpreter.application;
 
 import com.google.common.collect.Lists;
-import com.sebuilder.interpreter.Script;
-import com.sebuilder.interpreter.SeInterpreterTestListener;
-import com.sebuilder.interpreter.TestRunBuilder;
+import com.sebuilder.interpreter.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -30,16 +28,16 @@ public class SeInterpreterREPL extends CommandLineRunner {
     }
 
     public void run() {
+        this.setUpREPL();
         try {
-            this.setupREPL();
             this.runningREPL();
         } finally {
             this.tearDownREPL();
         }
     }
 
-    public void setupREPL() {
-        this.seInterpreterTestListener.cleanResult();
+    public void setUpREPL() {
+        this.seInterpreterTestListener.cleanDir();
     }
 
     public void runningREPL() {
@@ -74,8 +72,9 @@ public class SeInterpreterREPL extends CommandLineRunner {
     public void tearDownREPL() {
         if (this.driver != null) {
             this.driver.quit();
+            this.driver = null;
+            this.lastRun = null;
         }
-        this.seInterpreterTestListener.aggregateResult();
     }
 
     public Iterable<Script> loadScript(String file) {
@@ -111,33 +110,43 @@ public class SeInterpreterREPL extends CommandLineRunner {
         this.execute(createTestRunBuilder(script), this.seInterpreterTestListener);
     }
 
-    public void execute(Script script, SeInterpreterTestListener seInterpreterTestListener) {
-        this.execute(createTestRunBuilder(script), seInterpreterTestListener);
+    public void execute(Suite suite, SeInterpreterTestListener seInterpreterTestListener) {
+        seInterpreterTestListener.cleanResult(new File(Context.getInstance().getResultOutputDirectory(), String.valueOf(execCount++)));
+        try {
+            suite.getTestRuns()
+                    .forEach(it -> execute(it, seInterpreterTestListener));
+        } catch (Throwable t) {
+            log.error(t);
+        } finally {
+            seInterpreterTestListener.aggregateResult();
+        }
     }
 
-    public void execute(TestRunBuilder testRunBuilder, SeInterpreterTestListener seInterpreterTestListener) {
-        String suiteName = "com.sebuilder.interpreter.REPL_EXEC" + this.execCount++;
+    public void execute(Script script, SeInterpreterTestListener seInterpreterTestListener) {
+        seInterpreterTestListener.cleanResult(new File(Context.getInstance().getResultOutputDirectory(), String.valueOf(execCount++)));
+        try {
+            this.execute(createTestRunBuilder(script), seInterpreterTestListener);
+        } catch (Throwable t) {
+            log.error(t);
+        } finally {
+            seInterpreterTestListener.aggregateResult();
+        }
+    }
+
+    private void execute(TestRunBuilder testRunBuilder, SeInterpreterTestListener seInterpreterTestListener) {
         for (Map<String, String> data : testRunBuilder.loadData()) {
-            seInterpreterTestListener.openTestSuite(suiteName, data);
             this.execute(testRunBuilder, data, seInterpreterTestListener);
-            seInterpreterTestListener.closeTestSuite();
         }
     }
 
     private void execute(TestRunBuilder testRunBuilder, Map<String, String> data, SeInterpreterTestListener seInterpreterTestListener) {
-        this.log.info("start execute testRunBuilder");
+        this.log.info("start execute test");
         this.lastRun = this.getTestRun(testRunBuilder, data, seInterpreterTestListener);
-        while (this.lastRun.hasNext()) {
-            try {
-                this.lastRun.next();
-            } catch (AssertionError error) {
-                // nothing to do;
-            }
-        }
+        this.lastRun.finish();
         if (this.driver == null) {
             this.driver = this.lastRun.driver();
         }
-        this.log.info("finish execute testRunBuilder");
+        this.log.info("finish execute test");
     }
 
     private StringBuilder startScript() {

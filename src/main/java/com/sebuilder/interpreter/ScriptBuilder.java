@@ -1,7 +1,5 @@
 package com.sebuilder.interpreter;
 
-import com.google.common.collect.Maps;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,7 +12,6 @@ public class ScriptBuilder {
     private File relativePath;
     private boolean usePreviousDriverAndVars;
     private boolean closeDriver;
-    private Map<String, String> shareInputs;
     private DataSource dataSource;
     private Map<String, String> dataSourceConfig;
 
@@ -25,7 +22,6 @@ public class ScriptBuilder {
         this.relativePath = null;
         this.usePreviousDriverAndVars = false;
         this.closeDriver = true;
-        this.shareInputs = Maps.newHashMap();
         this.dataSource = null;
         this.dataSourceConfig = null;
     }
@@ -37,13 +33,22 @@ public class ScriptBuilder {
         this.relativePath = currentDisplay.relativePath;
         this.usePreviousDriverAndVars = currentDisplay.usePreviousDriverAndVars;
         this.closeDriver = currentDisplay.closeDriver;
-        this.shareInputs = currentDisplay.shareInputs;
         this.dataSource = currentDisplay.dataSource;
         this.dataSourceConfig = currentDisplay.dataSourceConfig;
     }
 
-    public ScriptBuilder setSteps(ArrayList<Step> steps) {
-        this.steps = steps;
+    public ScriptBuilder clearStep() {
+        this.steps.clear();
+        return this;
+    }
+
+    public ScriptBuilder addSteps(ArrayList<Step> steps) {
+        this.steps.addAll(steps);
+        return this;
+    }
+
+    public ScriptBuilder addStep(Step aStep) {
+        this.steps.add(aStep);
         return this;
     }
 
@@ -66,11 +71,6 @@ public class ScriptBuilder {
         return this;
     }
 
-    public ScriptBuilder setShareInputs(Map<String, String> shareInputs) {
-        this.shareInputs = shareInputs;
-        return this;
-    }
-
     public ScriptBuilder reusePreviousDriverAndVars() {
         this.closeDriver = false;
         this.usePreviousDriverAndVars = true;
@@ -84,9 +84,9 @@ public class ScriptBuilder {
                 , relativePath
                 , usePreviousDriverAndVars
                 , closeDriver
-                , shareInputs
                 , dataSource
                 , dataSourceConfig
         );
     }
+
 }

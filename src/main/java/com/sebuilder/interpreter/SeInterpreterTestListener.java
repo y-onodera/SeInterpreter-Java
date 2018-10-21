@@ -1,6 +1,5 @@
 package com.sebuilder.interpreter;
 
-import com.google.common.base.Strings;
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 import org.apache.logging.log4j.Logger;
@@ -23,9 +22,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class SeInterpreterTestListener {
-    private final Project project;
-    private final File resultDir;
     private final XMLJUnitResultFormatter formatter;
+    private Project project;
+    private File resultDir;
+    private File downloadDirectory;
+    private File screenShotOutputDirectory;
+    private File templateOutputDirectory;
     private JUnitTest suite;
     private TestCase test;
     private int stepNo;
@@ -40,7 +42,6 @@ public class SeInterpreterTestListener {
         this.project.setName("se-interpreter");
         this.project.setBaseDir(new File("."));
         this.project.setProperty("java.io.tmpdir", System.getProperty("java.io.tmpdir"));
-        this.resultDir = Context.getInstance().getResultOutputDirectory();
         this.formatter = new XMLJUnitResultFormatter();
         this.suite = null;
         this.test = null;
@@ -51,32 +52,68 @@ public class SeInterpreterTestListener {
     }
 
     public void cleanResult() {
-        this.log.info("clean up result folder");
+        this.cleanResult(Context.getInstance().getResultOutputDirectory());
+    }
+
+    public void cleanResult(File dest) {
+        this.cleanDir(dest);
+        this.setUpDir(dest);
+    }
+
+    public void cleanDir() {
+        this.cleanDir(Context.getInstance().getResultOutputDirectory());
+    }
+
+    public void cleanDir(File dest) {
+        this.log.info("clean up directory:" + dest.getName());
         // delete old result
         Delete delete = new Delete();
-        delete.setProject(project);
-        delete.setDir(resultDir);
+        delete.setProject(this.project);
+        delete.setDir(dest);
         delete.execute();
+    }
+
+    public void setUpDir(File dest) {
         // create directory result save in
+        this.resultDir = dest;
         Mkdir mkdir = new Mkdir();
-        mkdir.setProject(project);
-        mkdir.setDir(resultDir);
+        mkdir.setProject(this.project);
+        mkdir.setDir(this.resultDir);
         mkdir.execute();
-        // create directory screenshot output under the resultDir
-        mkdir.setDir(Context.getInstance().getScreenShotOutputDirectory());
+        this.downloadDirectory = new File(resultDir, Context.getInstance().getDownloadDirectory()).getAbsoluteFile();
+        mkdir.setDir(this.downloadDirectory);
+        mkdir.execute();
+        this.screenShotOutputDirectory = new File(resultDir, Context.getInstance().getScreenShotOutputDirectory()).getAbsoluteFile();
+        mkdir.setDir(this.screenShotOutputDirectory);
+        mkdir.execute();
+        this.templateOutputDirectory = new File(resultDir, Context.getInstance().getTemplateOutputDirectory()).getAbsoluteFile();
+        mkdir.setDir(this.templateOutputDirectory);
         mkdir.execute();
     }
 
-    public boolean openTestSuite(String name, Map<String, String> aProperty) {
-        String baseName = name;
-        if (!Strings.isNullOrEmpty(aProperty.get(DataSource.ROW_NUMBER))) {
-            baseName = name + "_rowNumber" + aProperty.get(DataSource.ROW_NUMBER);
-        }
+    public File getResultDir() {
+        return resultDir;
+    }
+
+    public File getDownloadDirectory() {
+        return downloadDirectory;
+    }
+
+    public File getScreenShotOutputDirectory() {
+        return screenShotOutputDirectory;
+    }
+
+    public File getTemplateOutputDirectory() {
+        return templateOutputDirectory;
+    }
+
+    public boolean openTestSuite(String scriptName, String testRunName, Map<String, String> aProperty) {
+        String baseName = testRunName;
         String testName = baseName.replace("\\", ".").replace("/", ".").replaceAll("^\\.+", "");
         this.log.info("open suite:" + testName);
         this.suite = new JUnitTest();
         this.suite.setName(testName);
-        this.suite.setProperties(new Hashtable<String, String>(
+        this.suite.setProperties(new Hashtable<>(
                 aProperty.entrySet()
                         .stream()
                         .collect(Collectors.toMap(
@@ -104,6 +141,14 @@ public class SeInterpreterTestListener {
         this.test = new TestCase(testName) {
         };
         this.formatter.startTest(this.test);
+    }
+
+    public void skipTestIndex(int count) {
+        this.stepNo = this.stepNo + count;
+    }
+
+    public int getStepNo() {
+        return this.stepNo;
     }
 
     public void addError(Throwable throwable) {
@@ -157,26 +202,6 @@ public class SeInterpreterTestListener {
         delete.setProject(this.project);
         delete.addFileset(fs);
         delete.execute();
-    }
-
-    public String testName() {
-        return this.test.getName();
-    }
-
-    public String suiteName() {
-        return this.suite.getName();
-    }
-
-    public void skipTestIndex(int count) {
-        this.stepNo = this.stepNo + count;
-    }
-
-    public int getStepNo() {
-        return this.stepNo;
-    }
-
-    public int getRunTest() {
-        return this.runTest;
     }
 
 }

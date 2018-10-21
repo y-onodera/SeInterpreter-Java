@@ -3,7 +3,6 @@ package com.sebuilder.interpreter.steptype;
 import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
 import com.google.common.io.Files;
-import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.ExportResource;
 import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
@@ -35,7 +34,7 @@ public class ExportTemplate implements StepType {
             ctx.log().info(result);
             if (ctx.containsKey("file")) {
                 String fileName = ctx.string("file");
-                File outputTo = new File(Context.getInstance().getTemplateOutputDirectory(), fileName);
+                File outputTo = new File(ctx.getListener().getTemplateOutputDirectory(), fileName);
                 return outputFile(ctx, result, outputTo, Charsets.UTF_8);
             }
             return true;

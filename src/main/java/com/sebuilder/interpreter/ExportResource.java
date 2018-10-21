@@ -1,7 +1,6 @@
 package com.sebuilder.interpreter;
 
 import au.com.bytecode.opencsv.CSVWriter;
-import com.google.common.base.Strings;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -20,12 +19,12 @@ import java.util.Map;
 public class ExportResource {
     private final Map<String, String> variables;
     private final JSONObject script;
-    private final String datasourceFile;
+    private final File dataSourceFile;
 
-    public ExportResource(JSONObject script, Map<String, String> variables, String datasourceFile) {
+    public ExportResource(JSONObject script, Map<String, String> variables, File dataSourceFile) {
         this.script = script;
         this.variables = new LinkedHashMap<>(variables);
-        this.datasourceFile = datasourceFile;
+        this.dataSourceFile = dataSourceFile;
     }
 
     public static Builder builder(TestRun ctx) {
@@ -41,13 +40,12 @@ public class ExportResource {
     }
 
     public boolean hasDataSource() {
-        return !Strings.isNullOrEmpty(datasourceFile);
+        return this.dataSourceFile != null;
     }
 
     public void outputDataSourceTemplate() throws IOException {
         Map<String, String> valuables = this.getVariables();
-        File outputTo = new File(Context.getInstance().getTemplateOutputDirectory(), this.datasourceFile);
-        CSVWriter writer = new CSVWriter(new OutputStreamWriter(new FileOutputStream(outputTo),
+        CSVWriter writer = new CSVWriter(new OutputStreamWriter(new FileOutputStream(this.dataSourceFile),
                 Charset.forName(Context.getInstance().getDataSourceEncording())));
         writer.writeNext(valuables.keySet().toArray(new String[valuables.keySet().size()]));
         writer.writeNext(valuables.values().toArray(new String[valuables.values().size()]));
@@ -62,7 +60,7 @@ public class ExportResource {
         final JSONObject source;
         final JSONArray steps;
         JSONObject currentStep;
-        final boolean needDatasource;
+        final boolean needDataSource;
 
         public Builder(TestRun aCtx) {
             variables = new LinkedHashMap<>();
@@ -71,24 +69,25 @@ public class ExportResource {
             steps = new JSONArray();
             currentStep = null;
             ctx = aCtx;
-            needDatasource = this.ctx.containsKey("datasource");
+            needDataSource = this.ctx.containsKey("datasource");
         }
 
         public ExportResource build() throws JSONException {
             this.source.put("steps", this.steps);
-            String datasourceFile = null;
-            if (this.needDatasource) {
-                datasourceFile = this.ctx.string("datasource");
+            File dataSourceFile = null;
+            if (this.needDataSource) {
+                final String fileName = this.ctx.string("datasource");
+                dataSourceFile = new File(this.ctx.getListener().getTemplateOutputDirectory(), fileName);
                 JSONObject configs = new JSONObject();
                 JSONObject data = new JSONObject();
                 JSONObject csv = new JSONObject();
-                csv.put("path", datasourceFile);
+                csv.put("path", fileName);
                 configs.put("csv", csv);
                 data.put("configs", configs);
                 data.put("source", "csv");
                 this.source.put("data", data);
             }
-            return new ExportResource(source, this.variables, datasourceFile);
+            return new ExportResource(source, this.variables, dataSourceFile);
         }
 
         public Builder addStep(Exportable source, RemoteWebDriver driver, WebElement element) {
@@ -128,7 +127,7 @@ public class ExportResource {
 
         public Builder stepOption(String opt, String value) {
             try {
-                if (this.needDatasource && this.currentStep.has("locator")) {
+                if (this.needDataSource && this.currentStep.has("locator")) {
                     JSONObject locatorJSON = (JSONObject) this.currentStep.get("locator");
                     Locator locator = new Locator(locatorJSON.getString("type"), locatorJSON.getString("value"));
                     String valuable = addVariable(locator.toPrettyString(), value);

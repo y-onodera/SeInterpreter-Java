@@ -1,7 +1,6 @@
 package com.sebuilder.interpreter.steptype;
 
 import com.google.common.base.Charsets;
-import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.LocatorHolder;
 import com.sebuilder.interpreter.TestRun;
 import org.apache.http.HttpEntity;
@@ -100,7 +99,6 @@ public class FileDownload implements ConditionalStep, LocatorHolder {
     }
 
 
-
     public void getDownloadFile(TestRun ctx, String downloadUrl, String outputFilePath) throws IOException {
         HttpClient httpClient = getHttpClient(ctx);
         HttpGet httpGet = new HttpGet(downloadUrl);
@@ -111,7 +109,7 @@ public class FileDownload implements ConditionalStep, LocatorHolder {
     public void downLoadFile(TestRun ctx, String outputFilePath, HttpResponse response) throws IOException {
         HttpEntity entity = response.getEntity();
         if (entity != null) {
-            File outputFile = new File(Context.getInstance().getDownloadDirectory(), ctx.suiteName() + "_" + ctx.scriptName() + "_" + outputFilePath);
+            File outputFile = new File(ctx.getListener().getDownloadDirectory(), ctx.getTestRunName() + "_" + outputFilePath);
             try (InputStream inputStream = entity.getContent(); FileOutputStream fileOutputStream = new FileOutputStream(outputFile)) {
                 int read;
                 byte[] bytes = new byte[1024];

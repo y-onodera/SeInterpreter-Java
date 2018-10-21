@@ -186,7 +186,7 @@ public class SeInterpreterApplication extends Application {
     @Subscribe
     public void browserOpern(BrowserOpenEvent event) throws IOException, JSONException {
         Script dummy = this.templateScript();
-        this.queue.add((runner) -> runner.runScript(dummy, log -> new SeInterpreterTestListener(log)));
+        this.queue.add((runner) -> runner.runScript(dummy));
     }
 
     @Subscribe
@@ -198,9 +198,9 @@ public class SeInterpreterApplication extends Application {
     }
 
     @Subscribe
-    public void highLightElement(ElementHighLightEvent event) throws IOException, JSONException {
+    public void highLightElement(ElementHighLightEvent event) {
         Script script = getScriptFactory().highLightElement(event.getLocator(), event.getValue());
-        this.queue.add((runner) -> runner.runScript(script, log -> new SeInterpreterTestListener(log)));
+        this.queue.add((runner) -> runner.runScript(script));
     }
 
     @Subscribe
@@ -254,5 +254,4 @@ public class SeInterpreterApplication extends Application {
             Files.asCharSink(target, Charsets.UTF_8).write(content);
         });
     }
-
 }

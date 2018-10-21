@@ -6,12 +6,15 @@ import com.google.common.collect.Maps;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 public class SuiteBuilder {
     private final File suiteFile;
     private final ArrayList<Script> scripts;
     private final Map<Script, Script> scriptChains;
+    private DataSource dataSource;
+    private Map<String, String> dataSourceConfig;
     private boolean shareState = true;
 
     public SuiteBuilder(Script script) {
@@ -22,6 +25,8 @@ public class SuiteBuilder {
         this.suiteFile = null;
         this.scripts = aScripts;
         this.scriptChains = Maps.newHashMap();
+        this.dataSource = null;
+        this.dataSourceConfig = Maps.newHashMap();
     }
 
 
@@ -29,6 +34,8 @@ public class SuiteBuilder {
         this.suiteFile = suiteFile;
         this.scripts = new ArrayList<>();
         this.scriptChains = Maps.newHashMap();
+        this.dataSource = null;
+        this.dataSourceConfig = Maps.newHashMap();
     }
 
     public SuiteBuilder(Suite suite) {
@@ -39,11 +46,19 @@ public class SuiteBuilder {
         }
         this.scripts = Lists.newArrayList(suite);
         this.scriptChains = suite.getScriptChains();
+        this.dataSource = suite.getDataSource();
+        this.dataSourceConfig = suite.getDataSourceConfig();
         this.shareState = suite.isShareState();
     }
 
     public File getSuiteFile() {
         return this.suiteFile;
+    }
+
+    public SuiteBuilder setDataSource(DataSource dataSource, HashMap<String, String> config) {
+        this.dataSource = dataSource;
+        this.dataSourceConfig = config;
+        return this;
     }
 
     public SuiteBuilder setShareState(boolean shareState) {
@@ -107,7 +122,12 @@ public class SuiteBuilder {
             copyScripts.add(copy);
             replaceChainMap(copyScriptChains, script, copy);
         }
-        return new Suite(this.suiteFile, copyScripts, copyScriptChains, this.shareState);
+        return new Suite(this.suiteFile
+                , copyScripts
+                , copyScriptChains
+                , this.dataSource
+                , Maps.newHashMap(this.dataSourceConfig)
+                , this.shareState);
     }
 
     private void replaceChainMap(Map<Script, Script> chainMap, Script oldScript, Script newScript) {
@@ -122,6 +142,4 @@ public class SuiteBuilder {
             }
         }
     }
-
-
 }

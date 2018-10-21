@@ -16,7 +16,6 @@
 
 package com.sebuilder.interpreter.steptype;
 
-import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.screenshot.LocatorInnerScrollElementHandler;
@@ -38,7 +37,7 @@ public class SaveScreenshot implements StepType {
         wd.manage().window().maximize();
         Page target = new Page(ctx, 100, new LocatorInnerScrollElementHandler(wd));
         try {
-            File file = new File(Context.getInstance().getScreenShotOutputDirectory(), ctx.suiteName() + "_" + ctx.scriptName() + "_" + ctx.string("file"));
+            File file = new File(ctx.getListener().getScreenShotOutputDirectory(), ctx.getTestRunName() + "_" + ctx.string("file"));
             ImageIO.write(target.getFinalImage(), "PNG", file);
             return file.exists();
         } catch (IOException e) {

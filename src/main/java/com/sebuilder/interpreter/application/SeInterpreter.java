@@ -92,9 +92,7 @@ public class SeInterpreter extends CommandLineRunner {
 
     private void runScript(TestRunBuilder testRunBuilder) {
         for (Map<String, String> data : testRunBuilder.loadData()) {
-            this.seInterpreterTestListener.openTestSuite(testRunBuilder.getScriptName(), data);
             this.runScript(testRunBuilder, data, this.seInterpreterTestListener);
-            this.seInterpreterTestListener.closeTestSuite();
         }
     }
 

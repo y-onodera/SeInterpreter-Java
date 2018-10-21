@@ -17,6 +17,7 @@ package com.sebuilder.interpreter.factory;
 
 import com.google.common.base.Strings;
 import com.sebuilder.interpreter.*;
+import com.sebuilder.interpreter.steptype.HighLightElement;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,18 +61,12 @@ public class ScriptFactory {
         return this.parse("{\"steps\":[" + "{\"type\":\"get\",\"url\":\"" + url + "\"}" + "]}");
     }
 
-    public Script highLightElement(String locatorType, String value) throws JSONException, IOException {
-        JSONObject json = new JSONObject();
-        JSONArray steps = new JSONArray();
-        JSONObject step = new JSONObject();
-        JSONObject locator = new JSONObject();
-        locator.put("type", locatorType);
-        locator.put("value", value);
-        step.put("type", "highLightElement");
-        step.putOpt("locator", locator);
-        steps.put(step);
-        json.putOpt("steps", steps);
-        return this.parseScript(json, null).iterator().next();
+    public Script highLightElement(String locatorType, String value) {
+        Step highLightElement = new Step(new HighLightElement());
+        highLightElement.locatorParams.put("locator", new Locator(locatorType, value));
+        return new ScriptBuilder()
+                .addStep(highLightElement)
+                .createScript();
     }
 
     /**
@@ -141,9 +136,12 @@ public class ScriptFactory {
      * @throws IOException If anything goes wrong with interpreting the JSON.
      */
     public Suite parseSuite(JSONObject o, File suiteFile) throws IOException {
-        SuiteBuilder builder = new SuiteBuilder(suiteFile)
-                .setShareState(o.optBoolean("shareState", true));
         try {
+            DataSource dataSource = this.dataSourceFactory.getDataSource(o);
+            HashMap<String, String> config = this.dataSourceFactory.getDataSourceConfig(o);
+            SuiteBuilder builder = new SuiteBuilder(suiteFile)
+                    .setShareState(o.optBoolean("shareState", true))
+                    .setDataSource(dataSource, config);
             this.loadScripts(o, builder);
             return builder.createSuite();
         } catch (JSONException e) {
@@ -174,7 +172,7 @@ public class ScriptFactory {
         DataSource dataSource = this.dataSourceFactory.getDataSource(o);
         HashMap<String, String> config = this.dataSourceFactory.getDataSourceConfig(o);
         Script script = new ScriptBuilder()
-                .setSteps(this.getStepTypeFactory().parseStep(o))
+                .addSteps(this.getStepTypeFactory().parseStep(o))
                 .associateWith(saveTo)
                 .setDataSource(dataSource, config)
                 .createScript();

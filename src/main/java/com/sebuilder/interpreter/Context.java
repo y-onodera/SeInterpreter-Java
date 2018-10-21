@@ -11,121 +11,72 @@ public enum Context {
     }
 
     private final File baseDirectory = Paths.get(".").toAbsolutePath().normalize().toFile();
-    /**
-     *
-     */
-    private String dataSourceEncording = "UTF-8";
-    /**
-     *
-     */
     private String dataSourceDirectory = "input";
-    /**
-     *
-     */
-    private String screenShotOutputDirectory = "screenshot";
-    /**
-     *
-     */
+    private String dataSourceEncording = "UTF-8";
     private String resultOutputDirectory = "result";
-    /**
-     *
-     */
-    private String templateOutputDirectory = "template";
-    /**
-     *
-     */
     private String downloadDirectory = "download";
-
-
+    private String screenShotOutputDirectory = "screenshot";
+    private String templateOutputDirectory = "template";
     private String browser = "Chrome";
 
-    public File getBaseDirectory() {
-        return baseDirectory;
+    public void setBrowser(String browser) {
+        this.browser = browser;
     }
 
-    /**
-     * @return
-     */
-    public String getDataSourceEncording() {
-        return dataSourceEncording;
-    }
-
-    /**
-     * @param dataSourceEncording
-     */
-    public void setDataSourceEncording(String dataSourceEncording) {
-        this.dataSourceEncording = dataSourceEncording;
-    }
-
-    /**
-     * @return
-     */
-    public File getDataSourceDirectory() {
-        return new File(dataSourceDirectory);
-    }
-
-    /**
-     * @param dataSourceDirectory
-     */
     public void setDataSourceDirectory(String dataSourceDirectory) {
         this.dataSourceDirectory = dataSourceDirectory;
     }
 
-    /**
-     * @return
-     */
-    public File getScreenShotOutputDirectory() {
-        File result = new File(this.getResultOutputDirectory(), this.screenShotOutputDirectory);
-        if (!result.exists()) {
-            result.mkdirs();
-        }
-        return new File(this.getResultOutputDirectory(), screenShotOutputDirectory);
-    }
-
-    /**
-     * @param screenShotOutput
-     */
-    public void setScreenShotOutputDirectory(String screenShotOutput) {
-        this.screenShotOutputDirectory = screenShotOutput;
-    }
-
-    public File getResultOutputDirectory() {
-        return new File(resultOutputDirectory);
+    public void setDataSourceEncording(String dataSourceEncording) {
+        this.dataSourceEncording = dataSourceEncording;
     }
 
     public void setResultOutputDirectory(String aResultOutputDirectory) {
         this.resultOutputDirectory = aResultOutputDirectory;
     }
 
-    public File getTemplateOutputDirectory() {
-        File result = new File(this.getResultOutputDirectory(), this.templateOutputDirectory);
-        if (!result.exists()) {
-            result.mkdirs();
-        }
-        return result;
+    public void setDownloadDirectory(String downloadDirectory) {
+        this.downloadDirectory = downloadDirectory;
+    }
+
+    public void setScreenShotOutputDirectory(String screenShotOutput) {
+        this.screenShotOutputDirectory = screenShotOutput;
     }
 
     public void setTemplateOutputDirectory(String aTemplateOutputDirectory) {
         this.templateOutputDirectory = aTemplateOutputDirectory;
     }
 
-    public File getDownloadDirectory() {
-        File result = new File(this.getResultOutputDirectory(), this.downloadDirectory);
-        if (!result.exists()) {
-            result.mkdirs();
-        }
-        return result;
-    }
-
-    public void setDownloadDirectory(String downloadDirectory) {
-        this.downloadDirectory = downloadDirectory;
-    }
-
     public String getBrowser() {
         return this.browser;
     }
 
-    public void setBrowser(String browser) {
-        this.browser = browser;
+    public File getBaseDirectory() {
+        return baseDirectory;
     }
+
+    public File getDataSourceDirectory() {
+        return new File(dataSourceDirectory);
+    }
+
+    public String getDataSourceEncording() {
+        return dataSourceEncording;
+    }
+
+    public File getResultOutputDirectory() {
+        return new File(resultOutputDirectory);
+    }
+
+    public String getDownloadDirectory() {
+        return this.downloadDirectory;
+    }
+
+    public String getScreenShotOutputDirectory() {
+        return this.screenShotOutputDirectory;
+    }
+
+    public String getTemplateOutputDirectory() {
+        return this.templateOutputDirectory;
+    }
+
 }
