@@ -60,6 +60,6 @@ public class Loop implements StepType {
     private boolean next(TestRun ctx) {
         ctx.toNextStepIndex();
         ctx.startTest();
-        return ctx.currentStep().type.run(ctx);
+        return ctx.currentStep().getType().run(ctx);
     }
 }

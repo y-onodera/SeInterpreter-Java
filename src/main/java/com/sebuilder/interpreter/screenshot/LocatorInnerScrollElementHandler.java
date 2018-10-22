@@ -49,7 +49,7 @@ public class LocatorInnerScrollElementHandler implements VerticalSurvey, InnerSc
     }
 
     public void handleScrollableTag(Printable parent, TreeMap<Integer, InnerElement> innerPrintableElement, TestRun testRun) {
-        if (!testRun.currentStep().locatorParams.containsKey("locator")) {
+        if (!testRun.currentStep().locatorContains("locator")) {
             return;
         }
         List<WebElement> divs = testRun.locator().findElements(testRun)

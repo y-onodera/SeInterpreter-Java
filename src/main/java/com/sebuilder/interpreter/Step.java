@@ -31,29 +31,77 @@ public class Step {
      * Whether the step is negated. Only relevant for Assert/Verify/WaitFor
      * steps.
      */
-    public boolean negated;
-
+    private boolean negated;
     /**
      * The custom name of the step, if any.
      */
-    public String name;
-
-    public StepType type;
-    public HashMap<String, String> stringParams = new HashMap<>();
-    public HashMap<String, Locator> locatorParams = new HashMap<>();
-
-    public boolean isNegated() {
-        return negated;
-    }
+    private String name;
+    private StepType type;
+    private HashMap<String, String> stringParams = new HashMap<>();
+    private HashMap<String, Locator> locatorParams = new HashMap<>();
 
     public Step(StepType type) {
         this.type = type;
     }
 
+    public Step(String name, StepType type, boolean isNegated) {
+        this.name = name;
+        this.type = type;
+        this.negated = isNegated;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public StepType getType() {
+        return this.type;
+    }
+
+    public boolean isNegated() {
+        return negated;
+    }
+
+    public boolean run(TestRun testRun) {
+        if (this.isSkip(testRun)) {
+            return true;
+        }
+        return this.type.run(testRun);
+    }
+
+    public boolean isSkip(TestRun ctx) {
+        if (this.isSkippable()) {
+            return Boolean.parseBoolean(ctx.string("skip"));
+        }
+        return false;
+    }
+
+    public void put(String key, String value) {
+        this.stringParams.put(key, value);
+    }
+
+    public String getParam(String paramName) {
+        return this.stringParams.get(paramName);
+    }
+
+    public boolean containsParam(String paramKey) {
+        return this.stringParams.containsKey(paramKey);
+    }
+
+    public void put(String key, Locator value) {
+        this.locatorParams.put(key, value);
+    }
+
+    public Locator getLocator(String locatorName) {
+        return this.locatorParams.get(locatorName);
+    }
+
+    public boolean locatorContains(String locatorName) {
+        return this.locatorParams.containsKey(locatorName);
+    }
+
     public Step copy() {
-        Step newStep = new Step(this.type);
-        newStep.negated = this.negated;
-        newStep.name = this.name;
+        Step newStep = new Step(this.name, this.type, this.negated);
         this.stringParams.entrySet().forEach(it -> newStep.stringParams.put(it.getKey(), it.getValue()));
         this.locatorParams.entrySet().forEach(it -> newStep.locatorParams.put(it.getKey(), it.getValue().copy()));
         return newStep;
@@ -97,31 +145,37 @@ public class Step {
 
     public JSONObject toJSON() throws JSONException {
         JSONObject o = new JSONObject();
-        if (name != null) {
-            o.put("step_name", name);
+        if (this.name != null) {
+            o.put("step_name", this.name);
         }
-        if (type instanceof Assert) {
-            o.put("type", "assert" + ((Assert) type).getter.getClass().getSimpleName());
-        } else if (type instanceof Verify) {
-            o.put("type", "verify" + ((Verify) type).getter.getClass().getSimpleName());
-        } else if (type instanceof WaitFor) {
-            o.put("type", "waitFor" + ((WaitFor) type).getter.getClass().getSimpleName());
-        } else if (type instanceof Store) {
-            o.put("type", "store" + ((Store) type).getter.getClass().getSimpleName());
-        } else if (type instanceof Print) {
-            o.put("type", "print" + ((Print) type).getter.getClass().getSimpleName());
+        if (this.type instanceof Assert) {
+            o.put("type", "assert" + ((Assert) this.type).getter.getClass().getSimpleName());
+        } else if (this.type instanceof Verify) {
+            o.put("type", "verify" + ((Verify) this.type).getter.getClass().getSimpleName());
+        } else if (this.type instanceof WaitFor) {
+            o.put("type", "waitFor" + ((WaitFor) this.type).getter.getClass().getSimpleName());
+        } else if (this.type instanceof Store) {
+            o.put("type", "store" + ((Store) this.type).getter.getClass().getSimpleName());
+        } else if (this.type instanceof Print) {
+            o.put("type", "print" + ((Print) this.type).getter.getClass().getSimpleName());
         } else {
-            o.put("type", type.getClass().getSimpleName());
+            o.put("type", this.type.getClass().getSimpleName());
         }
-        o.put("negated", negated);
-        for (Map.Entry<String, String> pe : stringParams.entrySet()) {
+        o.put("negated", this.negated);
+        for (Map.Entry<String, String> pe : this.stringParams.entrySet()) {
             o.put(pe.getKey(), pe.getValue());
         }
-        for (Map.Entry<String, Locator> le : locatorParams.entrySet()) {
+        for (Map.Entry<String, Locator> le : this.locatorParams.entrySet()) {
             o.put(le.getKey(), le.getValue().toJSON());
         }
-
+        if (!isSkippable()) {
+            o.put("skip", "false");
+        }
         return o;
+    }
+
+    private boolean isSkippable() {
+        return this.stringParams.containsKey("skip");
     }
 
     public JSONObject toFullJSON() throws JSONException {

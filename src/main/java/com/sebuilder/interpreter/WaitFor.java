@@ -44,14 +44,14 @@ public class WaitFor implements StepType {
 		boolean result;
 		// NB: If the step is negated, a result of "true"  means that we haven't succeeded yet.
 		//     If the step is normal,  a result of "false" means that we haven't succeeded yet.
-		while ((result = test(ctx)) == ctx.currentStep().negated && System.currentTimeMillis() < stopBy) {
+        while ((result = test(ctx)) == ctx.currentStep().isNegated() && System.currentTimeMillis() < stopBy) {
 			try {
 				Thread.sleep(intervalMs);
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}
 		}
-		return result != ctx.currentStep().negated;
+        return result != ctx.currentStep().isNegated();
 	}
 
     @Override

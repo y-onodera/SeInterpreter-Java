@@ -13,7 +13,7 @@ public class Variable implements Getter {
     @Override
     public String get(TestRun ctx) {
         String variableName = ctx.string("variable");
-        ctx.currentStep().stringParams.put("text", "${" + variableName + "}");
+        ctx.currentStep().put("text", "${" + variableName + "}");
         return ctx.text();
     }
 

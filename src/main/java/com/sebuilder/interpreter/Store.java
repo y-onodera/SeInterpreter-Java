@@ -34,7 +34,7 @@ public class Store implements StepType {
     @Override
     public boolean run(TestRun ctx) {
         String value = getter.get(ctx);
-        if (ctx.currentStep().stringParams.containsKey("regex")) {
+        if (ctx.currentStep().containsParam("regex")) {
             value = value.replaceAll(ctx.string("regex"), ctx.string("replacement"));
         }
         ctx.vars().put(ctx.string("variable"), value);

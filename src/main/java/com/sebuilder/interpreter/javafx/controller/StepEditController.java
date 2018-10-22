@@ -195,11 +195,12 @@ public class StepEditController {
             Iterator keys = json.keys();
             int row = 1;
             String typeName = this.resetStepType(json);
+            row = addTextBox(json, row, "skip");
             row = addLocator(json, row, "locator", true);
             while (keys.hasNext()) {
                 String key = keys.next().toString();
-                if (key.equals("type") || key.equals("locator")
-                        || key.equals("negated") && !(typeName.startsWith("wait") || typeName.startsWith("verify"))) {
+                if (key.equals("type") || key.equals("locator") || key.equals("skip")
+                        || (key.equals("negated") && !(typeName.startsWith("wait") || typeName.startsWith("verify")))) {
                     continue;
                 }
                 if (key.startsWith("locator")) {

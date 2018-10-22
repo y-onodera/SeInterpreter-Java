@@ -63,7 +63,7 @@ public class ScriptFactory {
 
     public Script highLightElement(String locatorType, String value) {
         Step highLightElement = new Step(new HighLightElement());
-        highLightElement.locatorParams.put("locator", new Locator(locatorType, value));
+        highLightElement.put("locator", new Locator(locatorType, value));
         return new ScriptBuilder()
                 .addStep(highLightElement)
                 .createScript();

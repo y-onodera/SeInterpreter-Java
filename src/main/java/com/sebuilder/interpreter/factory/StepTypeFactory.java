@@ -116,11 +116,11 @@ public class StepTypeFactory {
                     rawStepType = false;
                 }
                 if (name.equals("retry")) {
-                    className ="Retry";
+                    className = "Retry";
                     rawStepType = false;
                 }
                 if (name.equals("loop")) {
-                    className ="Loop";
+                    className = "Loop";
                     rawStepType = false;
                 }
                 Class<?> c = null;
@@ -180,10 +180,9 @@ public class StepTypeFactory {
      */
     private Step createStep(JSONObject stepO) throws JSONException {
         StepType type = this.getStepTypeOfName(stepO.getString("type"));
-        Step step = new Step(type);
-        step.negated = stepO.optBoolean("negated", false);
-        step.name = stepO.optString("step_name", null);
-        return step;
+        boolean isNegated = stepO.optBoolean("negated", false);
+        String name = stepO.optString("step_name", null);
+        return new Step(name, type, isNegated);
     }
 
     /**
@@ -213,7 +212,7 @@ public class StepTypeFactory {
         } else if (key.equals("actions")) {
             this.configureStepSubElement(steps, stepO, step, key);
         } else {
-            step.stringParams.put(key, stepO.getString(key));
+            step.put(key, stepO.getString(key));
         }
     }
 
@@ -226,14 +225,14 @@ public class StepTypeFactory {
     private void configureStepSubElement(ArrayList<Step> steps, JSONObject stepO, Step step, String key) throws JSONException {
         switch (key) {
             case "locator":
-                step.locatorParams.put(key, new Locator(stepO.getJSONObject(key).getString("type"), stepO.getJSONObject(key).getString("value")));
+                step.put(key, new Locator(stepO.getJSONObject(key).getString("type"), stepO.getJSONObject(key).getString("value")));
                 break;
             case "until":
                 this.parseStep(steps, stepO.getJSONObject(key));
                 break;
             case "actions":
                 JSONArray actions = stepO.getJSONArray(key);
-                step.stringParams.put("subStep", String.valueOf(actions.length()));
+                step.put("subStep", String.valueOf(actions.length()));
                 for (int i = 0, j = actions.length(); i < j; i++) {
                     this.parseStep(steps, actions.getJSONObject(i));
                 }

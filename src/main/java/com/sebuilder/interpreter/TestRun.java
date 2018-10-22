@@ -111,7 +111,7 @@ public class TestRun {
      * @return
      */
     public boolean containsKey(String key) {
-        return this.currentStep().stringParams.containsKey(key);
+        return this.currentStep().containsParam(key);
     }
 
     /**
@@ -128,7 +128,7 @@ public class TestRun {
      * @return The parameter's value.
      */
     public String string(String paramName) {
-        String s = this.currentStep().stringParams.get(paramName);
+        String s = this.currentStep().getParam(paramName);
         if (s == null) {
             throw new RuntimeException("Missing parameter \"" + paramName + "\" at step #" + (this.stepIndex + 1) + ".");
         }
@@ -157,7 +157,7 @@ public class TestRun {
      * @return The parameter's value.
      */
     public Locator locator(String paramName) {
-        Locator l = this.currentStep().locatorParams.get(paramName);
+        Locator l = this.currentStep().getLocator(paramName);
         if (l == null) {
             throw new RuntimeException("Missing parameter \"" + paramName + "\" at step #" + (this.stepIndex + 1) + ".");
         }
@@ -250,11 +250,11 @@ public class TestRun {
     public boolean runTest() {
         this.toNextStepIndex();
         this.startTest();
-        return this.currentStep().type.run(this);
+        return this.currentStep().run(this);
     }
 
     public void startTest() {
-        this.getListener().startTest(currentStep().name != null ? this.currentStep().name : this.currentStep().toPrettyString());
+        this.getListener().startTest(currentStep().getName() != null ? this.currentStep().getName() : this.currentStep().toPrettyString());
     }
 
     public boolean processTestSuccess() {
@@ -265,7 +265,7 @@ public class TestRun {
     public boolean processTestFailure() {
         this.getListener().addFailure(this.currentStep() + " failed.");
         // If a verify failed, we just note this but continue.
-        if (this.currentStep().type instanceof Verify) {
+        if (this.currentStep().getType() instanceof Verify) {
             return false;
         }
         // In all other cases, we throw an exception to stop the run.
