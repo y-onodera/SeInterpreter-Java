@@ -127,6 +127,9 @@ public class Script {
 
     public Script insertStep(int stepIndex, Step newStep) {
         return this.editStep(it -> {
+            if (this.steps.size() == 0) {
+                return Lists.newArrayList(newStep);
+            }
                     final ArrayList<Step> newSteps = new ArrayList<>();
                     for (int i = 0, j = this.steps.size(); i < j; i++) {
                         if (i == stepIndex) {
@@ -141,6 +144,9 @@ public class Script {
 
     public Script addStep(int stepIndex, Step newStep) {
         return this.editStep(it -> {
+            if (this.steps.size() == 0) {
+                return Lists.newArrayList(newStep);
+            }
                     final ArrayList<Step> newSteps = new ArrayList<>();
                     for (int i = 0, j = this.steps.size(); i < j; i++) {
                         newSteps.add(this.steps.get(i));

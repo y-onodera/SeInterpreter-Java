@@ -299,7 +299,7 @@ public class TestRun {
 
     public boolean end(boolean success) {
         this.getListener().closeTestSuite();
-        if (this.chainRun) {
+        if (this.chainRun && !this.isStopped()) {
             this.chainRun = false;
             return this.chainRun(this.scriptChain.get(this.script));
         }

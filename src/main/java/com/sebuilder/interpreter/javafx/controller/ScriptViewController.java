@@ -83,7 +83,7 @@ public class ScriptViewController {
     void handleScriptSaveAs(ActionEvent event) {
         FileChooser fileSave = new FileChooser();
         fileSave.setTitle("Close Resource File");
-        fileSave.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("select target script", ".json"));
+        fileSave.getExtensionFilters().add(new FileChooser.ExtensionFilter("json format (*.json)", "*.json"));
         fileSave.setInitialDirectory(Context.getInstance().getBaseDirectory());
         File file = fileSave.showSaveDialog(treeViewScriptName.getScene().getWindow());
         if (file != null) {
@@ -113,5 +113,4 @@ public class ScriptViewController {
             EventBus.publish(new ScriptSelectEvent(lastItem.getValue()));
         });
     }
-
 }

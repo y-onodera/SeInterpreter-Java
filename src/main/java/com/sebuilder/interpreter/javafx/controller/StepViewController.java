@@ -156,7 +156,11 @@ public class StepViewController {
         dialog.setTitle("edit step");
         StepEditController controller = loader.getController();
         ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
-        controller.init(dialog, item.no.intValue() - 1, action);
+        int no = 0;
+        if (item != null) {
+            no = item.no.intValue() - 1;
+        }
+        controller.init(dialog, no, action);
         return dialog;
     }
 

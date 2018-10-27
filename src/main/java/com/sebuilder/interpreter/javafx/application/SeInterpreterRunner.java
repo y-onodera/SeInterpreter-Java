@@ -44,7 +44,11 @@ public class SeInterpreterRunner {
         SeInterpreterTestListener listener = new SeInterpreterTestListener(this.log);
         this.repl.execute(get, listener);
         File exported = new File(listener.getTemplateOutputDirectory(), fileName);
-        return this.repl.loadScript(exported.getAbsolutePath()).iterator().next();
+        Script result = this.repl.loadScript(exported.getAbsolutePath()).iterator().next();
+        return result.builder()
+                .associateWith(null)
+                .setName(result.name)
+                .createScript();
     }
 
     public void runScript(Script currentDisplay) {

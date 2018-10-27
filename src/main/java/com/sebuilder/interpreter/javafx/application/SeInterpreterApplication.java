@@ -180,8 +180,9 @@ public class SeInterpreterApplication extends Application {
 
     @Subscribe
     public void opern(BrowserOpenEvent event) throws IOException, JSONException {
-        Script dummy = this.templateScript();
-        this.runner.runScript(dummy);
+        this.runner.runScript(this.templateScript(), logger -> {
+            return new SeInterpreterTestListener(logger);
+        });
     }
 
     @Subscribe
@@ -232,8 +233,7 @@ public class SeInterpreterApplication extends Application {
     }
 
     private Script templateScript() throws IOException, JSONException {
-        Script templateScript = getScriptFactory().open("https://www.google.com");
-        return templateScript;
+        return getScriptFactory().open("https://www.google.com");
     }
 
     private void resetSuite(Suite aSuite) {

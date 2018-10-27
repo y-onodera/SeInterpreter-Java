@@ -65,6 +65,11 @@ public class ScriptBuilder {
         return this;
     }
 
+    public ScriptBuilder setName(String name) {
+        this.name = name;
+        return this;
+    }
+
     public ScriptBuilder setDataSource(DataSource dataSource, HashMap<String, String> config) {
         this.dataSource = dataSource;
         this.dataSourceConfig = config;
