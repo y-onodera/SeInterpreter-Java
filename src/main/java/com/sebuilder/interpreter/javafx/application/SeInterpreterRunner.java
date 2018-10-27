@@ -6,49 +6,23 @@ import com.sebuilder.interpreter.SeInterpreterTestListener;
 import com.sebuilder.interpreter.Suite;
 import com.sebuilder.interpreter.application.CommandLineArgument;
 import com.sebuilder.interpreter.application.SeInterpreterREPL;
+import javafx.concurrent.Task;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
-import java.util.Queue;
-import java.util.function.Consumer;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
-public class SeInterpreterRunner implements Runnable {
+public class SeInterpreterRunner {
 
     private int exportCount;
 
-    private boolean stop;
-
     private SeInterpreterREPL repl;
 
-    private Queue<Consumer<SeInterpreterRunner>> queue;
-
     private Logger log = LogManager.getLogger(SeInterpreterRunner.class);
-
-    public SeInterpreterRunner(Queue<Consumer<SeInterpreterRunner>> queue) {
-        this.queue = queue;
-    }
-
-    @Override
-    public void run() {
-        this.log.info("start running");
-        while (!this.stop) {
-            Consumer<SeInterpreterRunner> operation = this.queue.poll();
-            if (operation != null) {
-                try {
-                    this.log.info("operation recieve:" + operation);
-                    operation.accept(this);
-                } catch (Throwable ex) {
-                    this.log.error(ex);
-                }
-            }
-        }
-        if (this.isOpen()) {
-            this.close();
-        }
-        this.log.info("stop running");
-    }
 
     public void reloadSetting(String browserName, String driverPath) {
         if (this.isOpen()) {
@@ -73,33 +47,40 @@ public class SeInterpreterRunner implements Runnable {
         return this.repl.loadScript(exported.getAbsolutePath()).iterator().next();
     }
 
-    public void runSuite(Suite suite) {
-        if (!this.isOpen()) {
-            this.setUp();
-        }
-        this.repl.execute(suite, new SeInterpreterTestGUIListener(this.log));
-    }
-
     public void runScript(Script currentDisplay) {
         this.runScript(currentDisplay, log -> new SeInterpreterTestGUIListener(log));
     }
 
     public void runScript(Script currentDisplay, Function<Logger, SeInterpreterTestListener> listenerFactory) {
-        if (!this.isOpen()) {
-            this.setUp();
-        }
-        this.repl.execute(currentDisplay, listenerFactory.apply(this.log));
+        this.backgroundTaskRunning(() -> {
+            if (!this.isOpen()) {
+                this.setUp();
+            }
+            this.repl.execute(currentDisplay, listenerFactory.apply(this.log));
+            return true;
+        });
+    }
+
+    public void runSuite(Suite suite) {
+        this.backgroundTaskRunning(() -> {
+            if (!this.isOpen()) {
+                this.setUp();
+            }
+            this.repl.execute(suite, new SeInterpreterTestGUIListener(this.log));
+            return true;
+        });
+    }
+
+    public void stopRunning() {
+        repl.stopRunning();
     }
 
     public void close() {
         if (!this.isOpen()) {
             return;
         }
+        this.stopRunning();
         this.repl.tearDownREPL();
-    }
-
-    public void quit() {
-        this.stop = true;
     }
 
     private void setUp() {
@@ -108,6 +89,29 @@ public class SeInterpreterRunner implements Runnable {
             this.repl = new SeInterpreterREPL(args, log);
             this.repl.setUpREPL();
         }
+    }
+
+    private void backgroundTaskRunning(Supplier<Boolean> s) {
+        Task task = new Task() {
+            @Override
+            protected Object call() {
+                Boolean result = false;
+                try {
+                    log.info("operation recieve");
+                    result = s.get();
+                } catch (Throwable ex) {
+                    log.error(ex);
+                }
+                if (result) {
+                    log.info("operation success");
+                } else {
+                    log.info("operation failed");
+                }
+                return result;
+            }
+        };
+        Executor executor = Executors.newSingleThreadExecutor();
+        executor.execute(task);
     }
 
 }

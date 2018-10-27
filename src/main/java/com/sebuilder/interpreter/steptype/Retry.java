@@ -15,7 +15,6 @@ public class Retry implements StepType {
      * @return Whether the step succeeded. This should be true except for failed verify steps, which
      * should return false. Other failures should throw a RuntimeException.
      */
-    @Override
     public boolean run(TestRun ctx) {
         ctx.processTestSuccess();
         boolean success = true;
@@ -52,9 +51,7 @@ public class Retry implements StepType {
     }
 
     private boolean next(TestRun ctx) {
-        ctx.toNextStepIndex();
-        ctx.startTest();
-        return ctx.currentStep().getType().run(ctx);
+        return ctx.runTest();
     }
 
 }

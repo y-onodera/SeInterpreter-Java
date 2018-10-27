@@ -113,8 +113,7 @@ public class SeInterpreterREPL extends CommandLineRunner {
     public void execute(Suite suite, SeInterpreterTestListener seInterpreterTestListener) {
         seInterpreterTestListener.cleanResult(new File(Context.getInstance().getResultOutputDirectory(), String.valueOf(execCount++)));
         try {
-            suite.getTestRuns()
-                    .forEach(it -> execute(it, seInterpreterTestListener));
+            suite.getTestRuns().forEach(it -> execute(it, seInterpreterTestListener));
         } catch (Throwable t) {
             log.error(t);
         } finally {
@@ -133,20 +132,31 @@ public class SeInterpreterREPL extends CommandLineRunner {
         }
     }
 
-    private void execute(TestRunBuilder testRunBuilder, SeInterpreterTestListener seInterpreterTestListener) {
-        for (Map<String, String> data : testRunBuilder.loadData()) {
-            this.execute(testRunBuilder, data, seInterpreterTestListener);
+    public void stopRunning() {
+        if (this.lastRun != null) {
+            this.log.info("stop execute test");
+            this.lastRun.stop();
         }
     }
 
-    private void execute(TestRunBuilder testRunBuilder, Map<String, String> data, SeInterpreterTestListener seInterpreterTestListener) {
-        this.log.info("start execute test");
-        this.lastRun = this.getTestRun(testRunBuilder, data, seInterpreterTestListener);
-        this.lastRun.finish();
-        if (this.driver == null) {
+    private void execute(TestRunBuilder testRunBuilder, SeInterpreterTestListener seInterpreterTestListener) {
+        for (Map<String, String> data : testRunBuilder.loadData()) {
+            boolean stop = this.execute(testRunBuilder, data, seInterpreterTestListener);
+            if (stop) {
+                break;
+            }
+        }
+    }
+
+    private boolean execute(TestRunBuilder testRunBuilder, Map<String, String> data, SeInterpreterTestListener seInterpreterTestListener) {
+        if (this.driver == null && lastRun != null) {
             this.driver = this.lastRun.driver();
         }
+        this.lastRun = this.getTestRun(testRunBuilder, data, seInterpreterTestListener);
+        this.log.info("start execute test");
+        this.lastRun.finish();
         this.log.info("finish execute test");
+        return this.lastRun.isStopped();
     }
 
     private StringBuilder startScript() {

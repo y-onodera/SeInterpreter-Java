@@ -9,6 +9,7 @@ import com.sebuilder.interpreter.javafx.event.file.FileLoadEvent;
 import com.sebuilder.interpreter.javafx.event.replay.RunEvent;
 import com.sebuilder.interpreter.javafx.event.replay.RunSuiteEvent;
 import com.sebuilder.interpreter.javafx.event.replay.StepResultResetEvent;
+import com.sebuilder.interpreter.javafx.event.replay.StopEvent;
 import com.sebuilder.interpreter.javafx.event.script.ScriptResetEvent;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -114,6 +115,11 @@ public class MenuController {
     void handleReplayScript(ActionEvent event) {
         EventBus.publish(new StepResultResetEvent());
         EventBus.publish(new RunEvent());
+    }
+
+    @FXML
+    void handleReplayStop(ActionEvent event) {
+        EventBus.publish(new StopEvent());
     }
 
 }

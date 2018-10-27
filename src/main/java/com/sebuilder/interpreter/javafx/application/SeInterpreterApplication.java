@@ -32,9 +32,6 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
-import java.util.Queue;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.function.Consumer;
 
 public class SeInterpreterApplication extends Application {
 
@@ -42,7 +39,7 @@ public class SeInterpreterApplication extends Application {
 
     private Script currentDisplay;
 
-    private Queue<Consumer<SeInterpreterRunner>> queue = new LinkedBlockingDeque<>();
+    private SeInterpreterRunner runner;
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -55,12 +52,12 @@ public class SeInterpreterApplication extends Application {
         stage.show();
         EventBus.registSubscriber(this);
         EventBus.publish(new ScriptResetEvent());
-        new Thread(new SeInterpreterRunner(this.queue)).start();
+        this.runner = new SeInterpreterRunner();
     }
 
     @Override
     public void stop() throws Exception {
-        this.queue.add((runner) -> runner.quit());
+        this.runner.close();
         super.stop();
     }
 
@@ -177,58 +174,57 @@ public class SeInterpreterApplication extends Application {
     public void browserSetting(BrowserSettingEvent event) throws IOException, JSONException {
         String browserName = event.getSelectedBrowser();
         String driverPath = event.getDriverPath();
-        this.queue.add((runner) -> {
-            runner.reloadSetting(browserName, driverPath);
-        });
-        this.browserOpern(new BrowserOpenEvent());
+        this.runner.reloadSetting(browserName, driverPath);
+        this.opern(new BrowserOpenEvent());
     }
 
     @Subscribe
-    public void browserOpern(BrowserOpenEvent event) throws IOException, JSONException {
+    public void opern(BrowserOpenEvent event) throws IOException, JSONException {
         Script dummy = this.templateScript();
-        this.queue.add((runner) -> runner.runScript(dummy));
+        this.runner.runScript(dummy);
     }
 
     @Subscribe
-    public void browserExportScriptTemplate(TemplateLoadEvent event) {
-        this.queue.add((runner) -> {
-            Script export = runner.exportScriptTemplate();
-            Platform.runLater(() -> EventBus.publish(new ScriptAddEvent(export)));
-        });
+    public void exportScriptTemplate(TemplateLoadEvent event) {
+        Script export = this.runner.exportScriptTemplate();
+        Platform.runLater(() -> EventBus.publish(new ScriptAddEvent(export)));
     }
 
     @Subscribe
     public void highLightElement(ElementHighLightEvent event) {
         Script script = getScriptFactory().highLightElement(event.getLocator(), event.getValue());
-        this.queue.add((runner) -> runner.runScript(script));
+        this.runner.runScript(script);
     }
 
     @Subscribe
-    public void browserRunStep(RunStepEvent event) {
-        this.queue.add((runner) -> {
-            runner.runScript(this.currentDisplay.removeStep(event.getFilter())
-                    , log -> new SeInterpreterTestGUIListener(log) {
-                        @Override
-                        public int getStepNo() {
-                            return event.getStepNoFunction().apply(super.getStepNo());
-                        }
-                    });
-        });
+    public void runStep(RunStepEvent event) {
+        this.runner.runScript(this.currentDisplay.removeStep(event.getFilter())
+                , log -> new SeInterpreterTestGUIListener(log) {
+                    @Override
+                    public int getStepNo() {
+                        return event.getStepNoFunction().apply(super.getStepNo());
+                    }
+                });
     }
 
     @Subscribe
-    public void browserRunScript(RunEvent event) {
-        this.queue.add((runner) -> runner.runScript(this.currentDisplay));
+    public void runScript(RunEvent event) {
+        this.runner.runScript(this.currentDisplay);
     }
 
     @Subscribe
-    public void browserRunSuite(RunSuiteEvent event) {
-        this.queue.add((runner) -> runner.runSuite(this.suite));
+    public void runSuite(RunSuiteEvent event) {
+        this.runner.runSuite(this.suite);
     }
 
     @Subscribe
-    public void browserClose(BrowserCloseEvent event) {
-        this.queue.add((runner) -> runner.close());
+    public void runStop(StopEvent event) {
+        this.runner.stopRunning();
+    }
+
+    @Subscribe
+    public void close(BrowserCloseEvent event) {
+        this.runner.close();
     }
 
     protected ScriptFactory getScriptFactory() {

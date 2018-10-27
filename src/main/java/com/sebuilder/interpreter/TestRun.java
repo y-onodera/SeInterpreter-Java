@@ -39,6 +39,8 @@ public class TestRun {
     private final Map<Script, Script> scriptChain = new HashMap<>();
     private int stepIndex = -1;
     private boolean chainRun;
+    private boolean finished;
+    private boolean stop;
 
     public TestRun(
             String testRunName,
@@ -168,6 +170,14 @@ public class TestRun {
         return l;
     }
 
+    public boolean isFinished() {
+        return this.finished;
+    }
+
+    public boolean isStopped() {
+        return this.stop;
+    }
+
     /**
      * Runs the entire (rest of the) script.
      *
@@ -176,24 +186,30 @@ public class TestRun {
      * @throws RuntimeException if the script failed.
      */
     public boolean finish() {
-        this.getListener().openTestSuite(this.script.name(), this.testRunName, this.vars);
-        boolean success = true;
         try {
-            while (this.hasNext()) {
-                success = this.next() && success;
+            this.start();
+            boolean success = true;
+            try {
+                while (this.hasNext()) {
+                    success = this.next() && success;
+                }
+            } catch (RuntimeException e) {
+                return this.absent(e);
             }
-        } catch (RuntimeException e) {
-            this.getListener().closeTestSuite();
-            // If the script terminates, the driver will be closed automatically.
-            this.quit();
-            throw e;
+            return this.end(success);
+        } finally {
+            this.finished = true;
         }
-        this.getListener().closeTestSuite();
-        if (this.chainRun) {
-            this.chainRun = false;
-            return this.chainRun(this.scriptChain.get(this.script));
-        }
-        return success;
+    }
+
+    public void start() {
+        this.finished = false;
+        this.stop = false;
+        this.getListener().openTestSuite(this.script.name(), this.testRunName, this.vars);
+    }
+
+    public void stop() {
+        this.stop = true;
     }
 
     /**
@@ -205,6 +221,10 @@ public class TestRun {
             this.quit();
         }
         return hasNext;
+    }
+
+    public boolean stepRest() {
+        return !this.isStopped() && this.stepIndex < this.script.steps.size() - 1;
     }
 
     /**
@@ -225,12 +245,21 @@ public class TestRun {
         return this.processTestSuccess();
     }
 
+    public boolean runTest() {
+        this.toNextStepIndex();
+        this.startTest();
+        return this.currentStep().run(this);
+    }
+
+    public void startTest() {
+        this.getListener().startTest(currentStep().getName() != null ? this.currentStep().getName() : this.currentStep().toPrettyString());
+    }
+
     /**
      *
      */
-    public void forwardStepIndex(int count) {
-        this.getListener().skipTestIndex(count);
-        this.stepIndex = this.stepIndex + count;
+    public void toNextStepIndex() {
+        this.forwardStepIndex(1);
     }
 
     /**
@@ -243,18 +272,9 @@ public class TestRun {
     /**
      *
      */
-    public void toNextStepIndex() {
-        this.forwardStepIndex(1);
-    }
-
-    public boolean runTest() {
-        this.toNextStepIndex();
-        this.startTest();
-        return this.currentStep().run(this);
-    }
-
-    public void startTest() {
-        this.getListener().startTest(currentStep().getName() != null ? this.currentStep().getName() : this.currentStep().toPrettyString());
+    public void forwardStepIndex(int count) {
+        this.getListener().skipTestIndex(count);
+        this.stepIndex = this.stepIndex + count;
     }
 
     public boolean processTestSuccess() {
@@ -277,7 +297,23 @@ public class TestRun {
         throw new AssertionError(this.currentStep() + " failed.", e);
     }
 
-    private void quit() {
+    public boolean end(boolean success) {
+        this.getListener().closeTestSuite();
+        if (this.chainRun) {
+            this.chainRun = false;
+            return this.chainRun(this.scriptChain.get(this.script));
+        }
+        return success;
+    }
+
+    public boolean absent(RuntimeException e) {
+        this.getListener().closeTestSuite();
+        // If the script terminates, the driver will be closed automatically.
+        this.quit();
+        throw e;
+    }
+
+    public void quit() {
         if (this.script.closeDriver()) {
             this.log.debug("Quitting driver.");
             try {
@@ -286,10 +322,6 @@ public class TestRun {
                 //
             }
         }
-    }
-
-    private boolean stepRest() {
-        return this.stepIndex < this.script.steps.size() - 1;
     }
 
     private boolean chainRun(Script chainTo) {
