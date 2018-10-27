@@ -1,5 +1,6 @@
 package com.sebuilder.interpreter;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.json.JSONArray;
@@ -7,6 +8,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -122,19 +124,23 @@ public class Suite implements Iterable<Script> {
                 .collect(Collectors.toList());
     }
 
+    public SuiteBuilder builder() {
+        return new SuiteBuilder(this);
+    }
+
     public Suite insert(Script aScript, Script newScript) {
-        return new SuiteBuilder(this).insertScript(aScript, newScript)
+        return builder().insertScript(aScript, newScript)
                 .createSuite();
     }
 
     public Suite add(Script aScript) {
-        return new SuiteBuilder(this)
+        return builder()
                 .addScript(aScript)
                 .createSuite();
     }
 
     public Suite delete(Script aScript) {
-        return new SuiteBuilder(this)
+        return builder()
                 .deleteScript(aScript)
                 .createSuite();
     }
@@ -144,7 +150,7 @@ public class Suite implements Iterable<Script> {
     }
 
     public Suite replace(String oldName, Script newValue) {
-        return new SuiteBuilder(this)
+        return builder()
                 .replace(oldName, newValue)
                 .createSuite();
     }
@@ -166,22 +172,22 @@ public class Suite implements Iterable<Script> {
             if (this.scriptChains.containsKey(s) && !this.scriptChains.containsValue(s)) {
                 chain = new JSONArray();
                 JSONObject scriptPath = new JSONObject();
-                scriptPath.put("path", s.path);
+                scriptPath.put("path", relativePath(s));
                 chain.put(scriptPath);
             } else if (this.scriptChains.containsKey(s) && this.scriptChains.containsValue(s)) {
                 JSONObject scriptPath = new JSONObject();
-                scriptPath.put("path", s.path);
+                scriptPath.put("path", relativePath(s));
                 chain.put(scriptPath);
             } else if (!this.scriptChains.containsKey(s) && this.scriptChains.containsValue(s)) {
                 JSONObject scriptPath = new JSONObject();
-                scriptPath.put("path", s.path);
+                scriptPath.put("path", relativePath(s));
                 chain.put(scriptPath);
                 JSONObject scriptPaths = new JSONObject();
                 scriptPaths.put("paths", chain);
                 scriptsA.put(scriptPaths);
             } else {
                 JSONObject scriptPath = new JSONObject();
-                scriptPath.put("path", s.path);
+                scriptPath.put("path", relativePath(s));
                 scriptsA.put(scriptPath);
             }
         }
@@ -192,7 +198,7 @@ public class Suite implements Iterable<Script> {
             JSONObject configs = new JSONObject();
             configs.put(sourceName, this.dataSourceConfig);
             data.put("configs", configs);
-            o.put("share", data);
+            o.put("data", data);
         }
         o.put("type", "suite");
         o.put("scripts", scriptsA);
@@ -200,4 +206,12 @@ public class Suite implements Iterable<Script> {
         return o;
     }
 
+    private String relativePath(Script s) {
+        if (this.relativePath == null && !Strings.isNullOrEmpty(s.path)) {
+            return s.path;
+        } else if (Strings.isNullOrEmpty(s.path)) {
+            return "script/" + s.name;
+        }
+        return this.relativePath.toPath().relativize(Paths.get(s.path)).toString().replace("\\", "/");
+    }
 }

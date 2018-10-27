@@ -82,7 +82,7 @@ public class ScriptViewController {
     @FXML
     void handleScriptSaveAs(ActionEvent event) {
         FileChooser fileSave = new FileChooser();
-        fileSave.setTitle("Close Resource File");
+        fileSave.setTitle("Save Script File");
         fileSave.getExtensionFilters().add(new FileChooser.ExtensionFilter("json format (*.json)", "*.json"));
         fileSave.setInitialDirectory(Context.getInstance().getBaseDirectory());
         File file = fileSave.showSaveDialog(treeViewScriptName.getScene().getWindow());
@@ -90,7 +90,6 @@ public class ScriptViewController {
             EventBus.publish(new FileSaveAsEvent(file));
         }
     }
-
 
     private void refleshScriptView(LinkedHashMap<String, Script> scripts) {
         this.treeViewScriptName.getRoot().getChildren().clear();

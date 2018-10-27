@@ -15,6 +15,10 @@
                     <items>
                         <MenuItem id="menuTestOpenFile" fx:id="menuScriptOpenFile" mnemonicParsing="false"
                                   onAction="#handleScriptOpenFile" text="Open File"/>
+                        <MenuItem id="menuTestSuiteSave" fx:id="menuSaveSuite" mnemonicParsing="false"
+                                  onAction="#handleSaveSuite" text="Save Suite"/>
+                        <MenuItem id="menuTestSuiteSaveAs" fx:id="menuSaveSuiteAs" mnemonicParsing="false"
+                                  onAction="#handleSaveSuiteAs" text="Save Suite As"/>
                         <MenuItem id="menuTestNew" fx:id="menuScriptNew" mnemonicParsing="false"
                                   onAction="#handleScriptNew" text="Create New Suite"/>
                     </items>

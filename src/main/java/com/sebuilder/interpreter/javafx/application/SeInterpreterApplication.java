@@ -1,6 +1,7 @@
 package com.sebuilder.interpreter.javafx.application;
 
 import com.google.common.base.Charsets;
+import com.google.common.collect.Lists;
 import com.google.common.eventbus.Subscribe;
 import com.google.common.io.Files;
 import com.sebuilder.interpreter.*;
@@ -10,15 +11,10 @@ import com.sebuilder.interpreter.javafx.event.ReportErrorEvent;
 import com.sebuilder.interpreter.javafx.event.browser.BrowserCloseEvent;
 import com.sebuilder.interpreter.javafx.event.browser.BrowserOpenEvent;
 import com.sebuilder.interpreter.javafx.event.browser.BrowserSettingEvent;
-import com.sebuilder.interpreter.javafx.event.file.FileLoadEvent;
-import com.sebuilder.interpreter.javafx.event.file.FileSaveAsEvent;
-import com.sebuilder.interpreter.javafx.event.file.FileSaveEvent;
+import com.sebuilder.interpreter.javafx.event.file.*;
 import com.sebuilder.interpreter.javafx.event.replay.*;
 import com.sebuilder.interpreter.javafx.event.script.*;
-import com.sebuilder.interpreter.javafx.event.view.OpenScriptSaveChooserEvent;
-import com.sebuilder.interpreter.javafx.event.view.RefreshScriptViewEvent;
-import com.sebuilder.interpreter.javafx.event.view.RefreshStepEditViewEvent;
-import com.sebuilder.interpreter.javafx.event.view.RefreshStepViewEvent;
+import com.sebuilder.interpreter.javafx.event.view.*;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -31,6 +27,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 
 public class SeInterpreterApplication extends Application {
@@ -149,25 +146,44 @@ public class SeInterpreterApplication extends Application {
     }
 
     @Subscribe
-    public void scriptSave(FileSaveEvent event) {
+    public void saveScript(FileSaveEvent event) {
         if (this.currentDisplay.path == null) {
             EventBus.publish(new OpenScriptSaveChooserEvent());
         } else {
             File target = new File(this.currentDisplay.path);
-            this.saveCurrentDisplay(target);
+            this.saveContents(target, this.currentDisplay);
         }
     }
 
     @Subscribe
-    public void scriptSave(FileSaveAsEvent event) {
+    public void saveScript(FileSaveAsEvent event) {
         File target = event.getFile();
         String oldName = this.currentDisplay.name;
         this.currentDisplay = new ScriptBuilder(this.currentDisplay)
                 .associateWith(target)
                 .createScript();
         this.suite = this.suite.replace(oldName, this.currentDisplay);
-        this.saveCurrentDisplay(target);
+        this.saveContents(target, this.currentDisplay);
         this.resetSuite(this.suite);
+    }
+
+    @Subscribe
+    public void saveSuite(FileSaveSuiteAsEvent event) {
+        if (this.suite.getPath() == null) {
+            EventBus.publish(new OpenSuiteSaveChooserEvent());
+        } else {
+            this.saveSuite();
+        }
+    }
+
+
+    @Subscribe
+    public void saveSuite(FileSaveSuiteEvent event) {
+        File target = event.getFile();
+        this.suite = this.suite.builder()
+                .associateWith(target)
+                .createSuite();
+        this.saveSuite();
     }
 
     @Subscribe
@@ -241,13 +257,32 @@ public class SeInterpreterApplication extends Application {
         EventBus.publish(new RefreshScriptViewEvent(this.suite));
     }
 
-    private void saveCurrentDisplay(File target) {
+    private void saveSuite() {
+        File target = new File(this.suite.getPath());
+        List<Script> notAssociateFile = Lists.newArrayList();
+        this.suite.forEach(it -> {
+            if (it.path == null) {
+                notAssociateFile.add(it);
+            }
+        });
+        notAssociateFile.forEach(it -> {
+                    File saveTo = new File(target.getParentFile(), it.name);
+                    this.suite = this.suite.replace(it.name, it.builder().associateWith(saveTo).createScript());
+                }
+        );
+        this.suite.forEach(it -> {
+            this.saveContents(new File(it.path), it);
+        });
+        this.saveContents(target, this.suite);
+        this.resetSuite(this.suite);
+    }
+
+    private void saveContents(File target, Object content) {
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
             if (!target.exists()) {
                 target.createNewFile();
             }
-            String content = this.currentDisplay.toJSON().toString(4);
-            Files.asCharSink(target, Charsets.UTF_8).write(content);
+            Files.asCharSink(target, Charsets.UTF_8).write(content.toString());
         });
     }
 }

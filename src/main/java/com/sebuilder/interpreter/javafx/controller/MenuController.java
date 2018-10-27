@@ -1,16 +1,20 @@
 package com.sebuilder.interpreter.javafx.controller;
 
 
+import com.google.common.eventbus.Subscribe;
 import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.javafx.EventBus;
 import com.sebuilder.interpreter.javafx.event.browser.BrowserCloseEvent;
 import com.sebuilder.interpreter.javafx.event.browser.BrowserOpenEvent;
 import com.sebuilder.interpreter.javafx.event.file.FileLoadEvent;
+import com.sebuilder.interpreter.javafx.event.file.FileSaveSuiteAsEvent;
+import com.sebuilder.interpreter.javafx.event.file.FileSaveSuiteEvent;
 import com.sebuilder.interpreter.javafx.event.replay.RunEvent;
 import com.sebuilder.interpreter.javafx.event.replay.RunSuiteEvent;
 import com.sebuilder.interpreter.javafx.event.replay.StepResultResetEvent;
 import com.sebuilder.interpreter.javafx.event.replay.StopEvent;
 import com.sebuilder.interpreter.javafx.event.script.ScriptResetEvent;
+import com.sebuilder.interpreter.javafx.event.view.OpenSuiteSaveChooserEvent;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -45,13 +49,37 @@ public class MenuController {
     void handleScriptOpenFile(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open Resource File");
-        fileChooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("select target script", ".json"));
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("json format (*.json)", "*.json"));
         fileChooser.setInitialDirectory(Context.getInstance().getBaseDirectory());
         Stage stage = new Stage();
         stage.initOwner(paneSeInterpreterMenu.getScene().getWindow());
         File file = fileChooser.showOpenDialog(stage);
         if (file != null) {
             EventBus.publish(new FileLoadEvent(file));
+        }
+    }
+
+    @Subscribe
+    public void saveSuiteAs(OpenSuiteSaveChooserEvent event) {
+        this.handleSaveSuiteAs(null);
+    }
+
+    @FXML
+    void handleSaveSuite(ActionEvent event) {
+        EventBus.publish(new FileSaveSuiteAsEvent());
+    }
+
+    @FXML
+    void handleSaveSuiteAs(ActionEvent event) {
+        FileChooser fileSave = new FileChooser();
+        fileSave.setTitle("Save Suite File");
+        fileSave.getExtensionFilters().add(new FileChooser.ExtensionFilter("json format (*.json)", "*.json"));
+        fileSave.setInitialDirectory(Context.getInstance().getBaseDirectory());
+        Stage stage = new Stage();
+        stage.initOwner(this.paneSeInterpreterMenu.getScene().getWindow());
+        File file = fileSave.showSaveDialog(stage);
+        if (file != null) {
+            EventBus.publish(new FileSaveSuiteEvent(file));
         }
     }
 

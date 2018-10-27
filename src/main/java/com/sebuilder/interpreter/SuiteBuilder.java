@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SuiteBuilder {
-    private final File suiteFile;
+    private File suiteFile;
     private final ArrayList<Script> scripts;
     private final Map<Script, Script> scriptChains;
     private DataSource dataSource;
@@ -49,6 +49,11 @@ public class SuiteBuilder {
         this.dataSource = suite.getDataSource();
         this.dataSourceConfig = suite.getDataSourceConfig();
         this.shareState = suite.isShareState();
+    }
+
+    public SuiteBuilder associateWith(File target) {
+        this.suiteFile = target;
+        return this;
     }
 
     public File getSuiteFile() {
