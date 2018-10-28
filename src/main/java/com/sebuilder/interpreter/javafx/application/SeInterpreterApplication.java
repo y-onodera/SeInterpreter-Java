@@ -16,7 +16,6 @@ import com.sebuilder.interpreter.javafx.event.replay.*;
 import com.sebuilder.interpreter.javafx.event.script.*;
 import com.sebuilder.interpreter.javafx.event.view.*;
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -204,7 +203,7 @@ public class SeInterpreterApplication extends Application {
     @Subscribe
     public void exportScriptTemplate(TemplateLoadEvent event) {
         Script export = this.runner.exportScriptTemplate();
-        Platform.runLater(() -> EventBus.publish(new ScriptAddEvent(export)));
+        EventBus.publish(new ScriptAddEvent(export));
     }
 
     @Subscribe
