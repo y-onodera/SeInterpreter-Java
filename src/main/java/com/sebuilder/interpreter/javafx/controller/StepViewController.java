@@ -146,7 +146,7 @@ public class StepViewController {
     }
 
     private Stage initStepEditDialog(String action) throws IOException {
-        FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(getClass().getClassLoader().getResource("fxml/seleniumbuilderstepedit.fxml")));
+        FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(this.getClass().getResource("/fxml/seleniumbuilderstepedit.fxml")));
         Parent root = loader.load();
         Scene scene = new Scene(root);
         Stage dialog = new Stage();

@@ -27,6 +27,8 @@ public class SeInterpreterRunner {
     public void reloadSetting(String browserName, String driverPath) {
         if (this.isOpen()) {
             this.close();
+        } else {
+            this.setUp();
         }
         this.repl.reloadBrowserSetting(browserName, driverPath);
     }

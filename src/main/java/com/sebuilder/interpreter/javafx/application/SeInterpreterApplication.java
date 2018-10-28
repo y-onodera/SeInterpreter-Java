@@ -26,6 +26,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.List;
 import java.util.Objects;
 
@@ -37,11 +38,17 @@ public class SeInterpreterApplication extends Application {
 
     private SeInterpreterRunner runner;
 
+    public static void main(String[] args) {
+        launch(args);
+    }
+
     @Override
     public void start(Stage stage) throws Exception {
         System.setProperty("log4j.configurationFile", "log4j2-gui.xml");
         stage.setTitle("SeInterpreter");
-        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getClassLoader().getResource("fxml/seleniumbuilder.fxml")));
+
+        final URL resource = this.getClass().getResource("/fxml/seleniumbuilder.fxml");
+        Parent root = FXMLLoader.load(Objects.requireNonNull(resource));
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.setResizable(true);
