@@ -14,7 +14,7 @@ public class Chrome implements WebDriverFactory {
      * @return A RemoteWebDriver of the type produced by this factory.
      */
     @Override
-    public RemoteWebDriver make(HashMap<String, String> config) throws Exception {
+    public RemoteWebDriver make(HashMap<String, String> config) {
         HashMap<String, String> caps = new HashMap<String, String>(config);
         DesiredCapabilities capabilities = new DesiredCapabilities(caps);
         ChromeOptions option = new ChromeOptions().merge(capabilities);

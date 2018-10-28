@@ -23,7 +23,7 @@ public class ReportErrorEvent {
         return source;
     }
 
-    public static interface ThrowableAction {
+    public interface ThrowableAction {
         void execute() throws Exception;
     }
 }

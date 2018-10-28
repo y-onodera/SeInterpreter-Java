@@ -28,7 +28,7 @@ import java.util.Map;
  */
 public interface DataSource {
 
-    static final String ROW_NUMBER = "_rowNumber";
+    String ROW_NUMBER = "_rowNumber";
 
     List<Map<String, String>> getData(Map<String, String> config, File relativeTo);
 }

@@ -94,7 +94,7 @@ public class SeInterpreterApplication extends Application {
     }
 
     @Subscribe
-    public void deleteScript(ScriptDeleteEvent event) throws IOException, JSONException {
+    public void deleteScript(ScriptDeleteEvent event) {
         this.suite = this.suite.delete(this.currentDisplay);
         this.resetSuite(this.suite);
     }

@@ -25,7 +25,7 @@ public interface WebDriverFactory {
 	 * @param config A key/value mapping of configuration options specific to this factory.
 	 * @return A RemoteWebDriver of the type produced by this factory.
 	 */
-	public RemoteWebDriver make(HashMap<String, String> config) throws Exception;
+    RemoteWebDriver make(HashMap<String, String> config) throws Exception;
 
 	void setDriverPath(String driverPath);
 }
