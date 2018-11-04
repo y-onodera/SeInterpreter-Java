@@ -301,9 +301,18 @@ public class SeInterpreterApplication extends Application {
                 notAssociateFile.add(it);
             }
         });
+        final File scriptSaveTo = new File(target.getParentFile(), "script");
+        if (notAssociateFile.size() > 0 && !scriptSaveTo.exists()) {
+            scriptSaveTo.mkdirs();
+        }
         notAssociateFile.forEach(it -> {
-                    File saveTo = new File(target.getParentFile(), it.name);
-                    this.suite = this.suite.replace(it.name, it.builder().associateWith(saveTo).createScript());
+            String oldName = it.name;
+            String newName = oldName;
+            if (!oldName.endsWith(".json")) {
+                newName = newName + ".json";
+            }
+            File saveTo = new File(scriptSaveTo, newName);
+            this.suite = this.suite.replace(oldName, it.builder().associateWith(saveTo).createScript());
                 }
         );
         this.suite.forEach(it -> {
