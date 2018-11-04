@@ -3,6 +3,7 @@ package com.sebuilder.interpreter.javafx.application;
 import com.sebuilder.interpreter.*;
 import com.sebuilder.interpreter.application.CommandLineArgument;
 import com.sebuilder.interpreter.application.SeInterpreterREPL;
+import com.sebuilder.interpreter.steptype.HighLightElement;
 import javafx.concurrent.Task;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -46,6 +47,16 @@ public class SeInterpreterRunner {
                 .associateWith(null)
                 .setName(result.name)
                 .createScript();
+    }
+
+    public void highLightElement(String locatorType, String value) {
+        Step highLightElement = new Step(new HighLightElement());
+        highLightElement.put("locator", new Locator(locatorType, value));
+        Script highLight = new ScriptBuilder()
+                .addStep(highLightElement)
+                .createScript();
+        SeInterpreterTestListener listener = new SimpleSeInterpreterTestListener(this.log);
+        this.repl.execute(highLight, listener);
     }
 
     public Task createRunScriptTask(Script currentDisplay) {

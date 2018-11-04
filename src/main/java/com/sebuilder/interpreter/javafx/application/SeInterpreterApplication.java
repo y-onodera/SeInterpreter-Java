@@ -226,9 +226,7 @@ public class SeInterpreterApplication extends Application {
 
     @Subscribe
     public void highLightElement(ElementHighLightEvent event) {
-        Script script = getScriptFactory().highLightElement(event.getLocator(), event.getValue());
-        Task task = this.runner.createRunScriptTask(script);
-        this.executeTask(task);
+        this.runner.highLightElement(event.getLocator(), event.getValue());
     }
 
     @Subscribe

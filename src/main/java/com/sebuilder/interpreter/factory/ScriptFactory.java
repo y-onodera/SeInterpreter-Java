@@ -17,7 +17,6 @@ package com.sebuilder.interpreter.factory;
 
 import com.google.common.base.Strings;
 import com.sebuilder.interpreter.*;
-import com.sebuilder.interpreter.steptype.HighLightElement;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -59,14 +58,6 @@ public class ScriptFactory {
 
     public Script open(String url) throws JSONException, IOException {
         return this.parse("{\"steps\":[" + "{\"type\":\"get\",\"url\":\"" + url + "\"}" + "]}");
-    }
-
-    public Script highLightElement(String locatorType, String value) {
-        Step highLightElement = new Step(new HighLightElement());
-        highLightElement.put("locator", new Locator(locatorType, value));
-        return new ScriptBuilder()
-                .addStep(highLightElement)
-                .createScript();
     }
 
     /**
