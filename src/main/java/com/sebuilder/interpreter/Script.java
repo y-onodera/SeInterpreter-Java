@@ -164,6 +164,12 @@ public class Script implements TestRunnable {
         );
     }
 
+    public Script addStep(Script export) {
+        ArrayList newStep = Lists.newArrayList(this.steps);
+        newStep.addAll(export.steps);
+        return this.replaceStep(newStep);
+    }
+
     public Script replaceStep(int stepIndex, Step newStep) {
         return this.editStep(it -> {
                     final ArrayList<Step> newSteps = new ArrayList<>();

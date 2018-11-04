@@ -236,7 +236,9 @@ public class SeInterpreterApplication extends Application {
     @Subscribe
     public void exportScriptTemplate(TemplateLoadEvent event) {
         Script export = this.runner.exportScriptTemplate();
-        EventBus.publish(new ScriptAddEvent(export));
+        this.currentDisplay = this.currentDisplay.addStep(export);
+        this.suite = this.suite.replace(this.currentDisplay);
+        EventBus.publish(new RefreshStepViewEvent(this.currentDisplay));
     }
 
     @Subscribe
