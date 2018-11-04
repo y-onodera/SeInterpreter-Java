@@ -44,10 +44,6 @@ public abstract class CommandLineRunner {
         return this.pageLoadWaitTime;
     }
 
-    public TestRunBuilder createTestRunBuilder(Script script) {
-        return new TestRunBuilder(script);
-    }
-
     public void setSeInterpreterTestListener(SeInterpreterTestListener seInterpreterTestListener) {
         this.seInterpreterTestListener = seInterpreterTestListener;
     }
@@ -102,7 +98,7 @@ public abstract class CommandLineRunner {
                 configureOption(s);
             }
         }
-        this.seInterpreterTestListener = new SeInterpreterTestListener(this.log);
+        this.seInterpreterTestListener = new SimpleSeInterpreterTestListener(this.log);
         this.log.info("setUp finish");
     }
 
@@ -136,4 +132,9 @@ public abstract class CommandLineRunner {
             this.log.fatal("Could not instantiate WebDriverFactory " + "com.sebuilder.interpreter.webdriverfactory." + s, e);
         }
     }
+
+    protected TestRunBuilder createTestRunBuilder(Script script) {
+        return new TestRunBuilder(script);
+    }
+
 }

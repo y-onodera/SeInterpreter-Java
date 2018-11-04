@@ -205,7 +205,7 @@ public class TestRun {
     public void start() {
         this.finished = false;
         this.stop = false;
-        this.getListener().openTestSuite(this.script.name(), this.testRunName, this.vars);
+        this.getListener().openTestSuite(this.script, this.testRunName, this.vars);
     }
 
     public void stop() {

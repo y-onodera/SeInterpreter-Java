@@ -12,7 +12,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Suite implements Iterable<Script> {
+public class Suite implements Iterable<Script>, TestRunnable {
 
     private final String name;
 
@@ -50,6 +50,11 @@ public class Suite implements Iterable<Script> {
         this.shareState = shareState;
         this.scripts.addAll(aScripts);
         this.scriptChains.putAll(scriptChains);
+    }
+
+    @Override
+    public void accept(TestRunner runner, SeInterpreterTestListener testListener) {
+        runner.execute(this, testListener);
     }
 
     public List<Map<String, String>> loadData() {

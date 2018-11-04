@@ -76,8 +76,8 @@ public class SeInterpreter extends CommandLineRunner {
                 this.runScripts(path);
             }
         } finally {
-            if (driver != null && closeDriver) {
-                driver.quit();
+            if (this.driver != null && this.closeDriver) {
+                this.driver.quit();
             }
             this.seInterpreterTestListener.aggregateResult();
         }
@@ -108,8 +108,8 @@ public class SeInterpreter extends CommandLineRunner {
             this.log.info(testRunBuilder.getScriptName() + " failed", e);
         }
         if (!testRunBuilder.closeDriver()) {
-            if (lastRun != null) {
-                this.driver = lastRun.driver();
+            if (this.lastRun != null) {
+                this.driver = this.lastRun.driver();
             }
             this.closeDriver = true;
         } else {

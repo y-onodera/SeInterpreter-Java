@@ -29,8 +29,6 @@
                                   onAction="#handleReplaySuite" text="Run Suite"/>
                         <MenuItem id="menuRunScript" fx:id="menuBrowserRunScript" mnemonicParsing="false"
                                   onAction="#handleReplayScript" text="Run Script"/>
-                        <MenuItem id="menuStopScript" fx:id="menuBrowserStopScript" mnemonicParsing="false"
-                                  onAction="#handleReplayStop" text="Stop Running"/>
                         <MenuItem fx:id="menuReplaySetting" mnemonicParsing="false" onAction="#handleReplaySetting"
                                   text="Setting"/>
                     </items>

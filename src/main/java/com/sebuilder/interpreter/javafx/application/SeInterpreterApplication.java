@@ -7,6 +7,7 @@ import com.google.common.io.Files;
 import com.sebuilder.interpreter.*;
 import com.sebuilder.interpreter.factory.ScriptFactory;
 import com.sebuilder.interpreter.javafx.EventBus;
+import com.sebuilder.interpreter.javafx.controller.RunningProgressController;
 import com.sebuilder.interpreter.javafx.event.ReportErrorEvent;
 import com.sebuilder.interpreter.javafx.event.browser.BrowserCloseEvent;
 import com.sebuilder.interpreter.javafx.event.browser.BrowserOpenEvent;
@@ -16,9 +17,12 @@ import com.sebuilder.interpreter.javafx.event.replay.*;
 import com.sebuilder.interpreter.javafx.event.script.*;
 import com.sebuilder.interpreter.javafx.event.view.*;
 import javafx.application.Application;
+import javafx.concurrent.Task;
+import javafx.concurrent.WorkerStateEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -29,6 +33,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class SeInterpreterApplication extends Application {
 
@@ -37,6 +43,10 @@ public class SeInterpreterApplication extends Application {
     private Script currentDisplay;
 
     private SeInterpreterRunner runner;
+
+    private Scene scene;
+
+    private Stage runProgressDialog;
 
     public static void main(String[] args) {
         launch(args);
@@ -49,8 +59,8 @@ public class SeInterpreterApplication extends Application {
 
         final URL resource = this.getClass().getResource("/fxml/seleniumbuilder.fxml");
         Parent root = FXMLLoader.load(Objects.requireNonNull(resource));
-        Scene scene = new Scene(root);
-        stage.setScene(scene);
+        this.scene = new Scene(root);
+        stage.setScene(this.scene);
         stage.setResizable(true);
         stage.show();
         EventBus.registSubscriber(this);
@@ -202,9 +212,10 @@ public class SeInterpreterApplication extends Application {
 
     @Subscribe
     public void opern(BrowserOpenEvent event) throws IOException, JSONException {
-        this.runner.runScript(this.templateScript(), logger -> {
-            return new SeInterpreterTestListener(logger);
+        Task task = this.runner.createRunScriptTask(this.templateScript(), logger -> {
+            return new SimpleSeInterpreterTestListener(logger);
         });
+        this.executeTask(task);
     }
 
     @Subscribe
@@ -216,28 +227,32 @@ public class SeInterpreterApplication extends Application {
     @Subscribe
     public void highLightElement(ElementHighLightEvent event) {
         Script script = getScriptFactory().highLightElement(event.getLocator(), event.getValue());
-        this.runner.runScript(script);
+        Task task = this.runner.createRunScriptTask(script);
+        this.executeTask(task);
     }
 
     @Subscribe
     public void runStep(RunStepEvent event) {
-        this.runner.runScript(this.currentDisplay.removeStep(event.getFilter())
+        Task task = this.runner.createRunScriptTask(this.currentDisplay.removeStep(event.getFilter())
                 , log -> new SeInterpreterTestGUIListener(log) {
                     @Override
                     public int getStepNo() {
                         return event.getStepNoFunction().apply(super.getStepNo());
                     }
                 });
+        this.executeTask(task);
     }
 
     @Subscribe
     public void runScript(RunEvent event) {
-        this.runner.runScript(this.currentDisplay);
+        Task task = this.runner.createRunScriptTask(this.currentDisplay);
+        this.executeTask(task);
     }
 
     @Subscribe
     public void runSuite(RunSuiteEvent event) {
-        this.runner.runSuite(this.suite);
+        Task task = this.runner.createRunSuiteTask(this.suite);
+        this.executeTask(task);
     }
 
     @Subscribe
@@ -290,5 +305,33 @@ public class SeInterpreterApplication extends Application {
             }
             Files.asCharSink(target, Charsets.UTF_8).write(content.toString());
         });
+    }
+
+    private void executeTask(Task task) {
+        ReportErrorEvent.publishIfExecuteThrowsException(() -> {
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            executor.submit(task);
+            this.initScriptRunProgressDialog(task);
+            task.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED, wse -> {
+                executor.shutdown();
+            });
+        });
+    }
+
+    private void initScriptRunProgressDialog(Task task) throws IOException {
+        if (this.runProgressDialog == null || !this.runProgressDialog.isShowing()) {
+            FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(this.getClass().getResource("/fxml/seleniumbuilderRunProgress.fxml")));
+            Parent root = loader.load();
+            Scene scene = new Scene(root);
+            this.runProgressDialog = new Stage();
+            this.runProgressDialog.setScene(scene);
+            this.runProgressDialog.initOwner(this.scene.getWindow());
+            this.runProgressDialog.initModality(Modality.WINDOW_MODAL);
+            this.runProgressDialog.setTitle("run progress");
+            RunningProgressController controller = loader.getController();
+            controller.bind(task);
+            this.runProgressDialog.setResizable(false);
+            this.runProgressDialog.show();
+        }
     }
 }

@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
  *
  * @author zarkonnen
  */
-public class Script {
+public class Script implements TestRunnable {
     public final ArrayList<Step> steps;
     public final String path;
     public final String name;
@@ -64,6 +64,11 @@ public class Script {
         this.closeDriver = closeDriver;
         this.dataSource = dataSource;
         this.dataSourceConfig = dataSourceConfig;
+    }
+
+    @Override
+    public void accept(TestRunner runner, SeInterpreterTestListener testListener) {
+        runner.execute(this, testListener);
     }
 
     public ScriptBuilder builder() {

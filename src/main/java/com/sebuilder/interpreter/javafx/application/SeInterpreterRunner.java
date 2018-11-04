@@ -1,9 +1,6 @@
 package com.sebuilder.interpreter.javafx.application;
 
-import com.sebuilder.interpreter.Context;
-import com.sebuilder.interpreter.Script;
-import com.sebuilder.interpreter.SeInterpreterTestListener;
-import com.sebuilder.interpreter.Suite;
+import com.sebuilder.interpreter.*;
 import com.sebuilder.interpreter.application.CommandLineArgument;
 import com.sebuilder.interpreter.application.SeInterpreterREPL;
 import javafx.concurrent.Task;
@@ -11,10 +8,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
+import java.util.Map;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class SeInterpreterRunner {
 
@@ -43,7 +38,7 @@ public class SeInterpreterRunner {
         }
         String fileName = "Template" + this.exportCount++ + ".json";
         Script get = this.repl.toScript("{\"steps\":[" + "{\"type\":\"exportTemplate\",\"file\":\"" + fileName + "\"}" + "]}");
-        SeInterpreterTestListener listener = new SeInterpreterTestListener(this.log);
+        SeInterpreterTestListener listener = new SimpleSeInterpreterTestListener(this.log);
         this.repl.execute(get, listener);
         File exported = new File(listener.getTemplateOutputDirectory(), fileName);
         Script result = this.repl.loadScript(exported.getAbsolutePath()).iterator().next();
@@ -53,32 +48,20 @@ public class SeInterpreterRunner {
                 .createScript();
     }
 
-    public void runScript(Script currentDisplay) {
-        this.runScript(currentDisplay, log -> new SeInterpreterTestGUIListener(log));
+    public Task createRunScriptTask(Script currentDisplay) {
+        return this.createRunScriptTask(currentDisplay, log -> new SeInterpreterTestGUIListener(log));
     }
 
-    public void runScript(Script currentDisplay, Function<Logger, SeInterpreterTestListener> listenerFactory) {
-        this.backgroundTaskRunning(() -> {
-            if (!this.isOpen()) {
-                this.setUp();
-            }
-            this.repl.execute(currentDisplay, listenerFactory.apply(this.log));
-            return true;
-        });
+    public Task createRunScriptTask(Script currentDisplay, Function<Logger, SeInterpreterTestListener> listenerFactory) {
+        return this.createBackgroundTask(currentDisplay, listenerFactory.apply(this.log));
     }
 
-    public void runSuite(Suite suite) {
-        this.backgroundTaskRunning(() -> {
-            if (!this.isOpen()) {
-                this.setUp();
-            }
-            this.repl.execute(suite, new SeInterpreterTestGUIListener(this.log));
-            return true;
-        });
+    public Task createRunSuiteTask(Suite suite) {
+        return this.createBackgroundTask(suite, new SeInterpreterTestGUIListener(this.log));
     }
 
     public void stopRunning() {
-        repl.stopRunning();
+        this.repl.stopRunning();
     }
 
     public void close() {
@@ -97,15 +80,36 @@ public class SeInterpreterRunner {
         }
     }
 
-    private void backgroundTaskRunning(Supplier<Boolean> s) {
-        Task task = new Task() {
+    private Task createBackgroundTask(TestRunnable runnable, SeInterpreterTestListener listener) {
+        if (!this.isOpen()) {
+            this.setUp();
+        }
+        return new Task() {
             @Override
             protected Object call() {
-                Boolean result = false;
+                Boolean result = true;
                 try {
                     log.info("operation recieve");
-                    result = s.get();
+                    updateMessage("setup running....");
+                    runnable.accept(repl, new SeInterpreterTestListenerWrapper(listener) {
+                        private int currentScriptSteps;
+
+                        @Override
+                        public boolean openTestSuite(Script script, String testRunName, Map<String, String> aProperty) {
+                            this.currentScriptSteps = script.steps.size();
+                            updateMessage(testRunName);
+                            updateProgress(0, this.currentScriptSteps);
+                            return super.openTestSuite(script, testRunName, aProperty);
+                        }
+
+                        @Override
+                        public void startTest(String testName) {
+                            updateProgress(this.getStepNo(), this.currentScriptSteps);
+                            super.startTest(testName);
+                        }
+                    });
                 } catch (Throwable ex) {
+                    result = false;
                     log.error(ex);
                 }
                 if (result) {
@@ -116,8 +120,6 @@ public class SeInterpreterRunner {
                 return result;
             }
         };
-        Executor executor = Executors.newSingleThreadExecutor();
-        executor.execute(task);
     }
 
 }

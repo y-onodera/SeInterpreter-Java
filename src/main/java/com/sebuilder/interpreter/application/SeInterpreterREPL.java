@@ -9,7 +9,7 @@ import java.io.File;
 import java.util.Map;
 import java.util.Scanner;
 
-public class SeInterpreterREPL extends CommandLineRunner {
+public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
     private int execCount = 1;
 
     public SeInterpreterREPL(String[] args, Logger log) {
@@ -102,14 +102,11 @@ public class SeInterpreterREPL extends CommandLineRunner {
         return result;
     }
 
-    public TestRunBuilder createTestRunBuilder(Script script) {
-        return super.createTestRunBuilder(script.reusePreviousDriverAndVars());
-    }
-
     public void execute(Script script) {
         this.execute(createTestRunBuilder(script), this.seInterpreterTestListener);
     }
 
+    @Override
     public void execute(Suite suite, SeInterpreterTestListener seInterpreterTestListener) {
         seInterpreterTestListener.cleanResult(new File(Context.getInstance().getResultOutputDirectory(), String.valueOf(execCount++)));
         try {
@@ -126,6 +123,7 @@ public class SeInterpreterREPL extends CommandLineRunner {
         }
     }
 
+    @Override
     public void execute(Script script, SeInterpreterTestListener seInterpreterTestListener) {
         seInterpreterTestListener.cleanResult(new File(Context.getInstance().getResultOutputDirectory(), String.valueOf(execCount++)));
         try {
@@ -142,6 +140,11 @@ public class SeInterpreterREPL extends CommandLineRunner {
             this.log.info("stop execute test");
             this.lastRun.stop();
         }
+    }
+
+    @Override
+    protected TestRunBuilder createTestRunBuilder(Script script) {
+        return super.createTestRunBuilder(script.reusePreviousDriverAndVars());
     }
 
     private boolean execute(TestRunBuilder testRunBuilder, SeInterpreterTestListener seInterpreterTestListener) {
