@@ -131,6 +131,21 @@ public class SeInterpreterApplication extends Application {
     }
 
     @Subscribe
+    public void moveStep(StepMoveEvent event) {
+        Step step = this.currentDisplay.steps.get(event.getFrom());
+        int indexTo = event.getTo();
+        if (event.getTo() > event.getFrom()) {
+            this.currentDisplay = this.currentDisplay.addStep(indexTo, step)
+                    .removeStep(event.getFrom());
+        } else {
+            this.currentDisplay = this.currentDisplay.insertStep(indexTo, step)
+                    .removeStep(event.getFrom() + 1);
+        }
+        this.suite = this.suite.replace(this.currentDisplay);
+        EventBus.publish(new RefreshStepViewEvent(this.currentDisplay));
+    }
+
+    @Subscribe
     public void editStep(StepEditEvent event) throws JSONException, IOException {
         JSONObject json = new JSONObject();
         JSONArray steps = new JSONArray();

@@ -11,6 +11,7 @@ import com.sebuilder.interpreter.javafx.event.replay.StepResultResetEvent;
 import com.sebuilder.interpreter.javafx.event.replay.StepResultSetEvent;
 import com.sebuilder.interpreter.javafx.event.script.StepDeleteEvent;
 import com.sebuilder.interpreter.javafx.event.script.StepLoadEvent;
+import com.sebuilder.interpreter.javafx.event.script.StepMoveEvent;
 import com.sebuilder.interpreter.javafx.event.view.RefreshStepViewEvent;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -25,6 +26,10 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.DataFormat;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
@@ -34,6 +39,8 @@ import java.util.List;
 import java.util.Objects;
 
 public class StepViewController {
+
+    private static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat("application/x-java-serialized-object");
 
     @FXML
     private TableColumn<ScriptBody, String> tableColumnScriptBodyStep;
@@ -54,7 +61,7 @@ public class StepViewController {
         this.tableViewScriptBody.setRowFactory(new Callback<TableView<ScriptBody>, TableRow<ScriptBody>>() {
             @Override
             public TableRow<ScriptBody> call(TableView<ScriptBody> scriptBodyTableView) {
-                return new TableRow<ScriptBody>() {
+                TableRow<ScriptBody> row = new TableRow<ScriptBody>() {
                     @Override
                     protected void updateItem(ScriptBody item, boolean empty) {
                         super.updateItem(item, empty);
@@ -68,7 +75,46 @@ public class StepViewController {
                         }
                     }
                 };
+                row.setOnDragDetected(event -> {
+                    if (!row.isEmpty()) {
+                        Integer index = row.getIndex();
+                        Dragboard db = row.startDragAndDrop(TransferMode.MOVE);
+                        db.setDragView(row.snapshot(null, null));
+                        ClipboardContent cc = new ClipboardContent();
+                        cc.put(SERIALIZED_MIME_TYPE, index);
+                        db.setContent(cc);
+                        event.consume();
+                    }
+                });
+
+                row.setOnDragOver(event -> {
+                    Dragboard db = event.getDragboard();
+                    if (db.hasContent(SERIALIZED_MIME_TYPE)) {
+                        if (row.getIndex() != ((Integer) db.getContent(SERIALIZED_MIME_TYPE)).intValue()) {
+                            event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+                            event.consume();
+                        }
+                    }
+                });
+
+                row.setOnDragDropped(event -> {
+                    Dragboard db = event.getDragboard();
+                    if (db.hasContent(SERIALIZED_MIME_TYPE)) {
+                        int draggedIndex = (Integer) db.getContent(SERIALIZED_MIME_TYPE);
+                        int dropIndex;
+                        if (row.isEmpty()) {
+                            dropIndex = tableViewScriptBody.getItems().size() - 1;
+                        } else {
+                            dropIndex = row.getIndex();
+                        }
+                        event.setDropCompleted(true);
+                        event.consume();
+                        EventBus.publish(new StepMoveEvent(draggedIndex, dropIndex));
+                    }
+                });
+                return row;
             }
+
         });
         EventBus.registSubscriber(this);
     }
