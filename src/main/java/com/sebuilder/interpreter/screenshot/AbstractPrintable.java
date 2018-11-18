@@ -23,7 +23,7 @@ public abstract class AbstractPrintable implements Printable, VerticalSurvey {
                 .reduce(0
                         , (sum, element) -> sum + element.getScrollHeight()
                         , (sum1, sum2) -> sum1 + sum2);
-        this.innerScrollWidth = this.innerScrollableElement
+        this.innerScrollWidth = this.getInnerHorizontalScrollableElement()
                 .values()
                 .stream()
                 .reduce(0
@@ -67,5 +67,10 @@ public abstract class AbstractPrintable implements Printable, VerticalSurvey {
                 .stream()
                 .filter(it -> it.getValue().hasHorizontalScroll())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    @Override
+    public Map<Integer, InnerElement> getInnerScrollableElement() {
+        return this.innerScrollableElement;
     }
 }

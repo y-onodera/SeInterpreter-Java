@@ -24,6 +24,16 @@ public class Page extends AbstractPrintable {
     }
 
     @Override
+    public int getPointY() {
+        return 0;
+    }
+
+    @Override
+    public int getPointX() {
+        return 0;
+    }
+
+    @Override
     public int getWindowHeight() {
         return this.windowHeight;
     }
@@ -39,18 +49,18 @@ public class Page extends AbstractPrintable {
     }
 
     @Override
+    public int getViewportWidth() {
+        return viewportWidth;
+    }
+
+    @Override
     public int getScrollableHeight() {
         return scrollableHeight;
     }
 
     @Override
-    public int getViewportWidth() {
-        return viewportHeight;
-    }
-
-    @Override
     public int getScrollableWidth() {
-        return scrollableHeight;
+        return scrollableWidth;
     }
 
 }

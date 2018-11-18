@@ -41,7 +41,7 @@ public class Frame extends InnerElement {
     public BufferedImage getScreenshot() {
         WebDriver wd = getWebDriver();
         wd.switchTo().parentFrame();
-        BufferedImage result = super.getScreenshot();
+        BufferedImage result = this.getParent().getScreenshot();
         wd.switchTo().frame(this.getElement());
         return result;
     }

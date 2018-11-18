@@ -7,6 +7,8 @@ import java.util.Map;
 
 public interface VerticalSurvey extends DocumentSurvey, Scrollable {
 
+    int getPointY();
+
     int getViewportHeight();
 
     int getScrollableHeight();

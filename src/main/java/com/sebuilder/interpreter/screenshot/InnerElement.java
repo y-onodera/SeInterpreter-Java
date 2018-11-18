@@ -57,6 +57,7 @@ public abstract class InnerElement extends AbstractPrintable {
         return scrollableHeight;
     }
 
+    @Override
     public int getPointX() {
         return pointX;
     }

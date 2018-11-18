@@ -29,4 +29,9 @@ public class ScrollableTag extends InnerElement {
     public void scrollVertically(int scrollY) {
         this.scrollVertically(scrollY, this.getElement());
     }
+
+    @Override
+    public void scrollHorizontally(int scrollX) {
+        this.scrollHorizontally(scrollX, this.getElement());
+    }
 }
