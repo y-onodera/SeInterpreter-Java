@@ -34,19 +34,8 @@ public class SeInterpreterRunner {
     }
 
     public Script exportScriptTemplate() {
-        if (!this.isOpen()) {
-            this.setUp();
-        }
-        String fileName = "Template" + this.exportCount++ + ".json";
-        Script get = this.repl.toScript("{\"steps\":[" + "{\"type\":\"exportTemplate\",\"file\":\"" + fileName + "\"}" + "]}");
-        SeInterpreterTestListener listener = new SimpleSeInterpreterTestListener(this.log);
-        this.repl.execute(get, listener);
-        File exported = new File(listener.getTemplateOutputDirectory(), fileName);
-        Script result = this.repl.loadScript(exported.getAbsolutePath()).iterator().next();
-        return result.builder()
-                .associateWith(null)
-                .setName(result.name)
-                .createScript();
+        String locator = new Locator("css selector", "body").toString();
+        return exportTemplate(locator);
     }
 
     public void highLightElement(String locatorType, String value) {
@@ -57,6 +46,14 @@ public class SeInterpreterRunner {
                 .createScript();
         SeInterpreterTestListener listener = new SimpleSeInterpreterTestListener(this.log);
         this.repl.execute(highLight, listener);
+    }
+
+    public Locator handleFocusElement() {
+        String locator = new Locator("focus", "").toString();
+        return exportTemplate(locator)
+                .steps
+                .get(0)
+                .getLocator("locator");
     }
 
     public Task createRunScriptTask(Script currentDisplay) {
@@ -133,4 +130,19 @@ public class SeInterpreterRunner {
         };
     }
 
+    private Script exportTemplate(String locator) {
+        if (!this.isOpen()) {
+            this.setUp();
+        }
+        String fileName = "Template" + this.exportCount++ + ".json";
+        Script get = this.repl.toScript("{\"steps\":[{\"type\":\"exportTemplate\",\"file\":\"" + fileName + "\",\"locator\":" + locator + "}]}");
+        SeInterpreterTestListener listener = new SimpleSeInterpreterTestListener(this.log);
+        this.repl.execute(get, listener);
+        File exported = new File(listener.getTemplateOutputDirectory(), fileName);
+        Script result = this.repl.loadScript(exported.getAbsolutePath()).iterator().next();
+        return result.builder()
+                .associateWith(null)
+                .setName(result.name)
+                .createScript();
+    }
 }

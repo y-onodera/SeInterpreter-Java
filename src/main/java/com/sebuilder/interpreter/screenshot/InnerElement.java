@@ -2,23 +2,49 @@ package com.sebuilder.interpreter.screenshot;
 
 import org.openqa.selenium.WebElement;
 
-import java.awt.image.BufferedImage;
-
 public abstract class InnerElement extends AbstractPrintable {
 
     private final Printable parent;
+    private final WebElement element;
     private final int pointY;
     private int scrollableHeight;
     private int viewportHeight;
-    private final WebElement element;
+    private final int pointX;
+    private int scrollableWidth;
+    private int viewportWidth;
 
-    public InnerElement(Printable parentPage, int pointY, WebElement element, int scrollableHeight, int viewportHeight, InnerScrollElementHandler innerScrollElementHandler) {
+    public InnerElement(Printable parentPage
+            , WebElement element
+            , InnerScrollElementHandler innerScrollElementHandler
+            , int pointY
+            , int scrollableHeight
+            , int viewportHeight
+            , int pointX
+            , int scrollableWidth
+            , int viewportWidth
+    ) {
         super(parentPage.getCtx(), parentPage.scrollTimeout(), innerScrollElementHandler);
-        this.scrollableHeight = scrollableHeight;
-        this.viewportHeight = viewportHeight;
         this.parent = parentPage;
-        this.pointY = pointY;
         this.element = element;
+        this.pointY = pointY;
+        this.viewportHeight = viewportHeight;
+        this.scrollableHeight = scrollableHeight;
+        this.pointX = pointX;
+        this.viewportWidth = viewportWidth;
+        this.scrollableWidth = scrollableWidth;
+    }
+
+    public WebElement getElement() {
+        return element;
+    }
+
+    public int getPointY() {
+        return pointY;
+    }
+
+    @Override
+    public int getWindowHeight() {
+        return this.getParent().getWindowHeight();
     }
 
     @Override
@@ -31,27 +57,23 @@ public abstract class InnerElement extends AbstractPrintable {
         return scrollableHeight;
     }
 
-    @Override
-    public BufferedImage getScreenshot() {
-        return getParent().getScreenshot();
+    public int getPointX() {
+        return pointX;
     }
 
     @Override
     public int getWindowWidth() {
-        return getParent().getWindowWidth();
+        return this.getParent().getWindowWidth();
     }
 
     @Override
-    public void appendImage(BufferedImage part) {
-        getParent().appendImage(part);
+    public int getViewportWidth() {
+        return viewportWidth;
     }
 
-    public int getPointY() {
-        return pointY;
-    }
-
-    public WebElement getElement() {
-        return element;
+    @Override
+    public int getScrollableWidth() {
+        return scrollableWidth;
     }
 
     protected Printable getParent() {

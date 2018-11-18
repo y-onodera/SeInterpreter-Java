@@ -1,14 +1,12 @@
 package com.sebuilder.interpreter.steptype;
 
 import com.google.common.base.Charsets;
-import com.google.common.base.Strings;
 import com.google.common.io.Files;
 import com.sebuilder.interpreter.ExportResource;
 import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.openqa.selenium.By;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,7 +36,7 @@ public class ExportTemplate implements StepType {
                 return outputFile(ctx, result, outputTo, Charsets.UTF_8);
             }
             return true;
-        } catch (JSONException | IOException  e) {
+        } catch (JSONException | IOException e) {
             ctx.log().error(e);
             return false;
         }
@@ -69,64 +67,11 @@ public class ExportTemplate implements StepType {
     }
 
     private ExportResource getExportResource(TestRun ctx) throws JSONException {
-        ExportResource.Builder builder = ExportResource.builder(ctx);
-        addInputStep(ctx, builder);
-        addSelectStep(ctx, builder);
-        addLinkClickStep(ctx, builder);
-        addButtonClickStep(ctx, builder);
-        return builder.build();
+        return ExportResource.builder(ctx)
+                .addInputStep()
+                .addSelectStep()
+                .addLinkClickStep()
+                .addButtonClickStep()
+                .build();
     }
-
-    private void addLinkClickStep(TestRun ctx, ExportResource.Builder builder) {
-        ctx.driver()
-                .findElementsByTagName("a")
-                .stream()
-                .filter(element -> !Strings.isNullOrEmpty(element.getText()))
-                .forEach(element -> {
-                    builder.addStep(new ClickElement(), ctx.driver(), element);
-                });
-    }
-
-    private void addButtonClickStep(TestRun ctx, ExportResource.Builder builder) {
-        ctx.driver()
-                .findElementsByTagName("button")
-                .stream()
-                .forEach(element -> {
-                    builder.addStep(new ClickElement(), ctx.driver(), element);
-                });
-    }
-
-    private void addSelectStep(TestRun ctx, ExportResource.Builder builder) {
-        ctx.driver()
-                .findElementsByTagName("select")
-                .stream()
-                .forEach(element -> {
-                    element.findElements(By.tagName("option")).stream().forEach(option -> {
-                        builder.addStep(new SetElementSelected(), ctx.driver(), option);
-                    });
-                });
-    }
-
-    private void addInputStep(TestRun ctx, ExportResource.Builder builder) {
-        ctx.driver()
-                .findElementsByTagName("input")
-                .stream()
-                .forEach(element -> {
-                    String type = element.getAttribute("type");
-                    switch (type) {
-                        case "text":
-                            builder.addStep(new SetElementText(), ctx.driver(), element);
-                            break;
-                        case "checkbox":
-                        case "radio":
-                            builder.addStep(new SetElementSelected(), ctx.driver(), element);
-                            break;
-                        case "hidden":
-                            break;
-                        default:
-                            builder.addStep(new SetElementText(), ctx.driver(), element);
-                    }
-                });
-    }
-
 }

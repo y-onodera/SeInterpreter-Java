@@ -1,18 +1,55 @@
 package com.sebuilder.interpreter.screenshot;
 
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.WebElement;
 
-public interface VerticalSurvey {
+import java.util.Map;
 
-    RemoteWebDriver getWebDriver();
+public interface VerticalSurvey extends DocumentSurvey, Scrollable {
 
-    default int getFullHeight() {
-        return ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return Math.max(document.body.scrollHeight, document.body.offsetHeight,document.documentElement.clientHeight, document.documentElement.scrollHeight, document.documentElement.offsetHeight);", new Object[0])).intValue();
+    int getViewportHeight();
+
+    int getScrollableHeight();
+
+    int getInnerScrollHeight();
+
+    default int getScrollHeight() {
+        return getScrollableHeight() - getViewportHeight() + getInnerScrollHeight();
     }
 
-    default int getWindowHeight() {
-        return ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return window.innerHeight || document.documentElement.clientHeight || document.getElementsByTagName('body')[0].clientHeight;", new Object[0])).intValue();
+    default boolean hasVerticalScroll() {
+        return this.getScrollableHeight() > this.getViewportHeight();
+    }
+
+    default boolean isMoveScrollTopTo(int aPointY) {
+        return aPointY + this.getViewportHeight() < this.getScrollableHeight();
+    }
+
+    Map<Integer, InnerElement> getInnerVerticalScrollableElement();
+
+    default void scrollVertically(int scrollY) {
+        if (this.hasVerticalScroll()) {
+            JavascriptExecutor.class.cast(getWebDriver()).executeScript("scrollTo(0, arguments[0]); return [];", scrollY);
+            waitForScrolling();
+        }
+    }
+
+    default void scrollVertically(int scrollY, WebElement element) {
+        this.getWebDriver().executeScript("arguments[0].scrollTop = arguments[1]; return [];", element, scrollY);
+        waitForScrolling();
+    }
+
+    default int scrollOutVertically(int printedHeight) {
+        if (this.isMoveScrollTopTo(printedHeight)) {
+            this.scrollVertically(printedHeight);
+            return 0;
+        }
+        if (this.getViewportHeight() >= this.getScrollableHeight()) {
+            return printedHeight;
+        }
+        final int scrollY = this.getScrollableHeight() - this.getViewportHeight();
+        this.scrollVertically(scrollY);
+        return printedHeight - scrollY;
     }
 
 }

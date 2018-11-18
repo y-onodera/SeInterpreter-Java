@@ -145,6 +145,10 @@ public class TestRun {
         return s;
     }
 
+    public boolean hasLocator() {
+        return this.currentStep().locatorContains("locator");
+    }
+
     /**
      * @return
      */

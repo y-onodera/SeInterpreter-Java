@@ -16,7 +16,7 @@
 
 package com.sebuilder.interpreter.steptype;
 
-import com.sebuilder.interpreter.ExportResource;
+import com.sebuilder.interpreter.ExportResourceBuilder;
 import com.sebuilder.interpreter.Exportable;
 import com.sebuilder.interpreter.LocatorHolder;
 import com.sebuilder.interpreter.TestRun;
@@ -43,7 +43,7 @@ public class SetElementSelected implements ConditionalStep, Exportable, LocatorH
     }
 
     @Override
-    public void addElement(ExportResource.Builder builder, RemoteWebDriver driver, WebElement element) {
+    public void addElement(ExportResourceBuilder builder, RemoteWebDriver driver, WebElement element) {
         builder.stepOption("check", String.valueOf(element.isSelected()));
     }
 

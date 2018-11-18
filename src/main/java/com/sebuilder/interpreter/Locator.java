@@ -17,6 +17,7 @@
 package com.sebuilder.interpreter;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.openqa.selenium.By;
@@ -148,6 +149,17 @@ public class Locator {
             @Override
             public List<WebElement> findElements(String value, TestRun ctx) {
                 return ctx.driver().findElementsByXPath(value);
+            }
+        },
+        FOCUS {
+            @Override
+            public WebElement find(String value, TestRun ctx) {
+                return ctx.driver().switchTo().activeElement();
+            }
+
+            @Override
+            public List<WebElement> findElements(String value, TestRun ctx) {
+                return Lists.newArrayList(ctx.driver().switchTo().activeElement());
             }
         };
 

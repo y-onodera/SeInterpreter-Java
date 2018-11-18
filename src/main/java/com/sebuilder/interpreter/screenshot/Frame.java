@@ -7,8 +7,34 @@ import java.awt.image.BufferedImage;
 
 public class Frame extends InnerElement {
 
-    public Frame(Printable parentPage, int pointY, WebElement element, int scrollableHeight, int viewportHeight, LocatorInnerScrollElementHandler innerElementScrollStrategy) {
-        super(parentPage, pointY, element, scrollableHeight, viewportHeight, innerElementScrollStrategy);
+    public Frame(Printable parentPage
+            , WebElement element
+            , LocatorInnerScrollElementHandler innerElementScrollStrategy
+            , int pointY
+            , int scrollableHeight
+            , int viewportHeight
+            , int pointX
+            , int scrollableWidth
+            , int viewportWidth
+    ) {
+        super(parentPage
+                , element
+                , innerElementScrollStrategy
+                , pointY
+                , scrollableHeight
+                , viewportHeight
+                , pointX
+                , scrollableWidth
+                , viewportWidth);
+    }
+
+    @Override
+    public BufferedImage printImage(VerticalPrinter aPrinter, int fromPointY) {
+        WebDriver wd = getWebDriver();
+        wd.switchTo().frame(this.getElement());
+        BufferedImage result = super.printImage(aPrinter, fromPointY);
+        wd.switchTo().parentFrame();
+        return result;
     }
 
     @Override
@@ -20,17 +46,4 @@ public class Frame extends InnerElement {
         return result;
     }
 
-    @Override
-    public void printImage(int fromPointY) {
-        WebDriver wd = getWebDriver();
-        wd.switchTo().frame(this.getElement());
-        super.printImage(fromPointY);
-        wd.switchTo().parentFrame();
-    }
-
-    @Override
-    public void setUpPrint(int fromPointY) {
-        this.scrollVertically(0);
-        this.resetPrintedHeight();
-    }
 }

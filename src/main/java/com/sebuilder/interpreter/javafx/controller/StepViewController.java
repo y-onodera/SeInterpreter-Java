@@ -166,7 +166,6 @@ public class StepViewController {
         EventBus.publish(new RunStepEvent(i -> item.no.intValue() - 1 >= i.intValue(), i -> i));
     }
 
-
     @Subscribe
     public void refreshTable(RefreshStepViewEvent event) {
         Script script = event.getScript();

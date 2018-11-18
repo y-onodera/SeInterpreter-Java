@@ -4,18 +4,29 @@ import org.openqa.selenium.WebElement;
 
 public class ScrollableTag extends InnerElement {
 
-    public ScrollableTag(Printable parentPage, int pointY, WebElement element, int scrollableHeight, int viewportHeight) {
-        super(parentPage, pointY, element, scrollableHeight, viewportHeight,InnerScrollElementHandler.ignoreInnerScroll);
-    }
-
-    @Override
-    public void setUpPrint(int fromPointY) {
-        this.scrollVertically(0);
-        this.resetPrintedHeight();
+    public ScrollableTag(Printable parentPage
+            , WebElement element
+            , int pointY
+            , int scrollableHeight
+            , int viewportHeight
+            , int pointX
+            , int scrollableWidth
+            , int viewportWidth
+    ) {
+        super(parentPage
+                , element
+                , InnerScrollElementHandler.ignoreInnerScroll
+                , pointY
+                , scrollableHeight
+                , viewportHeight
+                , pointX
+                , scrollableWidth
+                , viewportWidth
+        );
     }
 
     @Override
     public void scrollVertically(int scrollY) {
-        this.getWebDriver().executeScript("arguments[0].scrollTop = arguments[1]; return [];", this.getElement(), scrollY);
+        this.scrollVertically(scrollY, this.getElement());
     }
 }

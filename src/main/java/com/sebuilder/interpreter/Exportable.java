@@ -14,7 +14,7 @@ public interface Exportable {
         return true;
     }
 
-    default void addElement(ExportResource.Builder builder, RemoteWebDriver driver, WebElement element) {
+    default void addElement(ExportResourceBuilder builder, RemoteWebDriver driver, WebElement element) {
         // non defalut implementation
     }
 

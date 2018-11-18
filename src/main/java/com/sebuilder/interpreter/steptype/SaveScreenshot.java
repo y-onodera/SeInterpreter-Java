@@ -20,6 +20,7 @@ import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.screenshot.LocatorInnerScrollElementHandler;
 import com.sebuilder.interpreter.screenshot.Page;
+import com.sebuilder.interpreter.screenshot.VerticalPrinter;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -38,7 +39,7 @@ public class SaveScreenshot implements StepType {
         Page target = new Page(ctx, 100, new LocatorInnerScrollElementHandler(wd));
         try {
             File file = new File(ctx.getListener().getScreenShotOutputDirectory(), ctx.getTestRunName() + "_" + ctx.string("file"));
-            ImageIO.write(target.getFinalImage(), "PNG", file);
+            ImageIO.write(target.printImage(new VerticalPrinter(), 0), "PNG", file);
             return file.exists();
         } catch (IOException e) {
             ctx.log().error(e);

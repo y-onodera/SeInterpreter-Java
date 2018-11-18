@@ -11,10 +11,10 @@ import java.util.List;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-public class LocatorInnerScrollElementHandler implements VerticalSurvey, InnerScrollElementHandler {
+public class LocatorInnerScrollElementHandler implements InnerScrollElementHandler {
+
     private final RemoteWebDriver driver;
 
-    @Override
     public RemoteWebDriver getWebDriver() {
         return driver;
     }
@@ -38,10 +38,22 @@ public class LocatorInnerScrollElementHandler implements VerticalSurvey, InnerSc
             int viewportHeight = Integer.parseInt(targetFrame.getAttribute("clientHeight"));
             int border = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('border-top-width'));", targetFrame)).intValue();
             int pointY = targetFrame.getLocation().getY() + border;
+            int viewportWidth = Integer.parseInt(targetFrame.getAttribute("clientWidth"));
+            int borderWidth = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('border-left-width'));", targetFrame)).intValue();
+            int pointX = targetFrame.getLocation().getX() + borderWidth;
             wd.switchTo().frame(targetFrame);
-            int scrollableHeight = this.getFullHeight();
-            Frame printableFrame = new Frame(parent, pointY, targetFrame, scrollableHeight, viewportHeight, this);
-            if (printableFrame.hasScroll() && printableFrame.getViewportHeight() > 0) {
+            int scrollableHeight = parent.getFullHeight();
+            int scrollableWidth = parent.getFullWidth();
+            Frame printableFrame = new Frame(parent
+                    , targetFrame
+                    , this
+                    , pointY
+                    , scrollableHeight
+                    , viewportHeight
+                    , pointX
+                    , scrollableWidth
+                    , viewportWidth);
+            if (printableFrame.hasVerticalScroll() && printableFrame.getViewportHeight() > 0) {
                 innerPrintableElement.put(printableFrame.getPointY(), printableFrame);
             }
             wd.switchTo().parentFrame();
@@ -57,25 +69,46 @@ public class LocatorInnerScrollElementHandler implements VerticalSurvey, InnerSc
                 .filter(element -> {
                     int scrollHeight = Integer.valueOf(element.getAttribute("scrollHeight"));
                     int clientHeight = Integer.valueOf(element.getAttribute("clientHeight"));
-                    return scrollHeight > clientHeight;
+                    int scrollWidth = Integer.valueOf(element.getAttribute("scrollWidth"));
+                    int clientWidth = Integer.valueOf(element.getAttribute("clientWidth"));
+                    return (scrollHeight > clientHeight) || (scrollWidth > clientWidth);
                 })
                 .filter(element -> {
                     if (isScrollable(element, element.getCssValue("overflow"))) {
                         return true;
                     }
-                    return isScrollable(element, element.getCssValue("overflow-y"));
+                    return isScrollable(element, element.getCssValue("overflow-y"))
+                            || isScrollable(element, element.getCssValue("overflow-x"));
                 })
                 .collect(Collectors.toList());
+
         for (WebElement targetDiv : divs) {
+            Point framePoint = targetDiv.getLocation();
             int clientHeight = Integer.valueOf(targetDiv.getAttribute("clientHeight"));
             int border = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('border-top-width'));", targetDiv)).intValue();
             int paddingTop = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-top') || document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding'));", targetDiv)).intValue();
             int paddingBottom = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-bottom') || document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding'));", targetDiv)).intValue();
             int height = clientHeight - paddingTop - paddingBottom - border * 2;
-            Point framePoint = targetDiv.getLocation();
             int pointY = framePoint.getY() + paddingTop + border;
             int scrollableDivHeight = Integer.valueOf(targetDiv.getAttribute("scrollHeight")) - paddingTop - paddingBottom - border * 2;
-            ScrollableTag tag = new ScrollableTag(parent, pointY, targetDiv, scrollableDivHeight, height);
+
+            int clientWidth = Integer.valueOf(targetDiv.getAttribute("clientWidth"));
+            int borderWidth = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('border-left-width'));", targetDiv)).intValue();
+            int paddingLeft = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-left') || document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding'));", targetDiv)).intValue();
+            int paddingRight = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-right') || document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding'));", targetDiv)).intValue();
+            int width = clientWidth - paddingLeft - paddingRight - borderWidth * 2;
+            int pointX = framePoint.getX() + paddingLeft + borderWidth;
+            int scrollableDivWidth = Integer.valueOf(targetDiv.getAttribute("scrollWidth")) - paddingLeft - paddingRight - borderWidth * 2;
+
+            ScrollableTag tag = new ScrollableTag(parent
+                    , targetDiv
+                    , pointY
+                    , scrollableDivHeight
+                    , height
+                    , pointX
+                    , scrollableDivWidth
+                    , width
+            );
             innerPrintableElement.put(tag.getPointY(), tag);
         }
     }
