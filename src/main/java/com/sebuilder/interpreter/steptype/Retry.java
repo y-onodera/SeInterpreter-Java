@@ -20,18 +20,17 @@ public class Retry implements StepType {
         boolean success = true;
         int actions = Integer.valueOf(ctx.string("subStep"));
         while (!next(ctx)) {
-            ctx.processTestFailure();
+            ctx.processTestSuccess();
             for (int i = 0; i < actions; i++) {
                 success = next(ctx) && success;
                 if (i != actions - 1) {
                     if (success) {
                         ctx.processTestSuccess();
-                    } else {
-                        ctx.processTestFailure();
                     }
                 }
             }
             if (!success) {
+                ctx.processTestFailure();
                 return false;
             }
             ctx.processTestSuccess();

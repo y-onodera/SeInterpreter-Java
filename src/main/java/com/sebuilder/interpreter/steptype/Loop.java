@@ -22,6 +22,7 @@ public class Loop implements StepType {
         for (int i = 0; i < count; i++) {
             success = runOneStep(ctx, success, actions, i);
             if (!success) {
+                ctx.processTestFailure();
                 return false;
             }
             if (i + 1 < count) {
@@ -39,8 +40,6 @@ public class Loop implements StepType {
             if (exec != actions - 1) {
                 if (success) {
                     ctx.processTestSuccess();
-                } else {
-                    ctx.processTestFailure();
                 }
             }
         }
