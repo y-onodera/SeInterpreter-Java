@@ -3,7 +3,7 @@ package com.sebuilder.interpreter.steptype;
 import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
 
-public class Close implements StepType {
+public class CloseWindow implements StepType {
     /**
      * Perform the action this step consists of.
      *
