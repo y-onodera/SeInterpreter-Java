@@ -10,7 +10,7 @@ public class HorizontalPrinter {
     private BufferedImage finalImage;
     private Graphics2D graphics;
 
-    public BufferedImage getImage(Printable target) {
+    public BufferedImage getImage(HorizontalSurvey target) {
         if (!target.hasHorizontalScroll()) {
             return this.getScreenshot(target, 0, target.getWindowWidth());
         }
@@ -26,7 +26,7 @@ public class HorizontalPrinter {
         }
     }
 
-    protected void printImage(Printable target) {
+    protected void printImage(HorizontalSurvey target) {
         this.setUpPrint(target);
         int fromPointX = target.getPointX();
         int viewportPrintFrom = fromPointX;
@@ -45,11 +45,11 @@ public class HorizontalPrinter {
                 }
             }
         }
-        final int printed = target.getPointX() + target.getViewportHeight();
+        final int printed = target.getPointX() + target.getViewportWidth();
         this.appendImage(this.getScreenshot(target, printed, target.getWindowWidth() - printed));
     }
 
-    protected void setUpPrint(Printable printTarget) {
+    protected void setUpPrint(HorizontalSurvey printTarget) {
         printTarget.scrollHorizontally(0);
         this.resetPrintedWidth();
         this.appendImage(this.getScreenshot(printTarget, 0, printTarget.getPointX()));
@@ -63,7 +63,7 @@ public class HorizontalPrinter {
         this.printedWidth = printedWidth;
     }
 
-    protected int nextPrintableWidth(Printable printTarget, int remainViewPortWidth) {
+    protected int nextPrintableWidth(HorizontalSurvey printTarget, int remainViewPortWidth) {
         return Math.min(remainViewPortWidth, printTarget.getScrollableWidth() - this.getPrintedWidth());
     }
 
@@ -71,11 +71,11 @@ public class HorizontalPrinter {
         return this.printedWidth;
     }
 
-    protected BufferedImage getScreenshot(Printable printTarget, int printFrom, int width) {
+    protected BufferedImage getScreenshot(HorizontalSurvey printTarget, int printFrom, int width) {
         return this.getScreenshot(printTarget, printFrom, width, width);
     }
 
-    protected BufferedImage getScreenshot(Printable printTarget, int printFrom, int remainWidth, int viewportWidth) {
+    protected BufferedImage getScreenshot(HorizontalSurvey printTarget, int printFrom, int remainWidth, int viewportWidth) {
         BufferedImage part = printTarget.getScreenshot();
         int height = part.getHeight();
         int width = Math.min(part.getWidth(), viewportWidth);
@@ -99,7 +99,7 @@ public class HorizontalPrinter {
         return part;
     }
 
-    protected int appendImageAndScrollHorizontal(Printable printTarget, BufferedImage part) {
+    protected int appendImageAndScrollHorizontal(HorizontalSurvey printTarget, BufferedImage part) {
         this.appendImage(part);
         return this.horizontallyScrollOutPrintedPart(printTarget, part.getWidth());
     }
@@ -109,7 +109,7 @@ public class HorizontalPrinter {
         this.printedImageWidth = this.printedImageWidth + part.getWidth();
     }
 
-    protected int horizontallyScrollOutPrintedPart(Printable printTarget, int printedWidth) {
+    protected int horizontallyScrollOutPrintedPart(HorizontalSurvey printTarget, int printedWidth) {
         this.appendPrintedWidth(printedWidth);
         return printTarget.scrollOutHorizontally(this.getPrintedWidth());
     }
