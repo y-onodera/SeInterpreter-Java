@@ -88,6 +88,7 @@ public class BrowserSettingController {
         this.currentDriverPath = currentDriverPath;
         this.browserSelect.getItems().add("Chrome");
         this.browserSelect.getItems().add("Firefox");
+        this.browserSelect.getItems().add("Edge");
         if (this.selectedBrowser != null) {
             this.browserSelect.getSelectionModel().select(this.selectedBrowser);
         } else {
@@ -105,6 +106,8 @@ public class BrowserSettingController {
         String driverName = "chromedriver.exe";
         if ("Firefox".equals(selectedBrowser)) {
             driverName = "geckodriver.exe";
+        } else if ("Edge".equals(selectedBrowser)) {
+            driverName = "MicrosoftWebDriver.exe";
         }
         if (parentDir == null || !parentDir.exists()) {
             File driverParent = new File(Context.getInstance().getBaseDirectory(), "exe/");
