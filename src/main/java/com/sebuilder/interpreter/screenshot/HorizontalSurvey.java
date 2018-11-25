@@ -16,7 +16,7 @@ public interface HorizontalSurvey extends DocumentSurvey, Scrollable {
     int getInnerScrollWidth();
 
     default int getScrollWidth() {
-        return getScrollableWidth() - getViewportWidth() + getInnerScrollWidth();
+        return getScrollableWidth() - getViewportWidth();
     }
 
     default boolean hasHorizontalScroll() {

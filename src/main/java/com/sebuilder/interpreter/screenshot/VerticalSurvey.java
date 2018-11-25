@@ -16,7 +16,7 @@ public interface VerticalSurvey extends DocumentSurvey, Scrollable {
     int getInnerScrollHeight();
 
     default int getScrollHeight() {
-        return getScrollableHeight() - getViewportHeight() + getInnerScrollHeight();
+        return getScrollableHeight() - getViewportHeight();
     }
 
     default boolean hasVerticalScroll() {
@@ -41,17 +41,21 @@ public interface VerticalSurvey extends DocumentSurvey, Scrollable {
         waitForScrolling();
     }
 
-    default int scrollOutVertically(int printedHeight) {
-        if (this.isMoveScrollTopTo(printedHeight)) {
-            this.scrollVertically(printedHeight);
+    default int scrollOutVertically(int printedHeight, int scrolledHeight) {
+        int nextScrollTop = printedHeight + scrolledHeight;
+        if (this.isMoveScrollTopTo(nextScrollTop)) {
+            this.scrollVertically(nextScrollTop);
             return 0;
         }
         if (this.getViewportHeight() >= this.getScrollableHeight()) {
-            return printedHeight;
+            return nextScrollTop;
         }
         final int scrollY = this.getScrollableHeight() - this.getViewportHeight();
         this.scrollVertically(scrollY);
-        return printedHeight - scrollY;
+        return nextScrollTop - scrollY;
     }
 
+    default int nextPrintableHeight(int remainViewPortHeight, int printedHeight) {
+        return Math.min(remainViewPortHeight, this.getScrollableHeight() - printedHeight);
+    }
 }

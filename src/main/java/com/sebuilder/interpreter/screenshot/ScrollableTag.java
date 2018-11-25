@@ -26,6 +26,18 @@ public class ScrollableTag extends InnerElement {
     }
 
     @Override
+    public int scrollOutVertically(int printedHeight, int scrolledHeight) {
+        if (this.getScrollHeight() <= scrolledHeight) {
+            return this.getParent().scrollOutVertically(printedHeight, this.getPointY() + scrolledHeight - this.getScrollHeight());
+        }
+        int couldNotScroll = super.scrollOutVertically(printedHeight, scrolledHeight);
+        if (this.getScrollHeight() < printedHeight) {
+            return this.getParent().scrollOutVertically(couldNotScroll, this.getPointY() + scrolledHeight);
+        }
+        return couldNotScroll;
+    }
+
+    @Override
     public void scrollVertically(int scrollY) {
         this.scrollVertically(scrollY, this.getElement());
     }

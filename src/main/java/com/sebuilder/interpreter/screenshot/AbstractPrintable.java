@@ -21,13 +21,13 @@ public abstract class AbstractPrintable implements Printable, VerticalSurvey {
                 .values()
                 .stream()
                 .reduce(0
-                        , (sum, element) -> sum + element.getScrollHeight()
+                        , (sum, element) -> sum + element.getScrollHeight() + element.getInnerScrollHeight()
                         , (sum1, sum2) -> sum1 + sum2);
         this.innerScrollWidth = this.getInnerHorizontalScrollableElement()
                 .values()
                 .stream()
                 .reduce(0
-                        , (sum, element) -> sum + element.getScrollWidth()
+                        , (sum, element) -> sum + element.getScrollWidth() + element.getInnerScrollWidth()
                         , (sum1, sum2) -> sum1 + sum2);
     }
 

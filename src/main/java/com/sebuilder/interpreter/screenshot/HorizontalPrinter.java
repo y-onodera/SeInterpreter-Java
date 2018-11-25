@@ -16,7 +16,7 @@ public class HorizontalPrinter {
         }
         try {
             int imageHeight = target.getWindowHeight();
-            int imageWidth = target.getWindowWidth() + target.getScrollWidth();
+            int imageWidth = target.getWindowWidth() + target.getScrollWidth() + target.getInnerScrollWidth();
             this.finalImage = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_3BYTE_BGR);
             this.graphics = this.finalImage.createGraphics();
             this.printImage(target);
