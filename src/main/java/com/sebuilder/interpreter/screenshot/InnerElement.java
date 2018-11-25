@@ -23,7 +23,7 @@ public abstract class InnerElement extends AbstractPrintable {
             , int scrollableWidth
             , int viewportWidth
     ) {
-        super(parentPage.getCtx(), parentPage.scrollTimeout(), innerScrollElementHandler);
+        super(parentPage.getCtx(), parentPage.scrollTimeout());
         this.parent = parentPage;
         this.element = element;
         this.pointY = pointY;
@@ -32,6 +32,7 @@ public abstract class InnerElement extends AbstractPrintable {
         this.pointX = pointX;
         this.viewportWidth = viewportWidth;
         this.scrollableWidth = scrollableWidth;
+        this.handleInnerScrollElement(innerScrollElementHandler);
     }
 
     public WebElement getElement() {

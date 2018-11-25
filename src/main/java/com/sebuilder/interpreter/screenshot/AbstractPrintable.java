@@ -13,9 +13,12 @@ public abstract class AbstractPrintable implements Printable, VerticalSurvey {
     private int innerScrollHeight;
     private int innerScrollWidth;
 
-    protected AbstractPrintable(TestRun ctx, long scrollTimeout, InnerScrollElementHandler innerScrollElementHandler) {
+    protected AbstractPrintable(TestRun ctx, long scrollTimeout) {
         this.ctx = ctx;
         this.scrollTimeout = scrollTimeout;
+    }
+
+    protected void handleInnerScrollElement(InnerScrollElementHandler innerScrollElementHandler) {
         this.innerScrollableElement = innerScrollElementHandler.handleTarget(this);
         this.innerScrollHeight = this.getInnerVerticalScrollableElement()
                 .values()

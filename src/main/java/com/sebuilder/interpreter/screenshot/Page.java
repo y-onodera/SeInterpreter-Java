@@ -14,13 +14,14 @@ public class Page extends AbstractPrintable {
     private int viewportWidth;
 
     public Page(TestRun ctx, long scrollTimeout, InnerScrollElementHandler innerScrollElementHandler) {
-        super(ctx, scrollTimeout, innerScrollElementHandler);
+        super(ctx, scrollTimeout);
         this.windowHeight = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return window.innerHeight || document.documentElement.clientHeight || document.getElementsByTagName('body')[0].clientHeight;", new Object[0])).intValue();
         this.windowWidth = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return window.innerWidth || document.documentElement.clientWidth || document.getElementsByTagName('body')[0].clientWidth;", new Object[0])).intValue();
         this.viewportHeight = this.getWindowHeight();
         this.viewportWidth = this.getWindowWidth();
         this.scrollableHeight = this.getFullHeight();
         this.scrollableWidth = this.getFullWidth();
+        this.handleInnerScrollElement(innerScrollElementHandler);
     }
 
     @Override
