@@ -218,7 +218,7 @@ public class SimpleSeInterpreterTestListener implements SeInterpreterTestListene
         aggregator.execute();
         Delete delete = new Delete();
         delete.setProject(this.project);
-        delete.addFileset(fs);
+        delete.setFile(new File(this.resultDir, "TEST-SeBuilder-result.xml"));
         delete.execute();
     }
 
