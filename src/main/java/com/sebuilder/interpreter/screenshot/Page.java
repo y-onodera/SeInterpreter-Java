@@ -1,8 +1,8 @@
 package com.sebuilder.interpreter.screenshot;
 
 import com.sebuilder.interpreter.TestRun;
-import org.openqa.selenium.JavascriptExecutor;
 
+import java.awt.image.BufferedImage;
 
 
 public class Page extends AbstractPrintable {
@@ -15,8 +15,9 @@ public class Page extends AbstractPrintable {
 
     public Page(TestRun ctx, long scrollTimeout, InnerScrollElementHandler innerScrollElementHandler) {
         super(ctx, scrollTimeout);
-        this.windowHeight = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return window.innerHeight || document.documentElement.clientHeight || document.getElementsByTagName('body')[0].clientHeight;", new Object[0])).intValue();
-        this.windowWidth = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return window.innerWidth || document.documentElement.clientWidth || document.getElementsByTagName('body')[0].clientWidth;", new Object[0])).intValue();
+        BufferedImage image = getScreenshot();
+        this.windowHeight = image.getHeight();
+        this.windowWidth = image.getWidth();
         this.viewportHeight = this.getWindowHeight();
         this.viewportWidth = this.getWindowWidth();
         this.scrollableHeight = this.getFullHeight();
