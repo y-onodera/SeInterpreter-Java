@@ -56,8 +56,9 @@ public class VerticalPrinter {
         }
     }
 
-    protected int printInnerScrollElement(Printable printTarget, int printFrom) {
+    protected int printInnerScrollElement(Printable printTarget, int from) {
         int viewportPrint = 0;
+        int printFrom = from;
         for (Integer pointY : printTarget.getInnerScrollableElement().keySet().stream()
                 .sorted(Comparator.comparing(Integer::intValue))
                 .collect(Collectors.toList())) {
@@ -69,7 +70,7 @@ public class VerticalPrinter {
                     this.appendImage(scrollElement.printImage(new VerticalPrinter(), printFrom));
                 } else {
                     viewportPrint = notScrolled;
-                    this.appendImage(scrollElement.printImage(new VerticalPrinter(), notScrolled));
+                    this.appendImage(scrollElement.printImage(new VerticalPrinter(), printFrom + notScrolled));
                 }
 
                 if (printTarget.isMoveScrollTopTo(this.getPrintedHeight() + scrollElement.getViewportHeight())) {
@@ -84,6 +85,7 @@ public class VerticalPrinter {
                         viewportPrint = viewportPrint + scrollElement.getViewportHeight();
                     }
                 }
+                printFrom = viewportPrint;
             }
         }
         return viewportPrint;

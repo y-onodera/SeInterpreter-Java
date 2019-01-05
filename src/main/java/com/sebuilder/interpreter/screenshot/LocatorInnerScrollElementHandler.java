@@ -1,5 +1,6 @@
 package com.sebuilder.interpreter.screenshot;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.Maps;
 import com.sebuilder.interpreter.TestRun;
 import org.openqa.selenium.JavascriptExecutor;
@@ -7,6 +8,7 @@ import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
@@ -84,21 +86,30 @@ public class LocatorInnerScrollElementHandler implements InnerScrollElementHandl
 
         for (WebElement targetDiv : divs) {
             Point framePoint = targetDiv.getLocation();
-            int clientHeight = Integer.valueOf(targetDiv.getAttribute("clientHeight"));
-            int border = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('border-top-width'));", targetDiv)).intValue();
-            int paddingTop = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-top') || document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding'));", targetDiv)).intValue();
-            int paddingBottom = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-bottom') || document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding'));", targetDiv)).intValue();
-            int height = clientHeight - paddingTop - paddingBottom - border * 2;
-            int pointY = framePoint.getY() + paddingTop + border;
-            int scrollableDivHeight = Integer.valueOf(targetDiv.getAttribute("scrollHeight")) - paddingTop - paddingBottom - border * 2;
 
+            int height = new BigDecimal(targetDiv.getCssValue("height").replaceAll("[^0-9\\.]", "")).intValue();
+            int clientHeight = Integer.valueOf(targetDiv.getAttribute("clientHeight"));
+            int scrollableDivHeight = Integer.valueOf(targetDiv.getAttribute("scrollHeight"));
+
+            int width = new BigDecimal(targetDiv.getCssValue("width").replaceAll("[^0-9\\.]", "")).intValue();
             int clientWidth = Integer.valueOf(targetDiv.getAttribute("clientWidth"));
+            int scrollableDivWidth = Integer.valueOf(targetDiv.getAttribute("scrollWidth"));
+
+            int borderHeight = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('border-top-width'));", targetDiv)).intValue();
+            int pointY = framePoint.getY() + borderHeight;
             int borderWidth = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('border-left-width'));", targetDiv)).intValue();
-            int paddingLeft = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-left') || document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding'));", targetDiv)).intValue();
-            int paddingRight = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-right') || document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding'));", targetDiv)).intValue();
-            int width = clientWidth - paddingLeft - paddingRight - borderWidth * 2;
-            int pointX = framePoint.getX() + paddingLeft + borderWidth;
-            int scrollableDivWidth = Integer.valueOf(targetDiv.getAttribute("scrollWidth")) - paddingLeft - paddingRight - borderWidth * 2;
+            int pointX = framePoint.getX() + borderWidth;
+            if (Objects.equal(targetDiv.getCssValue("box-sizing"), "border-box")) {
+                height = height - borderHeight * 2;
+                width = width - borderWidth * 2;
+            } else {
+                int paddingTop = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-top') || document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding'));", targetDiv)).intValue();
+                pointY = pointY + paddingTop;
+                int paddingLeft = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-left') || document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding'));", targetDiv)).intValue();
+                pointX = pointX + paddingLeft;
+            }
+            scrollableDivHeight = scrollableDivHeight - (clientHeight - height);
+            scrollableDivWidth = scrollableDivWidth - (clientWidth - width);
 
             ScrollableTag tag = new ScrollableTag(parent
                     , targetDiv

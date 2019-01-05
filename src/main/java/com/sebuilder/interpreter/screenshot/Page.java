@@ -20,8 +20,8 @@ public class Page extends AbstractPrintable {
         this.windowWidth = image.getWidth();
         this.viewportHeight = this.getWindowHeight();
         this.viewportWidth = this.getWindowWidth();
-        this.scrollableHeight = this.getFullHeight();
-        this.scrollableWidth = this.getFullWidth();
+        this.scrollableHeight = Math.max(this.getFullHeight(), this.windowHeight);
+        this.scrollableWidth = Math.max(this.getFullWidth(), this.windowWidth);
         this.handleInnerScrollElement(innerScrollElementHandler);
     }
 
