@@ -37,6 +37,9 @@ public class Store implements StepType {
         if (ctx.currentStep().containsParam("regex")) {
             value = value.replaceAll(ctx.string("regex"), ctx.string("replacement"));
         }
+        if (ctx.currentStep().isNegated()) {
+            value = String.valueOf(!Boolean.valueOf(value));
+        }
         ctx.vars().put(ctx.string("variable"), value);
         return true;
     }

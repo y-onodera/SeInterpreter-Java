@@ -13,6 +13,9 @@ public class Print implements StepType {
     @Override
     public boolean run(TestRun ctx) {
         String value = getter.get(ctx);
+        if (ctx.currentStep().isNegated()) {
+            value = String.valueOf(!Boolean.valueOf(value));
+        }
         ctx.log().info(value);
         return true;
     }

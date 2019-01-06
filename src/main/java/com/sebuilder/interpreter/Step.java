@@ -117,20 +117,32 @@ public class Step {
     }
 
     public String toPrettyString() {
+        boolean negateEnable = false;
         StringBuilder sb = new StringBuilder();
         if (name != null) {
             sb.append(name).append(": ");
         }
         if (type instanceof Assert) {
             sb.append("assert").append(((Assert) type).getter.getClass().getSimpleName());
+            negateEnable = true;
         } else if (type instanceof Verify) {
             sb.append("verify").append(((Verify) type).getter.getClass().getSimpleName());
+            negateEnable = true;
         } else if (type instanceof WaitFor) {
             sb.append("waitFor").append(((WaitFor) type).getter.getClass().getSimpleName());
+            negateEnable = true;
         } else if (type instanceof Store) {
             sb.append("store").append(((Store) type).getter.getClass().getSimpleName());
+            negateEnable = true;
+        } else if (this.type instanceof Print) {
+            sb.append("print").append(((Print) type).getter.getClass().getSimpleName());
+            negateEnable = true;
         } else {
             sb.append(type.getClass().getSimpleName());
+        }
+
+        if (negateEnable) {
+            sb.append(" negated=" + this.negated);
         }
 
         for (Map.Entry<String, String> pe : stringParams.entrySet()) {
