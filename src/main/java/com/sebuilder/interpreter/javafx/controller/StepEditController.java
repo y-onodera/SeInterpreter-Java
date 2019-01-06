@@ -79,6 +79,9 @@ public class StepEditController {
         stepTypeSelect.getItems().add("retry");
         stepTypeSelect.getItems().add("store");
         stepTypeSelect.getItems().add("pause");
+        stepTypeSelect.getItems().add("storeElementPresent");
+        stepTypeSelect.getItems().add("storeElementVisible");
+        stepTypeSelect.getItems().add("storeElementEnable");
         stepTypeSelect.getItems().add("storeElementValue");
         stepTypeSelect.getItems().add("storeElementAttribute");
         stepTypeSelect.getItems().add("storeElementStyle");
@@ -89,6 +92,9 @@ public class StepEditController {
         stepTypeSelect.getItems().add("storeCookieByName");
         stepTypeSelect.getItems().add("storeEval");
         stepTypeSelect.getItems().add("print");
+        stepTypeSelect.getItems().add("printElementPresent");
+        stepTypeSelect.getItems().add("printElementVisible");
+        stepTypeSelect.getItems().add("printElementEnable");
         stepTypeSelect.getItems().add("printElementValue");
         stepTypeSelect.getItems().add("printElementAttribute");
         stepTypeSelect.getItems().add("printElementStyle");
@@ -200,7 +206,8 @@ public class StepEditController {
             while (keys.hasNext()) {
                 String key = keys.next().toString();
                 if (key.equals("type") || key.equals("locator") || key.equals("skip")
-                        || (key.equals("negated") && !(typeName.startsWith("wait") || typeName.startsWith("verify")))) {
+                        || (key.equals("negated")
+                        && !(typeName.startsWith("wait") || typeName.startsWith("verify") || typeName.startsWith("print") || typeName.startsWith("store")))) {
                     continue;
                 }
                 if (key.startsWith("locator")) {
