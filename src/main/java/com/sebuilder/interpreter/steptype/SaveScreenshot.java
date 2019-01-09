@@ -16,6 +16,7 @@
 
 package com.sebuilder.interpreter.steptype;
 
+import com.sebuilder.interpreter.LocatorHolder;
 import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.screenshot.LocatorInnerScrollElementHandler;
@@ -29,7 +30,7 @@ import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
 
-public class SaveScreenshot implements StepType {
+public class SaveScreenshot implements StepType, LocatorHolder {
 
     @Override
     public boolean run(TestRun ctx) {
@@ -49,6 +50,7 @@ public class SaveScreenshot implements StepType {
 
     @Override
     public void supplementSerialized(JSONObject o) throws JSONException {
+        LocatorHolder.super.supplementSerialized(o);
         if (!o.has("file")) {
             o.put("file", "");
         }
