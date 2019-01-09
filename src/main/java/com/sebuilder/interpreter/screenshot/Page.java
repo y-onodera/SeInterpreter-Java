@@ -1,11 +1,14 @@
 package com.sebuilder.interpreter.screenshot;
 
 import com.sebuilder.interpreter.TestRun;
+import org.openqa.selenium.JavascriptExecutor;
 
 import java.awt.image.BufferedImage;
 
 
 public class Page extends AbstractPrintable {
+    private int imageHeight;
+    private int imageWidth;
     private int windowHeight;
     private int windowWidth;
     private int scrollableHeight;
@@ -16,12 +19,14 @@ public class Page extends AbstractPrintable {
     public Page(TestRun ctx, long scrollTimeout, InnerScrollElementHandler innerScrollElementHandler) {
         super(ctx, scrollTimeout);
         BufferedImage image = getScreenshot();
-        this.windowHeight = image.getHeight();
-        this.windowWidth = image.getWidth();
+        this.imageHeight = image.getHeight();
+        this.imageWidth = image.getWidth();
+        this.windowHeight = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return window.innerHeight || document.documentElement.clientHeight || document.getElementsByTagName('body')[0].clientHeight;", new Object[0])).intValue();
+        this.windowWidth = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return window.innerWidth || document.documentElement.clientWidth || document.getElementsByTagName('body')[0].clientWidth;", new Object[0])).intValue();
         this.viewportHeight = this.getWindowHeight();
         this.viewportWidth = this.getWindowWidth();
-        this.scrollableHeight = Math.max(this.getFullHeight(), this.windowHeight);
-        this.scrollableWidth = Math.max(this.getFullWidth(), this.windowWidth);
+        this.scrollableHeight = this.getFullHeight();
+        this.scrollableWidth = this.getFullWidth();
         this.handleInnerScrollElement(innerScrollElementHandler);
     }
 
@@ -33,6 +38,16 @@ public class Page extends AbstractPrintable {
     @Override
     public int getPointX() {
         return 0;
+    }
+
+    @Override
+    public int getImageHeight() {
+        return this.imageHeight;
+    }
+
+    @Override
+    public int getImageWidth() {
+        return this.imageWidth;
     }
 
     @Override

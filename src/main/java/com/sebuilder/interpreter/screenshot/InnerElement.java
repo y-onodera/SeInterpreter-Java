@@ -44,6 +44,11 @@ public abstract class InnerElement extends AbstractPrintable {
     }
 
     @Override
+    public int getImageHeight() {
+        return this.getParent().getImageHeight();
+    }
+
+    @Override
     public int getWindowHeight() {
         return this.getParent().getWindowHeight();
     }
@@ -61,6 +66,11 @@ public abstract class InnerElement extends AbstractPrintable {
     @Override
     public int getPointX() {
         return pointX;
+    }
+
+    @Override
+    public int getImageWidth() {
+        return this.getParent().getImageWidth();
     }
 
     @Override

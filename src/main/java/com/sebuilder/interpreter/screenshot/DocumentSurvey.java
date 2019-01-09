@@ -15,6 +15,10 @@ public interface DocumentSurvey {
 
     RemoteWebDriver getWebDriver();
 
+    int getImageHeight();
+
+    int getImageWidth();
+
     int getWindowHeight();
 
     int getWindowWidth();

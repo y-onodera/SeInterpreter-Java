@@ -56,6 +56,19 @@ public class VerticalPrinter {
         }
     }
 
+    protected void setUpPrint(Printable printTarget) {
+        printTarget.scrollVertically(0);
+        this.resetPrintedHeight();
+    }
+
+    protected void resetPrintedHeight() {
+        this.setPrintedHeight(0);
+    }
+
+    protected int nextPrintableHeight(Printable printTarget, int remainViewPortHeight) {
+        return printTarget.nextPrintableHeight(remainViewPortHeight, this.getPrintedHeight());
+    }
+
     protected int printInnerScrollElement(Printable printTarget, int from) {
         int viewportPrint = 0;
         int printFrom = from;
@@ -96,32 +109,7 @@ public class VerticalPrinter {
     }
 
     protected BufferedImage getScreenshot(Printable printTarget, int printFrom, int remainHeight, int viewportHeight) {
-        BufferedImage part = printTarget.printImage(new HorizontalPrinter());
-        int height = Math.min(part.getHeight(), viewportHeight);
-        int width = part.getWidth();
-        if (remainHeight < height) {
-            if (printFrom + viewportHeight < part.getHeight()) {
-                part = part.getSubimage(0, printFrom, width, remainHeight);
-            } else {
-                if (printFrom + remainHeight < part.getHeight()) {
-                    part = part.getSubimage(0, printFrom, width, remainHeight);
-                } else if (printFrom < part.getHeight()) {
-                    part = part.getSubimage(0, printFrom, width, part.getHeight() - printFrom);
-                }
-            }
-        } else {
-            if (printFrom + height < part.getHeight()) {
-                part = part.getSubimage(0, printFrom, width, height);
-            } else if (printFrom < part.getHeight()) {
-                part = part.getSubimage(0, printFrom, width, part.getHeight() - printFrom);
-            }
-        }
-        return part;
-    }
-
-    protected void appendImage(BufferedImage part) {
-        this.graphics.drawImage(part, 0, this.printedImageHeight, null);
-        this.printedImageHeight = this.printedImageHeight + part.getHeight();
+        return printTarget.getScreenshot(printFrom, remainHeight, viewportHeight);
     }
 
     protected int appendImageAndScrollVertical(Printable printTarget, BufferedImage part) {
@@ -129,33 +117,17 @@ public class VerticalPrinter {
         return this.verticallyScrollOutPrintedPart(printTarget, part.getHeight());
     }
 
-    protected void setUpPrint(Printable printTarget) {
-        printTarget.scrollVertically(0);
-        this.resetPrintedHeight();
-    }
-
-    protected void setPrintedHeight(int printedHeight) {
-        this.printedHeight = printedHeight;
-    }
-
-    protected void resetPrintedHeight() {
-        this.setPrintedHeight(0);
-    }
-
-    protected void appendPrintedHeight(int printedHeight) {
-        this.setPrintedHeight(this.getPrintedHeight() + printedHeight);
-    }
-
-    protected int getPrintedHeight() {
-        return this.printedHeight;
-    }
-
-    protected int nextPrintableHeight(Printable printTarget, int remainViewPortHeight) {
-        return printTarget.nextPrintableHeight(remainViewPortHeight, this.getPrintedHeight());
+    protected void appendImage(BufferedImage part) {
+        this.graphics.drawImage(part, 0, this.printedImageHeight, null);
+        this.printedImageHeight = this.printedImageHeight + part.getHeight();
     }
 
     protected int verticallyScrollOutPrintedPart(Printable printTarget, int printedHeight) {
         this.appendPrintedHeight(printedHeight);
+        return verticallyScrollOut(printTarget, printTarget.convertDocumentPerspective(printedHeight));
+    }
+
+    protected int verticallyScrollOut(Printable printTarget, int printedHeight) {
         int notScrolled = printTarget.scrollOutVertically(printedHeight, this.scrolledHeight);
         if (notScrolled == 0) {
             this.scrolledHeight = this.scrolledHeight + printedHeight;
@@ -165,4 +137,15 @@ public class VerticalPrinter {
         return notScrolled;
     }
 
+    protected int getPrintedHeight() {
+        return this.printedHeight;
+    }
+
+    protected void setPrintedHeight(int printedHeight) {
+        this.printedHeight = printedHeight;
+    }
+
+    protected void appendPrintedHeight(int printedHeight) {
+        this.setPrintedHeight(this.getPrintedHeight() + printedHeight);
+    }
 }

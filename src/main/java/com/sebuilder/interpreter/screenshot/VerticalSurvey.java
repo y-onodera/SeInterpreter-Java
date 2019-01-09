@@ -58,4 +58,12 @@ public interface VerticalSurvey extends DocumentSurvey, Scrollable {
     default int nextPrintableHeight(int remainViewPortHeight, int printedHeight) {
         return Math.min(remainViewPortHeight, this.getScrollableHeight() - printedHeight);
     }
+
+    default int convertImagePerspective(int documentHeight) {
+        return documentHeight * this.getImageHeight() / this.getWindowHeight();
+    }
+
+    default int convertDocumentPerspective(int imageHeight) {
+        return imageHeight * this.getWindowHeight() / this.getImageHeight();
+    }
 }
