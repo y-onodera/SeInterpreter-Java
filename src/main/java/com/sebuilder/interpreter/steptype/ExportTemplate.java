@@ -3,6 +3,7 @@ package com.sebuilder.interpreter.steptype;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import com.sebuilder.interpreter.ExportResource;
+import com.sebuilder.interpreter.LocatorHolder;
 import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
 import org.json.JSONException;
@@ -12,7 +13,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
-public class ExportTemplate implements StepType {
+public class ExportTemplate implements StepType, LocatorHolder {
 
     /**
      * Perform the action this step consists of.
@@ -44,6 +45,7 @@ public class ExportTemplate implements StepType {
 
     @Override
     public void supplementSerialized(JSONObject o) throws JSONException {
+        LocatorHolder.super.supplementSerialized(o);
         if (!o.has("datasource")) {
             o.put("datasource", "");
         }
