@@ -15,8 +15,8 @@ public class VerticalPrinter {
 
     public BufferedImage getImage(Printable target, int fromPointY) {
         try {
-            int imageHeight = target.getScrollableHeight() + target.getInnerScrollHeight();
-            int imageWidth = target.getWindowWidth() + target.getScrollWidth() + target.getInnerScrollWidth();
+            int imageHeight = target.getFullImageHeight();
+            int imageWidth = target.getFullImageWidth();
             this.finalImage = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_3BYTE_BGR);
             this.graphics = this.finalImage.createGraphics();
             this.printImage(target, fromPointY);
@@ -66,7 +66,7 @@ public class VerticalPrinter {
     }
 
     protected int nextPrintableHeight(Printable printTarget, int remainViewPortHeight) {
-        return printTarget.nextPrintableHeight(remainViewPortHeight, this.getPrintedHeight());
+        return printTarget.nextPrintableHeight(remainViewPortHeight, printTarget.convertDocumentHeight(this.getPrintedHeight()));
     }
 
     protected int printInnerScrollElement(Printable printTarget, int from) {
@@ -76,8 +76,9 @@ public class VerticalPrinter {
                 .sorted(Comparator.comparing(Integer::intValue))
                 .collect(Collectors.toList())) {
             InnerElement scrollElement = printTarget.getInnerScrollableElement().get(pointY);
-            if (this.getPrintedHeight() < pointY && pointY < this.getPrintedHeight() + printTarget.getViewportHeight()) {
-                BufferedImage part = this.getScreenshot(printTarget, printFrom, pointY - this.getPrintedHeight());
+            if (printTarget.convertDocumentHeight(this.getPrintedHeight()) < pointY
+                    && pointY < printTarget.convertDocumentHeight(this.getPrintedHeight()) + printTarget.getViewportHeight()) {
+                BufferedImage part = this.getScreenshot(printTarget, printFrom, pointY - printTarget.convertDocumentHeight(this.getPrintedHeight()));
                 int notScrolled = this.appendImageAndScrollVertical(printTarget, part);
                 if (notScrolled == 0) {
                     this.appendImage(scrollElement.printImage(new VerticalPrinter(), printFrom));
@@ -86,7 +87,7 @@ public class VerticalPrinter {
                     this.appendImage(scrollElement.printImage(new VerticalPrinter(), printFrom + notScrolled));
                 }
 
-                if (printTarget.isMoveScrollTopTo(this.getPrintedHeight() + scrollElement.getViewportHeight())) {
+                if (printTarget.isMoveScrollTopTo(printTarget.convertDocumentHeight(this.getPrintedHeight()) + scrollElement.getViewportHeight())) {
                     this.verticallyScrollOutPrintedPart(printTarget, scrollElement.getViewportHeight());
                     viewportPrint = 0;
                 } else {
@@ -109,7 +110,42 @@ public class VerticalPrinter {
     }
 
     protected BufferedImage getScreenshot(Printable printTarget, int printFrom, int remainHeight, int viewportHeight) {
-        return printTarget.getScreenshot(printFrom, remainHeight, viewportHeight);
+        BufferedImage part = printTarget.printImage(new HorizontalPrinter());
+        return getScreenshot(printTarget.convertImageHeight(printFrom)
+                , printTarget.convertImageHeight(remainHeight)
+                , printTarget.convertImageHeight(viewportHeight)
+                , part);
+    }
+
+    protected BufferedImage getScreenshot(int printFrom, int remainHeight, int viewportHeight, BufferedImage part) {
+        int height = Math.min(part.getHeight(), viewportHeight);
+        int width = part.getWidth();
+        if (remainHeight < height) {
+            if (printFrom + viewportHeight < part.getHeight()) {
+                part = this.getSubImage(printFrom, remainHeight, part, width);
+            } else {
+                if (printFrom + remainHeight < part.getHeight()) {
+                    part = this.getSubImage(printFrom, remainHeight, part, width);
+                } else if (printFrom < part.getHeight()) {
+                    part = this.getRestImage(printFrom, part, width);
+                }
+            }
+        } else {
+            if (printFrom + height < part.getHeight()) {
+                part = this.getSubImage(printFrom, height, part, width);
+            } else if (printFrom < part.getHeight()) {
+                part = this.getRestImage(printFrom, part, width);
+            }
+        }
+        return part;
+    }
+
+    protected BufferedImage getSubImage(int printFrom, int remainHeight, BufferedImage part, int width) {
+        return part.getSubimage(0, printFrom, width, remainHeight);
+    }
+
+    protected BufferedImage getRestImage(int printFrom, BufferedImage part, int width) {
+        return part.getSubimage(0, printFrom, width, part.getHeight() - printFrom);
     }
 
     protected int appendImageAndScrollVertical(Printable printTarget, BufferedImage part) {
@@ -124,7 +160,7 @@ public class VerticalPrinter {
 
     protected int verticallyScrollOutPrintedPart(Printable printTarget, int printedHeight) {
         this.appendPrintedHeight(printedHeight);
-        return verticallyScrollOut(printTarget, printTarget.convertDocumentPerspective(printedHeight));
+        return verticallyScrollOut(printTarget, printTarget.convertDocumentHeight(printedHeight));
     }
 
     protected int verticallyScrollOut(Printable printTarget, int printedHeight) {

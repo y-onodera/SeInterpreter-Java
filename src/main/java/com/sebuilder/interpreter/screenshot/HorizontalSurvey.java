@@ -19,6 +19,10 @@ public interface HorizontalSurvey extends DocumentSurvey, Scrollable {
         return getScrollableWidth() - getViewportWidth();
     }
 
+    default int getFullImageWidth() {
+        return this.convertImageWidth(this.getWindowWidth() + this.getScrollWidth() + this.getInnerScrollWidth());
+    }
+
     default boolean hasHorizontalScroll() {
         return this.getScrollableWidth() > this.getViewportWidth();
     }
@@ -52,5 +56,13 @@ public interface HorizontalSurvey extends DocumentSurvey, Scrollable {
         final int scrollX = this.getScrollableWidth() - this.getViewportWidth();
         this.scrollHorizontally(scrollX);
         return printedWidth - scrollX;
+    }
+
+    default int convertImageWidth(int documentWidth) {
+        return documentWidth * this.getImageWidth() / this.getWindowWidth();
+    }
+
+    default int convertDocumentWidth(int imageWidth) {
+        return imageWidth * this.getWindowWidth() / this.getImageWidth();
     }
 }

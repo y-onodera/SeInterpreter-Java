@@ -16,8 +16,6 @@ public interface Printable extends VerticalSurvey, HorizontalSurvey {
 
     TestRun getCtx();
 
-    BufferedImage getScreenshot(int printFrom, int remainHeight, int viewportHeight);
-
     default BufferedImage printImage(VerticalPrinter aPrinter, int fromPointY) {
         return aPrinter.getImage(this, fromPointY);
     }
