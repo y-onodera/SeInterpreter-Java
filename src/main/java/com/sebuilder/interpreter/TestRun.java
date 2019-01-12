@@ -197,7 +197,7 @@ public class TestRun {
                 while (this.hasNext()) {
                     success = this.next() && success;
                 }
-            } catch (RuntimeException e) {
+            } catch (Throwable e) {
                 return this.absent(e);
             }
             return this.end(success);
@@ -310,11 +310,11 @@ public class TestRun {
         return success;
     }
 
-    public boolean absent(RuntimeException e) {
+    public boolean absent(Throwable e) {
         this.getListener().closeTestSuite();
         // If the script terminates, the driver will be closed automatically.
         this.quit();
-        throw e;
+        throw new AssertionError(e);
     }
 
     public void quit() {
