@@ -370,12 +370,14 @@ public class StepEditController {
                     }
                 }
                 for (Map.Entry<String, Map<String, Node>> input : this.locatorInputs.entrySet()) {
-                    JSONObject locator = new JSONObject();
-                    step.put(input.getKey(), locator);
                     String type = ComboBox.class.cast(input.getValue().get("type")).getSelectionModel().getSelectedItem().toString();
-                    locator.put("type", type);
-                    String value = TextField.class.cast(input.getValue().get("value")).getText();
-                    locator.put("value", value);
+                    if (!Strings.isNullOrEmpty(type)) {
+                        JSONObject locator = new JSONObject();
+                        step.put(input.getKey(), locator);
+                        locator.put("type", type);
+                        String value = TextField.class.cast(input.getValue().get("value")).getText();
+                        locator.put("value", value);
+                    }
                 }
                 EventBus.publish(new StepEditEvent(this.action, this.stepIndex, step));
                 this.dialog.close();
