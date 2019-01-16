@@ -16,7 +16,7 @@
 
 package com.sebuilder.interpreter.datasource;
 
-import au.com.bytecode.opencsv.CSVReader;
+import com.opencsv.CSVReader;
 import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.DataSource;
 
