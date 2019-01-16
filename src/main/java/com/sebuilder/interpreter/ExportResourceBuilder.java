@@ -89,9 +89,12 @@ public class ExportResourceBuilder {
                 .findElements(By.tagName("select"))
                 .stream()
                 .forEach(element -> {
-                    element.findElements(By.tagName("option")).stream().forEach(option -> {
-                        this.addStep(new SetElementSelected(), this.ctx.driver(), option);
-                    });
+                    element.findElements(By.tagName("option"))
+                            .stream()
+                            .filter(option -> option.isSelected())
+                            .forEach(option -> {
+                                this.addStep(new SetElementSelected(), this.ctx.driver(), option);
+                            });
                 });
         return this;
     }
@@ -140,7 +143,14 @@ public class ExportResourceBuilder {
         if (!hasLocator) {
             return this;
         }
-        return this.addLocator(Locator.of(driver, element));
+        Locator result = Locator.of(driver, element);
+        if (result.value.contains("//select[@id=")) {
+            String id = "id:" + result.value.replaceAll(".+(?=@id='([^']+)').*", "$1");
+            String value = result.value.replaceAll(".+(?=@value='([^']+)').*", "$1");
+            this.addVariable(id, value.replaceAll("\\$\\{(.+)\\}", "$1"));
+            result = new Locator(result.type.toString(), result.value.replace(value, "${" + id + "}"));
+        }
+        return this.addLocator(result);
     }
 
     public ExportResourceBuilder addLocator(Locator element) {
@@ -157,8 +167,12 @@ public class ExportResourceBuilder {
             if (this.needDataSource && this.currentStep.has("locator")) {
                 JSONObject locatorJSON = (JSONObject) this.currentStep.get("locator");
                 Locator locator = new Locator(locatorJSON.getString("type"), locatorJSON.getString("value"));
-                String valuable = addVariable(locator.toPrettyString(), value);
-                this.currentStep.put(opt, valuable);
+                if (locator.value.contains("//select[@id=")) {
+                    this.currentStep.put(opt, value);
+                } else {
+                    String valuable = addVariable(locator.toPrettyString(), value);
+                    this.currentStep.put(opt, valuable);
+                }
             } else {
                 this.currentStep.put(opt, value);
             }
