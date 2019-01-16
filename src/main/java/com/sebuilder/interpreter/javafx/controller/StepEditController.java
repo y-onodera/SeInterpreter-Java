@@ -75,6 +75,7 @@ public class StepEditController {
         stepTypeSelect.getItems().add("sendKeysToElement");
         stepTypeSelect.getItems().add("submitElement");
         stepTypeSelect.getItems().add("fileDownload");
+        stepTypeSelect.getItems().add("execBat");
         stepTypeSelect.getItems().add("loop");
         stepTypeSelect.getItems().add("retry");
         stepTypeSelect.getItems().add("store");
