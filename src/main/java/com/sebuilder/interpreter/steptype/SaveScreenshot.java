@@ -36,7 +36,6 @@ public class SaveScreenshot implements StepType, LocatorHolder {
     public boolean run(TestRun ctx) {
         RemoteWebDriver wd = ctx.driver();
         wd.switchTo().defaultContent();
-        wd.manage().window().maximize();
         Page target = new Page(ctx, 100, new LocatorInnerScrollElementHandler(wd));
         try {
             File file = new File(ctx.getListener().getScreenShotOutputDirectory(), ctx.getTestRunName() + "_" + ctx.string("file"));
