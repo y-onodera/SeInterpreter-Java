@@ -44,6 +44,10 @@ public class Locator {
                 String value = element.getAttribute("value");
                 return new Locator("xpath", String.format("//select[@id='%s']/option[@value='%s']", parentAttribute, value));
             }
+            String value = parent.getAttribute("value");
+            if (!Strings.isNullOrEmpty(value)) {
+                return new Locator("xpath", WebElements.toXpath(driver, element) + "[@value='" + value + "']");
+            }
         }
         if (!Strings.isNullOrEmpty(id)) {
             return new Locator("id", id);

@@ -146,9 +146,9 @@ public class ExportResourceBuilder {
         Locator result = Locator.of(driver, element);
         if (result.value.contains("//select[@id=")) {
             String id = "id:" + result.value.replaceAll(".+(?=@id='([^']+)').*", "$1");
-            String value = result.value.replaceAll(".+(?=@value='([^']+)').*", "$1");
-            this.addVariable(id, value.replaceAll("\\$\\{(.+)\\}", "$1"));
-            result = new Locator(result.type.toString(), result.value.replace(value, "${" + id + "}"));
+            String value = result.value.replaceAll(".+(?=@value='([^']*)').*", "@value='$1'");
+            this.addVariable(id, value.replaceAll("@value='(.*)'", "$1"));
+            result = new Locator(result.type.toString(), result.value.replace(value, "@value='${" + id + "}'"));
         }
         return this.addLocator(result);
     }
