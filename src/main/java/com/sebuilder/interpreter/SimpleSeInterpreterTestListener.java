@@ -8,7 +8,6 @@ import org.apache.tools.ant.taskdefs.Delete;
 import org.apache.tools.ant.taskdefs.Mkdir;
 import org.apache.tools.ant.taskdefs.optional.junit.AggregateTransformer;
 import org.apache.tools.ant.taskdefs.optional.junit.JUnitTest;
-import org.apache.tools.ant.taskdefs.optional.junit.XMLJUnitResultFormatter;
 import org.apache.tools.ant.taskdefs.optional.junit.XMLResultAggregator;
 import org.apache.tools.ant.types.FileSet;
 
@@ -22,7 +21,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class SimpleSeInterpreterTestListener implements SeInterpreterTestListener {
-    private final XMLJUnitResultFormatter formatter;
+    private final SeInterpreterTestResultFormatter formatter;
     private Project project;
     private File resultDir;
     private File downloadDirectory;
@@ -42,7 +41,7 @@ public class SimpleSeInterpreterTestListener implements SeInterpreterTestListene
         this.project.setName("se-interpreter");
         this.project.setBaseDir(new File("."));
         this.project.setProperty("java.io.tmpdir", System.getProperty("java.io.tmpdir"));
-        this.formatter = new XMLJUnitResultFormatter();
+        this.formatter = new SeInterpreterTestResultFormatter();
         this.suite = null;
         this.test = null;
         this.runTest = 0;
@@ -151,6 +150,7 @@ public class SimpleSeInterpreterTestListener implements SeInterpreterTestListene
         this.runTest++;
         this.test = new TestCase(testName) {
         };
+        this.formatter.setClassname(this.suite.getName().replace("_", "."));
         this.formatter.startTest(this.test);
     }
 
