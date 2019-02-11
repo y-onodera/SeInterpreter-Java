@@ -2,11 +2,11 @@ package com.sebuilder.interpreter.javafx.event.view;
 
 import com.sebuilder.interpreter.Script;
 
-public class RefreshStepViewEvent {
+public class RefreshStepTextViewEvent {
 
     private final Script script;
 
-    public RefreshStepViewEvent(Script script) {
+    public RefreshStepTextViewEvent(Script script) {
         this.script = script;
     }
 

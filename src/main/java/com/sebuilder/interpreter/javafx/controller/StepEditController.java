@@ -63,9 +63,9 @@ public class StepEditController {
 
     @FXML
     void initialize() {
-        assert stepTypeSelect != null : "fx:id=\"stepTypeSelect\" was not injected: check your FXML file 'seleniumbuilderstepedit.fxml'.";
-        assert stepEditGrid != null : "fx:id=\"stepEditGrid\" was not injected: check your FXML file 'seleniumbuilderstepedit.fxml'.";
-        assert labelSelectType != null : "fx:id=\"labelSelectType\" was not injected: check your FXML file 'seleniumbuilderstepedit.fxml'.";
+        assert stepTypeSelect != null : "fx:id=\"stepTypeSelect\" was not injected: check your FXML file 'stepedit.fxml'.";
+        assert stepEditGrid != null : "fx:id=\"stepEditGrid\" was not injected: check your FXML file 'stepedit.fxml'.";
+        assert labelSelectType != null : "fx:id=\"labelSelectType\" was not injected: check your FXML file 'stepedit.fxml'.";
         stepTypeSelect.getItems().add("");
         stepTypeSelect.getItems().add("clickElement");
         stepTypeSelect.getItems().add("setElementText");

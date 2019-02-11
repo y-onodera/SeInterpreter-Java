@@ -36,10 +36,10 @@ public class BrowserSettingController {
 
     @FXML
     void initialize() {
-        assert browserSelect != null : "fx:id=\"browserSelect\" was not injected: check your FXML file 'seleniumbuilderbrowsersetting.fxml'.";
-        assert driverSearchButton != null : "fx:id=\"driverSearchButton\" was not injected: check your FXML file 'seleniumbuilderbrowsersetting.fxml'.";
-        assert driverText != null : "fx:id=\"driverText\" was not injected: check your FXML file 'seleniumbuilderbrowsersetting.fxml'.";
-        assert editButton != null : "fx:id=\"editButton\" was not injected: check your FXML file 'seleniumbuilderbrowsersetting.fxml'.";
+        assert browserSelect != null : "fx:id=\"browserSelect\" was not injected: check your FXML file 'browsersetting.fxml'.";
+        assert driverSearchButton != null : "fx:id=\"driverSearchButton\" was not injected: check your FXML file 'browsersetting.fxml'.";
+        assert driverText != null : "fx:id=\"driverText\" was not injected: check your FXML file 'browsersetting.fxml'.";
+        assert editButton != null : "fx:id=\"editButton\" was not injected: check your FXML file 'browsersetting.fxml'.";
         this.init("Chrome", System.getProperty("webdriver.chrome.driver"));
         EventBus.registSubscriber(this);
     }

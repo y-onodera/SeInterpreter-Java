@@ -7,7 +7,6 @@ public class ReportErrorEvent {
     private final Throwable source;
 
     public static void publishIfExecuteThrowsException(ThrowableAction action) {
-        EventBus.publish(CLEAR);
         try {
             action.execute();
         } catch (Throwable th) {

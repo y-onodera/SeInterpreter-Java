@@ -27,9 +27,9 @@ public class ScriptSettingController {
 
     @FXML
     void initialize() {
-        assert datasourceText != null : "fx:id=\"datasourceText\" was not injected: check your FXML file 'seleniumbuilderbrowsersetting.fxml'.";
-        assert datasourceSearchButton != null : "fx:id=\"datasourceSearchButton\" was not injected: check your FXML file 'seleniumbuilderbrowsersetting.fxml'.";
-        assert editButton != null : "fx:id=\"editButton\" was not injected: check your FXML file 'seleniumbuilderbrowsersetting.fxml'.";
+        assert datasourceText != null : "fx:id=\"datasourceText\" was not injected: check your FXML file 'browsersetting.fxml'.";
+        assert datasourceSearchButton != null : "fx:id=\"datasourceSearchButton\" was not injected: check your FXML file 'browsersetting.fxml'.";
+        assert editButton != null : "fx:id=\"editButton\" was not injected: check your FXML file 'browsersetting.fxml'.";
 
         if (Context.getInstance().getDataSourceDirectory().exists()) {
             this.datasourceText.setText(Context.getInstance().getDataSourceDirectory().getAbsolutePath());

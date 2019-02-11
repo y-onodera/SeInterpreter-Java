@@ -12,7 +12,7 @@ import com.sebuilder.interpreter.javafx.event.replay.StepResultSetEvent;
 import com.sebuilder.interpreter.javafx.event.script.StepDeleteEvent;
 import com.sebuilder.interpreter.javafx.event.script.StepLoadEvent;
 import com.sebuilder.interpreter.javafx.event.script.StepMoveEvent;
-import com.sebuilder.interpreter.javafx.event.view.RefreshStepViewEvent;
+import com.sebuilder.interpreter.javafx.event.view.RefreshStepTableViewEvent;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -167,7 +167,7 @@ public class StepViewController {
     }
 
     @Subscribe
-    public void refreshTable(RefreshStepViewEvent event) {
+    public void refreshTable(RefreshStepTableViewEvent event) {
         Script script = event.getScript();
         this.refleshTable(script);
     }
@@ -191,7 +191,7 @@ public class StepViewController {
     }
 
     private Stage initStepEditDialog(String action) throws IOException {
-        FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(this.getClass().getResource("/fxml/seleniumbuilderstepedit.fxml")));
+        FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(this.getClass().getResource("/fxml/stepedit.fxml")));
         Parent root = loader.load();
         Scene scene = new Scene(root);
         Stage dialog = new Stage();

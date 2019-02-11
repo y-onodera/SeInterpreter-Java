@@ -32,7 +32,7 @@ public class ScriptViewController {
 
     @FXML
     void initialize() {
-        assert this.treeViewScriptName != null : "fx:id=\"treeViewScriptName\" was not injected: check your FXML file 'seleniumbuilderscriptview.fxml'.";
+        assert this.treeViewScriptName != null : "fx:id=\"treeViewScriptName\" was not injected: check your FXML file 'scriptview.fxml'.";
         EventBus.registSubscriber(this);
     }
 
@@ -42,7 +42,7 @@ public class ScriptViewController {
         TreeItem<String> root = new TreeItem<>(aEvent.getFileName());
         root.setExpanded(true);
         this.treeViewScriptName.setRoot(root);
-        this.refleshScriptView(aEvent.getScripts());
+        this.refreshScriptView(aEvent.getScripts());
     }
 
     @Subscribe
@@ -91,7 +91,7 @@ public class ScriptViewController {
         }
     }
 
-    private void refleshScriptView(LinkedHashMap<String, Script> scripts) {
+    private void refreshScriptView(LinkedHashMap<String, Script> scripts) {
         this.treeViewScriptName.getRoot().getChildren().clear();
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
             for (String name : scripts.keySet()) {
@@ -106,10 +106,10 @@ public class ScriptViewController {
                         }
                     });
             MultipleSelectionModel msm = this.treeViewScriptName.getSelectionModel();
-            TreeItem<String> lastItem = this.treeViewScriptName.getRoot().getChildren().get(scripts.size() - 1);
-            int row = this.treeViewScriptName.getRow(lastItem);
+            TreeItem<String> firstItem = this.treeViewScriptName.getRoot().getChildren().get(0);
+            int row = this.treeViewScriptName.getRow(firstItem);
             msm.select(row);
-            EventBus.publish(new ScriptSelectEvent(lastItem.getValue()));
+            EventBus.publish(new ScriptSelectEvent(firstItem.getValue()));
         });
     }
 }

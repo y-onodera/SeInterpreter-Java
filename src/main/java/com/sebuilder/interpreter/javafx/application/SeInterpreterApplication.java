@@ -9,6 +9,7 @@ import com.sebuilder.interpreter.factory.ScriptFactory;
 import com.sebuilder.interpreter.javafx.EventBus;
 import com.sebuilder.interpreter.javafx.controller.RunningProgressController;
 import com.sebuilder.interpreter.javafx.event.ReportErrorEvent;
+import com.sebuilder.interpreter.javafx.event.ViewType;
 import com.sebuilder.interpreter.javafx.event.browser.BrowserCloseEvent;
 import com.sebuilder.interpreter.javafx.event.browser.BrowserOpenEvent;
 import com.sebuilder.interpreter.javafx.event.browser.BrowserSettingEvent;
@@ -41,6 +42,8 @@ public class SeInterpreterApplication extends Application {
     private Suite suite;
 
     private Script currentDisplay;
+
+    private ViewType currentMainView;
 
     private SeInterpreterRunner runner;
 
@@ -119,15 +122,30 @@ public class SeInterpreterApplication extends Application {
     public void changeCurrentScript(ScriptSelectEvent event) {
         if (!event.getScriptName().equals(this.suite.getName())) {
             this.currentDisplay = this.suite.get(event.getScriptName());
-            EventBus.publish(new RefreshStepViewEvent(this.currentDisplay));
+            this.refreshMainView();
         }
+    }
+
+    @Subscribe
+    public void replaceScript(ScriptReplaceEvent event) {
+        ReportErrorEvent.publishIfExecuteThrowsException(() -> {
+            this.currentDisplay = getScriptFactory().parse(event.getScript());
+            this.suite = this.suite.replace(this.currentDisplay);
+            this.refreshMainView();
+        });
+    }
+
+    @Subscribe
+    public void handleViewTypeChange(ScriptViewChangeEvent event) {
+        this.currentMainView = event.getViewType();
+        this.refreshMainView();
     }
 
     @Subscribe
     public void deleteStep(StepDeleteEvent event) {
         this.currentDisplay = this.currentDisplay.removeStep(event.getStepIndex());
         this.suite = this.suite.replace(this.currentDisplay);
-        EventBus.publish(new RefreshStepViewEvent(this.currentDisplay));
+        this.refreshMainView();
     }
 
     @Subscribe
@@ -142,7 +160,7 @@ public class SeInterpreterApplication extends Application {
                     .removeStep(event.getFrom() + 1);
         }
         this.suite = this.suite.replace(this.currentDisplay);
-        EventBus.publish(new RefreshStepViewEvent(this.currentDisplay));
+        this.refreshMainView();
     }
 
     @Subscribe
@@ -161,7 +179,7 @@ public class SeInterpreterApplication extends Application {
             this.currentDisplay = this.currentDisplay.addStep(event.getStepIndex(), newStep);
         }
         this.suite = this.suite.replace(this.currentDisplay);
-        EventBus.publish(new RefreshStepViewEvent(this.currentDisplay));
+        this.refreshMainView();
     }
 
     @Subscribe
@@ -222,11 +240,11 @@ public class SeInterpreterApplication extends Application {
         String browserName = event.getSelectedBrowser();
         String driverPath = event.getDriverPath();
         this.runner.reloadSetting(browserName, driverPath);
-        this.opern(new BrowserOpenEvent());
+        this.open(new BrowserOpenEvent());
     }
 
     @Subscribe
-    public void opern(BrowserOpenEvent event) throws IOException, JSONException {
+    public void open(BrowserOpenEvent event) throws IOException, JSONException {
         Task task = this.runner.createRunScriptTask(this.templateScript(), logger -> {
             return new SimpleSeInterpreterTestListener(logger);
         });
@@ -238,7 +256,7 @@ public class SeInterpreterApplication extends Application {
         Script export = this.runner.exportScriptTemplate();
         this.currentDisplay = this.currentDisplay.addStep(export);
         this.suite = this.suite.replace(this.currentDisplay);
-        EventBus.publish(new RefreshStepViewEvent(this.currentDisplay));
+        this.refreshMainView();
     }
 
     @Subscribe
@@ -329,6 +347,14 @@ public class SeInterpreterApplication extends Application {
             }
             Files.asCharSink(target, Charsets.UTF_8).write(content.toString());
         });
+    }
+
+    private void refreshMainView() {
+        if (this.currentMainView == ViewType.TABLE) {
+            EventBus.publish(new RefreshStepTableViewEvent(this.currentDisplay));
+        } else if (this.currentMainView == ViewType.TEXT) {
+            EventBus.publish(new RefreshStepTextViewEvent(this.currentDisplay));
+        }
     }
 
     private void executeTask(Task task) {

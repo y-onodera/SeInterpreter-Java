@@ -27,10 +27,10 @@ public class RunningProgressController {
 
     @FXML
     void initialize() {
-        assert stop != null : "fx:id=\"stop\" was not injected: check your FXML file 'seleniumbuilderRunProgress.fxml'.";
-        assert scriptDataSetProgress != null : "fx:id=\"scriptDataSetProgress\" was not injected: check your FXML file 'seleniumbuilderRunProgress.fxml'.";
-        assert scriptName != null : "fx:id=\"scriptName\" was not injected: check your FXML file 'seleniumbuilderRunProgress.fxml'.";
-        assert runStatus != null : "fx:id=\"runStatus\" was not injected: check your FXML file 'seleniumbuilderRunProgress.fxml'.";
+        assert stop != null : "fx:id=\"stop\" was not injected: check your FXML file 'runprogress.fxml'.";
+        assert scriptDataSetProgress != null : "fx:id=\"scriptDataSetProgress\" was not injected: check your FXML file 'runprogress.fxml'.";
+        assert scriptName != null : "fx:id=\"scriptName\" was not injected: check your FXML file 'runprogress.fxml'.";
+        assert runStatus != null : "fx:id=\"runStatus\" was not injected: check your FXML file 'runprogress.fxml'.";
     }
 
     @FXML

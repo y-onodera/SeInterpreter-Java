@@ -40,7 +40,7 @@ public class MenuController {
 
     @FXML
     void initialize() {
-        assert paneSeInterpreterMenu != null : "fx:id=\"paneSeInterpreterMenu\" was not injected: check your FXML file 'seleniumbuildermenu.fxml'.";
+        assert paneSeInterpreterMenu != null : "fx:id=\"paneSeInterpreterMenu\" was not injected: check your FXML file 'menu.fxml'.";
         EventBus.registSubscriber(this);
     }
 
