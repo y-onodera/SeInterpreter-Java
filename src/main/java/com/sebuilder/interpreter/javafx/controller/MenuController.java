@@ -103,7 +103,7 @@ public class MenuController {
     @FXML
     void handleBrowserSetting(ActionEvent event) throws IOException {
         if (browserSettingDialog == null) {
-            FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(this.getClass().getResource("/fxml/seleniumbuilderbrowsersetting.fxml")));
+            FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(this.getClass().getResource("/fxml/browsersetting.fxml")));
             Parent root = loader.load();
             Scene scene = new Scene(root);
             browserSettingDialog = new Stage();
@@ -119,7 +119,7 @@ public class MenuController {
     @FXML
     void handleReplaySetting(ActionEvent event) throws IOException {
         if (scriptSettingDialog == null) {
-            FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(this.getClass().getResource("/fxml/seleniumbuilderscriptsetting.fxml")));
+            FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(this.getClass().getResource("/fxml/scriptsetting.fxml")));
             Parent root = loader.load();
             Scene scene = new Scene(root);
             scriptSettingDialog = new Stage();
