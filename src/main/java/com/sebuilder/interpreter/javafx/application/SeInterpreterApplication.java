@@ -68,7 +68,11 @@ public class SeInterpreterApplication extends Application {
         stage.show();
         EventBus.registSubscriber(this);
         EventBus.publish(new ScriptResetEvent());
-        this.runner = new SeInterpreterRunner();
+        this.currentMainView = ViewType.TABLE;
+        final Parameters parameters = getParameters();
+        this.runner = new SeInterpreterRunner(parameters.getRaw());
+        Suite newSuite = getScriptFactory().parse(new File(parameters.getUnnamed().get(0)));
+        this.resetSuite(newSuite);
     }
 
     @Override

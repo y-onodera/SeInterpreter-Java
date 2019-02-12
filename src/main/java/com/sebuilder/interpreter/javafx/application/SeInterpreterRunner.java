@@ -9,6 +9,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -19,6 +20,11 @@ public class SeInterpreterRunner {
     private SeInterpreterREPL repl;
 
     private Logger log = LogManager.getLogger(SeInterpreterRunner.class);
+
+    public SeInterpreterRunner(List<String> raw) {
+        this.repl = new SeInterpreterREPL(raw.toArray(new String[raw.size()]), log);
+        this.repl.setUpREPL();
+    }
 
     public void reloadSetting(String browserName, String driverPath) {
         if (this.isOpen()) {
