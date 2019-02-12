@@ -370,7 +370,7 @@ public class SeInterpreterApplication extends Application {
 
     private void initScriptRunProgressDialog(Task task) throws IOException {
         if (this.runProgressDialog == null || !this.runProgressDialog.isShowing()) {
-            FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(this.getClass().getResource("/fxml/seleniumbuilderRunProgress.fxml")));
+            FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(this.getClass().getResource("/fxml/runprogress.fxml")));
             Parent root = loader.load();
             Scene scene = new Scene(root);
             this.runProgressDialog = new Stage();
