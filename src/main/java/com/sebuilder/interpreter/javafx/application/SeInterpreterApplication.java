@@ -71,8 +71,11 @@ public class SeInterpreterApplication extends Application {
         this.currentMainView = ViewType.TABLE;
         final Parameters parameters = getParameters();
         this.runner = new SeInterpreterRunner(parameters.getRaw());
-        Suite newSuite = getScriptFactory().parse(new File(parameters.getUnnamed().get(0)));
-        this.resetSuite(newSuite);
+        final List<String> unnamed = parameters.getUnnamed();
+        if (unnamed.size() > 0) {
+            Suite newSuite = getScriptFactory().parse(new File(unnamed.get(0)));
+            this.resetSuite(newSuite);
+        }
     }
 
     @Override
