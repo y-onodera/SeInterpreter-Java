@@ -117,12 +117,20 @@ public class SuiteBuilder {
     public Suite createSuite() {
         final Map<Script, Script> copyScriptChains = Maps.newHashMap(this.scriptChains);
         ArrayList<Script> copyScripts = Lists.newArrayList();
+        Map<String, Integer> duplicate = Maps.newHashMap();
         for (Script script : this.scripts) {
-            final Script copy;
+            Script copy;
             if (this.shareState) {
-                copy = script.reusePreviousDriverAndVars();
+                copy = script.usePreviousDriverAndVars();
             } else {
                 copy = script.copy();
+            }
+            if (duplicate.containsKey(copy.name)) {
+                int nextCount = duplicate.get(copy.name) + 1;
+                duplicate.put(copy.name, nextCount);
+                copy = copy.rename(script.name + String.format("(%d)", nextCount));
+            } else {
+                duplicate.put(copy.name, 0);
             }
             copyScripts.add(copy);
             replaceChainMap(copyScriptChains, script, copy);

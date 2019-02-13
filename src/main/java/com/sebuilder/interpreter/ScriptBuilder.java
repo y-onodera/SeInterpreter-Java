@@ -76,7 +76,7 @@ public class ScriptBuilder {
         return this;
     }
 
-    public ScriptBuilder reusePreviousDriverAndVars() {
+    public ScriptBuilder usePreviousDriverAndVars() {
         this.closeDriver = false;
         this.usePreviousDriverAndVars = true;
         return this;

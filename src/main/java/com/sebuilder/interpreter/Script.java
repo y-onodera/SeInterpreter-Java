@@ -90,9 +90,15 @@ public class Script implements TestRunnable {
         return this.dataSource.getData(this.dataSourceConfig, this.relativePath);
     }
 
-    public Script reusePreviousDriverAndVars() {
+    public Script rename(String aName) {
         return this.builder()
-                .reusePreviousDriverAndVars()
+                .setName(aName)
+                .createScript();
+    }
+
+    public Script usePreviousDriverAndVars() {
+        return this.builder()
+                .usePreviousDriverAndVars()
                 .createScript();
     }
 

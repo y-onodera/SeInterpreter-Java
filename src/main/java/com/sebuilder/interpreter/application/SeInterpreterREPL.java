@@ -144,7 +144,7 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
 
     @Override
     protected TestRunBuilder createTestRunBuilder(Script script) {
-        return super.createTestRunBuilder(script.reusePreviousDriverAndVars());
+        return super.createTestRunBuilder(script.usePreviousDriverAndVars());
     }
 
     private boolean execute(TestRunBuilder testRunBuilder, SeInterpreterTestListener seInterpreterTestListener) {

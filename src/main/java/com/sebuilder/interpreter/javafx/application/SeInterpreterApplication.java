@@ -136,7 +136,10 @@ public class SeInterpreterApplication extends Application {
     @Subscribe
     public void replaceScript(ScriptReplaceEvent event) {
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
-            this.currentDisplay = getScriptFactory().parse(event.getScript());
+            Script newScript = getScriptFactory().parse(event.getScript());
+            this.currentDisplay = newScript.builder().associateWith(new File(this.currentDisplay.path))
+                    .setName(this.currentDisplay.name())
+                    .createScript();
             this.suite = this.suite.replace(this.currentDisplay);
             this.refreshMainView();
         });
