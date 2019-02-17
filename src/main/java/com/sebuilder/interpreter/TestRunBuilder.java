@@ -9,9 +9,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class TestRunBuilder {
 
+    private static final Pattern DUPLICATE_PATTERN = Pattern.compile(".+\\.[^\\.]+(\\(\\d+\\)$)");
     private final Script script;
     private final Map<Script, Script> scriptChain;
     private final Map<String, String> shareInput;
@@ -111,7 +114,12 @@ public class TestRunBuilder {
     public String getTestRunName(Map<String, String> initialVars) {
         String result = this.script.name();
         if (script.path() != null && result.contains(".")) {
-            result = result.substring(0, result.lastIndexOf("."));
+            String suffix = "";
+            Matcher m = DUPLICATE_PATTERN.matcher(result);
+            if (m.matches()) {
+                suffix = m.group(1);
+            }
+            result = result.substring(0, result.lastIndexOf(".")) + suffix;
         }
         if (this.testRunNameSuffix != null) {
             result = result + this.testRunNameSuffix;
