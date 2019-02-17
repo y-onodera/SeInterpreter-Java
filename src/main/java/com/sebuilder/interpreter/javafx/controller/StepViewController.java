@@ -52,7 +52,7 @@ public class StepViewController {
     private TableView<ScriptBody> tableViewScriptBody;
 
     @FXML
-    void initialize() {
+    public void initialize() {
         assert tableColumnScriptBodyStep != null : "fx:id=\"tableColumnScriptBodyStep\" was not injected: check your FXML file 'seleniumbuilderscriptbody.fxml'.";
         assert tableColumnScriptBodyNo != null : "fx:id=\"tableColumnScriptBodyNo\" was not injected: check your FXML file 'seleniumbuilderscriptbody.fxml'.";
         assert tableViewScriptBody != null : "fx:id=\"tableViewScriptBody\" was not injected: check your FXML file 'seleniumbuilderscriptbody.fxml'.";
@@ -120,7 +120,7 @@ public class StepViewController {
     }
 
     @FXML
-    void handleStepDelete(ActionEvent event) {
+    public void handleStepDelete(ActionEvent event) {
         ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
         EventBus.publish(new StepDeleteEvent(item.noProperty().intValue() - 1));
     }
@@ -133,14 +133,14 @@ public class StepViewController {
     }
 
     @FXML
-    void handleStepAdd(ActionEvent event) throws IOException {
+    public void handleStepAdd(ActionEvent event) throws IOException {
         Stage dialog = initStepEditDialog("add");
         dialog.setResizable(true);
         dialog.show();
     }
 
     @FXML
-    void handleStepEdit(ActionEvent event) throws IOException {
+    public void handleStepEdit(ActionEvent event) throws IOException {
         Stage dialog = initStepEditDialog("change");
         dialog.setResizable(true);
         dialog.show();
@@ -169,7 +169,7 @@ public class StepViewController {
     @Subscribe
     public void refreshTable(RefreshStepTableViewEvent event) {
         Script script = event.getScript();
-        this.refleshTable(script);
+        this.refreshTable(script);
     }
 
     @Subscribe
@@ -209,7 +209,7 @@ public class StepViewController {
         return dialog;
     }
 
-    private void refleshTable(Script aScript) {
+    private void refreshTable(Script aScript) {
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
             int no = 1;
             if (this.tableViewScriptBody.getItems().size() > 0) {
