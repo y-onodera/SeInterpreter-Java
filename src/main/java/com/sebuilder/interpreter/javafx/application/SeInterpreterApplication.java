@@ -265,7 +265,7 @@ public class SeInterpreterApplication extends Application {
 
     @Subscribe
     public void exportTemplate(TemplateLoadEvent event) {
-        Script exported = this.runner.exportTemplate(event.getParentLocator(), event.getTargetTag());
+        Script exported = this.runner.exportTemplate(event.getParentLocator(), event.getTargetTag(), event.isWithDataSource());
         this.addScript(exported);
     }
 

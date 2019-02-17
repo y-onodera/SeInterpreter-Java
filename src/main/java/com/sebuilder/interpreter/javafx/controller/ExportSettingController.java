@@ -35,6 +35,9 @@ public class ExportSettingController {
     @FXML
     private ComboBox<String> selectParentLocator;
 
+    @FXML
+    private CheckBox checkWithDataSource;
+
     private String parentLocator;
 
     private String parentLocatorValue;
@@ -48,6 +51,7 @@ public class ExportSettingController {
         assert this.exportButton != null : "fx:id=\"exportButton\" was not injected: check your FXML file 'exportsetting.fxml'.";
         assert this.listTargetTag != null : "fx:id=\"listTargetTag\" was not injected: check your FXML file 'exportsetting.fxml'.";
         assert this.selectParentLocator != null : "fx:id=\"selectParentLocator\" was not injected: check your FXML file 'exportsetting.fxml'.";
+        assert checkWithDataSource != null : "fx:id=\"checkWithDataSource\" was not injected: check your FXML file 'exportsetting.fxml'.";
         this.selectParentLocator.getItems().clear();
         this.selectParentLocator.getItems().add(DEFAULT_PARENT);
         this.selectParentLocator.getItems().add("id");
@@ -69,6 +73,7 @@ public class ExportSettingController {
         this.listTargetTag.getSelectionModel().select("select");
         this.listTargetTag.getSelectionModel().select("button");
         this.listTargetTag.getSelectionModel().select("a");
+        this.checkWithDataSource.setSelected(true);
     }
 
     @FXML
@@ -101,9 +106,9 @@ public class ExportSettingController {
         String locatorValue = this.textLocatorValue.getText();
         List<String> targetTag = listTargetTag.getSelectionModel().getSelectedItems();
         if (DEFAULT_PARENT.equals(locator)) {
-            EventBus.publish(new TemplateLoadEvent(new Locator("css selector", DEFAULT_PARENT), targetTag));
+            EventBus.publish(new TemplateLoadEvent(new Locator("css selector", DEFAULT_PARENT), targetTag, this.checkWithDataSource.isSelected()));
         } else {
-            EventBus.publish(new TemplateLoadEvent(new Locator(locator, locatorValue), targetTag));
+            EventBus.publish(new TemplateLoadEvent(new Locator(locator, locatorValue), targetTag, this.checkWithDataSource.isSelected()));
         }
         ((Stage) this.exportButton.getScene().getWindow()).close();
     }

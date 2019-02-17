@@ -54,7 +54,7 @@ public class SeInterpreterRunner {
         return this.repl != null;
     }
 
-    public Script exportTemplate(Locator locator, List<String> targetTags) {
+    public Script exportTemplate(Locator locator, List<String> targetTags, boolean withDataSource) {
         if (!this.isOpen()) {
             this.setUp();
         }
@@ -63,10 +63,12 @@ public class SeInterpreterRunner {
         export.put("locator", locator);
         export.put("file", fileName);
         export.put("filterTag", "true");
-        final String datasourceName = "Template" + this.exportCount + ".csv";
-        export.put("datasource", datasourceName);
         for (String targetTag : targetTags) {
             export.put(targetTag, "true");
+        }
+        final String dataSourceName = "Template" + this.exportCount + ".csv";
+        if (withDataSource) {
+            export.put("datasource", dataSourceName);
         }
         Script get = new ScriptBuilder()
                 .addStep(export)
@@ -78,12 +80,14 @@ public class SeInterpreterRunner {
             return new ScriptBuilder().createScript();
         }
         this.exportCount++;
-        File exportedDatasource = new File(listener.getTemplateOutputDirectory(), datasourceName);
-        if (exportedDatasource.exists()) {
-            try {
-                Files.copy(exportedDatasource, new File(this.globalListener.getTemplateOutputDirectory(), datasourceName));
-            } catch (IOException e) {
-                this.log.error(e);
+        if (withDataSource) {
+            File exportedDataSource = new File(listener.getTemplateOutputDirectory(), dataSourceName);
+            if (exportedDataSource.exists()) {
+                try {
+                    Files.copy(exportedDataSource, new File(this.globalListener.getTemplateOutputDirectory(), dataSourceName));
+                } catch (IOException e) {
+                    this.log.error(e);
+                }
             }
         }
         Script result = this.repl.loadScript(exported.getAbsolutePath()).iterator().next();
