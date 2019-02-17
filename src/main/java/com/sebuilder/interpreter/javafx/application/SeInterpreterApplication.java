@@ -1,6 +1,7 @@
 package com.sebuilder.interpreter.javafx.application;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.eventbus.Subscribe;
 import com.google.common.io.Files;
@@ -206,11 +207,11 @@ public class SeInterpreterApplication extends Application {
 
     @Subscribe
     public void saveScript(FileSaveEvent event) {
-        if (this.currentDisplay.path() == null) {
+        if (Strings.isNullOrEmpty(this.currentDisplay.path())) {
             EventBus.publish(new OpenScriptSaveChooserEvent());
         } else {
             File target = new File(this.currentDisplay.path());
-            this.saveContents(target, this.currentDisplay);
+            this.saveContents(target, this.currentDisplay.toString());
         }
     }
 
@@ -218,17 +219,18 @@ public class SeInterpreterApplication extends Application {
     public void saveScript(FileSaveAsEvent event) {
         File target = event.getFile();
         String oldName = this.currentDisplay.name();
+        String oldPath = this.currentDisplay.path();
         this.currentDisplay = new ScriptBuilder(this.currentDisplay)
                 .associateWith(target)
                 .createScript();
         Suite newSuite = this.suite.replace(oldName, this.currentDisplay);
-        this.saveContents(target, this.currentDisplay);
+        this.saveContents(target, this.currentDisplay, oldPath);
         this.resetSuite(newSuite, this.currentDisplay);
     }
 
     @Subscribe
     public void saveSuite(FileSaveSuiteAsEvent event) {
-        if (this.suite.getPath() == null) {
+        if (Strings.isNullOrEmpty(this.suite.getPath())) {
             EventBus.publish(new OpenSuiteSaveChooserEvent());
         } else {
             this.saveSuite();
@@ -329,7 +331,7 @@ public class SeInterpreterApplication extends Application {
         File target = new File(this.suite.getPath());
         List<Script> notAssociateFile = Lists.newArrayList();
         this.suite.forEach(it -> {
-            if (it.path() == null) {
+            if (Strings.isNullOrEmpty(it.path())) {
                 notAssociateFile.add(it);
             }
         });
@@ -345,22 +347,39 @@ public class SeInterpreterApplication extends Application {
             }
             File saveTo = new File(scriptSaveTo, newName);
             this.suite = this.suite.replace(oldName, it.builder().associateWith(saveTo).createScript());
+            this.saveContents(saveTo, this.suite.get(newName), "");
                 }
         );
-        this.suite.forEach(it -> {
-            this.saveContents(new File(it.path()), it);
-        });
-        this.saveContents(target, this.suite);
+        this.saveContents(target, this.suite.toString());
         this.resetSuite(this.suite, this.currentDisplay);
     }
 
-    private void saveContents(File target, Object content) {
+    private void saveContents(File target, Script exportTo, String oldPath) {
+        if (Strings.isNullOrEmpty(oldPath)) {
+            this.copyDataSourceTemplate(exportTo);
+        }
+        this.saveContents(target, exportTo.toString());
+    }
+
+    private void saveContents(File target, String content) {
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
             if (!target.exists()) {
                 target.createNewFile();
             }
             Files.asCharSink(target, Charsets.UTF_8).write(content.toString());
         });
+    }
+
+    private void copyDataSourceTemplate(Script it) {
+        if (it.dataSourceConfig().containsKey("path")) {
+            File src = new File(this.runner.getTemplateOutputDirectory(), it.dataSourceConfig().get("path"));
+            final String newDatasourceName = it.name().replace(".json", ".csv");
+            File dest = new File(this.runner.getDataSourceDirectory(), newDatasourceName);
+            if (src.exists() && !dest.exists()) {
+                ReportErrorEvent.publishIfExecuteThrowsException(() -> Files.copy(src, dest));
+                it.dataSourceConfig().put("path", newDatasourceName);
+            }
+        }
     }
 
     private void refreshMainView() {

@@ -1,5 +1,6 @@
 package com.sebuilder.interpreter.javafx.application;
 
+import com.google.common.io.Files;
 import com.sebuilder.interpreter.*;
 import com.sebuilder.interpreter.application.CommandLineArgument;
 import com.sebuilder.interpreter.application.SeInterpreterREPL;
@@ -10,6 +11,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -22,9 +24,21 @@ public class SeInterpreterRunner {
 
     private Logger log = LogManager.getLogger(SeInterpreterRunner.class);
 
+    private SeInterpreterTestListener globalListener;
+
     public SeInterpreterRunner(List<String> raw) {
         this.repl = new SeInterpreterREPL(raw.toArray(new String[raw.size()]), log);
         this.repl.setUpREPL();
+        this.globalListener = new SimpleSeInterpreterTestListener(this.log);
+        this.globalListener.setUpDir(Context.getInstance().getResultOutputDirectory());
+    }
+
+    public File getDataSourceDirectory() {
+        return Context.getInstance().getDataSourceDirectory();
+    }
+
+    public File getTemplateOutputDirectory() {
+        return this.globalListener.getTemplateOutputDirectory();
     }
 
     public void reloadSetting(String browserName, String driverPath) {
@@ -44,11 +58,13 @@ public class SeInterpreterRunner {
         if (!this.isOpen()) {
             this.setUp();
         }
-        String fileName = "Template" + this.exportCount++ + ".json";
+        String fileName = "Template" + this.exportCount + ".json";
         Step export = new Step(new ExportTemplate());
         export.put("locator", locator);
         export.put("file", fileName);
         export.put("filterTag", "true");
+        final String datasourceName = "Template" + this.exportCount + ".csv";
+        export.put("datasource", datasourceName);
         for (String targetTag : targetTags) {
             export.put(targetTag, "true");
         }
@@ -60,6 +76,15 @@ public class SeInterpreterRunner {
         File exported = new File(listener.getTemplateOutputDirectory(), fileName);
         if (!exported.exists()) {
             return new ScriptBuilder().createScript();
+        }
+        this.exportCount++;
+        File exportedDatasource = new File(listener.getTemplateOutputDirectory(), datasourceName);
+        if (exportedDatasource.exists()) {
+            try {
+                Files.copy(exportedDatasource, new File(this.globalListener.getTemplateOutputDirectory(), datasourceName));
+            } catch (IOException e) {
+                this.log.error(e);
+            }
         }
         Script result = this.repl.loadScript(exported.getAbsolutePath()).iterator().next();
         return result.builder()
