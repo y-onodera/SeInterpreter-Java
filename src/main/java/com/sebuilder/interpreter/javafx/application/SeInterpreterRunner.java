@@ -64,7 +64,7 @@ public class SeInterpreterRunner {
         Script result = this.repl.loadScript(exported.getAbsolutePath()).iterator().next();
         return result.builder()
                 .associateWith(null)
-                .setName(result.name)
+                .setName(result.name())
                 .createScript();
     }
 

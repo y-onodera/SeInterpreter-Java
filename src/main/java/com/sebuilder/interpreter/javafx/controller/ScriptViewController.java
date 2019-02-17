@@ -3,6 +3,7 @@ package com.sebuilder.interpreter.javafx.controller;
 import com.google.common.eventbus.Subscribe;
 import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.Script;
+import com.sebuilder.interpreter.Suite;
 import com.sebuilder.interpreter.javafx.EventBus;
 import com.sebuilder.interpreter.javafx.event.ReportErrorEvent;
 import com.sebuilder.interpreter.javafx.event.file.FileSaveAsEvent;
@@ -27,7 +28,6 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.LinkedHashMap;
 import java.util.Objects;
 
 public class ScriptViewController {
@@ -93,10 +93,11 @@ public class ScriptViewController {
     @Subscribe
     public void showScriptView(RefreshScriptViewEvent aEvent) {
         EventBus.publish(new StepResultResetEvent());
-        TreeItem<String> root = new TreeItem<>(aEvent.getFileName());
+        Suite suite = aEvent.getSuite();
+        TreeItem<String> root = new TreeItem<>(suite.getName());
         root.setExpanded(true);
         this.treeViewScriptName.setRoot(root);
-        this.refreshScriptView(aEvent.getScripts(), aEvent.getSelectScriptName());
+        this.refreshScriptView(suite, aEvent.getSelectScriptName());
     }
 
     @Subscribe
@@ -104,14 +105,28 @@ public class ScriptViewController {
         this.handleScriptSaveAs(null);
     }
 
-    private void refreshScriptView(LinkedHashMap<String, Script> scripts, String selectScriptName) {
+    private void refreshScriptView(Suite suite, String selectScriptName) {
         this.treeViewScriptName.getRoot().getChildren().clear();
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
-            for (String name : scripts.keySet()) {
+            for (Script script : suite) {
+                String name = script.name();
                 TreeItem<String> item = new TreeItem<>(name);
-                this.treeViewScriptName.getRoot().getChildren().add(item);
-                if (name.equals(selectScriptName)) {
-                    this.treeViewScriptName.getSelectionModel().select(item);
+                if (!suite.getScriptChains().containsValue(script)) {
+                    this.treeViewScriptName.getRoot().getChildren().add(item);
+                    if (name.equals(selectScriptName)) {
+                        this.treeViewScriptName.getSelectionModel().select(item);
+                    }
+                }
+                if (suite.getScriptChains().containsKey(script)) {
+                    Script before = script;
+                    while (suite.getScriptChains().containsKey(before)) {
+                        TreeItem<String> chainItem = new TreeItem(suite.getScriptChains().get(before).name());
+                        item.getChildren().add(chainItem);
+                        if (chainItem.getValue().equals(selectScriptName)) {
+                            this.treeViewScriptName.getSelectionModel().select(chainItem);
+                        }
+                        before = suite.getScriptChains().get(before);
+                    }
                 }
             }
             this.treeViewScriptName.getSelectionModel()

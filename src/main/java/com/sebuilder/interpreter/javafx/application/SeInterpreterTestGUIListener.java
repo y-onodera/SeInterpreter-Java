@@ -18,7 +18,7 @@ public class SeInterpreterTestGUIListener extends SimpleSeInterpreterTestListene
 
     @Override
     public boolean openTestSuite(Script script, String testRunName, Map<String, String> aProperty) {
-        EventBus.publish(new ScriptSelectEvent(script.name));
+        EventBus.publish(new ScriptSelectEvent(script.name()));
         return super.openTestSuite(script, testRunName, aProperty);
     }
 

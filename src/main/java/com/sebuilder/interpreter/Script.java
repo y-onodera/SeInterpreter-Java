@@ -22,10 +22,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -40,13 +37,13 @@ import java.util.stream.Collectors;
  */
 public class Script implements TestRunnable {
     public final ArrayList<Step> steps;
-    public final String path;
-    public final String name;
-    public final File relativePath;
-    public final boolean usePreviousDriverAndVars;
-    public final boolean closeDriver;
-    public final DataSource dataSource;
-    public final Map<String, String> dataSourceConfig;
+    private final String path;
+    private final String name;
+    private final File relativePath;
+    private final boolean usePreviousDriverAndVars;
+    private final boolean closeDriver;
+    private final DataSource dataSource;
+    private final Map<String, String> dataSourceConfig;
 
     public Script(ArrayList<Step> steps
             , String path
@@ -79,8 +76,28 @@ public class Script implements TestRunnable {
         return this.closeDriver;
     }
 
+    public boolean usePreviousDriverAndVars() {
+        return this.usePreviousDriverAndVars;
+    }
+
+    public File relativePath() {
+        return this.relativePath;
+    }
+
     public String name() {
         return this.name;
+    }
+
+    public String path() {
+        return Optional.ofNullable(this.path).orElse("");
+    }
+
+    public DataSource dataSource() {
+        return this.dataSource;
+    }
+
+    public Map<String, String> dataSourceConfig() {
+        return this.dataSourceConfig;
     }
 
     public List<Map<String, String>> loadData() {
@@ -96,7 +113,7 @@ public class Script implements TestRunnable {
                 .createScript();
     }
 
-    public Script usePreviousDriverAndVars() {
+    public Script usePreviousDriverAndVars(boolean userPreviousDriverAndVars) {
         return this.builder()
                 .usePreviousDriverAndVars()
                 .createScript();

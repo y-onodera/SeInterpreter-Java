@@ -28,13 +28,13 @@ public class ScriptBuilder {
 
     public ScriptBuilder(Script currentDisplay) {
         this.steps = new ArrayList<>(currentDisplay.steps);
-        this.path = currentDisplay.path;
-        this.name = currentDisplay.name;
-        this.relativePath = currentDisplay.relativePath;
-        this.usePreviousDriverAndVars = currentDisplay.usePreviousDriverAndVars;
-        this.closeDriver = currentDisplay.closeDriver;
-        this.dataSource = currentDisplay.dataSource;
-        this.dataSourceConfig = currentDisplay.dataSourceConfig;
+        this.path = currentDisplay.path();
+        this.name = currentDisplay.name();
+        this.relativePath = currentDisplay.relativePath();
+        this.usePreviousDriverAndVars = currentDisplay.usePreviousDriverAndVars();
+        this.closeDriver = currentDisplay.closeDriver();
+        this.dataSource = currentDisplay.dataSource();
+        this.dataSourceConfig = currentDisplay.dataSourceConfig();
     }
 
     public ScriptBuilder clearStep() {

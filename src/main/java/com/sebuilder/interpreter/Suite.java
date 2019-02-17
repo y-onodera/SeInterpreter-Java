@@ -72,11 +72,26 @@ public class Suite implements Iterable<Script>, TestRunnable {
         return this.name;
     }
 
+    public int getIndex(Script script) {
+        int result = -1;
+        for (Script target : this.scripts) {
+            result++;
+            if (target.name().equals(script.name())) {
+                return result;
+            }
+        }
+        return result;
+    }
+
     public Script get(String scriptName) {
         return this.scripts.stream()
                 .filter(it -> it.name().equals(scriptName))
                 .findFirst()
                 .orElse(null);
+    }
+
+    public Script get(int index) {
+        return this.scripts.get(index);
     }
 
     @Override
@@ -156,7 +171,7 @@ public class Suite implements Iterable<Script>, TestRunnable {
     }
 
     public Suite replace(Script aScript) {
-        return this.replace(aScript.name, aScript);
+        return this.replace(aScript.name(), aScript);
     }
 
     public Suite replace(String oldName, Script newValue) {
@@ -217,11 +232,12 @@ public class Suite implements Iterable<Script>, TestRunnable {
     }
 
     private String relativePath(Script s) {
-        if (this.relativePath == null && !Strings.isNullOrEmpty(s.path)) {
-            return s.path;
-        } else if (Strings.isNullOrEmpty(s.path)) {
-            return "script/" + s.name;
+        if (this.relativePath == null && !Strings.isNullOrEmpty(s.path())) {
+            return s.path();
+        } else if (Strings.isNullOrEmpty(s.path())) {
+            return "script/" + s.name();
         }
-        return this.relativePath.toPath().relativize(Paths.get(s.path)).toString().replace("\\", "/");
+        return this.relativePath.toPath().relativize(Paths.get(s.path())).toString().replace("\\", "/");
     }
+
 }

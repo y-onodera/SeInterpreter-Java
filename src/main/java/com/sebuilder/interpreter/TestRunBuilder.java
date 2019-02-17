@@ -25,7 +25,7 @@ public class TestRunBuilder {
     }
 
     public String getScriptName() {
-        return this.getScriptFileName().substring(0, this.script.name.indexOf('.'));
+        return this.getScriptFileName().substring(0, this.script.name().indexOf('.'));
     }
 
     public String getScriptFileName() {
@@ -73,7 +73,7 @@ public class TestRunBuilder {
 
     public TestRun createTestRun(Logger log, WebDriverFactory webDriverFactory, HashMap<String, String> webDriverConfig, Long implicityWaitTime, Long pageLoadWaitTime, Map<String, String> initialVars, TestRun previousRun, SeInterpreterTestListener seInterpreterTestListener) {
         final RemoteWebDriver driver;
-        if (this.script.usePreviousDriverAndVars && previousRun != null && previousRun.driver() != null) {
+        if (this.script.usePreviousDriverAndVars() && previousRun != null && previousRun.driver() != null) {
             driver = previousRun.driver();
         } else {
             driver = createDriver(log, webDriverFactory, webDriverConfig);
@@ -109,8 +109,8 @@ public class TestRunBuilder {
     }
 
     public String getTestRunName(Map<String, String> initialVars) {
-        String result = this.script.name;
-        if (script.path != null && result.contains(".")) {
+        String result = this.script.name();
+        if (script.path() != null && result.contains(".")) {
             result = result.substring(0, result.lastIndexOf("."));
         }
         if (this.testRunNameSuffix != null) {

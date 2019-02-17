@@ -115,7 +115,8 @@ public class SeInterpreterApplication extends Application {
     public void insertScript(ScriptInsertEvent event) throws IOException, JSONException {
         Script newScript = this.templateScript();
         Suite newSuite = this.suite.insert(this.currentDisplay, newScript);
-        this.resetSuite(newSuite, newScript);
+        int index = newSuite.getIndex(this.currentDisplay);
+        this.resetSuite(newSuite, newSuite.get(index - 1));
     }
 
     @Subscribe
@@ -136,7 +137,7 @@ public class SeInterpreterApplication extends Application {
     public void replaceScript(ScriptReplaceEvent event) {
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
             Script newScript = getScriptFactory().parse(event.getScript());
-            this.currentDisplay = newScript.builder().associateWith(new File(this.currentDisplay.path))
+            this.currentDisplay = newScript.builder().associateWith(new File(this.currentDisplay.path()))
                     .setName(this.currentDisplay.name())
                     .createScript();
             this.suite = this.suite.replace(this.currentDisplay);
@@ -205,10 +206,10 @@ public class SeInterpreterApplication extends Application {
 
     @Subscribe
     public void saveScript(FileSaveEvent event) {
-        if (this.currentDisplay.path == null) {
+        if (this.currentDisplay.path() == null) {
             EventBus.publish(new OpenScriptSaveChooserEvent());
         } else {
-            File target = new File(this.currentDisplay.path);
+            File target = new File(this.currentDisplay.path());
             this.saveContents(target, this.currentDisplay);
         }
     }
@@ -216,7 +217,7 @@ public class SeInterpreterApplication extends Application {
     @Subscribe
     public void saveScript(FileSaveAsEvent event) {
         File target = event.getFile();
-        String oldName = this.currentDisplay.name;
+        String oldName = this.currentDisplay.name();
         this.currentDisplay = new ScriptBuilder(this.currentDisplay)
                 .associateWith(target)
                 .createScript();
@@ -315,19 +316,20 @@ public class SeInterpreterApplication extends Application {
 
     private void addScript(Script newScript) {
         Suite newSuite = this.suite.add(this.currentDisplay, newScript);
-        this.resetSuite(newSuite, newScript);
+        int index = newSuite.getIndex(this.currentDisplay);
+        this.resetSuite(newSuite, newSuite.get(index + 1));
     }
 
-    private void resetSuite(Suite aSuite, Script dispaly) {
+    private void resetSuite(Suite aSuite, Script toSelect) {
         this.suite = aSuite;
-        EventBus.publish(new RefreshScriptViewEvent(this.suite, dispaly.name()));
+        EventBus.publish(new RefreshScriptViewEvent(this.suite, toSelect.name()));
     }
 
     private void saveSuite() {
         File target = new File(this.suite.getPath());
         List<Script> notAssociateFile = Lists.newArrayList();
         this.suite.forEach(it -> {
-            if (it.path == null) {
+            if (it.path() == null) {
                 notAssociateFile.add(it);
             }
         });
@@ -336,7 +338,7 @@ public class SeInterpreterApplication extends Application {
             scriptSaveTo.mkdirs();
         }
         notAssociateFile.forEach(it -> {
-            String oldName = it.name;
+            String oldName = it.name();
             String newName = oldName;
             if (!oldName.endsWith(".json")) {
                 newName = newName + ".json";
@@ -346,7 +348,7 @@ public class SeInterpreterApplication extends Application {
                 }
         );
         this.suite.forEach(it -> {
-            this.saveContents(new File(it.path), it);
+            this.saveContents(new File(it.path()), it);
         });
         this.saveContents(target, this.suite);
         this.resetSuite(this.suite, this.currentDisplay);

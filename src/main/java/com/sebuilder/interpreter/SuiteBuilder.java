@@ -8,6 +8,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class SuiteBuilder {
     private File suiteFile;
@@ -106,7 +107,7 @@ public class SuiteBuilder {
         ArrayList newScripts = Lists.newArrayList();
         for (Script script : this.scripts) {
             Script newScript = script;
-            if (script.name.equals(oldName)) {
+            if (script.name().equals(oldName)) {
                 newScript = aScript;
             }
             newScripts.add(newScript);
@@ -126,16 +127,24 @@ public class SuiteBuilder {
         for (Script script : this.scripts) {
             Script copy;
             if (this.shareState) {
-                copy = script.usePreviousDriverAndVars();
+                copy = script.usePreviousDriverAndVars(this.shareState);
             } else {
                 copy = script.copy();
             }
-            if (duplicate.containsKey(copy.name)) {
-                int nextCount = duplicate.get(copy.name) + 1;
-                duplicate.put(copy.name, nextCount);
-                copy = copy.rename(script.name + String.format("(%d)", nextCount));
+            final String scriptName = copy.name();
+            if (duplicate.containsKey(copy.path())) {
+                Optional<String> entries = copyScripts
+                        .stream()
+                        .map(it -> it.name())
+                        .filter(it -> scriptName.startsWith(it))
+                        .findFirst();
+                if (entries.isPresent()) {
+                    int nextCount = duplicate.get(copy.path()) + 1;
+                    duplicate.put(copy.path(), nextCount);
+                    copy = copy.rename(entries.get() + String.format("(%d)", nextCount));
+                }
             } else {
-                duplicate.put(copy.name, 0);
+                duplicate.put(copy.path(), 0);
             }
             copyScripts.add(copy);
             replaceChainMap(copyScriptChains, script, copy);
