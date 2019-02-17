@@ -12,12 +12,16 @@ public class RefreshScriptViewEvent {
 
     private final LinkedHashMap<String, Script> scripts = Maps.newLinkedHashMap();
 
-    public RefreshScriptViewEvent(Suite suite) {
+    private final String selectScriptName;
+
+    public RefreshScriptViewEvent(Suite suite, String selectScriptName) {
         this.fileName = suite.getName();
+        this.selectScriptName = selectScriptName;
         for (Script script : suite) {
             this.scripts.put(script.name, script);
         }
     }
+
 
     public String getFileName() {
         return fileName;
@@ -27,4 +31,7 @@ public class RefreshScriptViewEvent {
         return Maps.newLinkedHashMap(this.scripts);
     }
 
+    public String getSelectScriptName() {
+        return selectScriptName;
+    }
 }

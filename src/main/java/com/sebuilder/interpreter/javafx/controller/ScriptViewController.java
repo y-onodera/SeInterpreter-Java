@@ -19,7 +19,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.MultipleSelectionModel;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.stage.FileChooser;
@@ -40,20 +39,6 @@ public class ScriptViewController {
     void initialize() {
         assert this.treeViewScriptName != null : "fx:id=\"treeViewScriptName\" was not injected: check your FXML file 'scriptview.fxml'.";
         EventBus.registSubscriber(this);
-    }
-
-    @Subscribe
-    public void showScriptView(RefreshScriptViewEvent aEvent) {
-        EventBus.publish(new StepResultResetEvent());
-        TreeItem<String> root = new TreeItem<>(aEvent.getFileName());
-        root.setExpanded(true);
-        this.treeViewScriptName.setRoot(root);
-        this.refreshScriptView(aEvent.getScripts());
-    }
-
-    @Subscribe
-    public void scriptSaveAs(OpenScriptSaveChooserEvent event) {
-        this.handleScriptSaveAs(null);
     }
 
     @FXML
@@ -105,12 +90,29 @@ public class ScriptViewController {
         }
     }
 
-    private void refreshScriptView(LinkedHashMap<String, Script> scripts) {
+    @Subscribe
+    public void showScriptView(RefreshScriptViewEvent aEvent) {
+        EventBus.publish(new StepResultResetEvent());
+        TreeItem<String> root = new TreeItem<>(aEvent.getFileName());
+        root.setExpanded(true);
+        this.treeViewScriptName.setRoot(root);
+        this.refreshScriptView(aEvent.getScripts(), aEvent.getSelectScriptName());
+    }
+
+    @Subscribe
+    public void scriptSaveAs(OpenScriptSaveChooserEvent event) {
+        this.handleScriptSaveAs(null);
+    }
+
+    private void refreshScriptView(LinkedHashMap<String, Script> scripts, String selectScriptName) {
         this.treeViewScriptName.getRoot().getChildren().clear();
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
             for (String name : scripts.keySet()) {
                 TreeItem<String> item = new TreeItem<>(name);
                 this.treeViewScriptName.getRoot().getChildren().add(item);
+                if (name.equals(selectScriptName)) {
+                    this.treeViewScriptName.getSelectionModel().select(item);
+                }
             }
             this.treeViewScriptName.getSelectionModel()
                     .selectedItemProperty()
@@ -119,11 +121,7 @@ public class ScriptViewController {
                             EventBus.publish(new ScriptSelectEvent(newValue.getValue()));
                         }
                     });
-            MultipleSelectionModel msm = this.treeViewScriptName.getSelectionModel();
-            TreeItem<String> firstItem = this.treeViewScriptName.getRoot().getChildren().get(0);
-            int row = this.treeViewScriptName.getRow(firstItem);
-            msm.select(row);
-            EventBus.publish(new ScriptSelectEvent(firstItem.getValue()));
+            EventBus.publish(new ScriptSelectEvent(selectScriptName));
         });
     }
 }

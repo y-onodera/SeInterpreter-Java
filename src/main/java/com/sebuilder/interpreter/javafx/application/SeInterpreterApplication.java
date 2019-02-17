@@ -74,7 +74,7 @@ public class SeInterpreterApplication extends Application {
         final List<String> unnamed = parameters.getUnnamed();
         if (unnamed.size() > 0) {
             Suite newSuite = getScriptFactory().parse(new File(unnamed.get(0)));
-            this.resetSuite(newSuite);
+            this.resetSuite(newSuite, newSuite.iterator().next());
         }
     }
 
@@ -87,8 +87,8 @@ public class SeInterpreterApplication extends Application {
     @Subscribe
     public void reset(ScriptResetEvent event) {
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
-            this.suite = new SuiteBuilder(this.templateScript()).createSuite();
-            this.resetSuite(this.suite);
+            Suite newSuite = new SuiteBuilder(this.templateScript()).createSuite();
+            this.resetSuite(newSuite, newSuite.iterator().next());
         });
     }
 
@@ -97,7 +97,7 @@ public class SeInterpreterApplication extends Application {
         File file = event.getFile();
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
             Suite newSuite = getScriptFactory().parse(file);
-            this.resetSuite(newSuite);
+            this.resetSuite(newSuite, newSuite.iterator().next());
         });
 
     }
@@ -108,21 +108,20 @@ public class SeInterpreterApplication extends Application {
         if (newScript == null) {
             newScript = this.templateScript();
         }
-        this.suite = this.suite.add(newScript);
-        this.resetSuite(this.suite);
+        addScript(newScript);
     }
 
     @Subscribe
     public void insertScript(ScriptInsertEvent event) throws IOException, JSONException {
         Script newScript = this.templateScript();
-        this.suite = this.suite.insert(this.currentDisplay, newScript);
-        this.resetSuite(this.suite);
+        Suite newSuite = this.suite.insert(this.currentDisplay, newScript);
+        this.resetSuite(newSuite, newScript);
     }
 
     @Subscribe
     public void deleteScript(ScriptDeleteEvent event) {
-        this.suite = this.suite.delete(this.currentDisplay);
-        this.resetSuite(this.suite);
+        Suite newSuite = this.suite.delete(this.currentDisplay);
+        this.resetSuite(newSuite, newSuite.iterator().next());
     }
 
     @Subscribe
@@ -221,9 +220,9 @@ public class SeInterpreterApplication extends Application {
         this.currentDisplay = new ScriptBuilder(this.currentDisplay)
                 .associateWith(target)
                 .createScript();
-        this.suite = this.suite.replace(oldName, this.currentDisplay);
+        Suite newSuite = this.suite.replace(oldName, this.currentDisplay);
         this.saveContents(target, this.currentDisplay);
-        this.resetSuite(this.suite);
+        this.resetSuite(newSuite, this.currentDisplay);
     }
 
     @Subscribe
@@ -263,10 +262,8 @@ public class SeInterpreterApplication extends Application {
 
     @Subscribe
     public void exportTemplate(TemplateLoadEvent event) {
-        Script export = this.runner.exportTemplate(event.getParentLocator(), event.getTargetTag());
-        this.currentDisplay = this.currentDisplay.addStep(export);
-        this.suite = this.suite.replace(this.currentDisplay);
-        this.refreshMainView();
+        Script exported = this.runner.exportTemplate(event.getParentLocator(), event.getTargetTag());
+        this.addScript(exported);
     }
 
     @Subscribe
@@ -316,9 +313,14 @@ public class SeInterpreterApplication extends Application {
         return getScriptFactory().open("https://www.google.com");
     }
 
-    private void resetSuite(Suite aSuite) {
+    private void addScript(Script newScript) {
+        Suite newSuite = this.suite.add(this.currentDisplay, newScript);
+        this.resetSuite(newSuite, newScript);
+    }
+
+    private void resetSuite(Suite aSuite, Script dispaly) {
         this.suite = aSuite;
-        EventBus.publish(new RefreshScriptViewEvent(this.suite));
+        EventBus.publish(new RefreshScriptViewEvent(this.suite, dispaly.name()));
     }
 
     private void saveSuite() {
@@ -347,7 +349,7 @@ public class SeInterpreterApplication extends Application {
             this.saveContents(new File(it.path), it);
         });
         this.saveContents(target, this.suite);
-        this.resetSuite(this.suite);
+        this.resetSuite(this.suite, this.currentDisplay);
     }
 
     private void saveContents(File target, Object content) {

@@ -77,8 +77,13 @@ public class SuiteBuilder {
     }
 
     public SuiteBuilder insertScript(Script aScript, Script newScript) {
-        this.scripts.add(this.scripts.indexOf(aScript), newScript);
-        return this;
+        final int index = this.scripts.indexOf(aScript);
+        return addScript(newScript, index);
+    }
+
+    public SuiteBuilder addScript(Script aScript, Script newScript) {
+        final int index = this.scripts.indexOf(aScript) + 1;
+        return addScript(newScript, index);
     }
 
     public SuiteBuilder addScript(Script s) {
@@ -141,6 +146,11 @@ public class SuiteBuilder {
                 , this.dataSource
                 , Maps.newHashMap(this.dataSourceConfig)
                 , this.shareState);
+    }
+
+    private SuiteBuilder addScript(Script newScript, int index) {
+        this.scripts.add(index, newScript);
+        return this;
     }
 
     private void replaceChainMap(Map<Script, Script> chainMap, Script oldScript, Script newScript) {

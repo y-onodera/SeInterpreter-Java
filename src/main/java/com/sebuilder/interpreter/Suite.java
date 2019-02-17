@@ -138,6 +138,11 @@ public class Suite implements Iterable<Script>, TestRunnable {
                 .createSuite();
     }
 
+    public Suite add(Script aScript, Script newScript) {
+        return builder().addScript(aScript, newScript)
+                .createSuite();
+    }
+
     public Suite add(Script aScript) {
         return builder()
                 .addScript(aScript)
