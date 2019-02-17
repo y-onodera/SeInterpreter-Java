@@ -58,11 +58,6 @@ public class MenuController {
         }
     }
 
-    @Subscribe
-    public void saveSuiteAs(OpenSuiteSaveChooserEvent event) {
-        this.handleSaveSuiteAs(null);
-    }
-
     @FXML
     void handleSaveSuite(ActionEvent event) {
         EventBus.publish(new FileSaveSuiteAsEvent());
@@ -142,6 +137,11 @@ public class MenuController {
     void handleReplayScript(ActionEvent event) {
         EventBus.publish(new StepResultResetEvent());
         EventBus.publish(new RunEvent());
+    }
+
+    @Subscribe
+    public void saveSuiteAs(OpenSuiteSaveChooserEvent event) {
+        this.handleSaveSuiteAs(null);
     }
 
 }

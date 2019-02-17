@@ -262,8 +262,8 @@ public class SeInterpreterApplication extends Application {
     }
 
     @Subscribe
-    public void exportScriptTemplate(TemplateLoadEvent event) {
-        Script export = this.runner.exportScriptTemplate();
+    public void exportTemplate(TemplateLoadEvent event) {
+        Script export = this.runner.exportTemplate(event.getParentLocator(), event.getTargetTag());
         this.currentDisplay = this.currentDisplay.addStep(export);
         this.suite = this.suite.replace(this.currentDisplay);
         this.refreshMainView();

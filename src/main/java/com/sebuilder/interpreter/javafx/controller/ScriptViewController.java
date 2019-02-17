@@ -8,7 +8,6 @@ import com.sebuilder.interpreter.javafx.event.ReportErrorEvent;
 import com.sebuilder.interpreter.javafx.event.file.FileSaveAsEvent;
 import com.sebuilder.interpreter.javafx.event.file.FileSaveEvent;
 import com.sebuilder.interpreter.javafx.event.replay.StepResultResetEvent;
-import com.sebuilder.interpreter.javafx.event.replay.TemplateLoadEvent;
 import com.sebuilder.interpreter.javafx.event.script.ScriptAddEvent;
 import com.sebuilder.interpreter.javafx.event.script.ScriptDeleteEvent;
 import com.sebuilder.interpreter.javafx.event.script.ScriptInsertEvent;
@@ -17,13 +16,20 @@ import com.sebuilder.interpreter.javafx.event.view.OpenScriptSaveChooserEvent;
 import com.sebuilder.interpreter.javafx.event.view.RefreshScriptViewEvent;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.MultipleSelectionModel;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.LinkedHashMap;
+import java.util.Objects;
 
 public class ScriptViewController {
 
@@ -63,9 +69,17 @@ public class ScriptViewController {
     }
 
     @FXML
-    void handleScriptCreateTemplate(ActionEvent event) {
-        EventBus.publish(new StepResultResetEvent());
-        EventBus.publish(new TemplateLoadEvent());
+    void handleScriptCreateTemplate(ActionEvent event) throws IOException {
+        FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(this.getClass().getResource("/fxml/exportsetting.fxml")));
+        Parent root = loader.load();
+        Scene scene = new Scene(root);
+        Stage exportSettingDialog = new Stage();
+        exportSettingDialog.setScene(scene);
+        exportSettingDialog.initOwner(treeViewScriptName.getScene().getWindow());
+        exportSettingDialog.initModality(Modality.WINDOW_MODAL);
+        exportSettingDialog.setResizable(false);
+        exportSettingDialog.setTitle("edit export setting");
+        exportSettingDialog.show();
     }
 
     @FXML

@@ -123,6 +123,10 @@ public class TestRun {
         return this.string("text");
     }
 
+    public boolean getBoolean(String filterTag) {
+        return containsKey(filterTag) && Boolean.valueOf(string(filterTag));
+    }
+
     /**
      * Fetches a String parameter from the current step.
      *

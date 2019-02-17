@@ -69,11 +69,14 @@ public class ExportTemplate implements StepType, LocatorHolder {
     }
 
     private ExportResource getExportResource(TestRun ctx) throws JSONException {
+        boolean filterTag = ctx.getBoolean("filterTag");
         return ExportResource.builder(ctx)
-                .addInputStep()
-                .addSelectStep()
-                .addLinkClickStep()
-                .addButtonClickStep()
+                .addInputStep(!filterTag || ctx.getBoolean("input"))
+                .addSelectStep(!filterTag || ctx.getBoolean("select"))
+                .addLinkClickStep(!filterTag || ctx.getBoolean("a"))
+                .addButtonClickStep(!filterTag || ctx.getBoolean("button"))
+                .addDivClickStep(filterTag && ctx.getBoolean("div"))
+                .addSpanClickStep(filterTag && ctx.getBoolean("span"))
                 .build();
     }
 }

@@ -3,6 +3,7 @@ package com.sebuilder.interpreter.javafx.application;
 import com.sebuilder.interpreter.*;
 import com.sebuilder.interpreter.application.CommandLineArgument;
 import com.sebuilder.interpreter.application.SeInterpreterREPL;
+import com.sebuilder.interpreter.steptype.ExportTemplate;
 import com.sebuilder.interpreter.steptype.HighLightElement;
 import javafx.concurrent.Task;
 import org.apache.logging.log4j.LogManager;
@@ -39,9 +40,32 @@ public class SeInterpreterRunner {
         return this.repl != null;
     }
 
-    public Script exportScriptTemplate() {
-        String locator = new Locator("css selector", "body").toString();
-        return exportTemplate(locator);
+    public Script exportTemplate(Locator locator, List<String> targetTags) {
+        if (!this.isOpen()) {
+            this.setUp();
+        }
+        String fileName = "Template" + this.exportCount++ + ".json";
+        Step export = new Step(new ExportTemplate());
+        export.put("locator", locator);
+        export.put("file", fileName);
+        export.put("filterTag", "true");
+        for (String targetTag : targetTags) {
+            export.put(targetTag, "true");
+        }
+        Script get = new ScriptBuilder()
+                .addStep(export)
+                .createScript();
+        SeInterpreterTestListener listener = new SimpleSeInterpreterTestListener(this.log);
+        this.repl.execute(get, listener);
+        File exported = new File(listener.getTemplateOutputDirectory(), fileName);
+        if (!exported.exists()) {
+            return new ScriptBuilder().createScript();
+        }
+        Script result = this.repl.loadScript(exported.getAbsolutePath()).iterator().next();
+        return result.builder()
+                .associateWith(null)
+                .setName(result.name)
+                .createScript();
     }
 
     public void highLightElement(String locatorType, String value) {
@@ -52,14 +76,6 @@ public class SeInterpreterRunner {
                 .createScript();
         SeInterpreterTestListener listener = new SimpleSeInterpreterTestListener(this.log);
         this.repl.execute(highLight, listener);
-    }
-
-    public Locator handleFocusElement() {
-        String locator = new Locator("focus", "").toString();
-        return exportTemplate(locator)
-                .steps
-                .get(0)
-                .getLocator("locator");
     }
 
     public Task createRunScriptTask(Script currentDisplay) {
@@ -136,19 +152,4 @@ public class SeInterpreterRunner {
         };
     }
 
-    private Script exportTemplate(String locator) {
-        if (!this.isOpen()) {
-            this.setUp();
-        }
-        String fileName = "Template" + this.exportCount++ + ".json";
-        Script get = this.repl.toScript("{\"steps\":[{\"type\":\"exportTemplate\",\"file\":\"" + fileName + "\",\"locator\":" + locator + "}]}");
-        SeInterpreterTestListener listener = new SimpleSeInterpreterTestListener(this.log);
-        this.repl.execute(get, listener);
-        File exported = new File(listener.getTemplateOutputDirectory(), fileName);
-        Script result = this.repl.loadScript(exported.getAbsolutePath()).iterator().next();
-        return result.builder()
-                .associateWith(null)
-                .setName(result.name)
-                .createScript();
-    }
 }

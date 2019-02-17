@@ -62,7 +62,7 @@ public class StepEditController {
     }
 
     @FXML
-    void initialize() {
+    public void initialize() {
         assert stepTypeSelect != null : "fx:id=\"stepTypeSelect\" was not injected: check your FXML file 'stepedit.fxml'.";
         assert stepEditGrid != null : "fx:id=\"stepEditGrid\" was not injected: check your FXML file 'stepedit.fxml'.";
         assert labelSelectType != null : "fx:id=\"labelSelectType\" was not injected: check your FXML file 'stepedit.fxml'.";
@@ -184,7 +184,7 @@ public class StepEditController {
     }
 
     @FXML
-    void selectType(ActionEvent event) {
+    public void selectType(ActionEvent event) {
         String stepType = stepTypeSelect.getSelectionModel().getSelectedItem();
         if (this.selectedStepType.equals(stepType)) {
             return;
@@ -195,7 +195,7 @@ public class StepEditController {
     }
 
     @Subscribe
-    public void refleshView(RefreshStepEditViewEvent aEvent) {
+    public void refreshView(RefreshStepEditViewEvent aEvent) {
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
             Step step = aEvent.getStep();
             JSONObject json = step.toFullJSON();

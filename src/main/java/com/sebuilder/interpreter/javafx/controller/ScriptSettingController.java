@@ -1,7 +1,6 @@
 package com.sebuilder.interpreter.javafx.controller;
 
 import com.sebuilder.interpreter.Context;
-import com.sebuilder.interpreter.javafx.EventBus;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -36,7 +35,6 @@ public class ScriptSettingController {
         } else {
             this.datasourceText.setText(Context.getInstance().getBaseDirectory().getAbsolutePath());
         }
-        EventBus.registSubscriber(this);
     }
 
     @FXML

@@ -41,7 +41,6 @@ public class BrowserSettingController {
         assert driverText != null : "fx:id=\"driverText\" was not injected: check your FXML file 'browsersetting.fxml'.";
         assert editButton != null : "fx:id=\"editButton\" was not injected: check your FXML file 'browsersetting.fxml'.";
         this.init("Chrome", System.getProperty("webdriver.chrome.driver"));
-        EventBus.registSubscriber(this);
     }
 
     @FXML

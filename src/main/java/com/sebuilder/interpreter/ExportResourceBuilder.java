@@ -61,7 +61,10 @@ public class ExportResourceBuilder {
         return new ExportResource(source.toString(4), this.variables, dataSourceFile);
     }
 
-    public ExportResourceBuilder addInputStep() {
+    public ExportResourceBuilder addInputStep(boolean aIsAppend) {
+        if (!aIsAppend) {
+            return this;
+        }
         this.extractFrom
                 .findElements(By.tagName("input"))
                 .stream()
@@ -84,7 +87,10 @@ public class ExportResourceBuilder {
         return this;
     }
 
-    public ExportResourceBuilder addSelectStep() {
+    public ExportResourceBuilder addSelectStep(boolean aIsAppend) {
+        if (!aIsAppend) {
+            return this;
+        }
         this.extractFrom
                 .findElements(By.tagName("select"))
                 .stream()
@@ -99,7 +105,10 @@ public class ExportResourceBuilder {
         return this;
     }
 
-    public ExportResourceBuilder addLinkClickStep() {
+    public ExportResourceBuilder addLinkClickStep(boolean aIsAppend) {
+        if (!aIsAppend) {
+            return this;
+        }
         this.extractFrom
                 .findElements(By.tagName("a"))
                 .stream()
@@ -110,9 +119,38 @@ public class ExportResourceBuilder {
         return this;
     }
 
-    public ExportResourceBuilder addButtonClickStep() {
+    public ExportResourceBuilder addButtonClickStep(boolean aIsAppend) {
+        if (!aIsAppend) {
+            return this;
+        }
         this.extractFrom
                 .findElements(By.tagName("button"))
+                .stream()
+                .forEach(element -> {
+                    this.addStep(new ClickElement(), this.ctx.driver(), element);
+                });
+        return this;
+    }
+
+    public ExportResourceBuilder addDivClickStep(boolean aIsAppend) {
+        if (!aIsAppend) {
+            return this;
+        }
+        this.extractFrom
+                .findElements(By.tagName("div"))
+                .stream()
+                .forEach(element -> {
+                    this.addStep(new ClickElement(), this.ctx.driver(), element);
+                });
+        return this;
+    }
+
+    public ExportResourceBuilder addSpanClickStep(boolean aIsAppend) {
+        if (!aIsAppend) {
+            return this;
+        }
+        this.extractFrom
+                .findElements(By.tagName("span"))
                 .stream()
                 .forEach(element -> {
                     this.addStep(new ClickElement(), this.ctx.driver(), element);
