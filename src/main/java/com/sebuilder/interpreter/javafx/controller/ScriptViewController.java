@@ -9,10 +9,7 @@ import com.sebuilder.interpreter.javafx.event.ReportErrorEvent;
 import com.sebuilder.interpreter.javafx.event.file.FileSaveAsEvent;
 import com.sebuilder.interpreter.javafx.event.file.FileSaveEvent;
 import com.sebuilder.interpreter.javafx.event.replay.StepResultResetEvent;
-import com.sebuilder.interpreter.javafx.event.script.ScriptAddEvent;
-import com.sebuilder.interpreter.javafx.event.script.ScriptDeleteEvent;
-import com.sebuilder.interpreter.javafx.event.script.ScriptInsertEvent;
-import com.sebuilder.interpreter.javafx.event.script.ScriptSelectEvent;
+import com.sebuilder.interpreter.javafx.event.script.*;
 import com.sebuilder.interpreter.javafx.event.view.OpenScriptSaveChooserEvent;
 import com.sebuilder.interpreter.javafx.event.view.RefreshScriptViewEvent;
 import javafx.event.ActionEvent;
@@ -65,6 +62,21 @@ public class ScriptViewController {
         exportSettingDialog.setResizable(false);
         exportSettingDialog.setTitle("edit export setting");
         exportSettingDialog.show();
+    }
+
+    @FXML
+    void handleScriptImport(ActionEvent event) {
+        EventBus.publish(new StepResultResetEvent());
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Open Resource File");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("json format (*.json)", "*.json"));
+        fileChooser.setInitialDirectory(Context.getInstance().getBaseDirectory());
+        Stage stage = new Stage();
+        stage.initOwner(treeViewScriptName.getScene().getWindow());
+        File file = fileChooser.showOpenDialog(stage);
+        if (file != null) {
+            EventBus.publish(new ScriptImportEvent(file));
+        }
     }
 
     @FXML

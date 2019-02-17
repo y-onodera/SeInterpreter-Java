@@ -121,6 +121,22 @@ public class SeInterpreterApplication extends Application {
     }
 
     @Subscribe
+    public void exportTemplate(TemplateLoadEvent event) {
+        Script exported = this.runner.exportTemplate(event.getParentLocator(), event.getTargetTag(), event.isWithDataSource());
+        this.addScript(exported);
+    }
+
+    @Subscribe
+    public void scriptImport(ScriptImportEvent event) {
+        File file = event.getFile();
+        ReportErrorEvent.publishIfExecuteThrowsException(() -> {
+            Script script = getScriptFactory().parse(file).get(0);
+            addScript(script);
+        });
+
+    }
+
+    @Subscribe
     public void deleteScript(ScriptDeleteEvent event) {
         Suite newSuite = this.suite.delete(this.currentDisplay);
         this.resetSuite(newSuite, newSuite.iterator().next());
@@ -264,12 +280,6 @@ public class SeInterpreterApplication extends Application {
     }
 
     @Subscribe
-    public void exportTemplate(TemplateLoadEvent event) {
-        Script exported = this.runner.exportTemplate(event.getParentLocator(), event.getTargetTag(), event.isWithDataSource());
-        this.addScript(exported);
-    }
-
-    @Subscribe
     public void highLightElement(ElementHighLightEvent event) {
         this.runner.highLightElement(event.getLocator(), event.getValue());
     }
@@ -373,11 +383,11 @@ public class SeInterpreterApplication extends Application {
     private void copyDataSourceTemplate(Script it) {
         if (it.dataSourceConfig().containsKey("path")) {
             File src = new File(this.runner.getTemplateOutputDirectory(), it.dataSourceConfig().get("path"));
-            final String newDatasourceName = it.name().replace(".json", ".csv");
-            File dest = new File(this.runner.getDataSourceDirectory(), newDatasourceName);
+            final String newDataSourceName = it.name().replace(".json", ".csv");
+            File dest = new File(this.runner.getDataSourceDirectory(), newDataSourceName);
             if (src.exists() && !dest.exists()) {
                 ReportErrorEvent.publishIfExecuteThrowsException(() -> Files.copy(src, dest));
-                it.dataSourceConfig().put("path", newDatasourceName);
+                it.dataSourceConfig().put("path", newDataSourceName);
             }
         }
     }
