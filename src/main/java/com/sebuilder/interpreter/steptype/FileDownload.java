@@ -1,32 +1,25 @@
 package com.sebuilder.interpreter.steptype;
 
-import com.google.common.base.Charsets;
 import com.sebuilder.interpreter.LocatorHolder;
 import com.sebuilder.interpreter.TestRun;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.CookieStore;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.cookie.BasicClientCookie;
-import org.apache.http.message.BasicNameValuePair;
+import okhttp3.*;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.openqa.selenium.Cookie;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.CookieHandler;
+import java.net.CookieManager;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
+
+import static java.net.CookiePolicy.ACCEPT_ALL;
 
 public class FileDownload implements ConditionalStep, LocatorHolder {
 
@@ -67,17 +60,17 @@ public class FileDownload implements ConditionalStep, LocatorHolder {
     }
 
     public void postDownloadFile(TestRun ctx, String downloadUrl, String outputFilePath) throws IOException {
-        HttpClient httpClient = getHttpClient(ctx);
-        HttpPost httpPost = new HttpPost(downloadUrl);
-        ArrayList<NameValuePair> params = new ArrayList<NameValuePair>();
+        OkHttpClient client = getHttpClient(ctx, downloadUrl);
+        Charset charset = Charset.forName(StandardCharsets.UTF_8.name());
+        FormBody.Builder requestBody = new FormBody.Builder(charset);
         ctx.locator()
                 .findElements(ctx)
                 .stream()
                 .forEach(element -> {
-                    params.add(new BasicNameValuePair(element.getAttribute("name"), element.getAttribute("value")));
+                    requestBody.add(element.getAttribute("name"), element.getAttribute("value"));
                 });
-        httpPost.setEntity(new UrlEncodedFormEntity(params, Charsets.UTF_8));
-        HttpResponse response = httpClient.execute(httpPost);
+        Request request = new Request.Builder().url(downloadUrl).post(requestBody.build()).build();
+        Response response = client.newCall(request).execute();
         downLoadFile(ctx, outputFilePath, response);
     }
 
@@ -100,17 +93,18 @@ public class FileDownload implements ConditionalStep, LocatorHolder {
 
 
     public void getDownloadFile(TestRun ctx, String downloadUrl, String outputFilePath) throws IOException {
-        HttpClient httpClient = getHttpClient(ctx);
-        HttpGet httpGet = new HttpGet(downloadUrl);
-        HttpResponse response = httpClient.execute(httpGet);
+        OkHttpClient client = getHttpClient(ctx, downloadUrl);
+        Request request = new Request.Builder().url(downloadUrl).build();
+        Call call = client.newCall(request);
+        Response response = call.execute();
         downLoadFile(ctx, outputFilePath, response);
     }
 
-    public void downLoadFile(TestRun ctx, String outputFilePath, HttpResponse response) throws IOException {
-        HttpEntity entity = response.getEntity();
-        if (entity != null) {
+    public void downLoadFile(TestRun ctx, String outputFilePath, Response response) throws IOException {
+        ResponseBody body = response.body();
+        if (body != null) {
             File outputFile = new File(ctx.getListener().getDownloadDirectory(), ctx.getTestRunName() + "_" + outputFilePath);
-            try (InputStream inputStream = entity.getContent(); FileOutputStream fileOutputStream = new FileOutputStream(outputFile)) {
+            try (InputStream inputStream = body.byteStream(); FileOutputStream fileOutputStream = new FileOutputStream(outputFile)) {
                 int read;
                 byte[] bytes = new byte[1024];
                 while ((read = inputStream.read(bytes)) != -1) {
@@ -120,33 +114,22 @@ public class FileDownload implements ConditionalStep, LocatorHolder {
         }
     }
 
-    public HttpClient getHttpClient(TestRun ctx) {
-        CookieStore cookieStore = seleniumCookiesToCookieStore(ctx.driver());
-        return HttpClientBuilder.create()
-                .setDefaultCookieStore(cookieStore)
-                .build();
-    }
-
-    /**
-     * Get Cookie from WebDriver browser session.
-     *
-     * @return cookieStore from WebDriver browser session.
-     */
-    private CookieStore seleniumCookiesToCookieStore(WebDriver driver) {
-
-        Set<Cookie> seleniumCookies = driver.manage().getCookies();
-        CookieStore cookieStore = new BasicCookieStore();
-
-        for (Cookie seleniumCookie : seleniumCookies) {
-            BasicClientCookie basicClientCookie =
-                    new BasicClientCookie(seleniumCookie.getName(), seleniumCookie.getValue());
-            basicClientCookie.setDomain(seleniumCookie.getDomain());
-            basicClientCookie.setExpiryDate(seleniumCookie.getExpiry());
-            basicClientCookie.setPath(seleniumCookie.getPath());
-            cookieStore.addCookie(basicClientCookie);
+    public OkHttpClient getHttpClient(TestRun ctx, String downloadUrl) {
+        List<Cookie> cookies = new ArrayList();
+        Set<org.openqa.selenium.Cookie> seleniumCookies = ctx.driver().manage().getCookies();
+        for (org.openqa.selenium.Cookie seleniumCookie : seleniumCookies) {
+            cookies.add(new Cookie.Builder()
+                    .name(seleniumCookie.getName())
+                    .value(seleniumCookie.getValue())
+                    .domain(seleniumCookie.getDomain())
+                    .expiresAt(seleniumCookie.getExpiry().getTime())
+                    .path(seleniumCookie.getPath())
+                    .build());
         }
-
-        return cookieStore;
+        CookieManager cookieManager = new CookieManager(null, ACCEPT_ALL);
+        CookieHandler.setDefault(cookieManager);
+        CookieJar cookieJar = new JavaNetCookieJar(cookieManager);
+        cookieJar.saveFromResponse(HttpUrl.parse(downloadUrl), cookies);
+        return new OkHttpClient().newBuilder().cookieJar(cookieJar).build();
     }
-
 }
