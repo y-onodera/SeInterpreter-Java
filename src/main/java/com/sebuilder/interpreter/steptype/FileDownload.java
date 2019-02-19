@@ -118,13 +118,25 @@ public class FileDownload implements ConditionalStep, LocatorHolder {
         List<Cookie> cookies = new ArrayList();
         Set<org.openqa.selenium.Cookie> seleniumCookies = ctx.driver().manage().getCookies();
         for (org.openqa.selenium.Cookie seleniumCookie : seleniumCookies) {
-            cookies.add(new Cookie.Builder()
+            Cookie.Builder builder = new Cookie.Builder()
                     .name(seleniumCookie.getName())
-                    .value(seleniumCookie.getValue())
-                    .domain(seleniumCookie.getDomain())
-                    .expiresAt(seleniumCookie.getExpiry().getTime())
-                    .path(seleniumCookie.getPath())
-                    .build());
+                    .value(seleniumCookie.getValue());
+            String domain = seleniumCookie.getDomain();
+            if (domain.startsWith(".")) {
+                domain = domain.substring(1);
+            }
+            builder.domain(domain);
+            if (seleniumCookie.getExpiry() != null) {
+                builder.expiresAt(seleniumCookie.getExpiry().getTime());
+            }
+            if (seleniumCookie.isSecure()) {
+                builder.secure();
+            }
+            if (seleniumCookie.isHttpOnly()) {
+                builder.httpOnly();
+            }
+            builder.path(seleniumCookie.getPath());
+            cookies.add(builder.build());
         }
         CookieManager cookieManager = new CookieManager(null, ACCEPT_ALL);
         CookieHandler.setDefault(cookieManager);
