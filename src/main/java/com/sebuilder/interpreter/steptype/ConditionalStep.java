@@ -6,7 +6,11 @@ import com.sebuilder.interpreter.WaitFor;
 
 public interface ConditionalStep extends StepType {
 
-    WaitFor waitForActive = new WaitFor(new ComplexCondition(new WaitFor(new ElementVisible()),new WaitFor(new ElementEnable())));
+    WaitFor waitForActive = ComplexCondition.builder()
+            .addCondition(new ElementVisible())
+            .addCondition(new ElementEnable())
+            .build()
+            .toWaitFor();
 
     /**
      * Perform the action this step consists of.

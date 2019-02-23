@@ -36,4 +36,19 @@ public interface Getter extends JSONSerializable {
      */
     String cmpParamName();
 
+    default WaitFor toWaitFor() {
+        return new WaitFor(this);
+    }
+
+    default Store toStore() {
+        return new Store(this);
+    }
+
+    default Verify toVerify() {
+        return new Verify(this);
+    }
+
+    default Assert toAssert() {
+        return new Assert(this);
+    }
 }

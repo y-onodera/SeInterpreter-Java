@@ -93,6 +93,7 @@ public class StepEditController {
         stepTypeSelect.getItems().add("storeVariable");
         stepTypeSelect.getItems().add("storeCookieByName");
         stepTypeSelect.getItems().add("storeEval");
+        stepTypeSelect.getItems().add("storeAntRun");
         stepTypeSelect.getItems().add("print");
         stepTypeSelect.getItems().add("printElementPresent");
         stepTypeSelect.getItems().add("printElementVisible");
@@ -108,6 +109,7 @@ public class StepEditController {
         stepTypeSelect.getItems().add("printVariable");
         stepTypeSelect.getItems().add("printCookieByName");
         stepTypeSelect.getItems().add("printEval");
+        stepTypeSelect.getItems().add("printAntRun");
         stepTypeSelect.getItems().add("waitForElementPresent");
         stepTypeSelect.getItems().add("waitForElementVisible");
         stepTypeSelect.getItems().add("waitForElementEnable");
@@ -124,6 +126,7 @@ public class StepEditController {
         stepTypeSelect.getItems().add("waitForCookieByName");
         stepTypeSelect.getItems().add("waitForCookiePresent");
         stepTypeSelect.getItems().add("waitForEval");
+        stepTypeSelect.getItems().add("waitForAntRun");
         stepTypeSelect.getItems().add("waitForDocumentReady");
         stepTypeSelect.getItems().add("verifyElementPresent");
         stepTypeSelect.getItems().add("verifyElementVisible");
@@ -141,6 +144,7 @@ public class StepEditController {
         stepTypeSelect.getItems().add("verifyCookieText");
         stepTypeSelect.getItems().add("verifyCookiePresent");
         stepTypeSelect.getItems().add("verifyEval");
+        stepTypeSelect.getItems().add("verifyAntRun");
         stepTypeSelect.getItems().add("verifyDocumentReady");
         stepTypeSelect.getItems().add("assertElementPresent");
         stepTypeSelect.getItems().add("assertElementVisible");
@@ -157,6 +161,7 @@ public class StepEditController {
         stepTypeSelect.getItems().add("assertCookieText");
         stepTypeSelect.getItems().add("assertCookiePresent");
         stepTypeSelect.getItems().add("assertEval");
+        stepTypeSelect.getItems().add("assertAntRun");
         stepTypeSelect.getItems().add("assertDocumentReady");
         stepTypeSelect.getItems().add("acceptAlert");
         stepTypeSelect.getItems().add("answerAlert");
