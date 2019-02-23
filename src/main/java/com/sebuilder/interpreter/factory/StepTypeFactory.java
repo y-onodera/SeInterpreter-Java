@@ -123,6 +123,10 @@ public class StepTypeFactory {
                     className = "Loop";
                     rawStepType = false;
                 }
+                if (name.equals("if")) {
+                    className = "If";
+                    rawStepType = false;
+                }
                 Class<?> c = null;
                 try {
                     c = Class.forName(primaryPackage + "." + className);
@@ -240,5 +244,4 @@ public class StepTypeFactory {
             default:
         }
     }
-
 }

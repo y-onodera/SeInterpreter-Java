@@ -1,11 +1,11 @@
 package com.sebuilder.interpreter.steptype;
 
-import com.sebuilder.interpreter.StepType;
+import com.sebuilder.interpreter.FlowStep;
 import com.sebuilder.interpreter.TestRun;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class Loop implements StepType {
+public class Loop implements FlowStep {
     /**
      * Perform the action this step consists of.
      *
@@ -17,10 +17,11 @@ public class Loop implements StepType {
     public boolean run(TestRun ctx) {
         ctx.processTestSuccess();
         boolean success = true;
-        int actions = Integer.valueOf(ctx.string("subStep"));
+        int actions = getSubSteps(ctx);
         int count = Integer.valueOf(ctx.string("count"));
         for (int i = 0; i < count; i++) {
-            success = runOneStep(ctx, success, actions, i);
+            ctx.vars().put("_index", String.valueOf(i + 1));
+            success = runSubStep(ctx, success, actions);
             if (!success) {
                 ctx.processTestFailure();
                 return false;
@@ -33,30 +34,11 @@ public class Loop implements StepType {
         return success;
     }
 
-    public boolean runOneStep(TestRun ctx, boolean success, int actions, int i) {
-        ctx.vars().put("_index", String.valueOf(i + 1));
-        for (int exec = 0; exec < actions; exec++) {
-            success = next(ctx) && success;
-            if (exec != actions - 1) {
-                if (success) {
-                    ctx.processTestSuccess();
-                }
-            }
-        }
-        return success;
-    }
-
     @Override
     public void supplementSerialized(JSONObject o) throws JSONException {
-        if (!o.has("subStep")) {
-            o.put("subStep", "");
-        }
+        FlowStep.super.supplementSerialized(o);
         if (!o.has("count")) {
             o.put("count", "");
         }
-    }
-
-    private boolean next(TestRun ctx) {
-        return ctx.runTest();
     }
 }

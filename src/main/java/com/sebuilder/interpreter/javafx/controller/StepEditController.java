@@ -76,6 +76,7 @@ public class StepEditController {
         stepTypeSelect.getItems().add("submitElement");
         stepTypeSelect.getItems().add("fileDownload");
         stepTypeSelect.getItems().add("execBat");
+        stepTypeSelect.getItems().add("if");
         stepTypeSelect.getItems().add("loop");
         stepTypeSelect.getItems().add("retry");
         stepTypeSelect.getItems().add("store");
@@ -123,6 +124,7 @@ public class StepEditController {
         stepTypeSelect.getItems().add("waitForCookieByName");
         stepTypeSelect.getItems().add("waitForCookiePresent");
         stepTypeSelect.getItems().add("waitForEval");
+        stepTypeSelect.getItems().add("waitForDocumentReady");
         stepTypeSelect.getItems().add("verifyElementPresent");
         stepTypeSelect.getItems().add("verifyElementVisible");
         stepTypeSelect.getItems().add("verifyElementEnable");
@@ -139,6 +141,7 @@ public class StepEditController {
         stepTypeSelect.getItems().add("verifyCookieText");
         stepTypeSelect.getItems().add("verifyCookiePresent");
         stepTypeSelect.getItems().add("verifyEval");
+        stepTypeSelect.getItems().add("verifyDocumentReady");
         stepTypeSelect.getItems().add("assertElementPresent");
         stepTypeSelect.getItems().add("assertElementVisible");
         stepTypeSelect.getItems().add("assertElementEnable");
@@ -154,6 +157,7 @@ public class StepEditController {
         stepTypeSelect.getItems().add("assertCookieText");
         stepTypeSelect.getItems().add("assertCookiePresent");
         stepTypeSelect.getItems().add("assertEval");
+        stepTypeSelect.getItems().add("assertDocumentReady");
         stepTypeSelect.getItems().add("acceptAlert");
         stepTypeSelect.getItems().add("answerAlert");
         stepTypeSelect.getItems().add("dismissAlert");

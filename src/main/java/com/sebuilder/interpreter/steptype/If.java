@@ -1,10 +1,9 @@
 package com.sebuilder.interpreter.steptype;
 
-
 import com.sebuilder.interpreter.FlowStep;
 import com.sebuilder.interpreter.TestRun;
 
-public class Retry implements FlowStep {
+public class If implements FlowStep {
 
     /**
      * Perform the action this step consists of.
@@ -17,19 +16,17 @@ public class Retry implements FlowStep {
         ctx.processTestSuccess();
         boolean success = true;
         int actions = getSubSteps(ctx);
-        while (!next(ctx)) {
-            ctx.processTestSuccess();
-            this.runSubStep(ctx, success, actions);
+        final boolean isTrue = this.next(ctx);
+        ctx.processTestSuccess();
+        if (isTrue) {
+            success = this.runSubStep(ctx, success, actions);
             if (!success) {
                 ctx.processTestFailure();
                 return false;
             }
-            ctx.processTestSuccess();
-            ctx.backStepIndex(actions + 1);
+        } else {
+            ctx.forwardStepIndex(actions);
         }
-        ctx.processTestSuccess();
-        ctx.forwardStepIndex(actions);
-        ctx.startTest();
         return true;
     }
 
