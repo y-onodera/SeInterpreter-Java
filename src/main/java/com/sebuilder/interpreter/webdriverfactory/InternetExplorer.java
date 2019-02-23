@@ -14,9 +14,17 @@ public class InternetExplorer implements WebDriverFactory {
      */
     @Override
     public RemoteWebDriver make(HashMap<String, String> config) {
+        DesiredCapabilities ieCapabilities = DesiredCapabilities.internetExplorer();
+        ieCapabilities.setCapability("nativeEvents", false);
+        ieCapabilities.setCapability("unexpectedAlertBehaviour", "accept");
+        ieCapabilities.setCapability("ignoreProtectedModeSettings", true);
+        ieCapabilities.setCapability("disable-popup-blocking", true);
+        ieCapabilities.setCapability("enablePersistentHover", true);
+        ieCapabilities.setCapability("ignoreZoomSetting", true);
         HashMap<String, String> caps = new HashMap<String, String>(config);
         DesiredCapabilities capabilities = new DesiredCapabilities(caps);
-        return new InternetExplorerDriver(new InternetExplorerOptions(capabilities));
+        ieCapabilities.merge(capabilities);
+        return new InternetExplorerDriver(new InternetExplorerOptions(ieCapabilities));
     }
 
     @Override
