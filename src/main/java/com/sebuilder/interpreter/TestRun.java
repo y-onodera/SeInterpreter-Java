@@ -59,6 +59,7 @@ public class TestRun {
             vars.putAll(initialVars);
         }
         this.listener = seInterpreterTestListener;
+        this.vars.put("_browser", Context.getInstance().getBrowser());
         this.vars.put("_baseDir", Context.getInstance().getBaseDirectory().getAbsolutePath());
         this.vars.put("_dataSourceDir", Context.getInstance().getDataSourceDirectory().getAbsolutePath());
         this.vars.put("_resultDir", seInterpreterTestListener.getResultDir().getAbsolutePath());
