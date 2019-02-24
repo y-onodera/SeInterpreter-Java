@@ -139,15 +139,7 @@ public class TestRun {
         if (s == null) {
             throw new RuntimeException("Missing parameter \"" + paramName + "\" at step #" + (this.stepIndex + 1) + ".");
         }
-        // Sub special keys using the !{keyname} syntax.
-        for (Keys k : Keys.values()) {
-            s = s.replace("!{" + k.name() + "}", k.toString());
-        }
-        // This kind of variable substitution makes for short code, but it's inefficient.
-        for (Map.Entry<String, String> v : vars.entrySet()) {
-            s = s.replace("${" + v.getKey() + "}", v.getValue());
-        }
-        return s;
+        return replaceVariable(s);
     }
 
     public boolean hasLocator() {
@@ -173,9 +165,7 @@ public class TestRun {
             throw new RuntimeException("Missing parameter \"" + paramName + "\" at step #" + (this.stepIndex + 1) + ".");
         }
         // This kind of variable substitution makes for short code, but it's inefficient.
-        for (Map.Entry<String, String> v : this.vars.entrySet()) {
-            l.value = l.value.replace("${" + v.getKey() + "}", v.getValue());
-        }
+        l.value = replaceVars(l.value);
         return l;
     }
 
@@ -261,7 +251,7 @@ public class TestRun {
     }
 
     public void startTest() {
-        this.getListener().startTest(currentStep().getName() != null ? this.currentStep().getName() : this.currentStep().toPrettyString());
+        this.getListener().startTest(currentStep().getName() != null ? this.currentStep().getName() : this.replaceVariable(this.currentStep().toPrettyString()));
     }
 
     /**
@@ -331,6 +321,29 @@ public class TestRun {
                 //
             }
         }
+    }
+
+
+    private String replaceVariable(String s) {
+        // Sub special keys using the !{keyname} syntax.
+        s = replaceKeys(s);
+        // This kind of variable substitution makes for short code, but it's inefficient.
+        s = replaceVars(s);
+        return s;
+    }
+
+    private String replaceKeys(String s) {
+        for (Keys k : Keys.values()) {
+            s = s.replace("!{" + k.name() + "}", k.toString());
+        }
+        return s;
+    }
+
+    private String replaceVars(String variable) {
+        for (Map.Entry<String, String> v : this.vars.entrySet()) {
+            variable = variable.replace("${" + v.getKey() + "}", v.getValue());
+        }
+        return variable;
     }
 
     private boolean chainRun(Script chainTo) {
