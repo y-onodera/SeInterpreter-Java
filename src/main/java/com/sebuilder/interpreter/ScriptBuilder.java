@@ -14,6 +14,7 @@ public class ScriptBuilder {
     private boolean closeDriver;
     private DataSource dataSource;
     private Map<String, String> dataSourceConfig;
+    private String skip;
 
     public ScriptBuilder() {
         this.steps = new ArrayList<>();
@@ -24,6 +25,7 @@ public class ScriptBuilder {
         this.closeDriver = true;
         this.dataSource = null;
         this.dataSourceConfig = null;
+        this.skip = "false";
     }
 
     public ScriptBuilder(Script currentDisplay) {
@@ -35,6 +37,7 @@ public class ScriptBuilder {
         this.closeDriver = currentDisplay.closeDriver();
         this.dataSource = currentDisplay.dataSource();
         this.dataSourceConfig = currentDisplay.dataSourceConfig();
+        this.skip = currentDisplay.skip();
     }
 
     public ScriptBuilder clearStep() {
@@ -76,6 +79,11 @@ public class ScriptBuilder {
         return this;
     }
 
+    public ScriptBuilder setSkip(String skip) {
+        this.skip = skip;
+        return this;
+    }
+
     public ScriptBuilder usePreviousDriverAndVars() {
         this.closeDriver = false;
         this.usePreviousDriverAndVars = true;
@@ -91,6 +99,7 @@ public class ScriptBuilder {
                 , closeDriver
                 , dataSource
                 , dataSourceConfig
+                , skip
         );
     }
 

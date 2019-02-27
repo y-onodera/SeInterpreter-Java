@@ -162,12 +162,22 @@ public class ScriptFactory {
     private Script create(JSONObject o, File saveTo) throws JSONException {
         DataSource dataSource = this.dataSourceFactory.getDataSource(o);
         HashMap<String, String> config = this.dataSourceFactory.getDataSourceConfig(o);
+        String skip = this.getSkip(o);
         Script script = new ScriptBuilder()
                 .addSteps(this.getStepTypeFactory().parseStep(o))
                 .associateWith(saveTo)
                 .setDataSource(dataSource, config)
+                .setSkip(skip)
                 .createScript();
         return script;
+    }
+
+    private String getSkip(JSONObject o) throws JSONException {
+        String result = "false";
+        if (o.has("skip")) {
+            result = o.getString("skip");
+        }
+        return result;
     }
 
     private void loadScripts(JSONObject o, SuiteBuilder builder) throws IOException, JSONException {

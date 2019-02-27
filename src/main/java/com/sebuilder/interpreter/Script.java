@@ -44,6 +44,7 @@ public class Script implements TestRunnable {
     private final boolean closeDriver;
     private final DataSource dataSource;
     private final Map<String, String> dataSourceConfig;
+    private final String skip;
 
     public Script(ArrayList<Step> steps
             , String path
@@ -52,7 +53,8 @@ public class Script implements TestRunnable {
             , boolean usePreviousDriverAndVars
             , boolean closeDriver
             , DataSource dataSource
-            , Map<String, String> dataSourceConfig) {
+            , Map<String, String> dataSourceConfig
+            , String skip) {
         this.steps = steps;
         this.path = path;
         this.name = name;
@@ -61,6 +63,7 @@ public class Script implements TestRunnable {
         this.closeDriver = closeDriver;
         this.dataSource = dataSource;
         this.dataSourceConfig = dataSourceConfig;
+        this.skip = skip;
     }
 
     @Override
@@ -100,11 +103,23 @@ public class Script implements TestRunnable {
         return this.dataSourceConfig;
     }
 
+    public String skip() {
+        return skip;
+    }
+
     public List<Map<String, String>> loadData() {
         if (this.dataSource == null) {
             return Lists.newArrayList(new HashMap<>());
         }
         return this.dataSource.getData(this.dataSourceConfig, this.relativePath);
+    }
+
+    public boolean skipRunning(Map<String, String> dataSource) {
+        String result = this.skip;
+        for (Map.Entry<String, String> v : dataSource.entrySet()) {
+            result = result.replace("${" + v.getKey() + "}", v.getValue());
+        }
+        return Boolean.valueOf(result);
     }
 
     public Script rename(String aName) {

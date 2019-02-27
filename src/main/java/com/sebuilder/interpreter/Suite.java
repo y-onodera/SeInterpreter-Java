@@ -136,6 +136,7 @@ public class Suite implements Iterable<Script>, TestRunnable {
                     return this.scripts
                             .stream()
                             .filter(script -> !scriptChains.containsValue(script))
+                            .filter(script -> !script.skipRunning(it))
                             .map(script -> new TestRunBuilder(script)
                                     .addChain(this.scriptChains)
                                     .addTestRunNamePrefix(prefix + "_")
