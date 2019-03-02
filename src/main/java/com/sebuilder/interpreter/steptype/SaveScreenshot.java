@@ -24,6 +24,9 @@ import com.sebuilder.interpreter.screenshot.Page;
 import com.sebuilder.interpreter.screenshot.VerticalPrinter;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.edge.EdgeDriver;
+import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import javax.imageio.ImageIO;
@@ -35,14 +38,21 @@ public class SaveScreenshot implements StepType, LocatorHolder {
     @Override
     public boolean run(TestRun ctx) {
         RemoteWebDriver wd = ctx.driver();
+        Dimension beforeSize = wd.manage().window().getSize();
+        if (this.needMaximize(wd)) {
+            wd.manage().window().maximize();
+            this.waitForRepaint();
+        }
         wd.switchTo().defaultContent();
         Page target = new Page(ctx, 100, new LocatorInnerScrollElementHandler(wd));
         try {
             File file = new File(ctx.getListener().getScreenShotOutputDirectory(), ctx.getTestRunName() + "_" + ctx.string("file"));
             ImageIO.write(target.printImage(new VerticalPrinter(), 0), "PNG", file);
+            this.returnSize(wd, beforeSize);
             return file.exists();
         } catch (IOException e) {
             ctx.log().error(e);
+            this.returnSize(wd, beforeSize);
             return false;
         }
     }
@@ -52,6 +62,25 @@ public class SaveScreenshot implements StepType, LocatorHolder {
         LocatorHolder.super.supplementSerialized(o);
         if (!o.has("file")) {
             o.put("file", "");
+        }
+    }
+
+    private boolean needMaximize(RemoteWebDriver wd) {
+        return wd instanceof InternetExplorerDriver || wd instanceof EdgeDriver;
+    }
+
+    private void returnSize(RemoteWebDriver wd, Dimension beforeSize) {
+        if (this.needMaximize(wd)) {
+            wd.manage().window().setSize(beforeSize);
+            this.waitForRepaint();
+        }
+    }
+
+    private void waitForRepaint() {
+        try {
+            Thread.sleep(600);
+        } catch (InterruptedException var2) {
+            throw new IllegalStateException("Exception while waiting for repaint", var2);
         }
     }
 }
