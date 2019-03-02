@@ -347,6 +347,12 @@ public class TestRun {
     }
 
     private boolean chainRun(Script chainTo) {
+        if (chainTo.skipRunning(this.vars)) {
+            if (this.scriptChain.containsKey(chainTo)) {
+                return this.chainRun(this.scriptChain.get(chainTo));
+            }
+            return true;
+        }
         boolean success = true;
         for (Map<String, String> data : chainTo.loadData()) {
             Map<String, String> chainData = Maps.newHashMap(this.vars);

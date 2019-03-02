@@ -130,7 +130,7 @@ public class Script implements TestRunnable {
 
     public Script usePreviousDriverAndVars(boolean userPreviousDriverAndVars) {
         return this.builder()
-                .usePreviousDriverAndVars()
+                .usePreviousDriverAndVars(userPreviousDriverAndVars)
                 .createScript();
     }
 
@@ -223,6 +223,12 @@ public class Script implements TestRunnable {
         );
     }
 
+    public Script skip(String skip) {
+        return this.builder()
+                .setSkip(skip)
+                .createScript();
+    }
+
     @Override
     public String toString() {
         try {
@@ -257,5 +263,4 @@ public class Script implements TestRunnable {
                 .addSteps(newStep)
                 .createScript();
     }
-
 }

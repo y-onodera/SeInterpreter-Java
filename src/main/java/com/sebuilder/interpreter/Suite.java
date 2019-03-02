@@ -149,6 +149,12 @@ public class Suite implements Iterable<Script>, TestRunnable {
         return new SuiteBuilder(this);
     }
 
+    public Suite skip(String skip) {
+        return builder()
+                .skip(skip)
+                .createSuite();
+    }
+
     public Suite insert(Script aScript, Script newScript) {
         return builder().insertScript(aScript, newScript)
                 .createSuite();

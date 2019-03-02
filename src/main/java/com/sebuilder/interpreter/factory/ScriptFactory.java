@@ -167,17 +167,8 @@ public class ScriptFactory {
                 .addSteps(this.getStepTypeFactory().parseStep(o))
                 .associateWith(saveTo)
                 .setDataSource(dataSource, config)
-                .setSkip(skip)
                 .createScript();
         return script;
-    }
-
-    private String getSkip(JSONObject o) throws JSONException {
-        String result = "false";
-        if (o.has("skip")) {
-            result = o.getString("skip");
-        }
-        return result;
     }
 
     private void loadScripts(JSONObject o, SuiteBuilder builder) throws IOException, JSONException {
@@ -203,13 +194,13 @@ public class ScriptFactory {
         String path = script.getString("path");
         if (script.has("where") && Strings.isNullOrEmpty(script.getString("where"))) {
             File wherePath = new File(script.getString("where"), path);
-            return this.loadScriptIfExists(wherePath);
+            return this.loadScriptIfExists(wherePath, this.getSkip(script));
         }
         File f = new File(path);
         if (!f.exists()) {
             f = new File(suiteFile.getAbsoluteFile().getParentFile(), path);
         }
-        return this.loadScriptIfExists(f);
+        return this.loadScriptIfExists(f, this.getSkip(script));
     }
 
     private void loadScriptChain(JSONArray scriptArrays, SuiteBuilder builder) throws JSONException, IOException {
@@ -227,15 +218,24 @@ public class ScriptFactory {
 
     /**
      * @param wherePath file script load from
+     * @param skip
      * @return Script loaded from file
      * @throws IOException   If script file not found.
      * @throws JSONException If anything goes wrong with interpreting the JSON.
      */
-    private Suite loadScriptIfExists(File wherePath) throws IOException, JSONException {
+    private Suite loadScriptIfExists(File wherePath, String skip) throws IOException, JSONException {
         if (wherePath.exists()) {
-            return this.parse(wherePath);
+            Suite result = this.parse(wherePath);
+            return result.skip(skip);
         }
         throw new IOException("Script file " + wherePath.toString() + " not found.");
     }
 
+    private String getSkip(JSONObject o) throws JSONException {
+        String result = "false";
+        if (o.has("skip")) {
+            result = o.getString("skip");
+        }
+        return result;
+    }
 }

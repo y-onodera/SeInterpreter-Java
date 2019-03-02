@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 public class SuiteBuilder {
     private File suiteFile;
@@ -17,6 +18,7 @@ public class SuiteBuilder {
     private DataSource dataSource;
     private Map<String, String> dataSourceConfig;
     private boolean shareState = true;
+    private Function<Script, Script> converter = script -> script.usePreviousDriverAndVars(this.shareState);
 
     public SuiteBuilder(Script script) {
         this(Lists.newArrayList(script));
@@ -120,17 +122,27 @@ public class SuiteBuilder {
         return this;
     }
 
+    public SuiteBuilder skip(String skip) {
+        this.converter = this.converter.andThen(it -> it.skip(skip));
+        return this;
+    }
+
     public Suite createSuite() {
         final Map<Script, Script> copyScriptChains = Maps.newHashMap(this.scriptChains);
         ArrayList<Script> copyScripts = Lists.newArrayList();
+        this.copyScriptTo(copyScripts, copyScriptChains);
+        return new Suite(this.suiteFile
+                , copyScripts
+                , copyScriptChains
+                , this.dataSource
+                , Maps.newHashMap(this.dataSourceConfig)
+                , this.shareState);
+    }
+
+    private void copyScriptTo(ArrayList<Script> copyScripts, Map<Script, Script> copyScriptChains) {
         Map<String, Integer> duplicate = Maps.newHashMap();
         for (Script script : this.scripts) {
-            Script copy;
-            if (this.shareState) {
-                copy = script.usePreviousDriverAndVars(this.shareState);
-            } else {
-                copy = script.copy();
-            }
+            Script copy = this.converter.apply(script);
             final String scriptName = copy.name();
             if (duplicate.containsKey(copy.path())) {
                 Optional<String> entries = copyScripts
@@ -147,14 +159,8 @@ public class SuiteBuilder {
                 duplicate.put(copy.path(), 0);
             }
             copyScripts.add(copy);
-            replaceChainMap(copyScriptChains, script, copy);
+            this.replaceChainMap(copyScriptChains, script, copy);
         }
-        return new Suite(this.suiteFile
-                , copyScripts
-                , copyScriptChains
-                , this.dataSource
-                , Maps.newHashMap(this.dataSourceConfig)
-                , this.shareState);
     }
 
     private SuiteBuilder addScript(Script newScript, int index) {

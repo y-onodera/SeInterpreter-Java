@@ -84,9 +84,14 @@ public class ScriptBuilder {
         return this;
     }
 
-    public ScriptBuilder usePreviousDriverAndVars() {
-        this.closeDriver = false;
-        this.usePreviousDriverAndVars = true;
+    public ScriptBuilder usePreviousDriverAndVars(boolean userPreviousDriverAndVars) {
+        if (userPreviousDriverAndVars) {
+            this.closeDriver = false;
+            this.usePreviousDriverAndVars = true;
+        } else {
+            this.closeDriver = true;
+            this.usePreviousDriverAndVars = false;
+        }
         return this;
     }
 
