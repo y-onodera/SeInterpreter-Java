@@ -203,24 +203,16 @@ public class Suite implements Iterable<Script>, TestRunnable {
         for (Script s : this.scripts) {
             if (this.scriptChains.containsKey(s) && !this.scriptChains.containsValue(s)) {
                 chain = new JSONArray();
-                JSONObject scriptPath = new JSONObject();
-                scriptPath.put("path", relativePath(s));
-                chain.put(scriptPath);
+                chain.put(this.getScriptJson(s));
             } else if (this.scriptChains.containsKey(s) && this.scriptChains.containsValue(s)) {
-                JSONObject scriptPath = new JSONObject();
-                scriptPath.put("path", relativePath(s));
-                chain.put(scriptPath);
+                chain.put(this.getScriptJson(s));
             } else if (!this.scriptChains.containsKey(s) && this.scriptChains.containsValue(s)) {
-                JSONObject scriptPath = new JSONObject();
-                scriptPath.put("path", relativePath(s));
-                chain.put(scriptPath);
+                chain.put(this.getScriptJson(s));
                 JSONObject scriptPaths = new JSONObject();
                 scriptPaths.put("paths", chain);
                 scriptsA.put(scriptPaths);
             } else {
-                JSONObject scriptPath = new JSONObject();
-                scriptPath.put("path", relativePath(s));
-                scriptsA.put(scriptPath);
+                scriptsA.put(this.getScriptJson(s));
             }
         }
         if (this.dataSource != null) {
@@ -238,6 +230,15 @@ public class Suite implements Iterable<Script>, TestRunnable {
         return o;
     }
 
+    private JSONObject getScriptJson(Script s) throws JSONException {
+        JSONObject scriptPath = new JSONObject();
+        scriptPath.put("path", relativePath(s));
+        if (!Objects.equals(s.skip(), "false")) {
+            scriptPath.put("skip", s.skip());
+        }
+        return scriptPath;
+    }
+
     private String relativePath(Script s) {
         if (this.relativePath == null && !Strings.isNullOrEmpty(s.path())) {
             return s.path();
@@ -246,5 +247,4 @@ public class Suite implements Iterable<Script>, TestRunnable {
         }
         return this.relativePath.toPath().relativize(Paths.get(s.path())).toString().replace("\\", "/");
     }
-
 }
