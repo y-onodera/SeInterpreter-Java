@@ -162,7 +162,6 @@ public class ScriptFactory {
     private Script create(JSONObject o, File saveTo) throws JSONException {
         DataSource dataSource = this.dataSourceFactory.getDataSource(o);
         HashMap<String, String> config = this.dataSourceFactory.getDataSourceConfig(o);
-        String skip = this.getSkip(o);
         Script script = new ScriptBuilder()
                 .addSteps(this.getStepTypeFactory().parseStep(o))
                 .associateWith(saveTo)
@@ -180,6 +179,9 @@ public class ScriptFactory {
             } else if (script.has("paths")) {
                 JSONArray scriptArrays = script.getJSONArray("paths");
                 this.loadScriptChain(scriptArrays, builder);
+            } else if (script.has("suite")) {
+                JSONArray scriptArrays = script.getJSONArray("suite");
+                this.loadScriptChain(scriptArrays, builder);
             }
         }
     }
@@ -194,13 +196,13 @@ public class ScriptFactory {
         String path = script.getString("path");
         if (script.has("where") && Strings.isNullOrEmpty(script.getString("where"))) {
             File wherePath = new File(script.getString("where"), path);
-            return this.loadScriptIfExists(wherePath, this.getSkip(script));
+            return this.loadScriptIfExists(wherePath, script);
         }
         File f = new File(path);
         if (!f.exists()) {
             f = new File(suiteFile.getAbsoluteFile().getParentFile(), path);
         }
-        return this.loadScriptIfExists(f, this.getSkip(script));
+        return this.loadScriptIfExists(f, script);
     }
 
     private void loadScriptChain(JSONArray scriptArrays, SuiteBuilder builder) throws JSONException, IOException {
@@ -218,15 +220,24 @@ public class ScriptFactory {
 
     /**
      * @param wherePath file script load from
-     * @param skip
+     * @param script
      * @return Script loaded from file
      * @throws IOException   If script file not found.
      * @throws JSONException If anything goes wrong with interpreting the JSON.
      */
-    private Suite loadScriptIfExists(File wherePath, String skip) throws IOException, JSONException {
+    private Suite loadScriptIfExists(File wherePath, JSONObject script) throws IOException, JSONException {
         if (wherePath.exists()) {
             Suite result = this.parse(wherePath);
-            return result.skip(skip);
+            Script origin = result.get(0);
+            Script resultScript = origin;
+            DataSource dataSource = this.dataSourceFactory.getDataSource(script);
+            if (dataSource != null) {
+                HashMap<String, String> config = this.dataSourceFactory.getDataSourceConfig(script);
+                resultScript = origin.builder()
+                        .overrideDataSource(dataSource, config)
+                        .createScript();
+            }
+            return result.replace(resultScript.skip(this.getSkip(script)));
         }
         throw new IOException("Script file " + wherePath.toString() + " not found.");
     }

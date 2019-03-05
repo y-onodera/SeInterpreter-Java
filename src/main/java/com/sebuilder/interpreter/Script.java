@@ -44,26 +44,22 @@ public class Script implements TestRunnable {
     private final boolean closeDriver;
     private final DataSource dataSource;
     private final Map<String, String> dataSourceConfig;
+    private final DataSource overrideDataSource;
+    private final Map<String, String> overrideDataSourceConfig;
     private final String skip;
 
-    public Script(ArrayList<Step> steps
-            , String path
-            , String name
-            , File relativePath
-            , boolean usePreviousDriverAndVars
-            , boolean closeDriver
-            , DataSource dataSource
-            , Map<String, String> dataSourceConfig
-            , String skip) {
-        this.steps = steps;
-        this.path = path;
-        this.name = name;
-        this.relativePath = relativePath;
-        this.usePreviousDriverAndVars = usePreviousDriverAndVars;
-        this.closeDriver = closeDriver;
-        this.dataSource = dataSource;
-        this.dataSourceConfig = dataSourceConfig;
-        this.skip = skip;
+    public Script(ScriptBuilder scriptBuilder) {
+        this.steps = scriptBuilder.getSteps();
+        this.path = scriptBuilder.getPath();
+        this.name = scriptBuilder.getName();
+        this.relativePath = scriptBuilder.getRelativePath();
+        this.usePreviousDriverAndVars = scriptBuilder.isUsePreviousDriverAndVars();
+        this.closeDriver = scriptBuilder.isCloseDriver();
+        this.dataSource = scriptBuilder.getDataSource();
+        this.dataSourceConfig = scriptBuilder.getDataSourceConfig();
+        this.overrideDataSource = scriptBuilder.getOverrideDataSource();
+        this.overrideDataSourceConfig = scriptBuilder.getOverrideDataSourceConfig();
+        this.skip = scriptBuilder.getSkip();
     }
 
     @Override
@@ -103,11 +99,22 @@ public class Script implements TestRunnable {
         return this.dataSourceConfig;
     }
 
+    public DataSource overrideDataSource() {
+        return overrideDataSource;
+    }
+
+    public Map<String, String> overrideDataSourceConfig() {
+        return overrideDataSourceConfig;
+    }
+
     public String skip() {
         return skip;
     }
 
     public List<Map<String, String>> loadData() {
+        if (this.overrideDataSource != null) {
+            return this.overrideDataSource.getData(this.overrideDataSourceConfig, this.relativePath);
+        }
         if (this.dataSource == null) {
             return Lists.newArrayList(new HashMap<>());
         }

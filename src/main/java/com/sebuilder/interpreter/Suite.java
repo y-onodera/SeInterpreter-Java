@@ -209,7 +209,7 @@ public class Suite implements Iterable<Script>, TestRunnable {
             } else if (!this.scriptChains.containsKey(s) && this.scriptChains.containsValue(s)) {
                 chain.put(this.getScriptJson(s));
                 JSONObject scriptPaths = new JSONObject();
-                scriptPaths.put("paths", chain);
+                scriptPaths.put("suite", chain);
                 scriptsA.put(scriptPaths);
             } else {
                 scriptsA.put(this.getScriptJson(s));
@@ -236,6 +236,15 @@ public class Suite implements Iterable<Script>, TestRunnable {
         if (!Objects.equals(s.skip(), "false")) {
             scriptPath.put("skip", s.skip());
         }
+        if (s.overrideDataSource() != null) {
+            JSONObject data = new JSONObject();
+            final String sourceName = s.overrideDataSource().getClass().getSimpleName().toLowerCase();
+            data.put("source", sourceName);
+            JSONObject configs = new JSONObject();
+            configs.put(sourceName, s.overrideDataSourceConfig());
+            data.put("configs", configs);
+            scriptPath.put("data", data);
+        }
         return scriptPath;
     }
 
@@ -245,6 +254,6 @@ public class Suite implements Iterable<Script>, TestRunnable {
         } else if (Strings.isNullOrEmpty(s.path())) {
             return "script/" + s.name();
         }
-        return this.relativePath.toPath().relativize(Paths.get(s.path())).toString().replace("\\", "/");
+        return this.relativePath.toPath().relativize(Paths.get(s.path()).toAbsolutePath()).toString().replace("\\", "/");
     }
 }

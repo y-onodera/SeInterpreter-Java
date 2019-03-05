@@ -14,6 +14,8 @@ public class ScriptBuilder {
     private boolean closeDriver;
     private DataSource dataSource;
     private Map<String, String> dataSourceConfig;
+    private DataSource overrideDataSource;
+    private Map<String, String> overrideDataSourceConfig;
     private String skip;
 
     public ScriptBuilder() {
@@ -25,6 +27,8 @@ public class ScriptBuilder {
         this.closeDriver = true;
         this.dataSource = null;
         this.dataSourceConfig = null;
+        this.overrideDataSource = null;
+        this.overrideDataSourceConfig = null;
         this.skip = "false";
     }
 
@@ -37,7 +41,53 @@ public class ScriptBuilder {
         this.closeDriver = currentDisplay.closeDriver();
         this.dataSource = currentDisplay.dataSource();
         this.dataSourceConfig = currentDisplay.dataSourceConfig();
+        this.overrideDataSource = currentDisplay.overrideDataSource();
+        this.overrideDataSourceConfig = currentDisplay.overrideDataSourceConfig();
         this.skip = currentDisplay.skip();
+    }
+
+    public ArrayList<Step> getSteps() {
+        return steps;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public File getRelativePath() {
+        return relativePath;
+    }
+
+    public boolean isUsePreviousDriverAndVars() {
+        return usePreviousDriverAndVars;
+    }
+
+    public boolean isCloseDriver() {
+        return closeDriver;
+    }
+
+    public DataSource getDataSource() {
+        return dataSource;
+    }
+
+    public Map<String, String> getDataSourceConfig() {
+        return dataSourceConfig;
+    }
+
+    public DataSource getOverrideDataSource() {
+        return overrideDataSource;
+    }
+
+    public Map<String, String> getOverrideDataSourceConfig() {
+        return overrideDataSourceConfig;
+    }
+
+    public String getSkip() {
+        return skip;
     }
 
     public ScriptBuilder clearStep() {
@@ -79,6 +129,12 @@ public class ScriptBuilder {
         return this;
     }
 
+    public ScriptBuilder overrideDataSource(DataSource dataSource, HashMap<String, String> config) {
+        this.overrideDataSource = dataSource;
+        this.overrideDataSourceConfig = config;
+        return this;
+    }
+
     public ScriptBuilder setSkip(String skip) {
         this.skip = skip;
         return this;
@@ -96,16 +152,7 @@ public class ScriptBuilder {
     }
 
     public Script createScript() {
-        return new Script(steps
-                , path
-                , name
-                , relativePath
-                , usePreviousDriverAndVars
-                , closeDriver
-                , dataSource
-                , dataSourceConfig
-                , skip
-        );
+        return new Script(this);
     }
 
 }
