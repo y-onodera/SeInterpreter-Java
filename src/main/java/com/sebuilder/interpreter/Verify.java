@@ -16,6 +16,7 @@
 
 package com.sebuilder.interpreter;
 
+import com.google.common.base.Objects;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -47,5 +48,18 @@ public class Verify implements StepType {
                 o.put(getter.cmpParamName(), "");
             }
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Verify verify = (Verify) o;
+        return Objects.equal(getter, verify.getter);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(getter);
     }
 }

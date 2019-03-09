@@ -36,16 +36,14 @@ import java.util.stream.Collectors;
  * @author zarkonnen
  */
 public class Script implements TestRunnable {
-    public final ArrayList<Step> steps;
+    private final ArrayList<Step> steps;
     private final String path;
     private final String name;
     private final File relativePath;
     private final boolean usePreviousDriverAndVars;
     private final boolean closeDriver;
-    private final DataSource dataSource;
-    private final Map<String, String> dataSourceConfig;
-    private final DataSource overrideDataSource;
-    private final Map<String, String> overrideDataSourceConfig;
+    private final DataSet dataSet;
+    private final DataSet overrideDataSet;
     private final String skip;
 
     public Script(ScriptBuilder scriptBuilder) {
@@ -55,10 +53,8 @@ public class Script implements TestRunnable {
         this.relativePath = scriptBuilder.getRelativePath();
         this.usePreviousDriverAndVars = scriptBuilder.isUsePreviousDriverAndVars();
         this.closeDriver = scriptBuilder.isCloseDriver();
-        this.dataSource = scriptBuilder.getDataSource();
-        this.dataSourceConfig = scriptBuilder.getDataSourceConfig();
-        this.overrideDataSource = scriptBuilder.getOverrideDataSource();
-        this.overrideDataSourceConfig = scriptBuilder.getOverrideDataSourceConfig();
+        this.dataSet = scriptBuilder.getDataSet();
+        this.overrideDataSet = scriptBuilder.getOverrideDataSet();
         this.skip = scriptBuilder.getSkip();
     }
 
@@ -69,6 +65,10 @@ public class Script implements TestRunnable {
 
     public ScriptBuilder builder() {
         return new ScriptBuilder(this);
+    }
+
+    public List<Step> steps() {
+        return Collections.unmodifiableList(this.steps);
     }
 
     public boolean closeDriver() {
@@ -92,19 +92,19 @@ public class Script implements TestRunnable {
     }
 
     public DataSource dataSource() {
-        return this.dataSource;
+        return this.dataSet.getDataSource();
     }
 
     public Map<String, String> dataSourceConfig() {
-        return this.dataSourceConfig;
+        return this.dataSet.getDataSourceConfig();
     }
 
     public DataSource overrideDataSource() {
-        return overrideDataSource;
+        return overrideDataSet.getDataSource();
     }
 
     public Map<String, String> overrideDataSourceConfig() {
-        return overrideDataSourceConfig;
+        return overrideDataSet.getDataSourceConfig();
     }
 
     public String skip() {
@@ -112,21 +112,14 @@ public class Script implements TestRunnable {
     }
 
     public List<Map<String, String>> loadData() {
-        if (this.overrideDataSource != null) {
-            return this.overrideDataSource.getData(this.overrideDataSourceConfig, this.relativePath);
+        if (this.overrideDataSource() != null) {
+            return this.overrideDataSet.loadData();
         }
-        if (this.dataSource == null) {
-            return Lists.newArrayList(new HashMap<>());
-        }
-        return this.dataSource.getData(this.dataSourceConfig, this.relativePath);
+        return this.dataSet.loadData();
     }
 
     public boolean skipRunning(Map<String, String> dataSource) {
-        String result = this.skip;
-        for (Map.Entry<String, String> v : dataSource.entrySet()) {
-            result = result.replace("${" + v.getKey() + "}", v.getValue());
-        }
-        return Boolean.valueOf(result);
+        return Boolean.valueOf(TestRuns.replaceVars(this.skip, dataSource));
     }
 
     public Script rename(String aName) {
@@ -252,13 +245,8 @@ public class Script implements TestRunnable {
             stepsA.put(s.toJSON());
         }
         o.put("steps", stepsA);
-        if (this.dataSource != null) {
-            JSONObject data = new JSONObject();
-            final String sourceName = this.dataSource.getClass().getSimpleName().toLowerCase();
-            data.put("source", sourceName);
-            JSONObject configs = new JSONObject();
-            configs.put(sourceName, this.dataSourceConfig);
-            data.put("configs", configs);
+        JSONObject data = this.dataSet.toJSON();
+        if (data != null) {
             o.put("data", data);
         }
         return o;
@@ -270,4 +258,5 @@ public class Script implements TestRunnable {
                 .addSteps(newStep)
                 .createScript();
     }
+
 }

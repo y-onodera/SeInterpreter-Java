@@ -21,12 +21,9 @@ import com.sebuilder.interpreter.DataSource;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Factory for data sources.
@@ -50,10 +47,6 @@ public class DataSourceFactory {
 	public void setCustomDataSourcePackage(String customDataSourcePackage) {
 		this.customDataSourcePackage = customDataSourcePackage;
 	}
-
-    public List<Map<String, String>> getData(String sourceName, Map<String, String> config, File relativeToFile) {
-        return getDataSource(sourceName).getData(config, relativeToFile);
-    }
 
     public DataSource getDataSource(JSONObject o) throws JSONException {
         if (!o.has("data")) {

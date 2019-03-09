@@ -16,6 +16,7 @@
 
 package com.sebuilder.interpreter;
 
+import com.google.common.base.Objects;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -76,5 +77,18 @@ public class WaitFor implements StepType {
         return getter.cmpParamName() == null
                 ? Boolean.parseBoolean(got)
                 : ctx.string(getter.cmpParamName()).equals(got);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        WaitFor waitFor = (WaitFor) o;
+        return Objects.equal(getter, waitFor.getter);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(getter);
     }
 }

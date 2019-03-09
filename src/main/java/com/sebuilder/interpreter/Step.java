@@ -27,14 +27,7 @@ import java.util.Map;
  * @author jkowalczyk
  */
 public class Step {
-    /**
-     * Whether the step is negated. Only relevant for Assert/Verify/WaitFor
-     * steps.
-     */
     private boolean negated;
-    /**
-     * The custom name of the step, if any.
-     */
     private String name;
     private StepType type;
     private HashMap<String, String> stringParams = new HashMap<>();
@@ -63,15 +56,15 @@ public class Step {
     }
 
     public boolean run(TestRun testRun) {
-        if (this.isSkip(testRun)) {
+        if (this.isSkip()) {
             return true;
         }
         return this.type.run(testRun);
     }
 
-    public boolean isSkip(TestRun ctx) {
+    public boolean isSkip() {
         if (this.isSkippable()) {
-            return Boolean.parseBoolean(ctx.string("skip"));
+            return Boolean.parseBoolean(TestRuns.replaceVariable(this.getParam("skip"), this.stringParams));
         }
         return false;
     }
@@ -151,7 +144,6 @@ public class Step {
         for (Map.Entry<String, Locator> le : locatorParams.entrySet()) {
             sb.append(" ").append(le.getKey()).append("=").append(le.getValue().toPrettyString());
         }
-
         return sb.toString();
     }
 
@@ -186,14 +178,14 @@ public class Step {
         return o;
     }
 
-    private boolean isSkippable() {
-        return this.stringParams.containsKey("skip");
-    }
-
     public JSONObject toFullJSON() throws JSONException {
         JSONObject o = this.toJSON();
         this.type.supplementSerialized(o);
         return o;
+    }
+
+    private boolean isSkippable() {
+        return this.stringParams.containsKey("skip");
     }
 
 }

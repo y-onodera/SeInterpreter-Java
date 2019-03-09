@@ -179,8 +179,8 @@ public class ScriptFactory {
             } else if (script.has("paths")) {
                 JSONArray scriptArrays = script.getJSONArray("paths");
                 this.loadScriptChain(scriptArrays, builder);
-            } else if (script.has("suite")) {
-                JSONArray scriptArrays = script.getJSONArray("suite");
+            } else if (script.has("chain")) {
+                JSONArray scriptArrays = script.getJSONArray("chain");
                 this.loadScriptChain(scriptArrays, builder);
             }
         }

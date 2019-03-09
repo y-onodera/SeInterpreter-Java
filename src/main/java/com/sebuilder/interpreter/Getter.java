@@ -44,6 +44,10 @@ public interface Getter extends JSONSerializable {
         return new Store(this);
     }
 
+    default Print toPrint() {
+        return new Print(this);
+    }
+
     default Verify toVerify() {
         return new Verify(this);
     }

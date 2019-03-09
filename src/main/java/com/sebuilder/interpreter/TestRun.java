@@ -18,7 +18,6 @@ package com.sebuilder.interpreter;
 
 import com.google.common.collect.Maps;
 import org.apache.logging.log4j.Logger;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.util.HashMap;
@@ -106,7 +105,7 @@ public class TestRun {
      * @return The step that is being/has just been executed.
      */
     public Step currentStep() {
-        return this.script.steps.get(this.stepIndex);
+        return this.script.steps().get(this.stepIndex);
     }
 
     /**
@@ -139,7 +138,7 @@ public class TestRun {
         if (s == null) {
             throw new RuntimeException("Missing parameter \"" + paramName + "\" at step #" + (this.stepIndex + 1) + ".");
         }
-        return replaceVariable(s);
+        return TestRuns.replaceVariable(s, this.vars);
     }
 
     public boolean hasLocator() {
@@ -165,7 +164,7 @@ public class TestRun {
             throw new RuntimeException("Missing parameter \"" + paramName + "\" at step #" + (this.stepIndex + 1) + ".");
         }
         // This kind of variable substitution makes for short code, but it's inefficient.
-        l.value = replaceVars(l.value);
+        l.value = TestRuns.replaceVars(l.value, this.vars);
         return l;
     }
 
@@ -223,7 +222,7 @@ public class TestRun {
     }
 
     public boolean stepRest() {
-        return !this.isStopped() && this.stepIndex < this.script.steps.size() - 1;
+        return !this.isStopped() && this.stepIndex < this.script.steps().size() - 1;
     }
 
     /**
@@ -251,7 +250,7 @@ public class TestRun {
     }
 
     public void startTest() {
-        this.getListener().startTest(currentStep().getName() != null ? this.currentStep().getName() : this.replaceVariable(this.currentStep().toPrettyString()));
+        this.getListener().startTest(currentStep().getName() != null ? this.currentStep().getName() : TestRuns.replaceVariable(this.currentStep().toPrettyString(), this.vars));
     }
 
     /**
@@ -321,29 +320,6 @@ public class TestRun {
                 //
             }
         }
-    }
-
-
-    private String replaceVariable(String s) {
-        // Sub special keys using the !{keyname} syntax.
-        s = replaceKeys(s);
-        // This kind of variable substitution makes for short code, but it's inefficient.
-        s = replaceVars(s);
-        return s;
-    }
-
-    private String replaceKeys(String s) {
-        for (Keys k : Keys.values()) {
-            s = s.replace("!{" + k.name() + "}", k.toString());
-        }
-        return s;
-    }
-
-    private String replaceVars(String variable) {
-        for (Map.Entry<String, String> v : this.vars.entrySet()) {
-            variable = variable.replace("${" + v.getKey() + "}", v.getValue());
-        }
-        return variable;
     }
 
     private boolean chainRun(Script chainTo) {

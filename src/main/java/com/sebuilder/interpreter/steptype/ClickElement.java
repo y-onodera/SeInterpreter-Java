@@ -16,6 +16,7 @@
 
 package com.sebuilder.interpreter.steptype;
 
+import com.google.common.base.Objects;
 import com.sebuilder.interpreter.Exportable;
 import com.sebuilder.interpreter.LocatorHolder;
 import com.sebuilder.interpreter.TestRun;
@@ -28,4 +29,15 @@ public class ClickElement implements ConditionalStep, Exportable, LocatorHolder 
         return true;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null) return false;
+        return this.getClass() == o.getClass();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(this.getClass().getSimpleName());
+    }
 }

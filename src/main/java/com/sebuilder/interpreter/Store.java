@@ -16,6 +16,7 @@
 
 package com.sebuilder.interpreter;
 
+import com.google.common.base.Objects;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -56,5 +57,18 @@ public class Store implements StepType {
             o.put("variable", "");
         }
         getter.supplementSerialized(o);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Store store = (Store) o;
+        return Objects.equal(getter, store.getter);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(getter);
     }
 }

@@ -155,7 +155,7 @@ public class SeInterpreterRunner {
 
                         @Override
                         public boolean openTestSuite(Script script, String testRunName, Map<String, String> aProperty) {
-                            this.currentScriptSteps = script.steps.size();
+                            this.currentScriptSteps = script.steps().size();
                             updateMessage(testRunName);
                             updateProgress(0, this.currentScriptSteps);
                             return super.openTestSuite(script, testRunName, aProperty);

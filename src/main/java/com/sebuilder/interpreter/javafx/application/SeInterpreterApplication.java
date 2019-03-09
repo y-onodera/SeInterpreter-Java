@@ -177,7 +177,7 @@ public class SeInterpreterApplication extends Application {
 
     @Subscribe
     public void moveStep(StepMoveEvent event) {
-        Step step = this.currentDisplay.steps.get(event.getFrom());
+        Step step = this.currentDisplay.steps().get(event.getFrom());
         int indexTo = event.getTo();
         if (event.getTo() > event.getFrom()) {
             this.currentDisplay = this.currentDisplay.addStep(indexTo, step)
@@ -197,7 +197,7 @@ public class SeInterpreterApplication extends Application {
         steps.put(event.getStepSource());
         json.putOpt("steps", steps);
         Script script = getScriptFactory().parse(json);
-        Step newStep = script.steps.get(0);
+        Step newStep = script.steps().get(0);
         if (event.getEditAction().equals("change")) {
             this.currentDisplay = this.currentDisplay.replaceStep(event.getStepIndex(), newStep);
         } else if (event.getEditAction().equals("insert")) {
@@ -212,12 +212,12 @@ public class SeInterpreterApplication extends Application {
     @Subscribe
     public void createStep(StepAddEvent event) throws IOException, JSONException {
         Script templateScript = getScriptFactory().template(event.getStepType());
-        EventBus.publish(RefreshStepEditViewEvent.add(templateScript.steps.get(0)));
+        EventBus.publish(RefreshStepEditViewEvent.add(templateScript.steps().get(0)));
     }
 
     @Subscribe
     public void loadStep(StepLoadEvent event) {
-        Step step = this.currentDisplay.steps.get(event.getStepIndex());
+        Step step = this.currentDisplay.steps().get(event.getStepIndex());
         EventBus.publish(RefreshStepEditViewEvent.change(step));
     }
 

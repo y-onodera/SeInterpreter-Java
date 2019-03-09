@@ -33,7 +33,7 @@ public class ScriptBuilder {
     }
 
     public ScriptBuilder(Script currentDisplay) {
-        this.steps = new ArrayList<>(currentDisplay.steps);
+        this.steps = new ArrayList<>(currentDisplay.steps());
         this.path = currentDisplay.path();
         this.name = currentDisplay.name();
         this.relativePath = currentDisplay.relativePath();
@@ -88,6 +88,14 @@ public class ScriptBuilder {
 
     public String getSkip() {
         return skip;
+    }
+
+    public DataSet getDataSet() {
+        return new DataSet(this.getDataSource(), this.getDataSourceConfig(), this.getRelativePath());
+    }
+
+    public DataSet getOverrideDataSet() {
+        return new DataSet(this.getOverrideDataSource(), this.getOverrideDataSourceConfig(), this.getRelativePath());
     }
 
     public ScriptBuilder clearStep() {
