@@ -56,15 +56,15 @@ public class Step {
     }
 
     public boolean run(TestRun testRun) {
-        if (this.isSkip()) {
+        if (this.isSkip(testRun.vars())) {
             return true;
         }
         return this.type.run(testRun);
     }
 
-    public boolean isSkip() {
+    public boolean isSkip(Map<String, String> vars) {
         if (this.isSkippable()) {
-            return Boolean.parseBoolean(TestRuns.replaceVariable(this.getParam("skip"), this.stringParams));
+            return Boolean.parseBoolean(TestRuns.replaceVariable(this.getParam("skip"), vars));
         }
         return false;
     }

@@ -1,5 +1,6 @@
 package com.sebuilder.interpreter.factory;
 
+import com.google.common.collect.Maps;
 import com.sebuilder.interpreter.Locator;
 import com.sebuilder.interpreter.Step;
 import com.sebuilder.interpreter.StepType;
@@ -43,7 +44,7 @@ public class StepTypeFactoryTest {
         assertEquals(results.get(i).getType(), stepType);
         assertSame(results.get(i).getLocator("locator").type, locatorName);
         assertEquals(results.get(i).getLocator("locator").value, locatorValue);
-        assertEquals(results.get(i).isSkip(), isSkip);
+        assertEquals(results.get(i).isSkip(Maps.newHashMap()), isSkip);
         assertEquals(results.get(i).isNegated(), isNageted);
     }
 }
