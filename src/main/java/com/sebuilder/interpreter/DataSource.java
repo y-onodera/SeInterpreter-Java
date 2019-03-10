@@ -30,5 +30,5 @@ public interface DataSource {
 
     String ROW_NUMBER = "_rowNumber";
 
-    List<Map<String, String>> getData(Map<String, String> config, File relativeTo);
+    List<Map<String, String>> getData(Map<String, String> config, File relativeTo, Map<String, String> vars);
 }

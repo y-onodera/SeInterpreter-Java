@@ -111,9 +111,9 @@ public class Script implements TestRunnable {
         return skip;
     }
 
-    public List<Map<String, String>> loadData() {
+    public List<Map<String, String>> loadData(Map<String, String> vars) {
         if (this.overrideDataSource() != null) {
-            return this.overrideDataSet.loadData();
+            return this.overrideDataSet.loadData(vars);
         }
         return this.dataSet.loadData();
     }

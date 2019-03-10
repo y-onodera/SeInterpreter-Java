@@ -71,7 +71,7 @@ public class TestRunBuilder {
     }
 
     public List<Map<String, String>> loadData() {
-        return this.script.loadData();
+        return this.script.loadData(this.shareInput);
     }
 
     public TestRun createTestRun(Logger log, WebDriverFactory webDriverFactory, HashMap<String, String> webDriverConfig, Long implicityWaitTime, Long pageLoadWaitTime, Map<String, String> initialVars, TestRun previousRun, SeInterpreterTestListener seInterpreterTestListener) {

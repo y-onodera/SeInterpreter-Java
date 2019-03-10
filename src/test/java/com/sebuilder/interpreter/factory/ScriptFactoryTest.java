@@ -1,5 +1,6 @@
 package com.sebuilder.interpreter.factory;
 
+import com.google.common.collect.Maps;
 import com.sebuilder.interpreter.Script;
 import com.sebuilder.interpreter.Suite;
 import com.sebuilder.interpreter.datasource.Csv;
@@ -11,6 +12,8 @@ import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -169,6 +172,12 @@ public class ScriptFactoryTest {
             assertEquals("false", result.get(0).skip());
             assertTrue(result.get(0).overrideDataSource() instanceof Csv);
             assertEquals("override.csv", result.get(0).overrideDataSourceConfig().get("path"));
+            List<Map<String, String>> loadData = result.get(0).loadData(Maps.newHashMap());
+            assertEquals(2, loadData.size());
+            assertEquals("a", loadData.get(0).get("column1"));
+            assertEquals("b", loadData.get(0).get("column2"));
+            assertEquals("1", loadData.get(1).get("column1"));
+            assertEquals("2", loadData.get(1).get("column2"));
             assertScriptWithSteps("scriptWithSteps.json", result.get(1));
             assertEquals("true", result.get(1).skip());
             assertNull(result.get(1).overrideDataSource());
@@ -188,6 +197,12 @@ public class ScriptFactoryTest {
             assertEquals("false", result.get(0).skip());
             assertTrue(result.get(0).overrideDataSource() instanceof Csv);
             assertEquals("override.csv", result.get(0).overrideDataSourceConfig().get("path"));
+            result.get(0).loadData(Maps.newHashMap());
+            assertEquals(2, loadData.size());
+            assertEquals("a", loadData.get(0).get("column1"));
+            assertEquals("b", loadData.get(0).get("column2"));
+            assertEquals("1", loadData.get(1).get("column1"));
+            assertEquals("2", loadData.get(1).get("column2"));
             assertScriptWithSteps("scriptWithSteps.json", result.get(1));
             assertEquals("true", result.get(1).skip());
             assertNull(result.get(1).overrideDataSource());
@@ -240,6 +255,66 @@ public class ScriptFactoryTest {
             assertNull(script2.overrideDataSource());
             assertEquals(0, script2.overrideDataSourceConfig().size());
             script3 = result.getScriptChains().get(script2);
+            assertScriptWithDataSource("scriptWithDataSource.json", script3);
+            assertEquals("false", script3.skip());
+            assertTrue(script3.overrideDataSource() instanceof None);
+            assertEquals(0, script3.overrideDataSourceConfig().size());
+            assertNoDataSource(result);
+            assertTrue(result.isShareState());
+        }
+
+        @Test
+        public void parseSuiteWithScriptRuntimeDataSource() throws IOException, JSONException {
+            final String testFile = "suiteWithScriptRuntimeDataSource.json";
+            final File testSource = new File(baseDir, testFile);
+
+            Suite result = target.parse(testSource);
+            assertEquals(3, result.scriptSize());
+            assertEquals(0, result.getScriptChains().size());
+            assertFileAttribute(testFile, testSource, result);
+            assertSimpleScript("simpleScript.json", result.get(0));
+            assertEquals("false", result.get(0).skip());
+            assertTrue(result.get(0).overrideDataSource() instanceof Csv);
+            assertEquals("${path}/override.csv", result.get(0).overrideDataSourceConfig().get("path"));
+            List<Map<String, String>> loadData = result.get(0).loadData(Map.of("path", "csv"));
+            assertEquals(2, loadData.size());
+            assertEquals("1", loadData.get(0).get("column1"));
+            assertEquals("2", loadData.get(0).get("column2"));
+            assertEquals("a", loadData.get(1).get("column1"));
+            assertEquals("b", loadData.get(1).get("column2"));
+            Script script2 = result.get(1);
+            assertScriptWithSteps("scriptWithSteps.json", script2);
+            assertEquals("true", script2.skip());
+            assertNull(script2.overrideDataSource());
+            assertEquals(0, script2.overrideDataSourceConfig().size());
+            Script script3 = result.get(2);
+            assertScriptWithDataSource("scriptWithDataSource.json", script3);
+            assertEquals("false", script3.skip());
+            assertTrue(script3.overrideDataSource() instanceof None);
+            assertEquals(0, script3.overrideDataSourceConfig().size());
+            assertNoDataSource(result);
+            assertTrue(result.isShareState());
+
+            result = target.parse(result.toJSON(), new File(result.getPath()));
+            assertEquals(3, result.scriptSize());
+            assertEquals(0, result.getScriptChains().size());
+            assertFileAttribute(testFile, testSource, result);
+            assertSimpleScript("simpleScript.json", result.get(0));
+            assertEquals("false", result.get(0).skip());
+            assertTrue(result.get(0).overrideDataSource() instanceof Csv);
+            assertEquals("${path}/override.csv", result.get(0).overrideDataSourceConfig().get("path"));
+            loadData = result.get(0).loadData(Map.of("path", "csv"));
+            assertEquals(2, loadData.size());
+            assertEquals("1", loadData.get(0).get("column1"));
+            assertEquals("2", loadData.get(0).get("column2"));
+            assertEquals("a", loadData.get(1).get("column1"));
+            assertEquals("b", loadData.get(1).get("column2"));
+            script2 = result.get(1);
+            assertScriptWithSteps("scriptWithSteps.json", script2);
+            assertEquals("true", script2.skip());
+            assertNull(script2.overrideDataSource());
+            assertEquals(0, script2.overrideDataSourceConfig().size());
+            script3 = result.get(2);
             assertScriptWithDataSource("scriptWithDataSource.json", script3);
             assertEquals("false", script3.skip());
             assertTrue(script3.overrideDataSource() instanceof None);

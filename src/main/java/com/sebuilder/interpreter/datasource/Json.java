@@ -16,7 +16,9 @@
 
 package com.sebuilder.interpreter.datasource;
 
+import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.DataSource;
+import com.sebuilder.interpreter.TestRuns;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -36,10 +38,11 @@ import static com.sebuilder.interpreter.datasource.Utils.findFile;
  */
 public class Json implements DataSource {
     @Override
-    public List<Map<String, String>> getData(Map<String, String> config, File relativeTo) {
+    public List<Map<String, String>> getData(Map<String, String> config, File relativeTo, Map<String, String> vars) {
         ArrayList<Map<String, String>> data = new ArrayList<>();
-        File f = findFile(relativeTo, config.get("path"));
-        try (BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(f), "UTF-8"))) {
+        File f = findFile(relativeTo, TestRuns.replaceVariable(config.get("path"), vars));
+        String charsetName = Context.getInstance().getDataSourceEncording();
+        try (BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(f), charsetName))) {
             JSONTokener tok = new JSONTokener(r);
             JSONArray a = new JSONArray(tok);
             for (int i = 0; i < a.length(); i++) {
@@ -56,5 +59,17 @@ public class Json implements DataSource {
             throw new RuntimeException("Unable to get data.", e);
         }
         return data;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null) return false;
+        return this.getClass() == o.getClass();
+    }
+
+    @Override
+    public int hashCode() {
+        return this.getClass().getSimpleName().hashCode();
     }
 }

@@ -42,10 +42,14 @@ public class DataSet {
     }
 
     public List<Map<String, String>> loadData() {
+        return this.loadData(Maps.newHashMap());
+    }
+
+    public List<Map<String, String>> loadData(Map<String, String> vars) {
         if (this.dataSource == null) {
             return Lists.newArrayList(new HashMap<>());
         }
-        return this.dataSource.getData(this.dataSourceConfig, this.relativePath);
+        return this.dataSource.getData(this.dataSourceConfig, this.relativePath, vars);
     }
 
     public JSONObject toJSON() throws JSONException {

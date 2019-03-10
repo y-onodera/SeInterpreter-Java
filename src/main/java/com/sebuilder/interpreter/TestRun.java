@@ -253,23 +253,14 @@ public class TestRun {
         this.getListener().startTest(currentStep().getName() != null ? this.currentStep().getName() : TestRuns.replaceVariable(this.currentStep().toPrettyString(), this.vars));
     }
 
-    /**
-     *
-     */
     public void toNextStepIndex() {
         this.forwardStepIndex(1);
     }
 
-    /**
-     *
-     */
     public void backStepIndex(int count) {
         this.forwardStepIndex(count * -1);
     }
 
-    /**
-     *
-     */
     public void forwardStepIndex(int count) {
         this.getListener().skipTestIndex(count);
         this.stepIndex = this.stepIndex + count;
@@ -330,7 +321,7 @@ public class TestRun {
             return true;
         }
         boolean success = true;
-        for (Map<String, String> data : chainTo.loadData()) {
+        for (Map<String, String> data : chainTo.loadData(this.vars)) {
             Map<String, String> chainData = Maps.newHashMap(this.vars);
             chainData.remove(DataSource.ROW_NUMBER);
             chainData.putAll(data);
