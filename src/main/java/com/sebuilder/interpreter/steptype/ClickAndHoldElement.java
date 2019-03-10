@@ -26,4 +26,16 @@ public class ClickAndHoldElement implements ConditionalStep, LocatorHolder {
         new Actions(ctx.driver()).clickAndHold(ctx.locator().find(ctx)).build().perform();
         return true;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null) return false;
+        return this.getClass() == o.getClass();
+    }
+
+    @Override
+    public int hashCode() {
+        return this.getClass().getSimpleName().hashCode();
+    }
 }

@@ -29,4 +29,16 @@ public class Title implements Getter {
     public String cmpParamName() {
         return "title";
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null) return false;
+        return this.getClass() == o.getClass();
+    }
+
+    @Override
+    public int hashCode() {
+        return this.getClass().getSimpleName().hashCode();
+    }
 }

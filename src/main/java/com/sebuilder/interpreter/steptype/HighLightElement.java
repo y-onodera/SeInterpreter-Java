@@ -28,6 +28,18 @@ public class HighLightElement implements StepType, LocatorHolder {
         return true;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null) return false;
+        return this.getClass() == o.getClass();
+    }
+
+    @Override
+    public int hashCode() {
+        return this.getClass().getSimpleName().hashCode();
+    }
+
     static void toggleHighlight(TestRun ctx, WebElement element, String aStyle) {
         toggleBorder(ctx, element, aStyle);
         if (isChangeOutline(element)) {

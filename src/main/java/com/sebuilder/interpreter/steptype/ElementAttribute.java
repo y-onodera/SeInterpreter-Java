@@ -16,7 +16,6 @@
 
 package com.sebuilder.interpreter.steptype;
 
-import com.google.common.base.Objects;
 import com.sebuilder.interpreter.Getter;
 import com.sebuilder.interpreter.LocatorHolder;
 import com.sebuilder.interpreter.TestRun;
@@ -52,6 +51,6 @@ public class ElementAttribute implements Getter, LocatorHolder {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(this.getClass().getSimpleName());
+        return this.getClass().getSimpleName().hashCode();
     }
 }

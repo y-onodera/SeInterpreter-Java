@@ -83,4 +83,16 @@ public class SaveScreenshot implements StepType, LocatorHolder {
             throw new IllegalStateException("Exception while waiting for repaint", var2);
         }
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null) return false;
+        return this.getClass() == o.getClass();
+    }
+
+    @Override
+    public int hashCode() {
+        return this.getClass().getSimpleName().hashCode();
+    }
 }

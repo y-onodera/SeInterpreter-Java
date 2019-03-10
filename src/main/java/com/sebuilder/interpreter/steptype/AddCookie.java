@@ -16,6 +16,7 @@
 
 package com.sebuilder.interpreter.steptype;
 
+import com.google.common.base.Objects;
 import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
 import org.json.JSONException;
@@ -56,5 +57,17 @@ public class AddCookie implements StepType {
         if (!o.has("options")) {
             o.put("options", "");
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null) return false;
+        return this.getClass() == o.getClass();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(this.getClass().getSimpleName());
     }
 }

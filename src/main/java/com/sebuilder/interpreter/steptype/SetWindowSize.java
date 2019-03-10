@@ -7,13 +7,13 @@ import org.json.JSONObject;
 import org.openqa.selenium.Dimension;
 
 public class SetWindowSize implements StepType {
-	@Override
-	public boolean run(TestRun ctx) {
-		ctx.driver().manage().window().setSize(new Dimension(
-				Integer.parseInt(ctx.string("width")),
-				Integer.parseInt(ctx.string("height"))));
-		return true;
-	}
+    @Override
+    public boolean run(TestRun ctx) {
+        ctx.driver().manage().window().setSize(new Dimension(
+                Integer.parseInt(ctx.string("width")),
+                Integer.parseInt(ctx.string("height"))));
+        return true;
+    }
 
     @Override
     public void supplementSerialized(JSONObject o) throws JSONException {
@@ -25,4 +25,15 @@ public class SetWindowSize implements StepType {
         }
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null) return false;
+        return this.getClass() == o.getClass();
+    }
+
+    @Override
+    public int hashCode() {
+        return this.getClass().getSimpleName().hashCode();
+    }
 }
