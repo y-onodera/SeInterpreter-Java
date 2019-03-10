@@ -4,11 +4,16 @@ import com.google.common.base.Objects;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class Print implements StepType {
+public class Print implements GetterUseStep {
     public final Getter getter;
 
     public Print(Getter getter) {
         this.getter = getter;
+    }
+
+    @Override
+    public Getter getGetter() {
+        return getter;
     }
 
     @Override
@@ -23,7 +28,7 @@ public class Print implements StepType {
 
     @Override
     public void supplementSerialized(JSONObject o) throws JSONException {
-        getter.supplementSerialized(o);
+        GetterUseStep.super.supplementSerialized(o);
     }
 
     @Override

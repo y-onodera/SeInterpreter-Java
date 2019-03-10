@@ -115,26 +115,9 @@ public class Step {
         if (name != null) {
             sb.append(name).append(": ");
         }
-        if (type instanceof Assert) {
-            sb.append("assert").append(((Assert) type).getter.getClass().getSimpleName());
-            negateEnable = true;
-        } else if (type instanceof Verify) {
-            sb.append("verify").append(((Verify) type).getter.getClass().getSimpleName());
-            negateEnable = true;
-        } else if (type instanceof WaitFor) {
-            sb.append("waitFor").append(((WaitFor) type).getter.getClass().getSimpleName());
-            negateEnable = true;
-        } else if (type instanceof Store) {
-            sb.append("store").append(((Store) type).getter.getClass().getSimpleName());
-            negateEnable = true;
-        } else if (this.type instanceof Print) {
-            sb.append("print").append(((Print) type).getter.getClass().getSimpleName());
-            negateEnable = true;
-        } else {
-            sb.append(type.getClass().getSimpleName());
-        }
+        sb.append(type.getStepTypeName());
 
-        if (negateEnable) {
+        if (type instanceof GetterUseStep) {
             sb.append(" negated=" + this.negated);
         }
 
@@ -152,19 +135,7 @@ public class Step {
         if (this.name != null) {
             o.put("step_name", this.name);
         }
-        if (this.type instanceof Assert) {
-            o.put("type", "assert" + ((Assert) this.type).getter.getClass().getSimpleName());
-        } else if (this.type instanceof Verify) {
-            o.put("type", "verify" + ((Verify) this.type).getter.getClass().getSimpleName());
-        } else if (this.type instanceof WaitFor) {
-            o.put("type", "waitFor" + ((WaitFor) this.type).getter.getClass().getSimpleName());
-        } else if (this.type instanceof Store) {
-            o.put("type", "store" + ((Store) this.type).getter.getClass().getSimpleName());
-        } else if (this.type instanceof Print) {
-            o.put("type", "print" + ((Print) this.type).getter.getClass().getSimpleName());
-        } else {
-            o.put("type", this.type.getClass().getSimpleName());
-        }
+        o.put("type", this.type.getStepTypeName());
         o.put("negated", this.negated);
         for (Map.Entry<String, String> pe : this.stringParams.entrySet()) {
             o.put(pe.getKey(), pe.getValue());

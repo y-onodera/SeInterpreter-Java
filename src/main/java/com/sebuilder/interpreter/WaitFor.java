@@ -25,11 +25,16 @@ import org.json.JSONObject;
  *
  * @author zarkonnen
  */
-public class WaitFor implements StepType {
+public class WaitFor implements GetterUseStep {
     public final Getter getter;
 
     public WaitFor(Getter getter) {
         this.getter = getter;
+    }
+
+    @Override
+    public Getter getGetter() {
+        return getter;
     }
 
     @Override
@@ -46,37 +51,25 @@ public class WaitFor implements StepType {
         boolean result;
         // NB: If the step is negated, a result of "true"  means that we haven't succeeded yet.
         //     If the step is normal,  a result of "false" means that we haven't succeeded yet.
-        while ((result = test(ctx)) == ctx.currentStep().isNegated() && System.currentTimeMillis() < stopBy) {
+        while (!this.test(ctx) && System.currentTimeMillis() < stopBy) {
             try {
                 Thread.sleep(intervalMs);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }
-        return result != ctx.currentStep().isNegated();
+        return this.test(ctx);
     }
 
     @Override
     public void supplementSerialized(JSONObject o) throws JSONException {
+        GetterUseStep.super.supplementSerialized(o);
         if (!o.has("maxWait")) {
             o.put("maxWait", "60000");
         }
         if (!o.has("interval")) {
             o.put("interval", "500");
         }
-        getter.supplementSerialized(o);
-        if (getter.cmpParamName() != null) {
-            if (!o.has(getter.cmpParamName())) {
-                o.put(getter.cmpParamName(), "");
-            }
-        }
-    }
-
-    private boolean test(TestRun ctx) {
-        String got = getter.get(ctx);
-        return getter.cmpParamName() == null
-                ? Boolean.parseBoolean(got)
-                : ctx.string(getter.cmpParamName()).equals(got);
     }
 
     @Override

@@ -27,7 +27,7 @@ public class StepTypeFactoryTest {
     public void parseStep() throws FileNotFoundException, JSONException {
         File file = new File(this.baseDir, "scriptWithSteps.json");
         List<Step> results = target.parseStep(new JSONObject(new JSONTokener(new FileReader(file))));
-        assertEquals(7, results.size());
+        assertEquals(9, results.size());
         assertStep(results, 0, new ClickElement(), Locator.Type.ID, "id1", false, false);
         assertStep(results, 1, new ClickElement(), Locator.Type.NAME, "name1", true, false);
         assertStep(results, 2, new ElementAttribute().toWaitFor(), Locator.Type.LINK_TEXT, "link", false, false);
@@ -35,6 +35,8 @@ public class StepTypeFactoryTest {
         assertStep(results, 4, new ElementAttribute().toAssert(), Locator.Type.XPATH, "//", false, false);
         assertStep(results, 5, new ElementAttribute().toStore(), Locator.Type.CSS_SELECTOR, "selector", false, true);
         assertStep(results, 6, new ElementAttribute().toPrint(), Locator.Type.XPATH, "//", false, false);
+        assertStep(results, 7, new ElementAttribute().toIf(), Locator.Type.ID, "id1", false, false);
+        assertStep(results, 8, new ElementAttribute().toRetry(), Locator.Type.NAME, "name1", false, false);
     }
 
     private void assertStep(List<Step> results, int i, StepType stepType, Locator.Type locatorName, String locatorValue, boolean isSkip, boolean isNageted) {

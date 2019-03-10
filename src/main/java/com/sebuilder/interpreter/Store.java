@@ -25,11 +25,16 @@ import org.json.JSONObject;
  *
  * @author zarkonnen
  */
-public class Store implements StepType {
+public class Store implements GetterUseStep {
     public final Getter getter;
 
     public Store(Getter getter) {
         this.getter = getter;
+    }
+
+    @Override
+    public Getter getGetter() {
+        return getter;
     }
 
     @Override
@@ -47,6 +52,7 @@ public class Store implements StepType {
 
     @Override
     public void supplementSerialized(JSONObject o) throws JSONException {
+        GetterUseStep.super.supplementSerialized(o);
         if (!o.has("regex")) {
             o.put("regex", "");
         }
@@ -56,7 +62,6 @@ public class Store implements StepType {
         if (!o.has("variable")) {
             o.put("variable", "");
         }
-        getter.supplementSerialized(o);
     }
 
     @Override

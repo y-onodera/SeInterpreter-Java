@@ -32,4 +32,8 @@ public interface StepType extends JSONSerializable {
      * should return false. Other failures should throw a RuntimeException.
      */
     boolean run(TestRun ctx);
+
+    default String getStepTypeName() {
+        return this.getClass().getSimpleName();
+    }
 }

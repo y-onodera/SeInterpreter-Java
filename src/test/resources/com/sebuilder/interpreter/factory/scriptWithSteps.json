@@ -61,6 +61,24 @@
       "type": "printElementAttribute",
       "attributeName": "id",
       "value": "id1"
+    },
+    {
+      "locator": {
+        "type": "id",
+        "value": "id1"
+      },
+      "type": "ifElementAttribute",
+      "attributeName": "id",
+      "value": "id1"
+    },
+    {
+      "locator": {
+        "type": "name",
+        "value": "name1"
+      },
+      "type": "retryElementAttribute",
+      "attributeName": "name",
+      "value": "name1"
     }
   ]
 }

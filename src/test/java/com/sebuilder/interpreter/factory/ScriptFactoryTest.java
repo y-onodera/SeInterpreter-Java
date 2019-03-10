@@ -275,7 +275,7 @@ public class ScriptFactoryTest {
     private static void assertScriptWithSteps(String testFile, Script actual) {
         assertFileAttribute(testFile, actual);
         assertNoDataSource(actual);
-        assertEquals(7, actual.steps().size());
+        assertEquals(9, actual.steps().size());
     }
 
     private static void assertScriptWithDataSource(String testFile, Script actual) {

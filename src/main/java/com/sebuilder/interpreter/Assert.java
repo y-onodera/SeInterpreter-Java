@@ -17,15 +17,13 @@
 package com.sebuilder.interpreter;
 
 import com.google.common.base.Objects;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * Generic Assert that wraps a getter.
  *
  * @author zarkonnen
  */
-public class Assert implements StepType {
+public class Assert implements GetterUseStep {
     public final Getter getter;
 
     public Assert(Getter getter) {
@@ -33,22 +31,13 @@ public class Assert implements StepType {
     }
 
     @Override
-    public boolean run(TestRun ctx) {
-        String got = getter.get(ctx);
-        boolean result = getter.cmpParamName() == null
-                ? Boolean.parseBoolean(got)
-                : ctx.string(getter.cmpParamName()).equals(got);
-        return result != ctx.currentStep().isNegated();
+    public Getter getGetter() {
+        return getter;
     }
 
     @Override
-    public void supplementSerialized(JSONObject o) throws JSONException {
-        getter.supplementSerialized(o);
-        if (getter.cmpParamName() != null) {
-            if (!o.has(getter.cmpParamName())) {
-                o.put(getter.cmpParamName(), "");
-            }
-        }
+    public boolean run(TestRun ctx) {
+        return this.test(ctx);
     }
 
     @Override

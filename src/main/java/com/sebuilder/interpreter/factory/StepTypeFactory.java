@@ -15,7 +15,10 @@
  */
 package com.sebuilder.interpreter.factory;
 
-import com.sebuilder.interpreter.*;
+import com.sebuilder.interpreter.Getter;
+import com.sebuilder.interpreter.Locator;
+import com.sebuilder.interpreter.Step;
+import com.sebuilder.interpreter.StepType;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -43,16 +46,8 @@ public class StepTypeFactory {
      */
     private String secondaryPackage = DEFAULT_PACKAGE;
 
-    public String getPrimaryPackage() {
-        return primaryPackage;
-    }
-
     public void setPrimaryPackage(String primaryPackage) {
         this.primaryPackage = primaryPackage;
-    }
-
-    public String getSecondaryPackage() {
-        return secondaryPackage;
     }
 
     public void setSecondaryPackage(String secondaryPackage) {
@@ -115,6 +110,14 @@ public class StepTypeFactory {
                     className = className.substring("print".length());
                     rawStepType = false;
                 }
+                if (name.startsWith("if") && !name.equals("if")) {
+                    className = className.substring("if".length());
+                    rawStepType = false;
+                }
+                if (name.startsWith("retry") && !name.equals("retry")) {
+                    className = className.substring("retry".length());
+                    rawStepType = false;
+                }
                 if (name.equals("retry")) {
                     className = "Retry";
                     rawStepType = false;
@@ -142,15 +145,19 @@ public class StepTypeFactory {
                 if (c != null) try {
                     Object o = c.getDeclaredConstructor().newInstance();
                     if (name.startsWith("assert")) {
-                        typesMap.put(name, new Assert((Getter) o));
+                        typesMap.put(name, Getter.class.cast(o).toAssert());
                     } else if (name.startsWith("verify")) {
-                        typesMap.put(name, new Verify((Getter) o));
+                        typesMap.put(name, Getter.class.cast(o).toVerify());
                     } else if (name.startsWith("waitFor")) {
-                        typesMap.put(name, new WaitFor((Getter) o));
+                        typesMap.put(name, Getter.class.cast(o).toWaitFor());
                     } else if (name.startsWith("store") && !name.equals("store")) {
-                        typesMap.put(name, new Store((Getter) o));
+                        typesMap.put(name, Getter.class.cast(o).toStore());
                     } else if (name.startsWith("print") && !name.equals("print")) {
-                        typesMap.put(name, new Print((Getter) o));
+                        typesMap.put(name, Getter.class.cast(o).toPrint());
+                    } else if (name.startsWith("if") && !name.equals("if")) {
+                        typesMap.put(name, Getter.class.cast(o).toIf());
+                    } else if (name.startsWith("retry") && !name.equals("retry")) {
+                        typesMap.put(name, Getter.class.cast(o).toRetry());
                     } else {
                         typesMap.put(name, (StepType) o);
                     }
@@ -211,37 +218,10 @@ public class StepTypeFactory {
         if (key.equals("type") || key.equals("negated")) {
             return;
         }
-        if (stepO.optJSONObject(key) != null) {
-            this.configureStepSubElement(steps, stepO, step, key);
-        } else if (key.equals("actions")) {
-            this.configureStepSubElement(steps, stepO, step, key);
+        if (stepO.optJSONObject(key) != null && key.equals("locator")) {
+            step.put(key, new Locator(stepO.getJSONObject(key).getString("type"), stepO.getJSONObject(key).getString("value")));
         } else {
             step.put(key, stepO.getString(key));
-        }
-    }
-
-    /**
-     * @param stepO json object step configuration load from
-     * @param step  step configuration to
-     * @param key   configuration key
-     * @throws JSONException If anything goes wrong with interpreting the JSON.
-     */
-    private void configureStepSubElement(ArrayList<Step> steps, JSONObject stepO, Step step, String key) throws JSONException {
-        switch (key) {
-            case "locator":
-                step.put(key, new Locator(stepO.getJSONObject(key).getString("type"), stepO.getJSONObject(key).getString("value")));
-                break;
-            case "until":
-                this.parseStep(steps, stepO.getJSONObject(key));
-                break;
-            case "actions":
-                JSONArray actions = stepO.getJSONArray(key);
-                step.put("subStep", String.valueOf(actions.length()));
-                for (int i = 0, j = actions.length(); i < j; i++) {
-                    this.parseStep(steps, actions.getJSONObject(i));
-                }
-                break;
-            default:
         }
     }
 }

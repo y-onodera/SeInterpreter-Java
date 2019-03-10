@@ -75,12 +75,46 @@ public class StepEditController {
         stepTypeSelect.getItems().add("sendKeysToElement");
         stepTypeSelect.getItems().add("submitElement");
         stepTypeSelect.getItems().add("fileDownload");
-        stepTypeSelect.getItems().add("execBat");
-        stepTypeSelect.getItems().add("if");
-        stepTypeSelect.getItems().add("loop");
-        stepTypeSelect.getItems().add("retry");
-        stepTypeSelect.getItems().add("store");
+        stepTypeSelect.getItems().add("execCmd");
         stepTypeSelect.getItems().add("pause");
+        stepTypeSelect.getItems().add("loop");
+        stepTypeSelect.getItems().add("ifElementPresent");
+        stepTypeSelect.getItems().add("ifElementVisible");
+        stepTypeSelect.getItems().add("ifElementEnable");
+        stepTypeSelect.getItems().add("ifElementValue");
+        stepTypeSelect.getItems().add("ifElementAttribute");
+        stepTypeSelect.getItems().add("ifElementStyle");
+        stepTypeSelect.getItems().add("ifCurrentUrl");
+        stepTypeSelect.getItems().add("ifTitle");
+        stepTypeSelect.getItems().add("ifText");
+        stepTypeSelect.getItems().add("ifTextPresent");
+        stepTypeSelect.getItems().add("ifVariable");
+        stepTypeSelect.getItems().add("ifAlertText");
+        stepTypeSelect.getItems().add("ifAlertPresent");
+        stepTypeSelect.getItems().add("ifCookieText");
+        stepTypeSelect.getItems().add("ifCookiePresent");
+        stepTypeSelect.getItems().add("ifEval");
+        stepTypeSelect.getItems().add("ifAntRun");
+        stepTypeSelect.getItems().add("ifDocumentReady");
+        stepTypeSelect.getItems().add("retryElementPresent");
+        stepTypeSelect.getItems().add("retryElementVisible");
+        stepTypeSelect.getItems().add("retryElementEnable");
+        stepTypeSelect.getItems().add("retryElementValue");
+        stepTypeSelect.getItems().add("retryElementAttribute");
+        stepTypeSelect.getItems().add("retryElementStyle");
+        stepTypeSelect.getItems().add("retryCurrentUrl");
+        stepTypeSelect.getItems().add("retryTitle");
+        stepTypeSelect.getItems().add("retryText");
+        stepTypeSelect.getItems().add("retryTextPresent");
+        stepTypeSelect.getItems().add("retryVariable");
+        stepTypeSelect.getItems().add("retryAlertText");
+        stepTypeSelect.getItems().add("retryAlertPresent");
+        stepTypeSelect.getItems().add("retryCookieText");
+        stepTypeSelect.getItems().add("retryCookiePresent");
+        stepTypeSelect.getItems().add("retryEval");
+        stepTypeSelect.getItems().add("retryAntRun");
+        stepTypeSelect.getItems().add("retryDocumentReady");
+        stepTypeSelect.getItems().add("store");
         stepTypeSelect.getItems().add("storeElementPresent");
         stepTypeSelect.getItems().add("storeElementVisible");
         stepTypeSelect.getItems().add("storeElementEnable");
@@ -173,9 +207,6 @@ public class StepEditController {
         stepTypeSelect.getItems().add("dragAndDropToElement");
         stepTypeSelect.getItems().add("addCookie");
         stepTypeSelect.getItems().add("deleteCookie");
-        stepTypeSelect.getItems().add("refresh");
-        stepTypeSelect.getItems().add("goBack");
-        stepTypeSelect.getItems().add("goForward");
         stepTypeSelect.getItems().add("switchToDefaultContent");
         stepTypeSelect.getItems().add("switchToFrame");
         stepTypeSelect.getItems().add("switchToFrameByIndex");
@@ -187,6 +218,9 @@ public class StepEditController {
         stepTypeSelect.getItems().add("setWindowSize");
         stepTypeSelect.getItems().add("windowMaximize");
         stepTypeSelect.getItems().add("get");
+        stepTypeSelect.getItems().add("refresh");
+        stepTypeSelect.getItems().add("goBack");
+        stepTypeSelect.getItems().add("goForward");
         stepTypeSelect.getSelectionModel().select(0);
         this.selectedStepType = this.stepTypeSelect.getSelectionModel().getSelectedItem();
         EventBus.registSubscriber(this);
@@ -216,8 +250,7 @@ public class StepEditController {
             while (keys.hasNext()) {
                 String key = keys.next().toString();
                 if (key.equals("type") || key.equals("locator") || key.equals("skip")
-                        || (key.equals("negated")
-                        && !(typeName.startsWith("wait") || typeName.startsWith("verify") || typeName.startsWith("print") || typeName.startsWith("store")))) {
+                        || (key.equals("negated") && !hasGetterType(typeName))) {
                     continue;
                 }
                 if (key.startsWith("locator")) {
@@ -232,6 +265,16 @@ public class StepEditController {
             this.stepEditGrid.add(stepEditApply, 2, row);
             stepEditGrid.getScene().getWindow().sizeToScene();
         });
+    }
+
+    private boolean hasGetterType(String typeName) {
+        return typeName.startsWith("wait")
+                || typeName.startsWith("assert")
+                || typeName.startsWith("verify")
+                || typeName.startsWith("if")
+                || typeName.startsWith("retry")
+                || typeName.startsWith("print")
+                || typeName.startsWith("store");
     }
 
     private void clearInputFields() {

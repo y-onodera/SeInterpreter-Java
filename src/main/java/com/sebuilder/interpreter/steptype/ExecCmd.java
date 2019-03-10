@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-public class ExecBat implements StepType {
+public class ExecCmd implements StepType {
 
     /**
      * Perform the action this step consists of.

@@ -16,6 +16,7 @@
 
 package com.sebuilder.interpreter;
 
+
 /**
  * Interface to plug into the generic Assert/Verify/Store steps that does the work of actually
  * getting the relevant variable.
@@ -54,5 +55,13 @@ public interface Getter extends JSONSerializable {
 
     default Assert toAssert() {
         return new Assert(this);
+    }
+
+    default If toIf() {
+        return new If(this);
+    }
+
+    default Retry toRetry() {
+        return new Retry(this);
     }
 }
