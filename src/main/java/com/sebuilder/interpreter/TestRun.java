@@ -35,7 +35,7 @@ public class TestRun {
     private final RemoteWebDriver driver;
     private final Logger log;
     private final SeInterpreterTestListener listener;
-    private final Map<Script, Script> scriptChain = new HashMap<>();
+    private final ScriptChain scriptChain;
     private int stepIndex = -1;
     private boolean chainRun;
     private boolean finished;
@@ -48,7 +48,7 @@ public class TestRun {
             RemoteWebDriver driver,
             Map<String, String> initialVars,
             SeInterpreterTestListener seInterpreterTestListener,
-            Map<Script, Script> scriptChain
+            ScriptChain scriptChain
     ) {
         this.testRunName = testRunName;
         this.script = script;
@@ -65,7 +65,7 @@ public class TestRun {
         this.vars.put("_screenShotDir", seInterpreterTestListener.getScreenShotOutputDirectory().getAbsolutePath());
         this.vars.put("_templateDir", seInterpreterTestListener.getTemplateOutputDirectory().getAbsolutePath());
         this.vars.put("_downloadDir", seInterpreterTestListener.getDownloadDirectory().getAbsolutePath());
-        this.scriptChain.putAll(scriptChain);
+        this.scriptChain = scriptChain;
         this.chainRun = this.scriptChain.containsKey(this.script);
     }
 

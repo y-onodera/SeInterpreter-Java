@@ -22,7 +22,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -37,6 +40,7 @@ import java.util.stream.Collectors;
  */
 public class Script implements TestRunnable {
     private final ArrayList<Step> steps;
+    private final Function<Map<String, String>, Script> lazyLoad;
     private final String path;
     private final String name;
     private final File relativePath;
@@ -48,6 +52,7 @@ public class Script implements TestRunnable {
 
     public Script(ScriptBuilder scriptBuilder) {
         this.steps = scriptBuilder.getSteps();
+        this.lazyLoad = scriptBuilder.getLazyLoad();
         this.path = scriptBuilder.getPath();
         this.name = scriptBuilder.getName();
         this.relativePath = scriptBuilder.getRelativePath();
@@ -67,8 +72,8 @@ public class Script implements TestRunnable {
         return new ScriptBuilder(this);
     }
 
-    public List<Step> steps() {
-        return Collections.unmodifiableList(this.steps);
+    public ArrayList<Step> steps() {
+        return Lists.newArrayList(this.steps);
     }
 
     public boolean closeDriver() {
@@ -87,6 +92,21 @@ public class Script implements TestRunnable {
         return this.name;
     }
 
+    public Function<Map<String, String>, Script> lazyLoad() {
+        return this.lazyLoad;
+    }
+
+    public Script loadContents(Map<String, String> it) {
+        if (this.isLazyLoad()) {
+            return this.lazyLoad.apply(it)
+                    .builder()
+                    .overrideDataSource(this.overrideDataSource(), this.overrideDataSourceConfig())
+                    .setSkip(this.skip)
+                    .createScript();
+        }
+        return this;
+    }
+
     public String path() {
         return Optional.ofNullable(this.path).orElse("");
     }
@@ -100,15 +120,19 @@ public class Script implements TestRunnable {
     }
 
     public DataSource overrideDataSource() {
-        return overrideDataSet.getDataSource();
+        return this.overrideDataSet.getDataSource();
     }
 
     public Map<String, String> overrideDataSourceConfig() {
-        return overrideDataSet.getDataSourceConfig();
+        return this.overrideDataSet.getDataSourceConfig();
     }
 
     public String skip() {
-        return skip;
+        return this.skip;
+    }
+
+    public boolean isLazyLoad() {
+        return this.lazyLoad != null;
     }
 
     public List<Map<String, String>> loadData(Map<String, String> vars) {
@@ -227,6 +251,10 @@ public class Script implements TestRunnable {
         return this.builder()
                 .setSkip(skip)
                 .createScript();
+    }
+
+    public Suite toSuite() {
+        return new SuiteBuilder(this).createSuite();
     }
 
     @Override

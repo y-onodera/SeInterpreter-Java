@@ -3,6 +3,7 @@ package com.sebuilder.interpreter.factory;
 import com.google.common.collect.Maps;
 import com.sebuilder.interpreter.Script;
 import com.sebuilder.interpreter.Suite;
+import com.sebuilder.interpreter.TestRunBuilder;
 import com.sebuilder.interpreter.datasource.Csv;
 import com.sebuilder.interpreter.datasource.None;
 import org.json.JSONException;
@@ -216,6 +217,132 @@ public class ScriptFactoryTest {
         }
 
         @Test
+        public void parseSuiteWithLazyScript() throws IOException, JSONException {
+            final String testFile = "suiteWithLazyScript.json";
+            final File testSource = new File(baseDir, testFile);
+
+            Suite result = target.parse(testSource);
+            assertEquals(3, result.scriptSize());
+            assertEquals(0, result.getScriptChains().size());
+            assertFileAttribute(testFile, testSource, result);
+            assertEquals("${script1}.json", result.get(0).name());
+            assertEquals("scriptPath", result.get(0).path());
+            assertNull(result.get(0).relativePath());
+            assertEquals("${skip1}", result.get(0).skip());
+            assertTrue(result.get(0).overrideDataSource() instanceof Csv);
+            assertEquals("${dataSource1}.csv", result.get(0).overrideDataSourceConfig().get("path"));
+            assertScriptWithSteps("scriptWithSteps.json", result.get(1));
+            assertEquals("true", result.get(1).skip());
+            assertNull(result.get(1).overrideDataSource());
+            assertEquals(0, result.get(1).overrideDataSourceConfig().size());
+            assertScriptWithDataSource("scriptWithDataSource.json", result.get(2));
+            assertEquals("false", result.get(2).skip());
+            assertTrue(result.get(2).overrideDataSource() instanceof None);
+            assertEquals(0, result.get(2).overrideDataSourceConfig().size());
+            assertTrue(result.isShareState());
+            List<TestRunBuilder> lazyFetch = result.getTestRuns();
+            List<Map<String, String>> loadData = lazyFetch.get(0).loadData();
+            assertEquals(2, loadData.size());
+            assertEquals("a", loadData.get(0).get("column1"));
+            assertEquals("b", loadData.get(0).get("column2"));
+            assertEquals("1", loadData.get(1).get("column1"));
+            assertEquals("2", loadData.get(1).get("column2"));
+
+            result = target.parse(result.toJSON(), new File(result.getPath()));
+            assertEquals(3, result.scriptSize());
+            assertEquals(0, result.getScriptChains().size());
+            assertFileAttribute(testFile, testSource, result);
+            assertEquals("${script1}.json", result.get(0).name());
+            assertEquals("scriptPath", result.get(0).path());
+            assertNull(result.get(0).relativePath());
+            assertEquals("${skip1}", result.get(0).skip());
+            assertTrue(result.get(0).overrideDataSource() instanceof Csv);
+            assertEquals("${dataSource1}.csv", result.get(0).overrideDataSourceConfig().get("path"));
+            assertScriptWithSteps("scriptWithSteps.json", result.get(1));
+            assertEquals("true", result.get(1).skip());
+            assertNull(result.get(1).overrideDataSource());
+            assertEquals(0, result.get(1).overrideDataSourceConfig().size());
+            assertScriptWithDataSource("scriptWithDataSource.json", result.get(2));
+            assertEquals("false", result.get(2).skip());
+            assertTrue(result.get(2).overrideDataSource() instanceof None);
+            assertEquals(0, result.get(2).overrideDataSourceConfig().size());
+            assertTrue(result.isShareState());
+            lazyFetch = result.getTestRuns();
+            loadData = lazyFetch.get(0).loadData();
+            assertEquals(2, loadData.size());
+            assertEquals("a", loadData.get(0).get("column1"));
+            assertEquals("b", loadData.get(0).get("column2"));
+            assertEquals("1", loadData.get(1).get("column1"));
+            assertEquals("2", loadData.get(1).get("column2"));
+        }
+
+        @Test
+        public void parseSuiteWithLazyScriptChain() throws IOException, JSONException {
+            final String testFile = "suiteWithLazyScriptChain.json";
+            final File testSource = new File(baseDir, testFile);
+
+            Suite result = target.parse(testSource);
+            assertEquals(3, result.scriptSize());
+            assertEquals(2, result.getScriptChains().size());
+            assertFileAttribute(testFile, testSource, result);
+            assertEquals("${script1}.json", result.get(0).name());
+            assertEquals("scriptPath", result.get(0).path());
+            assertNull(result.get(0).relativePath());
+            assertEquals("false", result.get(0).skip());
+            assertNull(result.get(0).overrideDataSource());
+            assertEquals(0, result.get(0).overrideDataSourceConfig().size());
+            assertScriptWithSteps("scriptWithSteps.json", result.get(1));
+            assertSame(result.get(1), result.getScriptChains().get(result.get(0)));
+            assertEquals("true", result.get(1).skip());
+            assertNull(result.get(1).overrideDataSource());
+            assertEquals(0, result.get(1).overrideDataSourceConfig().size());
+            assertEquals("${script3}.json", result.get(2).name());
+            assertEquals("scriptPath", result.get(2).path());
+            assertSame(result.get(2), result.getScriptChains().get(result.get(1)));
+            assertEquals("false", result.get(2).skip());
+            assertTrue(result.get(2).overrideDataSource() instanceof Csv);
+            assertEquals("${dataSource3}.csv", result.get(2).overrideDataSourceConfig().get("path"));
+            assertTrue(result.isShareState());
+            List<TestRunBuilder> lazyFetch = result.getTestRuns();
+            List<Map<String, String>> loadData = lazyFetch.get(0).loadData();
+            assertEquals(2, loadData.size());
+            assertEquals("A", loadData.get(0).get("column1"));
+            assertEquals("B", loadData.get(0).get("column2"));
+            assertEquals("2", loadData.get(1).get("column1"));
+            assertEquals("1", loadData.get(1).get("column2"));
+
+            result = target.parse(result.toJSON(), new File(result.getPath()));
+            assertEquals(3, result.scriptSize());
+            assertEquals(2, result.getScriptChains().size());
+            assertFileAttribute(testFile, testSource, result);
+            assertEquals("${script1}.json", result.get(0).name());
+            assertEquals("scriptPath", result.get(0).path());
+            assertNull(result.get(0).relativePath());
+            assertEquals("false", result.get(0).skip());
+            assertNull(result.get(0).overrideDataSource());
+            assertEquals(0, result.get(0).overrideDataSourceConfig().size());
+            assertScriptWithSteps("scriptWithSteps.json", result.get(1));
+            assertSame(result.get(1), result.getScriptChains().get(result.get(0)));
+            assertEquals("true", result.get(1).skip());
+            assertNull(result.get(1).overrideDataSource());
+            assertEquals(0, result.get(1).overrideDataSourceConfig().size());
+            assertEquals("${script3}.json", result.get(2).name());
+            assertEquals("scriptPath", result.get(2).path());
+            assertSame(result.get(2), result.getScriptChains().get(result.get(1)));
+            assertEquals("false", result.get(2).skip());
+            assertTrue(result.get(2).overrideDataSource() instanceof Csv);
+            assertEquals("${dataSource3}.csv", result.get(2).overrideDataSourceConfig().get("path"));
+            assertTrue(result.isShareState());
+            lazyFetch = result.getTestRuns();
+            loadData = lazyFetch.get(0).loadData();
+            assertEquals(2, loadData.size());
+            assertEquals("A", loadData.get(0).get("column1"));
+            assertEquals("B", loadData.get(0).get("column2"));
+            assertEquals("2", loadData.get(1).get("column1"));
+            assertEquals("1", loadData.get(1).get("column2"));
+        }
+
+        @Test
         public void parseSuiteWithScriptChain() throws IOException, JSONException {
             final String testFile = "suiteWithScriptChain.json";
             final File testSource = new File(baseDir, testFile);
@@ -229,11 +356,13 @@ public class ScriptFactoryTest {
             assertTrue(result.get(0).overrideDataSource() instanceof Csv);
             assertEquals("override.csv", result.get(0).overrideDataSourceConfig().get("path"));
             Script script2 = result.getScriptChains().get(result.get(0));
+            assertSame(result.get(1), script2);
             assertScriptWithSteps("scriptWithSteps.json", script2);
             assertEquals("true", script2.skip());
             assertNull(script2.overrideDataSource());
             assertEquals(0, script2.overrideDataSourceConfig().size());
             Script script3 = result.getScriptChains().get(script2);
+            assertSame(result.get(2), script3);
             assertScriptWithDataSource("scriptWithDataSource.json", script3);
             assertEquals("false", script3.skip());
             assertTrue(script3.overrideDataSource() instanceof None);
@@ -250,11 +379,13 @@ public class ScriptFactoryTest {
             assertTrue(result.get(0).overrideDataSource() instanceof Csv);
             assertEquals("override.csv", result.get(0).overrideDataSourceConfig().get("path"));
             script2 = result.getScriptChains().get(result.get(0));
+            assertSame(result.get(1), script2);
             assertScriptWithSteps("scriptWithSteps.json", script2);
             assertEquals("true", script2.skip());
             assertNull(script2.overrideDataSource());
             assertEquals(0, script2.overrideDataSourceConfig().size());
             script3 = result.getScriptChains().get(script2);
+            assertSame(result.get(2), script3);
             assertScriptWithDataSource("scriptWithDataSource.json", script3);
             assertEquals("false", script3.skip());
             assertTrue(script3.overrideDataSource() instanceof None);

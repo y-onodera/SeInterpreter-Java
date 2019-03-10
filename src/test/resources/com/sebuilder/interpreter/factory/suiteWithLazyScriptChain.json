@@ -1,0 +1,37 @@
+{
+  "type": "suite",
+  "scripts": [
+    {
+      "chain": [
+        {
+          "lazyLoad": "${script1}.json"
+        },
+        {
+          "path": "scriptWithSteps.json",
+          "skip": "true"
+        },
+        {
+          "lazyLoad": "${script3}.json",
+          "data": {
+            "configs": {
+              "csv": {
+                "path": "${dataSource3}.csv"
+              }
+            },
+            "source": "csv"
+          }
+        }
+      ]
+    }
+  ],
+  "data": {
+    "configs": {
+      "manual": {
+        "script3": "simpleScript",
+        "dataSource3": "csv/override",
+        "script1": "scriptWithDataSource"
+      }
+    },
+    "source": "manual"
+  }
+}

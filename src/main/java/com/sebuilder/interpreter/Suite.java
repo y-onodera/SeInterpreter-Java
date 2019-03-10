@@ -2,7 +2,6 @@ package com.sebuilder.interpreter;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,7 +23,7 @@ public class Suite implements Iterable<Script>, TestRunnable {
 
     private final ArrayList<Script> scripts = Lists.newArrayList();
 
-    private final Map<Script, Script> scriptChains = Maps.newHashMap();
+    private final ScriptChain scriptChains;
 
     private final DataSet dataSet;
 
@@ -32,7 +31,7 @@ public class Suite implements Iterable<Script>, TestRunnable {
 
     public Suite(File suiteFile
             , ArrayList<Script> aScripts
-            , Map<Script, Script> scriptChains
+            , ScriptChain scriptChains
             , DataSource dataSource
             , Map<String, String> config
             , boolean shareState) {
@@ -47,7 +46,7 @@ public class Suite implements Iterable<Script>, TestRunnable {
         }
         this.shareState = shareState;
         this.scripts.addAll(aScripts);
-        this.scriptChains.putAll(scriptChains);
+        this.scriptChains = scriptChains;
         this.dataSet = new DataSet(dataSource, config, this.relativePath);
     }
 
@@ -103,8 +102,8 @@ public class Suite implements Iterable<Script>, TestRunnable {
         return this.scripts.iterator();
     }
 
-    public Map<Script, Script> getScriptChains() {
-        return Maps.newHashMap(this.scriptChains);
+    public ScriptChain getScriptChains() {
+        return this.scriptChains;
     }
 
     public boolean isShareState() {
@@ -137,14 +136,25 @@ public class Suite implements Iterable<Script>, TestRunnable {
                     } else {
                         prefix = suiteName;
                     }
-                    return this.scripts
+                    List<Script> loadedScripts = Lists.newArrayList();
+                    ScriptChain loadedScriptChains = this.scriptChains;
+                    for (Script script : this.scripts) {
+                        Script loaded = script.loadContents(it);
+                        loadedScripts.add(loaded);
+                        if (script != loaded) {
+                            loadedScriptChains = loadedScriptChains.replace(script, loaded);
+                        }
+                    }
+                    final ScriptChain runScriptChain = loadedScriptChains;
+                    return loadedScripts
                             .stream()
-                            .filter(script -> !scriptChains.containsValue(script))
+                            .filter(script -> !runScriptChain.containsValue(script))
                             .filter(script -> !script.skipRunning(it))
                             .map(script -> new TestRunBuilder(script)
-                                    .addChain(this.scriptChains)
+                                    .addChain(runScriptChain)
                                     .addTestRunNamePrefix(prefix + "_")
-                                    .setShareInput(it));
+                                    .setShareInput(it)
+                            );
                 })
                 .collect(Collectors.toList());
     }
@@ -231,7 +241,11 @@ public class Suite implements Iterable<Script>, TestRunnable {
 
     private JSONObject getScriptJson(Script s) throws JSONException {
         JSONObject scriptPath = new JSONObject();
-        scriptPath.put("path", relativePath(s));
+        if (s.isLazyLoad()) {
+            scriptPath.put("lazyLoad", s.name());
+        } else {
+            scriptPath.put("path", relativePath(s));
+        }
         if (!Objects.equals(s.skip(), "false")) {
             scriptPath.put("skip", s.skip());
         }

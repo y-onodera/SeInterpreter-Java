@@ -2,11 +2,12 @@ package com.sebuilder.interpreter;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 public class ScriptBuilder {
     private ArrayList<Step> steps;
+    private Function<Map<String, String>, Script> lazyLoad;
     private String path;
     private String name;
     private File relativePath;
@@ -20,13 +21,14 @@ public class ScriptBuilder {
 
     public ScriptBuilder() {
         this.steps = new ArrayList<>();
+        this.lazyLoad = null;
         this.path = "scriptPath";
         this.name = "scriptName";
         this.relativePath = null;
-        this.usePreviousDriverAndVars = false;
-        this.closeDriver = true;
         this.dataSource = null;
         this.dataSourceConfig = null;
+        this.usePreviousDriverAndVars = false;
+        this.closeDriver = true;
         this.overrideDataSource = null;
         this.overrideDataSourceConfig = null;
         this.skip = "false";
@@ -34,60 +36,72 @@ public class ScriptBuilder {
 
     public ScriptBuilder(Script currentDisplay) {
         this.steps = new ArrayList<>(currentDisplay.steps());
+        this.lazyLoad = currentDisplay.lazyLoad();
         this.path = currentDisplay.path();
         this.name = currentDisplay.name();
         this.relativePath = currentDisplay.relativePath();
-        this.usePreviousDriverAndVars = currentDisplay.usePreviousDriverAndVars();
-        this.closeDriver = currentDisplay.closeDriver();
         this.dataSource = currentDisplay.dataSource();
         this.dataSourceConfig = currentDisplay.dataSourceConfig();
+        this.usePreviousDriverAndVars = currentDisplay.usePreviousDriverAndVars();
+        this.closeDriver = currentDisplay.closeDriver();
         this.overrideDataSource = currentDisplay.overrideDataSource();
         this.overrideDataSourceConfig = currentDisplay.overrideDataSourceConfig();
         this.skip = currentDisplay.skip();
     }
 
+    public static Script lazyLoad(String beforeReplace, Function<Map<String, String>, Script> lazyLoad) {
+        ScriptBuilder builder = new ScriptBuilder();
+        builder.setName(beforeReplace);
+        builder.lazyLoad = lazyLoad;
+        return builder.createScript();
+    }
+
     public ArrayList<Step> getSteps() {
-        return steps;
+        return this.steps;
+    }
+
+    public Function<Map<String, String>, Script> getLazyLoad() {
+        return this.lazyLoad;
     }
 
     public String getPath() {
-        return path;
+        return this.path;
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public File getRelativePath() {
-        return relativePath;
+        return this.relativePath;
     }
 
     public boolean isUsePreviousDriverAndVars() {
-        return usePreviousDriverAndVars;
+        return this.usePreviousDriverAndVars;
     }
 
     public boolean isCloseDriver() {
-        return closeDriver;
+        return this.closeDriver;
     }
 
     public DataSource getDataSource() {
-        return dataSource;
+        return this.dataSource;
     }
 
     public Map<String, String> getDataSourceConfig() {
-        return dataSourceConfig;
+        return this.dataSourceConfig;
     }
 
     public DataSource getOverrideDataSource() {
-        return overrideDataSource;
+        return this.overrideDataSource;
     }
 
     public Map<String, String> getOverrideDataSourceConfig() {
-        return overrideDataSourceConfig;
+        return this.overrideDataSourceConfig;
     }
 
     public String getSkip() {
-        return skip;
+        return this.skip;
     }
 
     public DataSet getDataSet() {
@@ -131,13 +145,13 @@ public class ScriptBuilder {
         return this;
     }
 
-    public ScriptBuilder setDataSource(DataSource dataSource, HashMap<String, String> config) {
+    public ScriptBuilder setDataSource(DataSource dataSource, Map<String, String> config) {
         this.dataSource = dataSource;
         this.dataSourceConfig = config;
         return this;
     }
 
-    public ScriptBuilder overrideDataSource(DataSource dataSource, HashMap<String, String> config) {
+    public ScriptBuilder overrideDataSource(DataSource dataSource, Map<String, String> config) {
         this.overrideDataSource = dataSource;
         this.overrideDataSourceConfig = config;
         return this;

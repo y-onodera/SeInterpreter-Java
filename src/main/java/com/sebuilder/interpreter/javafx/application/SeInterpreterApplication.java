@@ -154,7 +154,8 @@ public class SeInterpreterApplication extends Application {
     public void replaceScript(ScriptReplaceEvent event) {
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
             Script newScript = getScriptFactory().parse(event.getScript());
-            this.currentDisplay = newScript.builder().associateWith(new File(this.currentDisplay.path()))
+            this.currentDisplay = newScript.builder()
+                    .associateWith(new File(this.currentDisplay.path()))
                     .setName(this.currentDisplay.name())
                     .createScript();
             this.suite = this.suite.replace(this.currentDisplay);
@@ -356,7 +357,9 @@ public class SeInterpreterApplication extends Application {
                 newName = newName + ".json";
             }
             File saveTo = new File(scriptSaveTo, newName);
-            this.suite = this.suite.replace(oldName, it.builder().associateWith(saveTo).createScript());
+            this.suite = this.suite.replace(oldName, it.builder()
+                    .associateWith(saveTo)
+                    .createScript());
             this.saveContents(saveTo, this.suite.get(newName), "");
                 }
         );

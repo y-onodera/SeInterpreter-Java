@@ -24,6 +24,7 @@ import org.json.JSONTokener;
 
 import java.io.*;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Factory to create Script objects from a string, a reader or JSONObject.
@@ -149,7 +150,7 @@ public class ScriptFactory {
     public Suite parseScript(JSONObject o, File f) throws IOException {
         try {
             Script script = this.create(o, f);
-            return new SuiteBuilder(script).createSuite();
+            return script.toSuite();
         } catch (JSONException e) {
             throw new IOException("Could not parse script.", e);
         }
@@ -174,35 +175,51 @@ public class ScriptFactory {
         JSONArray scriptLocations = o.getJSONArray("scripts");
         for (int i = 0; i < scriptLocations.length(); i++) {
             JSONObject script = scriptLocations.getJSONObject(i);
-            if (script.has("path")) {
-                builder.addScripts(this.loadScript(script, builder.getSuiteFile()));
-            } else if (script.has("paths")) {
+            if (script.has("paths")) {
                 JSONArray scriptArrays = script.getJSONArray("paths");
                 this.loadScriptChain(scriptArrays, builder);
             } else if (script.has("chain")) {
                 JSONArray scriptArrays = script.getJSONArray("chain");
                 this.loadScriptChain(scriptArrays, builder);
+            } else {
+                builder.addScripts(this.loadScript(script, builder.getSuiteFile()));
             }
         }
     }
 
     /**
      * @param script A JSONObject describing a script or a suite where load from.
-     * @return Script loaded from file
+     * @return loaded from file
      * @throws JSONException If anything goes wrong with interpreting the JSON.
      * @throws IOException   If script file not found.
      */
     private Suite loadScript(JSONObject script, File suiteFile) throws JSONException, IOException {
-        String path = script.getString("path");
-        if (script.has("where") && Strings.isNullOrEmpty(script.getString("where"))) {
-            File wherePath = new File(script.getString("where"), path);
-            return this.loadScriptIfExists(wherePath, script);
+        if (script.has("path")) {
+            String path = script.getString("path");
+            if (script.has("where") && Strings.isNullOrEmpty(script.getString("where"))) {
+                File wherePath = new File(script.getString("where"), path);
+                return this.loadScriptIfExists(wherePath, script);
+            }
+            File f = new File(path);
+            if (!f.exists()) {
+                f = new File(suiteFile.getAbsoluteFile().getParentFile(), path);
+            }
+            return this.loadScriptIfExists(f, script);
+        } else if (script.has("lazyLoad")) {
+            String beforeReplace = script.getString("lazyLoad");
+            final Script resultScript = ScriptBuilder.lazyLoad(beforeReplace, (Map<String, String> data) -> {
+                String fileName = TestRuns.replaceVariable(beforeReplace, data);
+                JSONObject source = new JSONObject();
+                try {
+                    source.put("path", fileName);
+                    return loadScript(source, suiteFile).get(0);
+                } catch (JSONException | IOException e) {
+                    throw new AssertionError(e);
+                }
+            });
+            return this.overrideSetting(script, resultScript).toSuite();
         }
-        File f = new File(path);
-        if (!f.exists()) {
-            f = new File(suiteFile.getAbsoluteFile().getParentFile(), path);
-        }
-        return this.loadScriptIfExists(f, script);
+        return null;
     }
 
     private void loadScriptChain(JSONArray scriptArrays, SuiteBuilder builder) throws JSONException, IOException {
@@ -228,18 +245,21 @@ public class ScriptFactory {
     private Suite loadScriptIfExists(File wherePath, JSONObject script) throws IOException, JSONException {
         if (wherePath.exists()) {
             Suite result = this.parse(wherePath);
-            Script origin = result.get(0);
-            Script resultScript = origin;
-            DataSource dataSource = this.dataSourceFactory.getDataSource(script);
-            if (dataSource != null) {
-                HashMap<String, String> config = this.dataSourceFactory.getDataSourceConfig(script);
-                resultScript = origin.builder()
-                        .overrideDataSource(dataSource, config)
-                        .createScript();
-            }
-            return result.replace(resultScript.skip(this.getSkip(script)));
+            return result.replace(this.overrideSetting(script, result.get(0)));
         }
         throw new IOException("Script file " + wherePath.toString() + " not found.");
+    }
+
+    private Script overrideSetting(JSONObject script, Script resultScript) throws JSONException {
+        DataSource dataSource = this.dataSourceFactory.getDataSource(script);
+        if (dataSource != null) {
+            HashMap<String, String> config = this.dataSourceFactory.getDataSourceConfig(script);
+            resultScript = resultScript.builder()
+                    .overrideDataSource(dataSource, config)
+                    .createScript();
+        }
+        resultScript = resultScript.skip(this.getSkip(script));
+        return resultScript;
     }
 
     private String getSkip(JSONObject o) throws JSONException {

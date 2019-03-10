@@ -14,7 +14,7 @@ import java.util.function.Function;
 public class SuiteBuilder {
     private File suiteFile;
     private final ArrayList<Script> scripts;
-    private final Map<Script, Script> scriptChains;
+    private ScriptChain scriptChains;
     private DataSource dataSource;
     private Map<String, String> dataSourceConfig;
     private boolean shareState = true;
@@ -27,7 +27,7 @@ public class SuiteBuilder {
     public SuiteBuilder(ArrayList<Script> aScripts) {
         this.suiteFile = null;
         this.scripts = aScripts;
-        this.scriptChains = Maps.newHashMap();
+        this.scriptChains = new ScriptChain();
         this.dataSource = null;
         this.dataSourceConfig = Maps.newHashMap();
     }
@@ -36,7 +36,7 @@ public class SuiteBuilder {
     public SuiteBuilder(File suiteFile) {
         this.suiteFile = suiteFile;
         this.scripts = new ArrayList<>();
-        this.scriptChains = Maps.newHashMap();
+        this.scriptChains = new ScriptChain();
         this.dataSource = null;
         this.dataSourceConfig = Maps.newHashMap();
     }
@@ -100,12 +100,11 @@ public class SuiteBuilder {
     }
 
     public SuiteBuilder addScriptChain(Script from, Script to) {
-        this.scriptChains.put(from, to);
+        this.scriptChains = this.scriptChains.add(from, to);
         return this;
     }
 
     public SuiteBuilder replace(String oldName, Script aScript) {
-        final Map<Script, Script> copyScriptChains = Maps.newHashMap(this.scriptChains);
         ArrayList newScripts = Lists.newArrayList();
         for (Script script : this.scripts) {
             Script newScript = script;
@@ -113,12 +112,10 @@ public class SuiteBuilder {
                 newScript = aScript;
             }
             newScripts.add(newScript);
-            this.replaceChainMap(copyScriptChains, script, newScript);
+            this.scriptChains = this.scriptChains.replace(script, newScript);
         }
         this.scripts.clear();
         this.scripts.addAll(newScripts);
-        this.scriptChains.clear();
-        this.scriptChains.putAll(copyScriptChains);
         return this;
     }
 
@@ -128,18 +125,23 @@ public class SuiteBuilder {
     }
 
     public Suite createSuite() {
-        final Map<Script, Script> copyScriptChains = Maps.newHashMap(this.scriptChains);
         ArrayList<Script> copyScripts = Lists.newArrayList();
-        this.copyScriptTo(copyScripts, copyScriptChains);
+        ScriptChain copyScriptChain = this.copyScriptTo(copyScripts);
         return new Suite(this.suiteFile
                 , copyScripts
-                , copyScriptChains
+                , copyScriptChain
                 , this.dataSource
                 , Maps.newHashMap(this.dataSourceConfig)
                 , this.shareState);
     }
 
-    private void copyScriptTo(ArrayList<Script> copyScripts, Map<Script, Script> copyScriptChains) {
+    private SuiteBuilder addScript(Script newScript, int index) {
+        this.scripts.add(index, newScript);
+        return this;
+    }
+
+    private ScriptChain copyScriptTo(ArrayList<Script> copyScripts) {
+        ScriptChain result = this.scriptChains;
         Map<String, Integer> duplicate = Maps.newHashMap();
         for (Script script : this.scripts) {
             Script copy = this.converter.apply(script);
@@ -159,25 +161,8 @@ public class SuiteBuilder {
                 duplicate.put(copy.path(), 0);
             }
             copyScripts.add(copy);
-            this.replaceChainMap(copyScriptChains, script, copy);
+            result = result.replace(script, copy);
         }
-    }
-
-    private SuiteBuilder addScript(Script newScript, int index) {
-        this.scripts.add(index, newScript);
-        return this;
-    }
-
-    private void replaceChainMap(Map<Script, Script> chainMap, Script oldScript, Script newScript) {
-        if (chainMap.containsKey(oldScript) || chainMap.containsValue(oldScript)) {
-            for (Map.Entry<Script, Script> entry : Maps.newHashMap(chainMap).entrySet()) {
-                if (entry.getKey() == oldScript) {
-                    chainMap.remove(oldScript);
-                    chainMap.put(newScript, entry.getValue());
-                } else if (entry.getValue() == oldScript) {
-                    chainMap.put(entry.getKey(), newScript);
-                }
-            }
-        }
+        return result;
     }
 }

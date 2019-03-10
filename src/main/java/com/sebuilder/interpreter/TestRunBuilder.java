@@ -16,14 +16,14 @@ public class TestRunBuilder {
 
     private static final Pattern DUPLICATE_PATTERN = Pattern.compile(".+\\.[^\\.]+(\\(\\d+\\)$)");
     private final Script script;
-    private final Map<Script, Script> scriptChain;
+    private ScriptChain scriptChain;
     private final Map<String, String> shareInput;
     private String testRunNamePrefix;
     private String testRunNameSuffix;
 
     public TestRunBuilder(Script script) {
         this.script = script;
-        this.scriptChain = Maps.newHashMap();
+        this.scriptChain = new ScriptChain();
         this.shareInput = Maps.newHashMap();
     }
 
@@ -39,11 +39,11 @@ public class TestRunBuilder {
         return this.script.closeDriver();
     }
 
-    public TestRunBuilder addChain(Map<Script, Script> scriptChain) {
+    public TestRunBuilder addChain(ScriptChain scriptChain) {
         Script scriptFrom = this.script;
         while (scriptChain.containsKey(scriptFrom)) {
             Script chainTo = scriptChain.get(scriptFrom);
-            this.scriptChain.put(scriptFrom, chainTo);
+            this.scriptChain = this.scriptChain.add(scriptFrom, chainTo);
             scriptFrom = chainTo;
         }
         return this;
@@ -96,16 +96,7 @@ public class TestRunBuilder {
 
     public TestRun createTestRun(Logger log, RemoteWebDriver driver, Map<String, String> initialVars, SeInterpreterTestListener seInterpreterTestListener) {
         final Script copy = this.script.copy();
-        final Map<Script, Script> copyScriptChain = Maps.newHashMap();
-        for (Map.Entry<Script, Script> entry : this.scriptChain.entrySet()) {
-            if (entry.getKey() == this.script) {
-                copyScriptChain.put(copy, entry.getValue());
-            } else if (entry.getValue() == this.script) {
-                copyScriptChain.put(entry.getKey(), copy);
-            } else {
-                copyScriptChain.put(entry.getKey(), entry.getValue());
-            }
-        }
+        final ScriptChain copyScriptChain = this.scriptChain.replace(this.script, copy);
         Map<String, String> data = Maps.newHashMap(this.shareInput);
         data.putAll(initialVars);
         return new TestRun(getTestRunName(data), copy, log, driver, data, seInterpreterTestListener, copyScriptChain);
