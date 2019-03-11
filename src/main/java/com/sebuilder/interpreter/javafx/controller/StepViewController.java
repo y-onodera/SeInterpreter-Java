@@ -213,7 +213,7 @@ public class StepViewController {
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
             int no = 1;
             if (this.tableViewScriptBody.getItems().size() > 0) {
-                this.tableViewScriptBody.getItems().clear();
+                this.tableViewScriptBody.getItems().setAll(List.of());
             }
             for (Step step : aScript.steps()) {
                 ScriptBody row = new ScriptBody(no++, step.toPrettyString(), null);
