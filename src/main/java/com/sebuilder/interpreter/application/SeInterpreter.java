@@ -18,6 +18,7 @@ package com.sebuilder.interpreter.application;
 
 import com.sebuilder.interpreter.SeInterpreterTestListener;
 import com.sebuilder.interpreter.Suite;
+import com.sebuilder.interpreter.TestData;
 import com.sebuilder.interpreter.TestRunBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,7 +27,6 @@ import org.json.JSONException;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Map;
 
 /**
  * An interpreter for Builder JSON tests. Given one or more JSON script files, it plays them back
@@ -91,12 +91,12 @@ public class SeInterpreter extends CommandLineRunner {
     }
 
     private void runScript(TestRunBuilder testRunBuilder) {
-        for (Map<String, String> data : testRunBuilder.loadData()) {
+        for (TestData data : testRunBuilder.loadData()) {
             this.runScript(testRunBuilder, data, this.seInterpreterTestListener);
         }
     }
 
-    private void runScript(TestRunBuilder testRunBuilder, Map<String, String> data, SeInterpreterTestListener seInterpreterTestListener) {
+    private void runScript(TestRunBuilder testRunBuilder, TestData data, SeInterpreterTestListener seInterpreterTestListener) {
         try {
             this.lastRun = getTestRun(testRunBuilder, data, seInterpreterTestListener);
             if (this.lastRun.finish()) {

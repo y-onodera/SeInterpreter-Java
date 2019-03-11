@@ -16,8 +16,9 @@
 
 package com.sebuilder.interpreter.datasource;
 
+import com.google.common.collect.Lists;
 import com.sebuilder.interpreter.DataSource;
-import com.sebuilder.interpreter.TestRuns;
+import com.sebuilder.interpreter.TestData;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -39,9 +40,9 @@ import static com.sebuilder.interpreter.datasource.Utils.findFile;
  */
 public class Xml implements DataSource {
     @Override
-    public List<Map<String, String>> getData(Map<String, String> config, File relativeTo, Map<String, String> vars) {
-        ArrayList<Map<String, String>> data = new ArrayList<Map<String, String>>();
-        File f = findFile(relativeTo, TestRuns.replaceVariable(config.get("path"), vars));
+    public List<TestData> getData(Map<String, String> config, File relativeTo, TestData vars) {
+        ArrayList<TestData> data = Lists.newArrayList();
+        File f = findFile(relativeTo, vars.bind(config.get("path")));
         try {
             Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(f);
             NodeList rows = doc.getElementsByTagName("test");
@@ -49,11 +50,11 @@ public class Xml implements DataSource {
                 Node rowN = rows.item(i);
                 NamedNodeMap attributes = rowN.getAttributes();
                 Map<String, String> row = new HashMap<String, String>();
-                row.put(DataSource.ROW_NUMBER, String.valueOf(i + 1));
+                row.put(TestData.ROW_NUMBER, String.valueOf(i + 1));
                 for (int j = 0; j < attributes.getLength(); j++) {
                     row.put(attributes.item(j).getNodeName(), attributes.item(j).getNodeValue());
                 }
-                data.add(row);
+                data.add(new TestData(row));
             }
         } catch (Exception e) {
             throw new RuntimeException("Unable to get data.", e);

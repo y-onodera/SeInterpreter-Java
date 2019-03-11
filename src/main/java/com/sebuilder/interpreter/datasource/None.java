@@ -16,7 +16,9 @@
 
 package com.sebuilder.interpreter.datasource;
 
+import com.google.common.collect.Lists;
 import com.sebuilder.interpreter.DataSource;
+import com.sebuilder.interpreter.TestData;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -26,11 +28,11 @@ import java.util.Map;
 
 public class None implements DataSource {
     @Override
-    public List<Map<String, String>> getData(Map<String, String> config, File relativeTo, Map<String, String> vars) {
-        ArrayList<Map<String, String>> l = new ArrayList<Map<String, String>>();
+    public List<TestData> getData(Map<String, String> config, File relativeTo, TestData vars) {
+        ArrayList<TestData> l = Lists.newArrayList();
         final HashMap<String, String> row = new HashMap<>();
-        row.put(DataSource.ROW_NUMBER, String.valueOf(1));
-        l.add(row);
+        row.put(TestData.ROW_NUMBER, String.valueOf(1));
+        l.add(new TestData(row));
         return l;
     }
 

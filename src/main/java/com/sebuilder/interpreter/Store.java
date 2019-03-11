@@ -46,7 +46,7 @@ public class Store implements GetterUseStep {
         if (ctx.currentStep().isNegated()) {
             value = String.valueOf(!Boolean.valueOf(value));
         }
-        ctx.vars().put(ctx.string("variable"), value);
+        ctx.putVars(ctx.string("variable"), value);
         return true;
     }
 

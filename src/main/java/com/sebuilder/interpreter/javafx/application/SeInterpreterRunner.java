@@ -13,7 +13,6 @@ import org.apache.logging.log4j.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 
 public class SeInterpreterRunner {
@@ -154,7 +153,7 @@ public class SeInterpreterRunner {
                         private int currentScriptSteps;
 
                         @Override
-                        public boolean openTestSuite(Script script, String testRunName, Map<String, String> aProperty) {
+                        public boolean openTestSuite(Script script, String testRunName, TestData aProperty) {
                             this.currentScriptSteps = script.steps().size();
                             updateMessage(testRunName);
                             updateProgress(0, this.currentScriptSteps);

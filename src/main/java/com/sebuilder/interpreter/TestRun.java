@@ -16,12 +16,8 @@
 
 package com.sebuilder.interpreter;
 
-import com.google.common.collect.Maps;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.remote.RemoteWebDriver;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * A single run of a test script.
@@ -31,7 +27,7 @@ import java.util.Map;
 public class TestRun {
     private final String testRunName;
     private final Script script;
-    private final HashMap<String, String> vars = new HashMap<>();
+    private TestData vars = new TestData();
     private final RemoteWebDriver driver;
     private final Logger log;
     private final SeInterpreterTestListener listener;
@@ -46,7 +42,7 @@ public class TestRun {
             Script script,
             Logger log,
             RemoteWebDriver driver,
-            Map<String, String> initialVars,
+            TestData initialVars,
             SeInterpreterTestListener seInterpreterTestListener,
             ScriptChain scriptChain
     ) {
@@ -54,17 +50,16 @@ public class TestRun {
         this.script = script;
         this.log = log;
         this.driver = driver;
-        if (initialVars != null) {
-            vars.putAll(initialVars);
-        }
         this.listener = seInterpreterTestListener;
-        this.vars.put("_browser", Context.getInstance().getBrowser());
-        this.vars.put("_baseDir", Context.getInstance().getBaseDirectory().getAbsolutePath());
-        this.vars.put("_dataSourceDir", Context.getInstance().getDataSourceDirectory().getAbsolutePath());
-        this.vars.put("_resultDir", seInterpreterTestListener.getResultDir().getAbsolutePath());
-        this.vars.put("_screenShotDir", seInterpreterTestListener.getScreenShotOutputDirectory().getAbsolutePath());
-        this.vars.put("_templateDir", seInterpreterTestListener.getTemplateOutputDirectory().getAbsolutePath());
-        this.vars.put("_downloadDir", seInterpreterTestListener.getDownloadDirectory().getAbsolutePath());
+        this.vars = initialVars.builder()
+                .add("_browser", Context.getInstance().getBrowser())
+                .add("_baseDir", Context.getInstance().getBaseDirectory().getAbsolutePath())
+                .add("_dataSourceDir", Context.getInstance().getDataSourceDirectory().getAbsolutePath())
+                .add("_resultDir", seInterpreterTestListener.getResultDir().getAbsolutePath())
+                .add("_screenShotDir", seInterpreterTestListener.getScreenShotOutputDirectory().getAbsolutePath())
+                .add("_downloadDir", seInterpreterTestListener.getDownloadDirectory().getAbsolutePath())
+                .add("_templateDir", seInterpreterTestListener.getTemplateOutputDirectory().getAbsolutePath())
+                .build();
         this.scriptChain = scriptChain;
         this.chainRun = this.scriptChain.containsKey(this.script);
     }
@@ -97,7 +92,7 @@ public class TestRun {
     /**
      * @return The HashMap of variables.
      */
-    public HashMap<String, String> vars() {
+    public TestData vars() {
         return this.vars;
     }
 
@@ -138,7 +133,7 @@ public class TestRun {
         if (s == null) {
             throw new RuntimeException("Missing parameter \"" + paramName + "\" at step #" + (this.stepIndex + 1) + ".");
         }
-        return TestRuns.replaceVariable(s, this.vars);
+        return this.vars.bind(s);
     }
 
     public boolean hasLocator() {
@@ -164,7 +159,7 @@ public class TestRun {
             throw new RuntimeException("Missing parameter \"" + paramName + "\" at step #" + (this.stepIndex + 1) + ".");
         }
         // This kind of variable substitution makes for short code, but it's inefficient.
-        l.value = TestRuns.replaceVars(l.value, this.vars);
+        l.value = this.vars.bind(l.value);
         return l;
     }
 
@@ -174,6 +169,10 @@ public class TestRun {
 
     public boolean isStopped() {
         return this.stop;
+    }
+
+    public void putVars(String index, String s) {
+        this.vars = this.vars.add(index, s);
     }
 
     /**
@@ -250,7 +249,7 @@ public class TestRun {
     }
 
     public void startTest() {
-        this.getListener().startTest(currentStep().getName() != null ? this.currentStep().getName() : TestRuns.replaceVariable(this.currentStep().toPrettyString(), this.vars));
+        this.getListener().startTest(currentStep().getName() != null ? this.currentStep().getName() : this.vars.bind(this.currentStep().toPrettyString()));
     }
 
     public void toNextStepIndex() {
@@ -321,10 +320,8 @@ public class TestRun {
             return true;
         }
         boolean success = true;
-        for (Map<String, String> data : chainTo.loadData(this.vars)) {
-            Map<String, String> chainData = Maps.newHashMap(this.vars);
-            chainData.remove(DataSource.ROW_NUMBER);
-            chainData.putAll(data);
+        for (TestData data : chainTo.loadData(this.vars)) {
+            TestData chainData = this.vars.clearRowNumber().add(data);
             TestRun testRun = createChainRun(chainTo, chainData);
             if (!testRun.finish()) {
                 return false;
@@ -333,7 +330,7 @@ public class TestRun {
         return success;
     }
 
-    private TestRun createChainRun(Script chainTo, Map<String, String> data) {
+    private TestRun createChainRun(Script chainTo, TestData data) {
         return new TestRunBuilder(chainTo)
                 .addChain(this.scriptChain)
                 .addTestRunNamePrefix(this.testRunName + "_")

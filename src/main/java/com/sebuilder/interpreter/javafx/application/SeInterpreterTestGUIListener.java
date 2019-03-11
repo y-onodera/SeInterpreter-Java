@@ -2,13 +2,12 @@ package com.sebuilder.interpreter.javafx.application;
 
 import com.sebuilder.interpreter.Script;
 import com.sebuilder.interpreter.SimpleSeInterpreterTestListener;
+import com.sebuilder.interpreter.TestData;
 import com.sebuilder.interpreter.javafx.EventBus;
 import com.sebuilder.interpreter.javafx.Result;
 import com.sebuilder.interpreter.javafx.event.replay.StepResultSetEvent;
 import com.sebuilder.interpreter.javafx.event.script.ScriptSelectEvent;
 import org.apache.logging.log4j.Logger;
-
-import java.util.Map;
 
 public class SeInterpreterTestGUIListener extends SimpleSeInterpreterTestListener {
 
@@ -17,7 +16,7 @@ public class SeInterpreterTestGUIListener extends SimpleSeInterpreterTestListene
     }
 
     @Override
-    public boolean openTestSuite(Script script, String testRunName, Map<String, String> aProperty) {
+    public boolean openTestSuite(Script script, String testRunName, TestData aProperty) {
         EventBus.publish(new ScriptSelectEvent(script.name()));
         return super.openTestSuite(script, testRunName, aProperty);
     }

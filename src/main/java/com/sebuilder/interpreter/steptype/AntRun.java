@@ -26,7 +26,7 @@ public class AntRun implements Getter {
         ProjectHelper helper = ProjectHelper.getProjectHelper();
         p.addReference("ant.projectHelper", helper);
         helper.parse(p, buildFile);
-        ctx.vars().forEach((k, v) -> p.setProperty(k, v));
+        ctx.vars().entrySet().forEach(entry -> p.setProperty(entry.getKey(), entry.getValue()));
         String target = p.getDefaultTarget();
         if (ctx.containsKey("target") && !Strings.isNullOrEmpty(ctx.string("target"))) {
             target = ctx.string("target");

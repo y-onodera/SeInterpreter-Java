@@ -1,8 +1,8 @@
 package com.sebuilder.interpreter.factory;
 
-import com.google.common.collect.Maps;
 import com.sebuilder.interpreter.Script;
 import com.sebuilder.interpreter.Suite;
+import com.sebuilder.interpreter.TestData;
 import com.sebuilder.interpreter.TestRunBuilder;
 import com.sebuilder.interpreter.datasource.Csv;
 import com.sebuilder.interpreter.datasource.None;
@@ -14,7 +14,6 @@ import org.junit.runner.RunWith;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -173,7 +172,7 @@ public class ScriptFactoryTest {
             assertEquals("false", result.get(0).skip());
             assertTrue(result.get(0).overrideDataSource() instanceof Csv);
             assertEquals("override.csv", result.get(0).overrideDataSourceConfig().get("path"));
-            List<Map<String, String>> loadData = result.get(0).loadData(Maps.newHashMap());
+            List<TestData> loadData = result.get(0).loadData(new TestData());
             assertEquals(2, loadData.size());
             assertEquals("a", loadData.get(0).get("column1"));
             assertEquals("b", loadData.get(0).get("column2"));
@@ -198,7 +197,7 @@ public class ScriptFactoryTest {
             assertEquals("false", result.get(0).skip());
             assertTrue(result.get(0).overrideDataSource() instanceof Csv);
             assertEquals("override.csv", result.get(0).overrideDataSourceConfig().get("path"));
-            result.get(0).loadData(Maps.newHashMap());
+            result.get(0).loadData(new TestData());
             assertEquals(2, loadData.size());
             assertEquals("a", loadData.get(0).get("column1"));
             assertEquals("b", loadData.get(0).get("column2"));
@@ -241,7 +240,7 @@ public class ScriptFactoryTest {
             assertEquals(0, result.get(2).overrideDataSourceConfig().size());
             assertTrue(result.isShareState());
             List<TestRunBuilder> lazyFetch = result.getTestRuns();
-            List<Map<String, String>> loadData = lazyFetch.get(0).loadData();
+            List<TestData> loadData = lazyFetch.get(0).loadData();
             assertEquals(2, loadData.size());
             assertEquals("a", loadData.get(0).get("column1"));
             assertEquals("b", loadData.get(0).get("column2"));
@@ -304,7 +303,7 @@ public class ScriptFactoryTest {
             assertEquals("${dataSource3}.csv", result.get(2).overrideDataSourceConfig().get("path"));
             assertTrue(result.isShareState());
             List<TestRunBuilder> lazyFetch = result.getTestRuns();
-            List<Map<String, String>> loadData = lazyFetch.get(0).loadData();
+            List<TestData> loadData = lazyFetch.get(0).loadData();
             assertEquals(2, loadData.size());
             assertEquals("A", loadData.get(0).get("column1"));
             assertEquals("B", loadData.get(0).get("column2"));
@@ -407,7 +406,7 @@ public class ScriptFactoryTest {
             assertEquals("false", result.get(0).skip());
             assertTrue(result.get(0).overrideDataSource() instanceof Csv);
             assertEquals("${path}/override.csv", result.get(0).overrideDataSourceConfig().get("path"));
-            List<Map<String, String>> loadData = result.get(0).loadData(Map.of("path", "csv"));
+            List<TestData> loadData = result.get(0).loadData(new TestData().add("path", "csv"));
             assertEquals(2, loadData.size());
             assertEquals("1", loadData.get(0).get("column1"));
             assertEquals("2", loadData.get(0).get("column2"));
@@ -434,7 +433,7 @@ public class ScriptFactoryTest {
             assertEquals("false", result.get(0).skip());
             assertTrue(result.get(0).overrideDataSource() instanceof Csv);
             assertEquals("${path}/override.csv", result.get(0).overrideDataSourceConfig().get("path"));
-            loadData = result.get(0).loadData(Map.of("path", "csv"));
+            loadData = result.get(0).loadData(new TestData().add("path", "csv"));
             assertEquals(2, loadData.size());
             assertEquals("1", loadData.get(0).get("column1"));
             assertEquals("2", loadData.get(0).get("column2"));

@@ -7,7 +7,7 @@
 package com.sebuilder.interpreter.datasource;
 
 import com.sebuilder.interpreter.DataSource;
-import com.sebuilder.interpreter.TestRuns;
+import com.sebuilder.interpreter.TestData;
 
 import java.io.File;
 import java.util.Collections;
@@ -21,12 +21,12 @@ import java.util.Map;
  */
 public class Manual implements DataSource {
     @Override
-    public List<Map<String, String>> getData(Map<String, String> config, File relativeTo, Map<String, String> vars) {
-        config.put(DataSource.ROW_NUMBER, String.valueOf(1));
+    public List<TestData> getData(Map<String, String> config, File relativeTo, TestData vars) {
+        config.put(TestData.ROW_NUMBER, String.valueOf(1));
         config.keySet()
                 .stream()
-                .forEach(key -> config.put(key, TestRuns.replaceVariable(config.get(key), vars)));
-        return Collections.singletonList(config);
+                .forEach(key -> config.put(key, vars.bind(config.get(key))));
+        return Collections.singletonList(new TestData(config));
     }
 
     @Override

@@ -17,7 +17,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Hashtable;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class SimpleSeInterpreterTestListener implements SeInterpreterTestListener {
@@ -116,7 +115,7 @@ public class SimpleSeInterpreterTestListener implements SeInterpreterTestListene
     }
 
     @Override
-    public boolean openTestSuite(Script script, String testRunName, Map<String, String> aProperty) {
+    public boolean openTestSuite(Script script, String testRunName, TestData aProperty) {
         String baseName = testRunName;
         String testName = baseName.replace("\\", ".").replace("/", ".").replaceAll("^\\.+", "");
         this.log.info("open suite:" + testName);

@@ -6,7 +6,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
-import java.util.Map;
 import java.util.Scanner;
 
 public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
@@ -148,7 +147,7 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
     }
 
     private boolean execute(TestRunBuilder testRunBuilder, SeInterpreterTestListener seInterpreterTestListener) {
-        for (Map<String, String> data : testRunBuilder.loadData()) {
+        for (TestData data : testRunBuilder.loadData()) {
             boolean stop = this.execute(testRunBuilder, data, seInterpreterTestListener);
             if (stop) {
                 return true;
@@ -157,7 +156,7 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
         return false;
     }
 
-    private boolean execute(TestRunBuilder testRunBuilder, Map<String, String> data, SeInterpreterTestListener seInterpreterTestListener) {
+    private boolean execute(TestRunBuilder testRunBuilder, TestData data, SeInterpreterTestListener seInterpreterTestListener) {
         this.lastRun = this.getTestRun(testRunBuilder, data, seInterpreterTestListener);
         this.log.info("start execute test");
         this.lastRun.finish();

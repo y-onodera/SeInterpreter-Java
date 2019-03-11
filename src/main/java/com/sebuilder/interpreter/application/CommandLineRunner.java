@@ -10,7 +10,6 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
-import java.util.Map;
 
 public abstract class CommandLineRunner {
     protected static WebDriverFactory DEFAULT_DRIVER_FACTORY = new Firefox();
@@ -102,7 +101,7 @@ public abstract class CommandLineRunner {
         this.log.info("setUp finish");
     }
 
-    protected TestRun getTestRun(TestRunBuilder script, Map<String, String> data, SeInterpreterTestListener seInterpreterTestListener) {
+    protected TestRun getTestRun(TestRunBuilder script, TestData data, SeInterpreterTestListener seInterpreterTestListener) {
         return script.createTestRun(this.log
                 , this.wdf
                 , this.driverConfig

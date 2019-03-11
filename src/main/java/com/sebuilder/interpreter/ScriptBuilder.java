@@ -7,7 +7,7 @@ import java.util.function.Function;
 
 public class ScriptBuilder {
     private ArrayList<Step> steps;
-    private Function<Map<String, String>, Script> lazyLoad;
+    private Function<TestData, Script> lazyLoad;
     private String path;
     private String name;
     private File relativePath;
@@ -49,7 +49,7 @@ public class ScriptBuilder {
         this.skip = currentDisplay.skip();
     }
 
-    public static Script lazyLoad(String beforeReplace, Function<Map<String, String>, Script> lazyLoad) {
+    public static Script lazyLoad(String beforeReplace, Function<TestData, Script> lazyLoad) {
         ScriptBuilder builder = new ScriptBuilder();
         builder.setName(beforeReplace);
         builder.lazyLoad = lazyLoad;
@@ -60,7 +60,7 @@ public class ScriptBuilder {
         return this.steps;
     }
 
-    public Function<Map<String, String>, Script> getLazyLoad() {
+    public Function<TestData, Script> getLazyLoad() {
         return this.lazyLoad;
     }
 

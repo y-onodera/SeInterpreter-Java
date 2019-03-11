@@ -1,7 +1,6 @@
 package com.sebuilder.interpreter;
 
 import java.io.File;
-import java.util.Map;
 
 public class SeInterpreterTestListenerWrapper implements SeInterpreterTestListener {
     private final SeInterpreterTestListener delegate;
@@ -56,7 +55,7 @@ public class SeInterpreterTestListenerWrapper implements SeInterpreterTestListen
     }
 
     @Override
-    public boolean openTestSuite(Script script, String testRunName, Map<String, String> aProperty) {
+    public boolean openTestSuite(Script script, String testRunName, TestData aProperty) {
         return delegate.openTestSuite(script, testRunName, aProperty);
     }
 

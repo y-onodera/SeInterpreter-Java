@@ -24,7 +24,7 @@ import org.json.JSONObject;
 public class Store implements StepType {
     @Override
     public boolean run(TestRun ctx) {
-        ctx.vars().put(ctx.string("variable"), ctx.string("text"));
+        ctx.putVars(ctx.string("variable"), ctx.string("text"));
         return true;
     }
 

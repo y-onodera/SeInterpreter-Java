@@ -1,13 +1,11 @@
 package com.sebuilder.interpreter;
 
-import com.google.common.collect.Maps;
 import com.sebuilder.interpreter.webdriverfactory.WebDriverFactory;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -17,14 +15,14 @@ public class TestRunBuilder {
     private static final Pattern DUPLICATE_PATTERN = Pattern.compile(".+\\.[^\\.]+(\\(\\d+\\)$)");
     private final Script script;
     private ScriptChain scriptChain;
-    private final Map<String, String> shareInput;
+    private TestData shareInput;
     private String testRunNamePrefix;
     private String testRunNameSuffix;
 
     public TestRunBuilder(Script script) {
         this.script = script;
         this.scriptChain = new ScriptChain();
-        this.shareInput = Maps.newHashMap();
+        this.shareInput = new TestData();
     }
 
     public String getScriptName() {
@@ -49,8 +47,8 @@ public class TestRunBuilder {
         return this;
     }
 
-    public TestRunBuilder setShareInput(Map<String, String> shareInput) {
-        this.shareInput.putAll(shareInput);
+    public TestRunBuilder setShareInput(TestData shareInput) {
+        this.shareInput = this.shareInput.add(shareInput);
         return this;
     }
 
@@ -70,11 +68,11 @@ public class TestRunBuilder {
         return this;
     }
 
-    public List<Map<String, String>> loadData() {
+    public List<TestData> loadData() {
         return this.script.loadData(this.shareInput);
     }
 
-    public TestRun createTestRun(Logger log, WebDriverFactory webDriverFactory, HashMap<String, String> webDriverConfig, Long implicityWaitTime, Long pageLoadWaitTime, Map<String, String> initialVars, TestRun previousRun, SeInterpreterTestListener seInterpreterTestListener) {
+    public TestRun createTestRun(Logger log, WebDriverFactory webDriverFactory, HashMap<String, String> webDriverConfig, Long implicityWaitTime, Long pageLoadWaitTime, TestData initialVars, TestRun previousRun, SeInterpreterTestListener seInterpreterTestListener) {
         final RemoteWebDriver driver;
         if (this.script.usePreviousDriverAndVars() && previousRun != null && previousRun.driver() != null) {
             driver = previousRun.driver();
@@ -90,19 +88,18 @@ public class TestRunBuilder {
         return this.createTestRun(log, driver, initialVars, seInterpreterTestListener);
     }
 
-    public TestRun createTestRun(Logger log, Map<String, String> initialVars, TestRun previousRun, SeInterpreterTestListener seInterpreterTestListener) {
+    public TestRun createTestRun(Logger log, TestData initialVars, TestRun previousRun, SeInterpreterTestListener seInterpreterTestListener) {
         return this.createTestRun(log, previousRun.driver(), initialVars, seInterpreterTestListener);
     }
 
-    public TestRun createTestRun(Logger log, RemoteWebDriver driver, Map<String, String> initialVars, SeInterpreterTestListener seInterpreterTestListener) {
+    public TestRun createTestRun(Logger log, RemoteWebDriver driver, TestData initialVars, SeInterpreterTestListener seInterpreterTestListener) {
         final Script copy = this.script.copy();
         final ScriptChain copyScriptChain = this.scriptChain.replace(this.script, copy);
-        Map<String, String> data = Maps.newHashMap(this.shareInput);
-        data.putAll(initialVars);
+        TestData data = this.shareInput.add(initialVars);
         return new TestRun(getTestRunName(data), copy, log, driver, data, seInterpreterTestListener, copyScriptChain);
     }
 
-    public String getTestRunName(Map<String, String> initialVars) {
+    public String getTestRunName(TestData initialVars) {
         String result = this.script.name();
         if (script.path() != null && result.contains(".")) {
             String suffix = "";
@@ -118,8 +115,8 @@ public class TestRunBuilder {
         if (this.testRunNamePrefix != null) {
             result = this.testRunNamePrefix + result;
         }
-        if (initialVars.containsKey(DataSource.ROW_NUMBER)) {
-            result = result + "_row_" + initialVars.get(DataSource.ROW_NUMBER);
+        if (initialVars.rowNumber() != null) {
+            result = result + "_row_" + initialVars.rowNumber();
         }
         return result;
     }

@@ -24,7 +24,6 @@ import org.json.JSONTokener;
 
 import java.io.*;
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Factory to create Script objects from a string, a reader or JSONObject.
@@ -207,8 +206,8 @@ public class ScriptFactory {
             return this.loadScriptIfExists(f, script);
         } else if (script.has("lazyLoad")) {
             String beforeReplace = script.getString("lazyLoad");
-            final Script resultScript = ScriptBuilder.lazyLoad(beforeReplace, (Map<String, String> data) -> {
-                String fileName = TestRuns.replaceVariable(beforeReplace, data);
+            final Script resultScript = ScriptBuilder.lazyLoad(beforeReplace, (TestData data) -> {
+                String fileName = data.bind(beforeReplace);
                 JSONObject source = new JSONObject();
                 try {
                     source.put("path", fileName);

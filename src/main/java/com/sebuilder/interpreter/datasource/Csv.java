@@ -19,7 +19,7 @@ package com.sebuilder.interpreter.datasource;
 import com.opencsv.CSVReader;
 import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.DataSource;
-import com.sebuilder.interpreter.TestRuns;
+import com.sebuilder.interpreter.TestData;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -36,9 +36,9 @@ import static com.sebuilder.interpreter.datasource.Utils.findFile;
  */
 public class Csv implements DataSource {
     @Override
-    public List<Map<String, String>> getData(Map<String, String> config, File relativeTo, Map<String, String> vars) {
-        ArrayList<Map<String, String>> data = new ArrayList<>();
-        File f = findFile(relativeTo, TestRuns.replaceVariable(config.get("path"), vars));
+    public List<TestData> getData(Map<String, String> config, File relativeTo, TestData vars) {
+        ArrayList<TestData> data = new ArrayList<>();
+        File f = findFile(relativeTo, vars.bind(config.get("path")));
         String charsetName = Context.getInstance().getDataSourceEncording();
         BufferedReader r = null;
         try {
@@ -54,11 +54,11 @@ public class Csv implements DataSource {
                     if (line.length < keys.length) {
                         throw new IOException("Not enough cells in row " + rowNumber + ".");
                     }
-                    row.put(DataSource.ROW_NUMBER, String.valueOf(rowNumber - 1));
+                    row.put(TestData.ROW_NUMBER, String.valueOf(rowNumber - 1));
                     for (int c = 0; c < keys.length; c++) {
                         row.put(keys[c], line[c]);
                     }
-                    data.add(row);
+                    data.add(new TestData(row));
                 }
             }
         } catch (Exception e) {

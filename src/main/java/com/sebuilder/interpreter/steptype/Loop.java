@@ -20,7 +20,7 @@ public class Loop implements FlowStep {
         int actions = getSubSteps(ctx);
         int count = Integer.valueOf(ctx.string("count"));
         for (int i = 0; i < count; i++) {
-            ctx.vars().put("_index", String.valueOf(i + 1));
+            ctx.putVars("_index", String.valueOf(i + 1));
             success = runSubStep(ctx, success, actions);
             if (!success) {
                 ctx.processTestFailure();

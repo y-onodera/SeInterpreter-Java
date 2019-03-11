@@ -18,7 +18,7 @@ package com.sebuilder.interpreter.datasource;
 
 import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.DataSource;
-import com.sebuilder.interpreter.TestRuns;
+import com.sebuilder.interpreter.TestData;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -38,9 +38,9 @@ import static com.sebuilder.interpreter.datasource.Utils.findFile;
  */
 public class Json implements DataSource {
     @Override
-    public List<Map<String, String>> getData(Map<String, String> config, File relativeTo, Map<String, String> vars) {
-        ArrayList<Map<String, String>> data = new ArrayList<>();
-        File f = findFile(relativeTo, TestRuns.replaceVariable(config.get("path"), vars));
+    public List<TestData> getData(Map<String, String> config, File relativeTo, TestData vars) {
+        ArrayList<TestData> data = new ArrayList<>();
+        File f = findFile(relativeTo, vars.bind(config.get("path")));
         String charsetName = Context.getInstance().getDataSourceEncording();
         try (BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(f), charsetName))) {
             JSONTokener tok = new JSONTokener(r);
@@ -48,12 +48,12 @@ public class Json implements DataSource {
             for (int i = 0; i < a.length(); i++) {
                 JSONObject rowO = a.getJSONObject(i);
                 Map<String, String> row = new HashMap<>();
-                row.put(DataSource.ROW_NUMBER, String.valueOf(i + 1));
+                row.put(TestData.ROW_NUMBER, String.valueOf(i + 1));
                 for (Iterator<String> it = rowO.keys(); it.hasNext(); ) {
                     String key = it.next();
                     row.put(key, rowO.getString(key));
                 }
-                data.add(row);
+                data.add(new TestData(row));
             }
         } catch (Exception e) {
             throw new RuntimeException("Unable to get data.", e);

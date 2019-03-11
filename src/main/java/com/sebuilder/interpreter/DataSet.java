@@ -7,7 +7,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -41,13 +40,13 @@ public class DataSet {
         return this.relativePath;
     }
 
-    public List<Map<String, String>> loadData() {
-        return this.loadData(Maps.newHashMap());
+    public List<TestData> loadData() {
+        return this.loadData(new TestData());
     }
 
-    public List<Map<String, String>> loadData(Map<String, String> vars) {
+    public List<TestData> loadData(TestData vars) {
         if (this.dataSource == null) {
-            return Lists.newArrayList(new HashMap<>());
+            return Lists.newArrayList(new TestData());
         }
         return this.dataSource.getData(this.dataSourceConfig, this.relativePath, vars);
     }

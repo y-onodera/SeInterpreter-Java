@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
  */
 public class Script implements TestRunnable {
     private final ArrayList<Step> steps;
-    private final Function<Map<String, String>, Script> lazyLoad;
+    private final Function<TestData, Script> lazyLoad;
     private final String path;
     private final String name;
     private final File relativePath;
@@ -92,11 +92,11 @@ public class Script implements TestRunnable {
         return this.name;
     }
 
-    public Function<Map<String, String>, Script> lazyLoad() {
+    public Function<TestData, Script> lazyLoad() {
         return this.lazyLoad;
     }
 
-    public Script loadContents(Map<String, String> it) {
+    public Script loadContents(TestData it) {
         if (this.isLazyLoad()) {
             return this.lazyLoad.apply(it)
                     .builder()
@@ -135,15 +135,15 @@ public class Script implements TestRunnable {
         return this.lazyLoad != null;
     }
 
-    public List<Map<String, String>> loadData(Map<String, String> vars) {
+    public List<TestData> loadData(TestData vars) {
         if (this.overrideDataSource() != null) {
             return this.overrideDataSet.loadData(vars);
         }
         return this.dataSet.loadData();
     }
 
-    public boolean skipRunning(Map<String, String> dataSource) {
-        return Boolean.valueOf(TestRuns.replaceVars(this.skip, dataSource));
+    public boolean skipRunning(TestData testData) {
+        return Boolean.valueOf(testData.bind(this.skip));
     }
 
     public Script rename(String aName) {

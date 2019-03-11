@@ -55,7 +55,7 @@ public class Suite implements Iterable<Script>, TestRunnable {
         runner.execute(this, testListener);
     }
 
-    public List<Map<String, String>> loadData() {
+    public List<TestData> loadData() {
         return this.dataSet.loadData();
     }
 
@@ -128,8 +128,8 @@ public class Suite implements Iterable<Script>, TestRunnable {
         return this.loadData()
                 .stream()
                 .flatMap(it -> {
-                    String rowNum = it.get(DataSource.ROW_NUMBER);
-                    it.remove(DataSource.ROW_NUMBER);
+                    String rowNum = it.rowNumber();
+                    TestData newRow = it.clearRowNumber();
                     final String prefix;
                     if (rowNum != null) {
                         prefix = suiteName + "_" + rowNum;
@@ -139,7 +139,7 @@ public class Suite implements Iterable<Script>, TestRunnable {
                     List<Script> loadedScripts = Lists.newArrayList();
                     ScriptChain loadedScriptChains = this.scriptChains;
                     for (Script script : this.scripts) {
-                        Script loaded = script.loadContents(it);
+                        Script loaded = script.loadContents(newRow);
                         loadedScripts.add(loaded);
                         if (script != loaded) {
                             loadedScriptChains = loadedScriptChains.replace(script, loaded);
@@ -149,11 +149,11 @@ public class Suite implements Iterable<Script>, TestRunnable {
                     return loadedScripts
                             .stream()
                             .filter(script -> !runScriptChain.containsValue(script))
-                            .filter(script -> !script.skipRunning(it))
+                            .filter(script -> !script.skipRunning(newRow))
                             .map(script -> new TestRunBuilder(script)
                                     .addChain(runScriptChain)
                                     .addTestRunNamePrefix(prefix + "_")
-                                    .setShareInput(it)
+                                    .setShareInput(newRow)
                             );
                 })
                 .collect(Collectors.toList());

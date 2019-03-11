@@ -1,7 +1,6 @@
 package com.sebuilder.interpreter;
 
 import java.io.File;
-import java.util.Map;
 
 public interface SeInterpreterTestListener {
     void cleanResult();
@@ -22,7 +21,7 @@ public interface SeInterpreterTestListener {
 
     File getTemplateOutputDirectory();
 
-    boolean openTestSuite(Script script, String testRunName, Map<String, String> aProperty);
+    boolean openTestSuite(Script script, String testRunName, TestData aProperty);
 
     void startTest(String testName);
 
