@@ -108,6 +108,11 @@ public class Scenario {
         Map<TestCase, TestCase> newMap = Maps.newHashMap(this.chains);
         newList.remove(aTestCase);
         newMap.remove(aTestCase);
+        this.chains.entrySet()
+                .stream()
+                .filter(entry -> entry.getValue().equals(aTestCase))
+                .findFirst()
+                .ifPresent(entry -> newMap.remove(entry.getKey()));
         return new Scenario(newList, newMap);
     }
 
