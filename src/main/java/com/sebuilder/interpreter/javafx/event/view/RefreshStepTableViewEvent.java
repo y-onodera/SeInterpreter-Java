@@ -1,16 +1,16 @@
 package com.sebuilder.interpreter.javafx.event.view;
 
-import com.sebuilder.interpreter.Script;
+import com.sebuilder.interpreter.TestCase;
 
 public class RefreshStepTableViewEvent {
 
-    private final Script script;
+    private final TestCase testCase;
 
-    public RefreshStepTableViewEvent(Script script) {
-        this.script = script;
+    public RefreshStepTableViewEvent(TestCase testCase) {
+        this.testCase = testCase;
     }
 
-    public Script getScript() {
-        return script;
+    public TestCase getTestCase() {
+        return testCase;
     }
 }

@@ -12,7 +12,7 @@ public enum Context {
 
     private final File baseDirectory = Paths.get(".").toAbsolutePath().normalize().toFile();
     private String dataSourceDirectory = "input";
-    private String dataSourceEncording = "UTF-8";
+    private String dataSourceEncoding = "UTF-8";
     private String resultOutputDirectory = "result";
     private String downloadDirectory = "download";
     private String screenShotOutputDirectory = "screenshot";
@@ -27,8 +27,8 @@ public enum Context {
         this.dataSourceDirectory = dataSourceDirectory;
     }
 
-    public void setDataSourceEncording(String dataSourceEncording) {
-        this.dataSourceEncording = dataSourceEncording;
+    public void setDataSourceEncoding(String dataSourceEncoding) {
+        this.dataSourceEncoding = dataSourceEncoding;
     }
 
     public void setResultOutputDirectory(String aResultOutputDirectory) {
@@ -59,8 +59,8 @@ public enum Context {
         return new File(dataSourceDirectory);
     }
 
-    public String getDataSourceEncording() {
-        return dataSourceEncording;
+    public String getDataSourceEncoding() {
+        return dataSourceEncoding;
     }
 
     public File getResultOutputDirectory() {

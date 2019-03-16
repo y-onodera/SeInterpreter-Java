@@ -2,10 +2,10 @@ package com.sebuilder.interpreter.steptype;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
-import com.sebuilder.interpreter.ExportResource;
-import com.sebuilder.interpreter.LocatorHolder;
 import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
+import com.sebuilder.interpreter.step.ExportResource;
+import com.sebuilder.interpreter.step.LocatorHolder;
 import org.json.JSONException;
 import org.json.JSONObject;
 

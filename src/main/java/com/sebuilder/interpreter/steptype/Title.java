@@ -16,8 +16,8 @@
 
 package com.sebuilder.interpreter.steptype;
 
-import com.sebuilder.interpreter.Getter;
 import com.sebuilder.interpreter.TestRun;
+import com.sebuilder.interpreter.step.Getter;
 
 public class Title implements Getter {
     @Override

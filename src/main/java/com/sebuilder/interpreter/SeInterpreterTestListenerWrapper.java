@@ -55,8 +55,8 @@ public class SeInterpreterTestListenerWrapper implements SeInterpreterTestListen
     }
 
     @Override
-    public boolean openTestSuite(Script script, String testRunName, TestData aProperty) {
-        return delegate.openTestSuite(script, testRunName, aProperty);
+    public boolean openTestSuite(TestCase testCase, String testRunName, TestData aProperty) {
+        return delegate.openTestSuite(testCase, testRunName, aProperty);
     }
 
     @Override

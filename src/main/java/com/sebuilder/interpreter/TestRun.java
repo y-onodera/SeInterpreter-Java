@@ -16,35 +16,36 @@
 
 package com.sebuilder.interpreter;
 
+import com.sebuilder.interpreter.step.Verify;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 /**
- * A single run of a test script.
+ * A single run of a test testCase.
  *
  * @author zarkonnen
  */
 public class TestRun {
     private final String testRunName;
-    private final Script script;
+    private final TestCase testCase;
     private final RemoteWebDriver driver;
     private final Logger log;
     private final SeInterpreterTestListener listener;
-    private final ScriptChain scriptChain;
+    private final Scenario scenario;
     private TestRunStatus testRunStatus;
     private TestData vars;
 
     public TestRun(
             String testRunName,
-            Script script,
+            TestCase testCase,
             Logger log,
             RemoteWebDriver driver,
             TestData initialVars,
             SeInterpreterTestListener seInterpreterTestListener,
-            ScriptChain scriptChain
+            Scenario scenario
     ) {
         this.testRunName = testRunName;
-        this.script = script;
+        this.testCase = testCase;
         this.log = log;
         this.driver = driver;
         this.listener = seInterpreterTestListener;
@@ -57,8 +58,8 @@ public class TestRun {
                 .add("_downloadDir", seInterpreterTestListener.getDownloadDirectory().getAbsolutePath())
                 .add("_templateDir", seInterpreterTestListener.getTemplateOutputDirectory().getAbsolutePath())
                 .build();
-        this.scriptChain = scriptChain;
-        this.testRunStatus = TestRunStatus.of(this.scriptChain.containsKey(this.script));
+        this.scenario = scenario;
+        this.testRunStatus = TestRunStatus.of(this.scenario, this.testCase);
     }
 
     public String getTestRunName() {
@@ -97,7 +98,7 @@ public class TestRun {
      * @return The step that is being/has just been executed.
      */
     public Step currentStep() {
-        return this.script.steps().get(this.testRunStatus.stepIndex());
+        return this.testCase.steps().get(this.testRunStatus.stepIndex());
     }
 
     /**
@@ -169,11 +170,11 @@ public class TestRun {
     }
 
     /**
-     * Runs the entire (rest of the) script.
+     * Runs the entire (rest of the) testCase.
      *
-     * @return True if the script ran successfully, false if a verification failed.
+     * @return True if the testCase ran successfully, false if a verification failed.
      * Any other failure throws an exception.
-     * @throws RuntimeException if the script failed.
+     * @throws RuntimeException if the testCase failed.
      */
     public boolean finish() {
         try {
@@ -193,7 +194,7 @@ public class TestRun {
 
     public boolean start() {
         this.testRunStatus = this.testRunStatus.start();
-        this.getListener().openTestSuite(this.script, this.testRunName, this.vars);
+        this.getListener().openTestSuite(this.testCase, this.testRunName, this.vars);
         return true;
     }
 
@@ -213,7 +214,7 @@ public class TestRun {
     }
 
     public boolean stepRest() {
-        return testRunStatus.isNeedRunning(this.script.steps().size() - 1);
+        return testRunStatus.isNeedRunning(this.testCase.steps().size() - 1);
     }
 
     /**
@@ -280,20 +281,20 @@ public class TestRun {
     public boolean end(boolean success) {
         this.getListener().closeTestSuite();
         if (this.testRunStatus.isNeedChain()) {
-            return this.chainRun(this.scriptChain.get(this.script));
+            return this.chainRun(this.scenario.getChainTo(this.testCase));
         }
         return success;
     }
 
     public boolean absent(Throwable e) {
         this.getListener().closeTestSuite();
-        // If the script terminates, the driver will be closed automatically.
+        // If the testCase terminates, the driver will be closed automatically.
         this.quit();
         throw new AssertionError(e);
     }
 
     public void quit() {
-        if (this.script.closeDriver()) {
+        if (this.testCase.closeDriver()) {
             this.log.debug("Quitting driver.");
             try {
                 this.driver.quit();
@@ -303,11 +304,11 @@ public class TestRun {
         }
     }
 
-    private boolean chainRun(Script chainTo) {
+    private boolean chainRun(TestCase chainTo) {
         this.testRunStatus = this.testRunStatus.chainCalled();
         if (chainTo.skipRunning(this.vars)) {
-            if (this.scriptChain.containsKey(chainTo)) {
-                return this.chainRun(this.scriptChain.get(chainTo));
+            if (this.scenario.hasChain(chainTo)) {
+                return this.chainRun(this.scenario.getChainTo(chainTo));
             }
             return true;
         }
@@ -322,9 +323,8 @@ public class TestRun {
         return success;
     }
 
-    private TestRun createChainRun(Script chainTo, TestData data) {
-        return new TestRunBuilder(chainTo)
-                .addChain(this.scriptChain)
+    private TestRun createChainRun(TestCase chainTo, TestData data) {
+        return new TestRunBuilder(chainTo, this.scenario)
                 .addTestRunNamePrefix(this.testRunName + "_")
                 .createTestRun(this.log
                         , data

@@ -6,7 +6,8 @@ import com.google.common.collect.Lists;
 import com.google.common.eventbus.Subscribe;
 import com.google.common.io.Files;
 import com.sebuilder.interpreter.*;
-import com.sebuilder.interpreter.factory.ScriptFactory;
+import com.sebuilder.interpreter.application.SimpleSeInterpreterTestListener;
+import com.sebuilder.interpreter.factory.TestCaseFactory;
 import com.sebuilder.interpreter.javafx.EventBus;
 import com.sebuilder.interpreter.javafx.controller.RunningProgressController;
 import com.sebuilder.interpreter.javafx.event.ReportErrorEvent;
@@ -42,7 +43,7 @@ public class SeInterpreterApplication extends Application {
 
     private Suite suite;
 
-    private Script currentDisplay;
+    private TestCase currentDisplay;
 
     private ViewType currentMainView;
 
@@ -105,24 +106,24 @@ public class SeInterpreterApplication extends Application {
 
     @Subscribe
     public void addScript(ScriptAddEvent event) throws IOException, JSONException {
-        Script newScript = event.getScript();
-        if (newScript == null) {
-            newScript = this.templateScript();
+        TestCase newTestCase = event.getTestCase();
+        if (newTestCase == null) {
+            newTestCase = this.templateScript();
         }
-        addScript(newScript);
+        addScript(newTestCase);
     }
 
     @Subscribe
     public void insertScript(ScriptInsertEvent event) throws IOException, JSONException {
-        Script newScript = this.templateScript();
-        Suite newSuite = this.suite.insert(this.currentDisplay, newScript);
+        TestCase newTestCase = this.templateScript();
+        Suite newSuite = this.suite.insert(this.currentDisplay, newTestCase);
         int index = newSuite.getIndex(this.currentDisplay);
         this.resetSuite(newSuite, newSuite.get(index - 1));
     }
 
     @Subscribe
     public void exportTemplate(TemplateLoadEvent event) {
-        Script exported = this.runner.exportTemplate(event.getParentLocator(), event.getTargetTag(), event.isWithDataSource());
+        TestCase exported = this.runner.exportTemplate(event.getParentLocator(), event.getTargetTag(), event.isWithDataSource());
         this.addScript(exported);
     }
 
@@ -130,8 +131,8 @@ public class SeInterpreterApplication extends Application {
     public void scriptImport(ScriptImportEvent event) {
         File file = event.getFile();
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
-            Script script = getScriptFactory().parse(file).get(0);
-            addScript(script);
+            TestCase testCase = getScriptFactory().parse(file).get(0);
+            addScript(testCase);
         });
 
     }
@@ -153,8 +154,8 @@ public class SeInterpreterApplication extends Application {
     @Subscribe
     public void replaceScript(ScriptReplaceEvent event) {
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
-            Script newScript = getScriptFactory().parse(event.getScript());
-            this.currentDisplay = newScript.builder()
+            TestCase newTestCase = getScriptFactory().parse(event.getScript());
+            this.currentDisplay = newTestCase.builder()
                     .associateWith(new File(this.currentDisplay.path()))
                     .setName(this.currentDisplay.name())
                     .createScript();
@@ -197,8 +198,8 @@ public class SeInterpreterApplication extends Application {
         JSONArray steps = new JSONArray();
         steps.put(event.getStepSource());
         json.putOpt("steps", steps);
-        Script script = getScriptFactory().parse(json);
-        Step newStep = script.steps().get(0);
+        TestCase testCase = getScriptFactory().parse(json);
+        Step newStep = testCase.steps().get(0);
         if (event.getEditAction().equals("change")) {
             this.currentDisplay = this.currentDisplay.replaceStep(event.getStepIndex(), newStep);
         } else if (event.getEditAction().equals("insert")) {
@@ -212,8 +213,8 @@ public class SeInterpreterApplication extends Application {
 
     @Subscribe
     public void createStep(StepAddEvent event) throws IOException, JSONException {
-        Script templateScript = getScriptFactory().template(event.getStepType());
-        EventBus.publish(RefreshStepEditViewEvent.add(templateScript.steps().get(0)));
+        TestCase templateTestCase = getScriptFactory().template(event.getStepType());
+        EventBus.publish(RefreshStepEditViewEvent.add(templateTestCase.steps().get(0)));
     }
 
     @Subscribe
@@ -237,7 +238,7 @@ public class SeInterpreterApplication extends Application {
         File target = event.getFile();
         String oldName = this.currentDisplay.name();
         String oldPath = this.currentDisplay.path();
-        this.currentDisplay = new ScriptBuilder(this.currentDisplay)
+        this.currentDisplay = new TestCaseBuilder(this.currentDisplay)
                 .associateWith(target)
                 .createScript();
         Suite newSuite = this.suite.replace(oldName, this.currentDisplay);
@@ -319,28 +320,28 @@ public class SeInterpreterApplication extends Application {
         this.runner.close();
     }
 
-    protected ScriptFactory getScriptFactory() {
-        return new ScriptFactory();
+    protected TestCaseFactory getScriptFactory() {
+        return new TestCaseFactory();
     }
 
-    private Script templateScript() throws IOException, JSONException {
+    private TestCase templateScript() throws IOException, JSONException {
         return getScriptFactory().open("https://www.google.com");
     }
 
-    private void addScript(Script newScript) {
-        Suite newSuite = this.suite.add(this.currentDisplay, newScript);
+    private void addScript(TestCase newTestCase) {
+        Suite newSuite = this.suite.add(this.currentDisplay, newTestCase);
         int index = newSuite.getIndex(this.currentDisplay);
         this.resetSuite(newSuite, newSuite.get(index + 1));
     }
 
-    private void resetSuite(Suite aSuite, Script toSelect) {
+    private void resetSuite(Suite aSuite, TestCase toSelect) {
         this.suite = aSuite;
         EventBus.publish(new RefreshScriptViewEvent(this.suite, toSelect.name()));
     }
 
     private void saveSuite() {
         File target = new File(this.suite.getPath());
-        List<Script> notAssociateFile = Lists.newArrayList();
+        List<TestCase> notAssociateFile = Lists.newArrayList();
         this.suite.forEach(it -> {
             if (Strings.isNullOrEmpty(it.path())) {
                 notAssociateFile.add(it);
@@ -367,7 +368,7 @@ public class SeInterpreterApplication extends Application {
         this.resetSuite(this.suite, this.currentDisplay);
     }
 
-    private void saveContents(File target, Script exportTo, String oldPath) {
+    private void saveContents(File target, TestCase exportTo, String oldPath) {
         if (Strings.isNullOrEmpty(oldPath)) {
             this.copyDataSourceTemplate(exportTo);
         }
@@ -383,7 +384,7 @@ public class SeInterpreterApplication extends Application {
         });
     }
 
-    private void copyDataSourceTemplate(Script it) {
+    private void copyDataSourceTemplate(TestCase it) {
         if (it.dataSourceConfig().containsKey("path")) {
             File src = new File(this.runner.getTemplateOutputDirectory(), it.dataSourceConfig().get("path"));
             final String newDataSourceName = it.name().replace(".json", ".csv");

@@ -1,19 +1,19 @@
 package com.sebuilder.interpreter.javafx.event.script;
 
-import com.sebuilder.interpreter.Script;
+import com.sebuilder.interpreter.TestCase;
 
 public class ScriptAddEvent {
-    private final Script script;
+    private final TestCase testCase;
 
     public ScriptAddEvent() {
         this(null);
     }
 
-    public ScriptAddEvent(Script script) {
-        this.script = script;
+    public ScriptAddEvent(TestCase testCase) {
+        this.testCase = testCase;
     }
 
-    public Script getScript() {
-        return script;
+    public TestCase getTestCase() {
+        return testCase;
     }
 }

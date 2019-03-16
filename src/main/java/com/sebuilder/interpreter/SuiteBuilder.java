@@ -8,26 +8,28 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 
 public class SuiteBuilder {
     private File suiteFile;
-    private final ArrayList<Script> scripts;
-    private ScriptChain scriptChains;
+    private Scenario scenario;
     private DataSource dataSource;
     private Map<String, String> dataSourceConfig;
     private boolean shareState = true;
-    private Function<Script, Script> converter = script -> script.usePreviousDriverAndVars(this.shareState);
+    private Function<TestCase, TestCase> converter = script -> {
+        if (script.usePreviousDriverAndVars() != this.shareState) {
+            return script.usePreviousDriverAndVars(this.shareState);
+        }
+        return script;
+    };
 
-    public SuiteBuilder(Script script) {
-        this(Lists.newArrayList(script));
+    public SuiteBuilder(TestCase testCase) {
+        this(Lists.newArrayList(testCase));
     }
 
-    public SuiteBuilder(ArrayList<Script> aScripts) {
+    public SuiteBuilder(ArrayList<TestCase> aTestCases) {
         this.suiteFile = null;
-        this.scripts = aScripts;
-        this.scriptChains = new ScriptChain();
+        this.scenario = new Scenario(aTestCases);
         this.dataSource = null;
         this.dataSourceConfig = Maps.newHashMap();
     }
@@ -35,8 +37,7 @@ public class SuiteBuilder {
 
     public SuiteBuilder(File suiteFile) {
         this.suiteFile = suiteFile;
-        this.scripts = new ArrayList<>();
-        this.scriptChains = new ScriptChain();
+        this.scenario = new Scenario();
         this.dataSource = null;
         this.dataSourceConfig = Maps.newHashMap();
     }
@@ -47,8 +48,7 @@ public class SuiteBuilder {
         } else {
             this.suiteFile = null;
         }
-        this.scripts = Lists.newArrayList(suite);
-        this.scriptChains = suite.getScriptChains();
+        this.scenario = suite.getScenario();
         this.dataSource = suite.getDataSource();
         this.dataSourceConfig = suite.getDataSourceConfig();
         this.shareState = suite.isShareState();
@@ -74,48 +74,38 @@ public class SuiteBuilder {
         return this;
     }
 
-    public SuiteBuilder addScripts(Suite s) {
-        this.scripts.addAll(Lists.newArrayList(s));
+    public SuiteBuilder addTests(Suite s) {
+        this.scenario = this.scenario.append(s);
         return this;
     }
 
-    public SuiteBuilder insertScript(Script aScript, Script newScript) {
-        final int index = this.scripts.indexOf(aScript);
-        return addScript(newScript, index);
+    public SuiteBuilder insertTest(TestCase aTestCase, TestCase newTestCase) {
+        final int index = this.scenario.indexOf(aTestCase);
+        return addTest(newTestCase, index);
     }
 
-    public SuiteBuilder addScript(Script aScript, Script newScript) {
-        final int index = this.scripts.indexOf(aScript) + 1;
-        return addScript(newScript, index);
+    public SuiteBuilder addTest(TestCase aTestCase, TestCase newTestCase) {
+        final int index = this.scenario.indexOf(aTestCase) + 1;
+        return addTest(newTestCase, index);
     }
 
-    public SuiteBuilder addScript(Script s) {
-        this.scripts.add(s);
+    public SuiteBuilder addTest(TestCase s) {
+        this.scenario = this.scenario.append(s);
         return this;
     }
 
-    public SuiteBuilder deleteScript(Script aScript) {
-        this.scripts.remove(aScript);
+    public SuiteBuilder removeTest(TestCase aTestCase) {
+        this.scenario = this.scenario.minus(aTestCase);
         return this;
     }
 
-    public SuiteBuilder addScriptChain(Script from, Script to) {
-        this.scriptChains = this.scriptChains.add(from, to);
+    public SuiteBuilder testChain(TestCase from, TestCase to) {
+        this.scenario = this.scenario.appendNewChain(from, to);
         return this;
     }
 
-    public SuiteBuilder replace(String oldName, Script aScript) {
-        ArrayList newScripts = Lists.newArrayList();
-        for (Script script : this.scripts) {
-            Script newScript = script;
-            if (script.name().equals(oldName)) {
-                newScript = aScript;
-            }
-            newScripts.add(newScript);
-            this.scriptChains = this.scriptChains.replace(script, newScript);
-        }
-        this.scripts.clear();
-        this.scripts.addAll(newScripts);
+    public SuiteBuilder replace(String oldName, TestCase aTestCase) {
+        this.scenario = this.scenario.replaceTest(oldName, aTestCase);
         return this;
     }
 
@@ -125,44 +115,16 @@ public class SuiteBuilder {
     }
 
     public Suite createSuite() {
-        ArrayList<Script> copyScripts = Lists.newArrayList();
-        ScriptChain copyScriptChain = this.copyScriptTo(copyScripts);
         return new Suite(this.suiteFile
-                , copyScripts
-                , copyScriptChain
+                , this.scenario.map(this.converter)
                 , this.dataSource
                 , Maps.newHashMap(this.dataSourceConfig)
                 , this.shareState);
     }
 
-    private SuiteBuilder addScript(Script newScript, int index) {
-        this.scripts.add(index, newScript);
+    private SuiteBuilder addTest(TestCase newTestCase, int index) {
+        this.scenario = this.scenario.append(index, newTestCase);
         return this;
     }
 
-    private ScriptChain copyScriptTo(ArrayList<Script> copyScripts) {
-        ScriptChain result = this.scriptChains;
-        Map<String, Integer> duplicate = Maps.newHashMap();
-        for (Script script : this.scripts) {
-            Script copy = this.converter.apply(script);
-            final String scriptName = copy.name();
-            if (duplicate.containsKey(copy.path())) {
-                Optional<String> entries = copyScripts
-                        .stream()
-                        .map(it -> it.name())
-                        .filter(it -> scriptName.startsWith(it))
-                        .findFirst();
-                if (entries.isPresent()) {
-                    int nextCount = duplicate.get(copy.path()) + 1;
-                    duplicate.put(copy.path(), nextCount);
-                    copy = copy.rename(entries.get() + String.format("(%d)", nextCount));
-                }
-            } else {
-                duplicate.put(copy.path(), 0);
-            }
-            copyScripts.add(copy);
-            result = result.replace(script, copy);
-        }
-        return result;
-    }
 }

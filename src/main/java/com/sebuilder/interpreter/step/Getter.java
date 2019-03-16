@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-package com.sebuilder.interpreter;
+package com.sebuilder.interpreter.step;
 
+
+import com.sebuilder.interpreter.JSONSerializable;
+import com.sebuilder.interpreter.TestRun;
 
 /**
  * Interface to plug into the generic Assert/Verify/Store steps that does the work of actually

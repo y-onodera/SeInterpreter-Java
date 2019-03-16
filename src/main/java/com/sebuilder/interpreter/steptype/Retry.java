@@ -1,8 +1,8 @@
 package com.sebuilder.interpreter.steptype;
 
 
-import com.sebuilder.interpreter.FlowStep;
 import com.sebuilder.interpreter.TestRun;
+import com.sebuilder.interpreter.step.FlowStep;
 
 public class Retry implements FlowStep {
 

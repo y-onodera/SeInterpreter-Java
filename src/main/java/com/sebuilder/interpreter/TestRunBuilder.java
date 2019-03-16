@@ -13,38 +13,32 @@ import java.util.regex.Pattern;
 public class TestRunBuilder {
 
     private static final Pattern DUPLICATE_PATTERN = Pattern.compile(".+\\.[^\\.]+(\\(\\d+\\)$)");
-    private final Script script;
-    private ScriptChain scriptChain;
+    private final TestCase testCase;
+    private Scenario scenario;
     private TestData shareInput;
     private String testRunNamePrefix;
     private String testRunNameSuffix;
 
-    public TestRunBuilder(Script script) {
-        this.script = script;
-        this.scriptChain = new ScriptChain();
+    public TestRunBuilder(TestCase testCase) {
+        this(testCase, new Scenario(testCase));
+    }
+
+    public TestRunBuilder(TestCase testCase, Scenario aScenario) {
+        this.testCase = testCase;
+        this.scenario = aScenario;
         this.shareInput = new TestData();
     }
 
     public String getScriptName() {
-        return this.getScriptFileName().substring(0, this.script.name().indexOf('.'));
+        return this.getScriptFileName().substring(0, this.testCase.name().indexOf('.'));
     }
 
     public String getScriptFileName() {
-        return this.script.name();
+        return this.testCase.name();
     }
 
     public boolean closeDriver() {
-        return this.script.closeDriver();
-    }
-
-    public TestRunBuilder addChain(ScriptChain scriptChain) {
-        Script scriptFrom = this.script;
-        while (scriptChain.containsKey(scriptFrom)) {
-            Script chainTo = scriptChain.get(scriptFrom);
-            this.scriptChain = this.scriptChain.add(scriptFrom, chainTo);
-            scriptFrom = chainTo;
-        }
-        return this;
+        return this.testCase.closeDriver();
     }
 
     public TestRunBuilder setShareInput(TestData shareInput) {
@@ -69,12 +63,12 @@ public class TestRunBuilder {
     }
 
     public List<TestData> loadData() {
-        return this.script.loadData(this.shareInput);
+        return this.testCase.loadData(this.shareInput);
     }
 
     public TestRun createTestRun(Logger log, WebDriverFactory webDriverFactory, HashMap<String, String> webDriverConfig, Long implicityWaitTime, Long pageLoadWaitTime, TestData initialVars, TestRun previousRun, SeInterpreterTestListener seInterpreterTestListener) {
         final RemoteWebDriver driver;
-        if (this.script.usePreviousDriverAndVars() && previousRun != null && previousRun.driver() != null) {
+        if (this.testCase.usePreviousDriverAndVars() && previousRun != null && previousRun.driver() != null) {
             driver = previousRun.driver();
         } else {
             driver = createDriver(log, webDriverFactory, webDriverConfig);
@@ -93,15 +87,13 @@ public class TestRunBuilder {
     }
 
     public TestRun createTestRun(Logger log, RemoteWebDriver driver, TestData initialVars, SeInterpreterTestListener seInterpreterTestListener) {
-        final Script copy = this.script.copy();
-        final ScriptChain copyScriptChain = this.scriptChain.replace(this.script, copy);
         TestData data = this.shareInput.add(initialVars);
-        return new TestRun(getTestRunName(data), copy, log, driver, data, seInterpreterTestListener, copyScriptChain);
+        return new TestRun(getTestRunName(data), this.testCase, log, driver, data, seInterpreterTestListener, this.scenario);
     }
 
     public String getTestRunName(TestData initialVars) {
-        String result = this.script.name();
-        if (script.path() != null && result.contains(".")) {
+        String result = this.testCase.name();
+        if (testCase.path() != null && result.contains(".")) {
             String suffix = "";
             Matcher m = DUPLICATE_PATTERN.matcher(result);
             if (m.matches()) {

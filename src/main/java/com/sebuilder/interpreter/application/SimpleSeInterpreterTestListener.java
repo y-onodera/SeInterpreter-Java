@@ -1,7 +1,10 @@
-package com.sebuilder.interpreter;
+package com.sebuilder.interpreter.application;
 
+import com.sebuilder.interpreter.Context;
+import com.sebuilder.interpreter.SeInterpreterTestListener;
+import com.sebuilder.interpreter.TestCase;
+import com.sebuilder.interpreter.TestData;
 import junit.framework.AssertionFailedError;
-import junit.framework.TestCase;
 import org.apache.logging.log4j.Logger;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.Delete;
@@ -27,7 +30,7 @@ public class SimpleSeInterpreterTestListener implements SeInterpreterTestListene
     private File screenShotOutputDirectory;
     private File templateOutputDirectory;
     private JUnitTest suite;
-    private TestCase test;
+    private junit.framework.TestCase test;
     private int stepNo;
     private int runTest;
     private int error;
@@ -115,7 +118,7 @@ public class SimpleSeInterpreterTestListener implements SeInterpreterTestListene
     }
 
     @Override
-    public boolean openTestSuite(Script script, String testRunName, TestData aProperty) {
+    public boolean openTestSuite(TestCase testCase, String testRunName, TestData aProperty) {
         String baseName = testRunName;
         String testName = baseName.replace("\\", ".").replace("/", ".").replaceAll("^\\.+", "");
         this.log.info("open suite:" + testName);
@@ -147,7 +150,7 @@ public class SimpleSeInterpreterTestListener implements SeInterpreterTestListene
     public void startTest(String testName) {
         this.log.info("start test:" + testName);
         this.runTest++;
-        this.test = new TestCase(testName) {
+        this.test = new junit.framework.TestCase(testName) {
         };
         this.formatter.setClassname(this.suite.getName().replace("_", "."));
         this.formatter.startTest(this.test);

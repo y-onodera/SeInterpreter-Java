@@ -1,8 +1,8 @@
 package com.sebuilder.interpreter.application;
 
 import com.sebuilder.interpreter.*;
-import com.sebuilder.interpreter.factory.ScriptFactory;
 import com.sebuilder.interpreter.factory.StepTypeFactory;
+import com.sebuilder.interpreter.factory.TestCaseFactory;
 import com.sebuilder.interpreter.webdriverfactory.Firefox;
 import com.sebuilder.interpreter.webdriverfactory.WebDriverFactory;
 import org.apache.logging.log4j.Logger;
@@ -13,7 +13,7 @@ import java.util.HashMap;
 
 public abstract class CommandLineRunner {
     protected static WebDriverFactory DEFAULT_DRIVER_FACTORY = new Firefox();
-    protected ScriptFactory sf;
+    protected TestCaseFactory sf;
     protected StepTypeFactory stf;
     protected HashMap<String, String> driverConfig;
     protected WebDriverFactory wdf;
@@ -26,7 +26,7 @@ public abstract class CommandLineRunner {
 
     protected CommandLineRunner(String[] args, Logger log) {
         this.log = log;
-        this.sf = new ScriptFactory();
+        this.sf = new TestCaseFactory();
         this.stf = new StepTypeFactory();
         this.driverConfig = new HashMap<>();
         this.wdf = DEFAULT_DRIVER_FACTORY;
@@ -79,7 +79,7 @@ public abstract class CommandLineRunner {
                 } else if (s.startsWith(CommandLineArgument.DRIVER.key())) {
                     resetDriverFactory(kv[1]);
                 } else if (s.startsWith(CommandLineArgument.DATASOURCE_ENCODING.key())) {
-                    Context.getInstance().setDataSourceEncording(kv[1]);
+                    Context.getInstance().setDataSourceEncoding(kv[1]);
                 } else if (s.startsWith(CommandLineArgument.DATASOURCE_DIRECTORY.key())) {
                     Context.getInstance().setDataSourceDirectory(kv[1]);
                 } else if (s.startsWith(CommandLineArgument.SCREENSHOT_OUTPUT.key())) {
@@ -132,8 +132,8 @@ public abstract class CommandLineRunner {
         }
     }
 
-    protected TestRunBuilder createTestRunBuilder(Script script) {
-        return new TestRunBuilder(script);
+    protected TestRunBuilder createTestRunBuilder(TestCase testCase) {
+        return new TestRunBuilder(testCase);
     }
 
 }

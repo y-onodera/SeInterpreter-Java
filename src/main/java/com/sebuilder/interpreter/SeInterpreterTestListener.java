@@ -21,7 +21,7 @@ public interface SeInterpreterTestListener {
 
     File getTemplateOutputDirectory();
 
-    boolean openTestSuite(Script script, String testRunName, TestData aProperty);
+    boolean openTestSuite(TestCase testCase, String testRunName, TestData aProperty);
 
     void startTest(String testName);
 

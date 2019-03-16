@@ -1,7 +1,7 @@
 package com.sebuilder.interpreter.factory;
 
-import com.sebuilder.interpreter.Script;
 import com.sebuilder.interpreter.Suite;
+import com.sebuilder.interpreter.TestCase;
 import com.sebuilder.interpreter.TestData;
 import com.sebuilder.interpreter.TestRunBuilder;
 import com.sebuilder.interpreter.datasource.Csv;
@@ -18,12 +18,12 @@ import java.util.List;
 import static org.junit.Assert.*;
 
 @RunWith(Enclosed.class)
-public class ScriptFactoryTest {
+public class TestCaseFactoryTest {
 
-    private static String baseDir = ScriptFactoryTest.class.getResource(".").getPath();
-    private static ScriptFactory target = new ScriptFactory();
+    private static String baseDir = TestCaseFactoryTest.class.getResource(".").getPath();
+    private static TestCaseFactory target = new TestCaseFactory();
 
-    public static class ScriptTest {
+    public static class TestCaseTest {
 
         @Test
         public void parseScript() throws IOException, JSONException {
@@ -32,7 +32,7 @@ public class ScriptFactoryTest {
 
             Suite result = target.parse(testSource);
             assertSuiteAttribute(result);
-            Script actual = result.get(testFile);
+            TestCase actual = result.get(testFile);
             assertSame(actual, result.get(0));
             assertSimpleScript(testFile, actual);
 
@@ -50,7 +50,7 @@ public class ScriptFactoryTest {
 
             Suite result = target.parse(testSource);
             assertSuiteAttribute(result);
-            Script actual = result.get(testFile);
+            TestCase actual = result.get(testFile);
             assertSame(actual, result.get(0));
             assertSimpleScript(testFile, actual);
 
@@ -68,7 +68,7 @@ public class ScriptFactoryTest {
 
             Suite result = target.parse(testSource);
             assertSuiteAttribute(result);
-            Script actual = result.get(testFile);
+            TestCase actual = result.get(testFile);
             assertSame(actual, result.get(0));
             assertScriptWithDataSource(testFile, actual);
 
@@ -86,7 +86,7 @@ public class ScriptFactoryTest {
 
             Suite result = target.parse(testSource);
             assertSuiteAttribute(result);
-            Script actual = result.get(testFile);
+            TestCase actual = result.get(testFile);
             assertSame(actual, result.get(0));
             assertScriptWithSteps(testFile, actual);
 
@@ -101,7 +101,7 @@ public class ScriptFactoryTest {
             assertEquals(Suite.DEFAULT_NAME, result.getName());
             assertEquals("", result.getPath());
             assertEquals(1, result.scriptSize());
-            assertEquals(0, result.getScriptChains().size());
+            assertEquals(0, result.getScenario().chainSize());
             assertNull(result.getDataSource());
             assertEquals(0, result.getDataSourceConfig().size());
             assertTrue(result.isShareState());
@@ -118,7 +118,7 @@ public class ScriptFactoryTest {
 
             Suite result = target.parse(testSource);
             assertEquals(0, result.scriptSize());
-            assertEquals(0, result.getScriptChains().size());
+            assertEquals(0, result.getScenario().chainSize());
             assertFileAttribute(testFile, testSource, result);
             assertNoScript(result);
             assertNoDataSource(result);
@@ -126,7 +126,7 @@ public class ScriptFactoryTest {
 
             result = target.parse(result.toJSON(), new File(result.getPath()));
             assertEquals(0, result.scriptSize());
-            assertEquals(0, result.getScriptChains().size());
+            assertEquals(0, result.getScenario().chainSize());
             assertFileAttribute(testFile, testSource, result);
             assertNoScript(result);
             assertNoDataSource(result);
@@ -140,7 +140,7 @@ public class ScriptFactoryTest {
 
             Suite result = target.parse(testSource);
             assertEquals(0, result.scriptSize());
-            assertEquals(0, result.getScriptChains().size());
+            assertEquals(0, result.getScenario().chainSize());
             assertFileAttribute(testFile, testSource, result);
             assertNoScript(result);
             assertTrue(result.getDataSource() instanceof Csv);
@@ -150,7 +150,7 @@ public class ScriptFactoryTest {
 
             result = target.parse(result.toJSON(), new File(result.getPath()));
             assertEquals(0, result.scriptSize());
-            assertEquals(0, result.getScriptChains().size());
+            assertEquals(0, result.getScenario().chainSize());
             assertFileAttribute(testFile, testSource, result);
             assertNoScript(result);
             assertTrue(result.getDataSource() instanceof Csv);
@@ -166,7 +166,7 @@ public class ScriptFactoryTest {
 
             Suite result = target.parse(testSource);
             assertEquals(3, result.scriptSize());
-            assertEquals(0, result.getScriptChains().size());
+            assertEquals(0, result.getScenario().chainSize());
             assertFileAttribute(testFile, testSource, result);
             assertSimpleScript("simpleScript.json", result.get(0));
             assertEquals("false", result.get(0).skip());
@@ -191,7 +191,7 @@ public class ScriptFactoryTest {
 
             result = target.parse(result.toJSON(), new File(result.getPath()));
             assertEquals(3, result.scriptSize());
-            assertEquals(0, result.getScriptChains().size());
+            assertEquals(0, result.getScenario().chainSize());
             assertFileAttribute(testFile, testSource, result);
             assertSimpleScript("simpleScript.json", result.get(0));
             assertEquals("false", result.get(0).skip());
@@ -222,7 +222,7 @@ public class ScriptFactoryTest {
 
             Suite result = target.parse(testSource);
             assertEquals(3, result.scriptSize());
-            assertEquals(0, result.getScriptChains().size());
+            assertEquals(0, result.getScenario().chainSize());
             assertFileAttribute(testFile, testSource, result);
             assertEquals("${script1}.json", result.get(0).name());
             assertEquals("", result.get(0).path());
@@ -249,7 +249,7 @@ public class ScriptFactoryTest {
 
             result = target.parse(result.toJSON(), new File(result.getPath()));
             assertEquals(3, result.scriptSize());
-            assertEquals(0, result.getScriptChains().size());
+            assertEquals(0, result.getScenario().chainSize());
             assertFileAttribute(testFile, testSource, result);
             assertEquals("${script1}.json", result.get(0).name());
             assertEquals("", result.get(0).path());
@@ -282,7 +282,7 @@ public class ScriptFactoryTest {
 
             Suite result = target.parse(testSource);
             assertEquals(3, result.scriptSize());
-            assertEquals(2, result.getScriptChains().size());
+            assertEquals(2, result.getScenario().chainSize());
             assertFileAttribute(testFile, testSource, result);
             assertEquals("${script1}.json", result.get(0).name());
             assertEquals("", result.get(0).path());
@@ -291,13 +291,13 @@ public class ScriptFactoryTest {
             assertNull(result.get(0).overrideDataSource());
             assertEquals(0, result.get(0).overrideDataSourceConfig().size());
             assertScriptWithSteps("scriptWithSteps.json", result.get(1));
-            assertSame(result.get(1), result.getScriptChains().get(result.get(0)));
+            assertSame(result.get(1), result.getScenario().getChainTo(result.get(0)));
             assertEquals("true", result.get(1).skip());
             assertNull(result.get(1).overrideDataSource());
             assertEquals(0, result.get(1).overrideDataSourceConfig().size());
             assertEquals("${script3}.json", result.get(2).name());
             assertEquals("", result.get(2).path());
-            assertSame(result.get(2), result.getScriptChains().get(result.get(1)));
+            assertSame(result.get(2), result.getScenario().getChainTo(result.get(1)));
             assertEquals("false", result.get(2).skip());
             assertTrue(result.get(2).overrideDataSource() instanceof Csv);
             assertEquals("${dataSource3}.csv", result.get(2).overrideDataSourceConfig().get("path"));
@@ -312,7 +312,7 @@ public class ScriptFactoryTest {
 
             result = target.parse(result.toJSON(), new File(result.getPath()));
             assertEquals(3, result.scriptSize());
-            assertEquals(2, result.getScriptChains().size());
+            assertEquals(2, result.getScenario().chainSize());
             assertFileAttribute(testFile, testSource, result);
             assertEquals("${script1}.json", result.get(0).name());
             assertEquals("", result.get(0).path());
@@ -321,13 +321,13 @@ public class ScriptFactoryTest {
             assertNull(result.get(0).overrideDataSource());
             assertEquals(0, result.get(0).overrideDataSourceConfig().size());
             assertScriptWithSteps("scriptWithSteps.json", result.get(1));
-            assertSame(result.get(1), result.getScriptChains().get(result.get(0)));
+            assertSame(result.get(1), result.getScenario().getChainTo(result.get(0)));
             assertEquals("true", result.get(1).skip());
             assertNull(result.get(1).overrideDataSource());
             assertEquals(0, result.get(1).overrideDataSourceConfig().size());
             assertEquals("${script3}.json", result.get(2).name());
             assertEquals("", result.get(2).path());
-            assertSame(result.get(2), result.getScriptChains().get(result.get(1)));
+            assertSame(result.get(2), result.getScenario().getChainTo(result.get(1)));
             assertEquals("false", result.get(2).skip());
             assertTrue(result.get(2).overrideDataSource() instanceof Csv);
             assertEquals("${dataSource3}.csv", result.get(2).overrideDataSourceConfig().get("path"));
@@ -348,47 +348,47 @@ public class ScriptFactoryTest {
 
             Suite result = target.parse(testSource);
             assertEquals(3, result.scriptSize());
-            assertEquals(2, result.getScriptChains().size());
+            assertEquals(2, result.getScenario().chainSize());
             assertFileAttribute(testFile, testSource, result);
             assertSimpleScript("simpleScript.json", result.get(0));
             assertEquals("false", result.get(0).skip());
             assertTrue(result.get(0).overrideDataSource() instanceof Csv);
             assertEquals("override.csv", result.get(0).overrideDataSourceConfig().get("path"));
-            Script script2 = result.getScriptChains().get(result.get(0));
-            assertSame(result.get(1), script2);
-            assertScriptWithSteps("scriptWithSteps.json", script2);
-            assertEquals("true", script2.skip());
-            assertNull(script2.overrideDataSource());
-            assertEquals(0, script2.overrideDataSourceConfig().size());
-            Script script3 = result.getScriptChains().get(script2);
-            assertSame(result.get(2), script3);
-            assertScriptWithDataSource("scriptWithDataSource.json", script3);
-            assertEquals("false", script3.skip());
-            assertTrue(script3.overrideDataSource() instanceof None);
-            assertEquals(0, script3.overrideDataSourceConfig().size());
+            TestCase testCase2 = result.getScenario().getChainTo(result.get(0));
+            assertSame(result.get(1), testCase2);
+            assertScriptWithSteps("scriptWithSteps.json", testCase2);
+            assertEquals("true", testCase2.skip());
+            assertNull(testCase2.overrideDataSource());
+            assertEquals(0, testCase2.overrideDataSourceConfig().size());
+            TestCase testCase3 = result.getScenario().getChainTo(testCase2);
+            assertSame(result.get(2), testCase3);
+            assertScriptWithDataSource("scriptWithDataSource.json", testCase3);
+            assertEquals("false", testCase3.skip());
+            assertTrue(testCase3.overrideDataSource() instanceof None);
+            assertEquals(0, testCase3.overrideDataSourceConfig().size());
             assertNoDataSource(result);
             assertTrue(result.isShareState());
 
             result = target.parse(result.toJSON(), new File(result.getPath()));
             assertEquals(3, result.scriptSize());
-            assertEquals(2, result.getScriptChains().size());
+            assertEquals(2, result.getScenario().chainSize());
             assertFileAttribute(testFile, testSource, result);
             assertSimpleScript("simpleScript.json", result.get(0));
             assertEquals("false", result.get(0).skip());
             assertTrue(result.get(0).overrideDataSource() instanceof Csv);
             assertEquals("override.csv", result.get(0).overrideDataSourceConfig().get("path"));
-            script2 = result.getScriptChains().get(result.get(0));
-            assertSame(result.get(1), script2);
-            assertScriptWithSteps("scriptWithSteps.json", script2);
-            assertEquals("true", script2.skip());
-            assertNull(script2.overrideDataSource());
-            assertEquals(0, script2.overrideDataSourceConfig().size());
-            script3 = result.getScriptChains().get(script2);
-            assertSame(result.get(2), script3);
-            assertScriptWithDataSource("scriptWithDataSource.json", script3);
-            assertEquals("false", script3.skip());
-            assertTrue(script3.overrideDataSource() instanceof None);
-            assertEquals(0, script3.overrideDataSourceConfig().size());
+            testCase2 = result.getScenario().getChainTo(result.get(0));
+            assertSame(result.get(1), testCase2);
+            assertScriptWithSteps("scriptWithSteps.json", testCase2);
+            assertEquals("true", testCase2.skip());
+            assertNull(testCase2.overrideDataSource());
+            assertEquals(0, testCase2.overrideDataSourceConfig().size());
+            testCase3 = result.getScenario().getChainTo(testCase2);
+            assertSame(result.get(2), testCase3);
+            assertScriptWithDataSource("scriptWithDataSource.json", testCase3);
+            assertEquals("false", testCase3.skip());
+            assertTrue(testCase3.overrideDataSource() instanceof None);
+            assertEquals(0, testCase3.overrideDataSourceConfig().size());
             assertNoDataSource(result);
             assertTrue(result.isShareState());
         }
@@ -400,7 +400,7 @@ public class ScriptFactoryTest {
 
             Suite result = target.parse(testSource);
             assertEquals(3, result.scriptSize());
-            assertEquals(0, result.getScriptChains().size());
+            assertEquals(0, result.getScenario().chainSize());
             assertFileAttribute(testFile, testSource, result);
             assertSimpleScript("simpleScript.json", result.get(0));
             assertEquals("false", result.get(0).skip());
@@ -412,22 +412,22 @@ public class ScriptFactoryTest {
             assertEquals("2", loadData.get(0).get("column2"));
             assertEquals("a", loadData.get(1).get("column1"));
             assertEquals("b", loadData.get(1).get("column2"));
-            Script script2 = result.get(1);
-            assertScriptWithSteps("scriptWithSteps.json", script2);
-            assertEquals("true", script2.skip());
-            assertNull(script2.overrideDataSource());
-            assertEquals(0, script2.overrideDataSourceConfig().size());
-            Script script3 = result.get(2);
-            assertScriptWithDataSource("scriptWithDataSource.json", script3);
-            assertEquals("false", script3.skip());
-            assertTrue(script3.overrideDataSource() instanceof None);
-            assertEquals(0, script3.overrideDataSourceConfig().size());
+            TestCase testCase2 = result.get(1);
+            assertScriptWithSteps("scriptWithSteps.json", testCase2);
+            assertEquals("true", testCase2.skip());
+            assertNull(testCase2.overrideDataSource());
+            assertEquals(0, testCase2.overrideDataSourceConfig().size());
+            TestCase testCase3 = result.get(2);
+            assertScriptWithDataSource("scriptWithDataSource.json", testCase3);
+            assertEquals("false", testCase3.skip());
+            assertTrue(testCase3.overrideDataSource() instanceof None);
+            assertEquals(0, testCase3.overrideDataSourceConfig().size());
             assertNoDataSource(result);
             assertTrue(result.isShareState());
 
             result = target.parse(result.toJSON(), new File(result.getPath()));
             assertEquals(3, result.scriptSize());
-            assertEquals(0, result.getScriptChains().size());
+            assertEquals(0, result.getScenario().chainSize());
             assertFileAttribute(testFile, testSource, result);
             assertSimpleScript("simpleScript.json", result.get(0));
             assertEquals("false", result.get(0).skip());
@@ -439,16 +439,16 @@ public class ScriptFactoryTest {
             assertEquals("2", loadData.get(0).get("column2"));
             assertEquals("a", loadData.get(1).get("column1"));
             assertEquals("b", loadData.get(1).get("column2"));
-            script2 = result.get(1);
-            assertScriptWithSteps("scriptWithSteps.json", script2);
-            assertEquals("true", script2.skip());
-            assertNull(script2.overrideDataSource());
-            assertEquals(0, script2.overrideDataSourceConfig().size());
-            script3 = result.get(2);
-            assertScriptWithDataSource("scriptWithDataSource.json", script3);
-            assertEquals("false", script3.skip());
-            assertTrue(script3.overrideDataSource() instanceof None);
-            assertEquals(0, script3.overrideDataSourceConfig().size());
+            testCase2 = result.get(1);
+            assertScriptWithSteps("scriptWithSteps.json", testCase2);
+            assertEquals("true", testCase2.skip());
+            assertNull(testCase2.overrideDataSource());
+            assertEquals(0, testCase2.overrideDataSourceConfig().size());
+            testCase3 = result.get(2);
+            assertScriptWithDataSource("scriptWithDataSource.json", testCase3);
+            assertEquals("false", testCase3.skip());
+            assertTrue(testCase3.overrideDataSource() instanceof None);
+            assertEquals(0, testCase3.overrideDataSourceConfig().size());
             assertNoDataSource(result);
             assertTrue(result.isShareState());
         }
@@ -461,7 +461,7 @@ public class ScriptFactoryTest {
 
         private void assertNoScript(Suite result) {
             assertEquals(0, result.scriptSize());
-            assertEquals(0, result.getScriptChains().size());
+            assertEquals(0, result.getScenario().chainSize());
         }
 
         private void assertNoDataSource(Suite result) {
@@ -471,19 +471,19 @@ public class ScriptFactoryTest {
 
     }
 
-    private static void assertSimpleScript(String testFile, Script actual) {
+    private static void assertSimpleScript(String testFile, TestCase actual) {
         assertFileAttribute(testFile, actual);
         assertNoDataSource(actual);
         assertNoSteps(actual);
     }
 
-    private static void assertScriptWithSteps(String testFile, Script actual) {
+    private static void assertScriptWithSteps(String testFile, TestCase actual) {
         assertFileAttribute(testFile, actual);
         assertNoDataSource(actual);
         assertEquals(9, actual.steps().size());
     }
 
-    private static void assertScriptWithDataSource(String testFile, Script actual) {
+    private static void assertScriptWithDataSource(String testFile, TestCase actual) {
         assertFileAttribute(testFile, actual);
         assertTrue(actual.dataSource() instanceof Csv);
         assertEquals(1, actual.dataSourceConfig().size());
@@ -491,17 +491,17 @@ public class ScriptFactoryTest {
         assertNoSteps(actual);
     }
 
-    private static void assertFileAttribute(String testFile, Script actual) {
+    private static void assertFileAttribute(String testFile, TestCase actual) {
         assertEquals(testFile, actual.name());
         assertEquals(new File(baseDir), actual.relativePath());
     }
 
-    private static void assertNoDataSource(Script actual) {
+    private static void assertNoDataSource(TestCase actual) {
         assertNull(actual.dataSource());
         assertEquals(0, actual.dataSourceConfig().size());
     }
 
-    private static void assertNoSteps(Script actual) {
+    private static void assertNoSteps(TestCase actual) {
         assertEquals(0, actual.steps().size());
     }
 }

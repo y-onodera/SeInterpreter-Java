@@ -1,38 +1,34 @@
 package com.sebuilder.interpreter;
 
-import com.google.common.collect.Lists;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
-public class Suite implements Iterable<Script>, TestRunnable {
+public class Suite implements Iterable<TestCase>, TestRunnable {
 
     public static final String DEFAULT_NAME = "New_Suite";
 
-    private final TestCase testCase;
+    private final ScriptFile scriptFile;
 
-    private final ArrayList<Script> scripts = Lists.newArrayList();
-
-    private final ScriptChain scriptChains;
+    private final Scenario scenario;
 
     private final DataSet dataSet;
 
     private final boolean shareState;
 
     public Suite(File suiteFile
-            , ArrayList<Script> aScripts
-            , ScriptChain scriptChains
+            , Scenario scenario
             , DataSource dataSource
             , Map<String, String> config
             , boolean shareState) {
-        this.testCase = TestCase.of(suiteFile, DEFAULT_NAME);
+        this.scriptFile = ScriptFile.of(suiteFile, DEFAULT_NAME);
         this.shareState = shareState;
-        this.scripts.addAll(aScripts);
-        this.scriptChains = scriptChains;
+        this.scenario = scenario;
         this.dataSet = new DataSet(dataSource, config, this.getRelativePath());
     }
 
@@ -45,51 +41,45 @@ public class Suite implements Iterable<Script>, TestRunnable {
         return this.dataSet.loadData();
     }
 
+    public ScriptFile getScriptFile() {
+        return scriptFile;
+    }
+
     public String getPath() {
-        return this.testCase.path();
+        return this.scriptFile.path();
     }
 
     public String getName() {
-        return this.testCase.name();
+        return this.scriptFile.name();
     }
 
     public File getRelativePath() {
-        return this.testCase.relativePath();
+        return this.scriptFile.relativePath();
     }
 
     public int scriptSize() {
-        return this.scripts.size();
+        return this.scenario.scriptSize();
     }
 
-    public int getIndex(Script script) {
-        int result = -1;
-        for (Script target : this.scripts) {
-            result++;
-            if (target.name().equals(script.name())) {
-                return result;
-            }
-        }
-        return result;
+    public int getIndex(TestCase testCase) {
+        return this.scenario.indexOf(testCase);
     }
 
-    public Script get(String scriptName) {
-        return this.scripts.stream()
-                .filter(it -> it.name().equals(scriptName))
-                .findFirst()
-                .orElse(null);
+    public TestCase get(String scriptName) {
+        return this.scenario.get(scriptName);
     }
 
-    public Script get(int index) {
-        return this.scripts.get(index);
+    public TestCase get(int index) {
+        return this.scenario.get(index);
     }
 
     @Override
-    public Iterator<Script> iterator() {
-        return this.scripts.iterator();
+    public Iterator<TestCase> iterator() {
+        return this.scenario.scriptIterator();
     }
 
-    public ScriptChain getScriptChains() {
-        return this.scriptChains;
+    public Scenario getScenario() {
+        return this.scenario;
     }
 
     public boolean isShareState() {
@@ -105,7 +95,7 @@ public class Suite implements Iterable<Script>, TestRunnable {
     }
 
     public List<TestRunBuilder> getTestRuns() {
-        final String suiteName = this.testCase.nameExcludeExtention();
+        final String suiteName = this.scriptFile.nameExcludeExtention();
         return this.loadData()
                 .stream()
                 .flatMap(it -> {
@@ -117,25 +107,7 @@ public class Suite implements Iterable<Script>, TestRunnable {
                     } else {
                         prefix = suiteName;
                     }
-                    List<Script> loadedScripts = Lists.newArrayList();
-                    ScriptChain loadedScriptChains = this.scriptChains;
-                    for (Script script : this.scripts) {
-                        Script loaded = script.loadContents(newRow);
-                        loadedScripts.add(loaded);
-                        if (script != loaded) {
-                            loadedScriptChains = loadedScriptChains.replace(script, loaded);
-                        }
-                    }
-                    final ScriptChain runScriptChain = loadedScriptChains;
-                    return loadedScripts
-                            .stream()
-                            .filter(script -> !runScriptChain.containsValue(script))
-                            .filter(script -> !script.skipRunning(newRow))
-                            .map(script -> new TestRunBuilder(script)
-                                    .addChain(runScriptChain)
-                                    .addTestRunNamePrefix(prefix + "_")
-                                    .setShareInput(newRow)
-                            );
+                    return this.scenario.getTestRuns(newRow, (TestRunBuilder result) -> result.addTestRunNamePrefix(prefix + "_"));
                 })
                 .collect(Collectors.toList());
     }
@@ -150,33 +122,33 @@ public class Suite implements Iterable<Script>, TestRunnable {
                 .createSuite();
     }
 
-    public Suite insert(Script aScript, Script newScript) {
-        return builder().insertScript(aScript, newScript)
+    public Suite insert(TestCase aTestCase, TestCase newTestCase) {
+        return builder().insertTest(aTestCase, newTestCase)
                 .createSuite();
     }
 
-    public Suite add(Script aScript, Script newScript) {
-        return builder().addScript(aScript, newScript)
+    public Suite add(TestCase aTestCase, TestCase newTestCase) {
+        return builder().addTest(aTestCase, newTestCase)
                 .createSuite();
     }
 
-    public Suite add(Script aScript) {
+    public Suite add(TestCase aTestCase) {
         return builder()
-                .addScript(aScript)
+                .addTest(aTestCase)
                 .createSuite();
     }
 
-    public Suite delete(Script aScript) {
+    public Suite delete(TestCase aTestCase) {
         return builder()
-                .deleteScript(aScript)
+                .removeTest(aTestCase)
                 .createSuite();
     }
 
-    public Suite replace(Script aScript) {
-        return this.replace(aScript.name(), aScript);
+    public Suite replace(TestCase aTestCase) {
+        return this.replace(aTestCase.name(), aTestCase);
     }
 
-    public Suite replace(String oldName, Script newValue) {
+    public Suite replace(String oldName, TestCase newValue) {
         return builder()
                 .replace(oldName, newValue)
                 .createSuite();
@@ -193,53 +165,13 @@ public class Suite implements Iterable<Script>, TestRunnable {
 
     public JSONObject toJSON() throws JSONException {
         JSONObject o = new JSONObject();
-        JSONArray scriptsA = new JSONArray();
-        JSONArray chain = null;
-        for (Script s : this.scripts) {
-            if (this.scriptChains.containsKey(s) && !this.scriptChains.containsValue(s)) {
-                chain = new JSONArray();
-                chain.put(this.getScriptJson(s));
-            } else if (this.scriptChains.containsKey(s) && this.scriptChains.containsValue(s)) {
-                chain.put(this.getScriptJson(s));
-            } else if (!this.scriptChains.containsKey(s) && this.scriptChains.containsValue(s)) {
-                chain.put(this.getScriptJson(s));
-                JSONObject scriptPaths = new JSONObject();
-                scriptPaths.put("chain", chain);
-                scriptsA.put(scriptPaths);
-            } else {
-                scriptsA.put(this.getScriptJson(s));
-            }
-        }
         JSONObject data = this.dataSet.toJSON();
         if (data != null) {
             o.put("data", data);
         }
         o.put("type", "suite");
-        o.put("scripts", scriptsA);
+        o.put("scripts", this.scenario.toJSON(this));
         o.put("shareState", this.shareState);
         return o;
     }
-
-    private JSONObject getScriptJson(Script s) throws JSONException {
-        JSONObject scriptPath = new JSONObject();
-        if (s.isLazyLoad()) {
-            scriptPath.put("lazyLoad", s.name());
-        } else {
-            scriptPath.put("path", this.testCase.relativePath(s));
-        }
-        if (!Objects.equals(s.skip(), "false")) {
-            scriptPath.put("skip", s.skip());
-        }
-        if (s.overrideDataSource() != null) {
-            JSONObject data = new JSONObject();
-            final String sourceName = s.overrideDataSource().name();
-            data.put("source", sourceName);
-            JSONObject configs = new JSONObject();
-            configs.put(sourceName, s.overrideDataSourceConfig());
-            data.put("configs", configs);
-            scriptPath.put("data", data);
-        }
-        return scriptPath;
-    }
-
 }

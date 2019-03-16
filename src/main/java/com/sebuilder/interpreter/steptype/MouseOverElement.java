@@ -16,9 +16,9 @@
 
 package com.sebuilder.interpreter.steptype;
 
-import com.sebuilder.interpreter.LocatorHolder;
 import com.sebuilder.interpreter.TestRun;
-import com.sebuilder.interpreter.WaitFor;
+import com.sebuilder.interpreter.step.LocatorHolder;
+import com.sebuilder.interpreter.step.WaitFor;
 import org.openqa.selenium.interactions.Actions;
 
 public class MouseOverElement implements ConditionalStep, LocatorHolder {

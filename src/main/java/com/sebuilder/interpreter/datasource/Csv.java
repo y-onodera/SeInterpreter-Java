@@ -39,7 +39,7 @@ public class Csv implements DataSource {
     public List<TestData> getData(Map<String, String> config, File relativeTo, TestData vars) {
         ArrayList<TestData> data = new ArrayList<>();
         File f = findFile(relativeTo, vars.bind(config.get("path")));
-        String charsetName = Context.getInstance().getDataSourceEncording();
+        String charsetName = Context.getInstance().getDataSourceEncoding();
         BufferedReader r = null;
         try {
             r = new BufferedReader(new InputStreamReader(new FileInputStream(f), charsetName));

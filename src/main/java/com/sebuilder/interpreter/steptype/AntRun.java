@@ -1,8 +1,8 @@
 package com.sebuilder.interpreter.steptype;
 
 import com.google.common.base.Strings;
-import com.sebuilder.interpreter.Getter;
 import com.sebuilder.interpreter.TestRun;
+import com.sebuilder.interpreter.step.Getter;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.ProjectHelper;
 import org.json.JSONException;

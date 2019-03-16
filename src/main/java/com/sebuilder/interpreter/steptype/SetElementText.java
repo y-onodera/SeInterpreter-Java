@@ -16,10 +16,10 @@
 
 package com.sebuilder.interpreter.steptype;
 
-import com.sebuilder.interpreter.ExportResourceBuilder;
-import com.sebuilder.interpreter.Exportable;
-import com.sebuilder.interpreter.LocatorHolder;
 import com.sebuilder.interpreter.TestRun;
+import com.sebuilder.interpreter.step.ExportResourceBuilder;
+import com.sebuilder.interpreter.step.Exportable;
+import com.sebuilder.interpreter.step.LocatorHolder;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.openqa.selenium.Keys;

@@ -15,6 +15,7 @@
  */
 package com.sebuilder.interpreter;
 
+import com.sebuilder.interpreter.step.GetterUseStep;
 import org.json.JSONException;
 import org.json.JSONObject;
 

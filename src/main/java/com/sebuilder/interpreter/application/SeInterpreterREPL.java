@@ -57,10 +57,10 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
             } else if (commandInput && line.equals("/")) {
                 this.closeScript(input);
                 commandInput = false;
-                Script script = this.toScript(input.toString());
+                TestCase testCase = this.toTestCase(input.toString());
                 input = null;
-                if (script != null) {
-                    this.execute(script);
+                if (testCase != null) {
+                    this.execute(testCase);
                 }
             } else if (commandInput) {
                 input.append(line);
@@ -76,8 +76,8 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
         }
     }
 
-    public Iterable<Script> loadScript(String file) {
-        Iterable<Script> result = Lists.newArrayList();
+    public Iterable<TestCase> loadScript(String file) {
+        Iterable<TestCase> result = Lists.newArrayList();
         try {
             result = this.sf.parse(new File(file));
         } catch (Throwable e) {
@@ -86,9 +86,9 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
         return result;
     }
 
-    public Script toScript(String cmdInput) {
+    public TestCase toTestCase(String cmdInput) {
         this.log.info("start parse input");
-        Script result = null;
+        TestCase result = null;
         try {
             result = this.sf.parse(cmdInput);
         } catch (Throwable e) {
@@ -101,8 +101,8 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
         return result;
     }
 
-    public void execute(Script script) {
-        this.execute(createTestRunBuilder(script), this.seInterpreterTestListener);
+    public void execute(TestCase testCase) {
+        this.execute(createTestRunBuilder(testCase), this.seInterpreterTestListener);
     }
 
     @Override
@@ -123,10 +123,10 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
     }
 
     @Override
-    public void execute(Script script, SeInterpreterTestListener seInterpreterTestListener) {
+    public void execute(TestCase testCase, SeInterpreterTestListener seInterpreterTestListener) {
         seInterpreterTestListener.cleanResult(new File(Context.getInstance().getResultOutputDirectory(), String.valueOf(execCount++)));
         try {
-            this.execute(createTestRunBuilder(script), seInterpreterTestListener);
+            this.execute(createTestRunBuilder(testCase), seInterpreterTestListener);
         } catch (Throwable t) {
             log.error(t);
         } finally {
@@ -142,8 +142,8 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
     }
 
     @Override
-    protected TestRunBuilder createTestRunBuilder(Script script) {
-        return super.createTestRunBuilder(script.usePreviousDriverAndVars(true));
+    protected TestRunBuilder createTestRunBuilder(TestCase testCase) {
+        return super.createTestRunBuilder(testCase.usePreviousDriverAndVars(true));
     }
 
     private boolean execute(TestRunBuilder testRunBuilder, SeInterpreterTestListener seInterpreterTestListener) {

@@ -1,67 +1,327 @@
+/*
+ * Copyright 2012 Sauce Labs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.sebuilder.interpreter;
 
-import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
-import java.nio.file.Paths;
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
-public class TestCase {
-    private final String name;
-    private final String path;
-    private final File relativePath;
+/**
+ * A Selenium 2 script. To create and run a test, instantiate a TestCase object,
+ * appendNewChain some TestCase.Steps to its steps, then invoke "run". If you want to be able
+ * to run the script step by step, invoke "start", which will return a TestRun
+ * object.
+ *
+ * @author zarkonnen
+ */
+public class TestCase implements TestRunnable {
+    public static final String DEFAULT_SCRIPT_NAME = "New_Script";
+    private final ArrayList<Step> steps;
+    private final Function<TestData, TestCase> lazyLoad;
+    private final boolean usePreviousDriverAndVars;
+    private final boolean closeDriver;
+    private final DataSet dataSet;
+    private final DataSet overrideDataSet;
+    private final String skip;
+    private final ScriptFile scriptFile;
 
-    public static TestCase of(File suiteFile, String defaultName) {
-        if (suiteFile != null) {
-            return new TestCase(suiteFile);
-        }
-        return new TestCase(defaultName);
+    public TestCase(TestCaseBuilder testCaseBuilder) {
+        this.steps = testCaseBuilder.getSteps();
+        this.lazyLoad = testCaseBuilder.getLazyLoad();
+        this.scriptFile = testCaseBuilder.getScriptFile();
+        this.usePreviousDriverAndVars = testCaseBuilder.isUsePreviousDriverAndVars();
+        this.closeDriver = testCaseBuilder.isCloseDriver();
+        this.dataSet = testCaseBuilder.getDataSet();
+        this.overrideDataSet = testCaseBuilder.getOverrideDataSet();
+        this.skip = testCaseBuilder.getSkip();
     }
 
-    public TestCase(String name) {
-        this(name, null, null);
+    @Override
+    public void accept(TestRunner runner, SeInterpreterTestListener testListener) {
+        runner.execute(this, testListener);
     }
 
-    public TestCase(File suiteFile) {
-        this(suiteFile.getName(), suiteFile.getAbsolutePath(), suiteFile.getParentFile().getAbsoluteFile());
+    public TestCaseBuilder builder() {
+        return new TestCaseBuilder(this);
     }
 
-    public TestCase(String name, String path, File relativePath) {
-        this.name = name;
-        this.path = path;
-        this.relativePath = relativePath;
+    public ArrayList<Step> steps() {
+        return Lists.newArrayList(this.steps);
     }
 
-    public TestCase changeName(String name) {
-        return new TestCase(name, this.path, this.relativePath);
+    public boolean closeDriver() {
+        return this.closeDriver;
     }
 
-    public String nameExcludeExtention() {
-        if (this.path != null && this.name().contains(".")) {
-            return this.name().substring(0, this.name().lastIndexOf("."));
-        }
-        return this.name();
+    public boolean usePreviousDriverAndVars() {
+        return this.usePreviousDriverAndVars;
     }
 
-    public String name() {
-        return this.name;
-    }
-
-    public String path() {
-        return Optional.ofNullable(this.path).orElse("");
+    public ScriptFile testCase() {
+        return this.scriptFile;
     }
 
     public File relativePath() {
-        return this.relativePath;
+        return this.scriptFile.relativePath();
     }
 
-    public String relativePath(Script s) {
-        if (this.relativePath == null && !Strings.isNullOrEmpty(s.path())) {
-            return s.path();
-        } else if (Strings.isNullOrEmpty(s.path())) {
-            return "script/" + s.name();
+    public String name() {
+        return this.scriptFile.name();
+    }
+
+    public Function<TestData, TestCase> lazyLoad() {
+        return this.lazyLoad;
+    }
+
+    public TestCase lazyLoad(TestData it) {
+        if (this.isLazyLoad()) {
+            return this.lazyLoad.apply(it)
+                    .builder()
+                    .overrideDataSource(this.overrideDataSource(), this.overrideDataSourceConfig())
+                    .setSkip(this.skip)
+                    .createScript();
         }
-        return this.relativePath.toPath().relativize(Paths.get(s.path()).toAbsolutePath()).toString().replace("\\", "/");
+        return this;
     }
 
+    public String path() {
+        return this.scriptFile.path();
+    }
+
+    public DataSource dataSource() {
+        return this.dataSet.getDataSource();
+    }
+
+    public Map<String, String> dataSourceConfig() {
+        return this.dataSet.getDataSourceConfig();
+    }
+
+    public DataSource overrideDataSource() {
+        return this.overrideDataSet.getDataSource();
+    }
+
+    public Map<String, String> overrideDataSourceConfig() {
+        return this.overrideDataSet.getDataSourceConfig();
+    }
+
+    public String skip() {
+        return this.skip;
+    }
+
+    public boolean isLazyLoad() {
+        return this.lazyLoad != null;
+    }
+
+    public List<TestData> loadData(TestData vars) {
+        if (this.overrideDataSource() != null) {
+            return this.overrideDataSet.loadData(vars);
+        }
+        return this.dataSet.loadData();
+    }
+
+    public boolean skipRunning(TestData testData) {
+        return Boolean.valueOf(testData.bind(this.skip));
+    }
+
+    public TestCase rename(String aName) {
+        return this.builder()
+                .setName(aName)
+                .createScript();
+    }
+
+    public TestCase usePreviousDriverAndVars(boolean userPreviousDriverAndVars) {
+        return this.builder()
+                .usePreviousDriverAndVars(userPreviousDriverAndVars)
+                .createScript();
+    }
+
+    public TestCase editStep(Function<ArrayList<Step>, ArrayList<Step>> converter) {
+        return this.replaceStep(converter.apply(this.steps));
+    }
+
+    public TestCase filterStep(Predicate<Step> filter) {
+        return this.editStep(it -> it.stream()
+                .filter(filter)
+                .collect(Collectors.toCollection(ArrayList::new))
+        );
+    }
+
+    public TestCase copy() {
+        return this.editStep((ArrayList<Step> it) -> it.stream()
+                .map(step -> step.copy())
+                .collect(Collectors.toCollection(ArrayList::new)));
+    }
+
+    public TestCase removeStep(int stepIndex) {
+        return removeStep(i -> i.intValue() != stepIndex);
+    }
+
+    public TestCase removeStep(Predicate<Number> filter) {
+        return this.editStep(it -> {
+                    final ArrayList<Step> newSteps = new ArrayList<>();
+                    for (int i = 0, j = this.steps.size(); i < j; i++) {
+                        if (filter.test(i)) {
+                            newSteps.add(this.steps.get(i));
+                        }
+                    }
+                    return newSteps;
+                }
+        );
+    }
+
+    public TestCase insertStep(int stepIndex, Step newStep) {
+        return this.editStep(it -> {
+                    if (this.steps.size() == 0) {
+                        return Lists.newArrayList(newStep);
+                    }
+                    final ArrayList<Step> newSteps = new ArrayList<>();
+                    for (int i = 0, j = this.steps.size(); i < j; i++) {
+                        if (i == stepIndex) {
+                            newSteps.add(newStep);
+                        }
+                        newSteps.add(this.steps.get(i));
+                    }
+                    return newSteps;
+                }
+        );
+    }
+
+    public TestCase addStep(int stepIndex, Step newStep) {
+        return this.editStep(it -> {
+                    if (this.steps.size() == 0) {
+                        return Lists.newArrayList(newStep);
+                    }
+                    final ArrayList<Step> newSteps = new ArrayList<>();
+                    for (int i = 0, j = this.steps.size(); i < j; i++) {
+                        newSteps.add(this.steps.get(i));
+                        if (i == stepIndex) {
+                            newSteps.add(newStep);
+                        }
+                    }
+                    return newSteps;
+                }
+        );
+    }
+
+    public TestCase addStep(TestCase export) {
+        ArrayList newStep = Lists.newArrayList(this.steps);
+        newStep.addAll(export.steps);
+        return this.replaceStep(newStep);
+    }
+
+    public TestCase replaceStep(int stepIndex, Step newStep) {
+        return this.editStep(it -> {
+                    final ArrayList<Step> newSteps = new ArrayList<>();
+                    for (int i = 0, j = this.steps.size(); i < j; i++) {
+                        if (i != stepIndex) {
+                            newSteps.add(this.steps.get(i));
+                        } else {
+                            newSteps.add(newStep);
+                        }
+                    }
+                    return newSteps;
+                }
+        );
+    }
+
+    public TestCase skip(String skip) {
+        return this.builder()
+                .setSkip(skip)
+                .createScript();
+    }
+
+    public Suite toSuite() {
+        return new SuiteBuilder(this).createSuite();
+    }
+
+    @Override
+    public String toString() {
+        try {
+            return toJSON().toString(4);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public JSONObject toJSON() throws JSONException {
+        JSONObject o = new JSONObject();
+        JSONArray stepsA = new JSONArray();
+        for (Step s : steps) {
+            stepsA.put(s.toJSON());
+        }
+        o.put("steps", stepsA);
+        JSONObject data = this.dataSet.toJSON();
+        if (data != null) {
+            o.put("data", data);
+        }
+        return o;
+    }
+
+    public JSONObject getJSON(Suite aSuite) throws JSONException {
+        JSONObject scriptPath = new JSONObject();
+        if (this.isLazyLoad()) {
+            scriptPath.put("lazyLoad", this.name());
+        } else {
+            scriptPath.put("path", aSuite.getScriptFile().relativePath(this));
+        }
+        if (!Objects.equals(this.skip(), "false")) {
+            scriptPath.put("skip", this.skip());
+        }
+        JSONObject data = this.overrideDataSet.toJSON();
+        if (data != null) {
+            scriptPath.put("data", data);
+        }
+        return scriptPath;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TestCase testCase = (TestCase) o;
+        return usePreviousDriverAndVars == testCase.usePreviousDriverAndVars &&
+                closeDriver == testCase.closeDriver &&
+                com.google.common.base.Objects.equal(steps, testCase.steps) &&
+                com.google.common.base.Objects.equal(isLazyLoad(), testCase.isLazyLoad()) &&
+                com.google.common.base.Objects.equal(dataSet, testCase.dataSet) &&
+                com.google.common.base.Objects.equal(overrideDataSet, testCase.overrideDataSet) &&
+                com.google.common.base.Objects.equal(skip, testCase.skip) &&
+                com.google.common.base.Objects.equal(scriptFile, testCase.scriptFile);
+    }
+
+    @Override
+    public int hashCode() {
+        return com.google.common.base.Objects.hashCode(steps, isLazyLoad(), usePreviousDriverAndVars, closeDriver, dataSet, overrideDataSet, skip, scriptFile);
+    }
+
+    private TestCase replaceStep(ArrayList<Step> newStep) {
+        return new TestCaseBuilder(this)
+                .clearStep()
+                .addSteps(newStep)
+                .createScript();
+    }
 }

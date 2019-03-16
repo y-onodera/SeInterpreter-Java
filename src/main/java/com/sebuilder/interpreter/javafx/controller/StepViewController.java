@@ -1,8 +1,8 @@
 package com.sebuilder.interpreter.javafx.controller;
 
 import com.google.common.eventbus.Subscribe;
-import com.sebuilder.interpreter.Script;
 import com.sebuilder.interpreter.Step;
+import com.sebuilder.interpreter.TestCase;
 import com.sebuilder.interpreter.javafx.EventBus;
 import com.sebuilder.interpreter.javafx.Result;
 import com.sebuilder.interpreter.javafx.event.ReportErrorEvent;
@@ -134,7 +134,7 @@ public class StepViewController {
 
     @FXML
     public void handleStepAdd(ActionEvent event) throws IOException {
-        Stage dialog = initStepEditDialog("add");
+        Stage dialog = initStepEditDialog("appendNewChain");
         dialog.setResizable(true);
         dialog.show();
     }
@@ -168,8 +168,8 @@ public class StepViewController {
 
     @Subscribe
     public void refreshTable(RefreshStepTableViewEvent event) {
-        Script script = event.getScript();
-        this.refreshTable(script);
+        TestCase testCase = event.getTestCase();
+        this.refreshTable(testCase);
     }
 
     @Subscribe
@@ -209,11 +209,11 @@ public class StepViewController {
         return dialog;
     }
 
-    private void refreshTable(Script aScript) {
+    private void refreshTable(TestCase aTestCase) {
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
             this.tableViewScriptBody.getItems().setAll(List.of());
             int no = 1;
-            for (Step step : aScript.steps()) {
+            for (Step step : aTestCase.steps()) {
                 ScriptBody row = new ScriptBody(no++, step.toPrettyString(), null);
                 this.tableViewScriptBody.getItems().add(row);
             }

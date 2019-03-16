@@ -16,9 +16,9 @@
 
 package com.sebuilder.interpreter.steptype;
 
-import com.sebuilder.interpreter.Getter;
-import com.sebuilder.interpreter.LocatorHolder;
 import com.sebuilder.interpreter.TestRun;
+import com.sebuilder.interpreter.step.Getter;
+import com.sebuilder.interpreter.step.LocatorHolder;
 
 public class ElementSelected implements Getter, LocatorHolder {
     @Override

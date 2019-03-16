@@ -64,7 +64,7 @@ public class SeInterpreterController {
     public void showScriptAsText(RefreshStepTextViewEvent event) {
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
             this.textAreaStep.clear();
-            this.textAreaStep.setText(event.getScript().toString());
+            this.textAreaStep.setText(event.getTestCase().toString());
         });
     }
 

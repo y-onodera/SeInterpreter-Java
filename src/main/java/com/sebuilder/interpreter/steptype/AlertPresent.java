@@ -17,8 +17,8 @@
 package com.sebuilder.interpreter.steptype;
 
 import com.google.common.base.Objects;
-import com.sebuilder.interpreter.Getter;
 import com.sebuilder.interpreter.TestRun;
+import com.sebuilder.interpreter.step.Getter;
 import org.openqa.selenium.NoAlertPresentException;
 
 public class AlertPresent implements Getter {

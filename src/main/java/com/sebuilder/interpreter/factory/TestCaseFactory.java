@@ -26,11 +26,11 @@ import java.io.*;
 import java.util.HashMap;
 
 /**
- * Factory to create Script objects from a string, a reader or JSONObject.
+ * Factory to create TestCase objects from a string, a reader or JSONObject.
  *
  * @author jkowalczyk
  */
-public class ScriptFactory {
+public class TestCaseFactory {
 
     private StepTypeFactory stepTypeFactory = new StepTypeFactory();
 
@@ -52,11 +52,11 @@ public class ScriptFactory {
         this.dataSourceFactory = dataSourceFactory;
     }
 
-    public Script template(String stepType) throws JSONException, IOException {
+    public TestCase template(String stepType) throws JSONException, IOException {
         return this.parse("{\"steps\":[{\"type\":\"" + stepType + "\"}]}");
     }
 
-    public Script open(String url) throws JSONException, IOException {
+    public TestCase open(String url) throws JSONException, IOException {
         return this.parse("{\"steps\":[" + "{\"type\":\"get\",\"url\":\"" + url + "\"}" + "]}");
     }
 
@@ -67,7 +67,7 @@ public class ScriptFactory {
      *                       with the Reader.
      * @throws JSONException If the JSON can't be parsed.
      */
-    public Script parse(String jsonString) throws IOException, JSONException {
+    public TestCase parse(String jsonString) throws IOException, JSONException {
         return this.parse(new JSONObject(new JSONTokener(jsonString)));
     }
 
@@ -78,7 +78,7 @@ public class ScriptFactory {
      *                       with the Reader.
      * @throws JSONException If the JSON can't be parsed.
      */
-    public Script parse(JSONObject json) throws IOException {
+    public TestCase parse(JSONObject json) throws IOException {
         return this.parse(json, null).iterator().next();
     }
 
@@ -148,8 +148,8 @@ public class ScriptFactory {
      */
     public Suite parseScript(JSONObject o, File f) throws IOException {
         try {
-            Script script = this.create(o, f);
-            return script.toSuite();
+            TestCase testCase = this.create(o, f);
+            return testCase.toSuite();
         } catch (JSONException e) {
             throw new IOException("Could not parse script.", e);
         }
@@ -159,15 +159,15 @@ public class ScriptFactory {
      * @param saveTo file script save to
      * @return A new instance of script
      */
-    private Script create(JSONObject o, File saveTo) throws JSONException {
+    private TestCase create(JSONObject o, File saveTo) throws JSONException {
         DataSource dataSource = this.dataSourceFactory.getDataSource(o);
         HashMap<String, String> config = this.dataSourceFactory.getDataSourceConfig(o);
-        Script script = new ScriptBuilder()
+        TestCase testCase = new TestCaseBuilder()
                 .addSteps(this.getStepTypeFactory().parseStep(o))
                 .associateWith(saveTo)
                 .setDataSource(dataSource, config)
                 .createScript();
-        return script;
+        return testCase;
     }
 
     private void loadScripts(JSONObject o, SuiteBuilder builder) throws IOException, JSONException {
@@ -181,7 +181,7 @@ public class ScriptFactory {
                 JSONArray scriptArrays = script.getJSONArray("chain");
                 this.loadScriptChain(scriptArrays, builder);
             } else {
-                builder.addScripts(this.loadScript(script, builder.getSuiteFile()));
+                builder.addTests(this.loadScript(script, builder.getSuiteFile()));
             }
         }
     }
@@ -206,7 +206,7 @@ public class ScriptFactory {
             return this.loadScriptIfExists(f, script);
         } else if (script.has("lazyLoad")) {
             String beforeReplace = script.getString("lazyLoad");
-            final Script resultScript = ScriptBuilder.lazyLoad(beforeReplace, (TestData data) -> {
+            final TestCase resultTestCase = TestCaseBuilder.lazyLoad(beforeReplace, (TestData data) -> {
                 String fileName = data.bind(beforeReplace);
                 JSONObject source = new JSONObject();
                 try {
@@ -216,19 +216,19 @@ public class ScriptFactory {
                     throw new AssertionError(e);
                 }
             });
-            return this.overrideSetting(script, resultScript).toSuite();
+            return this.overrideSetting(script, resultTestCase).toSuite();
         }
         return null;
     }
 
     private void loadScriptChain(JSONArray scriptArrays, SuiteBuilder builder) throws JSONException, IOException {
-        Script lastLoad = null;
+        TestCase lastLoad = null;
         for (int j = 0; j < scriptArrays.length(); j++) {
-            for (Script loaded : this.loadScript(scriptArrays.getJSONObject(j), builder.getSuiteFile())) {
+            for (TestCase loaded : this.loadScript(scriptArrays.getJSONObject(j), builder.getSuiteFile())) {
                 if (lastLoad != null) {
-                    builder.addScriptChain(lastLoad, loaded);
+                    builder.testChain(lastLoad, loaded);
                 }
-                builder.addScript(loaded);
+                builder.addTest(loaded);
                 lastLoad = loaded;
             }
         }
@@ -237,7 +237,7 @@ public class ScriptFactory {
     /**
      * @param wherePath file script load from
      * @param script
-     * @return Script loaded from file
+     * @return TestCase loaded from file
      * @throws IOException   If script file not found.
      * @throws JSONException If anything goes wrong with interpreting the JSON.
      */
@@ -246,19 +246,19 @@ public class ScriptFactory {
             Suite result = this.parse(wherePath);
             return result.replace(this.overrideSetting(script, result.get(0)));
         }
-        throw new IOException("Script file " + wherePath.toString() + " not found.");
+        throw new IOException("TestCase file " + wherePath.toString() + " not found.");
     }
 
-    private Script overrideSetting(JSONObject script, Script resultScript) throws JSONException {
+    private TestCase overrideSetting(JSONObject script, TestCase resultTestCase) throws JSONException {
         DataSource dataSource = this.dataSourceFactory.getDataSource(script);
         if (dataSource != null) {
             HashMap<String, String> config = this.dataSourceFactory.getDataSourceConfig(script);
-            resultScript = resultScript.builder()
+            resultTestCase = resultTestCase.builder()
                     .overrideDataSource(dataSource, config)
                     .createScript();
         }
-        resultScript = resultScript.skip(this.getSkip(script));
-        return resultScript;
+        resultTestCase = resultTestCase.skip(this.getSkip(script));
+        return resultTestCase;
     }
 
     private String getSkip(JSONObject o) throws JSONException {

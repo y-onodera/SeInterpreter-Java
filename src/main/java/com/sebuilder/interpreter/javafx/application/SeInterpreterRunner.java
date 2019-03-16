@@ -4,6 +4,7 @@ import com.google.common.io.Files;
 import com.sebuilder.interpreter.*;
 import com.sebuilder.interpreter.application.CommandLineArgument;
 import com.sebuilder.interpreter.application.SeInterpreterREPL;
+import com.sebuilder.interpreter.application.SimpleSeInterpreterTestListener;
 import com.sebuilder.interpreter.steptype.ExportTemplate;
 import com.sebuilder.interpreter.steptype.HighLightElement;
 import javafx.concurrent.Task;
@@ -53,7 +54,7 @@ public class SeInterpreterRunner {
         return this.repl != null;
     }
 
-    public Script exportTemplate(Locator locator, List<String> targetTags, boolean withDataSource) {
+    public TestCase exportTemplate(Locator locator, List<String> targetTags, boolean withDataSource) {
         if (!this.isOpen()) {
             this.setUp();
         }
@@ -69,14 +70,14 @@ public class SeInterpreterRunner {
         if (withDataSource) {
             export.put("datasource", dataSourceName);
         }
-        Script get = new ScriptBuilder()
+        TestCase get = new TestCaseBuilder()
                 .addStep(export)
                 .createScript();
         SeInterpreterTestListener listener = new SimpleSeInterpreterTestListener(this.log);
         this.repl.execute(get, listener);
         File exported = new File(listener.getTemplateOutputDirectory(), fileName);
         if (!exported.exists()) {
-            return new ScriptBuilder().createScript();
+            return new TestCaseBuilder().createScript();
         }
         this.exportCount++;
         if (withDataSource) {
@@ -89,7 +90,7 @@ public class SeInterpreterRunner {
                 }
             }
         }
-        Script result = this.repl.loadScript(exported.getAbsolutePath()).iterator().next();
+        TestCase result = this.repl.loadScript(exported.getAbsolutePath()).iterator().next();
         return result.builder()
                 .associateWith(null)
                 .setName(result.name())
@@ -99,18 +100,18 @@ public class SeInterpreterRunner {
     public void highLightElement(String locatorType, String value) {
         Step highLightElement = new Step(new HighLightElement());
         highLightElement.put("locator", new Locator(locatorType, value));
-        Script highLight = new ScriptBuilder()
+        TestCase highLight = new TestCaseBuilder()
                 .addStep(highLightElement)
                 .createScript();
         SeInterpreterTestListener listener = new SimpleSeInterpreterTestListener(this.log);
         this.repl.execute(highLight, listener);
     }
 
-    public Task createRunScriptTask(Script currentDisplay) {
+    public Task createRunScriptTask(TestCase currentDisplay) {
         return this.createRunScriptTask(currentDisplay, log -> new SeInterpreterTestGUIListener(log));
     }
 
-    public Task createRunScriptTask(Script currentDisplay, Function<Logger, SeInterpreterTestListener> listenerFactory) {
+    public Task createRunScriptTask(TestCase currentDisplay, Function<Logger, SeInterpreterTestListener> listenerFactory) {
         return this.createBackgroundTask(currentDisplay, listenerFactory.apply(this.log));
     }
 
@@ -153,11 +154,11 @@ public class SeInterpreterRunner {
                         private int currentScriptSteps;
 
                         @Override
-                        public boolean openTestSuite(Script script, String testRunName, TestData aProperty) {
-                            this.currentScriptSteps = script.steps().size();
+                        public boolean openTestSuite(TestCase testCase, String testRunName, TestData aProperty) {
+                            this.currentScriptSteps = testCase.steps().size();
                             updateMessage(testRunName);
                             updateProgress(0, this.currentScriptSteps);
-                            return super.openTestSuite(script, testRunName, aProperty);
+                            return super.openTestSuite(testCase, testRunName, aProperty);
                         }
 
                         @Override

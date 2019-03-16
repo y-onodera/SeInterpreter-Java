@@ -15,10 +15,10 @@
  */
 package com.sebuilder.interpreter.factory;
 
-import com.sebuilder.interpreter.Getter;
 import com.sebuilder.interpreter.Locator;
 import com.sebuilder.interpreter.Step;
 import com.sebuilder.interpreter.StepType;
+import com.sebuilder.interpreter.step.Getter;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -58,11 +58,11 @@ public class StepTypeFactory {
      * Mapping of the names of step types to their implementing classes, lazily
      * loaded through reflection. StepType classes must be either in the first
      * package either in the second one and their name must be the capitalized
-     * name of their type. For example, the class for "get" is at
+     * name of their type. For example, the class for "getChainTo" is at
      * com.sebuilder.interpreter.steptype.Get.
      * <p>
      * Assert/Verify/WaitFor/Store steps use "Getter" objects that encapsulate
-     * how to get the value they are about. Getters should be named e.g "Title"
+     * how to getChainTo the value they are about. Getters should be named e.g "Title"
      * for "verifyTitle" and also be in the com.sebuilder.interpreter.steptype
      * package.
      */

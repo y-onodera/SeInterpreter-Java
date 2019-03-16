@@ -1,6 +1,8 @@
-package com.sebuilder.interpreter;
+package com.sebuilder.interpreter.step;
 
 import com.google.common.base.Strings;
+import com.sebuilder.interpreter.Locator;
+import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.steptype.ClickElement;
 import com.sebuilder.interpreter.steptype.SetElementSelected;
 import com.sebuilder.interpreter.steptype.SetElementText;

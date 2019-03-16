@@ -1,6 +1,8 @@
-package com.sebuilder.interpreter;
+package com.sebuilder.interpreter.step;
 
 import com.opencsv.CSVWriter;
+import com.sebuilder.interpreter.Context;
+import com.sebuilder.interpreter.TestRun;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -40,7 +42,7 @@ public class ExportResource {
     public void outputDataSourceTemplate() throws IOException {
         Map<String, String> valuables = this.getVariables();
         CSVWriter writer = new CSVWriter(new OutputStreamWriter(new FileOutputStream(this.dataSourceFile),
-                Charset.forName(Context.getInstance().getDataSourceEncording())));
+                Charset.forName(Context.getInstance().getDataSourceEncoding())));
         writer.writeNext(valuables.keySet().toArray(new String[valuables.keySet().size()]));
         writer.writeNext(valuables.values().toArray(new String[valuables.values().size()]));
         writer.flush();

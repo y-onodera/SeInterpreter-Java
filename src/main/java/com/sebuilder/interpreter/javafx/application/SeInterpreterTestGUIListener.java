@@ -1,8 +1,8 @@
 package com.sebuilder.interpreter.javafx.application;
 
-import com.sebuilder.interpreter.Script;
-import com.sebuilder.interpreter.SimpleSeInterpreterTestListener;
+import com.sebuilder.interpreter.TestCase;
 import com.sebuilder.interpreter.TestData;
+import com.sebuilder.interpreter.application.SimpleSeInterpreterTestListener;
 import com.sebuilder.interpreter.javafx.EventBus;
 import com.sebuilder.interpreter.javafx.Result;
 import com.sebuilder.interpreter.javafx.event.replay.StepResultSetEvent;
@@ -16,9 +16,9 @@ public class SeInterpreterTestGUIListener extends SimpleSeInterpreterTestListene
     }
 
     @Override
-    public boolean openTestSuite(Script script, String testRunName, TestData aProperty) {
-        EventBus.publish(new ScriptSelectEvent(script.name()));
-        return super.openTestSuite(script, testRunName, aProperty);
+    public boolean openTestSuite(TestCase testCase, String testRunName, TestData aProperty) {
+        EventBus.publish(new ScriptSelectEvent(testCase.name()));
+        return super.openTestSuite(testCase, testRunName, aProperty);
     }
 
     @Override

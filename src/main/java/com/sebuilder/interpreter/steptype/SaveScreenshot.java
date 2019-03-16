@@ -16,12 +16,12 @@
 
 package com.sebuilder.interpreter.steptype;
 
-import com.sebuilder.interpreter.LocatorHolder;
 import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.screenshot.LocatorInnerScrollElementHandler;
 import com.sebuilder.interpreter.screenshot.Page;
 import com.sebuilder.interpreter.screenshot.VerticalPrinter;
+import com.sebuilder.interpreter.step.LocatorHolder;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.openqa.selenium.Dimension;

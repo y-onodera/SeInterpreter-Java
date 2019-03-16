@@ -1,5 +1,7 @@
-package com.sebuilder.interpreter;
+package com.sebuilder.interpreter.step;
 
+import com.sebuilder.interpreter.StepType;
+import com.sebuilder.interpreter.TestRun;
 import org.json.JSONException;
 import org.json.JSONObject;
 

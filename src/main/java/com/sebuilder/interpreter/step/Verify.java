@@ -14,38 +14,27 @@
  * limitations under the License.
  */
 
-package com.sebuilder.interpreter;
+package com.sebuilder.interpreter.step;
 
 import com.google.common.base.Objects;
 
 /**
- * Generic Assert that wraps a getter.
+ * Generic Verify that wraps a getter.
  *
  * @author zarkonnen
  */
-public class Assert implements GetterUseStep {
-    public final Getter getter;
+public class Verify extends Assert {
 
-    public Assert(Getter getter) {
-        this.getter = getter;
-    }
-
-    @Override
-    public Getter getGetter() {
-        return getter;
-    }
-
-    @Override
-    public boolean run(TestRun ctx) {
-        return this.test(ctx);
+    public Verify(Getter getter) {
+        super(getter);
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Assert anAssert = (Assert) o;
-        return Objects.equal(getter, anAssert.getter);
+        Verify verify = (Verify) o;
+        return Objects.equal(getter, verify.getter);
     }
 
     @Override

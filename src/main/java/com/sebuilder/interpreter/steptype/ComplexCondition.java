@@ -2,9 +2,9 @@ package com.sebuilder.interpreter.steptype;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
-import com.sebuilder.interpreter.Getter;
 import com.sebuilder.interpreter.TestRun;
-import com.sebuilder.interpreter.WaitFor;
+import com.sebuilder.interpreter.step.Getter;
+import com.sebuilder.interpreter.step.WaitFor;
 
 import java.util.List;
 

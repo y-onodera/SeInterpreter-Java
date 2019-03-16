@@ -1,6 +1,7 @@
-package com.sebuilder.interpreter;
+package com.sebuilder.interpreter.step;
 
 import com.google.common.base.Objects;
+import com.sebuilder.interpreter.TestRun;
 import org.json.JSONException;
 import org.json.JSONObject;
 

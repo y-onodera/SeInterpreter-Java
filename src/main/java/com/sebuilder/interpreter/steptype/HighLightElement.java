@@ -2,9 +2,9 @@ package com.sebuilder.interpreter.steptype;
 
 import com.google.common.collect.Maps;
 import com.sebuilder.interpreter.Locator;
-import com.sebuilder.interpreter.LocatorHolder;
 import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
+import com.sebuilder.interpreter.step.LocatorHolder;
 import org.openqa.selenium.WebElement;
 
 import java.util.Map;

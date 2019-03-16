@@ -41,7 +41,7 @@ public class Json implements DataSource {
     public List<TestData> getData(Map<String, String> config, File relativeTo, TestData vars) {
         ArrayList<TestData> data = new ArrayList<>();
         File f = findFile(relativeTo, vars.bind(config.get("path")));
-        String charsetName = Context.getInstance().getDataSourceEncording();
+        String charsetName = Context.getInstance().getDataSourceEncoding();
         try (BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(f), charsetName))) {
             JSONTokener tok = new JSONTokener(r);
             JSONArray a = new JSONArray(tok);

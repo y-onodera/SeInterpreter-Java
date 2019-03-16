@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.function.Function;
 
-public class ScriptBuilder {
+public class TestCaseBuilder {
     private ArrayList<Step> steps;
-    private Function<TestData, Script> lazyLoad;
+    private Function<TestData, TestCase> lazyLoad;
     private boolean usePreviousDriverAndVars;
     private boolean closeDriver;
     private DataSource dataSource;
@@ -15,12 +15,12 @@ public class ScriptBuilder {
     private DataSource overrideDataSource;
     private Map<String, String> overrideDataSourceConfig;
     private String skip;
-    private TestCase testCase;
+    private ScriptFile scriptFile;
 
-    public ScriptBuilder() {
+    public TestCaseBuilder() {
         this.steps = new ArrayList<>();
         this.lazyLoad = null;
-        this.testCase = new TestCase(Script.DEFAULT_SCRIPT_NAME);
+        this.scriptFile = new ScriptFile(TestCase.DEFAULT_SCRIPT_NAME);
         this.dataSource = null;
         this.dataSourceConfig = null;
         this.usePreviousDriverAndVars = false;
@@ -30,10 +30,10 @@ public class ScriptBuilder {
         this.skip = "false";
     }
 
-    public ScriptBuilder(Script currentDisplay) {
+    public TestCaseBuilder(TestCase currentDisplay) {
         this.steps = new ArrayList<>(currentDisplay.steps());
         this.lazyLoad = currentDisplay.lazyLoad();
-        this.testCase = currentDisplay.testCase();
+        this.scriptFile = currentDisplay.testCase();
         this.dataSource = currentDisplay.dataSource();
         this.dataSourceConfig = currentDisplay.dataSourceConfig();
         this.usePreviousDriverAndVars = currentDisplay.usePreviousDriverAndVars();
@@ -43,8 +43,8 @@ public class ScriptBuilder {
         this.skip = currentDisplay.skip();
     }
 
-    public static Script lazyLoad(String beforeReplace, Function<TestData, Script> lazyLoad) {
-        ScriptBuilder builder = new ScriptBuilder();
+    public static TestCase lazyLoad(String beforeReplace, Function<TestData, TestCase> lazyLoad) {
+        TestCaseBuilder builder = new TestCaseBuilder();
         builder.setName(beforeReplace);
         builder.lazyLoad = lazyLoad;
         return builder.createScript();
@@ -54,16 +54,16 @@ public class ScriptBuilder {
         return this.steps;
     }
 
-    public Function<TestData, Script> getLazyLoad() {
+    public Function<TestData, TestCase> getLazyLoad() {
         return this.lazyLoad;
     }
 
-    public TestCase getTestCase() {
-        return this.testCase;
+    public ScriptFile getScriptFile() {
+        return this.scriptFile;
     }
 
     public File getRelativePath() {
-        return this.getTestCase().relativePath();
+        return this.getScriptFile().relativePath();
     }
 
     public boolean isUsePreviousDriverAndVars() {
@@ -102,49 +102,49 @@ public class ScriptBuilder {
         return new DataSet(this.getOverrideDataSource(), this.getOverrideDataSourceConfig(), this.getRelativePath());
     }
 
-    public ScriptBuilder clearStep() {
+    public TestCaseBuilder clearStep() {
         this.steps.clear();
         return this;
     }
 
-    public ScriptBuilder addSteps(ArrayList<Step> steps) {
+    public TestCaseBuilder addSteps(ArrayList<Step> steps) {
         this.steps.addAll(steps);
         return this;
     }
 
-    public ScriptBuilder addStep(Step aStep) {
+    public TestCaseBuilder addStep(Step aStep) {
         this.steps.add(aStep);
         return this;
     }
 
-    public ScriptBuilder associateWith(File target) {
-        this.testCase = TestCase.of(target, Script.DEFAULT_SCRIPT_NAME);
+    public TestCaseBuilder associateWith(File target) {
+        this.scriptFile = ScriptFile.of(target, TestCase.DEFAULT_SCRIPT_NAME);
         return this;
     }
 
-    public ScriptBuilder setName(String name) {
-        this.testCase = testCase.changeName(name);
+    public TestCaseBuilder setName(String name) {
+        this.scriptFile = scriptFile.changeName(name);
         return this;
     }
 
-    public ScriptBuilder setDataSource(DataSource dataSource, Map<String, String> config) {
+    public TestCaseBuilder setDataSource(DataSource dataSource, Map<String, String> config) {
         this.dataSource = dataSource;
         this.dataSourceConfig = config;
         return this;
     }
 
-    public ScriptBuilder overrideDataSource(DataSource dataSource, Map<String, String> config) {
+    public TestCaseBuilder overrideDataSource(DataSource dataSource, Map<String, String> config) {
         this.overrideDataSource = dataSource;
         this.overrideDataSourceConfig = config;
         return this;
     }
 
-    public ScriptBuilder setSkip(String skip) {
+    public TestCaseBuilder setSkip(String skip) {
         this.skip = skip;
         return this;
     }
 
-    public ScriptBuilder usePreviousDriverAndVars(boolean userPreviousDriverAndVars) {
+    public TestCaseBuilder usePreviousDriverAndVars(boolean userPreviousDriverAndVars) {
         if (userPreviousDriverAndVars) {
             this.closeDriver = false;
             this.usePreviousDriverAndVars = true;
@@ -155,8 +155,8 @@ public class ScriptBuilder {
         return this;
     }
 
-    public Script createScript() {
-        return new Script(this);
+    public TestCase createScript() {
+        return new TestCase(this);
     }
 
 }

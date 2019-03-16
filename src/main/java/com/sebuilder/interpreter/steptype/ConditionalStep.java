@@ -2,7 +2,7 @@ package com.sebuilder.interpreter.steptype;
 
 import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
-import com.sebuilder.interpreter.WaitFor;
+import com.sebuilder.interpreter.step.WaitFor;
 
 public interface ConditionalStep extends StepType {
 

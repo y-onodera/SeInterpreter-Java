@@ -1,4 +1,4 @@
-package com.sebuilder.interpreter;
+package com.sebuilder.interpreter.application;
 
 import junit.framework.Test;
 import org.apache.tools.ant.BuildException;

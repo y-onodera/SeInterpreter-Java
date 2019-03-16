@@ -6,15 +6,15 @@ public class TestRunStatus {
     private final boolean finished;
     private final boolean stopped;
 
-    public TestRunStatus(int stepIndex, boolean chainRun, boolean finished, boolean stop) {
+    private TestRunStatus(int stepIndex, boolean chainRun, boolean finished, boolean stop) {
         this.stepIndex = stepIndex;
         this.chainRun = chainRun;
         this.finished = finished;
         this.stopped = stop;
     }
 
-    public static TestRunStatus of(boolean aHasChain) {
-        return new TestRunStatus(-1, aHasChain, false, false);
+    public static TestRunStatus of(Scenario scenario, TestCase testCase) {
+        return new TestRunStatus(-1, scenario.hasChain(testCase), false, false);
     }
 
     public TestRunStatus start() {

@@ -54,7 +54,7 @@ public class DataSet {
     public JSONObject toJSON() throws JSONException {
         if (this.dataSource != null) {
             JSONObject data = new JSONObject();
-            final String sourceName = this.dataSource.getClass().getSimpleName().toLowerCase();
+            final String sourceName = this.dataSource.name();
             data.put("source", sourceName);
             JSONObject configs = new JSONObject();
             configs.put(sourceName, this.dataSourceConfig);
