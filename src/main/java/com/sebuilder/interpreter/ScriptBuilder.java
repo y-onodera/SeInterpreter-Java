@@ -8,9 +8,6 @@ import java.util.function.Function;
 public class ScriptBuilder {
     private ArrayList<Step> steps;
     private Function<TestData, Script> lazyLoad;
-    private String path;
-    private String name;
-    private File relativePath;
     private boolean usePreviousDriverAndVars;
     private boolean closeDriver;
     private DataSource dataSource;
@@ -18,13 +15,12 @@ public class ScriptBuilder {
     private DataSource overrideDataSource;
     private Map<String, String> overrideDataSourceConfig;
     private String skip;
+    private TestCase testCase;
 
     public ScriptBuilder() {
         this.steps = new ArrayList<>();
         this.lazyLoad = null;
-        this.path = "scriptPath";
-        this.name = "scriptName";
-        this.relativePath = null;
+        this.testCase = new TestCase(Script.DEFAULT_SCRIPT_NAME);
         this.dataSource = null;
         this.dataSourceConfig = null;
         this.usePreviousDriverAndVars = false;
@@ -37,9 +33,7 @@ public class ScriptBuilder {
     public ScriptBuilder(Script currentDisplay) {
         this.steps = new ArrayList<>(currentDisplay.steps());
         this.lazyLoad = currentDisplay.lazyLoad();
-        this.path = currentDisplay.path();
-        this.name = currentDisplay.name();
-        this.relativePath = currentDisplay.relativePath();
+        this.testCase = currentDisplay.testCase();
         this.dataSource = currentDisplay.dataSource();
         this.dataSourceConfig = currentDisplay.dataSourceConfig();
         this.usePreviousDriverAndVars = currentDisplay.usePreviousDriverAndVars();
@@ -64,16 +58,12 @@ public class ScriptBuilder {
         return this.lazyLoad;
     }
 
-    public String getPath() {
-        return this.path;
-    }
-
-    public String getName() {
-        return this.name;
+    public TestCase getTestCase() {
+        return this.testCase;
     }
 
     public File getRelativePath() {
-        return this.relativePath;
+        return this.getTestCase().relativePath();
     }
 
     public boolean isUsePreviousDriverAndVars() {
@@ -128,20 +118,12 @@ public class ScriptBuilder {
     }
 
     public ScriptBuilder associateWith(File target) {
-        if (target != null) {
-            this.name = target.getName();
-            this.path = target.getPath();
-            this.relativePath = target.getAbsoluteFile().getParentFile();
-        } else {
-            this.name = "New_Script";
-            this.path = null;
-            this.relativePath = null;
-        }
+        this.testCase = TestCase.of(target, Script.DEFAULT_SCRIPT_NAME);
         return this;
     }
 
     public ScriptBuilder setName(String name) {
-        this.name = name;
+        this.testCase = testCase.changeName(name);
         return this;
     }
 

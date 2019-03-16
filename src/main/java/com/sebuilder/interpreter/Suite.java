@@ -1,13 +1,11 @@
 package com.sebuilder.interpreter;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -15,11 +13,7 @@ public class Suite implements Iterable<Script>, TestRunnable {
 
     public static final String DEFAULT_NAME = "New_Suite";
 
-    private final String name;
-
-    private final String path;
-
-    private final File relativePath;
+    private final TestCase testCase;
 
     private final ArrayList<Script> scripts = Lists.newArrayList();
 
@@ -35,19 +29,11 @@ public class Suite implements Iterable<Script>, TestRunnable {
             , DataSource dataSource
             , Map<String, String> config
             , boolean shareState) {
-        if (suiteFile != null) {
-            this.name = suiteFile.getName();
-            this.path = suiteFile.getAbsolutePath();
-            this.relativePath = suiteFile.getParentFile().getAbsoluteFile();
-        } else {
-            this.name = DEFAULT_NAME;
-            this.path = null;
-            this.relativePath = null;
-        }
+        this.testCase = TestCase.of(suiteFile, DEFAULT_NAME);
         this.shareState = shareState;
         this.scripts.addAll(aScripts);
         this.scriptChains = scriptChains;
-        this.dataSet = new DataSet(dataSource, config, this.relativePath);
+        this.dataSet = new DataSet(dataSource, config, this.getRelativePath());
     }
 
     @Override
@@ -60,15 +46,15 @@ public class Suite implements Iterable<Script>, TestRunnable {
     }
 
     public String getPath() {
-        return this.path;
+        return this.testCase.path();
     }
 
     public String getName() {
-        return this.name;
+        return this.testCase.name();
     }
 
     public File getRelativePath() {
-        return relativePath;
+        return this.testCase.relativePath();
     }
 
     public int scriptSize() {
@@ -119,12 +105,7 @@ public class Suite implements Iterable<Script>, TestRunnable {
     }
 
     public List<TestRunBuilder> getTestRuns() {
-        final String suiteName;
-        if (this.path != null && name.contains(".")) {
-            suiteName = name.substring(0, name.lastIndexOf("."));
-        } else {
-            suiteName = this.name;
-        }
+        final String suiteName = this.testCase.nameExcludeExtention();
         return this.loadData()
                 .stream()
                 .flatMap(it -> {
@@ -244,14 +225,14 @@ public class Suite implements Iterable<Script>, TestRunnable {
         if (s.isLazyLoad()) {
             scriptPath.put("lazyLoad", s.name());
         } else {
-            scriptPath.put("path", relativePath(s));
+            scriptPath.put("path", this.testCase.relativePath(s));
         }
         if (!Objects.equals(s.skip(), "false")) {
             scriptPath.put("skip", s.skip());
         }
         if (s.overrideDataSource() != null) {
             JSONObject data = new JSONObject();
-            final String sourceName = s.overrideDataSource().getClass().getSimpleName().toLowerCase();
+            final String sourceName = s.overrideDataSource().name();
             data.put("source", sourceName);
             JSONObject configs = new JSONObject();
             configs.put(sourceName, s.overrideDataSourceConfig());
@@ -261,12 +242,4 @@ public class Suite implements Iterable<Script>, TestRunnable {
         return scriptPath;
     }
 
-    private String relativePath(Script s) {
-        if (this.relativePath == null && !Strings.isNullOrEmpty(s.path())) {
-            return s.path();
-        } else if (Strings.isNullOrEmpty(s.path())) {
-            return "script/" + s.name();
-        }
-        return this.relativePath.toPath().relativize(Paths.get(s.path()).toAbsolutePath()).toString().replace("\\", "/");
-    }
 }

@@ -29,4 +29,8 @@ import java.util.Map;
 public interface DataSource {
 
     List<TestData> getData(Map<String, String> config, File relativeTo, TestData vars);
+
+    default String name() {
+        return this.getClass().getSimpleName().toLowerCase();
+    }
 }

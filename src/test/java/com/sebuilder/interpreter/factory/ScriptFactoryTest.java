@@ -99,7 +99,7 @@ public class ScriptFactoryTest {
 
         private void assertSuiteAttribute(Suite result) {
             assertEquals(Suite.DEFAULT_NAME, result.getName());
-            assertNull(result.getPath());
+            assertEquals("", result.getPath());
             assertEquals(1, result.scriptSize());
             assertEquals(0, result.getScriptChains().size());
             assertNull(result.getDataSource());
@@ -225,7 +225,7 @@ public class ScriptFactoryTest {
             assertEquals(0, result.getScriptChains().size());
             assertFileAttribute(testFile, testSource, result);
             assertEquals("${script1}.json", result.get(0).name());
-            assertEquals("scriptPath", result.get(0).path());
+            assertEquals("", result.get(0).path());
             assertNull(result.get(0).relativePath());
             assertEquals("${skip1}", result.get(0).skip());
             assertTrue(result.get(0).overrideDataSource() instanceof Csv);
@@ -252,7 +252,7 @@ public class ScriptFactoryTest {
             assertEquals(0, result.getScriptChains().size());
             assertFileAttribute(testFile, testSource, result);
             assertEquals("${script1}.json", result.get(0).name());
-            assertEquals("scriptPath", result.get(0).path());
+            assertEquals("", result.get(0).path());
             assertNull(result.get(0).relativePath());
             assertEquals("${skip1}", result.get(0).skip());
             assertTrue(result.get(0).overrideDataSource() instanceof Csv);
@@ -285,7 +285,7 @@ public class ScriptFactoryTest {
             assertEquals(2, result.getScriptChains().size());
             assertFileAttribute(testFile, testSource, result);
             assertEquals("${script1}.json", result.get(0).name());
-            assertEquals("scriptPath", result.get(0).path());
+            assertEquals("", result.get(0).path());
             assertNull(result.get(0).relativePath());
             assertEquals("false", result.get(0).skip());
             assertNull(result.get(0).overrideDataSource());
@@ -296,7 +296,7 @@ public class ScriptFactoryTest {
             assertNull(result.get(1).overrideDataSource());
             assertEquals(0, result.get(1).overrideDataSourceConfig().size());
             assertEquals("${script3}.json", result.get(2).name());
-            assertEquals("scriptPath", result.get(2).path());
+            assertEquals("", result.get(2).path());
             assertSame(result.get(2), result.getScriptChains().get(result.get(1)));
             assertEquals("false", result.get(2).skip());
             assertTrue(result.get(2).overrideDataSource() instanceof Csv);
@@ -315,7 +315,7 @@ public class ScriptFactoryTest {
             assertEquals(2, result.getScriptChains().size());
             assertFileAttribute(testFile, testSource, result);
             assertEquals("${script1}.json", result.get(0).name());
-            assertEquals("scriptPath", result.get(0).path());
+            assertEquals("", result.get(0).path());
             assertNull(result.get(0).relativePath());
             assertEquals("false", result.get(0).skip());
             assertNull(result.get(0).overrideDataSource());
@@ -326,7 +326,7 @@ public class ScriptFactoryTest {
             assertNull(result.get(1).overrideDataSource());
             assertEquals(0, result.get(1).overrideDataSourceConfig().size());
             assertEquals("${script3}.json", result.get(2).name());
-            assertEquals("scriptPath", result.get(2).path());
+            assertEquals("", result.get(2).path());
             assertSame(result.get(2), result.getScriptChains().get(result.get(1)));
             assertEquals("false", result.get(2).skip());
             assertTrue(result.get(2).overrideDataSource() instanceof Csv);

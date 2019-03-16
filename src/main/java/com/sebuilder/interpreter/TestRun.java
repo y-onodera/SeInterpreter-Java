@@ -27,15 +27,12 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 public class TestRun {
     private final String testRunName;
     private final Script script;
-    private TestData vars = new TestData();
     private final RemoteWebDriver driver;
     private final Logger log;
     private final SeInterpreterTestListener listener;
     private final ScriptChain scriptChain;
-    private int stepIndex = -1;
-    private boolean chainRun;
-    private boolean finished;
-    private boolean stop;
+    private TestRunStatus testRunStatus;
+    private TestData vars;
 
     public TestRun(
             String testRunName,
@@ -61,7 +58,7 @@ public class TestRun {
                 .add("_templateDir", seInterpreterTestListener.getTemplateOutputDirectory().getAbsolutePath())
                 .build();
         this.scriptChain = scriptChain;
-        this.chainRun = this.scriptChain.containsKey(this.script);
+        this.testRunStatus = TestRunStatus.of(this.scriptChain.containsKey(this.script));
     }
 
     public String getTestRunName() {
@@ -100,7 +97,7 @@ public class TestRun {
      * @return The step that is being/has just been executed.
      */
     public Step currentStep() {
-        return this.script.steps().get(this.stepIndex);
+        return this.script.steps().get(this.testRunStatus.stepIndex());
     }
 
     /**
@@ -131,7 +128,7 @@ public class TestRun {
     public String string(String paramName) {
         String s = this.currentStep().getParam(paramName);
         if (s == null) {
-            throw new RuntimeException("Missing parameter \"" + paramName + "\" at step #" + (this.stepIndex + 1) + ".");
+            throw new RuntimeException("Missing parameter \"" + paramName + "\" at step #" + this.testRunStatus.stepIndex() + ".");
         }
         return this.vars.bind(s);
     }
@@ -156,19 +153,15 @@ public class TestRun {
     public Locator locator(String paramName) {
         Locator l = this.currentStep().getLocator(paramName);
         if (l == null) {
-            throw new RuntimeException("Missing parameter \"" + paramName + "\" at step #" + (this.stepIndex + 1) + ".");
+            throw new RuntimeException("Missing parameter \"" + paramName + "\" at step #" + this.testRunStatus.stepIndex() + ".");
         }
         // This kind of variable substitution makes for short code, but it's inefficient.
         l.value = this.vars.bind(l.value);
         return l;
     }
 
-    public boolean isFinished() {
-        return this.finished;
-    }
-
     public boolean isStopped() {
-        return this.stop;
+        return this.testRunStatus.isStopped();
     }
 
     public void putVars(String index, String s) {
@@ -184,8 +177,7 @@ public class TestRun {
      */
     public boolean finish() {
         try {
-            this.start();
-            boolean success = true;
+            boolean success = this.start();
             try {
                 while (this.hasNext()) {
                     success = this.next() && success;
@@ -195,18 +187,18 @@ public class TestRun {
             }
             return this.end(success);
         } finally {
-            this.finished = true;
+            this.testRunStatus = this.testRunStatus.finish();
         }
     }
 
-    public void start() {
-        this.finished = false;
-        this.stop = false;
+    public boolean start() {
+        this.testRunStatus = this.testRunStatus.start();
         this.getListener().openTestSuite(this.script, this.testRunName, this.vars);
+        return true;
     }
 
     public void stop() {
-        this.stop = true;
+        this.testRunStatus = this.testRunStatus.stop();
     }
 
     /**
@@ -221,7 +213,7 @@ public class TestRun {
     }
 
     public boolean stepRest() {
-        return !this.isStopped() && this.stepIndex < this.script.steps().size() - 1;
+        return testRunStatus.isNeedRunning(this.script.steps().size() - 1);
     }
 
     /**
@@ -262,7 +254,7 @@ public class TestRun {
 
     public void forwardStepIndex(int count) {
         this.getListener().skipTestIndex(count);
-        this.stepIndex = this.stepIndex + count;
+        this.testRunStatus = this.testRunStatus.forwardStepIndex(count);
     }
 
     public boolean processTestSuccess() {
@@ -287,8 +279,7 @@ public class TestRun {
 
     public boolean end(boolean success) {
         this.getListener().closeTestSuite();
-        if (this.chainRun && !this.isStopped()) {
-            this.chainRun = false;
+        if (this.testRunStatus.isNeedChain()) {
             return this.chainRun(this.scriptChain.get(this.script));
         }
         return success;
@@ -313,6 +304,7 @@ public class TestRun {
     }
 
     private boolean chainRun(Script chainTo) {
+        this.testRunStatus = this.testRunStatus.chainCalled();
         if (chainTo.skipRunning(this.vars)) {
             if (this.scriptChain.containsKey(chainTo)) {
                 return this.chainRun(this.scriptChain.get(chainTo));

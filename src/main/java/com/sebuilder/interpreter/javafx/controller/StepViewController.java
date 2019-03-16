@@ -211,10 +211,8 @@ public class StepViewController {
 
     private void refreshTable(Script aScript) {
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
+            this.tableViewScriptBody.getItems().setAll(List.of());
             int no = 1;
-            if (this.tableViewScriptBody.getItems().size() > 0) {
-                this.tableViewScriptBody.getItems().setAll(List.of());
-            }
             for (Step step : aScript.steps()) {
                 ScriptBody row = new ScriptBody(no++, step.toPrettyString(), null);
                 this.tableViewScriptBody.getItems().add(row);

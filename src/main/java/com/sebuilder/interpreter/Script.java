@@ -25,7 +25,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -39,23 +38,20 @@ import java.util.stream.Collectors;
  * @author zarkonnen
  */
 public class Script implements TestRunnable {
+    public static final String DEFAULT_SCRIPT_NAME = "New_Script";
     private final ArrayList<Step> steps;
     private final Function<TestData, Script> lazyLoad;
-    private final String path;
-    private final String name;
-    private final File relativePath;
     private final boolean usePreviousDriverAndVars;
     private final boolean closeDriver;
     private final DataSet dataSet;
     private final DataSet overrideDataSet;
     private final String skip;
+    private final TestCase testCase;
 
     public Script(ScriptBuilder scriptBuilder) {
         this.steps = scriptBuilder.getSteps();
         this.lazyLoad = scriptBuilder.getLazyLoad();
-        this.path = scriptBuilder.getPath();
-        this.name = scriptBuilder.getName();
-        this.relativePath = scriptBuilder.getRelativePath();
+        this.testCase = scriptBuilder.getTestCase();
         this.usePreviousDriverAndVars = scriptBuilder.isUsePreviousDriverAndVars();
         this.closeDriver = scriptBuilder.isCloseDriver();
         this.dataSet = scriptBuilder.getDataSet();
@@ -84,12 +80,16 @@ public class Script implements TestRunnable {
         return this.usePreviousDriverAndVars;
     }
 
+    public TestCase testCase() {
+        return this.testCase;
+    }
+
     public File relativePath() {
-        return this.relativePath;
+        return this.testCase.relativePath();
     }
 
     public String name() {
-        return this.name;
+        return this.testCase.name();
     }
 
     public Function<TestData, Script> lazyLoad() {
@@ -108,7 +108,7 @@ public class Script implements TestRunnable {
     }
 
     public String path() {
-        return Optional.ofNullable(this.path).orElse("");
+        return this.testCase.path();
     }
 
     public DataSource dataSource() {
