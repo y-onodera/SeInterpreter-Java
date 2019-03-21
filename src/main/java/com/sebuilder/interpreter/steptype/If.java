@@ -14,13 +14,10 @@ public class If implements FlowStep {
      */
     public boolean run(TestRun ctx) {
         ctx.processTestSuccess();
-        boolean success = true;
         int actions = getSubSteps(ctx);
-        final boolean isTrue = this.next(ctx);
-        ctx.processTestSuccess();
-        if (isTrue) {
-            success = this.runSubStep(ctx, success, actions);
-            if (!success) {
+        if (this.next(ctx)) {
+            ctx.processTestSuccess();
+            if (!this.runSubStep(ctx, actions)) {
                 ctx.processTestFailure();
                 return false;
             }

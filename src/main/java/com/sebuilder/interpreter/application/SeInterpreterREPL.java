@@ -1,5 +1,6 @@
 package com.sebuilder.interpreter.application;
 
+import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.sebuilder.interpreter.*;
 import org.apache.logging.log4j.LogManager;
@@ -116,7 +117,7 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
                 }
             }
         } catch (Throwable t) {
-            log.error(t);
+            log.error(Throwables.getStackTraceAsString(t));
         } finally {
             seInterpreterTestListener.aggregateResult();
         }
@@ -128,7 +129,7 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
         try {
             this.execute(createTestRunBuilder(testCase), seInterpreterTestListener);
         } catch (Throwable t) {
-            log.error(t);
+            log.error(Throwables.getStackTraceAsString(t));
         } finally {
             seInterpreterTestListener.aggregateResult();
         }

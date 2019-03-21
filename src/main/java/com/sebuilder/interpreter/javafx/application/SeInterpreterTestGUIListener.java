@@ -1,15 +1,15 @@
 package com.sebuilder.interpreter.javafx.application;
 
+import com.sebuilder.interpreter.SeInterpreterTestListenerImpl;
 import com.sebuilder.interpreter.TestCase;
 import com.sebuilder.interpreter.TestData;
-import com.sebuilder.interpreter.application.SimpleSeInterpreterTestListener;
 import com.sebuilder.interpreter.javafx.EventBus;
 import com.sebuilder.interpreter.javafx.Result;
 import com.sebuilder.interpreter.javafx.event.replay.StepResultSetEvent;
 import com.sebuilder.interpreter.javafx.event.script.ScriptSelectEvent;
 import org.apache.logging.log4j.Logger;
 
-public class SeInterpreterTestGUIListener extends SimpleSeInterpreterTestListener {
+public class SeInterpreterTestGUIListener extends SeInterpreterTestListenerImpl {
 
     public SeInterpreterTestGUIListener(Logger aLog) {
         super(aLog);

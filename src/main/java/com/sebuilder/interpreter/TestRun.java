@@ -32,8 +32,9 @@ public class TestRun {
     private final Logger log;
     private final SeInterpreterTestListener listener;
     private final Scenario scenario;
-    private TestRunStatus testRunStatus;
+    private final Aspect aspect;
     private TestData vars;
+    private TestRunStatus testRunStatus;
 
     public TestRun(
             String testRunName,
@@ -59,7 +60,12 @@ public class TestRun {
                 .add("_templateDir", seInterpreterTestListener.getTemplateOutputDirectory().getAbsolutePath())
                 .build();
         this.scenario = scenario;
+        this.aspect = this.scenario.aspect();
         this.testRunStatus = TestRunStatus.of(this.scenario, this.testCase);
+    }
+
+    public void putVars(String index, String s) {
+        this.vars = this.vars.add(index, s);
     }
 
     public String getTestRunName() {
@@ -165,10 +171,6 @@ public class TestRun {
         return this.testRunStatus.isStopped();
     }
 
-    public void putVars(String index, String s) {
-        this.vars = this.vars.add(index, s);
-    }
-
     /**
      * Runs the entire (rest of the) testCase.
      *
@@ -192,47 +194,8 @@ public class TestRun {
         }
     }
 
-    public boolean start() {
-        this.testRunStatus = this.testRunStatus.start();
-        this.getListener().openTestSuite(this.testCase, this.testRunName, this.vars);
-        return true;
-    }
-
     public void stop() {
         this.testRunStatus = this.testRunStatus.stop();
-    }
-
-    /**
-     * @return True if there is another step to execute.
-     */
-    public boolean hasNext() {
-        boolean hasNext = this.stepRest();
-        if (!hasNext && this.driver != null) {
-            this.quit();
-        }
-        return hasNext;
-    }
-
-    public boolean stepRest() {
-        return testRunStatus.isNeedRunning(this.testCase.steps().size() - 1);
-    }
-
-    /**
-     * Executes the next step.
-     *
-     * @return True on success.
-     */
-    public boolean next() {
-        boolean result;
-        try {
-            result = this.runTest();
-        } catch (Throwable e) {
-            return this.processTestError(e);
-        }
-        if (!result) {
-            return this.processTestFailure();
-        }
-        return this.processTestSuccess();
     }
 
     public boolean runTest() {
@@ -242,7 +205,9 @@ public class TestRun {
     }
 
     public void startTest() {
-        this.getListener().startTest(currentStep().getName() != null ? this.currentStep().getName() : this.vars.bind(this.currentStep().toPrettyString()));
+        this.aspect.advice(this.currentStep())
+                .invokeBefore(this);
+        this.getListener().startTest(this.currentStep().getName() != null ? this.currentStep().getName() : this.vars.bind(this.currentStep().toPrettyString()));
     }
 
     public void toNextStepIndex() {
@@ -260,6 +225,8 @@ public class TestRun {
 
     public boolean processTestSuccess() {
         this.getListener().endTest();
+        this.aspect.advice(this.currentStep())
+                .invokeAfter(this);
         return true;
     }
 
@@ -278,7 +245,44 @@ public class TestRun {
         throw new AssertionError(this.currentStep() + " failed.", e);
     }
 
-    public boolean end(boolean success) {
+    protected boolean start() {
+        this.testRunStatus = this.testRunStatus.start();
+        this.getListener().openTestSuite(this.testCase, this.testRunName, this.vars);
+        return true;
+    }
+
+    /**
+     * @return True if there is another step to execute.
+     */
+    protected boolean hasNext() {
+        boolean hasNext = this.stepRest();
+        if (!hasNext && this.driver != null) {
+            this.quit();
+        }
+        return hasNext;
+    }
+
+    protected boolean stepRest() {
+        return testRunStatus.isNeedRunning(this.testCase.steps().size() - 1);
+    }
+
+    /**
+     * Executes the next step.
+     *
+     * @return True on success.
+     */
+    protected boolean next() {
+        try {
+            if (!this.runTest()) {
+                return this.processTestFailure();
+            }
+            return this.processTestSuccess();
+        } catch (Throwable e) {
+            return this.processTestError(e);
+        }
+    }
+
+    protected boolean end(boolean success) {
         this.getListener().closeTestSuite();
         if (this.testRunStatus.isNeedChain()) {
             return this.chainRun(this.scenario.getChainTo(this.testCase));
@@ -286,25 +290,14 @@ public class TestRun {
         return success;
     }
 
-    public boolean absent(Throwable e) {
+    protected boolean absent(Throwable e) {
         this.getListener().closeTestSuite();
         // If the testCase terminates, the driver will be closed automatically.
         this.quit();
         throw new AssertionError(e);
     }
 
-    public void quit() {
-        if (this.testCase.closeDriver()) {
-            this.log.debug("Quitting driver.");
-            try {
-                this.driver.quit();
-            } catch (Exception e2) {
-                //
-            }
-        }
-    }
-
-    private boolean chainRun(TestCase chainTo) {
+    protected boolean chainRun(TestCase chainTo) {
         this.testRunStatus = this.testRunStatus.chainCalled();
         if (chainTo.skipRunning(this.vars)) {
             if (this.scenario.hasChain(chainTo)) {
@@ -323,13 +316,21 @@ public class TestRun {
         return success;
     }
 
-    private TestRun createChainRun(TestCase chainTo, TestData data) {
+    protected TestRun createChainRun(TestCase chainTo, TestData data) {
         return new TestRunBuilder(chainTo, this.scenario)
                 .addTestRunNamePrefix(this.testRunName + "_")
-                .createTestRun(this.log
-                        , data
-                        , this
-                        , this.listener);
+                .createTestRun(data, this);
+    }
+
+    protected void quit() {
+        if (this.testCase.closeDriver()) {
+            this.log.debug("Quitting driver.");
+            try {
+                this.driver.quit();
+            } catch (Exception e2) {
+                //
+            }
+        }
     }
 
 }

@@ -218,7 +218,7 @@ public class StepTypeFactory {
         if (key.equals("type") || key.equals("negated")) {
             return;
         }
-        if (stepO.optJSONObject(key) != null && key.equals("locator")) {
+        if (stepO.optJSONObject(key) != null && key.startsWith("locator")) {
             step.put(key, new Locator(stepO.getJSONObject(key).getString("type"), stepO.getJSONObject(key).getString("value")));
         } else {
             step.put(key, stepO.getString(key));

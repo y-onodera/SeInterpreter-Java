@@ -6,7 +6,6 @@ import com.google.common.collect.Lists;
 import com.google.common.eventbus.Subscribe;
 import com.google.common.io.Files;
 import com.sebuilder.interpreter.*;
-import com.sebuilder.interpreter.application.SimpleSeInterpreterTestListener;
 import com.sebuilder.interpreter.factory.TestCaseFactory;
 import com.sebuilder.interpreter.javafx.EventBus;
 import com.sebuilder.interpreter.javafx.controller.RunningProgressController;
@@ -158,7 +157,7 @@ public class SeInterpreterApplication extends Application {
             this.currentDisplay = newTestCase.builder()
                     .associateWith(new File(this.currentDisplay.path()))
                     .setName(this.currentDisplay.name())
-                    .createScript();
+                    .build();
             this.suite = this.suite.replace(this.currentDisplay);
             this.refreshMainView();
         });
@@ -240,7 +239,7 @@ public class SeInterpreterApplication extends Application {
         String oldPath = this.currentDisplay.path();
         this.currentDisplay = new TestCaseBuilder(this.currentDisplay)
                 .associateWith(target)
-                .createScript();
+                .build();
         Suite newSuite = this.suite.replace(oldName, this.currentDisplay);
         this.saveContents(target, this.currentDisplay, oldPath);
         this.resetSuite(newSuite, this.currentDisplay);
@@ -276,7 +275,7 @@ public class SeInterpreterApplication extends Application {
     @Subscribe
     public void open(BrowserOpenEvent event) throws IOException, JSONException {
         Task task = this.runner.createRunScriptTask(this.templateScript(), logger -> {
-            return new SimpleSeInterpreterTestListener(logger);
+            return new SeInterpreterTestListenerImpl(logger);
         });
         this.executeTask(task);
     }
@@ -360,7 +359,7 @@ public class SeInterpreterApplication extends Application {
             File saveTo = new File(scriptSaveTo, newName);
             this.suite = this.suite.replace(oldName, it.builder()
                     .associateWith(saveTo)
-                    .createScript());
+                    .build());
             this.saveContents(saveTo, this.suite.get(newName), "");
                 }
         );

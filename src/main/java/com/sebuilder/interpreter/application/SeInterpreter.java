@@ -48,7 +48,7 @@ public class SeInterpreter extends CommandLineRunner {
         Logger log = LogManager.getLogger(SeInterpreter.class);
         SeInterpreter interpreter = new SeInterpreter(args, log);
         if (interpreter.paths.isEmpty()) {
-            log.info("Configuration successful but no paths to scripts specified. Exiting.");
+            log.info("Configuration successful but no paths to testCases specified. Exiting.");
             System.exit(0);
         }
         try {

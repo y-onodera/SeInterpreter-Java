@@ -19,8 +19,7 @@ public class Retry implements FlowStep {
         int actions = getSubSteps(ctx);
         while (!next(ctx)) {
             ctx.processTestSuccess();
-            this.runSubStep(ctx, success, actions);
-            if (!success) {
+            if (!this.runSubStep(ctx, actions)) {
                 ctx.processTestFailure();
                 return false;
             }

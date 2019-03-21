@@ -1,5 +1,6 @@
 package com.sebuilder.interpreter;
 
+import com.google.common.base.Objects;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -58,7 +59,7 @@ public class Suite implements Iterable<TestCase>, TestRunnable {
     }
 
     public int scriptSize() {
-        return this.scenario.scriptSize();
+        return this.scenario.testCaseSize();
     }
 
     public int getIndex(TestCase testCase) {
@@ -75,7 +76,7 @@ public class Suite implements Iterable<TestCase>, TestRunnable {
 
     @Override
     public Iterator<TestCase> iterator() {
-        return this.scenario.scriptIterator();
+        return this.scenario.testCaseIterator();
     }
 
     public Scenario getScenario() {
@@ -173,5 +174,21 @@ public class Suite implements Iterable<TestCase>, TestRunnable {
         o.put("scripts", this.scenario.toJSON(this));
         o.put("shareState", this.shareState);
         return o;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Suite testCases = (Suite) o;
+        return isShareState() == testCases.isShareState() &&
+                Objects.equal(getScriptFile(), testCases.getScriptFile()) &&
+                Objects.equal(getScenario(), testCases.getScenario()) &&
+                Objects.equal(dataSet, testCases.dataSet);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(getScriptFile(), getScenario(), dataSet, isShareState());
     }
 }

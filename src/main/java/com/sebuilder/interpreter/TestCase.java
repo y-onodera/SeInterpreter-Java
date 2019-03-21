@@ -103,7 +103,7 @@ public class TestCase implements TestRunnable {
                     .builder()
                     .overrideDataSource(this.overrideDataSource(), this.overrideDataSourceConfig())
                     .setSkip(this.skip)
-                    .createScript();
+                    .build();
         }
         return this;
     }
@@ -150,13 +150,13 @@ public class TestCase implements TestRunnable {
     public TestCase rename(String aName) {
         return this.builder()
                 .setName(aName)
-                .createScript();
+                .build();
     }
 
     public TestCase usePreviousDriverAndVars(boolean userPreviousDriverAndVars) {
         return this.builder()
                 .usePreviousDriverAndVars(userPreviousDriverAndVars)
-                .createScript();
+                .build();
     }
 
     public TestCase editStep(Function<ArrayList<Step>, ArrayList<Step>> converter) {
@@ -251,7 +251,7 @@ public class TestCase implements TestRunnable {
     public TestCase skip(String skip) {
         return this.builder()
                 .setSkip(skip)
-                .createScript();
+                .build();
     }
 
     public Suite toSuite() {
@@ -298,6 +298,13 @@ public class TestCase implements TestRunnable {
         return scriptPath;
     }
 
+    private TestCase replaceStep(ArrayList<Step> newStep) {
+        return new TestCaseBuilder(this)
+                .clearStep()
+                .addSteps(newStep)
+                .build();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -316,12 +323,5 @@ public class TestCase implements TestRunnable {
     @Override
     public int hashCode() {
         return com.google.common.base.Objects.hashCode(steps, isLazyLoad(), usePreviousDriverAndVars, closeDriver, dataSet, overrideDataSet, skip, scriptFile);
-    }
-
-    private TestCase replaceStep(ArrayList<Step> newStep) {
-        return new TestCaseBuilder(this)
-                .clearStep()
-                .addSteps(newStep)
-                .createScript();
     }
 }

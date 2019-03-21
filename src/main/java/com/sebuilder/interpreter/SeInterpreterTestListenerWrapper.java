@@ -1,5 +1,7 @@
 package com.sebuilder.interpreter;
 
+import org.apache.logging.log4j.Logger;
+
 import java.io.File;
 
 public class SeInterpreterTestListenerWrapper implements SeInterpreterTestListener {
@@ -32,6 +34,11 @@ public class SeInterpreterTestListenerWrapper implements SeInterpreterTestListen
     @Override
     public void setUpDir(File dest) {
         delegate.setUpDir(dest);
+    }
+
+    @Override
+    public Logger getLog() {
+        return delegate.getLog();
     }
 
     @Override

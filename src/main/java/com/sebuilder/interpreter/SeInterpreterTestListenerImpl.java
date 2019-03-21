@@ -1,9 +1,6 @@
-package com.sebuilder.interpreter.application;
+package com.sebuilder.interpreter;
 
-import com.sebuilder.interpreter.Context;
-import com.sebuilder.interpreter.SeInterpreterTestListener;
-import com.sebuilder.interpreter.TestCase;
-import com.sebuilder.interpreter.TestData;
+import com.sebuilder.interpreter.application.SeInterpreterTestResultFormatter;
 import junit.framework.AssertionFailedError;
 import org.apache.logging.log4j.Logger;
 import org.apache.tools.ant.Project;
@@ -22,7 +19,7 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.stream.Collectors;
 
-public class SimpleSeInterpreterTestListener implements SeInterpreterTestListener {
+public class SeInterpreterTestListenerImpl implements SeInterpreterTestListener {
     private final SeInterpreterTestResultFormatter formatter;
     private Project project;
     private File resultDir;
@@ -37,7 +34,7 @@ public class SimpleSeInterpreterTestListener implements SeInterpreterTestListene
     private int failed;
     private Logger log;
 
-    public SimpleSeInterpreterTestListener(Logger aLog) {
+    public SeInterpreterTestListenerImpl(Logger aLog) {
         this.log = aLog;
         this.project = new Project();
         this.project.setName("se-interpreter");
@@ -50,6 +47,29 @@ public class SimpleSeInterpreterTestListener implements SeInterpreterTestListene
         this.error = 0;
         this.failed = 0;
         this.stepNo = 0;
+        this.resultDir = null;
+        this.downloadDirectory = null;
+        this.screenShotOutputDirectory = null;
+        this.templateOutputDirectory = null;
+    }
+
+    public SeInterpreterTestListenerImpl(SeInterpreterTestListener extendFrom) {
+        this.log = extendFrom.getLog();
+        this.project = new Project();
+        this.project.setName("se-interpreter");
+        this.project.setBaseDir(new File("."));
+        this.project.setProperty("java.io.tmpdir", System.getProperty("java.io.tmpdir"));
+        this.formatter = new SeInterpreterTestResultFormatter();
+        this.suite = null;
+        this.test = null;
+        this.runTest = 0;
+        this.error = 0;
+        this.failed = 0;
+        this.stepNo = 0;
+        this.resultDir = extendFrom.getResultDir();
+        this.downloadDirectory = extendFrom.getDownloadDirectory();
+        this.screenShotOutputDirectory = extendFrom.getScreenShotOutputDirectory();
+        this.templateOutputDirectory = extendFrom.getTemplateOutputDirectory();
     }
 
     @Override
@@ -95,6 +115,11 @@ public class SimpleSeInterpreterTestListener implements SeInterpreterTestListene
         this.templateOutputDirectory = new File(resultDir, Context.getInstance().getTemplateOutputDirectory()).getAbsoluteFile();
         mkdir.setDir(this.templateOutputDirectory);
         mkdir.execute();
+    }
+
+    @Override
+    public Logger getLog() {
+        return log;
     }
 
     @Override

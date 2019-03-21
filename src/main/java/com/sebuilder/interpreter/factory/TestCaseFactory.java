@@ -36,12 +36,15 @@ public class TestCaseFactory {
 
     private DataSourceFactory dataSourceFactory = new DataSourceFactory();
 
+    private AspectFactory aspectFactory = new AspectFactory(this.stepTypeFactory);
+
     public StepTypeFactory getStepTypeFactory() {
         return this.stepTypeFactory;
     }
 
     public void setStepTypeFactory(StepTypeFactory stepTypeFactory) {
         this.stepTypeFactory = stepTypeFactory;
+        this.aspectFactory.setStepTypeFactory(stepTypeFactory);
     }
 
     public DataSourceFactory getDataSourceFactory() {
@@ -84,7 +87,7 @@ public class TestCaseFactory {
 
     /**
      * @param f A File pointing to a JSON file describing a script or suite.
-     * @return A list of scripts, ready to run.
+     * @return A list of script, ready to run.
      * @throws IOException   If anything goes wrong with interpreting the JSON, or
      *                       with the Reader.
      * @throws JSONException If the JSON can't be parsed.
@@ -98,7 +101,7 @@ public class TestCaseFactory {
     /**
      * @param reader     A Reader pointing to a JSON stream describing a script or suite.
      * @param sourceFile Optionally. the file the JSON was loaded from.
-     * @return A list of scripts, ready to run.
+     * @return A list of script, ready to run.
      * @throws IOException   If anything goes wrong with interpreting the JSON, or
      *                       with the Reader.
      * @throws JSONException If the JSON can't be parsed.
@@ -134,7 +137,8 @@ public class TestCaseFactory {
                     .setShareState(o.optBoolean("shareState", true))
                     .setDataSource(dataSource, config);
             this.loadScripts(o, builder);
-            return builder.createSuite();
+            return builder.setAspect(this.aspectFactory.getAspect(o))
+                    .createSuite();
         } catch (JSONException e) {
             throw new IOException("Could not parse suite.", e);
         }
@@ -166,7 +170,7 @@ public class TestCaseFactory {
                 .addSteps(this.getStepTypeFactory().parseStep(o))
                 .associateWith(saveTo)
                 .setDataSource(dataSource, config)
-                .createScript();
+                .build();
         return testCase;
     }
 
@@ -255,7 +259,7 @@ public class TestCaseFactory {
             HashMap<String, String> config = this.dataSourceFactory.getDataSourceConfig(script);
             resultTestCase = resultTestCase.builder()
                     .overrideDataSource(dataSource, config)
-                    .createScript();
+                    .build();
         }
         resultTestCase = resultTestCase.skip(this.getSkip(script));
         return resultTestCase;

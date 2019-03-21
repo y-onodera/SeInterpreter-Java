@@ -7,7 +7,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -15,33 +18,35 @@ public class Scenario {
 
     private final ArrayList<TestCase> testCases;
     private final Map<TestCase, TestCase> chains;
+    private Aspect aspect;
 
     public Scenario() {
-        this(Lists.newArrayList(), Maps.newHashMap());
+        this(Lists.newArrayList(), Maps.newHashMap(), new Aspect());
     }
 
     public Scenario(TestCase testCase) {
-        this(Lists.newArrayList(testCase), Maps.newHashMap());
+        this(Lists.newArrayList(testCase), Maps.newHashMap(), new Aspect());
     }
 
     public Scenario(ArrayList<TestCase> aTestCases) {
-        this(Lists.newArrayList(aTestCases), Maps.newHashMap());
+        this(Lists.newArrayList(aTestCases), Maps.newHashMap(), new Aspect());
     }
 
-    private Scenario(ArrayList<TestCase> newScripts, Map<TestCase, TestCase> newMap) {
+    private Scenario(ArrayList<TestCase> newScripts, Map<TestCase, TestCase> newMap, Aspect newAspect) {
         this.chains = newMap;
         this.testCases = newScripts;
+        this.aspect = newAspect;
     }
 
-    public Collection<TestCase> scripts() {
-        return this.testCases;
+    public Aspect aspect() {
+        return this.aspect;
     }
 
-    public Iterator<TestCase> scriptIterator() {
+    public Iterator<TestCase> testCaseIterator() {
         return this.testCases.iterator();
     }
 
-    public int scriptSize() {
+    public int testCaseSize() {
         return this.testCases.size();
     }
 
@@ -82,25 +87,25 @@ public class Scenario {
         }
         Map<TestCase, TestCase> newChain = Maps.newHashMap(this.chains);
         newChain.put(chainFrom, to);
-        return new Scenario(this.testCases, newChain);
+        return new Scenario(this.testCases, newChain, this.aspect);
     }
 
     public Scenario append(Iterable<TestCase> aScripts) {
         ArrayList<TestCase> newList = Lists.newArrayList(this.testCases);
         Iterables.addAll(newList, aScripts);
-        return new Scenario(newList, this.chains);
+        return new Scenario(newList, this.chains, this.aspect);
     }
 
     public Scenario append(TestCase testCase) {
         ArrayList<TestCase> newList = Lists.newArrayList(this.testCases);
         newList.add(testCase);
-        return new Scenario(newList, this.chains);
+        return new Scenario(newList, this.chains, this.aspect);
     }
 
     public Scenario append(int aIndex, TestCase testCase) {
         ArrayList<TestCase> newList = Lists.newArrayList(this.testCases);
         newList.add(aIndex, testCase);
-        return new Scenario(newList, this.chains);
+        return new Scenario(newList, this.chains, this.aspect);
     }
 
     public Scenario minus(TestCase aTestCase) {
@@ -113,7 +118,7 @@ public class Scenario {
                 .filter(entry -> entry.getValue().equals(aTestCase))
                 .findFirst()
                 .ifPresent(entry -> newMap.remove(entry.getKey()));
-        return new Scenario(newList, newMap);
+        return new Scenario(newList, newMap, this.aspect);
     }
 
     public Scenario map(Function<TestCase, TestCase> converter) {
@@ -140,7 +145,7 @@ public class Scenario {
             newTestCases.add(copy);
             newChains = this.getReplaceMap(testCase, copy, newChains);
         }
-        return new Scenario(newTestCases, newChains);
+        return new Scenario(newTestCases, newChains, this.aspect);
     }
 
     public Scenario replaceTest(String oldName, TestCase aTestCase) {
@@ -154,7 +159,11 @@ public class Scenario {
             }
             newTestCases.add(newTestCase);
         }
-        return new Scenario(newTestCases, newMap);
+        return new Scenario(newTestCases, newMap, this.aspect);
+    }
+
+    public Scenario addAspect(Aspect aspect) {
+        return new Scenario(this.testCases, this.chains, aspect);
     }
 
     public Scenario lazyLoad(TestData aSource) {
@@ -167,7 +176,7 @@ public class Scenario {
                 newMap = this.getReplaceMap(testCase, loaded, newMap);
             }
         }
-        return new Scenario(newTestCases, newMap);
+        return new Scenario(newTestCases, newMap, this.aspect);
     }
 
     public Stream<TestRunBuilder> getTestRuns(TestData param, Function<TestRunBuilder, TestRunBuilder> aFunction) {
@@ -207,7 +216,7 @@ public class Scenario {
     public JSONArray toJSON(Suite aSuite) throws JSONException {
         JSONArray scriptsA = new JSONArray();
         JSONArray chain = null;
-        for (TestCase s : this.scripts()) {
+        for (TestCase s : this.testCases) {
             if (this.hasChain(s) && !this.isChainTarget(s)) {
                 chain = new JSONArray();
                 chain.put(s.getJSON(aSuite));
@@ -231,11 +240,12 @@ public class Scenario {
         if (o == null || getClass() != o.getClass()) return false;
         Scenario scenario = (Scenario) o;
         return com.google.common.base.Objects.equal(testCases, scenario.testCases) &&
-                com.google.common.base.Objects.equal(chains, scenario.chains);
+                com.google.common.base.Objects.equal(chains, scenario.chains) &&
+                com.google.common.base.Objects.equal(aspect, scenario.aspect);
     }
 
     @Override
     public int hashCode() {
-        return com.google.common.base.Objects.hashCode(testCases, chains);
+        return com.google.common.base.Objects.hashCode(testCases, chains, aspect);
     }
 }

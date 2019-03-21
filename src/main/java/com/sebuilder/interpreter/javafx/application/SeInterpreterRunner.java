@@ -4,7 +4,6 @@ import com.google.common.io.Files;
 import com.sebuilder.interpreter.*;
 import com.sebuilder.interpreter.application.CommandLineArgument;
 import com.sebuilder.interpreter.application.SeInterpreterREPL;
-import com.sebuilder.interpreter.application.SimpleSeInterpreterTestListener;
 import com.sebuilder.interpreter.steptype.ExportTemplate;
 import com.sebuilder.interpreter.steptype.HighLightElement;
 import javafx.concurrent.Task;
@@ -29,7 +28,7 @@ public class SeInterpreterRunner {
     public SeInterpreterRunner(List<String> raw) {
         this.repl = new SeInterpreterREPL(raw.toArray(new String[raw.size()]), log);
         this.repl.setUpREPL();
-        this.globalListener = new SimpleSeInterpreterTestListener(this.log);
+        this.globalListener = new SeInterpreterTestListenerImpl(this.log);
         this.globalListener.setUpDir(Context.getInstance().getResultOutputDirectory());
     }
 
@@ -72,12 +71,12 @@ public class SeInterpreterRunner {
         }
         TestCase get = new TestCaseBuilder()
                 .addStep(export)
-                .createScript();
-        SeInterpreterTestListener listener = new SimpleSeInterpreterTestListener(this.log);
+                .build();
+        SeInterpreterTestListener listener = new SeInterpreterTestListenerImpl(this.log);
         this.repl.execute(get, listener);
         File exported = new File(listener.getTemplateOutputDirectory(), fileName);
         if (!exported.exists()) {
-            return new TestCaseBuilder().createScript();
+            return new TestCaseBuilder().build();
         }
         this.exportCount++;
         if (withDataSource) {
@@ -94,7 +93,7 @@ public class SeInterpreterRunner {
         return result.builder()
                 .associateWith(null)
                 .setName(result.name())
-                .createScript();
+                .build();
     }
 
     public void highLightElement(String locatorType, String value) {
@@ -102,8 +101,8 @@ public class SeInterpreterRunner {
         highLightElement.put("locator", new Locator(locatorType, value));
         TestCase highLight = new TestCaseBuilder()
                 .addStep(highLightElement)
-                .createScript();
-        SeInterpreterTestListener listener = new SimpleSeInterpreterTestListener(this.log);
+                .build();
+        SeInterpreterTestListener listener = new SeInterpreterTestListenerImpl(this.log);
         this.repl.execute(highLight, listener);
     }
 

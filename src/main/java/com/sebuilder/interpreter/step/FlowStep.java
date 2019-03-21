@@ -8,9 +8,10 @@ import org.json.JSONObject;
 
 public interface FlowStep extends StepType {
 
-    default boolean runSubStep(TestRun ctx, boolean success, int actions) {
+    default boolean runSubStep(TestRun ctx, int actions) {
+        boolean success = true;
         for (int exec = 0; exec < actions; exec++) {
-            success = next(ctx) && success;
+            success = success && next(ctx);
             if (exec != actions - 1) {
                 if (success) {
                     ctx.processTestSuccess();

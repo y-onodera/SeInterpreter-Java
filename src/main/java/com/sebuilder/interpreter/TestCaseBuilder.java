@@ -47,7 +47,7 @@ public class TestCaseBuilder {
         TestCaseBuilder builder = new TestCaseBuilder();
         builder.setName(beforeReplace);
         builder.lazyLoad = lazyLoad;
-        return builder.createScript();
+        return builder.build();
     }
 
     public ArrayList<Step> getSteps() {
@@ -155,7 +155,7 @@ public class TestCaseBuilder {
         return this;
     }
 
-    public TestCase createScript() {
+    public TestCase build() {
         return new TestCase(this);
     }
 

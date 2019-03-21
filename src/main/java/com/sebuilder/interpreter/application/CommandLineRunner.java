@@ -97,7 +97,7 @@ public abstract class CommandLineRunner {
                 configureOption(s);
             }
         }
-        this.seInterpreterTestListener = new SimpleSeInterpreterTestListener(this.log);
+        this.seInterpreterTestListener = new SeInterpreterTestListenerImpl(this.log);
         this.log.info("setUp finish");
     }
 

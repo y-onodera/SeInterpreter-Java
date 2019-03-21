@@ -16,6 +16,7 @@
 
 package com.sebuilder.interpreter;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import org.json.JSONException;
@@ -97,6 +98,20 @@ public class Locator {
 
     public String toPrettyString() {
         return this.type.name().toLowerCase() + ":" + this.value;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Locator locator = (Locator) o;
+        return type == locator.type &&
+                Objects.equal(value, locator.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(type, value);
     }
 
     public enum Type {

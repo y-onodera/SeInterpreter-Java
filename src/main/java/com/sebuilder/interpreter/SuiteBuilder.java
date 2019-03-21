@@ -127,4 +127,8 @@ public class SuiteBuilder {
         return this;
     }
 
+    public SuiteBuilder setAspect(Aspect aspect) {
+        this.scenario = this.scenario.addAspect(aspect);
+        return this;
+    }
 }

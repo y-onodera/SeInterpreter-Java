@@ -27,11 +27,9 @@ public class If implements FlowStep, GetterUseStep {
      */
     public boolean run(TestRun ctx) {
         ctx.processTestSuccess();
-        boolean success = true;
         int actions = getSubSteps(ctx);
         if (this.test(ctx)) {
-            success = this.runSubStep(ctx, success, actions);
-            if (!success) {
+            if (!this.runSubStep(ctx, actions)) {
                 ctx.processTestFailure();
                 return false;
             }

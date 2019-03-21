@@ -82,8 +82,8 @@ public class TestRunBuilder {
         return this.createTestRun(log, driver, initialVars, seInterpreterTestListener);
     }
 
-    public TestRun createTestRun(Logger log, TestData initialVars, TestRun previousRun, SeInterpreterTestListener seInterpreterTestListener) {
-        return this.createTestRun(log, previousRun.driver(), initialVars, seInterpreterTestListener);
+    public TestRun createTestRun(TestData initialVars, TestRun previousRun) {
+        return this.createTestRun(previousRun.log(), previousRun.driver(), initialVars, previousRun.getListener());
     }
 
     public TestRun createTestRun(Logger log, RemoteWebDriver driver, TestData initialVars, SeInterpreterTestListener seInterpreterTestListener) {

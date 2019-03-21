@@ -16,13 +16,11 @@ public class Loop implements FlowStep {
     @Override
     public boolean run(TestRun ctx) {
         ctx.processTestSuccess();
-        boolean success = true;
         int actions = getSubSteps(ctx);
         int count = Integer.valueOf(ctx.string("count"));
         for (int i = 0; i < count; i++) {
             ctx.putVars("_index", String.valueOf(i + 1));
-            success = runSubStep(ctx, success, actions);
-            if (!success) {
+            if (!this.runSubStep(ctx, actions)) {
                 ctx.processTestFailure();
                 return false;
             }
@@ -31,7 +29,7 @@ public class Loop implements FlowStep {
                 ctx.backStepIndex(actions);
             }
         }
-        return success;
+        return true;
     }
 
     @Override

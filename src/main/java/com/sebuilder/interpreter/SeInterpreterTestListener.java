@@ -1,5 +1,7 @@
 package com.sebuilder.interpreter;
 
+import org.apache.logging.log4j.Logger;
+
 import java.io.File;
 
 public interface SeInterpreterTestListener {
@@ -12,6 +14,8 @@ public interface SeInterpreterTestListener {
     void cleanDir(File dest);
 
     void setUpDir(File dest);
+
+    Logger getLog();
 
     File getResultDir();
 
