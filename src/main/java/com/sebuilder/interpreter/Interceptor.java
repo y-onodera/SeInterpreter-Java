@@ -24,37 +24,27 @@ public class Interceptor {
     }
 
     public boolean invokeBefore(TestRun testRun) {
-        return this.invokeAdvise(testRun, this.beforeStep, this.getInterceptCaseName(testRun) + "_before_");
+        return this.invokeAdvise(testRun, this.beforeStep, "before");
     }
 
     public boolean invokeAfter(TestRun testRun) {
-        return this.invokeAdvise(testRun, this.afterStep, this.getInterceptCaseName(testRun) + "_after_");
+        return this.invokeAdvise(testRun, this.afterStep, "after");
     }
 
-    private boolean invokeAdvise(TestRun testRun, ArrayList<Step> beforeStep, String testRunNamePrefix) {
-        int i = 1;
-        for (Step step : beforeStep) {
-            if (!this.runStep(testRun, step, testRunNamePrefix + i++)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private boolean runStep(TestRun testRun, Step step, String testRunNamePrefix) {
+    private boolean invokeAdvise(TestRun testRun, ArrayList<Step> steps, String testRunName) {
         final TestCase invokeCase = new TestCaseBuilder()
-                .setName("aspect")
-                .addStep(step)
+                .setName(testRunName)
+                .addSteps(steps)
                 .usePreviousDriverAndVars(true)
                 .build();
         TestRun interceptRun = new TestRunBuilder(invokeCase, new Scenario(invokeCase))
-                .addTestRunNamePrefix(testRunNamePrefix + "_")
+                .addTestRunNamePrefix(this.getInterceptCaseName(testRun))
                 .createTestRun(testRun.log(), testRun.driver(), testRun.vars(), new SeInterpreterTestListenerImpl(testRun.getListener()));
         return interceptRun.finish();
     }
 
     private String getInterceptCaseName(TestRun testRun) {
-        return testRun.getTestRunName() + "_" + testRun.currentStep().getType().getStepTypeName();
+        return testRun.getTestRunName() + "_" + testRun.currentStep().getType().getStepTypeName() + "_aspect_";
     }
 
     @Override
