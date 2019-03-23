@@ -406,11 +406,11 @@ public class SeInterpreterApplication extends Application {
     private void executeTask(Task task) {
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
             ExecutorService executor = Executors.newSingleThreadExecutor();
-            executor.submit(task);
             this.initScriptRunProgressDialog(task);
             task.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED, wse -> {
                 executor.shutdown();
             });
+            executor.submit(task);
         });
     }
 

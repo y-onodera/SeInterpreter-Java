@@ -165,6 +165,12 @@ public class SeInterpreterRunner {
                             updateProgress(this.getStepNo(), this.currentScriptSteps);
                             super.startTest(testName);
                         }
+
+                        @Override
+                        public void aggregateResult() {
+                            super.aggregateResult();
+                            updateValue((String) getResultDir().getAbsolutePath());
+                        }
                     });
                 } catch (Throwable ex) {
                     result = false;
@@ -175,7 +181,7 @@ public class SeInterpreterRunner {
                 } else {
                     log.info("operation failed");
                 }
-                return result;
+                return listener.getResultDir().getAbsolutePath();
             }
         };
     }

@@ -6,7 +6,7 @@
             xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.sebuilder.interpreter.javafx.controller.RunningProgressController">
     <children>
-        <SplitPane dividerPositions="0.5" orientation="VERTICAL">
+        <SplitPane dividerPositions="0.75" orientation="VERTICAL" prefHeight="120.0" prefWidth="400.0">
             <items>
                 <GridPane>
                     <columnConstraints>
@@ -28,8 +28,14 @@
                         <Label fx:id="runStatus" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
                     </children>
                 </GridPane>
-                <Button fx:id="stop" alignment="CENTER" mnemonicParsing="false" onAction="#handleReplayStop"
-                        text="Stop"/>
+                <HBox alignment="TOP_CENTER" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
+                    <children>
+                        <Button fx:id="stop" alignment="CENTER" mnemonicParsing="false" onAction="#handleReplayStop"
+                                text="Stop"/>
+                        <Button fx:id="openLog" mnemonicParsing="false" onAction="#handleOpenReplayLog" text="Report"/>
+                        <Button fx:id="openDir" mnemonicParsing="false" onAction="#handleOpenDirectory" text="Result"/>
+                    </children>
+                </HBox>
             </items>
         </SplitPane>
     </children>
