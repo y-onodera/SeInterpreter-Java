@@ -3,7 +3,11 @@ package com.sebuilder.interpreter.javafx.controller;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.google.common.eventbus.Subscribe;
+import com.sebuilder.interpreter.Locator;
 import com.sebuilder.interpreter.Step;
+import com.sebuilder.interpreter.StepBuilder;
+import com.sebuilder.interpreter.StepType;
+import com.sebuilder.interpreter.factory.StepTypeFactory;
 import com.sebuilder.interpreter.javafx.EventBus;
 import com.sebuilder.interpreter.javafx.event.ReportErrorEvent;
 import com.sebuilder.interpreter.javafx.event.replay.ElementHighLightEvent;
@@ -17,15 +21,168 @@ import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 public class StepEditController {
 
+    private static final String[] STEP_TYPES = {
+            "ClickElement"
+            , "SetElementText"
+            , "SetElementSelected"
+            , "SetElementNotSelected"
+            , "ClearSelections"
+            , "SendKeysToElement"
+            , "SubmitElement"
+            , "FileDownload"
+            , "ExecCmd"
+            , "Pause"
+            , "Loop"
+            , "ifElementPresent"
+            , "ifElementVisible"
+            , "ifElementEnable"
+            , "ifElementValue"
+            , "ifElementAttribute"
+            , "ifElementStyle"
+            , "ifCurrentUrl"
+            , "ifTitle"
+            , "ifText"
+            , "ifTextPresent"
+            , "ifVariable"
+            , "ifAlertText"
+            , "ifAlertPresent"
+            , "ifCookieByName"
+            , "ifCookiePresent"
+            , "ifEval"
+            , "ifAntRun"
+            , "ifDocumentReady"
+            , "retryElementPresent"
+            , "retryElementVisible"
+            , "retryElementEnable"
+            , "retryElementValue"
+            , "retryElementAttribute"
+            , "retryElementStyle"
+            , "retryCurrentUrl"
+            , "retryTitle"
+            , "retryText"
+            , "retryTextPresent"
+            , "retryVariable"
+            , "retryAlertText"
+            , "retryAlertPresent"
+            , "retryCookieByName"
+            , "retryCookiePresent"
+            , "retryEval"
+            , "retryAntRun"
+            , "retryDocumentReady"
+            , "Store"
+            , "storeElementPresent"
+            , "storeElementVisible"
+            , "storeElementEnable"
+            , "storeElementValue"
+            , "storeElementAttribute"
+            , "storeElementStyle"
+            , "storeCurrentUrl"
+            , "storeTitle"
+            , "storeText"
+            , "storeVariable"
+            , "storeCookieByName"
+            , "storeEval"
+            , "storeAntRun"
+            , "Print"
+            , "printElementPresent"
+            , "printElementVisible"
+            , "printElementEnable"
+            , "printElementValue"
+            , "printElementAttribute"
+            , "printElementStyle"
+            , "printCurrentUrl"
+            , "printTitle"
+            , "printBodyText"
+            , "printPageSource"
+            , "printText"
+            , "printVariable"
+            , "printCookieByName"
+            , "printEval"
+            , "printAntRun"
+            , "waitForElementPresent"
+            , "waitForElementVisible"
+            , "waitForElementEnable"
+            , "waitForElementValue"
+            , "waitForElementAttribute"
+            , "waitForElementStyle"
+            , "waitForCurrentUrl"
+            , "waitForTitle"
+            , "waitForText"
+            , "waitForTextPresent"
+            , "waitForVariable"
+            , "waitForAlertText"
+            , "waitForAlertPresent"
+            , "waitForCookieByName"
+            , "waitForCookiePresent"
+            , "waitForEval"
+            , "waitForAntRun"
+            , "waitForDocumentReady"
+            , "verifyElementPresent"
+            , "verifyElementVisible"
+            , "verifyElementEnable"
+            , "verifyElementValue"
+            , "verifyElementAttribute"
+            , "verifyElementStyle"
+            , "verifyCurrentUrl"
+            , "verifyTitle"
+            , "verifyText"
+            , "verifyTextPresent"
+            , "verifyVariable"
+            , "verifyAlertText"
+            , "verifyAlertPresent"
+            , "verifyCookieByName"
+            , "verifyCookiePresent"
+            , "verifyEval"
+            , "verifyAntRun"
+            , "verifyDocumentReady"
+            , "assertElementPresent"
+            , "assertElementVisible"
+            , "assertElementEnable"
+            , "assertElementValue"
+            , "assertElementAttribute"
+            , "assertElementStyle"
+            , "assertTitle"
+            , "assertText"
+            , "assertTextPresent"
+            , "assertVariable"
+            , "assertAlertText"
+            , "assertAlertPresent"
+            , "assertCookieByName"
+            , "assertCookiePresent"
+            , "assertEval"
+            , "assertAntRun"
+            , "assertDocumentReady"
+            , "AcceptAlert"
+            , "AnswerAlert"
+            , "DismissAlert"
+            , "DoubleClickElement"
+            , "ClickAndHoldElement"
+            , "MouseOverElement"
+            , "ReleaseElement"
+            , "DragAndDropToElement"
+            , "AddCookie"
+            , "DeleteCookie"
+            , "SwitchToDefaultContent"
+            , "SwitchToFrame"
+            , "SwitchToFrameByIndex"
+            , "SwitchToWindow"
+            , "SwitchToWindowByIndex"
+            , "SwitchToWindowByTitle"
+            , "SaveScreenshot"
+            , "ExportTemplate"
+            , "SetWindowSize"
+            , "WindowMaximize"
+            , "Get"
+            , "Refresh"
+            , "GoBack"
+            , "GoForward"
+    };
     @FXML
     private GridPane stepEditGrid;
 
@@ -55,6 +212,8 @@ public class StepEditController {
 
     private String action;
 
+    private StepTypeFactory stepTypeFactory = new StepTypeFactory();
+
     public void init(Stage dialog, int stepIndex, String action) {
         this.dialog = dialog;
         this.stepIndex = stepIndex;
@@ -62,172 +221,21 @@ public class StepEditController {
     }
 
     @FXML
-    public void initialize() {
+    void initialize() {
         assert stepTypeSelect != null : "fx:id=\"stepTypeSelect\" was not injected: check your FXML file 'stepedit.fxml'.";
         assert stepEditGrid != null : "fx:id=\"stepEditGrid\" was not injected: check your FXML file 'stepedit.fxml'.";
         assert labelSelectType != null : "fx:id=\"labelSelectType\" was not injected: check your FXML file 'stepedit.fxml'.";
         stepTypeSelect.getItems().add("");
-        stepTypeSelect.getItems().add("clickElement");
-        stepTypeSelect.getItems().add("setElementText");
-        stepTypeSelect.getItems().add("setElementSelected");
-        stepTypeSelect.getItems().add("setElementNotSelected");
-        stepTypeSelect.getItems().add("clearSelections");
-        stepTypeSelect.getItems().add("sendKeysToElement");
-        stepTypeSelect.getItems().add("submitElement");
-        stepTypeSelect.getItems().add("fileDownload");
-        stepTypeSelect.getItems().add("execCmd");
-        stepTypeSelect.getItems().add("pause");
-        stepTypeSelect.getItems().add("loop");
-        stepTypeSelect.getItems().add("ifElementPresent");
-        stepTypeSelect.getItems().add("ifElementVisible");
-        stepTypeSelect.getItems().add("ifElementEnable");
-        stepTypeSelect.getItems().add("ifElementValue");
-        stepTypeSelect.getItems().add("ifElementAttribute");
-        stepTypeSelect.getItems().add("ifElementStyle");
-        stepTypeSelect.getItems().add("ifCurrentUrl");
-        stepTypeSelect.getItems().add("ifTitle");
-        stepTypeSelect.getItems().add("ifText");
-        stepTypeSelect.getItems().add("ifTextPresent");
-        stepTypeSelect.getItems().add("ifVariable");
-        stepTypeSelect.getItems().add("ifAlertText");
-        stepTypeSelect.getItems().add("ifAlertPresent");
-        stepTypeSelect.getItems().add("ifCookieText");
-        stepTypeSelect.getItems().add("ifCookiePresent");
-        stepTypeSelect.getItems().add("ifEval");
-        stepTypeSelect.getItems().add("ifAntRun");
-        stepTypeSelect.getItems().add("ifDocumentReady");
-        stepTypeSelect.getItems().add("retryElementPresent");
-        stepTypeSelect.getItems().add("retryElementVisible");
-        stepTypeSelect.getItems().add("retryElementEnable");
-        stepTypeSelect.getItems().add("retryElementValue");
-        stepTypeSelect.getItems().add("retryElementAttribute");
-        stepTypeSelect.getItems().add("retryElementStyle");
-        stepTypeSelect.getItems().add("retryCurrentUrl");
-        stepTypeSelect.getItems().add("retryTitle");
-        stepTypeSelect.getItems().add("retryText");
-        stepTypeSelect.getItems().add("retryTextPresent");
-        stepTypeSelect.getItems().add("retryVariable");
-        stepTypeSelect.getItems().add("retryAlertText");
-        stepTypeSelect.getItems().add("retryAlertPresent");
-        stepTypeSelect.getItems().add("retryCookieText");
-        stepTypeSelect.getItems().add("retryCookiePresent");
-        stepTypeSelect.getItems().add("retryEval");
-        stepTypeSelect.getItems().add("retryAntRun");
-        stepTypeSelect.getItems().add("retryDocumentReady");
-        stepTypeSelect.getItems().add("store");
-        stepTypeSelect.getItems().add("storeElementPresent");
-        stepTypeSelect.getItems().add("storeElementVisible");
-        stepTypeSelect.getItems().add("storeElementEnable");
-        stepTypeSelect.getItems().add("storeElementValue");
-        stepTypeSelect.getItems().add("storeElementAttribute");
-        stepTypeSelect.getItems().add("storeElementStyle");
-        stepTypeSelect.getItems().add("storeCurrentUrl");
-        stepTypeSelect.getItems().add("storeTitle");
-        stepTypeSelect.getItems().add("storeText");
-        stepTypeSelect.getItems().add("storeVariable");
-        stepTypeSelect.getItems().add("storeCookieByName");
-        stepTypeSelect.getItems().add("storeEval");
-        stepTypeSelect.getItems().add("storeAntRun");
-        stepTypeSelect.getItems().add("print");
-        stepTypeSelect.getItems().add("printElementPresent");
-        stepTypeSelect.getItems().add("printElementVisible");
-        stepTypeSelect.getItems().add("printElementEnable");
-        stepTypeSelect.getItems().add("printElementValue");
-        stepTypeSelect.getItems().add("printElementAttribute");
-        stepTypeSelect.getItems().add("printElementStyle");
-        stepTypeSelect.getItems().add("printCurrentUrl");
-        stepTypeSelect.getItems().add("printTitle");
-        stepTypeSelect.getItems().add("printBodyText");
-        stepTypeSelect.getItems().add("printPageSource");
-        stepTypeSelect.getItems().add("printText");
-        stepTypeSelect.getItems().add("printVariable");
-        stepTypeSelect.getItems().add("printCookieByName");
-        stepTypeSelect.getItems().add("printEval");
-        stepTypeSelect.getItems().add("printAntRun");
-        stepTypeSelect.getItems().add("waitForElementPresent");
-        stepTypeSelect.getItems().add("waitForElementVisible");
-        stepTypeSelect.getItems().add("waitForElementEnable");
-        stepTypeSelect.getItems().add("waitForElementValue");
-        stepTypeSelect.getItems().add("waitForElementAttribute");
-        stepTypeSelect.getItems().add("waitForElementStyle");
-        stepTypeSelect.getItems().add("waitForCurrentUrl");
-        stepTypeSelect.getItems().add("waitForTitle");
-        stepTypeSelect.getItems().add("waitForText");
-        stepTypeSelect.getItems().add("waitForTextPresent");
-        stepTypeSelect.getItems().add("waitForVariable");
-        stepTypeSelect.getItems().add("waitForAlertText");
-        stepTypeSelect.getItems().add("waitForAlertPresent");
-        stepTypeSelect.getItems().add("waitForCookieByName");
-        stepTypeSelect.getItems().add("waitForCookiePresent");
-        stepTypeSelect.getItems().add("waitForEval");
-        stepTypeSelect.getItems().add("waitForAntRun");
-        stepTypeSelect.getItems().add("waitForDocumentReady");
-        stepTypeSelect.getItems().add("verifyElementPresent");
-        stepTypeSelect.getItems().add("verifyElementVisible");
-        stepTypeSelect.getItems().add("verifyElementEnable");
-        stepTypeSelect.getItems().add("verifyElementValue");
-        stepTypeSelect.getItems().add("verifyElementAttribute");
-        stepTypeSelect.getItems().add("verifyElementStyle");
-        stepTypeSelect.getItems().add("verifyCurrentUrl");
-        stepTypeSelect.getItems().add("verifyTitle");
-        stepTypeSelect.getItems().add("verifyText");
-        stepTypeSelect.getItems().add("verifyTextPresent");
-        stepTypeSelect.getItems().add("verifyVariable");
-        stepTypeSelect.getItems().add("verifyAlertText");
-        stepTypeSelect.getItems().add("verifyAlertPresent");
-        stepTypeSelect.getItems().add("verifyCookieText");
-        stepTypeSelect.getItems().add("verifyCookiePresent");
-        stepTypeSelect.getItems().add("verifyEval");
-        stepTypeSelect.getItems().add("verifyAntRun");
-        stepTypeSelect.getItems().add("verifyDocumentReady");
-        stepTypeSelect.getItems().add("assertElementPresent");
-        stepTypeSelect.getItems().add("assertElementVisible");
-        stepTypeSelect.getItems().add("assertElementEnable");
-        stepTypeSelect.getItems().add("assertElementValue");
-        stepTypeSelect.getItems().add("assertElementAttribute");
-        stepTypeSelect.getItems().add("assertElementStyle");
-        stepTypeSelect.getItems().add("assertTitle");
-        stepTypeSelect.getItems().add("assertText");
-        stepTypeSelect.getItems().add("assertTextPresent");
-        stepTypeSelect.getItems().add("assertVariable");
-        stepTypeSelect.getItems().add("assertAlertText");
-        stepTypeSelect.getItems().add("assertAlertPresent");
-        stepTypeSelect.getItems().add("assertCookieText");
-        stepTypeSelect.getItems().add("assertCookiePresent");
-        stepTypeSelect.getItems().add("assertEval");
-        stepTypeSelect.getItems().add("assertAntRun");
-        stepTypeSelect.getItems().add("assertDocumentReady");
-        stepTypeSelect.getItems().add("acceptAlert");
-        stepTypeSelect.getItems().add("answerAlert");
-        stepTypeSelect.getItems().add("dismissAlert");
-        stepTypeSelect.getItems().add("doubleClickElement");
-        stepTypeSelect.getItems().add("clickAndHoldElement");
-        stepTypeSelect.getItems().add("mouseOverElement");
-        stepTypeSelect.getItems().add("releaseElement");
-        stepTypeSelect.getItems().add("dragAndDropToElement");
-        stepTypeSelect.getItems().add("addCookie");
-        stepTypeSelect.getItems().add("deleteCookie");
-        stepTypeSelect.getItems().add("switchToDefaultContent");
-        stepTypeSelect.getItems().add("switchToFrame");
-        stepTypeSelect.getItems().add("switchToFrameByIndex");
-        stepTypeSelect.getItems().add("switchToWindow");
-        stepTypeSelect.getItems().add("switchToWindowByIndex");
-        stepTypeSelect.getItems().add("switchToWindowByTitle");
-        stepTypeSelect.getItems().add("saveScreenshot");
-        stepTypeSelect.getItems().add("exportTemplate");
-        stepTypeSelect.getItems().add("setWindowSize");
-        stepTypeSelect.getItems().add("windowMaximize");
-        stepTypeSelect.getItems().add("get");
-        stepTypeSelect.getItems().add("refresh");
-        stepTypeSelect.getItems().add("goBack");
-        stepTypeSelect.getItems().add("goForward");
+        for (String stepType : this.stepTypes()) {
+            stepTypeSelect.getItems().add(stepType);
+        }
         stepTypeSelect.getSelectionModel().select(0);
         this.selectedStepType = this.stepTypeSelect.getSelectionModel().getSelectedItem();
         EventBus.registSubscriber(this);
     }
 
     @FXML
-    public void selectType(ActionEvent event) {
+    void selectType(ActionEvent event) {
         String stepType = stepTypeSelect.getSelectionModel().getSelectedItem();
         if (this.selectedStepType.equals(stepType)) {
             return;
@@ -240,31 +248,54 @@ public class StepEditController {
     @Subscribe
     public void refreshView(RefreshStepEditViewEvent aEvent) {
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
-            Step step = aEvent.getStep();
-            JSONObject json = step.toFullJSON();
-            Iterator keys = json.keys();
+            Step step = aEvent.getStep().withAllParam();
             int row = 1;
-            String typeName = this.resetStepType(json);
-            row = addTextBox(json, row, "skip");
-            row = addLocator(json, row, "locator", true);
-            while (keys.hasNext()) {
-                String key = keys.next().toString();
-                if (key.equals("type") || key.equals("locator") || key.equals("skip")
-                        || (key.equals("negated") && !hasGetterType(typeName))) {
-                    continue;
-                }
-                if (key.startsWith("locator")) {
-                    row = this.addLocator(json, row, key, false);
-                } else if (key.equals("negated") || key.equals("post")) {
-                    row = addCheckBox(json, row, key);
-                } else {
-                    row = addTextBox(json, row, key);
-                }
-            }
+            String typeName = this.resetStepType(step);
+            row = this.addTextBox(step, row, "skip");
+            row = this.addLocator(step, row, "locator");
+            row = this.constructStringParamView(step, row, typeName);
+            row = this.constructLocatorParamView(step, row);
             Button stepEditApply = createApplyButton();
             this.stepEditGrid.add(stepEditApply, 2, row);
             stepEditGrid.getScene().getWindow().sizeToScene();
         });
+    }
+
+    private StepType getStepTypeOfName(String selectedStepType) {
+        return this.stepTypeFactory.getStepTypeOfName(selectedStepType);
+    }
+
+    private String[] stepTypes() {
+        return STEP_TYPES;
+    }
+
+    private boolean isDefaultLocator(String key) {
+        return key.equals("locator");
+    }
+
+    private int constructLocatorParamView(Step step, int row) throws JSONException {
+        for (String key : step.locatorKeys()) {
+            if (this.isDefaultLocator(key)) {
+                continue;
+            }
+            row = this.addLocator(step, row, key);
+        }
+        return row;
+    }
+
+    private int constructStringParamView(Step step, int row, String typeName) throws JSONException {
+        for (String key : step.paramKeys()) {
+            if (key.equals("type") || key.equals("skip")
+                    || (key.equals("negated") && !hasGetterType(typeName))) {
+                continue;
+            }
+            if (key.equals("negated") || key.equals("post")) {
+                row = addCheckBox(step, row, key);
+            } else {
+                row = addTextBox(step, row, key);
+            }
+        }
+        return row;
     }
 
     private boolean hasGetterType(String typeName) {
@@ -298,9 +329,8 @@ public class StepEditController {
         }
     }
 
-    private String resetStepType(JSONObject json) throws JSONException {
-        String typeName = json.getString("type");
-        typeName = typeName.substring(0, 1).toLowerCase() + typeName.substring(1);
+    private String resetStepType(Step step) throws JSONException {
+        String typeName = step.getType().getStepTypeName();
         if (typeName.equals(this.selectedStepType)) {
             return this.selectedStepType;
         }
@@ -309,25 +339,25 @@ public class StepEditController {
         return typeName;
     }
 
-    private int addLocator(JSONObject json, int row, String locator, boolean defaultLocator) throws JSONException {
-        if (json.has(locator)) {
+    private int addLocator(Step step, int row, String locator) throws JSONException {
+        if (step.locatorContains(locator)) {
             Label stepEditLabel = new Label();
             stepEditLabel.setText(locator);
-            ComboBox<String> select = resetLocatorSelect(json, locator, defaultLocator);
+            ComboBox<String> select = resetLocatorSelect(step, locator);
             this.stepEditGrid.add(stepEditLabel, 0, row);
             this.stepEditGrid.add(select, 1, row++);
-            TextField text = resetLocatorText(json, locator, defaultLocator);
+            TextField text = resetLocatorText(step, locator);
             Button button = new Button("find");
             button.setOnAction(ae -> {
                 EventBus.publish(new ElementHighLightEvent(select.getSelectionModel().getSelectedItem(), text.getText()));
             });
             this.stepEditGrid.add(text, 1, row);
             this.stepEditGrid.add(button, 2, row++);
-            HashMap<String, Node> input = Maps.newHashMap();
+            Map<String, Node> input = Maps.newHashMap();
             input.put("type", select);
             input.put("value", text);
             this.locatorInputs.put(locator, input);
-        } else if (defaultLocator) {
+        } else if (this.isDefaultLocator(locator)) {
             this.locatorTypeSelect = null;
             this.locatorText = null;
             this.beforeLocatorType = null;
@@ -336,7 +366,7 @@ public class StepEditController {
         return row;
     }
 
-    private ComboBox<String> resetLocatorSelect(JSONObject json, String locator, boolean defaultLocator) throws JSONException {
+    private ComboBox<String> resetLocatorSelect(Step step, String locator) throws JSONException {
         ComboBox<String> select = new ComboBox<>();
         select.getItems().add("");
         select.getItems().add("id");
@@ -344,8 +374,8 @@ public class StepEditController {
         select.getItems().add("css selector");
         select.getItems().add("xpath");
         select.getItems().add("link text");
-        String type = json.getJSONObject(locator).getString("type");
-        if (defaultLocator) {
+        String type = step.getLocator(locator).type.toString();
+        if (this.isDefaultLocator(locator)) {
             locatorTypeSelect = select;
             if (!type.equals("")) {
                 this.beforeLocatorType = type;
@@ -361,10 +391,10 @@ public class StepEditController {
         return select;
     }
 
-    private TextField resetLocatorText(JSONObject json, String locator, boolean defaultLocator) throws JSONException {
+    private TextField resetLocatorText(Step step, String locator) throws JSONException {
         TextField text = new TextField();
-        String value = json.getJSONObject(locator).getString("value");
-        if (defaultLocator) {
+        String value = step.getLocator(locator).value;
+        if (this.isDefaultLocator(locator)) {
             this.locatorText = text;
             if (!value.equals("")) {
                 this.beforeLocatorValue = value;
@@ -380,22 +410,22 @@ public class StepEditController {
         return text;
     }
 
-    private int addCheckBox(JSONObject json, int row, String key) throws JSONException {
+    private int addCheckBox(Step step, int row, String key) throws JSONException {
         Label label = new Label();
         label.setText(key);
         CheckBox checkbox = new CheckBox();
-        checkbox.setSelected(Boolean.valueOf(json.getString(key)));
+        checkbox.setSelected(Boolean.valueOf(step.getParam(key)));
         this.stepEditGrid.add(label, 0, row);
         this.stepEditGrid.add(checkbox, 1, row++);
         this.inputs.put(key, checkbox);
         return row;
     }
 
-    private int addTextBox(JSONObject json, int row, String key) throws JSONException {
+    private int addTextBox(Step step, int row, String key) throws JSONException {
         Label label = new Label();
         label.setText(key);
         TextField text = new TextField();
-        text.setText(json.getString(key));
+        text.setText(step.getParam(key));
         this.stepEditGrid.add(label, 0, row);
         this.stepEditGrid.add(text, 1, row++);
         this.inputs.put(key, text);
@@ -406,8 +436,7 @@ public class StepEditController {
         Button result = new Button("apply");
         result.setOnAction(ae -> {
             ReportErrorEvent.publishIfExecuteThrowsException(() -> {
-                JSONObject step = new JSONObject();
-                step.put("type", this.selectedStepType);
+                StepBuilder step = new StepBuilder(this.getStepTypeOfName(this.selectedStepType));
                 for (Map.Entry<String, Node> input : this.inputs.entrySet()) {
                     if (input.getValue() instanceof TextField) {
                         TextField text = TextField.class.cast(input.getValue());
@@ -424,18 +453,14 @@ public class StepEditController {
                 for (Map.Entry<String, Map<String, Node>> input : this.locatorInputs.entrySet()) {
                     String type = ComboBox.class.cast(input.getValue().get("type")).getSelectionModel().getSelectedItem().toString();
                     if (!Strings.isNullOrEmpty(type)) {
-                        JSONObject locator = new JSONObject();
-                        step.put(input.getKey(), locator);
-                        locator.put("type", type);
                         String value = TextField.class.cast(input.getValue().get("value")).getText();
-                        locator.put("value", value);
+                        step.put(input.getKey(), new Locator(type, value));
                     }
                 }
-                EventBus.publish(new StepEditEvent(this.action, this.stepIndex, step));
+                EventBus.publish(new StepEditEvent(this.action, this.stepIndex, step.build()));
                 this.dialog.close();
             });
         });
         return result;
     }
-
 }

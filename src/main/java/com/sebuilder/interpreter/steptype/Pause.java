@@ -16,10 +16,9 @@
 
 package com.sebuilder.interpreter.steptype;
 
+import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class Pause implements StepType {
     @Override
@@ -33,10 +32,11 @@ public class Pause implements StepType {
     }
 
     @Override
-    public void supplementSerialized(JSONObject o) throws JSONException {
-        if (!o.has("waitTime")) {
+    public StepBuilder addDefaultParam(StepBuilder o) {
+        if (!o.containsStringParam("waitTime")) {
             o.put("waitTime", "");
         }
+        return o;
     }
 
     @Override

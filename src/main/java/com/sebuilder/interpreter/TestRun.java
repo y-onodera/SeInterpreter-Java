@@ -122,8 +122,12 @@ public class TestRun {
         return this.string("text");
     }
 
+    public String bindRuntimeVariables(String s) {
+        return this.vars.bind(s);
+    }
+
     public boolean getBoolean(String filterTag) {
-        return containsKey(filterTag) && Boolean.valueOf(string(filterTag));
+        return this.containsKey(filterTag) && Boolean.valueOf(this.string(filterTag));
     }
 
     /**
@@ -137,7 +141,7 @@ public class TestRun {
         if (s == null) {
             throw new RuntimeException("Missing parameter \"" + paramName + "\" at step #" + this.testRunStatus.stepIndex() + ".");
         }
-        return this.vars.bind(s);
+        return this.bindRuntimeVariables(s);
     }
 
     public boolean hasLocator() {
@@ -163,7 +167,7 @@ public class TestRun {
             throw new RuntimeException("Missing parameter \"" + paramName + "\" at step #" + this.testRunStatus.stepIndex() + ".");
         }
         // This kind of variable substitution makes for short code, but it's inefficient.
-        l.value = this.vars.bind(l.value);
+        l.value = this.bindRuntimeVariables(l.value);
         return l;
     }
 
@@ -207,7 +211,7 @@ public class TestRun {
     public void startTest() {
         this.aspect.advice(this.currentStep())
                 .invokeBefore(this);
-        this.getListener().startTest(this.currentStep().getName() != null ? this.currentStep().getName() : this.vars.bind(this.currentStep().toPrettyString()));
+        this.getListener().startTest(this.currentStep().getName() != null ? this.currentStep().getName() : bindRuntimeVariables(this.currentStep().toPrettyString()));
     }
 
     public void toNextStepIndex() {

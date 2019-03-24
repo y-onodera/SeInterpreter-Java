@@ -1,9 +1,8 @@
 package com.sebuilder.interpreter.step;
 
+import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public interface GetterUseStep extends StepType {
 
@@ -24,12 +23,8 @@ public interface GetterUseStep extends StepType {
     }
 
     @Override
-    default void supplementSerialized(JSONObject o) throws JSONException {
-        this.getGetter().supplementSerialized(o);
-        if (this.getGetter().cmpParamName() != null) {
-            if (!o.has(this.getGetter().cmpParamName())) {
-                o.put(this.getGetter().cmpParamName(), "");
-            }
-        }
+    default StepBuilder addDefaultParam(StepBuilder o) {
+        return this.getGetter().addDefaultParam(o);
     }
+
 }

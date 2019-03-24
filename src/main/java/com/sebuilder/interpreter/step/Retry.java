@@ -1,9 +1,8 @@
 package com.sebuilder.interpreter.step;
 
 import com.google.common.base.Objects;
+import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class Retry implements FlowStep, GetterUseStep {
 
@@ -43,9 +42,9 @@ public class Retry implements FlowStep, GetterUseStep {
     }
 
     @Override
-    public void supplementSerialized(JSONObject o) throws JSONException {
-        FlowStep.super.supplementSerialized(o);
-        GetterUseStep.super.supplementSerialized(o);
+    public StepBuilder addDefaultParam(StepBuilder o) {
+        StepBuilder result = FlowStep.super.addDefaultParam(o);
+        return GetterUseStep.super.addDefaultParam(result);
     }
 
     @Override

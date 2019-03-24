@@ -22,7 +22,7 @@ package com.sebuilder.interpreter;
  *
  * @author zarkonnen
  */
-public interface StepType extends JSONSerializable {
+public interface StepType extends StepElement {
 
     /**
      * Perform the action this step consists of.
@@ -36,4 +36,9 @@ public interface StepType extends JSONSerializable {
     default String getStepTypeName() {
         return this.getClass().getSimpleName();
     }
+
+    default StepBuilder toStep() {
+        return new StepBuilder(this);
+    }
+
 }

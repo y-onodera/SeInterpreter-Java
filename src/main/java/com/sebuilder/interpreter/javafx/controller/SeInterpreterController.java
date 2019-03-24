@@ -1,6 +1,8 @@
 package com.sebuilder.interpreter.javafx.controller;
 
+import com.google.common.base.Throwables;
 import com.google.common.eventbus.Subscribe;
+import com.sebuilder.interpreter.factory.ScriptConverter;
 import com.sebuilder.interpreter.javafx.EventBus;
 import com.sebuilder.interpreter.javafx.TextAreaAppender;
 import com.sebuilder.interpreter.javafx.event.ReportErrorEvent;
@@ -13,9 +15,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TextArea;
-
-import java.io.PrintWriter;
-import java.io.StringWriter;
 
 public class SeInterpreterController {
 
@@ -56,7 +55,7 @@ public class SeInterpreterController {
     }
 
     @FXML
-    public void jsonCommit(ActionEvent event) {
+    void jsonCommit(ActionEvent event) {
         EventBus.publish(new ScriptReplaceEvent(this.textAreaStep.getText()));
     }
 
@@ -64,7 +63,7 @@ public class SeInterpreterController {
     public void showScriptAsText(RefreshStepTextViewEvent event) {
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
             this.textAreaStep.clear();
-            this.textAreaStep.setText(event.getTestCase().toString());
+            this.textAreaStep.setText(new ScriptConverter().toString(event.getTestCase()));
         });
     }
 
@@ -74,10 +73,6 @@ public class SeInterpreterController {
             this.textAreaScriptLog.clear();
             return;
         }
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
-        event.getSource().printStackTrace(pw);
-        String sStackTrace = sw.toString();
-        this.textAreaScriptLog.appendText(sStackTrace);
+        this.textAreaScriptLog.appendText(Throwables.getStackTraceAsString(event.getSource()));
     }
 }

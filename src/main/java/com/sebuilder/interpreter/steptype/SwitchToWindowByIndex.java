@@ -16,10 +16,9 @@
 
 package com.sebuilder.interpreter.steptype;
 
+import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -39,10 +38,11 @@ public class SwitchToWindowByIndex implements StepType {
     }
 
     @Override
-    public void supplementSerialized(JSONObject o) throws JSONException {
-        if (!o.has("index")) {
+    public StepBuilder addDefaultParam(StepBuilder o) {
+        if (!o.containsStringParam("index")) {
             o.put("index", "");
         }
+        return o;
     }
 
     @Override

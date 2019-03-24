@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import com.google.common.eventbus.Subscribe;
 import com.google.common.io.Files;
 import com.sebuilder.interpreter.*;
+import com.sebuilder.interpreter.factory.ScriptConverter;
 import com.sebuilder.interpreter.factory.TestCaseFactory;
 import com.sebuilder.interpreter.javafx.EventBus;
 import com.sebuilder.interpreter.javafx.controller.RunningProgressController;
@@ -18,20 +19,16 @@ import com.sebuilder.interpreter.javafx.event.file.*;
 import com.sebuilder.interpreter.javafx.event.replay.*;
 import com.sebuilder.interpreter.javafx.event.script.*;
 import com.sebuilder.interpreter.javafx.event.view.*;
+import com.sebuilder.interpreter.steptype.Get;
 import javafx.application.Application;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.Objects;
@@ -50,7 +47,7 @@ public class SeInterpreterApplication extends Application {
 
     private Scene scene;
 
-    private Stage runProgressDialog;
+    private TestCaseFactory testCaseFactory = new TestCaseFactory();
 
     public static void main(String[] args) {
         launch(args);
@@ -74,7 +71,7 @@ public class SeInterpreterApplication extends Application {
         this.runner = new SeInterpreterRunner(parameters.getRaw());
         final List<String> unnamed = parameters.getUnnamed();
         if (unnamed.size() > 0) {
-            Suite newSuite = getScriptFactory().parse(new File(unnamed.get(0)));
+            Suite newSuite = getTestcaseFactory().parse(new File(unnamed.get(0)));
             this.resetSuite(newSuite, newSuite.iterator().next());
         }
     }
@@ -97,14 +94,14 @@ public class SeInterpreterApplication extends Application {
     public void scriptReLoad(FileLoadEvent event) {
         File file = event.getFile();
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
-            Suite newSuite = getScriptFactory().parse(file);
+            Suite newSuite = getTestcaseFactory().parse(file);
             this.resetSuite(newSuite, newSuite.iterator().next());
         });
 
     }
 
     @Subscribe
-    public void addScript(ScriptAddEvent event) throws IOException, JSONException {
+    public void addScript(ScriptAddEvent event) {
         TestCase newTestCase = event.getTestCase();
         if (newTestCase == null) {
             newTestCase = this.templateScript();
@@ -113,7 +110,7 @@ public class SeInterpreterApplication extends Application {
     }
 
     @Subscribe
-    public void insertScript(ScriptInsertEvent event) throws IOException, JSONException {
+    public void insertScript(ScriptInsertEvent event) {
         TestCase newTestCase = this.templateScript();
         Suite newSuite = this.suite.insert(this.currentDisplay, newTestCase);
         int index = newSuite.getIndex(this.currentDisplay);
@@ -130,7 +127,7 @@ public class SeInterpreterApplication extends Application {
     public void scriptImport(ScriptImportEvent event) {
         File file = event.getFile();
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
-            TestCase testCase = getScriptFactory().parse(file).get(0);
+            TestCase testCase = getTestcaseFactory().parse(file).get(0);
             addScript(testCase);
         });
 
@@ -153,7 +150,7 @@ public class SeInterpreterApplication extends Application {
     @Subscribe
     public void replaceScript(ScriptReplaceEvent event) {
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
-            TestCase newTestCase = getScriptFactory().parse(event.getScript());
+            TestCase newTestCase = getTestcaseFactory().parse(event.getScript());
             this.currentDisplay = newTestCase.builder()
                     .associateWith(new File(this.currentDisplay.path()))
                     .setName(this.currentDisplay.name())
@@ -192,13 +189,8 @@ public class SeInterpreterApplication extends Application {
     }
 
     @Subscribe
-    public void editStep(StepEditEvent event) throws JSONException, IOException {
-        JSONObject json = new JSONObject();
-        JSONArray steps = new JSONArray();
-        steps.put(event.getStepSource());
-        json.putOpt("steps", steps);
-        TestCase testCase = getScriptFactory().parse(json);
-        Step newStep = testCase.steps().get(0);
+    public void editStep(StepEditEvent event) {
+        Step newStep = event.getStepSource();
         if (event.getEditAction().equals("change")) {
             this.currentDisplay = this.currentDisplay.replaceStep(event.getStepIndex(), newStep);
         } else if (event.getEditAction().equals("insert")) {
@@ -211,8 +203,13 @@ public class SeInterpreterApplication extends Application {
     }
 
     @Subscribe
-    public void createStep(StepAddEvent event) throws IOException, JSONException {
-        TestCase templateTestCase = getScriptFactory().template(event.getStepType());
+    public void createStep(StepAddEvent event) {
+        TestCase templateTestCase = getTestcaseFactory()
+                .getStepTypeFactory()
+                .getStepTypeOfName(event.getStepType())
+                .toStep()
+                .build()
+                .toTestCase();
         EventBus.publish(RefreshStepEditViewEvent.add(templateTestCase.steps().get(0)));
     }
 
@@ -228,7 +225,7 @@ public class SeInterpreterApplication extends Application {
             EventBus.publish(new OpenScriptSaveChooserEvent());
         } else {
             File target = new File(this.currentDisplay.path());
-            this.saveContents(target, this.currentDisplay.toString());
+            this.saveContents(target, new ScriptConverter().toString(this.currentDisplay));
         }
     }
 
@@ -265,7 +262,7 @@ public class SeInterpreterApplication extends Application {
     }
 
     @Subscribe
-    public void browserSetting(BrowserSettingEvent event) throws IOException, JSONException {
+    public void browserSetting(BrowserSettingEvent event) {
         String browserName = event.getSelectedBrowser();
         String driverPath = event.getDriverPath();
         this.runner.reloadSetting(browserName, driverPath);
@@ -273,7 +270,7 @@ public class SeInterpreterApplication extends Application {
     }
 
     @Subscribe
-    public void open(BrowserOpenEvent event) throws IOException, JSONException {
+    public void open(BrowserOpenEvent event) {
         Task task = this.runner.createRunScriptTask(this.templateScript(), logger -> {
             return new SeInterpreterTestListenerImpl(logger);
         });
@@ -319,12 +316,12 @@ public class SeInterpreterApplication extends Application {
         this.runner.close();
     }
 
-    protected TestCaseFactory getScriptFactory() {
-        return new TestCaseFactory();
+    protected TestCaseFactory getTestcaseFactory() {
+        return this.testCaseFactory;
     }
 
-    private TestCase templateScript() throws IOException, JSONException {
-        return getScriptFactory().open("https://www.google.com");
+    private TestCase templateScript() {
+        return new Get().toStep().put("url", "https://www.google.com").build().toTestCase();
     }
 
     private void addScript(TestCase newTestCase) {
@@ -363,15 +360,16 @@ public class SeInterpreterApplication extends Application {
             this.saveContents(saveTo, this.suite.get(newName), "");
                 }
         );
-        this.saveContents(target, this.suite.toString());
+        this.saveContents(target, new ScriptConverter().toString(this.suite));
         this.resetSuite(this.suite, this.currentDisplay);
     }
 
     private void saveContents(File target, TestCase exportTo, String oldPath) {
+        TestCase save = exportTo;
         if (Strings.isNullOrEmpty(oldPath)) {
-            this.copyDataSourceTemplate(exportTo);
+            save = this.copyDataSourceTemplate(exportTo);
         }
-        this.saveContents(target, exportTo.toString());
+        this.saveContents(target, new ScriptConverter().toString(save));
     }
 
     private void saveContents(File target, String content) {
@@ -383,16 +381,17 @@ public class SeInterpreterApplication extends Application {
         });
     }
 
-    private void copyDataSourceTemplate(TestCase it) {
+    private TestCase copyDataSourceTemplate(TestCase it) {
         if (it.dataSourceConfig().containsKey("path")) {
             File src = new File(this.runner.getTemplateOutputDirectory(), it.dataSourceConfig().get("path"));
             final String newDataSourceName = it.name().replace(".json", ".csv");
             File dest = new File(this.runner.getDataSourceDirectory(), newDataSourceName);
             if (src.exists() && !dest.exists()) {
                 ReportErrorEvent.publishIfExecuteThrowsException(() -> Files.copy(src, dest));
-                it.dataSourceConfig().put("path", newDataSourceName);
+                return it.changeDataSourceConfig("path", newDataSourceName);
             }
         }
+        return it;
     }
 
     private void refreshMainView() {
@@ -406,28 +405,11 @@ public class SeInterpreterApplication extends Application {
     private void executeTask(Task task) {
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
             ExecutorService executor = Executors.newSingleThreadExecutor();
-            this.initScriptRunProgressDialog(task);
+            RunningProgressController.init(this.scene.getWindow(), task);
             task.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED, wse -> {
                 executor.shutdown();
             });
             executor.submit(task);
         });
-    }
-
-    private void initScriptRunProgressDialog(Task task) throws IOException {
-        if (this.runProgressDialog == null || !this.runProgressDialog.isShowing()) {
-            FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(this.getClass().getResource("/fxml/runprogress.fxml")));
-            Parent root = loader.load();
-            Scene scene = new Scene(root);
-            this.runProgressDialog = new Stage();
-            this.runProgressDialog.setScene(scene);
-            this.runProgressDialog.initOwner(this.scene.getWindow());
-            this.runProgressDialog.initModality(Modality.WINDOW_MODAL);
-            this.runProgressDialog.setTitle("run progress");
-            RunningProgressController controller = loader.getController();
-            controller.bind(task);
-            this.runProgressDialog.setResizable(false);
-            this.runProgressDialog.show();
-        }
     }
 }

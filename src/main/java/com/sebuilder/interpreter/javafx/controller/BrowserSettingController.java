@@ -54,7 +54,7 @@ public class BrowserSettingController {
     }
 
     @FXML
-    public void setDriverPath(ActionEvent actionEvent) {
+    void setDriverPath(ActionEvent actionEvent) {
         this.currentDriverPath = this.driverText.getText();
         if (!Strings.isNullOrEmpty(this.currentDriverPath)) {
             this.parentDir = new File(this.currentDriverPath).getParentFile().getAbsoluteFile();

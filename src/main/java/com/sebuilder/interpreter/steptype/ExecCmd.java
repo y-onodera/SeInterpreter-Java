@@ -1,10 +1,9 @@
 package com.sebuilder.interpreter.steptype;
 
 import com.google.common.base.Strings;
+import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -49,10 +48,11 @@ public class ExecCmd implements StepType {
     }
 
     @Override
-    public void supplementSerialized(JSONObject o) throws JSONException {
-        if (!o.has("cmd")) {
+    public StepBuilder addDefaultParam(StepBuilder o) {
+        if (!o.containsStringParam("cmd")) {
             o.put("cmd", "");
         }
+        return o;
     }
 
     @Override

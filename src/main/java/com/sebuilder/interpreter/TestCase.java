@@ -17,15 +17,11 @@
 package com.sebuilder.interpreter;
 
 import com.google.common.collect.Lists;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -112,12 +108,20 @@ public class TestCase implements TestRunnable {
         return this.scriptFile.path();
     }
 
+    public DataSet getDataSet() {
+        return dataSet;
+    }
+
     public DataSource dataSource() {
         return this.dataSet.getDataSource();
     }
 
     public Map<String, String> dataSourceConfig() {
         return this.dataSet.getDataSourceConfig();
+    }
+
+    public DataSet getOverrideDataSet() {
+        return overrideDataSet;
     }
 
     public DataSource overrideDataSource() {
@@ -151,6 +155,12 @@ public class TestCase implements TestRunnable {
         return this.builder()
                 .setName(aName)
                 .build();
+    }
+
+    public TestCase changeDataSourceConfig(String key, String value) {
+        TestCaseBuilder builder = this.builder();
+        builder.getDataSourceConfig().put(key, value);
+        return builder.build();
     }
 
     public TestCase usePreviousDriverAndVars(boolean userPreviousDriverAndVars) {
@@ -233,6 +243,13 @@ public class TestCase implements TestRunnable {
         return this.replaceStep(newStep);
     }
 
+    public TestCase replaceStep(ArrayList<Step> newStep) {
+        return new TestCaseBuilder(this)
+                .clearStep()
+                .addSteps(newStep)
+                .build();
+    }
+
     public TestCase replaceStep(int stepIndex, Step newStep) {
         return this.editStep(it -> {
                     final ArrayList<Step> newSteps = new ArrayList<>();
@@ -259,53 +276,6 @@ public class TestCase implements TestRunnable {
     }
 
     @Override
-    public String toString() {
-        try {
-            return toJSON().toString(4);
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public JSONObject toJSON() throws JSONException {
-        JSONObject o = new JSONObject();
-        JSONArray stepsA = new JSONArray();
-        for (Step s : steps) {
-            stepsA.put(s.toJSON());
-        }
-        o.put("steps", stepsA);
-        JSONObject data = this.dataSet.toJSON();
-        if (data != null) {
-            o.put("data", data);
-        }
-        return o;
-    }
-
-    public JSONObject getJSON(Suite aSuite) throws JSONException {
-        JSONObject scriptPath = new JSONObject();
-        if (this.isLazyLoad()) {
-            scriptPath.put("lazyLoad", this.name());
-        } else {
-            scriptPath.put("path", aSuite.getScriptFile().relativePath(this));
-        }
-        if (!Objects.equals(this.skip(), "false")) {
-            scriptPath.put("skip", this.skip());
-        }
-        JSONObject data = this.overrideDataSet.toJSON();
-        if (data != null) {
-            scriptPath.put("data", data);
-        }
-        return scriptPath;
-    }
-
-    private TestCase replaceStep(ArrayList<Step> newStep) {
-        return new TestCaseBuilder(this)
-                .clearStep()
-                .addSteps(newStep)
-                .build();
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -324,4 +294,5 @@ public class TestCase implements TestRunnable {
     public int hashCode() {
         return com.google.common.base.Objects.hashCode(steps, isLazyLoad(), usePreviousDriverAndVars, closeDriver, dataSet, overrideDataSet, skip, scriptFile);
     }
+
 }

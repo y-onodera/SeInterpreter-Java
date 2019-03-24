@@ -17,9 +17,8 @@
 package com.sebuilder.interpreter.step;
 
 import com.google.common.base.Objects;
+import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * Generic Wait that wraps a getter.
@@ -63,14 +62,14 @@ public class WaitFor implements GetterUseStep {
     }
 
     @Override
-    public void supplementSerialized(JSONObject o) throws JSONException {
-        GetterUseStep.super.supplementSerialized(o);
-        if (!o.has("maxWait")) {
+    public StepBuilder addDefaultParam(StepBuilder o) {
+        if (!o.containsStringParam("maxWait")) {
             o.put("maxWait", "60000");
         }
-        if (!o.has("interval")) {
+        if (!o.containsStringParam("interval")) {
             o.put("interval", "500");
         }
+        return GetterUseStep.super.addDefaultParam(o);
     }
 
     @Override

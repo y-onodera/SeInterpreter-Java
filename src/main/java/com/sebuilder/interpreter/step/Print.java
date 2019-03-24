@@ -1,9 +1,8 @@
 package com.sebuilder.interpreter.step;
 
 import com.google.common.base.Objects;
+import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class Print implements GetterUseStep {
     public final Getter getter;
@@ -28,8 +27,8 @@ public class Print implements GetterUseStep {
     }
 
     @Override
-    public void supplementSerialized(JSONObject o) throws JSONException {
-        GetterUseStep.super.supplementSerialized(o);
+    public StepBuilder addDefaultParam(StepBuilder o) {
+        return GetterUseStep.super.addDefaultParam(o);
     }
 
     @Override

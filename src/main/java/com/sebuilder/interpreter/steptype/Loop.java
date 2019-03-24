@@ -1,9 +1,8 @@
 package com.sebuilder.interpreter.steptype;
 
+import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.step.FlowStep;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class Loop implements FlowStep {
     /**
@@ -33,11 +32,11 @@ public class Loop implements FlowStep {
     }
 
     @Override
-    public void supplementSerialized(JSONObject o) throws JSONException {
-        FlowStep.super.supplementSerialized(o);
-        if (!o.has("count")) {
+    public StepBuilder addDefaultParam(StepBuilder o) {
+        if (!o.containsStringParam("count")) {
             o.put("count", "");
         }
+        return FlowStep.super.addDefaultParam(o);
     }
 
     @Override

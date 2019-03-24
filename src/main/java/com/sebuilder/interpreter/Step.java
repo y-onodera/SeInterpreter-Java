@@ -16,9 +16,8 @@
 package com.sebuilder.interpreter;
 
 import com.sebuilder.interpreter.step.GetterUseStep;
-import org.json.JSONException;
-import org.json.JSONObject;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,6 +41,14 @@ public class Step {
         this.name = name;
         this.type = type;
         this.negated = isNegated;
+    }
+
+    public Step(StepBuilder stepBuilder) {
+        this.name = stepBuilder.getName();
+        this.type = stepBuilder.getStepType();
+        this.negated = stepBuilder.isNegated();
+        this.stringParams.putAll(stepBuilder.getStringParams());
+        this.locatorParams.putAll(stepBuilder.getLocatorParams());
     }
 
     public String getName() {
@@ -70,8 +77,8 @@ public class Step {
         return false;
     }
 
-    public void put(String key, String value) {
-        this.stringParams.put(key, value);
+    public Collection<String> paramKeys() {
+        return this.stringParams.keySet();
     }
 
     public String getParam(String paramName) {
@@ -82,8 +89,8 @@ public class Step {
         return this.stringParams.containsKey(paramKey);
     }
 
-    public void put(String key, Locator value) {
-        this.locatorParams.put(key, value);
+    public Collection<String> locatorKeys() {
+        return this.locatorParams.keySet();
     }
 
     public Locator getLocator(String locatorName) {
@@ -95,23 +102,33 @@ public class Step {
     }
 
     public Step copy() {
-        Step newStep = new Step(this.name, this.type, this.negated);
-        this.stringParams.entrySet().forEach(it -> newStep.stringParams.put(it.getKey(), it.getValue()));
-        this.locatorParams.entrySet().forEach(it -> newStep.locatorParams.put(it.getKey(), it.getValue().copy()));
-        return newStep;
+        return this.builder().build();
+    }
+
+    public TestCase toTestCase() {
+        return new TestCaseBuilder().addStep(this).build();
+    }
+
+    public StepBuilder builder() {
+        return new StepBuilder(this.getType())
+                .name(this.name)
+                .negated(this.negated)
+                .stringParams(this.stringParams)
+                .locatorParams(this.locatorParams);
+    }
+
+    public Step withAllParam() {
+        StepBuilder o = this.builder();
+        this.type.addDefaultParam(o);
+        return o.build();
     }
 
     @Override
     public String toString() {
-        try {
-            return toJSON().toString();
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
+        return this.toPrettyString();
     }
 
     public String toPrettyString() {
-        boolean negateEnable = false;
         StringBuilder sb = new StringBuilder();
         if (name != null) {
             sb.append(name).append(": ");
@@ -129,31 +146,6 @@ public class Step {
             sb.append(" ").append(le.getKey()).append("=").append(le.getValue().toPrettyString());
         }
         return sb.toString();
-    }
-
-    public JSONObject toJSON() throws JSONException {
-        JSONObject o = new JSONObject();
-        if (this.name != null) {
-            o.put("step_name", this.name);
-        }
-        o.put("type", this.type.getStepTypeName());
-        o.put("negated", this.negated);
-        for (Map.Entry<String, String> pe : this.stringParams.entrySet()) {
-            o.put(pe.getKey(), pe.getValue());
-        }
-        for (Map.Entry<String, Locator> le : this.locatorParams.entrySet()) {
-            o.put(le.getKey(), le.getValue().toJSON());
-        }
-        if (!isSkippable()) {
-            o.put("skip", "false");
-        }
-        return o;
-    }
-
-    public JSONObject toFullJSON() throws JSONException {
-        JSONObject o = this.toJSON();
-        this.type.supplementSerialized(o);
-        return o;
     }
 
     private boolean isSkippable() {

@@ -1,6 +1,5 @@
 package com.sebuilder.interpreter.javafx.controller;
 
-
 import com.google.common.eventbus.Subscribe;
 import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.javafx.EventBus;

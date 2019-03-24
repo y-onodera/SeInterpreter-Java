@@ -17,9 +17,8 @@
 package com.sebuilder.interpreter.step;
 
 import com.google.common.base.Objects;
+import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * Generic Store that wraps a getter.
@@ -52,17 +51,17 @@ public class Store implements GetterUseStep {
     }
 
     @Override
-    public void supplementSerialized(JSONObject o) throws JSONException {
-        GetterUseStep.super.supplementSerialized(o);
-        if (!o.has("regex")) {
+    public StepBuilder addDefaultParam(StepBuilder o) {
+        if (!o.containsStringParam("regex")) {
             o.put("regex", "");
         }
-        if (!o.has("replacement")) {
+        if (!o.containsStringParam("replacement")) {
             o.put("replacement", "");
         }
-        if (!o.has("variable")) {
+        if (!o.containsStringParam("variable")) {
             o.put("variable", "");
         }
+        return GetterUseStep.super.addDefaultParam(o);
     }
 
     @Override

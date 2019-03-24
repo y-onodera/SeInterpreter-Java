@@ -17,7 +17,8 @@
 package com.sebuilder.interpreter.step;
 
 
-import com.sebuilder.interpreter.JSONSerializable;
+import com.sebuilder.interpreter.StepBuilder;
+import com.sebuilder.interpreter.StepElement;
 import com.sebuilder.interpreter.TestRun;
 
 /**
@@ -26,7 +27,7 @@ import com.sebuilder.interpreter.TestRun;
  *
  * @author zarkonnen
  */
-public interface Getter extends JSONSerializable {
+public interface Getter extends StepElement {
 
     /**
      * @param ctx Current test run.
@@ -66,5 +67,15 @@ public interface Getter extends JSONSerializable {
 
     default Retry toRetry() {
         return new Retry(this);
+    }
+
+    @Override
+    default StepBuilder addDefaultParam(StepBuilder o) {
+        if (this.cmpParamName() != null) {
+            if (!o.containsStringParam(this.cmpParamName())) {
+                o.put(this.cmpParamName(), "");
+            }
+        }
+        return o;
     }
 }

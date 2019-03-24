@@ -52,7 +52,7 @@ public class StepViewController {
     private TableView<ScriptBody> tableViewScriptBody;
 
     @FXML
-    public void initialize() {
+    void initialize() {
         assert tableColumnScriptBodyStep != null : "fx:id=\"tableColumnScriptBodyStep\" was not injected: check your FXML file 'seleniumbuilderscriptbody.fxml'.";
         assert tableColumnScriptBodyNo != null : "fx:id=\"tableColumnScriptBodyNo\" was not injected: check your FXML file 'seleniumbuilderscriptbody.fxml'.";
         assert tableViewScriptBody != null : "fx:id=\"tableViewScriptBody\" was not injected: check your FXML file 'seleniumbuilderscriptbody.fxml'.";
@@ -120,27 +120,27 @@ public class StepViewController {
     }
 
     @FXML
-    public void handleStepDelete(ActionEvent event) {
+    void handleStepDelete(ActionEvent event) {
         ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
         EventBus.publish(new StepDeleteEvent(item.noProperty().intValue() - 1));
     }
 
     @FXML
-    public void handleStepInsert(ActionEvent actionEvent) throws IOException {
+    void handleStepInsert(ActionEvent actionEvent) throws IOException {
         Stage dialog = initStepEditDialog("insert");
         dialog.setResizable(true);
         dialog.show();
     }
 
     @FXML
-    public void handleStepAdd(ActionEvent event) throws IOException {
+    void handleStepAdd(ActionEvent event) throws IOException {
         Stage dialog = initStepEditDialog("appendNewChain");
         dialog.setResizable(true);
         dialog.show();
     }
 
     @FXML
-    public void handleStepEdit(ActionEvent event) throws IOException {
+    void handleStepEdit(ActionEvent event) throws IOException {
         Stage dialog = initStepEditDialog("change");
         dialog.setResizable(true);
         dialog.show();
@@ -149,19 +149,19 @@ public class StepViewController {
     }
 
     @FXML
-    public void handleRunStep(ActionEvent actionEvent) {
+    void handleRunStep(ActionEvent actionEvent) {
         ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
         EventBus.publish(new RunStepEvent(i -> item.no.intValue() - 1 == i.intValue(), i -> i + item.no.intValue() - 1));
     }
 
     @FXML
-    public void handleRunFromHere(ActionEvent actionEvent) {
+    void handleRunFromHere(ActionEvent actionEvent) {
         ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
         EventBus.publish(new RunStepEvent(i -> item.no.intValue() - 1 <= i.intValue(), i -> i + item.no.intValue() - 1));
     }
 
     @FXML
-    public void handleRunToHere(ActionEvent actionEvent) {
+    void handleRunToHere(ActionEvent actionEvent) {
         ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
         EventBus.publish(new RunStepEvent(i -> item.no.intValue() - 1 >= i.intValue(), i -> i));
     }

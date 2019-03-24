@@ -16,10 +16,9 @@
 
 package com.sebuilder.interpreter.steptype;
 
+import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class Store implements StepType {
     @Override
@@ -29,13 +28,14 @@ public class Store implements StepType {
     }
 
     @Override
-    public void supplementSerialized(JSONObject o) throws JSONException {
-        if (!o.has("variable")) {
+    public StepBuilder addDefaultParam(StepBuilder o) {
+        if (!o.containsStringParam("variable")) {
             o.put("variable", "");
         }
-        if (!o.has("text")) {
+        if (!o.containsStringParam("text")) {
             o.put("text", "");
         }
+        return o;
     }
 
     @Override

@@ -9,7 +9,6 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
-import java.nio.file.Paths;
 
 public class ScriptSettingController {
 
@@ -21,8 +20,6 @@ public class ScriptSettingController {
 
     @FXML
     private Button editButton;
-
-    private final File currentDir = Paths.get(".").toAbsolutePath().normalize().toFile();
 
     @FXML
     void initialize() {

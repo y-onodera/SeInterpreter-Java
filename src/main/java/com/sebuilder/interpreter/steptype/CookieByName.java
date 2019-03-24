@@ -16,10 +16,9 @@
 
 package com.sebuilder.interpreter.steptype;
 
+import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.step.Getter;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class CookieByName implements Getter {
     @Override
@@ -33,10 +32,11 @@ public class CookieByName implements Getter {
     }
 
     @Override
-    public void supplementSerialized(JSONObject o) throws JSONException {
-        if (!o.has("name")) {
+    public StepBuilder addDefaultParam(StepBuilder o) {
+        if (!o.containsStringParam("name")) {
             o.put("name", "");
         }
+        return Getter.super.addDefaultParam(o);
     }
 
     @Override

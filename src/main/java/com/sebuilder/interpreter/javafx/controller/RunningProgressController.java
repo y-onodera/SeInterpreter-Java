@@ -7,13 +7,20 @@ import javafx.beans.property.StringProperty;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.Window;
 
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 
 import static javafx.concurrent.Worker.State.RUNNING;
 
@@ -38,6 +45,21 @@ public class RunningProgressController {
     private Label runStatus;
 
     private StringProperty lastRunResultDir = new SimpleStringProperty();
+
+    public static void init(Window window, Task task) throws IOException {
+        FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(RunningProgressController.class.getResource("/fxml/runprogress.fxml")));
+        Parent root = loader.load();
+        Scene scene = new Scene(root);
+        Stage runProgressDialog = new Stage();
+        runProgressDialog.setScene(scene);
+        runProgressDialog.initOwner(window);
+        runProgressDialog.initModality(Modality.WINDOW_MODAL);
+        runProgressDialog.setTitle("run progress");
+        RunningProgressController controller = loader.getController();
+        controller.bind(task);
+        runProgressDialog.setResizable(false);
+        runProgressDialog.show();
+    }
 
     @FXML
     void initialize() {
@@ -65,8 +87,7 @@ public class RunningProgressController {
         Desktop.getDesktop().open(new File(this.lastRunResultDir.get()));
     }
 
-
-    public void bind(Task task) {
+    private void bind(Task task) {
         this.scriptName.textProperty().bind(task.messageProperty());
         this.scriptDataSetProgress.progressProperty().bind(task.progressProperty());
         this.runStatus.textProperty().bind(task.stateProperty().asString());

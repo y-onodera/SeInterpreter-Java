@@ -17,10 +17,9 @@
 package com.sebuilder.interpreter.steptype;
 
 import com.google.common.base.Objects;
+import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.openqa.selenium.Cookie;
 
 import java.util.Date;
@@ -47,16 +46,17 @@ public class AddCookie implements StepType {
     }
 
     @Override
-    public void supplementSerialized(JSONObject o) throws JSONException {
-        if (!o.has("name")) {
+    public StepBuilder addDefaultParam(StepBuilder o) {
+        if (!o.containsStringParam("name")) {
             o.put("name", "");
         }
-        if (!o.has("value")) {
+        if (!o.containsStringParam("value")) {
             o.put("value", "");
         }
-        if (!o.has("options")) {
+        if (!o.containsStringParam("options")) {
             o.put("options", "");
         }
+        return o;
     }
 
     @Override

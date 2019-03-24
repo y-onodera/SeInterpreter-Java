@@ -1,9 +1,8 @@
 package com.sebuilder.interpreter.steptype;
 
+import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.step.Getter;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class Variable implements Getter {
     /**
@@ -13,8 +12,7 @@ public class Variable implements Getter {
     @Override
     public String get(TestRun ctx) {
         String variableName = ctx.string("variable");
-        ctx.currentStep().put("text", "${" + variableName + "}");
-        return ctx.text();
+        return ctx.bindRuntimeVariables("${" + variableName + "}");
     }
 
     /**
@@ -27,13 +25,11 @@ public class Variable implements Getter {
     }
 
     @Override
-    public void supplementSerialized(JSONObject o) throws JSONException {
-        if (!o.has("variable")) {
+    public StepBuilder addDefaultParam(StepBuilder o) {
+        if (!o.containsStringParam("variable")) {
             o.put("variable", "");
         }
-        if (!o.has("text")) {
-            o.put("text", "");
-        }
+        return o.apply(Getter.super::addDefaultParam);
     }
 
     @Override

@@ -17,6 +17,7 @@ package com.sebuilder.interpreter.factory;
 
 import com.sebuilder.interpreter.Locator;
 import com.sebuilder.interpreter.Step;
+import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.step.Getter;
 import org.json.JSONArray;
@@ -46,14 +47,6 @@ public class StepTypeFactory {
      */
     private String secondaryPackage = DEFAULT_PACKAGE;
 
-    public void setPrimaryPackage(String primaryPackage) {
-        this.primaryPackage = primaryPackage;
-    }
-
-    public void setSecondaryPackage(String secondaryPackage) {
-        this.secondaryPackage = secondaryPackage;
-    }
-
     /**
      * Mapping of the names of step types to their implementing classes, lazily
      * loaded through reflection. StepType classes must be either in the first
@@ -68,17 +61,12 @@ public class StepTypeFactory {
      */
     private final HashMap<String, StepType> typesMap = new HashMap<String, StepType>();
 
-    /**
-     * @param o json object step load from
-     * @throws JSONException If anything goes wrong with interpreting the JSON.
-     */
-    public ArrayList<Step> parseStep(JSONObject o) throws JSONException {
-        JSONArray stepsA = o.getJSONArray("steps");
-        ArrayList<Step> steps = new ArrayList<>();
-        for (int i = 0; i < stepsA.length(); i++) {
-            this.parseStep(steps, stepsA.getJSONObject(i));
-        }
-        return steps;
+    public void setPrimaryPackage(String primaryPackage) {
+        this.primaryPackage = primaryPackage;
+    }
+
+    public void setSecondaryPackage(String secondaryPackage) {
+        this.secondaryPackage = secondaryPackage;
     }
 
     /**
@@ -87,7 +75,7 @@ public class StepTypeFactory {
      */
     public StepType getStepTypeOfName(String name) {
         try {
-            if (!typesMap.containsKey(name)) {
+            if (!this.typesMap.containsKey(name)) {
                 String className = name.substring(0, 1).toUpperCase() + name.substring(1);
                 boolean rawStepType = true;
                 if (name.startsWith("assert")) {
@@ -132,11 +120,11 @@ public class StepTypeFactory {
                 }
                 Class<?> c = null;
                 try {
-                    c = Class.forName(primaryPackage + "." + className);
+                    c = Class.forName(this.primaryPackage + "." + className);
                 } catch (ClassNotFoundException cnfe) {
                     try {
-                        if (secondaryPackage != null) {
-                            c = Class.forName(secondaryPackage + "." + className);
+                        if (this.secondaryPackage != null) {
+                            c = Class.forName(this.secondaryPackage + "." + className);
                         }
                     } catch (ClassNotFoundException cnfe2) {
                         throw new RuntimeException("No implementation class for step type \"" + name + "\" could be found.", cnfe);
@@ -145,21 +133,21 @@ public class StepTypeFactory {
                 if (c != null) try {
                     Object o = c.getDeclaredConstructor().newInstance();
                     if (name.startsWith("assert")) {
-                        typesMap.put(name, Getter.class.cast(o).toAssert());
+                        this.typesMap.put(name, Getter.class.cast(o).toAssert());
                     } else if (name.startsWith("verify")) {
-                        typesMap.put(name, Getter.class.cast(o).toVerify());
+                        this.typesMap.put(name, Getter.class.cast(o).toVerify());
                     } else if (name.startsWith("waitFor")) {
-                        typesMap.put(name, Getter.class.cast(o).toWaitFor());
+                        this.typesMap.put(name, Getter.class.cast(o).toWaitFor());
                     } else if (name.startsWith("store") && !name.equals("store")) {
-                        typesMap.put(name, Getter.class.cast(o).toStore());
+                        this.typesMap.put(name, Getter.class.cast(o).toStore());
                     } else if (name.startsWith("print") && !name.equals("print")) {
-                        typesMap.put(name, Getter.class.cast(o).toPrint());
+                        this.typesMap.put(name, Getter.class.cast(o).toPrint());
                     } else if (name.startsWith("if") && !name.equals("if")) {
-                        typesMap.put(name, Getter.class.cast(o).toIf());
+                        this.typesMap.put(name, Getter.class.cast(o).toIf());
                     } else if (name.startsWith("retry") && !name.equals("retry")) {
-                        typesMap.put(name, Getter.class.cast(o).toRetry());
+                        this.typesMap.put(name, Getter.class.cast(o).toRetry());
                     } else {
-                        typesMap.put(name, (StepType) o);
+                        this.typesMap.put(name, (StepType) o);
                     }
                 } catch (InstantiationException | IllegalAccessException ie) {
                     throw new RuntimeException(c.getName() + " could not be instantiated.", ie);
@@ -168,10 +156,23 @@ public class StepTypeFactory {
                             + (rawStepType ? "StepType" : "Getter") + ".", cce);
                 }
             }
-            return typesMap.get(name);
+            return this.typesMap.get(name);
         } catch (Exception e) {
             throw new RuntimeException("Step type \"" + name + "\" is not implemented.", e);
         }
+    }
+
+    /**
+     * @param o json object step load from
+     * @throws JSONException If anything goes wrong with interpreting the JSON.
+     */
+    ArrayList<Step> parseStep(JSONObject o) throws JSONException {
+        JSONArray stepsA = o.getJSONArray("steps");
+        ArrayList<Step> steps = new ArrayList<>();
+        for (int i = 0; i < stepsA.length(); i++) {
+            this.parseStep(steps, stepsA.getJSONObject(i));
+        }
+        return steps;
     }
 
     /**
@@ -179,9 +180,9 @@ public class StepTypeFactory {
      * @throws JSONException If anything goes wrong with interpreting the JSON.
      */
     private void parseStep(ArrayList<Step> steps, JSONObject stepO) throws JSONException {
-        Step step = this.createStep(stepO);
-        steps.add(step);
-        this.configureStep(steps, stepO, step);
+        StepBuilder step = this.createStep(stepO);
+        this.configureStep(stepO, step);
+        steps.add(step.build());
     }
 
     /**
@@ -189,11 +190,11 @@ public class StepTypeFactory {
      * @return A new instance of step
      * @throws JSONException If anything goes wrong with interpreting the JSON.
      */
-    private Step createStep(JSONObject stepO) throws JSONException {
+    private StepBuilder createStep(JSONObject stepO) throws JSONException {
         StepType type = this.getStepTypeOfName(stepO.getString("type"));
         boolean isNegated = stepO.optBoolean("negated", false);
         String name = stepO.optString("step_name", null);
-        return new Step(name, type, isNegated);
+        return new StepBuilder(name, type, isNegated);
     }
 
     /**
@@ -201,10 +202,10 @@ public class StepTypeFactory {
      * @param step  step configuration to
      * @throws JSONException If anything goes wrong with interpreting the JSON.
      */
-    private void configureStep(ArrayList<Step> steps, JSONObject stepO, Step step) throws JSONException {
+    private void configureStep(JSONObject stepO, StepBuilder step) throws JSONException {
         JSONArray keysA = stepO.names();
         for (int j = 0; j < keysA.length(); j++) {
-            this.configureStep(steps, stepO, step, keysA.getString(j));
+            this.configureStep(stepO, step, keysA.getString(j));
         }
     }
 
@@ -214,7 +215,7 @@ public class StepTypeFactory {
      * @param key   configuration key
      * @throws JSONException If anything goes wrong with interpreting the JSON.
      */
-    private void configureStep(ArrayList<Step> steps, JSONObject stepO, Step step, String key) throws JSONException {
+    private void configureStep(JSONObject stepO, StepBuilder step, String key) throws JSONException {
         if (key.equals("type") || key.equals("negated")) {
             return;
         }

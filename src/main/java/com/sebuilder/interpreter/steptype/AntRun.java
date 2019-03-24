@@ -1,12 +1,11 @@
 package com.sebuilder.interpreter.steptype;
 
 import com.google.common.base.Strings;
+import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.step.Getter;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.ProjectHelper;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.util.Objects;
@@ -41,16 +40,17 @@ public class AntRun implements Getter {
     }
 
     @Override
-    public void supplementSerialized(JSONObject o) throws JSONException {
-        if (!o.has("build.xml")) {
+    public StepBuilder addDefaultParam(StepBuilder o) {
+        if (!o.containsStringParam("build.xml")) {
             o.put("build.xml", "${_baseDir}/build.xml");
         }
-        if (!o.has("target")) {
+        if (!o.containsStringParam("target")) {
             o.put("target", "");
         }
-        if (!o.has("resultProperty")) {
+        if (!o.containsStringParam("resultProperty")) {
             o.put("resultProperty", "resultProperty");
         }
+        return Getter.super.addDefaultParam(o);
     }
 
     @Override

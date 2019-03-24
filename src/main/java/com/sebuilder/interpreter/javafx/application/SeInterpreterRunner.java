@@ -58,10 +58,11 @@ public class SeInterpreterRunner {
             this.setUp();
         }
         String fileName = "Template" + this.exportCount + ".json";
-        Step export = new Step(new ExportTemplate());
-        export.put("locator", locator);
-        export.put("file", fileName);
-        export.put("filterTag", "true");
+        StepBuilder export = new ExportTemplate()
+                .toStep()
+                .locator(locator)
+                .put("file", fileName)
+                .put("filterTag", "true");
         for (String targetTag : targetTags) {
             export.put(targetTag, "true");
         }
@@ -69,9 +70,7 @@ public class SeInterpreterRunner {
         if (withDataSource) {
             export.put("datasource", dataSourceName);
         }
-        TestCase get = new TestCaseBuilder()
-                .addStep(export)
-                .build();
+        TestCase get = export.build().toTestCase();
         SeInterpreterTestListener listener = new SeInterpreterTestListenerImpl(this.log);
         this.repl.execute(get, listener);
         File exported = new File(listener.getTemplateOutputDirectory(), fileName);
@@ -97,11 +96,11 @@ public class SeInterpreterRunner {
     }
 
     public void highLightElement(String locatorType, String value) {
-        Step highLightElement = new Step(new HighLightElement());
-        highLightElement.put("locator", new Locator(locatorType, value));
-        TestCase highLight = new TestCaseBuilder()
-                .addStep(highLightElement)
+        Step highLightElement = new HighLightElement()
+                .toStep()
+                .locator(new Locator(locatorType, value))
                 .build();
+        TestCase highLight = highLightElement.toTestCase();
         SeInterpreterTestListener listener = new SeInterpreterTestListenerImpl(this.log);
         this.repl.execute(highLight, listener);
     }
@@ -142,48 +141,6 @@ public class SeInterpreterRunner {
         if (!this.isOpen()) {
             this.setUp();
         }
-        return new Task() {
-            @Override
-            protected Object call() {
-                Boolean result = true;
-                try {
-                    log.info("operation recieve");
-                    updateMessage("setup running....");
-                    runnable.accept(repl, new SeInterpreterTestListenerWrapper(listener) {
-                        private int currentScriptSteps;
-
-                        @Override
-                        public boolean openTestSuite(TestCase testCase, String testRunName, TestData aProperty) {
-                            this.currentScriptSteps = testCase.steps().size();
-                            updateMessage(testRunName);
-                            updateProgress(0, this.currentScriptSteps);
-                            return super.openTestSuite(testCase, testRunName, aProperty);
-                        }
-
-                        @Override
-                        public void startTest(String testName) {
-                            updateProgress(this.getStepNo(), this.currentScriptSteps);
-                            super.startTest(testName);
-                        }
-
-                        @Override
-                        public void aggregateResult() {
-                            super.aggregateResult();
-                            updateValue((String) getResultDir().getAbsolutePath());
-                        }
-                    });
-                } catch (Throwable ex) {
-                    result = false;
-                    log.error(ex);
-                }
-                if (result) {
-                    log.info("operation success");
-                } else {
-                    log.info("operation failed");
-                }
-                return listener.getResultDir().getAbsolutePath();
-            }
-        };
+        return new SeInterpreterRunTask(this.log, listener, this.repl, runnable);
     }
-
 }

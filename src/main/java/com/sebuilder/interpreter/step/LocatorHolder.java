@@ -1,17 +1,15 @@
 package com.sebuilder.interpreter.step;
 
-import com.sebuilder.interpreter.JSONSerializable;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.sebuilder.interpreter.Locator;
+import com.sebuilder.interpreter.StepBuilder;
+import com.sebuilder.interpreter.StepElement;
 
-public interface LocatorHolder extends JSONSerializable {
-    @Override
-    default void supplementSerialized(JSONObject o) throws JSONException {
-        if (!o.has("locator")) {
-            JSONObject locator = new JSONObject();
-            locator.put("type", "");
-            locator.put("value", "");
-            o.put("locator", locator);
+public interface LocatorHolder extends StepElement {
+
+    default StepBuilder addDefaultParam(StepBuilder o) {
+        if (!o.containsLocatorParam("locator")) {
+            o.put("locator", new Locator("id", ""));
         }
+        return o;
     }
 }

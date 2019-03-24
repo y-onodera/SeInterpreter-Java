@@ -1,10 +1,9 @@
 
 package com.sebuilder.interpreter.step;
 
+import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public interface FlowStep extends StepType {
 
@@ -30,9 +29,11 @@ public interface FlowStep extends StepType {
     }
 
     @Override
-    default void supplementSerialized(JSONObject o) throws JSONException {
-        if (!o.has("subStep")) {
+    default StepBuilder addDefaultParam(StepBuilder o) {
+        if (!o.containsStringParam("subStep")) {
             o.put("subStep", "");
         }
+        return o;
     }
+
 }

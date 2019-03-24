@@ -1,9 +1,8 @@
 package com.sebuilder.interpreter.steptype;
 
+import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.openqa.selenium.Dimension;
 
 public class SetWindowSize implements StepType {
@@ -16,13 +15,14 @@ public class SetWindowSize implements StepType {
     }
 
     @Override
-    public void supplementSerialized(JSONObject o) throws JSONException {
-        if (!o.has("width")) {
+    public StepBuilder addDefaultParam(StepBuilder o) {
+        if (!o.containsStringParam("width")) {
             o.put("width", "");
         }
-        if (!o.has("height")) {
+        if (!o.containsStringParam("height")) {
             o.put("height", "");
         }
+        return o;
     }
 
     @Override

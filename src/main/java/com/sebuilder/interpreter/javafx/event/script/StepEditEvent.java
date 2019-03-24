@@ -1,6 +1,6 @@
 package com.sebuilder.interpreter.javafx.event.script;
 
-import org.json.JSONObject;
+import com.sebuilder.interpreter.Step;
 
 public class StepEditEvent {
 
@@ -8,9 +8,9 @@ public class StepEditEvent {
 
     private final int stepIndex;
 
-    private final JSONObject stepSource;
+    private final Step stepSource;
 
-    public StepEditEvent(String editAction, int stepIndex, JSONObject stepSource) {
+    public StepEditEvent(String editAction, int stepIndex, Step stepSource) {
         this.editAction = editAction;
         this.stepIndex = stepIndex;
         this.stepSource = stepSource;
@@ -24,7 +24,7 @@ public class StepEditEvent {
         return stepIndex;
     }
 
-    public JSONObject getStepSource() {
+    public Step getStepSource() {
         return stepSource;
     }
 }

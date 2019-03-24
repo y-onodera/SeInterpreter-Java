@@ -42,25 +42,8 @@ public class TestCaseFactory {
         return this.stepTypeFactory;
     }
 
-    public void setStepTypeFactory(StepTypeFactory stepTypeFactory) {
-        this.stepTypeFactory = stepTypeFactory;
-        this.aspectFactory.setStepTypeFactory(stepTypeFactory);
-    }
-
     public DataSourceFactory getDataSourceFactory() {
         return dataSourceFactory;
-    }
-
-    public void setDataSourceFactory(DataSourceFactory dataSourceFactory) {
-        this.dataSourceFactory = dataSourceFactory;
-    }
-
-    public TestCase template(String stepType) throws JSONException, IOException {
-        return this.parse("{\"steps\":[{\"type\":\"" + stepType + "\"}]}");
-    }
-
-    public TestCase open(String url) throws JSONException, IOException {
-        return this.parse("{\"steps\":[" + "{\"type\":\"get\",\"url\":\"" + url + "\"}" + "]}");
     }
 
     /**
@@ -71,18 +54,18 @@ public class TestCaseFactory {
      * @throws JSONException If the JSON can't be parsed.
      */
     public TestCase parse(String jsonString) throws IOException, JSONException {
-        return this.parse(new JSONObject(new JSONTokener(jsonString)));
+        return this.parse(new JSONObject(new JSONTokener(jsonString)), null).iterator().next();
     }
 
     /**
      * @param json A JSON string describing a script or suite.
-     * @return A script, ready to run.
+     * @return A list of script, ready to run.
      * @throws IOException   If anything goes wrong with interpreting the JSON, or
      *                       with the Reader.
      * @throws JSONException If the JSON can't be parsed.
      */
-    public TestCase parse(JSONObject json) throws IOException {
-        return this.parse(json, null).iterator().next();
+    public Suite parse(String json, File file) throws IOException, JSONException {
+        return this.parse(new JSONObject(new JSONTokener(json)), file);
     }
 
     /**
@@ -94,20 +77,8 @@ public class TestCaseFactory {
      */
     public Suite parse(File f) throws IOException, JSONException {
         try (BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(f), "UTF-8"))) {
-            return this.parse(r, f);
+            return this.parse(new JSONObject(new JSONTokener(r)), f);
         }
-    }
-
-    /**
-     * @param reader     A Reader pointing to a JSON stream describing a script or suite.
-     * @param sourceFile Optionally. the file the JSON was loaded from.
-     * @return A list of script, ready to run.
-     * @throws IOException   If anything goes wrong with interpreting the JSON, or
-     *                       with the Reader.
-     * @throws JSONException If the JSON can't be parsed.
-     */
-    public Suite parse(Reader reader, File sourceFile) throws IOException, JSONException {
-        return this.parse(new JSONObject(new JSONTokener(reader)), sourceFile);
     }
 
     /**
@@ -116,7 +87,7 @@ public class TestCaseFactory {
      * @return A script, ready to run.
      * @throws IOException If anything goes wrong with interpreting the JSON.
      */
-    public Suite parse(JSONObject o, File sourceFile) throws IOException {
+    private Suite parse(JSONObject o, File sourceFile) throws IOException {
         if (o.optString("type", "script").equals("suite")) {
             return this.parseSuite(o, sourceFile);
         }
@@ -129,7 +100,7 @@ public class TestCaseFactory {
      * @return A script, ready to run.
      * @throws IOException If anything goes wrong with interpreting the JSON.
      */
-    public Suite parseSuite(JSONObject o, File suiteFile) throws IOException {
+    private Suite parseSuite(JSONObject o, File suiteFile) throws IOException {
         try {
             DataSource dataSource = this.dataSourceFactory.getDataSource(o);
             HashMap<String, String> config = this.dataSourceFactory.getDataSourceConfig(o);
@@ -150,10 +121,9 @@ public class TestCaseFactory {
      * @return A script, ready to run.
      * @throws IOException If anything goes wrong with interpreting the JSON.
      */
-    public Suite parseScript(JSONObject o, File f) throws IOException {
+    private Suite parseScript(JSONObject o, File f) throws IOException {
         try {
-            TestCase testCase = this.create(o, f);
-            return testCase.toSuite();
+            return this.create(o, f).toSuite();
         } catch (JSONException e) {
             throw new IOException("Could not parse script.", e);
         }
@@ -197,18 +167,7 @@ public class TestCaseFactory {
      * @throws IOException   If script file not found.
      */
     private Suite loadScript(JSONObject script, File suiteFile) throws JSONException, IOException {
-        if (script.has("path")) {
-            String path = script.getString("path");
-            if (script.has("where") && Strings.isNullOrEmpty(script.getString("where"))) {
-                File wherePath = new File(script.getString("where"), path);
-                return this.loadScriptIfExists(wherePath, script);
-            }
-            File f = new File(path);
-            if (!f.exists()) {
-                f = new File(suiteFile.getAbsoluteFile().getParentFile(), path);
-            }
-            return this.loadScriptIfExists(f, script);
-        } else if (script.has("lazyLoad")) {
+        if (script.has("lazyLoad")) {
             String beforeReplace = script.getString("lazyLoad");
             final TestCase resultTestCase = TestCaseBuilder.lazyLoad(beforeReplace, (TestData data) -> {
                 String fileName = data.bind(beforeReplace);
@@ -222,7 +181,16 @@ public class TestCaseFactory {
             });
             return this.overrideSetting(script, resultTestCase).toSuite();
         }
-        return null;
+        String path = script.getString("path");
+        if (script.has("where") && Strings.isNullOrEmpty(script.getString("where"))) {
+            File wherePath = new File(script.getString("where"), path);
+            return this.loadScriptIfExists(wherePath, script);
+        }
+        File f = new File(path);
+        if (!f.exists()) {
+            f = new File(suiteFile.getAbsoluteFile().getParentFile(), path);
+        }
+        return this.loadScriptIfExists(f, script);
     }
 
     private void loadScriptChain(JSONArray scriptArrays, SuiteBuilder builder) throws JSONException, IOException {
@@ -238,13 +206,6 @@ public class TestCaseFactory {
         }
     }
 
-    /**
-     * @param wherePath file script load from
-     * @param script
-     * @return TestCase loaded from file
-     * @throws IOException   If script file not found.
-     * @throws JSONException If anything goes wrong with interpreting the JSON.
-     */
     private Suite loadScriptIfExists(File wherePath, JSONObject script) throws IOException, JSONException {
         if (wherePath.exists()) {
             Suite result = this.parse(wherePath);

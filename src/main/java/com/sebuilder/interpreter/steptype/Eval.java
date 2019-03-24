@@ -16,10 +16,9 @@
 
 package com.sebuilder.interpreter.steptype;
 
+import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.step.Getter;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class Eval implements Getter {
     @Override
@@ -34,10 +33,11 @@ public class Eval implements Getter {
     }
 
     @Override
-    public void supplementSerialized(JSONObject o) throws JSONException {
-        if (!o.has("script")) {
+    public StepBuilder addDefaultParam(StepBuilder o) {
+        if (!o.containsStringParam("script")) {
             o.put("script", "return true;");
         }
+        return o.apply(Getter.super::addDefaultParam);
     }
 
     @Override

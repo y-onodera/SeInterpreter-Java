@@ -15,7 +15,6 @@ import java.util.List;
 
 public class ExportSettingController {
     private static final String DEFAULT_PARENT = "body";
-    private static final String UNSPECIFIED = "unspecified";
 
     @FXML
     private GridPane exportSettingsGrid;
@@ -38,14 +37,8 @@ public class ExportSettingController {
     @FXML
     private CheckBox checkWithDataSource;
 
-    private String parentLocator;
-
-    private String parentLocatorValue;
-
-    private String targetTag;
-
     @FXML
-    public void initialize() {
+    void initialize() {
         assert this.textLocatorValue != null : "fx:id=\"textLocatorValue\" was not injected: check your FXML file 'exportsetting.fxml'.";
         assert this.parentSearchButton != null : "fx:id=\"parentSearchButton\" was not injected: check your FXML file 'exportsetting.fxml'.";
         assert this.exportButton != null : "fx:id=\"exportButton\" was not injected: check your FXML file 'exportsetting.fxml'.";
@@ -77,12 +70,12 @@ public class ExportSettingController {
     }
 
     @FXML
-    public void parentFind(ActionEvent event) {
+    void parentFind(ActionEvent event) {
         EventBus.publish(new ElementHighLightEvent(this.selectParentLocator.getSelectionModel().getSelectedItem(), this.textLocatorValue.getText()));
     }
 
     @FXML
-    public void selectLocator(ActionEvent actionEvent) {
+    void selectLocator(ActionEvent actionEvent) {
         String locator = this.selectParentLocator.getSelectionModel().getSelectedItem();
         if (DEFAULT_PARENT.equals(locator)) {
             if (this.exportSettingsGrid.getRowCount() == 3) {
@@ -94,13 +87,8 @@ public class ExportSettingController {
         this.exportSettingsGrid.add(this.parentSearchButton, 2, 1);
     }
 
-    private void removeLocatorValue() {
-        this.exportSettingsGrid.getChildren().remove(this.textLocatorValue);
-        this.exportSettingsGrid.getChildren().remove(this.parentSearchButton);
-    }
-
     @FXML
-    public void execExport(ActionEvent event) {
+    void execExport(ActionEvent event) {
         EventBus.publish(new StepResultResetEvent());
         String locator = this.selectParentLocator.getSelectionModel().getSelectedItem();
         String locatorValue = this.textLocatorValue.getText();
@@ -111,6 +99,11 @@ public class ExportSettingController {
             EventBus.publish(new TemplateLoadEvent(new Locator(locator, locatorValue), targetTag, this.checkWithDataSource.isSelected()));
         }
         ((Stage) this.exportButton.getScene().getWindow()).close();
+    }
+
+    private void removeLocatorValue() {
+        this.exportSettingsGrid.getChildren().remove(this.textLocatorValue);
+        this.exportSettingsGrid.getChildren().remove(this.parentSearchButton);
     }
 
 }

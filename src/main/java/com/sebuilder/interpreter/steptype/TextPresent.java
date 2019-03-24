@@ -16,10 +16,9 @@
 
 package com.sebuilder.interpreter.steptype;
 
+import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.step.Getter;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class TextPresent implements Getter {
     @Override
@@ -33,10 +32,11 @@ public class TextPresent implements Getter {
     }
 
     @Override
-    public void supplementSerialized(JSONObject o) throws JSONException {
-        if (!o.has("text")) {
+    public StepBuilder addDefaultParam(StepBuilder o) {
+        if (!o.containsStringParam("text")) {
             o.put("text", "");
         }
+        return o.apply(Getter.super::addDefaultParam);
     }
 
     @Override
