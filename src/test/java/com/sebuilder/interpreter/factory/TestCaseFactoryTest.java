@@ -22,6 +22,7 @@ public class TestCaseFactoryTest {
 
     private static String baseDir = TestCaseFactoryTest.class.getResource(".").getPath();
     private static TestCaseFactory target = new TestCaseFactory();
+    private static ScriptConverter converter = new ScriptConverter();
 
     public static class TestCaseTest {
 
@@ -36,7 +37,7 @@ public class TestCaseFactoryTest {
             assertSame(actual, result.get(0));
             assertSimpleScript(testFile, actual);
 
-            result = target.parse(result.toJSON(), null);
+            result = target.parse(converter.toString(result), null);
             assertSuiteAttribute(result);
             actual = result.get(testFile);
             assertSame(actual, result.get(0));
@@ -54,7 +55,7 @@ public class TestCaseFactoryTest {
             assertSame(actual, result.get(0));
             assertSimpleScript(testFile, actual);
 
-            result = target.parse(result.toJSON(), null);
+            result = target.parse(converter.toString(result), null);
             assertSuiteAttribute(result);
             actual = result.get(testFile);
             assertSame(actual, result.get(0));
@@ -72,7 +73,7 @@ public class TestCaseFactoryTest {
             assertSame(actual, result.get(0));
             assertScriptWithDataSource(testFile, actual);
 
-            result = target.parse(result.toJSON(), null);
+            result = target.parse(converter.toString(result), null);
             assertSuiteAttribute(result);
             actual = result.get(testFile);
             assertSame(actual, result.get(0));
@@ -90,7 +91,7 @@ public class TestCaseFactoryTest {
             assertSame(actual, result.get(0));
             assertScriptWithSteps(testFile, actual);
 
-            result = target.parse(result.toJSON(), null);
+            result = target.parse(converter.toString(result), null);
             assertSuiteAttribute(result);
             actual = result.get(testFile);
             assertSame(actual, result.get(0));
@@ -124,7 +125,7 @@ public class TestCaseFactoryTest {
             assertNoDataSource(result);
             assertTrue(result.isShareState());
 
-            result = target.parse(result.toJSON(), new File(result.getPath()));
+            result = target.parse(converter.toString(result), testSource);
             assertEquals(0, result.scriptSize());
             assertEquals(0, result.getScenario().chainSize());
             assertFileAttribute(testFile, testSource, result);
@@ -148,7 +149,7 @@ public class TestCaseFactoryTest {
             assertEquals("test.csv", result.getDataSourceConfig().get("path"));
             assertTrue(result.isShareState());
 
-            result = target.parse(result.toJSON(), new File(result.getPath()));
+            result = target.parse(converter.toString(result), testSource);
             assertEquals(0, result.scriptSize());
             assertEquals(0, result.getScenario().chainSize());
             assertFileAttribute(testFile, testSource, result);
@@ -189,7 +190,7 @@ public class TestCaseFactoryTest {
             assertNoDataSource(result);
             assertTrue(result.isShareState());
 
-            result = target.parse(result.toJSON(), new File(result.getPath()));
+            result = target.parse(converter.toString(result), testSource);
             assertEquals(3, result.scriptSize());
             assertEquals(0, result.getScenario().chainSize());
             assertFileAttribute(testFile, testSource, result);
@@ -247,7 +248,7 @@ public class TestCaseFactoryTest {
             assertEquals("1", loadData.get(1).get("column1"));
             assertEquals("2", loadData.get(1).get("column2"));
 
-            result = target.parse(result.toJSON(), new File(result.getPath()));
+            result = target.parse(converter.toString(result), testSource);
             assertEquals(3, result.scriptSize());
             assertEquals(0, result.getScenario().chainSize());
             assertFileAttribute(testFile, testSource, result);
@@ -310,7 +311,7 @@ public class TestCaseFactoryTest {
             assertEquals("2", loadData.get(1).get("column1"));
             assertEquals("1", loadData.get(1).get("column2"));
 
-            result = target.parse(result.toJSON(), new File(result.getPath()));
+            result = target.parse(converter.toString(result), testSource);
             assertEquals(3, result.scriptSize());
             assertEquals(2, result.getScenario().chainSize());
             assertFileAttribute(testFile, testSource, result);
@@ -369,7 +370,7 @@ public class TestCaseFactoryTest {
             assertNoDataSource(result);
             assertTrue(result.isShareState());
 
-            result = target.parse(result.toJSON(), new File(result.getPath()));
+            result = target.parse(converter.toString(result), testSource);
             assertEquals(3, result.scriptSize());
             assertEquals(2, result.getScenario().chainSize());
             assertFileAttribute(testFile, testSource, result);
@@ -425,7 +426,7 @@ public class TestCaseFactoryTest {
             assertNoDataSource(result);
             assertTrue(result.isShareState());
 
-            result = target.parse(result.toJSON(), new File(result.getPath()));
+            result = target.parse(converter.toString(result), testSource);
             assertEquals(3, result.scriptSize());
             assertEquals(0, result.getScenario().chainSize());
             assertFileAttribute(testFile, testSource, result);

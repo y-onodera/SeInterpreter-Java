@@ -3,8 +3,6 @@ package com.sebuilder.interpreter;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.util.List;
@@ -49,19 +47,6 @@ public class DataSet {
             return Lists.newArrayList(new TestData());
         }
         return this.dataSource.getData(this.dataSourceConfig, this.relativePath, vars);
-    }
-
-    public JSONObject toJSON() throws JSONException {
-        if (this.dataSource != null) {
-            JSONObject data = new JSONObject();
-            final String sourceName = this.dataSource.name();
-            data.put("source", sourceName);
-            JSONObject configs = new JSONObject();
-            configs.put(sourceName, this.dataSourceConfig);
-            data.put("configs", configs);
-            return data;
-        }
-        return null;
     }
 
     @Override

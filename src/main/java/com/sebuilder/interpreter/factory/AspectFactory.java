@@ -16,23 +16,19 @@ import org.json.JSONObject;
 import java.util.Map;
 import java.util.function.Predicate;
 
-public class AspectFactory {
+class AspectFactory {
 
     private StepTypeFactory stepTypeFactory;
 
-    public AspectFactory(StepTypeFactory stepTypeFactory) {
+    AspectFactory(StepTypeFactory stepTypeFactory) {
         this.stepTypeFactory = stepTypeFactory;
     }
 
-    public void setStepTypeFactory(StepTypeFactory stepTypeFactory) {
-        this.stepTypeFactory = stepTypeFactory;
-    }
-
-    public StepTypeFactory getStepTypeFactory() {
+    StepTypeFactory getStepTypeFactory() {
         return stepTypeFactory;
     }
 
-    public Aspect getAspect(JSONObject o) throws JSONException {
+    Aspect getAspect(JSONObject o) throws JSONException {
         Aspect result = new Aspect();
         if (o.has("aspect")) {
             Aspect.Builder builder = result.builder();

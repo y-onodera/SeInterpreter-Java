@@ -1,7 +1,6 @@
 package com.sebuilder.interpreter.application;
 
 import com.sebuilder.interpreter.*;
-import com.sebuilder.interpreter.factory.StepTypeFactory;
 import com.sebuilder.interpreter.factory.TestCaseFactory;
 import com.sebuilder.interpreter.webdriverfactory.Firefox;
 import com.sebuilder.interpreter.webdriverfactory.WebDriverFactory;
@@ -14,7 +13,6 @@ import java.util.HashMap;
 public abstract class CommandLineRunner {
     protected static WebDriverFactory DEFAULT_DRIVER_FACTORY = new Firefox();
     protected TestCaseFactory sf;
-    protected StepTypeFactory stf;
     protected HashMap<String, String> driverConfig;
     protected WebDriverFactory wdf;
     protected TestRun lastRun;
@@ -27,7 +25,6 @@ public abstract class CommandLineRunner {
     protected CommandLineRunner(String[] args, Logger log) {
         this.log = log;
         this.sf = new TestCaseFactory();
-        this.stf = new StepTypeFactory();
         this.driverConfig = new HashMap<>();
         this.wdf = DEFAULT_DRIVER_FACTORY;
         this.implicitlyWaitTime = Long.valueOf(-1);
@@ -60,7 +57,6 @@ public abstract class CommandLineRunner {
         }
         preSetUp();
         this.lastRun = null;
-        this.sf.setStepTypeFactory(this.stf);
         for (String s : args) {
             if (s.startsWith("--")) {
                 String[] kv = s.split("=", 2);
@@ -73,7 +69,7 @@ public abstract class CommandLineRunner {
                 } else if (s.startsWith(CommandLineArgument.PAGE_LOAD_TIMEOUT.key())) {
                     this.pageLoadWaitTime = Long.valueOf(kv[1]);
                 } else if (s.startsWith(CommandLineArgument.STEP_TYPE_PACKAGE.key())) {
-                    this.stf.setPrimaryPackage(kv[1]);
+                    this.sf.getStepTypeFactory().setPrimaryPackage(kv[1]);
                 } else if (s.startsWith(CommandLineArgument.DRIVER_CONFIG_PREFIX.key())) {
                     this.driverConfig.put(kv[0].substring(CommandLineArgument.DRIVER_CONFIG_PREFIX.key().length()), kv[1]);
                 } else if (s.startsWith(CommandLineArgument.DRIVER.key())) {

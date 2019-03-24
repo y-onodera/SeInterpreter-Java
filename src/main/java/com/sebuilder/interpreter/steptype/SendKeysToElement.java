@@ -16,13 +16,13 @@
 
 package com.sebuilder.interpreter.steptype;
 
+import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.step.LocatorHolder;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.openqa.selenium.WebElement;
 
 public class SendKeysToElement implements ConditionalStep, LocatorHolder {
+
     @Override
     public boolean doRun(TestRun ctx) {
         WebElement el = ctx.locator().find(ctx);
@@ -31,11 +31,11 @@ public class SendKeysToElement implements ConditionalStep, LocatorHolder {
     }
 
     @Override
-    public void supplementSerialized(JSONObject o) throws JSONException {
-        LocatorHolder.super.supplementSerialized(o);
-        if (!o.has("text")) {
+    public StepBuilder addDefaultParam(StepBuilder o) {
+        if (!o.containsStringParam("text")) {
             o.put("text", "");
         }
+        return o.apply(LocatorHolder.super::addDefaultParam);
     }
 
     @Override

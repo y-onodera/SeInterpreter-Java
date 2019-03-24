@@ -1,8 +1,6 @@
 package com.sebuilder.interpreter;
 
 import com.google.common.base.Objects;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.util.Iterator;
@@ -36,6 +34,11 @@ public class Suite implements Iterable<TestCase>, TestRunnable {
     @Override
     public void accept(TestRunner runner, SeInterpreterTestListener testListener) {
         runner.execute(this, testListener);
+    }
+
+    @Override
+    public Iterator<TestCase> iterator() {
+        return this.scenario.testCaseIterator();
     }
 
     public List<TestData> loadData() {
@@ -74,17 +77,16 @@ public class Suite implements Iterable<TestCase>, TestRunnable {
         return this.scenario.get(index);
     }
 
-    @Override
-    public Iterator<TestCase> iterator() {
-        return this.scenario.testCaseIterator();
-    }
-
     public Scenario getScenario() {
         return this.scenario;
     }
 
     public boolean isShareState() {
         return this.shareState;
+    }
+
+    public DataSet getDataSet() {
+        return this.dataSet;
     }
 
     public Map<String, String> getDataSourceConfig() {
@@ -156,27 +158,6 @@ public class Suite implements Iterable<TestCase>, TestRunnable {
     }
 
     @Override
-    public String toString() {
-        try {
-            return toJSON().toString(4);
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public JSONObject toJSON() throws JSONException {
-        JSONObject o = new JSONObject();
-        JSONObject data = this.dataSet.toJSON();
-        if (data != null) {
-            o.put("data", data);
-        }
-        o.put("type", "suite");
-        o.put("scripts", this.scenario.toJSON(this));
-        o.put("shareState", this.shareState);
-        return o;
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -191,4 +172,5 @@ public class Suite implements Iterable<TestCase>, TestRunnable {
     public int hashCode() {
         return Objects.hashCode(getScriptFile(), getScenario(), dataSet, isShareState());
     }
+
 }

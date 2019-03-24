@@ -16,14 +16,13 @@
 
 package com.sebuilder.interpreter.steptype;
 
+import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.screenshot.LocatorInnerScrollElementHandler;
 import com.sebuilder.interpreter.screenshot.Page;
 import com.sebuilder.interpreter.screenshot.VerticalPrinter;
 import com.sebuilder.interpreter.step.LocatorHolder;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
@@ -58,11 +57,11 @@ public class SaveScreenshot implements StepType, LocatorHolder {
     }
 
     @Override
-    public void supplementSerialized(JSONObject o) throws JSONException {
-        LocatorHolder.super.supplementSerialized(o);
-        if (!o.has("file")) {
+    public StepBuilder addDefaultParam(StepBuilder o) {
+        if (!o.containsStringParam("file")) {
             o.put("file", "");
         }
+        return o.apply(LocatorHolder.super::addDefaultParam);
     }
 
     private boolean needMaximize(RemoteWebDriver wd) {

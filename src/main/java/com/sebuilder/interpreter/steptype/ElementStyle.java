@@ -16,11 +16,10 @@
 
 package com.sebuilder.interpreter.steptype;
 
+import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.step.Getter;
 import com.sebuilder.interpreter.step.LocatorHolder;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class ElementStyle implements Getter, LocatorHolder {
     @Override
@@ -34,11 +33,12 @@ public class ElementStyle implements Getter, LocatorHolder {
     }
 
     @Override
-    public void supplementSerialized(JSONObject o) throws JSONException {
-        LocatorHolder.super.supplementSerialized(o);
-        if (!o.has("propertyName")) {
+    public StepBuilder addDefaultParam(StepBuilder o) {
+        if (!o.containsStringParam("propertyName")) {
             o.put("propertyName", "");
         }
+        return o.apply(LocatorHolder.super::addDefaultParam)
+                .apply(Getter.super::addDefaultParam);
     }
 
     @Override

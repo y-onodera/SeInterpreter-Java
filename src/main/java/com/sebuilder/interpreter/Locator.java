@@ -19,8 +19,6 @@ package com.sebuilder.interpreter;
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -80,20 +78,9 @@ public class Locator {
         return this.type.findElements(this.value, ctx);
     }
 
-    public JSONObject toJSON() throws JSONException {
-        JSONObject o = new JSONObject();
-        o.put("type", this.type.toString());
-        o.put("value", this.value);
-        return o;
-    }
-
     @Override
     public String toString() {
-        try {
-            return this.toJSON().toString();
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
+        return this.toPrettyString();
     }
 
     public String toPrettyString() {

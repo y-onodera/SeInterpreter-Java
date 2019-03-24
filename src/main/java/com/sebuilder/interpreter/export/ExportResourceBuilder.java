@@ -1,39 +1,45 @@
-package com.sebuilder.interpreter.step;
+package com.sebuilder.interpreter.export;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.sebuilder.interpreter.Locator;
+import com.sebuilder.interpreter.StepBuilder;
+import com.sebuilder.interpreter.TestCaseBuilder;
 import com.sebuilder.interpreter.TestRun;
+import com.sebuilder.interpreter.factory.ScriptConverter;
+import com.sebuilder.interpreter.factory.TestCaseFactory;
 import com.sebuilder.interpreter.steptype.ClickElement;
 import com.sebuilder.interpreter.steptype.SetElementSelected;
 import com.sebuilder.interpreter.steptype.SetElementText;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ExportResourceBuilder {
     private final TestRun ctx;
     private final Map<String, String> variables;
     private final Map<String, Integer> duplicate;
-    private final JSONObject source;
-    private final JSONArray steps;
-    private JSONObject currentStep;
+    private final TestCaseBuilder source;
+    private final ArrayList<StepBuilder> steps;
+    private StepBuilder currentStep;
     private final boolean needDataSource;
     private final Locator locator;
     private final WebElement extractFrom;
+    private final TestCaseFactory testCaseFactory = new TestCaseFactory();
+    private final ScriptConverter scriptExporter = new ScriptConverter();
 
     public ExportResourceBuilder(TestRun aCtx) {
         this.variables = new LinkedHashMap<>();
         this.duplicate = new HashMap<>();
-        this.source = new JSONObject();
-        this.steps = new JSONArray();
+        this.source = new TestCaseBuilder();
+        this.steps = Lists.newArrayList();
         this.currentStep = null;
         this.ctx = aCtx;
         this.needDataSource = this.ctx.containsKey("datasource");
@@ -45,22 +51,18 @@ public class ExportResourceBuilder {
         extractFrom = this.locator.find(this.ctx);
     }
 
-    public ExportResource build() throws JSONException {
-        this.source.put("steps", this.steps);
+    public ExportResource build() {
+        this.source.addSteps(this.steps.stream()
+                .map(it -> it.build())
+                .collect(Collectors.toCollection(ArrayList::new)));
         File dataSourceFile = null;
         if (this.needDataSource) {
             final String fileName = this.ctx.string("datasource");
             dataSourceFile = new File(this.ctx.getListener().getTemplateOutputDirectory(), fileName);
-            JSONObject configs = new JSONObject();
-            JSONObject data = new JSONObject();
-            JSONObject csv = new JSONObject();
-            csv.put("path", fileName);
-            configs.put("csv", csv);
-            data.put("configs", configs);
-            data.put("source", "csv");
-            this.source.put("data", data);
+            this.source.setDataSource(this.testCaseFactory.getDataSourceFactory()
+                    .getDataSource("csv"), Map.of("path", fileName));
         }
-        return new ExportResource(source.toString(4), this.variables, dataSourceFile);
+        return new ExportResource(this.scriptExporter.toString(source.build()), this.variables, dataSourceFile);
     }
 
     public ExportResourceBuilder addInputStep(boolean aIsAppend) {
@@ -168,14 +170,8 @@ public class ExportResourceBuilder {
     }
 
     public ExportResourceBuilder addStep(String typeName) {
-        JSONObject step = new JSONObject();
-        try {
-            step.put("type", typeName);
-            this.currentStep = step;
-            this.steps.put(step);
-        } catch (JSONException e) {
-            this.ctx.log().error(e);
-        }
+        this.currentStep = new StepBuilder(this.testCaseFactory.getStepTypeFactory().getStepTypeOfName(typeName));
+        this.steps.add(this.currentStep);
         return this;
     }
 
@@ -194,30 +190,21 @@ public class ExportResourceBuilder {
     }
 
     public ExportResourceBuilder addLocator(Locator element) {
-        try {
-            this.currentStep.put("locator", element.toJSON());
-        } catch (JSONException e) {
-            this.ctx.log().error(e);
-        }
+        this.currentStep.put("locator", element);
         return this;
     }
 
     public ExportResourceBuilder stepOption(String opt, String value) {
-        try {
-            if (this.needDataSource && this.currentStep.has("locator")) {
-                JSONObject locatorJSON = (JSONObject) this.currentStep.get("locator");
-                Locator locator = new Locator(locatorJSON.getString("type"), locatorJSON.getString("value"));
-                if (locator.value.contains("//select[@id=")) {
-                    this.currentStep.put(opt, value);
-                } else {
-                    String valuable = addVariable(locator.toPrettyString(), value);
-                    this.currentStep.put(opt, valuable);
-                }
-            } else {
+        if (this.needDataSource && this.currentStep.containsLocatorParam("locator")) {
+            Locator locator = this.currentStep.getLocatorParams().get("locator");
+            if (locator.value.contains("//select[@id=")) {
                 this.currentStep.put(opt, value);
+            } else {
+                String valuable = addVariable(locator.toPrettyString(), value);
+                this.currentStep.put(opt, valuable);
             }
-        } catch (JSONException e) {
-            this.ctx.log().error(e);
+        } else {
+            this.currentStep.put(opt, value);
         }
         return this;
     }

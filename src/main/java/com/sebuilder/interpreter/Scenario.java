@@ -3,9 +3,6 @@ package com.sebuilder.interpreter;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -14,7 +11,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-public class Scenario {
+public class Scenario implements Iterable<TestCase> {
 
     private final ArrayList<TestCase> testCases;
     private final Map<TestCase, TestCase> chains;
@@ -36,6 +33,11 @@ public class Scenario {
         this.chains = newMap;
         this.testCases = newScripts;
         this.aspect = newAspect;
+    }
+
+    @Override
+    public Iterator<TestCase> iterator() {
+        return this.testCaseIterator();
     }
 
     public Aspect aspect() {
@@ -211,27 +213,6 @@ public class Scenario {
     private Stream<TestCase> testRunStreams() {
         return this.testCases.stream()
                 .filter(script -> !this.isChainTarget(script));
-    }
-
-    public JSONArray toJSON(Suite aSuite) throws JSONException {
-        JSONArray scriptsA = new JSONArray();
-        JSONArray chain = null;
-        for (TestCase s : this.testCases) {
-            if (this.hasChain(s) && !this.isChainTarget(s)) {
-                chain = new JSONArray();
-                chain.put(s.getJSON(aSuite));
-            } else if (this.hasChain(s) && this.isChainTarget(s)) {
-                chain.put(s.getJSON(aSuite));
-            } else if (!this.hasChain(s) && this.isChainTarget(s)) {
-                chain.put(s.getJSON(aSuite));
-                JSONObject scriptPaths = new JSONObject();
-                scriptPaths.put("chain", chain);
-                scriptsA.put(scriptPaths);
-            } else {
-                scriptsA.put(s.getJSON(aSuite));
-            }
-        }
-        return scriptsA;
     }
 
     @Override

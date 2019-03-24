@@ -1,10 +1,9 @@
 package com.sebuilder.interpreter.steptype;
 
+import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.step.LocatorHolder;
 import okhttp3.*;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.openqa.selenium.WebElement;
 
 import java.io.File;
@@ -75,22 +74,21 @@ public class FileDownload implements ConditionalStep, LocatorHolder {
     }
 
     @Override
-    public void supplementSerialized(JSONObject o) throws JSONException {
-        LocatorHolder.super.supplementSerialized(o);
-        if (!o.has("name")) {
+    public StepBuilder addDefaultParam(StepBuilder o) {
+        if (!o.containsStringParam("name")) {
             o.put("name", "");
         }
-        if (!o.has("value")) {
+        if (!o.containsStringParam("value")) {
             o.put("value", "");
         }
-        if (!o.has("filepath")) {
+        if (!o.containsStringParam("filepath")) {
             o.put("filepath", "");
         }
-        if (!o.has("post")) {
+        if (!o.containsStringParam("post")) {
             o.put("post", "");
         }
+        return o.apply(LocatorHolder.super::addDefaultParam);
     }
-
 
     public void getDownloadFile(TestRun ctx, String downloadUrl, String outputFilePath) throws IOException {
         OkHttpClient client = getHttpClient(ctx, downloadUrl);

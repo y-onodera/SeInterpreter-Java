@@ -1,4 +1,4 @@
-package com.sebuilder.interpreter.step;
+package com.sebuilder.interpreter.export;
 
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;

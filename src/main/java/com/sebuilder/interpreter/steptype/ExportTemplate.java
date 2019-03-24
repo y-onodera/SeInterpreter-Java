@@ -2,12 +2,11 @@ package com.sebuilder.interpreter.steptype;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
+import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
-import com.sebuilder.interpreter.step.ExportResource;
+import com.sebuilder.interpreter.export.ExportResource;
 import com.sebuilder.interpreter.step.LocatorHolder;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,21 +36,21 @@ public class ExportTemplate implements StepType, LocatorHolder {
                 return outputFile(ctx, result, outputTo, Charsets.UTF_8);
             }
             return true;
-        } catch (JSONException | IOException e) {
+        } catch (IOException e) {
             ctx.log().error(e);
             return false;
         }
     }
 
     @Override
-    public void supplementSerialized(JSONObject o) throws JSONException {
-        LocatorHolder.super.supplementSerialized(o);
-        if (!o.has("datasource")) {
+    public StepBuilder addDefaultParam(StepBuilder o) {
+        if (!o.containsStringParam("datasource")) {
             o.put("datasource", "");
         }
-        if (!o.has("file")) {
+        if (!o.containsStringParam("file")) {
             o.put("file", "");
         }
+        return o.apply(LocatorHolder.super::addDefaultParam);
     }
 
     private boolean outputFile(TestRun ctx, String result, File outputTo, Charset charset) {
@@ -68,7 +67,7 @@ public class ExportTemplate implements StepType, LocatorHolder {
         return true;
     }
 
-    private ExportResource getExportResource(TestRun ctx) throws JSONException {
+    private ExportResource getExportResource(TestRun ctx) {
         boolean filterTag = ctx.getBoolean("filterTag");
         return ExportResource.builder(ctx)
                 .addInputStep(!filterTag || ctx.getBoolean("input"))

@@ -16,10 +16,10 @@
 
 package com.sebuilder.interpreter.steptype;
 
+import com.sebuilder.interpreter.Locator;
+import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.step.LocatorHolder;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.openqa.selenium.interactions.Actions;
 
 public class DragAndDropToElement implements ConditionalStep, LocatorHolder {
@@ -32,14 +32,11 @@ public class DragAndDropToElement implements ConditionalStep, LocatorHolder {
     }
 
     @Override
-    public void supplementSerialized(JSONObject o) throws JSONException {
-        LocatorHolder.super.supplementSerialized(o);
-        if (!o.has("locator2")) {
-            JSONObject locator2 = new JSONObject();
-            locator2.put("type", "");
-            locator2.put("value", "");
-            o.put("locator2", locator2);
+    public StepBuilder addDefaultParam(StepBuilder o) {
+        if (!o.containsLocatorParam("locator2")) {
+            o.put("locator2", new Locator("id", ""));
         }
+        return LocatorHolder.super.addDefaultParam(o);
     }
 
     @Override

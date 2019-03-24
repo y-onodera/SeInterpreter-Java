@@ -16,6 +16,7 @@
 
 package com.sebuilder.interpreter.steptype;
 
+import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.step.Getter;
 import com.sebuilder.interpreter.step.LocatorHolder;
@@ -29,6 +30,12 @@ public class ElementPresent implements Getter, LocatorHolder {
     @Override
     public String cmpParamName() {
         return null;
+    }
+
+    @Override
+    public StepBuilder addDefaultParam(StepBuilder o) {
+        return o.apply(LocatorHolder.super::addDefaultParam)
+                .apply(Getter.super::addDefaultParam);
     }
 
     @Override
