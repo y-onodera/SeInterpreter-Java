@@ -301,12 +301,8 @@ public class TestRun {
     protected boolean chainRun(TestCase chainTo) {
         this.testRunStatus = this.testRunStatus.chainCalled();
         if (chainTo.skipRunning(this.vars)) {
-            if (this.scenario.hasChain(chainTo)) {
-                return this.chainRun(this.scenario.getChainTo(chainTo));
-            }
-            return true;
+            return this.nextChain(chainTo);
         }
-        boolean success = true;
         for (TestData data : chainTo.loadData(this.vars)) {
             TestData chainData = this.vars.clearRowNumber().add(data);
             TestRun testRun = createChainRun(chainTo, chainData);
@@ -314,13 +310,20 @@ public class TestRun {
                 return false;
             }
         }
-        return success;
+        return this.nextChain(chainTo);
     }
 
     protected TestRun createChainRun(TestCase chainTo, TestData data) {
-        return new TestRunBuilder(chainTo, this.scenario)
+        return new TestRunBuilder(chainTo, new Scenario(chainTo))
                 .addTestRunNamePrefix(this.testRunName + "_")
                 .createTestRun(data, this);
+    }
+
+    protected boolean nextChain(TestCase chainTo) {
+        if (this.scenario.hasChain(chainTo)) {
+            return this.chainRun(this.scenario.getChainTo(chainTo));
+        }
+        return true;
     }
 
     protected void quit() {
