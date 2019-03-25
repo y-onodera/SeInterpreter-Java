@@ -162,10 +162,7 @@ public class TestRun {
      * @return The parameter's value.
      */
     public Locator locator(String paramName) {
-        Locator l = this.currentStep().getLocator(paramName);
-        if (l == null) {
-            throw new RuntimeException("Missing parameter \"" + paramName + "\" at step #" + this.testRunStatus.stepIndex() + ".");
-        }
+        Locator l = new Locator(this.currentStep().getLocator(paramName));
         // This kind of variable substitution makes for short code, but it's inefficient.
         l.value = this.bindRuntimeVariables(l.value);
         return l;
