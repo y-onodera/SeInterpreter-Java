@@ -1,21 +1,21 @@
 package com.sebuilder.interpreter.factory;
 
+import com.sebuilder.interpreter.DataSet;
 import com.sebuilder.interpreter.Suite;
-import com.sebuilder.interpreter.TestCase;
-import com.sebuilder.interpreter.TestData;
-import com.sebuilder.interpreter.TestRunBuilder;
+import com.sebuilder.interpreter.SuiteAssert;
+import com.sebuilder.interpreter.TestCaseAssert;
 import com.sebuilder.interpreter.datasource.Csv;
+import com.sebuilder.interpreter.datasource.Manual;
 import com.sebuilder.interpreter.datasource.None;
 import org.json.JSONException;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
-
-import static org.junit.Assert.*;
+import java.util.Map;
 
 @RunWith(Enclosed.class)
 public class TestCaseFactoryTest {
@@ -24,485 +24,420 @@ public class TestCaseFactoryTest {
     private static TestCaseFactory target = new TestCaseFactory();
     private static ScriptConverter converter = new ScriptConverter();
 
-    public static class TestCaseTest {
+    private static final DataSet DATA_SET_NONE = new DataSet(new None(), Map.of(), new File(baseDir));
+    private static final DataSet DATA_SET_CSV = new DataSet(new Csv(), Map.of("path", "test.csv"), new File(baseDir));
+    private static final DataSet DATA_SET_OVERRIDE_CSV = new DataSet(new Csv(), Map.of("path", "override.csv"), new File(baseDir));
+    private static final DataSet DATA_SET_OVERRIDE_LAZY = new DataSet(new Csv(), Map.of("path", "${dataSource1}.csv"), null);
+
+    private static final File testFileNoType = new File(baseDir, "noType.json");
+
+    private static final File testFileScriptWithNoContents = new File(baseDir, "scriptWithNoContents.json");
+    private static final File testFileScriptWithDataSource = new File(baseDir, "scriptWithDataSource.json");
+    private static final File testFileScriptWithSteps = new File(baseDir, "scriptWithSteps.json");
+    private static final File testFileScriptWithFullContents = new File(baseDir, "scriptWithFullContents.json");
+
+    public static abstract class ParseResultTest {
+        protected Suite result;
 
         @Test
-        public void parseScript() throws IOException, JSONException {
-            final String testFile = "simpleScript.json";
-            final File testSource = new File(baseDir, testFile);
-
-            Suite result = target.parse(testSource);
-            assertSuiteAttribute(result);
-            TestCase actual = result.get(testFile);
-            assertSame(actual, result.get(0));
-            assertSimpleScript(testFile, actual);
-
-            result = target.parse(converter.toString(result), null);
-            assertSuiteAttribute(result);
-            actual = result.get(testFile);
-            assertSame(actual, result.get(0));
-            assertSimpleScript(testFile, actual);
+        public void parseResultContents() {
+            this.getSuiteAssert().run(result);
         }
 
         @Test
-        public void parseNoTypeFileAsScript() throws IOException, JSONException {
-            final String testFile = "simpleScriptNoType.json";
-            final File testSource = new File(baseDir, testFile);
-
-            Suite result = target.parse(testSource);
-            assertSuiteAttribute(result);
-            TestCase actual = result.get(testFile);
-            assertSame(actual, result.get(0));
-            assertSimpleScript(testFile, actual);
-
-            result = target.parse(converter.toString(result), null);
-            assertSuiteAttribute(result);
-            actual = result.get(testFile);
-            assertSame(actual, result.get(0));
-            assertSimpleScript(testFile, actual);
+        public void parseResultReversible() throws IOException, JSONException {
+            Suite reverse = target.parse(converter.toString(this.result), com.google.common.base.Strings.isNullOrEmpty(this.result.getPath()) ? null : new File(this.result.getPath()));
+            this.getSuiteAssert().run(reverse);
         }
 
-        @Test
-        public void parseScriptWithDataSource() throws IOException, JSONException {
-            final String testFile = "scriptWithDataSource.json";
-            final File testSource = new File(baseDir, testFile);
+        public abstract SuiteAssert getSuiteAssert();
 
-            Suite result = target.parse(testSource);
-            assertSuiteAttribute(result);
-            TestCase actual = result.get(testFile);
-            assertSame(actual, result.get(0));
-            assertScriptWithDataSource(testFile, actual);
+    }
 
-            result = target.parse(converter.toString(result), null);
-            assertSuiteAttribute(result);
-            actual = result.get(testFile);
-            assertSame(actual, result.get(0));
-            assertScriptWithDataSource(testFile, actual);
+    public static abstract class ParseScriptTest extends ParseResultTest {
+
+        public abstract TestCaseAssert getTestCaseAssert();
+
+        public TestCaseAssert reverseTestCaseAssert() {
+            return this.getTestCaseAssert();
+        }
+    }
+
+
+    public static class ParseNoType extends ParseScriptTest {
+
+        @Before
+        public void setUp() throws IOException, JSONException {
+            this.result = target.parse(testFileNoType);
         }
 
-        @Test
-        public void parseScriptWithSteps() throws IOException, JSONException {
-            final String testFile = "scriptWithSteps.json";
-            final File testSource = new File(baseDir, testFile);
-
-            Suite result = target.parse(testSource);
-            assertSuiteAttribute(result);
-            TestCase actual = result.get(testFile);
-            assertSame(actual, result.get(0));
-            assertScriptWithSteps(testFile, actual);
-
-            result = target.parse(converter.toString(result), null);
-            assertSuiteAttribute(result);
-            actual = result.get(testFile);
-            assertSame(actual, result.get(0));
-            assertScriptWithSteps(testFile, actual);
+        @Override
+        public SuiteAssert getSuiteAssert() {
+            return SuiteAssert.of()
+                    .assertFileAttribute(SuiteAssert::assertEqualsNoRelationFile)
+                    .assertTestCaseCount(SuiteAssert.assertEqualsTestCaseCount(1))
+                    .assertTestCase(0, this.getTestCaseAssert())
+                    .assertChainCount(SuiteAssert::assertEqualsNoScriptChain)
+                    .assertDataSource(SuiteAssert::assertEqualsNoDataSource)
+                    .create();
         }
 
-        private void assertSuiteAttribute(Suite result) {
-            assertEquals(Suite.DEFAULT_NAME, result.getName());
-            assertEquals("", result.getPath());
-            assertEquals(1, result.scriptSize());
-            assertEquals(0, result.getScenario().chainSize());
-            assertNull(result.getDataSource());
-            assertEquals(0, result.getDataSourceConfig().size());
-            assertTrue(result.isShareState());
+        @Override
+        public TestCaseAssert getTestCaseAssert() {
+            return TestCaseAssert.of()
+                    .assertFileAttribute(TestCaseAssert.assertEqualsFileAttribute(testFileNoType))
+                    .assertStep(TestCaseAssert::assertEqualsNoStep)
+                    .assertDataSource(TestCaseAssert::assertEqualsNoDataSource)
+                    .assertSkip(TestCaseAssert.assertEqualsSkip("false"))
+                    .assertOverrideDataSource(TestCaseAssert::assertEqualsNoOverrideDataSource)
+                    .assertLazy(TestCaseAssert::assertEqualsNotLazyLoad)
+                    .create();
+        }
+    }
+
+    public static class ParseScriptNoContents extends ParseScriptTest {
+
+        @Before
+        public void setUp() throws IOException, JSONException {
+            this.result = target.parse(testFileScriptWithNoContents);
+        }
+
+        @Override
+        public SuiteAssert getSuiteAssert() {
+            return SuiteAssert.of()
+                    .assertFileAttribute(SuiteAssert::assertEqualsNoRelationFile)
+                    .assertTestCaseCount(SuiteAssert.assertEqualsTestCaseCount(1))
+                    .assertTestCase(0, this.getTestCaseAssert())
+                    .assertChainCount(SuiteAssert::assertEqualsNoScriptChain)
+                    .assertDataSource(SuiteAssert::assertEqualsNoDataSource)
+                    .create();
+        }
+
+        @Override
+        public TestCaseAssert getTestCaseAssert() {
+            return TestCaseAssert.of()
+                    .assertFileAttribute(TestCaseAssert.assertEqualsFileAttribute(testFileScriptWithNoContents))
+                    .assertStep(TestCaseAssert::assertEqualsNoStep)
+                    .assertDataSource(TestCaseAssert::assertEqualsNoDataSource)
+                    .assertSkip(TestCaseAssert.assertEqualsSkip("false"))
+                    .assertOverrideDataSource(TestCaseAssert::assertEqualsNoOverrideDataSource)
+                    .assertLazy(TestCaseAssert::assertEqualsNotLazyLoad)
+                    .create();
         }
 
     }
 
-    public static class SuiteTest {
+    public static class ParseScriptTypeWithDataSource extends ParseScriptTest {
 
-        @Test
-        public void parseSuite() throws IOException, JSONException {
-            final String testFile = "simpleSuite.json";
-            final File testSource = new File(baseDir, testFile);
-
-            Suite result = target.parse(testSource);
-            assertEquals(0, result.scriptSize());
-            assertEquals(0, result.getScenario().chainSize());
-            assertFileAttribute(testFile, testSource, result);
-            assertNoScript(result);
-            assertNoDataSource(result);
-            assertTrue(result.isShareState());
-
-            result = target.parse(converter.toString(result), testSource);
-            assertEquals(0, result.scriptSize());
-            assertEquals(0, result.getScenario().chainSize());
-            assertFileAttribute(testFile, testSource, result);
-            assertNoScript(result);
-            assertNoDataSource(result);
-            assertTrue(result.isShareState());
+        @Before
+        public void setUp() throws IOException, JSONException {
+            this.result = target.parse(testFileScriptWithDataSource);
         }
 
-        @Test
-        public void parseSuiteWithDataSource() throws IOException, JSONException {
-            final String testFile = "suiteWithDataSource.json";
-            final File testSource = new File(baseDir, testFile);
-
-            Suite result = target.parse(testSource);
-            assertEquals(0, result.scriptSize());
-            assertEquals(0, result.getScenario().chainSize());
-            assertFileAttribute(testFile, testSource, result);
-            assertNoScript(result);
-            assertTrue(result.getDataSource() instanceof Csv);
-            assertEquals(1, result.getDataSourceConfig().size());
-            assertEquals("test.csv", result.getDataSourceConfig().get("path"));
-            assertTrue(result.isShareState());
-
-            result = target.parse(converter.toString(result), testSource);
-            assertEquals(0, result.scriptSize());
-            assertEquals(0, result.getScenario().chainSize());
-            assertFileAttribute(testFile, testSource, result);
-            assertNoScript(result);
-            assertTrue(result.getDataSource() instanceof Csv);
-            assertEquals(1, result.getDataSourceConfig().size());
-            assertEquals("test.csv", result.getDataSourceConfig().get("path"));
-            assertTrue(result.isShareState());
+        @Override
+        public SuiteAssert getSuiteAssert() {
+            return SuiteAssert.of()
+                    .assertFileAttribute(SuiteAssert::assertEqualsNoRelationFile)
+                    .assertTestCaseCount(SuiteAssert.assertEqualsTestCaseCount(1))
+                    .assertTestCase(0, this.getTestCaseAssert())
+                    .assertChainCount(SuiteAssert::assertEqualsNoScriptChain)
+                    .assertDataSource(SuiteAssert::assertEqualsNoDataSource)
+                    .create();
         }
 
-        @Test
-        public void parseSuiteWithScripts() throws IOException, JSONException {
-            final String testFile = "suiteWithScripts.json";
-            final File testSource = new File(baseDir, testFile);
-
-            Suite result = target.parse(testSource);
-            assertEquals(3, result.scriptSize());
-            assertEquals(0, result.getScenario().chainSize());
-            assertFileAttribute(testFile, testSource, result);
-            assertSimpleScript("simpleScript.json", result.get(0));
-            assertEquals("false", result.get(0).skip());
-            assertTrue(result.get(0).overrideDataSource() instanceof Csv);
-            assertEquals("override.csv", result.get(0).overrideDataSourceConfig().get("path"));
-            List<TestData> loadData = result.get(0).loadData(new TestData());
-            assertEquals(2, loadData.size());
-            assertEquals("a", loadData.get(0).get("column1"));
-            assertEquals("b", loadData.get(0).get("column2"));
-            assertEquals("1", loadData.get(1).get("column1"));
-            assertEquals("2", loadData.get(1).get("column2"));
-            assertScriptWithSteps("scriptWithSteps.json", result.get(1));
-            assertEquals("true", result.get(1).skip());
-            assertNull(result.get(1).overrideDataSource());
-            assertEquals(0, result.get(1).overrideDataSourceConfig().size());
-            assertScriptWithDataSource("scriptWithDataSource.json", result.get(2));
-            assertEquals("false", result.get(2).skip());
-            assertTrue(result.get(2).overrideDataSource() instanceof None);
-            assertEquals(0, result.get(2).overrideDataSourceConfig().size());
-            assertNoDataSource(result);
-            assertTrue(result.isShareState());
-
-            result = target.parse(converter.toString(result), testSource);
-            assertEquals(3, result.scriptSize());
-            assertEquals(0, result.getScenario().chainSize());
-            assertFileAttribute(testFile, testSource, result);
-            assertSimpleScript("simpleScript.json", result.get(0));
-            assertEquals("false", result.get(0).skip());
-            assertTrue(result.get(0).overrideDataSource() instanceof Csv);
-            assertEquals("override.csv", result.get(0).overrideDataSourceConfig().get("path"));
-            result.get(0).loadData(new TestData());
-            assertEquals(2, loadData.size());
-            assertEquals("a", loadData.get(0).get("column1"));
-            assertEquals("b", loadData.get(0).get("column2"));
-            assertEquals("1", loadData.get(1).get("column1"));
-            assertEquals("2", loadData.get(1).get("column2"));
-            assertScriptWithSteps("scriptWithSteps.json", result.get(1));
-            assertEquals("true", result.get(1).skip());
-            assertNull(result.get(1).overrideDataSource());
-            assertEquals(0, result.get(1).overrideDataSourceConfig().size());
-            assertScriptWithDataSource("scriptWithDataSource.json", result.get(2));
-            assertEquals("false", result.get(2).skip());
-            assertTrue(result.get(2).overrideDataSource() instanceof None);
-            assertEquals(0, result.get(2).overrideDataSourceConfig().size());
-            assertNoDataSource(result);
-            assertTrue(result.isShareState());
+        @Override
+        public TestCaseAssert getTestCaseAssert() {
+            return TestCaseAssert.of()
+                    .assertFileAttribute(TestCaseAssert.assertEqualsFileAttribute(testFileScriptWithDataSource))
+                    .assertStep(TestCaseAssert::assertEqualsNoStep)
+                    .assertDataSource(TestCaseAssert.assertEqualsDataSet(DATA_SET_CSV))
+                    .assertSkip(TestCaseAssert.assertEqualsSkip("false"))
+                    .assertOverrideDataSource(TestCaseAssert::assertEqualsNoOverrideDataSource)
+                    .assertLazy(TestCaseAssert::assertEqualsNotLazyLoad)
+                    .create();
         }
-
-        @Test
-        public void parseSuiteWithLazyScript() throws IOException, JSONException {
-            final String testFile = "suiteWithLazyScript.json";
-            final File testSource = new File(baseDir, testFile);
-
-            Suite result = target.parse(testSource);
-            assertEquals(3, result.scriptSize());
-            assertEquals(0, result.getScenario().chainSize());
-            assertFileAttribute(testFile, testSource, result);
-            assertEquals("${script1}.json", result.get(0).name());
-            assertEquals("", result.get(0).path());
-            assertNull(result.get(0).relativePath());
-            assertEquals("${skip1}", result.get(0).skip());
-            assertTrue(result.get(0).overrideDataSource() instanceof Csv);
-            assertEquals("${dataSource1}.csv", result.get(0).overrideDataSourceConfig().get("path"));
-            assertScriptWithSteps("scriptWithSteps.json", result.get(1));
-            assertEquals("true", result.get(1).skip());
-            assertNull(result.get(1).overrideDataSource());
-            assertEquals(0, result.get(1).overrideDataSourceConfig().size());
-            assertScriptWithDataSource("scriptWithDataSource.json", result.get(2));
-            assertEquals("false", result.get(2).skip());
-            assertTrue(result.get(2).overrideDataSource() instanceof None);
-            assertEquals(0, result.get(2).overrideDataSourceConfig().size());
-            assertTrue(result.isShareState());
-            List<TestRunBuilder> lazyFetch = result.getTestRuns();
-            List<TestData> loadData = lazyFetch.get(0).loadData();
-            assertEquals(2, loadData.size());
-            assertEquals("a", loadData.get(0).get("column1"));
-            assertEquals("b", loadData.get(0).get("column2"));
-            assertEquals("1", loadData.get(1).get("column1"));
-            assertEquals("2", loadData.get(1).get("column2"));
-
-            result = target.parse(converter.toString(result), testSource);
-            assertEquals(3, result.scriptSize());
-            assertEquals(0, result.getScenario().chainSize());
-            assertFileAttribute(testFile, testSource, result);
-            assertEquals("${script1}.json", result.get(0).name());
-            assertEquals("", result.get(0).path());
-            assertNull(result.get(0).relativePath());
-            assertEquals("${skip1}", result.get(0).skip());
-            assertTrue(result.get(0).overrideDataSource() instanceof Csv);
-            assertEquals("${dataSource1}.csv", result.get(0).overrideDataSourceConfig().get("path"));
-            assertScriptWithSteps("scriptWithSteps.json", result.get(1));
-            assertEquals("true", result.get(1).skip());
-            assertNull(result.get(1).overrideDataSource());
-            assertEquals(0, result.get(1).overrideDataSourceConfig().size());
-            assertScriptWithDataSource("scriptWithDataSource.json", result.get(2));
-            assertEquals("false", result.get(2).skip());
-            assertTrue(result.get(2).overrideDataSource() instanceof None);
-            assertEquals(0, result.get(2).overrideDataSourceConfig().size());
-            assertTrue(result.isShareState());
-            lazyFetch = result.getTestRuns();
-            loadData = lazyFetch.get(0).loadData();
-            assertEquals(2, loadData.size());
-            assertEquals("a", loadData.get(0).get("column1"));
-            assertEquals("b", loadData.get(0).get("column2"));
-            assertEquals("1", loadData.get(1).get("column1"));
-            assertEquals("2", loadData.get(1).get("column2"));
-        }
-
-        @Test
-        public void parseSuiteWithLazyScriptChain() throws IOException, JSONException {
-            final String testFile = "suiteWithLazyScriptChain.json";
-            final File testSource = new File(baseDir, testFile);
-
-            Suite result = target.parse(testSource);
-            assertEquals(3, result.scriptSize());
-            assertEquals(2, result.getScenario().chainSize());
-            assertFileAttribute(testFile, testSource, result);
-            assertEquals("${script1}.json", result.get(0).name());
-            assertEquals("", result.get(0).path());
-            assertNull(result.get(0).relativePath());
-            assertEquals("false", result.get(0).skip());
-            assertNull(result.get(0).overrideDataSource());
-            assertEquals(0, result.get(0).overrideDataSourceConfig().size());
-            assertScriptWithSteps("scriptWithSteps.json", result.get(1));
-            assertSame(result.get(1), result.getScenario().getChainTo(result.get(0)));
-            assertEquals("true", result.get(1).skip());
-            assertNull(result.get(1).overrideDataSource());
-            assertEquals(0, result.get(1).overrideDataSourceConfig().size());
-            assertEquals("${script3}.json", result.get(2).name());
-            assertEquals("", result.get(2).path());
-            assertSame(result.get(2), result.getScenario().getChainTo(result.get(1)));
-            assertEquals("false", result.get(2).skip());
-            assertTrue(result.get(2).overrideDataSource() instanceof Csv);
-            assertEquals("${dataSource3}.csv", result.get(2).overrideDataSourceConfig().get("path"));
-            assertTrue(result.isShareState());
-            List<TestRunBuilder> lazyFetch = result.getTestRuns();
-            List<TestData> loadData = lazyFetch.get(0).loadData();
-            assertEquals(2, loadData.size());
-            assertEquals("A", loadData.get(0).get("column1"));
-            assertEquals("B", loadData.get(0).get("column2"));
-            assertEquals("2", loadData.get(1).get("column1"));
-            assertEquals("1", loadData.get(1).get("column2"));
-
-            result = target.parse(converter.toString(result), testSource);
-            assertEquals(3, result.scriptSize());
-            assertEquals(2, result.getScenario().chainSize());
-            assertFileAttribute(testFile, testSource, result);
-            assertEquals("${script1}.json", result.get(0).name());
-            assertEquals("", result.get(0).path());
-            assertNull(result.get(0).relativePath());
-            assertEquals("false", result.get(0).skip());
-            assertNull(result.get(0).overrideDataSource());
-            assertEquals(0, result.get(0).overrideDataSourceConfig().size());
-            assertScriptWithSteps("scriptWithSteps.json", result.get(1));
-            assertSame(result.get(1), result.getScenario().getChainTo(result.get(0)));
-            assertEquals("true", result.get(1).skip());
-            assertNull(result.get(1).overrideDataSource());
-            assertEquals(0, result.get(1).overrideDataSourceConfig().size());
-            assertEquals("${script3}.json", result.get(2).name());
-            assertEquals("", result.get(2).path());
-            assertSame(result.get(2), result.getScenario().getChainTo(result.get(1)));
-            assertEquals("false", result.get(2).skip());
-            assertTrue(result.get(2).overrideDataSource() instanceof Csv);
-            assertEquals("${dataSource3}.csv", result.get(2).overrideDataSourceConfig().get("path"));
-            assertTrue(result.isShareState());
-            lazyFetch = result.getTestRuns();
-            loadData = lazyFetch.get(0).loadData();
-            assertEquals(2, loadData.size());
-            assertEquals("A", loadData.get(0).get("column1"));
-            assertEquals("B", loadData.get(0).get("column2"));
-            assertEquals("2", loadData.get(1).get("column1"));
-            assertEquals("1", loadData.get(1).get("column2"));
-        }
-
-        @Test
-        public void parseSuiteWithScriptChain() throws IOException, JSONException {
-            final String testFile = "suiteWithScriptChain.json";
-            final File testSource = new File(baseDir, testFile);
-
-            Suite result = target.parse(testSource);
-            assertEquals(3, result.scriptSize());
-            assertEquals(2, result.getScenario().chainSize());
-            assertFileAttribute(testFile, testSource, result);
-            assertSimpleScript("simpleScript.json", result.get(0));
-            assertEquals("false", result.get(0).skip());
-            assertTrue(result.get(0).overrideDataSource() instanceof Csv);
-            assertEquals("override.csv", result.get(0).overrideDataSourceConfig().get("path"));
-            TestCase testCase2 = result.getScenario().getChainTo(result.get(0));
-            assertSame(result.get(1), testCase2);
-            assertScriptWithSteps("scriptWithSteps.json", testCase2);
-            assertEquals("true", testCase2.skip());
-            assertNull(testCase2.overrideDataSource());
-            assertEquals(0, testCase2.overrideDataSourceConfig().size());
-            TestCase testCase3 = result.getScenario().getChainTo(testCase2);
-            assertSame(result.get(2), testCase3);
-            assertScriptWithDataSource("scriptWithDataSource.json", testCase3);
-            assertEquals("false", testCase3.skip());
-            assertTrue(testCase3.overrideDataSource() instanceof None);
-            assertEquals(0, testCase3.overrideDataSourceConfig().size());
-            assertNoDataSource(result);
-            assertTrue(result.isShareState());
-
-            result = target.parse(converter.toString(result), testSource);
-            assertEquals(3, result.scriptSize());
-            assertEquals(2, result.getScenario().chainSize());
-            assertFileAttribute(testFile, testSource, result);
-            assertSimpleScript("simpleScript.json", result.get(0));
-            assertEquals("false", result.get(0).skip());
-            assertTrue(result.get(0).overrideDataSource() instanceof Csv);
-            assertEquals("override.csv", result.get(0).overrideDataSourceConfig().get("path"));
-            testCase2 = result.getScenario().getChainTo(result.get(0));
-            assertSame(result.get(1), testCase2);
-            assertScriptWithSteps("scriptWithSteps.json", testCase2);
-            assertEquals("true", testCase2.skip());
-            assertNull(testCase2.overrideDataSource());
-            assertEquals(0, testCase2.overrideDataSourceConfig().size());
-            testCase3 = result.getScenario().getChainTo(testCase2);
-            assertSame(result.get(2), testCase3);
-            assertScriptWithDataSource("scriptWithDataSource.json", testCase3);
-            assertEquals("false", testCase3.skip());
-            assertTrue(testCase3.overrideDataSource() instanceof None);
-            assertEquals(0, testCase3.overrideDataSourceConfig().size());
-            assertNoDataSource(result);
-            assertTrue(result.isShareState());
-        }
-
-        @Test
-        public void parseSuiteWithScriptRuntimeDataSource() throws IOException, JSONException {
-            final String testFile = "suiteWithScriptRuntimeDataSource.json";
-            final File testSource = new File(baseDir, testFile);
-
-            Suite result = target.parse(testSource);
-            assertEquals(3, result.scriptSize());
-            assertEquals(0, result.getScenario().chainSize());
-            assertFileAttribute(testFile, testSource, result);
-            assertSimpleScript("simpleScript.json", result.get(0));
-            assertEquals("false", result.get(0).skip());
-            assertTrue(result.get(0).overrideDataSource() instanceof Csv);
-            assertEquals("${path}/override.csv", result.get(0).overrideDataSourceConfig().get("path"));
-            List<TestData> loadData = result.get(0).loadData(new TestData().add("path", "csv"));
-            assertEquals(2, loadData.size());
-            assertEquals("1", loadData.get(0).get("column1"));
-            assertEquals("2", loadData.get(0).get("column2"));
-            assertEquals("a", loadData.get(1).get("column1"));
-            assertEquals("b", loadData.get(1).get("column2"));
-            TestCase testCase2 = result.get(1);
-            assertScriptWithSteps("scriptWithSteps.json", testCase2);
-            assertEquals("true", testCase2.skip());
-            assertNull(testCase2.overrideDataSource());
-            assertEquals(0, testCase2.overrideDataSourceConfig().size());
-            TestCase testCase3 = result.get(2);
-            assertScriptWithDataSource("scriptWithDataSource.json", testCase3);
-            assertEquals("false", testCase3.skip());
-            assertTrue(testCase3.overrideDataSource() instanceof None);
-            assertEquals(0, testCase3.overrideDataSourceConfig().size());
-            assertNoDataSource(result);
-            assertTrue(result.isShareState());
-
-            result = target.parse(converter.toString(result), testSource);
-            assertEquals(3, result.scriptSize());
-            assertEquals(0, result.getScenario().chainSize());
-            assertFileAttribute(testFile, testSource, result);
-            assertSimpleScript("simpleScript.json", result.get(0));
-            assertEquals("false", result.get(0).skip());
-            assertTrue(result.get(0).overrideDataSource() instanceof Csv);
-            assertEquals("${path}/override.csv", result.get(0).overrideDataSourceConfig().get("path"));
-            loadData = result.get(0).loadData(new TestData().add("path", "csv"));
-            assertEquals(2, loadData.size());
-            assertEquals("1", loadData.get(0).get("column1"));
-            assertEquals("2", loadData.get(0).get("column2"));
-            assertEquals("a", loadData.get(1).get("column1"));
-            assertEquals("b", loadData.get(1).get("column2"));
-            testCase2 = result.get(1);
-            assertScriptWithSteps("scriptWithSteps.json", testCase2);
-            assertEquals("true", testCase2.skip());
-            assertNull(testCase2.overrideDataSource());
-            assertEquals(0, testCase2.overrideDataSourceConfig().size());
-            testCase3 = result.get(2);
-            assertScriptWithDataSource("scriptWithDataSource.json", testCase3);
-            assertEquals("false", testCase3.skip());
-            assertTrue(testCase3.overrideDataSource() instanceof None);
-            assertEquals(0, testCase3.overrideDataSourceConfig().size());
-            assertNoDataSource(result);
-            assertTrue(result.isShareState());
-        }
-
-        private void assertFileAttribute(String testFile, File testSource, Suite result) {
-            assertEquals(testFile, result.getName());
-            assertEquals(testSource.getAbsolutePath(), result.getPath());
-            assertEquals(testSource.getParentFile().getAbsoluteFile(), result.getRelativePath());
-        }
-
-        private void assertNoScript(Suite result) {
-            assertEquals(0, result.scriptSize());
-            assertEquals(0, result.getScenario().chainSize());
-        }
-
-        private void assertNoDataSource(Suite result) {
-            assertNull(result.getDataSource());
-            assertEquals(0, result.getDataSourceConfig().size());
-        }
-
     }
 
-    private static void assertSimpleScript(String testFile, TestCase actual) {
-        assertFileAttribute(testFile, actual);
-        assertNoDataSource(actual);
-        assertNoSteps(actual);
+    public static class ParseScriptTypeWithSteps extends ParseScriptTest {
+
+        @Before
+        public void setUp() throws IOException, JSONException {
+            this.result = target.parse(testFileScriptWithSteps);
+        }
+
+        @Override
+        public SuiteAssert getSuiteAssert() {
+            return SuiteAssert.of()
+                    .assertFileAttribute(SuiteAssert::assertEqualsNoRelationFile)
+                    .assertTestCaseCount(SuiteAssert.assertEqualsTestCaseCount(1))
+                    .assertTestCase(0, this.getTestCaseAssert())
+                    .assertChainCount(SuiteAssert::assertEqualsNoScriptChain)
+                    .assertDataSource(SuiteAssert::assertEqualsNoDataSource)
+                    .create();
+        }
+
+        @Override
+        public TestCaseAssert getTestCaseAssert() {
+            return TestCaseAssert.of()
+                    .assertFileAttribute(TestCaseAssert.assertEqualsFileAttribute(testFileScriptWithSteps))
+                    .assertStep(TestCaseAssert.assertEqualsStepCount(9))
+                    .assertDataSource(TestCaseAssert::assertEqualsNoDataSource)
+                    .assertSkip(TestCaseAssert.assertEqualsSkip("false"))
+                    .assertOverrideDataSource(TestCaseAssert::assertEqualsNoOverrideDataSource)
+                    .assertLazy(TestCaseAssert::assertEqualsNotLazyLoad)
+                    .create();
+        }
     }
 
-    private static void assertScriptWithSteps(String testFile, TestCase actual) {
-        assertFileAttribute(testFile, actual);
-        assertNoDataSource(actual);
-        assertEquals(9, actual.steps().size());
+    public static class ParseScriptTypeWithFullContents extends ParseScriptTest {
+
+        @Before
+        public void setUp() throws IOException, JSONException {
+            this.result = target.parse(testFileScriptWithFullContents);
+        }
+
+        @Override
+        public SuiteAssert getSuiteAssert() {
+            return SuiteAssert.of()
+                    .assertFileAttribute(SuiteAssert::assertEqualsNoRelationFile)
+                    .assertTestCaseCount(SuiteAssert.assertEqualsTestCaseCount(1))
+                    .assertTestCase(0, this.getTestCaseAssert())
+                    .assertChainCount(SuiteAssert::assertEqualsNoScriptChain)
+                    .assertDataSource(SuiteAssert::assertEqualsNoDataSource)
+                    .create();
+        }
+
+        @Override
+        public TestCaseAssert getTestCaseAssert() {
+            return TestCaseAssert.of()
+                    .assertFileAttribute(TestCaseAssert.assertEqualsFileAttribute(testFileScriptWithFullContents))
+                    .assertStep(TestCaseAssert.assertEqualsStepCount(9))
+                    .assertDataSource(TestCaseAssert.assertEqualsDataSet(DATA_SET_CSV))
+                    .assertSkip(TestCaseAssert.assertEqualsSkip("false"))
+                    .assertOverrideDataSource(TestCaseAssert::assertEqualsNoOverrideDataSource)
+                    .assertLazy(TestCaseAssert::assertEqualsNotLazyLoad)
+                    .create();
+        }
     }
 
-    private static void assertScriptWithDataSource(String testFile, TestCase actual) {
-        assertFileAttribute(testFile, actual);
-        assertTrue(actual.dataSource() instanceof Csv);
-        assertEquals(1, actual.dataSourceConfig().size());
-        assertEquals("test.csv", actual.dataSourceConfig().get("path"));
-        assertNoSteps(actual);
+    public static class ParseSuiteNoContents extends ParseResultTest {
+
+        private final File testFile = new File(baseDir, "simpleSuite.json");
+
+        @Before
+        public void setUp() throws IOException, JSONException {
+            this.result = target.parse(this.testFile);
+        }
+
+        @Override
+        public SuiteAssert getSuiteAssert() {
+            return SuiteAssert.of()
+                    .assertFileAttribute(SuiteAssert.assertEqualsFileAttribute(testFile))
+                    .assertTestCaseCount(SuiteAssert::assertEqualsNoScript)
+                    .assertChainCount(SuiteAssert::assertEqualsNoScriptChain)
+                    .assertDataSource(SuiteAssert::assertEqualsNoDataSource)
+                    .create();
+        }
     }
 
-    private static void assertFileAttribute(String testFile, TestCase actual) {
-        assertEquals(testFile, actual.name());
-        assertEquals(new File(baseDir), actual.relativePath());
+    public static class ParseSuiteWithDataSource extends ParseResultTest {
+
+
+        private final File testFile = new File(baseDir, "suiteWithDataSource.json");
+
+        @Before
+        public void setUp() throws IOException, JSONException {
+            this.result = target.parse(this.testFile);
+        }
+
+        @Override
+        public SuiteAssert getSuiteAssert() {
+            return SuiteAssert.of()
+                    .assertFileAttribute(SuiteAssert.assertEqualsFileAttribute(testFile))
+                    .assertTestCaseCount(SuiteAssert::assertEqualsNoScript)
+                    .assertChainCount(SuiteAssert::assertEqualsNoScriptChain)
+                    .assertDataSource(SuiteAssert.assertEqualsDataSet(DATA_SET_CSV))
+                    .create();
+        }
     }
 
-    private static void assertNoDataSource(TestCase actual) {
-        assertNull(actual.dataSource());
-        assertEquals(0, actual.dataSourceConfig().size());
+    public static class ParseSuiteWithScripts extends ParseResultTest {
+
+        private final File testFile = new File(baseDir, "suiteWithScripts.json");
+
+        @Before
+        public void setUp() throws IOException, JSONException {
+            this.result = target.parse(this.testFile);
+        }
+
+        @Override
+        public SuiteAssert getSuiteAssert() {
+            return SuiteAssert.of()
+                    .assertFileAttribute(SuiteAssert.assertEqualsFileAttribute(testFile))
+                    .assertTestCaseCount(SuiteAssert.assertEqualsTestCaseCount(3))
+                    .assertTestCase(0, new ParseScriptNoContents().getTestCaseAssert()
+                            .builder()
+                            .assertOverrideDataSource(TestCaseAssert.assertEqualsOverrideDataSst(DATA_SET_OVERRIDE_CSV))
+                            .create())
+                    .assertTestCase(1, new ParseScriptTypeWithSteps().getTestCaseAssert()
+                            .builder()
+                            .assertSkip(TestCaseAssert.assertEqualsSkip("true"))
+                            .create())
+                    .assertTestCase(2, new ParseScriptTypeWithDataSource().getTestCaseAssert()
+                            .builder()
+                            .assertOverrideDataSource(TestCaseAssert.assertEqualsOverrideDataSst(DATA_SET_NONE))
+                            .create())
+                    .assertChainCount(SuiteAssert::assertEqualsNoScriptChain)
+                    .assertDataSource(SuiteAssert::assertEqualsNoDataSource)
+                    .create();
+        }
     }
 
-    private static void assertNoSteps(TestCase actual) {
-        assertEquals(0, actual.steps().size());
+    public static class ParseSuiteWithScriptChain extends ParseResultTest {
+
+        private final File testFile = new File(baseDir, "suiteWithScriptChain.json");
+
+        @Before
+        public void setUp() throws IOException, JSONException {
+            this.result = target.parse(this.testFile);
+        }
+
+        @Override
+        public SuiteAssert getSuiteAssert() {
+            return SuiteAssert.of()
+                    .assertFileAttribute(SuiteAssert.assertEqualsFileAttribute(testFile))
+                    .assertTestCaseCount(SuiteAssert.assertEqualsTestCaseCount(3))
+                    .assertTestCase(0, new ParseScriptNoContents().getTestCaseAssert()
+                            .builder()
+                            .assertOverrideDataSource(TestCaseAssert.assertEqualsOverrideDataSst(DATA_SET_OVERRIDE_CSV))
+                            .create())
+                    .assertTestCase(1, new ParseScriptTypeWithSteps().getTestCaseAssert()
+                            .builder()
+                            .assertSkip(TestCaseAssert.assertEqualsSkip("true"))
+                            .create())
+                    .assertTestCase(2, new ParseScriptTypeWithDataSource().getTestCaseAssert()
+                            .builder()
+                            .assertOverrideDataSource(TestCaseAssert.assertEqualsOverrideDataSst(DATA_SET_NONE))
+                            .create())
+                    .assertChainCount(SuiteAssert.assertEqualsChainCount(2))
+                    .assertChain(SuiteAssert.assertEqualsChain(0, 1))
+                    .assertChain(SuiteAssert.assertEqualsChain(1, 2))
+                    .assertDataSource(SuiteAssert::assertEqualsNoDataSource)
+                    .create();
+        }
+    }
+
+    public static class ParseSuiteWithScriptRuntimeDataSource extends ParseResultTest {
+
+        private final File testFile = new File(baseDir, "suiteWithScriptRuntimeDataSource.json");
+
+        @Before
+        public void setUp() throws IOException, JSONException {
+            this.result = target.parse(this.testFile);
+        }
+
+        @Override
+        public SuiteAssert getSuiteAssert() {
+            return SuiteAssert.of()
+                    .assertFileAttribute(SuiteAssert.assertEqualsFileAttribute(testFile))
+                    .assertTestCaseCount(SuiteAssert.assertEqualsTestCaseCount(3))
+                    .assertTestCase(0, new ParseScriptNoContents().getTestCaseAssert()
+                            .builder()
+                            .assertOverrideDataSource(TestCaseAssert.assertEqualsOverrideDataSst(new DataSet(new Csv(), Map.of("path", "${path}/override.csv"), new File(baseDir))))
+                            .create())
+                    .assertTestCase(1, new ParseScriptTypeWithSteps().getTestCaseAssert()
+                            .builder()
+                            .assertSkip(TestCaseAssert.assertEqualsSkip("true"))
+                            .create())
+                    .assertTestCase(2, new ParseScriptTypeWithDataSource().getTestCaseAssert()
+                            .builder()
+                            .assertOverrideDataSource(TestCaseAssert.assertEqualsOverrideDataSst(DATA_SET_NONE))
+                            .create())
+                    .assertChainCount(SuiteAssert::assertEqualsNoScriptChain)
+                    .assertDataSource(SuiteAssert::assertEqualsNoDataSource)
+                    .create();
+        }
+    }
+
+    public static class ParseSuiteWithLazyLoad extends ParseResultTest {
+
+        private final File testFile = new File(baseDir, "suiteWithLazyScript.json");
+
+        @Before
+        public void setUp() throws IOException, JSONException {
+            this.result = target.parse(this.testFile);
+        }
+
+        @Override
+        public SuiteAssert getSuiteAssert() {
+            return SuiteAssert.of()
+                    .assertFileAttribute(SuiteAssert.assertEqualsFileAttribute(testFile))
+                    .assertTestCaseCount(SuiteAssert.assertEqualsTestCaseCount(3))
+                    .assertTestCase(0, TestCaseAssert.of()
+                            .assertFileAttribute(TestCaseAssert.assertEqualsFileAttribute("${script1}.json"))
+                            .assertSkip(TestCaseAssert.assertEqualsSkip("${skip1}"))
+                            .assertStep(TestCaseAssert::assertEqualsNoStep)
+                            .assertDataSource(TestCaseAssert::assertEqualsNoDataSource)
+                            .assertOverrideDataSource(TestCaseAssert.assertEqualsOverrideDataSst(DATA_SET_OVERRIDE_LAZY))
+                            .assertLazy(TestCaseAssert::assertEqualsLazyLoad)
+                            .create())
+                    .assertTestCase(1, new ParseScriptTypeWithSteps().getTestCaseAssert()
+                            .builder()
+                            .assertSkip(TestCaseAssert.assertEqualsSkip("true"))
+                            .create())
+                    .assertTestCase(2, new ParseScriptTypeWithDataSource().getTestCaseAssert()
+                            .builder()
+                            .assertOverrideDataSource(TestCaseAssert.assertEqualsOverrideDataSst(DATA_SET_NONE))
+                            .create())
+                    .assertChainCount(SuiteAssert::assertEqualsNoScriptChain)
+                    .assertDataSource(SuiteAssert.assertEqualsDataSet(new DataSet(new Manual()
+                            , Map.of("script1", "scriptWithNoContents", "skip1", "false", "dataSource1", "override")
+                            , new File(baseDir))))
+                    .create();
+        }
+    }
+
+    public static class ParseSuiteWithLazyScriptChain extends ParseResultTest {
+
+        private final File testFile = new File(baseDir, "suiteWithLazyScriptChain.json");
+
+        @Before
+        public void setUp() throws IOException, JSONException {
+            this.result = target.parse(this.testFile);
+        }
+
+        @Override
+        public SuiteAssert getSuiteAssert() {
+            return SuiteAssert.of()
+                    .assertFileAttribute(SuiteAssert.assertEqualsFileAttribute(testFile))
+                    .assertTestCaseCount(SuiteAssert.assertEqualsTestCaseCount(3))
+                    .assertTestCase(0, TestCaseAssert.of()
+                            .assertFileAttribute(TestCaseAssert.assertEqualsFileAttribute("${script1}.json"))
+                            .assertSkip(TestCaseAssert.assertEqualsSkip("false"))
+                            .assertStep(TestCaseAssert::assertEqualsNoStep)
+                            .assertDataSource(TestCaseAssert::assertEqualsNoDataSource)
+                            .assertOverrideDataSource(TestCaseAssert::assertEqualsNoOverrideDataSource)
+                            .assertLazy(TestCaseAssert::assertEqualsLazyLoad)
+                            .create())
+                    .assertTestCase(1, new ParseScriptTypeWithSteps().getTestCaseAssert()
+                            .builder()
+                            .assertSkip(TestCaseAssert.assertEqualsSkip("true"))
+                            .create())
+                    .assertTestCase(2, TestCaseAssert.of()
+                            .assertFileAttribute(TestCaseAssert.assertEqualsFileAttribute("${script3}.json"))
+                            .assertSkip(TestCaseAssert.assertEqualsSkip("false"))
+                            .assertStep(TestCaseAssert::assertEqualsNoStep)
+                            .assertDataSource(TestCaseAssert::assertEqualsNoDataSource)
+                            .assertOverrideDataSource(TestCaseAssert.assertEqualsOverrideDataSst(new DataSet(new Csv(), Map.of("path", "${dataSource3}.csv"), null)))
+                            .assertLazy(TestCaseAssert::assertEqualsLazyLoad)
+                            .create())
+                    .assertChainCount(SuiteAssert.assertEqualsChainCount(2))
+                    .assertChain(SuiteAssert.assertEqualsChain(0, 1))
+                    .assertChain(SuiteAssert.assertEqualsChain(1, 2))
+                    .assertDataSource(SuiteAssert.assertEqualsDataSet(new DataSet(new Manual()
+                            , Map.of("script1", "scriptWithDataSource", "script3", "scriptWithNoContents", "dataSource3", "csv/override")
+                            , new File(baseDir))))
+                    .create();
+        }
     }
 }
