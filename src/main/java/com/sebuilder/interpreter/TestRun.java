@@ -20,6 +20,8 @@ import com.sebuilder.interpreter.step.Verify;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
+import javax.annotation.Nonnull;
+
 /**
  * A single run of a test testCase.
  *
@@ -64,82 +66,54 @@ public class TestRun {
         this.testRunStatus = TestRunStatus.of(this.scenario, this.testCase);
     }
 
-    public void putVars(String index, String s) {
-        this.vars = this.vars.add(index, s);
+    public void putVars(@Nonnull String key, String value) {
+        this.vars = this.vars.add(key, value);
     }
 
     public String getTestRunName() {
         return this.testRunName;
     }
 
-    /**
-     * @return The driver instance being used.
-     */
     public RemoteWebDriver driver() {
         return this.driver;
     }
 
-    /**
-     * @return The logger being used.
-     */
     public Logger log() {
         return this.log;
     }
 
-    /**
-     * @return The listener being used.
-     */
     public SeInterpreterTestListener getListener() {
         return this.listener;
     }
 
-    /**
-     * @return The HashMap of variables.
-     */
     public TestData vars() {
         return this.vars;
     }
 
-    /**
-     * @return The step that is being/has just been executed.
-     */
     public Step currentStep() {
         return this.testCase.steps().get(this.testRunStatus.stepIndex());
     }
 
-    /**
-     * @param key
-     * @return
-     */
     public boolean containsKey(String key) {
         return this.currentStep().containsParam(key);
     }
 
-    /**
-     * @return
-     */
     public String text() {
         return this.string("text");
     }
 
-    public String bindRuntimeVariables(String s) {
-        return this.vars.bind(s);
+    public String bindRuntimeVariables(String value) {
+        return this.vars.bind(value);
     }
 
-    public boolean getBoolean(String filterTag) {
-        return this.containsKey(filterTag) && Boolean.valueOf(this.string(filterTag));
+    public boolean getBoolean(@Nonnull String key) {
+        return this.containsKey(key) && Boolean.valueOf(this.string(key));
     }
 
-    /**
-     * Fetches a String parameter from the current step.
-     *
-     * @param paramName The parameter's name.
-     * @return The parameter's value.
-     */
-    public String string(String paramName) {
-        String s = this.currentStep().getParam(paramName);
+    public String string(@Nonnull String key) {
+        String s = this.currentStep().getParam(key);
         if (s == null) {
-            throw new RuntimeException("Missing parameter \"" + paramName + "\" at step #" + this.testRunStatus.stepIndex() + ".");
+            throw new RuntimeException("Missing parameter \"" + key + "\" at step #" + this.testRunStatus.stepIndex() + ".");
         }
         return this.bindRuntimeVariables(s);
     }
@@ -148,21 +122,12 @@ public class TestRun {
         return this.currentStep().locatorContains("locator");
     }
 
-    /**
-     * @return
-     */
     public Locator locator() {
         return this.locator("locator");
     }
 
-    /**
-     * Fetches a Locator parameter from the current step.
-     *
-     * @param paramName The parameter's name.
-     * @return The parameter's value.
-     */
-    public Locator locator(String paramName) {
-        Locator l = new Locator(this.currentStep().getLocator(paramName));
+    public Locator locator(@Nonnull String key) {
+        Locator l = new Locator(this.currentStep().getLocator(key));
         // This kind of variable substitution makes for short code, but it's inefficient.
         l.value = this.bindRuntimeVariables(l.value);
         return l;
@@ -208,7 +173,7 @@ public class TestRun {
     public void startTest() {
         this.aspect.advice(this.currentStep())
                 .invokeBefore(this);
-        this.getListener().startTest(this.currentStep().getName() != null ? this.currentStep().getName() : bindRuntimeVariables(this.currentStep().toPrettyString()));
+        this.getListener().startTest(currentStepToString());
     }
 
     public void toNextStepIndex() {
@@ -232,29 +197,25 @@ public class TestRun {
     }
 
     public boolean processTestFailure() {
-        this.getListener().addFailure(this.currentStep() + " failed.");
+        this.getListener().addFailure(currentStepToString() + " failed.");
         // If a verify failed, we just note this but continue.
         if (this.currentStep().getType() instanceof Verify) {
             return false;
         }
         // In all other cases, we throw an exception to stop the run.
-        throw new AssertionError(this.currentStep() + " failed.");
+        throw new AssertionError(currentStepToString() + " failed.");
     }
 
     public boolean processTestError(Throwable e) {
         this.getListener().addError(e);
-        throw new AssertionError(this.currentStep() + " failed.", e);
+        throw new AssertionError(currentStepToString() + " failed.", e);
     }
 
     protected boolean start() {
         this.testRunStatus = this.testRunStatus.start();
-        this.getListener().openTestSuite(this.testCase, this.testRunName, this.vars);
-        return true;
+        return this.getListener().openTestSuite(this.testCase, this.testRunName, this.vars);
     }
 
-    /**
-     * @return True if there is another step to execute.
-     */
     protected boolean hasNext() {
         boolean hasNext = this.stepRest();
         if (!hasNext && this.driver != null) {
@@ -267,11 +228,6 @@ public class TestRun {
         return testRunStatus.isNeedRunning(this.testCase.steps().size() - 1);
     }
 
-    /**
-     * Executes the next step.
-     *
-     * @return True on success.
-     */
     protected boolean next() {
         try {
             if (!this.runTest()) {
@@ -285,7 +241,7 @@ public class TestRun {
 
     protected boolean end(boolean success) {
         this.getListener().closeTestSuite();
-        if (this.testRunStatus.isNeedChain()) {
+        if (success && this.testRunStatus.isNeedChain()) {
             return this.chainRun(this.scenario.getChainTo(this.testCase));
         }
         return success;
@@ -337,4 +293,7 @@ public class TestRun {
         }
     }
 
+    protected String currentStepToString() {
+        return this.bindRuntimeVariables(this.currentStep().toPrettyString());
+    }
 }
