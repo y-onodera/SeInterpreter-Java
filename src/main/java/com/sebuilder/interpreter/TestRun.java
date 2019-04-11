@@ -266,11 +266,15 @@ public class TestRun {
                 return false;
             }
         }
-        return this.nextChain(chainTo);
+        return chainTo.isNestedChain() || this.nextChain(chainTo);
     }
 
     protected TestRun createChainRun(TestCase chainTo, TestData data) {
-        return new TestRunBuilder(chainTo, new Scenario(chainTo))
+        Scenario chainScenario = this.scenario;
+        if (!chainTo.isNestedChain()) {
+            chainScenario = new Scenario(chainTo);
+        }
+        return new TestRunBuilder(chainTo, chainScenario)
                 .addTestRunNamePrefix(this.testRunName + "_")
                 .createTestRun(data, this);
     }

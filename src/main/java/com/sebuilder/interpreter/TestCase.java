@@ -44,6 +44,7 @@ public class TestCase implements TestRunnable {
     private final DataSet overrideDataSet;
     private final String skip;
     private final ScriptFile scriptFile;
+    private boolean nestedChain;
 
     public TestCase(TestCaseBuilder testCaseBuilder) {
         this.steps = testCaseBuilder.getSteps();
@@ -54,6 +55,7 @@ public class TestCase implements TestRunnable {
         this.dataSet = testCaseBuilder.getDataSet();
         this.overrideDataSet = testCaseBuilder.getOverrideDataSet();
         this.skip = testCaseBuilder.getSkip();
+        this.nestedChain = testCaseBuilder.isNestedChain();
     }
 
     @Override
@@ -132,19 +134,23 @@ public class TestCase implements TestRunnable {
         return this.overrideDataSet.getDataSourceConfig();
     }
 
-    public String skip() {
-        return this.skip;
+    public List<TestData> loadData(TestData vars) {
+        if (this.overrideDataSource() != null) {
+            return this.overrideDataSet.loadData(vars);
+        }
+        return this.dataSet.loadData();
+    }
+
+    public boolean isNestedChain() {
+        return this.nestedChain;
     }
 
     public boolean isLazyLoad() {
         return this.lazyLoad != null;
     }
 
-    public List<TestData> loadData(TestData vars) {
-        if (this.overrideDataSource() != null) {
-            return this.overrideDataSet.loadData(vars);
-        }
-        return this.dataSet.loadData();
+    public String skip() {
+        return this.skip;
     }
 
     public boolean skipRunning(TestData testData) {
@@ -271,6 +277,12 @@ public class TestCase implements TestRunnable {
                 .build();
     }
 
+    public TestCase nestedChain(boolean nestedChain) {
+        return this.builder()
+                .isNestedChain(nestedChain)
+                .build();
+    }
+
     public Suite toSuite() {
         return new SuiteBuilder(this).createSuite();
     }
@@ -294,5 +306,4 @@ public class TestCase implements TestRunnable {
     public int hashCode() {
         return com.google.common.base.Objects.hashCode(steps, isLazyLoad(), usePreviousDriverAndVars, closeDriver, dataSet, overrideDataSet, skip, scriptFile);
     }
-
 }

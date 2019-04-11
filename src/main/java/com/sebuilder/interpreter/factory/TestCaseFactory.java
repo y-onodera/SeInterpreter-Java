@@ -222,8 +222,16 @@ public class TestCaseFactory {
                     .overrideDataSource(dataSource, config)
                     .build();
         }
-        resultTestCase = resultTestCase.skip(this.getSkip(script));
+        resultTestCase = resultTestCase.skip(this.getSkip(script)).nestedChain(this.isNestedChain(script));
         return resultTestCase;
+    }
+
+    private boolean isNestedChain(JSONObject script) throws JSONException {
+        boolean result = false;
+        if (script.has("nestedChain")) {
+            result = script.getBoolean("nestedChain");
+        }
+        return result;
     }
 
     private String getSkip(JSONObject o) throws JSONException {

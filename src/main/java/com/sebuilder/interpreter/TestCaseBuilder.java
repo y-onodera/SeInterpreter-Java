@@ -16,6 +16,7 @@ public class TestCaseBuilder {
     private Map<String, String> overrideDataSourceConfig;
     private String skip;
     private ScriptFile scriptFile;
+    private boolean nestedChain;
 
     public TestCaseBuilder() {
         this.steps = new ArrayList<>();
@@ -41,6 +42,7 @@ public class TestCaseBuilder {
         this.overrideDataSource = currentDisplay.overrideDataSource();
         this.overrideDataSourceConfig = currentDisplay.overrideDataSourceConfig();
         this.skip = currentDisplay.skip();
+        this.nestedChain = currentDisplay.isNestedChain();
     }
 
     public static TestCase lazyLoad(String beforeReplace, Function<TestData, TestCase> lazyLoad) {
@@ -102,6 +104,10 @@ public class TestCaseBuilder {
         return new DataSet(this.getOverrideDataSource(), this.getOverrideDataSourceConfig(), this.getRelativePath());
     }
 
+    public boolean isNestedChain() {
+        return this.nestedChain;
+    }
+
     public TestCaseBuilder clearStep() {
         this.steps.clear();
         return this;
@@ -144,6 +150,11 @@ public class TestCaseBuilder {
         return this;
     }
 
+    public TestCaseBuilder isNestedChain(boolean nestedChain) {
+        this.nestedChain = nestedChain;
+        return this;
+    }
+
     public TestCaseBuilder usePreviousDriverAndVars(boolean userPreviousDriverAndVars) {
         if (userPreviousDriverAndVars) {
             this.closeDriver = false;
@@ -158,5 +169,4 @@ public class TestCaseBuilder {
     public TestCase build() {
         return new TestCase(this);
     }
-
 }

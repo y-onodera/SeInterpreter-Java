@@ -117,6 +117,9 @@ public class ScriptConverter {
         if (!Objects.equals(testCase.skip(), "false")) {
             scriptPath.put("skip", testCase.skip());
         }
+        if (testCase.isNestedChain()) {
+            scriptPath.put("nestedChain", testCase.isNestedChain());
+        }
         JSONObject data = this.toJson(testCase.getOverrideDataSet());
         if (data != null) {
             scriptPath.put("data", data);
