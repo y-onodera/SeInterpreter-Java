@@ -1,15 +1,14 @@
 package com.sebuilder.interpreter;
 
+import com.google.common.collect.Lists;
 import com.sebuilder.interpreter.datasource.Csv;
 import com.sebuilder.interpreter.steptype.ClickElement;
+import com.sebuilder.interpreter.steptype.DoubleClickElement;
 import com.sebuilder.interpreter.steptype.ElementAttribute;
 import com.sebuilder.interpreter.steptype.SetElementText;
 import org.apache.logging.log4j.Logger;
 import org.hamcrest.CoreMatchers;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
@@ -757,6 +756,99 @@ public class TestRunTest {
             Mockito.verify(this.step).run(this.target);
             Mockito.verify(this.listener).endTest();
         }
+    }
+
+    public static class WithAspect extends AbstractTestRunTest {
+
+        private TestCase chainCase;
+
+        private Step chainStep;
+
+        private Step aspectBeforeStep;
+
+        private Step aspectAfterStep;
+
+        private Interceptor interceptor;
+
+        @Mock
+        private SeInterpreterTestListenerImpl adviseListener;
+
+        @Before
+        public void setUp() {
+            this.step = Mockito.spy(new StepBuilder(new ClickElement())
+                    .name("name")
+                    .build());
+            this.testCase = new TestCaseBuilder()
+                    .addStep(this.step)
+                    .build();
+            this.chainStep = Mockito.spy(new StepBuilder(new ClickElement())
+                    .name("chain")
+                    .build());
+            this.chainCase = this.testCase.builder().setName("chainCase").clearStep().addStep(this.chainStep).build();
+            this.resetTestRun(new Scenario(testCase).appendNewChain(this.testCase, this.chainCase));
+            this.aspectBeforeStep = Mockito.spy(new StepBuilder(new SetElementText()).build());
+            this.aspectAfterStep = Mockito.spy(new StepBuilder(new DoubleClickElement()).build());
+            this.interceptor = Mockito.spy(new Interceptor(
+                    it -> "chain".equals(it.getName())
+                    , Lists.newArrayList(this.aspectBeforeStep)
+                    , Lists.newArrayList(this.aspectAfterStep)));
+            final Aspect aAspect = new Aspect(Lists.newArrayList(interceptor));
+            Context.getInstance().setAspect(aAspect);
+            Mockito.doReturn(new File(".", "result")).when(this.adviseListener).getResultDir();
+            Mockito.doReturn(new File(".", "screenshot")).when(this.adviseListener).getScreenShotOutputDirectory();
+            Mockito.doReturn(new File(".", "template")).when(this.adviseListener).getTemplateOutputDirectory();
+            Mockito.doReturn(new File(".", "download")).when(this.adviseListener).getDownloadDirectory();
+        }
+
+        @After
+        public void tearDown() {
+            Context.getInstance().setAspect(new Aspect());
+        }
+
+        @Test
+        public void finish() {
+            Mockito.doReturn(true)
+                    .when(this.listener)
+                    .openTestSuite(Mockito.eq(this.testCase), Mockito.eq(TestCase.DEFAULT_SCRIPT_NAME), Mockito.any(TestData.class));
+            Mockito.doNothing().when(this.listener).startTest("name: ClickElement");
+            Mockito.doReturn(true).when(this.step).run(this.target);
+            Mockito.doNothing().when(this.listener).endTest();
+            Mockito.doNothing().when(this.listener).closeTestSuite();
+            Mockito.doReturn(true)
+                    .when(this.listener)
+                    .openTestSuite(Mockito.eq(this.chainCase), Mockito.eq(TestCase.DEFAULT_SCRIPT_NAME + "_chainCase"), Mockito.any(TestData.class));
+            Mockito.doReturn(this.adviseListener)
+                    .when(this.interceptor)
+                    .createAdviseListener(Mockito.any(TestRun.class));
+            Mockito.doReturn(true)
+                    .when(this.adviseListener)
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(TestCase.DEFAULT_SCRIPT_NAME + "_chainCase_ClickElement_aspect_before"), Mockito.any(TestData.class));
+            Mockito.doNothing().when(this.adviseListener).startTest("SetElementText");
+            Mockito.doReturn(true).when(this.aspectBeforeStep).run(Mockito.any());
+            Mockito.doNothing().when(this.adviseListener).endTest();
+            Mockito.doNothing().when(this.adviseListener).closeTestSuite();
+            Mockito.doNothing().when(this.listener).startTest("chain: ClickElement");
+            Mockito.doReturn(true).when(this.chainStep).run(Mockito.any());
+            Mockito.doReturn(true)
+                    .when(this.adviseListener)
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(TestCase.DEFAULT_SCRIPT_NAME + "_chainCase_ClickElement_aspect_after"), Mockito.any(TestData.class));
+            Mockito.doNothing().when(this.adviseListener).startTest("DoubleClickElement");
+            Mockito.doReturn(true).when(this.aspectAfterStep).run(Mockito.any());
+
+            assertTrue(target.finish());
+
+            Mockito.verify(this.listener)
+                    .openTestSuite(Mockito.eq(this.testCase), Mockito.eq(TestCase.DEFAULT_SCRIPT_NAME), Mockito.any(TestData.class));
+            Mockito.verify(this.listener).startTest("name: ClickElement");
+            Mockito.verify(this.step).run(this.target);
+            Mockito.verify(this.listener, Mockito.times(2)).endTest();
+            Mockito.verify(this.listener, Mockito.times(2)).closeTestSuite();
+            Mockito.verify(this.listener)
+                    .openTestSuite(Mockito.eq(this.chainCase), Mockito.eq(TestCase.DEFAULT_SCRIPT_NAME + "_chainCase"), Mockito.any(TestData.class));
+            Mockito.verify(this.listener).startTest("chain: ClickElement");
+            Mockito.verify(this.chainStep).run(Mockito.any());
+        }
+
     }
 
     public static class WithSkippableChainRun extends AbstractTestRunTest {

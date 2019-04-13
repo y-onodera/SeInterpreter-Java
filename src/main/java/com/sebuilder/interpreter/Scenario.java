@@ -165,7 +165,7 @@ public class Scenario implements Iterable<TestCase> {
     }
 
     public Scenario addAspect(Aspect aspect) {
-        return new Scenario(this.testCases, this.chains, aspect);
+        return new Scenario(this.testCases, this.chains, this.aspect.builder().add(aspect).build());
     }
 
     public Scenario lazyLoad(TestData aSource) {

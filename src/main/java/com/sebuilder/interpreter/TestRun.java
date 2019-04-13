@@ -171,8 +171,7 @@ public class TestRun {
     }
 
     public void startTest() {
-        this.aspect.advice(this.currentStep())
-                .invokeBefore(this);
+        this.getAdvice().invokeBefore(this);
         this.getListener().startTest(currentStepToString());
     }
 
@@ -191,8 +190,7 @@ public class TestRun {
 
     public boolean processTestSuccess() {
         this.getListener().endTest();
-        this.aspect.advice(this.currentStep())
-                .invokeAfter(this);
+        this.getAdvice().invokeAfter(this);
         return true;
     }
 
@@ -254,6 +252,13 @@ public class TestRun {
         throw new AssertionError(e);
     }
 
+    protected Aspect.Advice getAdvice() {
+        return this.aspect.builder()
+                .add(Context.getInstance().getAspect())
+                .build()
+                .advice(this.currentStep());
+    }
+
     protected boolean chainRun(TestCase chainTo) {
         this.testRunStatus = this.testRunStatus.chainCalled();
         if (chainTo.skipRunning(this.vars)) {
@@ -272,7 +277,7 @@ public class TestRun {
     protected TestRun createChainRun(TestCase chainTo, TestData data) {
         Scenario chainScenario = this.scenario;
         if (!chainTo.isNestedChain()) {
-            chainScenario = new Scenario(chainTo);
+            chainScenario = new Scenario(chainTo).addAspect(this.aspect);
         }
         return new TestRunBuilder(chainTo, chainScenario)
                 .addTestRunNamePrefix(this.testRunName + "_")

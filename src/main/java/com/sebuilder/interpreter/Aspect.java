@@ -3,6 +3,7 @@ package com.sebuilder.interpreter;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -98,6 +99,15 @@ public class Aspect {
         public Builder add(Interceptor interceptor) {
             this.interceptors.add(interceptor);
             return this;
+        }
+
+        public Builder add(Collection<Interceptor> interceptor) {
+            this.interceptors.addAll(interceptor);
+            return this;
+        }
+
+        public Builder add(Aspect other) {
+            return this.add(other.interceptors);
         }
 
         public Aspect build() {

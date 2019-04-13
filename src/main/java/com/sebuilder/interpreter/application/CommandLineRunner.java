@@ -5,8 +5,12 @@ import com.sebuilder.interpreter.factory.TestCaseFactory;
 import com.sebuilder.interpreter.webdriverfactory.Firefox;
 import com.sebuilder.interpreter.webdriverfactory.WebDriverFactory;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.util.Strings;
+import org.json.JSONException;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 
@@ -57,6 +61,7 @@ public abstract class CommandLineRunner {
         }
         preSetUp();
         this.lastRun = null;
+        String aspectFileName = null;
         for (String s : args) {
             if (s.startsWith("--")) {
                 String[] kv = s.split("=", 2);
@@ -86,11 +91,21 @@ public abstract class CommandLineRunner {
                     Context.getInstance().setResultOutputDirectory(kv[1]);
                 } else if (s.startsWith(CommandLineArgument.DOWNLOAD_OUTPUT.key())) {
                     Context.getInstance().setDownloadDirectory(kv[1]);
+                } else if (s.startsWith(CommandLineArgument.ASPECT.key())) {
+                    aspectFileName = kv[1];
                 } else {
                     configureOption(s, kv);
                 }
             } else {
                 configureOption(s);
+            }
+        }
+        if (Strings.isNotEmpty(aspectFileName)) {
+            try {
+                this.setAspect(new File(Context.getInstance().getBaseDirectory(), aspectFileName));
+            } catch (JSONException | IOException e) {
+                this.log.fatal(e);
+                System.exit(1);
             }
         }
         this.seInterpreterTestListener = new SeInterpreterTestListenerImpl(this.log);
@@ -126,6 +141,10 @@ public abstract class CommandLineRunner {
         } catch (InstantiationException | IllegalAccessException e) {
             this.log.fatal("Could not instantiate WebDriverFactory " + "com.sebuilder.interpreter.webdriverfactory." + s, e);
         }
+    }
+
+    protected void setAspect(File aSource) throws IOException, JSONException {
+        Context.getInstance().setAspect(this.sf.getAspectFactory().getAspect(aSource));
     }
 
     protected TestRunBuilder createTestRunBuilder(TestCase testCase) {

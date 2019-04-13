@@ -31,19 +31,31 @@ public class Interceptor {
         return this.invokeAdvise(testRun, this.afterStep, "after");
     }
 
-    private boolean invokeAdvise(TestRun testRun, ArrayList<Step> steps, String testRunName) {
-        final TestCase invokeCase = new TestCaseBuilder()
+    protected boolean invokeAdvise(TestRun testRun, ArrayList<Step> steps, String testRunName) {
+        final TestCase adviseCase = this.createAdviseCase(steps, testRunName);
+        TestRun interceptRun = this.createInterceptorRun(testRun, adviseCase);
+        return interceptRun.finish();
+    }
+
+    protected TestCase createAdviseCase(ArrayList<Step> steps, String testRunName) {
+        return new TestCaseBuilder()
                 .setName(testRunName)
                 .addSteps(steps)
                 .usePreviousDriverAndVars(true)
                 .build();
-        TestRun interceptRun = new TestRunBuilder(invokeCase, new Scenario(invokeCase))
-                .addTestRunNamePrefix(this.getInterceptCaseName(testRun))
-                .createTestRun(testRun.log(), testRun.driver(), testRun.vars(), new SeInterpreterTestListenerImpl(testRun.getListener()));
-        return interceptRun.finish();
     }
 
-    private String getInterceptCaseName(TestRun testRun) {
+    protected TestRun createInterceptorRun(TestRun testRun, TestCase invokeCase) {
+        return new TestRunBuilder(invokeCase, new Scenario(invokeCase))
+                .addTestRunNamePrefix(this.getInterceptCaseName(testRun))
+                .createTestRun(testRun.log(), testRun.driver(), testRun.vars(), this.createAdviseListener(testRun));
+    }
+
+    protected SeInterpreterTestListenerImpl createAdviseListener(TestRun testRun) {
+        return new SeInterpreterTestListenerImpl(testRun.getListener());
+    }
+
+    protected String getInterceptCaseName(TestRun testRun) {
         return testRun.getTestRunName() + "_" + testRun.currentStep().getType().getStepTypeName() + "_aspect_";
     }
 

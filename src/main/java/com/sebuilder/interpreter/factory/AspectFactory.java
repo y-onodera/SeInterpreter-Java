@@ -12,11 +12,13 @@ import com.sebuilder.interpreter.pointcut.StringParamFilter;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 
+import java.io.*;
 import java.util.Map;
 import java.util.function.Predicate;
 
-class AspectFactory {
+public class AspectFactory {
 
     private StepTypeFactory stepTypeFactory;
 
@@ -26,6 +28,12 @@ class AspectFactory {
 
     StepTypeFactory getStepTypeFactory() {
         return stepTypeFactory;
+    }
+
+    public Aspect getAspect(File f) throws IOException, JSONException {
+        try (BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(f), "UTF-8"))) {
+            return this.getAspect(new JSONObject(new JSONTokener(r)));
+        }
     }
 
     Aspect getAspect(JSONObject o) throws JSONException {

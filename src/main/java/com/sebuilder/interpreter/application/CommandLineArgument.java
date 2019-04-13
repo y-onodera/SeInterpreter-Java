@@ -12,7 +12,8 @@ public enum CommandLineArgument {
     SCREENSHOT_OUTPUT("--screenshotoutput"),
     TEMPLATE_OUTPUT("--templateoutput"),
     RESULT_OUTPUT("--resultoutput"),
-    DOWNLOAD_OUTPUT("--downloadoutput"),;
+    DOWNLOAD_OUTPUT("--downloadoutput"),
+    ASPECT("--aspectFile"),;
 
     private String key;
 

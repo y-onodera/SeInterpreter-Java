@@ -18,6 +18,7 @@ public enum Context {
     private String screenShotOutputDirectory = "screenshot";
     private String templateOutputDirectory = "template";
     private String browser = "Chrome";
+    private Aspect aspect = new Aspect();
 
     public void setBrowser(String browser) {
         this.browser = browser;
@@ -45,6 +46,10 @@ public enum Context {
 
     public void setTemplateOutputDirectory(String aTemplateOutputDirectory) {
         this.templateOutputDirectory = aTemplateOutputDirectory;
+    }
+
+    public void setAspect(Aspect aAspect) {
+        this.aspect = aAspect;
     }
 
     public String getBrowser() {
@@ -79,4 +84,7 @@ public enum Context {
         return this.templateOutputDirectory;
     }
 
+    public Aspect getAspect() {
+        return this.aspect;
+    }
 }

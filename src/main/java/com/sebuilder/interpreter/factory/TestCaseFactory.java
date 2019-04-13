@@ -46,6 +46,10 @@ public class TestCaseFactory {
         return dataSourceFactory;
     }
 
+    public AspectFactory getAspectFactory() {
+        return aspectFactory;
+    }
+
     /**
      * @param jsonString A JSON string describing a script or suite.
      * @return A script, ready to run.
