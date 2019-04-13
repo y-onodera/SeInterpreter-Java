@@ -1,0 +1,31 @@
+{
+  "type": "suite",
+  "scripts": [
+    {
+      "chain": [
+        {
+          "path": "scriptWithNoContents.json",
+          "data": {
+            "configs": {
+              "csv": {
+                "path": "override.csv"
+              }
+            },
+            "source": "csv"
+          }
+        },
+        {
+          "nestedChain": "true",
+          "path": "scriptWithSteps.json",
+          "skip": "true"
+        },
+        {
+          "path": "scriptWithDataSource.json",
+          "data": {
+            "source": "none"
+          }
+        }
+      ]
+    }
+  ]
+}

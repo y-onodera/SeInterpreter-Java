@@ -1,5 +1,6 @@
 package com.sebuilder.interpreter.factory;
 
+import com.google.common.base.Strings;
 import com.sebuilder.interpreter.DataSet;
 import com.sebuilder.interpreter.Suite;
 import com.sebuilder.interpreter.SuiteAssert;
@@ -46,7 +47,7 @@ public class TestCaseFactoryTest {
 
         @Test
         public void parseResultReversible() throws IOException, JSONException {
-            Suite reverse = target.parse(converter.toString(this.result), com.google.common.base.Strings.isNullOrEmpty(this.result.getPath()) ? null : new File(this.result.getPath()));
+            Suite reverse = target.parse(converter.toString(this.result), Strings.isNullOrEmpty(this.result.getPath()) ? null : new File(this.result.getPath()));
             this.getSuiteAssert().run(reverse);
         }
 
@@ -90,7 +91,8 @@ public class TestCaseFactoryTest {
                     .assertDataSource(TestCaseAssert::assertEqualsNoDataSource)
                     .assertSkip(TestCaseAssert.assertEqualsSkip("false"))
                     .assertOverrideDataSource(TestCaseAssert::assertEqualsNoOverrideDataSource)
-                    .assertLazy(TestCaseAssert::assertEqualsNotLazyLoad)
+                    .assertLazy(TestCaseAssert::assertNotLazyLoad)
+                    .assertNestedChain(TestCaseAssert::assertNotNestedChain)
                     .create();
         }
     }
@@ -121,7 +123,8 @@ public class TestCaseFactoryTest {
                     .assertDataSource(TestCaseAssert::assertEqualsNoDataSource)
                     .assertSkip(TestCaseAssert.assertEqualsSkip("false"))
                     .assertOverrideDataSource(TestCaseAssert::assertEqualsNoOverrideDataSource)
-                    .assertLazy(TestCaseAssert::assertEqualsNotLazyLoad)
+                    .assertLazy(TestCaseAssert::assertNotLazyLoad)
+                    .assertNestedChain(TestCaseAssert::assertNotNestedChain)
                     .create();
         }
 
@@ -153,7 +156,8 @@ public class TestCaseFactoryTest {
                     .assertDataSource(TestCaseAssert.assertEqualsDataSet(DATA_SET_CSV))
                     .assertSkip(TestCaseAssert.assertEqualsSkip("false"))
                     .assertOverrideDataSource(TestCaseAssert::assertEqualsNoOverrideDataSource)
-                    .assertLazy(TestCaseAssert::assertEqualsNotLazyLoad)
+                    .assertLazy(TestCaseAssert::assertNotLazyLoad)
+                    .assertNestedChain(TestCaseAssert::assertNotNestedChain)
                     .create();
         }
     }
@@ -184,7 +188,8 @@ public class TestCaseFactoryTest {
                     .assertDataSource(TestCaseAssert::assertEqualsNoDataSource)
                     .assertSkip(TestCaseAssert.assertEqualsSkip("false"))
                     .assertOverrideDataSource(TestCaseAssert::assertEqualsNoOverrideDataSource)
-                    .assertLazy(TestCaseAssert::assertEqualsNotLazyLoad)
+                    .assertLazy(TestCaseAssert::assertNotLazyLoad)
+                    .assertNestedChain(TestCaseAssert::assertNotNestedChain)
                     .create();
         }
     }
@@ -215,7 +220,8 @@ public class TestCaseFactoryTest {
                     .assertDataSource(TestCaseAssert.assertEqualsDataSet(DATA_SET_CSV))
                     .assertSkip(TestCaseAssert.assertEqualsSkip("false"))
                     .assertOverrideDataSource(TestCaseAssert::assertEqualsNoOverrideDataSource)
-                    .assertLazy(TestCaseAssert::assertEqualsNotLazyLoad)
+                    .assertLazy(TestCaseAssert::assertNotLazyLoad)
+                    .assertNestedChain(TestCaseAssert::assertNotNestedChain)
                     .create();
         }
     }
@@ -327,6 +333,41 @@ public class TestCaseFactoryTest {
         }
     }
 
+    public static class ParseSuiteWithNestedScriptChain extends ParseResultTest {
+
+        private final File testFile = new File(baseDir, "suiteWithNestedScriptChain.json");
+
+        @Before
+        public void setUp() throws IOException, JSONException {
+            this.result = target.parse(this.testFile);
+        }
+
+        @Override
+        public SuiteAssert getSuiteAssert() {
+            return SuiteAssert.of()
+                    .assertFileAttribute(SuiteAssert.assertEqualsFileAttribute(testFile))
+                    .assertTestCaseCount(SuiteAssert.assertEqualsTestCaseCount(3))
+                    .assertTestCase(0, new ParseScriptNoContents().getTestCaseAssert()
+                            .builder()
+                            .assertOverrideDataSource(TestCaseAssert.assertEqualsOverrideDataSst(DATA_SET_OVERRIDE_CSV))
+                            .create())
+                    .assertTestCase(1, new ParseScriptTypeWithSteps().getTestCaseAssert()
+                            .builder()
+                            .assertSkip(TestCaseAssert.assertEqualsSkip("true"))
+                            .assertNestedChain(TestCaseAssert::assertNestedChain)
+                            .create())
+                    .assertTestCase(2, new ParseScriptTypeWithDataSource().getTestCaseAssert()
+                            .builder()
+                            .assertOverrideDataSource(TestCaseAssert.assertEqualsOverrideDataSst(DATA_SET_NONE))
+                            .create())
+                    .assertChainCount(SuiteAssert.assertEqualsChainCount(2))
+                    .assertChain(SuiteAssert.assertEqualsChain(0, 1))
+                    .assertChain(SuiteAssert.assertEqualsChain(1, 2))
+                    .assertDataSource(SuiteAssert::assertEqualsNoDataSource)
+                    .create();
+        }
+    }
+
     public static class ParseSuiteWithScriptRuntimeDataSource extends ParseResultTest {
 
         private final File testFile = new File(baseDir, "suiteWithScriptRuntimeDataSource.json");
@@ -379,7 +420,8 @@ public class TestCaseFactoryTest {
                             .assertStep(TestCaseAssert::assertEqualsNoStep)
                             .assertDataSource(TestCaseAssert::assertEqualsNoDataSource)
                             .assertOverrideDataSource(TestCaseAssert.assertEqualsOverrideDataSst(DATA_SET_OVERRIDE_LAZY))
-                            .assertLazy(TestCaseAssert::assertEqualsLazyLoad)
+                            .assertLazy(TestCaseAssert::assertLazyLoad)
+                            .assertNestedChain(TestCaseAssert::assertNotNestedChain)
                             .create())
                     .assertTestCase(1, new ParseScriptTypeWithSteps().getTestCaseAssert()
                             .builder()
@@ -417,7 +459,8 @@ public class TestCaseFactoryTest {
                             .assertStep(TestCaseAssert::assertEqualsNoStep)
                             .assertDataSource(TestCaseAssert::assertEqualsNoDataSource)
                             .assertOverrideDataSource(TestCaseAssert::assertEqualsNoOverrideDataSource)
-                            .assertLazy(TestCaseAssert::assertEqualsLazyLoad)
+                            .assertLazy(TestCaseAssert::assertLazyLoad)
+                            .assertNestedChain(TestCaseAssert::assertNotNestedChain)
                             .create())
                     .assertTestCase(1, new ParseScriptTypeWithSteps().getTestCaseAssert()
                             .builder()
@@ -429,7 +472,8 @@ public class TestCaseFactoryTest {
                             .assertStep(TestCaseAssert::assertEqualsNoStep)
                             .assertDataSource(TestCaseAssert::assertEqualsNoDataSource)
                             .assertOverrideDataSource(TestCaseAssert.assertEqualsOverrideDataSst(new DataSet(new Csv(), Map.of("path", "${dataSource3}.csv"), null)))
-                            .assertLazy(TestCaseAssert::assertEqualsLazyLoad)
+                            .assertLazy(TestCaseAssert::assertLazyLoad)
+                            .assertNestedChain(TestCaseAssert::assertNotNestedChain)
                             .create())
                     .assertChainCount(SuiteAssert.assertEqualsChainCount(2))
                     .assertChain(SuiteAssert.assertEqualsChain(0, 1))

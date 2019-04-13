@@ -12,6 +12,7 @@ public class TestCaseAssert {
     private Consumer<TestCase> assertSkip;
     private Consumer<TestCase> assertOverrideDataSource;
     private Consumer<TestCase> assertLazy;
+    private Consumer<TestCase> assertNestedChain;
 
     public TestCaseAssert(Builder aBuilder) {
         this.assertFileAttribute = aBuilder.assertFileAttribute;
@@ -20,6 +21,7 @@ public class TestCaseAssert {
         this.assertSkip = aBuilder.assertSkip;
         this.assertOverrideDataSource = aBuilder.assertOverrideDataSource;
         this.assertLazy = aBuilder.assertLazy;
+        this.assertNestedChain = aBuilder.assertNestedChain;
     }
 
     public static Builder of() {
@@ -70,12 +72,20 @@ public class TestCaseAssert {
         return (TestCase actual) -> assertEquals(aSkip, actual.skip());
     }
 
-    public static void assertEqualsLazyLoad(TestCase actual) {
+    public static void assertLazyLoad(TestCase actual) {
         assertTrue(actual.isLazyLoad());
     }
 
-    public static void assertEqualsNotLazyLoad(TestCase actual) {
+    public static void assertNotLazyLoad(TestCase actual) {
         assertFalse(actual.isLazyLoad());
+    }
+
+    public static void assertNestedChain(TestCase actual) {
+        assertTrue(actual.isNestedChain());
+    }
+
+    public static void assertNotNestedChain(TestCase actual) {
+        assertFalse(actual.isNestedChain());
     }
 
     public void run(TestCase target) {
@@ -85,6 +95,7 @@ public class TestCaseAssert {
         this.assertSkip.accept(target);
         this.assertOverrideDataSource.accept(target);
         this.assertLazy.accept(target);
+        this.assertNestedChain.accept(target);
     }
 
     public Builder builder() {
@@ -98,6 +109,7 @@ public class TestCaseAssert {
         private Consumer<TestCase> assertSkip;
         private Consumer<TestCase> assertOverrideDataSource;
         private Consumer<TestCase> assertLazy;
+        public Consumer<TestCase> assertNestedChain;
 
         public Builder() {
         }
@@ -109,6 +121,7 @@ public class TestCaseAssert {
             this.assertSkip = testCaseAssert.assertSkip;
             this.assertOverrideDataSource = testCaseAssert.assertOverrideDataSource;
             this.assertLazy = testCaseAssert.assertLazy;
+            this.assertNestedChain = testCaseAssert.assertNestedChain;
         }
 
         public Builder assertFileAttribute(Consumer<TestCase> assertion) {
@@ -138,6 +151,11 @@ public class TestCaseAssert {
 
         public Builder assertLazy(Consumer<TestCase> assertion) {
             this.assertLazy = assertion;
+            return this;
+        }
+
+        public Builder assertNestedChain(Consumer<TestCase> assertion) {
+            this.assertNestedChain = assertion;
             return this;
         }
 
