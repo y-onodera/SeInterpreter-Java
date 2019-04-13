@@ -234,12 +234,12 @@ public class SeInterpreterApplication extends Application {
         File target = event.getFile();
         String oldName = this.currentDisplay.name();
         String oldPath = this.currentDisplay.path();
-        this.currentDisplay = new TestCaseBuilder(this.currentDisplay)
-                .associateWith(target)
-                .build();
-        Suite newSuite = this.suite.replace(oldName, this.currentDisplay);
-        this.saveContents(target, this.currentDisplay, oldPath);
-        this.resetSuite(newSuite, this.currentDisplay);
+        TestCase save = this.saveContents(target
+                , new TestCaseBuilder(this.currentDisplay)
+                        .associateWith(target)
+                        .build()
+                , oldPath);
+        this.resetSuite(this.suite.replace(oldName, save), save);
     }
 
     @Subscribe
@@ -354,22 +354,24 @@ public class SeInterpreterApplication extends Application {
                 newName = newName + ".json";
             }
             File saveTo = new File(scriptSaveTo, newName);
-            this.suite = this.suite.replace(oldName, it.builder()
-                    .associateWith(saveTo)
-                    .build());
-            this.saveContents(saveTo, this.suite.get(newName), "");
+            TestCase save = this.saveContents(saveTo, it.builder().associateWith(saveTo).build(), "");
+            this.suite = this.suite.replace(oldName, save);
+            if (it == this.currentDisplay) {
+                this.currentDisplay = this.suite.get(newName);
+            }
                 }
         );
         this.saveContents(target, new ScriptConverter().toString(this.suite));
         this.resetSuite(this.suite, this.currentDisplay);
     }
 
-    private void saveContents(File target, TestCase exportTo, String oldPath) {
+    private TestCase saveContents(File target, TestCase exportTo, String oldPath) {
         TestCase save = exportTo;
         if (Strings.isNullOrEmpty(oldPath)) {
             save = this.copyDataSourceTemplate(exportTo);
         }
         this.saveContents(target, new ScriptConverter().toString(save));
+        return save;
     }
 
     private void saveContents(File target, String content) {
