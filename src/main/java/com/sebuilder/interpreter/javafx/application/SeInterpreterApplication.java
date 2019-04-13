@@ -359,8 +359,7 @@ public class SeInterpreterApplication extends Application {
             if (it == this.currentDisplay) {
                 this.currentDisplay = this.suite.get(newName);
             }
-                }
-        );
+        });
         this.saveContents(target, new ScriptConverter().toString(this.suite));
         this.resetSuite(this.suite, this.currentDisplay);
     }
