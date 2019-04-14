@@ -16,6 +16,7 @@ public class TestRunBuilder {
     private final TestCase testCase;
     private Scenario scenario;
     private TestData shareInput;
+    private boolean preventContextAspect;
     private String testRunNamePrefix;
     private String testRunNameSuffix;
 
@@ -27,6 +28,7 @@ public class TestRunBuilder {
         this.testCase = testCase;
         this.scenario = aScenario;
         this.shareInput = new TestData();
+        this.preventContextAspect = false;
     }
 
     public String getScriptName() {
@@ -39,6 +41,18 @@ public class TestRunBuilder {
 
     public boolean closeDriver() {
         return this.testCase.closeDriver();
+    }
+
+    public TestCase getTestCase() {
+        return testCase;
+    }
+
+    public Scenario getScenario() {
+        return scenario;
+    }
+
+    public boolean isPreventContextAspect() {
+        return this.preventContextAspect;
     }
 
     public TestRunBuilder setShareInput(TestData shareInput) {
@@ -62,19 +76,24 @@ public class TestRunBuilder {
         return this;
     }
 
+    public TestRunBuilder preventContextAspect(boolean aPreventAspect) {
+        this.preventContextAspect = aPreventAspect;
+        return this;
+    }
+
     public List<TestData> loadData() {
         return this.testCase.loadData(this.shareInput);
     }
 
-    public TestRun createTestRun(Logger log, WebDriverFactory webDriverFactory, HashMap<String, String> webDriverConfig, Long implicityWaitTime, Long pageLoadWaitTime, TestData initialVars, TestRun previousRun, SeInterpreterTestListener seInterpreterTestListener) {
+    public TestRun createTestRun(Logger log, WebDriverFactory webDriverFactory, HashMap<String, String> webDriverConfig, Long implicitWaitTime, Long pageLoadWaitTime, TestData initialVars, TestRun previousRun, SeInterpreterTestListener seInterpreterTestListener) {
         final RemoteWebDriver driver;
         if (this.testCase.usePreviousDriverAndVars() && previousRun != null && previousRun.driver() != null) {
             driver = previousRun.driver();
         } else {
             driver = createDriver(log, webDriverFactory, webDriverConfig);
         }
-        if (implicityWaitTime != null && implicityWaitTime.longValue() > 0) {
-            driver.manage().timeouts().implicitlyWait(implicityWaitTime, TimeUnit.SECONDS);
+        if (implicitWaitTime != null && implicitWaitTime.longValue() > 0) {
+            driver.manage().timeouts().implicitlyWait(implicitWaitTime, TimeUnit.SECONDS);
         }
         if (pageLoadWaitTime != null && pageLoadWaitTime.longValue() > 0) {
             driver.manage().timeouts().pageLoadTimeout(pageLoadWaitTime, TimeUnit.SECONDS);
@@ -88,7 +107,7 @@ public class TestRunBuilder {
 
     public TestRun createTestRun(Logger log, RemoteWebDriver driver, TestData initialVars, SeInterpreterTestListener seInterpreterTestListener) {
         TestData data = this.shareInput.add(initialVars);
-        return new TestRun(getTestRunName(data), this.testCase, log, driver, data, seInterpreterTestListener, this.scenario);
+        return new TestRun(this, log, driver, data, seInterpreterTestListener);
     }
 
     public String getTestRunName(TestData initialVars) {
@@ -121,5 +140,4 @@ public class TestRunBuilder {
             throw new RuntimeException("Test run failed: unable to create driver.", e);
         }
     }
-
 }

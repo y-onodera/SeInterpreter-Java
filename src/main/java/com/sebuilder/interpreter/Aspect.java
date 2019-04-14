@@ -24,14 +24,15 @@ public class Aspect {
         }
     };
 
-    private List<Interceptor> interceptors = Lists.newArrayList();
+
+    private final List<Interceptor> interceptors;
 
     public Aspect() {
         this(Lists.newArrayList());
     }
 
     public Aspect(List<Interceptor> interceptors) {
-        this.interceptors = interceptors;
+        this.interceptors = Lists.newArrayList(interceptors);
     }
 
     public Builder builder() {
@@ -89,7 +90,7 @@ public class Aspect {
         private List<Interceptor> interceptors;
 
         public Builder(List<Interceptor> interceptors) {
-            this.interceptors = interceptors;
+            this.interceptors = Lists.newArrayList(interceptors);
         }
 
         public Interceptor.Builder interceptor() {

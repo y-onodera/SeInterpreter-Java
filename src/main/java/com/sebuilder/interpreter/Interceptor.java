@@ -48,6 +48,7 @@ public class Interceptor {
     protected TestRun createInterceptorRun(TestRun testRun, TestCase invokeCase) {
         return new TestRunBuilder(invokeCase, new Scenario(invokeCase))
                 .addTestRunNamePrefix(this.getInterceptCaseName(testRun))
+                .preventContextAspect(true)
                 .createTestRun(testRun.log(), testRun.driver(), testRun.vars(), this.createAdviseListener(testRun));
     }
 

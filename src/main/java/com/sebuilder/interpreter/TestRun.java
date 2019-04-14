@@ -35,20 +35,19 @@ public class TestRun {
     private final SeInterpreterTestListener listener;
     private final Scenario scenario;
     private final Aspect aspect;
+    private final boolean preventContextAspect;
     private TestData vars;
     private TestRunStatus testRunStatus;
 
     public TestRun(
-            String testRunName,
-            TestCase testCase,
+            TestRunBuilder testRunBuilder,
             Logger log,
             RemoteWebDriver driver,
             TestData initialVars,
-            SeInterpreterTestListener seInterpreterTestListener,
-            Scenario scenario
+            SeInterpreterTestListener seInterpreterTestListener
     ) {
-        this.testRunName = testRunName;
-        this.testCase = testCase;
+        this.testRunName = testRunBuilder.getTestRunName(initialVars);
+        this.testCase = testRunBuilder.getTestCase();
         this.log = log;
         this.driver = driver;
         this.listener = seInterpreterTestListener;
@@ -61,8 +60,9 @@ public class TestRun {
                 .add("_downloadDir", seInterpreterTestListener.getDownloadDirectory().getAbsolutePath())
                 .add("_templateDir", seInterpreterTestListener.getTemplateOutputDirectory().getAbsolutePath())
                 .build();
-        this.scenario = scenario;
+        this.scenario = testRunBuilder.getScenario();
         this.aspect = this.scenario.aspect();
+        this.preventContextAspect = testRunBuilder.isPreventContextAspect();
         this.testRunStatus = TestRunStatus.of(this.scenario, this.testCase);
     }
 
@@ -253,10 +253,13 @@ public class TestRun {
     }
 
     protected Aspect.Advice getAdvice() {
-        return this.aspect.builder()
-                .add(Context.getInstance().getAspect())
-                .build()
-                .advice(this.currentStep());
+        Aspect weaver = this.aspect;
+        if (!this.preventContextAspect) {
+            weaver = this.aspect.builder()
+                    .add(Context.getInstance().getAspect())
+                    .build();
+        }
+        return weaver.advice(this.currentStep());
     }
 
     protected boolean chainRun(TestCase chainTo) {
