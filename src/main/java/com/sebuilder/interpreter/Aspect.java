@@ -10,20 +10,9 @@ import java.util.stream.Collectors;
 
 public class Aspect {
 
-    public static Predicate<Step> NONE = new Predicate<Step>() {
-        @Override
-        public boolean test(Step step) {
-            return false;
-        }
-    };
+    public static Predicate<Step> NONE = (it) -> false;
 
-    public static Predicate<Step> APPLY = new Predicate<Step>() {
-        @Override
-        public boolean test(Step step) {
-            return true;
-        }
-    };
-
+    public static Predicate<Step> APPLY = (it) -> true;
 
     private final List<Interceptor> interceptors;
 
