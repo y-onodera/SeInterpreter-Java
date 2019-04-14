@@ -6,6 +6,8 @@ import com.sebuilder.interpreter.TestRun;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.math.BigDecimal;
@@ -37,14 +39,14 @@ public class LocatorInnerScrollElementHandler implements InnerScrollElementHandl
         RemoteWebDriver wd = getWebDriver();
         List<WebElement> frames = wd.findElementsByTagName("iframe");
         for (WebElement targetFrame : frames) {
-            int viewportHeight = Integer.parseInt(targetFrame.getAttribute("clientHeight"));
             int border = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('border-top-width'));", targetFrame)).intValue();
-            int pointY = targetFrame.getLocation().getY() + border;
-            int viewportWidth = Integer.parseInt(targetFrame.getAttribute("clientWidth"));
+            int pointY = getPointY(targetFrame, border, wd);
+            int viewportHeight = getClientHeight(targetFrame, border, wd);
             int borderWidth = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('border-left-width'));", targetFrame)).intValue();
             int pointX = targetFrame.getLocation().getX() + borderWidth;
+            int viewportWidth = Integer.parseInt(targetFrame.getAttribute("clientWidth"));
             wd.switchTo().frame(targetFrame);
-            int scrollableHeight = parent.getFullHeight();
+            int scrollableHeight = getScrollHeight(parent.getFullHeight(), border, wd);
             int scrollableWidth = parent.getFullWidth();
             Frame printableFrame = new Frame(parent
                     , targetFrame
@@ -108,6 +110,12 @@ public class LocatorInnerScrollElementHandler implements InnerScrollElementHandl
                 int paddingLeft = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-left') || document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding'));", targetDiv)).intValue();
                 pointX = pointX + paddingLeft;
             }
+            if (testRun.driver() instanceof FirefoxDriver) {
+                int paddingBottom = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-bottom') || document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding'));", targetDiv)).intValue();
+                height = height - paddingBottom;
+                int paddingRight = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-right') || document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding'));", targetDiv)).intValue();
+                width = width - paddingRight;
+            }
             scrollableDivHeight = scrollableDivHeight - (clientHeight - height);
             scrollableDivWidth = scrollableDivWidth - (clientWidth - width);
 
@@ -122,6 +130,27 @@ public class LocatorInnerScrollElementHandler implements InnerScrollElementHandl
             );
             innerPrintableElement.put(tag.getPointY(), tag);
         }
+    }
+
+    protected int getPointY(WebElement targetFrame, int border, RemoteWebDriver wd) {
+        if (wd instanceof FirefoxDriver || wd instanceof InternetExplorerDriver) {
+            return targetFrame.getLocation().getY() + border * 2;
+        }
+        return targetFrame.getLocation().getY() + border;
+    }
+
+    protected int getClientHeight(WebElement targetFrame, int border, RemoteWebDriver wd) {
+        if (wd instanceof FirefoxDriver || wd instanceof InternetExplorerDriver) {
+            return Integer.parseInt(targetFrame.getAttribute("clientHeight")) - border;
+        }
+        return Integer.parseInt(targetFrame.getAttribute("clientHeight"));
+    }
+
+    protected int getScrollHeight(int scrollHeight, int border, RemoteWebDriver wd) {
+        if (wd instanceof FirefoxDriver || wd instanceof InternetExplorerDriver) {
+            return scrollHeight - border;
+        }
+        return scrollHeight;
     }
 
     private boolean isScrollable(WebElement element, String overflow) {
