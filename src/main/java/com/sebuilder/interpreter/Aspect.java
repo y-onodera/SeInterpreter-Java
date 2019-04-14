@@ -49,7 +49,7 @@ public class Aspect {
 
     public static class Advice {
 
-        private List<Interceptor> advices = Lists.newArrayList();
+        private final List<Interceptor> advices;
 
         public Advice(List<Interceptor> advices) {
             this.advices = advices;
