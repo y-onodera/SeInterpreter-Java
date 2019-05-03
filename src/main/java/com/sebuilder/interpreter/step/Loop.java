@@ -1,11 +1,9 @@
-package com.sebuilder.interpreter.steptype;
+package com.sebuilder.interpreter.step;
 
-
+import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
-import com.sebuilder.interpreter.step.FlowStep;
 
-public class Retry implements FlowStep {
-
+public class Loop implements FlowStep {
     /**
      * Perform the action this step consists of.
      *
@@ -13,23 +11,31 @@ public class Retry implements FlowStep {
      * @return Whether the step succeeded. This should be true except for failed verify steps, which
      * should return false. Other failures should throw a RuntimeException.
      */
+    @Override
     public boolean run(TestRun ctx) {
         ctx.processTestSuccess();
-        boolean success = true;
         int actions = getSubSteps(ctx);
-        while (!next(ctx)) {
-            ctx.processTestSuccess();
+        int count = Integer.valueOf(ctx.string("count"));
+        for (int i = 0; i < count; i++) {
+            ctx.putVars("_index", String.valueOf(i + 1));
             if (!this.runSubStep(ctx, actions)) {
                 ctx.processTestFailure();
                 return false;
             }
-            ctx.processTestSuccess();
-            ctx.backStepIndex(actions + 1);
+            if (i + 1 < count) {
+                ctx.processTestSuccess();
+                ctx.backStepIndex(actions);
+            }
         }
-        ctx.processTestSuccess();
-        ctx.forwardStepIndex(actions);
-        ctx.startTest();
         return true;
+    }
+
+    @Override
+    public StepBuilder addDefaultParam(StepBuilder o) {
+        if (!o.containsStringParam("count")) {
+            o.put("count", "");
+        }
+        return FlowStep.super.addDefaultParam(o);
     }
 
     @Override

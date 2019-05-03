@@ -98,24 +98,16 @@ public class StepTypeFactory {
                     className = className.substring("print".length());
                     rawStepType = false;
                 }
-                if (name.startsWith("if") && !name.equals("if")) {
+                if (name.startsWith("if")) {
                     className = className.substring("if".length());
                     rawStepType = false;
                 }
-                if (name.startsWith("retry") && !name.equals("retry")) {
+                if (name.startsWith("retry")) {
                     className = className.substring("retry".length());
-                    rawStepType = false;
-                }
-                if (name.equals("retry")) {
-                    className = "Retry";
                     rawStepType = false;
                 }
                 if (name.equals("loop")) {
                     className = "Loop";
-                    rawStepType = false;
-                }
-                if (name.equals("if")) {
-                    className = "If";
                     rawStepType = false;
                 }
                 Class<?> c = null;
