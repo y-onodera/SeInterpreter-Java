@@ -57,10 +57,13 @@ public class TestData {
 
     public String bind(String s) {
         // Sub special keys using the !{keyname} syntax.
-        s = replaceKeys(s);
+        String result = this.replaceKeys(s);
         // This kind of variable substitution makes for short code, but it's inefficient.
-        s = replaceVars(s);
-        return s;
+        result = this.replaceVars(result);
+        if (!Objects.equal(s, result)) {
+            return this.bind(result);
+        }
+        return result;
     }
 
     public Builder builder() {
