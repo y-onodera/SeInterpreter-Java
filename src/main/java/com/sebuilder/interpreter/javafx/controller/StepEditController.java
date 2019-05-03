@@ -34,6 +34,7 @@ public class StepEditController {
             , "SetElementNotSelected"
             , "ClearSelections"
             , "SendKeysToElement"
+            , "SendKeysToPathElement"
             , "SubmitElement"
             , "FileDownload"
             , "ExecCmd"
