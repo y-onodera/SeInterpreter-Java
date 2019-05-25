@@ -1,7 +1,8 @@
-package com.sebuilder.interpreter.step;
+package com.sebuilder.interpreter.steptype;
 
 import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
+import com.sebuilder.interpreter.step.FlowStep;
 
 public class Loop implements FlowStep {
     /**
