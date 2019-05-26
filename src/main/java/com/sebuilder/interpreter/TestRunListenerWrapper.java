@@ -4,10 +4,10 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 
-public class SeInterpreterTestListenerWrapper implements SeInterpreterTestListener {
-    private final SeInterpreterTestListener delegate;
+public class TestRunListenerWrapper implements TestRunListener {
+    private final TestRunListener delegate;
 
-    public SeInterpreterTestListenerWrapper(SeInterpreterTestListener delegate) {
+    public TestRunListenerWrapper(TestRunListener delegate) {
         this.delegate = delegate;
     }
 

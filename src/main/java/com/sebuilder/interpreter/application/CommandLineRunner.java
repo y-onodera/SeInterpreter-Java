@@ -20,7 +20,7 @@ public abstract class CommandLineRunner {
     protected HashMap<String, String> driverConfig;
     protected WebDriverFactory wdf;
     protected TestRun lastRun;
-    protected SeInterpreterTestListener seInterpreterTestListener;
+    protected TestRunListener seInterpreterTestListener;
     protected Logger log;
     protected RemoteWebDriver driver;
     protected Long implicitlyWaitTime;
@@ -44,7 +44,7 @@ public abstract class CommandLineRunner {
         return this.pageLoadWaitTime;
     }
 
-    public void setSeInterpreterTestListener(SeInterpreterTestListener seInterpreterTestListener) {
+    public void setSeInterpreterTestListener(TestRunListener seInterpreterTestListener) {
         this.seInterpreterTestListener = seInterpreterTestListener;
     }
 
@@ -108,11 +108,11 @@ public abstract class CommandLineRunner {
                 System.exit(1);
             }
         }
-        this.seInterpreterTestListener = new SeInterpreterTestListenerImpl(this.log);
+        this.seInterpreterTestListener = new TestRunListenerImpl(this.log);
         this.log.info("setUp finish");
     }
 
-    protected TestRun getTestRun(TestRunBuilder script, TestData data, SeInterpreterTestListener seInterpreterTestListener) {
+    protected TestRun getTestRun(TestRunBuilder script, TestData data, TestRunListener seInterpreterTestListener) {
         return script.createTestRun(this.log
                 , this.wdf
                 , this.driverConfig

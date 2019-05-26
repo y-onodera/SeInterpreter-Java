@@ -8,11 +8,11 @@ import org.apache.logging.log4j.Logger;
 public class SeInterpreterRunTask extends Task<String> {
 
     private final Logger log;
-    private final SeInterpreterTestListener listener;
+    private final TestRunListener listener;
     private final SeInterpreterREPL repl;
     private final TestRunnable runnable;
 
-    public SeInterpreterRunTask(Logger log, SeInterpreterTestListener listener, SeInterpreterREPL repl, TestRunnable runnable) {
+    public SeInterpreterRunTask(Logger log, TestRunListener listener, SeInterpreterREPL repl, TestRunnable runnable) {
         this.log = log;
         this.listener = listener;
         this.repl = repl;
@@ -25,7 +25,7 @@ public class SeInterpreterRunTask extends Task<String> {
         try {
             this.log.info("operation recieve");
             updateMessage("setup running....");
-            this.runnable.accept(this.repl, new SeInterpreterTestListenerWrapper(this.listener) {
+            this.runnable.accept(this.repl, new TestRunListenerWrapper(this.listener) {
                 private int currentScriptSteps;
 
                 @Override

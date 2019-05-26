@@ -10,7 +10,14 @@ public interface FlowStep extends StepType {
     default boolean runSubStep(TestRun ctx, int actions) {
         boolean success = true;
         for (int exec = 0; exec < actions; exec++) {
-            success = success && next(ctx);
+            ctx.toNextStepIndex();
+            ctx.startTest();
+            int subStep = 0;
+            if (ctx.currentStep().getType() instanceof FlowStep) {
+                subStep = this.getSubSteps(ctx);
+            }
+            success = success && ctx.currentStep().run(ctx);
+            exec = exec + subStep;
             if (exec != actions - 1) {
                 if (success) {
                     ctx.processTestSuccess();
@@ -20,12 +27,9 @@ public interface FlowStep extends StepType {
         return success;
     }
 
-    default boolean next(TestRun ctx) {
-        return ctx.runTest();
-    }
-
     default int getSubSteps(TestRun ctx) {
-        return Integer.valueOf(ctx.string("subStep"));
+        int subStepCount = Integer.valueOf(ctx.string("subStep"));
+        return subStepCount;
     }
 
     @Override

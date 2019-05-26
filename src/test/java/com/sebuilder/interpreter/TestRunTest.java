@@ -37,7 +37,7 @@ public class TestRunTest {
         @Mock
         Logger log;
         @Mock
-        SeInterpreterTestListener listener;
+        TestRunListener listener;
         @Mock
         Step step;
         TestData initialVars;
@@ -771,7 +771,7 @@ public class TestRunTest {
         private Interceptor interceptor;
 
         @Mock
-        private SeInterpreterTestListenerImpl adviseListener;
+        private TestRunListenerImpl adviseListener;
 
         @Before
         public void setUp() {
@@ -867,7 +867,7 @@ public class TestRunTest {
         private Interceptor interceptor;
 
         @Mock
-        private SeInterpreterTestListenerImpl adviseListener;
+        private TestRunListenerImpl adviseListener;
 
         @Before
         public void setUp() {
@@ -975,10 +975,10 @@ public class TestRunTest {
         private Interceptor contextInterceptor;
 
         @Mock
-        private SeInterpreterTestListenerImpl adviseListener;
+        private TestRunListenerImpl adviseListener;
 
         @Mock
-        private SeInterpreterTestListenerImpl contextAdviseListener;
+        private TestRunListenerImpl contextAdviseListener;
 
         @Before
         public void setUp() {

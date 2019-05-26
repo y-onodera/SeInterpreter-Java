@@ -272,7 +272,7 @@ public class SeInterpreterApplication extends Application {
     @Subscribe
     public void open(BrowserOpenEvent event) {
         Task task = this.runner.createRunScriptTask(this.templateScript(), logger -> {
-            return new SeInterpreterTestListenerImpl(logger);
+            return new TestRunListenerImpl(logger);
         });
         this.executeTask(task);
     }
@@ -285,7 +285,7 @@ public class SeInterpreterApplication extends Application {
     @Subscribe
     public void runStep(RunStepEvent event) {
         Task task = this.runner.createRunScriptTask(this.currentDisplay.removeStep(event.getFilter())
-                , log -> new SeInterpreterTestGUIListener(log) {
+                , log -> new GUITestRunListener(log) {
                     @Override
                     public int getStepNo() {
                         return event.getStepNoFunction().apply(super.getStepNo());

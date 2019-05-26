@@ -25,15 +25,30 @@ public class If implements FlowStep, GetterUseStep {
      * should return false. Other failures should throw a RuntimeException.
      */
     public boolean run(TestRun ctx) {
-        ctx.processTestSuccess();
         int actions = getSubSteps(ctx);
         if (this.test(ctx)) {
+            ctx.processTestSuccess();
             if (!this.runSubStep(ctx, actions)) {
                 ctx.processTestFailure();
                 return false;
             }
         } else {
-            ctx.forwardStepIndex(actions);
+            ctx.processTestSuccess();
+            for (int i = 0; i < actions; i++) {
+                ctx.toNextStepIndex();
+                ctx.getListener().startTest(
+                        ctx.bindRuntimeVariables(
+                                ctx.currentStep()
+                                        .builder()
+                                        .put("skip", "true")
+                                        .build()
+                                        .toPrettyString()
+                        )
+                );
+                if (i != actions - 1) {
+                    ctx.processTestSuccess();
+                }
+            }
         }
         return true;
     }

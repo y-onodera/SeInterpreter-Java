@@ -107,7 +107,7 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
     }
 
     @Override
-    public void execute(Suite suite, SeInterpreterTestListener seInterpreterTestListener) {
+    public void execute(Suite suite, TestRunListener seInterpreterTestListener) {
         seInterpreterTestListener.cleanResult(new File(Context.getInstance().getResultOutputDirectory(), String.valueOf(execCount++)));
         try {
             for (TestRunBuilder builder : suite.getTestRuns()) {
@@ -124,7 +124,7 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
     }
 
     @Override
-    public void execute(TestCase testCase, SeInterpreterTestListener seInterpreterTestListener) {
+    public void execute(TestCase testCase, TestRunListener seInterpreterTestListener) {
         seInterpreterTestListener.cleanResult(new File(Context.getInstance().getResultOutputDirectory(), String.valueOf(execCount++)));
         try {
             this.execute(createTestRunBuilder(testCase), seInterpreterTestListener);
@@ -147,7 +147,7 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
         return super.createTestRunBuilder(testCase.usePreviousDriverAndVars(true));
     }
 
-    private boolean execute(TestRunBuilder testRunBuilder, SeInterpreterTestListener seInterpreterTestListener) {
+    private boolean execute(TestRunBuilder testRunBuilder, TestRunListener seInterpreterTestListener) {
         for (TestData data : testRunBuilder.loadData()) {
             boolean stop = this.execute(testRunBuilder, data, seInterpreterTestListener);
             if (stop) {
@@ -157,7 +157,7 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
         return false;
     }
 
-    private boolean execute(TestRunBuilder testRunBuilder, TestData data, SeInterpreterTestListener seInterpreterTestListener) {
+    private boolean execute(TestRunBuilder testRunBuilder, TestData data, TestRunListener seInterpreterTestListener) {
         this.lastRun = this.getTestRun(testRunBuilder, data, seInterpreterTestListener);
         this.log.info("start execute test");
         this.lastRun.finish();

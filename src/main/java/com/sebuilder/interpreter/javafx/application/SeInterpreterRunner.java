@@ -23,12 +23,12 @@ public class SeInterpreterRunner {
 
     private Logger log = LogManager.getLogger(SeInterpreterRunner.class);
 
-    private SeInterpreterTestListener globalListener;
+    private TestRunListener globalListener;
 
     public SeInterpreterRunner(List<String> raw) {
         this.repl = new SeInterpreterREPL(raw.toArray(new String[raw.size()]), log);
         this.repl.setUpREPL();
-        this.globalListener = new SeInterpreterTestListenerImpl(this.log);
+        this.globalListener = new TestRunListenerImpl(this.log);
         this.globalListener.setUpDir(Context.getInstance().getResultOutputDirectory());
     }
 
@@ -71,7 +71,7 @@ public class SeInterpreterRunner {
             export.put("datasource", dataSourceName);
         }
         TestCase get = export.build().toTestCase();
-        SeInterpreterTestListener listener = new SeInterpreterTestListenerImpl(this.log);
+        TestRunListener listener = new TestRunListenerImpl(this.log);
         this.repl.execute(get, listener);
         File exported = new File(listener.getTemplateOutputDirectory(), fileName);
         if (!exported.exists()) {
@@ -101,20 +101,20 @@ public class SeInterpreterRunner {
                 .locator(new Locator(locatorType, value))
                 .build();
         TestCase highLight = highLightElement.toTestCase();
-        SeInterpreterTestListener listener = new SeInterpreterTestListenerImpl(this.log);
+        TestRunListener listener = new TestRunListenerImpl(this.log);
         this.repl.execute(highLight, listener);
     }
 
     public Task createRunScriptTask(TestCase currentDisplay) {
-        return this.createRunScriptTask(currentDisplay, log -> new SeInterpreterTestGUIListener(log));
+        return this.createRunScriptTask(currentDisplay, log -> new GUITestRunListener(log));
     }
 
-    public Task createRunScriptTask(TestCase currentDisplay, Function<Logger, SeInterpreterTestListener> listenerFactory) {
+    public Task createRunScriptTask(TestCase currentDisplay, Function<Logger, TestRunListener> listenerFactory) {
         return this.createBackgroundTask(currentDisplay, listenerFactory.apply(this.log));
     }
 
     public Task createRunSuiteTask(Suite suite) {
-        return this.createBackgroundTask(suite, new SeInterpreterTestGUIListener(this.log));
+        return this.createBackgroundTask(suite, new GUITestRunListener(this.log));
     }
 
     public void stopRunning() {
@@ -137,7 +137,7 @@ public class SeInterpreterRunner {
         }
     }
 
-    private Task createBackgroundTask(TestRunnable runnable, SeInterpreterTestListener listener) {
+    private Task createBackgroundTask(TestRunnable runnable, TestRunListener listener) {
         if (!this.isOpen()) {
             this.setUp();
         }

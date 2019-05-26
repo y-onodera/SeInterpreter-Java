@@ -52,8 +52,8 @@ public class Interceptor {
                 .createTestRun(testRun.log(), testRun.driver(), testRun.vars(), this.createAdviseListener(testRun));
     }
 
-    protected SeInterpreterTestListenerImpl createAdviseListener(TestRun testRun) {
-        return new SeInterpreterTestListenerImpl(testRun.getListener());
+    protected TestRunListenerImpl createAdviseListener(TestRun testRun) {
+        return new TestRunListenerImpl(testRun.getListener());
     }
 
     protected String getInterceptCaseName(TestRun testRun) {

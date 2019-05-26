@@ -16,10 +16,10 @@
 
 package com.sebuilder.interpreter.application;
 
-import com.sebuilder.interpreter.SeInterpreterTestListener;
 import com.sebuilder.interpreter.Suite;
 import com.sebuilder.interpreter.TestData;
 import com.sebuilder.interpreter.TestRunBuilder;
+import com.sebuilder.interpreter.TestRunListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONException;
@@ -96,7 +96,7 @@ public class SeInterpreter extends CommandLineRunner {
         }
     }
 
-    private void runScript(TestRunBuilder testRunBuilder, TestData data, SeInterpreterTestListener seInterpreterTestListener) {
+    private void runScript(TestRunBuilder testRunBuilder, TestData data, TestRunListener seInterpreterTestListener) {
         try {
             this.lastRun = getTestRun(testRunBuilder, data, seInterpreterTestListener);
             if (this.lastRun.finish()) {

@@ -19,7 +19,7 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.stream.Collectors;
 
-public class SeInterpreterTestListenerImpl implements SeInterpreterTestListener {
+public class TestRunListenerImpl implements TestRunListener {
     private final SeInterpreterTestResultFormatter formatter;
     private Project project;
     private File resultDir;
@@ -34,7 +34,7 @@ public class SeInterpreterTestListenerImpl implements SeInterpreterTestListener 
     private int failed;
     private Logger log;
 
-    public SeInterpreterTestListenerImpl(Logger aLog) {
+    public TestRunListenerImpl(Logger aLog) {
         this.log = aLog;
         this.project = new Project();
         this.project.setName("se-interpreter");
@@ -53,7 +53,7 @@ public class SeInterpreterTestListenerImpl implements SeInterpreterTestListener 
         this.templateOutputDirectory = null;
     }
 
-    public SeInterpreterTestListenerImpl(SeInterpreterTestListener extendFrom) {
+    public TestRunListenerImpl(TestRunListener extendFrom) {
         this.log = extendFrom.getLog();
         this.project = new Project();
         this.project.setName("se-interpreter");

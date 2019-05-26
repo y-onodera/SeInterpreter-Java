@@ -59,7 +59,7 @@ public class TestCase implements TestRunnable {
     }
 
     @Override
-    public void accept(TestRunner runner, SeInterpreterTestListener testListener) {
+    public void accept(TestRunner runner, TestRunListener testListener) {
         runner.execute(this, testListener);
     }
 

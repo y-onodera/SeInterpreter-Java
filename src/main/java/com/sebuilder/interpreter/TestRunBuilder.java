@@ -85,7 +85,7 @@ public class TestRunBuilder {
         return this.testCase.loadData(this.shareInput);
     }
 
-    public TestRun createTestRun(Logger log, WebDriverFactory webDriverFactory, HashMap<String, String> webDriverConfig, Long implicitWaitTime, Long pageLoadWaitTime, TestData initialVars, TestRun previousRun, SeInterpreterTestListener seInterpreterTestListener) {
+    public TestRun createTestRun(Logger log, WebDriverFactory webDriverFactory, HashMap<String, String> webDriverConfig, Long implicitWaitTime, Long pageLoadWaitTime, TestData initialVars, TestRun previousRun, TestRunListener seInterpreterTestListener) {
         final RemoteWebDriver driver;
         if (this.testCase.usePreviousDriverAndVars() && previousRun != null && previousRun.driver() != null) {
             driver = previousRun.driver();
@@ -105,7 +105,7 @@ public class TestRunBuilder {
         return this.createTestRun(previousRun.log(), previousRun.driver(), initialVars, previousRun.getListener());
     }
 
-    public TestRun createTestRun(Logger log, RemoteWebDriver driver, TestData initialVars, SeInterpreterTestListener seInterpreterTestListener) {
+    public TestRun createTestRun(Logger log, RemoteWebDriver driver, TestData initialVars, TestRunListener seInterpreterTestListener) {
         TestData data = this.shareInput.add(initialVars);
         return new TestRun(this, log, driver, data, seInterpreterTestListener);
     }

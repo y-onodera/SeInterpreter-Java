@@ -32,7 +32,7 @@ public class TestRun {
     private final TestCase testCase;
     private final RemoteWebDriver driver;
     private final Logger log;
-    private final SeInterpreterTestListener listener;
+    private final TestRunListener listener;
     private final Scenario scenario;
     private final Aspect aspect;
     private final boolean preventContextAspect;
@@ -44,7 +44,7 @@ public class TestRun {
             Logger log,
             RemoteWebDriver driver,
             TestData initialVars,
-            SeInterpreterTestListener seInterpreterTestListener
+            TestRunListener seInterpreterTestListener
     ) {
         this.testRunName = testRunBuilder.getTestRunName(initialVars);
         this.testCase = testRunBuilder.getTestCase();
@@ -82,7 +82,7 @@ public class TestRun {
         return this.log;
     }
 
-    public SeInterpreterTestListener getListener() {
+    public TestRunListener getListener() {
         return this.listener;
     }
 
@@ -90,8 +90,12 @@ public class TestRun {
         return this.vars;
     }
 
+    public int currentStepIndex() {
+        return this.testRunStatus.stepIndex();
+    }
+
     public Step currentStep() {
-        return this.testCase.steps().get(this.testRunStatus.stepIndex());
+        return this.testCase.steps().get(currentStepIndex());
     }
 
     public boolean containsKey(String key) {
@@ -113,7 +117,7 @@ public class TestRun {
     public String string(@Nonnull String key) {
         String s = this.currentStep().getParam(key);
         if (s == null) {
-            throw new RuntimeException("Missing parameter \"" + key + "\" at step #" + this.testRunStatus.stepIndex() + ".");
+            throw new RuntimeException("Missing parameter \"" + key + "\" at step #" + currentStepIndex() + ".");
         }
         return this.bindRuntimeVariables(s);
     }
@@ -164,6 +168,17 @@ public class TestRun {
         this.testRunStatus = this.testRunStatus.stop();
     }
 
+    public boolean next() {
+        try {
+            if (!this.runTest()) {
+                return this.processTestFailure();
+            }
+            return this.processTestSuccess();
+        } catch (Throwable e) {
+            return this.processTestError(e);
+        }
+    }
+
     public boolean runTest() {
         this.toNextStepIndex();
         this.startTest();
@@ -172,7 +187,7 @@ public class TestRun {
 
     public void startTest() {
         this.getAdvice().invokeBefore(this);
-        this.getListener().startTest(currentStepToString());
+        this.getListener().startTest(this.currentStepToString());
     }
 
     public void toNextStepIndex() {
@@ -209,6 +224,10 @@ public class TestRun {
         throw new AssertionError(currentStepToString() + " failed.", e);
     }
 
+    public String currentStepToString() {
+        return this.bindRuntimeVariables(this.currentStep().toPrettyString());
+    }
+
     protected boolean start() {
         this.testRunStatus = this.testRunStatus.start();
         return this.getListener().openTestSuite(this.testCase, this.testRunName, this.vars);
@@ -224,17 +243,6 @@ public class TestRun {
 
     protected boolean stepRest() {
         return testRunStatus.isNeedRunning(this.testCase.steps().size() - 1);
-    }
-
-    protected boolean next() {
-        try {
-            if (!this.runTest()) {
-                return this.processTestFailure();
-            }
-            return this.processTestSuccess();
-        } catch (Throwable e) {
-            return this.processTestError(e);
-        }
     }
 
     protected boolean end(boolean success) {
@@ -305,7 +313,4 @@ public class TestRun {
         }
     }
 
-    protected String currentStepToString() {
-        return this.bindRuntimeVariables(this.currentStep().toPrettyString());
-    }
 }
