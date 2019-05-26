@@ -25,19 +25,19 @@ public class Retry implements FlowStep, GetterUseStep {
      * should return false. Other failures should throw a RuntimeException.
      */
     public boolean run(TestRun ctx) {
-        ctx.processTestSuccess();
         int actions = getSubSteps(ctx);
         while (!this.test(ctx)) {
+            ctx.processTestSuccess();
             if (!this.runSubStep(ctx, actions)) {
                 ctx.processTestFailure();
                 return false;
             }
             ctx.processTestSuccess();
             ctx.backStepIndex(actions);
+            ctx.startTest();
         }
         ctx.processTestSuccess();
-        ctx.forwardStepIndex(actions);
-        ctx.startTest();
+        this.skipSubStep(ctx, actions);
         return true;
     }
 

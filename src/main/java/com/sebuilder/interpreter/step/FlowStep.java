@@ -7,6 +7,11 @@ import com.sebuilder.interpreter.TestRun;
 
 public interface FlowStep extends StepType {
 
+    default int getSubSteps(TestRun ctx) {
+        int subStepCount = Integer.valueOf(ctx.string("subStep"));
+        return subStepCount;
+    }
+
     default boolean runSubStep(TestRun ctx, int actions) {
         boolean success = true;
         for (int exec = 0; exec < actions; exec++) {
@@ -21,15 +26,30 @@ public interface FlowStep extends StepType {
             if (exec != actions - 1) {
                 if (success) {
                     ctx.processTestSuccess();
+                } else {
+                    ctx.processTestFailure();
                 }
             }
         }
         return success;
     }
 
-    default int getSubSteps(TestRun ctx) {
-        int subStepCount = Integer.valueOf(ctx.string("subStep"));
-        return subStepCount;
+    default void skipSubStep(TestRun ctx, int actions) {
+        for (int i = 0; i < actions; i++) {
+            ctx.toNextStepIndex();
+            ctx.getListener().startTest(
+                    ctx.bindRuntimeVariables(
+                            ctx.currentStep()
+                                    .builder()
+                                    .put("skip", "true")
+                                    .build()
+                                    .toPrettyString()
+                    )
+            );
+            if (i != actions - 1) {
+                ctx.processTestSuccess();
+            }
+        }
     }
 
     @Override

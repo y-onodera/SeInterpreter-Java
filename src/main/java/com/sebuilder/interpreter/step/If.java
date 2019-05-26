@@ -34,21 +34,7 @@ public class If implements FlowStep, GetterUseStep {
             }
         } else {
             ctx.processTestSuccess();
-            for (int i = 0; i < actions; i++) {
-                ctx.toNextStepIndex();
-                ctx.getListener().startTest(
-                        ctx.bindRuntimeVariables(
-                                ctx.currentStep()
-                                        .builder()
-                                        .put("skip", "true")
-                                        .build()
-                                        .toPrettyString()
-                        )
-                );
-                if (i != actions - 1) {
-                    ctx.processTestSuccess();
-                }
-            }
+            this.skipSubStep(ctx, actions);
         }
         return true;
     }
