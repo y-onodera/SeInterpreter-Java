@@ -72,6 +72,15 @@ public class Aspect {
             }
             return true;
         }
+
+        public boolean invokeFailure(TestRun testRun) {
+            for (Interceptor interceptor : this.advices) {
+                if (!interceptor.invokeFailure(testRun)) {
+                    return false;
+                }
+            }
+            return true;
+        }
     }
 
     public static class Builder {

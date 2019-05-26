@@ -53,6 +53,9 @@ public class AspectFactory {
                 if (aspect.has("after")) {
                     interceptorBuilder.addAfter(this.getStepTypeFactory().parseStep(aspect.getJSONObject("after")));
                 }
+                if (aspect.has("failure")) {
+                    interceptorBuilder.addFailure(this.getStepTypeFactory().parseStep(aspect.getJSONObject("failure")));
+                }
                 interceptorBuilder.build();
             }
             result = builder.build();

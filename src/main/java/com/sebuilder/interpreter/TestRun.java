@@ -211,6 +211,7 @@ public class TestRun {
 
     public boolean processTestFailure() {
         this.getListener().addFailure(currentStepToString() + " failed.");
+        this.getAdvice().invokeFailure(this);
         // If a verify failed, we just note this but continue.
         if (this.currentStep().getType() instanceof Verify) {
             return false;

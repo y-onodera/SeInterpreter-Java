@@ -13,10 +13,13 @@ public class Interceptor {
 
     private final ArrayList<Step> afterStep;
 
-    public Interceptor(Predicate<Step> pointcut, ArrayList<Step> beforeStep, ArrayList<Step> afterStep) {
+    private final ArrayList<Step> failureStep;
+
+    public Interceptor(Predicate<Step> pointcut, ArrayList<Step> beforeStep, ArrayList<Step> afterStep, ArrayList<Step> failureStep) {
         this.pointcut = pointcut;
         this.beforeStep = Lists.newArrayList(beforeStep);
         this.afterStep = Lists.newArrayList(afterStep);
+        this.failureStep = Lists.newArrayList(failureStep);
     }
 
     public boolean isPointcut(Step step) {
@@ -29,6 +32,10 @@ public class Interceptor {
 
     public boolean invokeAfter(TestRun testRun) {
         return this.invokeAdvise(testRun, this.afterStep, "after");
+    }
+
+    public boolean invokeFailure(TestRun testRun) {
+        return this.invokeAdvise(testRun, this.failureStep, "failure");
     }
 
     protected boolean invokeAdvise(TestRun testRun, ArrayList<Step> steps, String testRunName) {
@@ -83,6 +90,8 @@ public class Interceptor {
 
         private ArrayList<Step> afterStep = Lists.newArrayList();
 
+        private ArrayList<Step> failureStep = Lists.newArrayList();
+
         public Builder(Aspect.Builder builder) {
             aspectBuilder = builder;
         }
@@ -102,8 +111,13 @@ public class Interceptor {
             return this;
         }
 
+        public Builder addFailure(ArrayList<Step> failure) {
+            this.failureStep.addAll(failure);
+            return this;
+        }
+
         public Aspect.Builder build() {
-            return this.aspectBuilder.add(new Interceptor(this.pointcut, this.beforeStep, this.afterStep));
+            return this.aspectBuilder.add(new Interceptor(this.pointcut, this.beforeStep, this.afterStep, this.failureStep));
         }
     }
 }
