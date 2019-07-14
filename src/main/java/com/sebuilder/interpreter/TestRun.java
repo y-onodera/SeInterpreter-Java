@@ -250,7 +250,7 @@ public class TestRun {
     protected boolean end(boolean success) {
         this.getListener().closeTestSuite();
         if (success && this.testRunStatus.isNeedChain()) {
-            return this.chainRun(this.scenario.getChainTo(this.testCase));
+            return this.chainRun(this.scenario.getChainTo(this.testCase), this.vars);
         }
         return success;
     }
@@ -272,19 +272,21 @@ public class TestRun {
         return weaver.advice(this.currentStep());
     }
 
-    protected boolean chainRun(TestCase chainTo) {
+    protected boolean chainRun(TestCase chainTo, TestData varTakeOver) {
         this.testRunStatus = this.testRunStatus.chainCalled();
-        if (chainTo.skipRunning(this.vars)) {
-            return this.nextChain(chainTo);
+        if (chainTo.skipRunning(varTakeOver)) {
+            return this.nextChain(chainTo, varTakeOver);
         }
-        for (TestData data : chainTo.loadData(this.vars)) {
-            TestData chainData = this.vars.clearRowNumber().add(data);
+        TestData takeOver = varTakeOver;
+        for (TestData data : chainTo.loadData(varTakeOver)) {
+            TestData chainData = varTakeOver.clearRowNumber().add(data);
             TestRun testRun = createChainRun(chainTo, chainData);
+            takeOver = testRun.vars;
             if (!testRun.finish()) {
                 return false;
             }
         }
-        return chainTo.isNestedChain() || this.nextChain(chainTo);
+        return chainTo.isNestedChain() || this.nextChain(chainTo, takeOver);
     }
 
     protected TestRun createChainRun(TestCase chainTo, TestData data) {
@@ -297,9 +299,9 @@ public class TestRun {
                 .createTestRun(data, this);
     }
 
-    protected boolean nextChain(TestCase chainTo) {
+    protected boolean nextChain(TestCase chainTo, TestData varTakeOver) {
         if (this.scenario.hasChain(chainTo)) {
-            return this.chainRun(this.scenario.getChainTo(chainTo));
+            return this.chainRun(this.scenario.getChainTo(chainTo), varTakeOver);
         }
         return true;
     }

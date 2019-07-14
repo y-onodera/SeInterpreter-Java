@@ -1304,7 +1304,7 @@ public class TestRunTest {
             Mockito.doReturn(true)
                     .when(this.listener)
                     .openTestSuite(Mockito.eq(this.chainCase2), Mockito.eq(TestCase.DEFAULT_SCRIPT_NAME + "_chainCase2"), Mockito.any(TestData.class));
-            Mockito.doNothing().when(this.listener).startTest("chain2: ClickElement key=default");
+            Mockito.doNothing().when(this.listener).startTest("chain2: ClickElement key=2");
             Mockito.doReturn(true).when(this.chainStep2).run(Mockito.any());
 
             assertTrue(target.finish());
@@ -1322,7 +1322,7 @@ public class TestRunTest {
             Mockito.verify(this.listener).startTest("chain: ClickElement key=1");
             Mockito.verify(this.listener).startTest("chain: ClickElement key=2");
             Mockito.verify(this.chainStep, Mockito.times(2)).run(Mockito.any());
-            Mockito.verify(this.listener).startTest("chain2: ClickElement key=default");
+            Mockito.verify(this.listener).startTest("chain2: ClickElement key=2");
             Mockito.verify(this.chainStep2).run(Mockito.any());
             Mockito.verify(this.listener, Mockito.times(4)).endTest();
             Mockito.verify(this.listener, Mockito.times(4)).closeTestSuite();
@@ -1464,7 +1464,7 @@ public class TestRunTest {
             Mockito.doReturn(true)
                     .when(this.listener)
                     .openTestSuite(Mockito.eq(this.chainCase2), Mockito.eq(TestCase.DEFAULT_SCRIPT_NAME + "_chainCase2"), Mockito.any(TestData.class));
-            Mockito.doNothing().when(this.listener).startTest("chain2: ClickElement key=change");
+            Mockito.doNothing().when(this.listener).startTest("chain2: ClickElement key=2");
             Mockito.doReturn(true).when(this.chainStep2).run(Mockito.any());
 
             this.target.putVars("key", "change");
@@ -1483,7 +1483,7 @@ public class TestRunTest {
             Mockito.verify(this.listener).startTest("chain: ClickElement key=1");
             Mockito.verify(this.listener).startTest("chain: ClickElement key=2");
             Mockito.verify(this.chainStep, Mockito.times(2)).run(Mockito.any());
-            Mockito.verify(this.listener).startTest("chain2: ClickElement key=change");
+            Mockito.verify(this.listener).startTest("chain2: ClickElement key=2");
             Mockito.verify(this.chainStep2).run(Mockito.any());
             Mockito.verify(this.listener, Mockito.times(4)).endTest();
             Mockito.verify(this.listener, Mockito.times(4)).closeTestSuite();
