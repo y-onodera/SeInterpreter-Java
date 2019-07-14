@@ -291,7 +291,7 @@ public class TestCase implements TestRunnable {
 
     public TestCase breakNestedChain(boolean breakNestedChain) {
         return this.builder()
-                .isBreakNestedChain(nestedChain)
+                .isBreakNestedChain(breakNestedChain)
                 .build();
     }
 
