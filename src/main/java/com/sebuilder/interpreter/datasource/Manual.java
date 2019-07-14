@@ -26,7 +26,7 @@ public class Manual implements DataSource {
         config.keySet()
                 .stream()
                 .forEach(key -> config.put(key, vars.bind(config.get(key))));
-        return Collections.singletonList(new TestData(config));
+        return Collections.singletonList(new TestData(config).lastRow(true));
     }
 
     @Override

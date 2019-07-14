@@ -60,6 +60,10 @@ public class Csv implements DataSource {
                     }
                     data.add(new TestData(row));
                 }
+                final int lastRowNumber = rowNumber - 2;
+                TestData lastRow = data.get(lastRowNumber).lastRow(true);
+                data.remove(lastRowNumber);
+                data.add(lastRow);
             }
         } catch (Exception e) {
             throw new RuntimeException("Unable to get data.", e);

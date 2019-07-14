@@ -56,6 +56,10 @@ public class Xml implements DataSource {
                 }
                 data.add(new TestData(row));
             }
+            final int lastRowNumber = rows.getLength() - 1;
+            TestData lastRow = data.get(lastRowNumber).lastRow(true);
+            data.remove(lastRowNumber);
+            data.add(lastRow);
         } catch (Exception e) {
             throw new RuntimeException("Unable to get data.", e);
         }

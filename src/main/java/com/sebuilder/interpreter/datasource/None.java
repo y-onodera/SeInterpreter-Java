@@ -32,7 +32,7 @@ public class None implements DataSource {
         ArrayList<TestData> l = Lists.newArrayList();
         final HashMap<String, String> row = new HashMap<>();
         row.put(TestData.ROW_NUMBER, String.valueOf(1));
-        l.add(new TestData(row));
+        l.add(new TestData(row).lastRow(true));
         return l;
     }
 

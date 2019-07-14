@@ -15,12 +15,19 @@ public class TestData {
 
     private final Map<String, String> row;
 
+    private final boolean lastRow;
+
     public TestData() {
-        this.row = EMPTY;
+        this(EMPTY, true);
     }
 
     public TestData(Map<String, String> row) {
+        this(row, false);
+    }
+
+    public TestData(Map<String, String> row, boolean lastRow) {
         this.row = Maps.newHashMap(row);
+        this.lastRow = lastRow;
     }
 
     public String rowNumber() {
@@ -32,27 +39,31 @@ public class TestData {
     }
 
     public TestData clearRowNumber() {
-        TestData result = new TestData(this.row);
+        TestData result = copy();
         result.row.remove(ROW_NUMBER);
         return result;
     }
 
     public TestData add(TestData shareInput) {
-        TestData result = new TestData(this.row);
+        TestData result = this.copy();
         result.row.putAll(shareInput.row);
         return result;
     }
 
     public TestData add(Map<String, String> initialVars) {
-        TestData result = new TestData(this.row);
+        TestData result = this.copy();
         result.row.putAll(initialVars);
         return result;
     }
 
     public TestData add(String key, String value) {
-        TestData result = new TestData(this.row);
+        TestData result = this.copy();
         result.row.put(key, value);
         return result;
+    }
+
+    public TestData lastRow(boolean isLastRow) {
+        return new TestData(this.row, isLastRow);
     }
 
     public String bind(String s) {
@@ -67,11 +78,19 @@ public class TestData {
     }
 
     public Builder builder() {
-        return new Builder(Maps.newHashMap(this.row));
+        return new Builder(Maps.newHashMap(this.row), this.lastRow);
     }
 
     public Set<Map.Entry<String, String>> entrySet() {
         return this.row.entrySet();
+    }
+
+    public boolean isLastRow() {
+        return this.lastRow;
+    }
+
+    protected TestData copy() {
+        return new TestData(this.row, this.lastRow);
     }
 
     private String replaceKeys(String s) {
@@ -111,12 +130,15 @@ public class TestData {
     public static class Builder {
         private final Map<String, String> row;
 
-        public Builder(Map<String, String> row) {
+        private final boolean lastRow;
+
+        public Builder(Map<String, String> row, boolean lastRow) {
             this.row = row;
+            this.lastRow = lastRow;
         }
 
         public TestData build() {
-            return new TestData(this.row);
+            return new TestData(this.row, this.lastRow);
         }
 
         public Builder add(TestData shareInput) {

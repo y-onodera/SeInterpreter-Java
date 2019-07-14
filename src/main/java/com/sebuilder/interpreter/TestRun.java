@@ -300,6 +300,9 @@ public class TestRun {
     }
 
     protected boolean nextChain(TestCase chainTo, TestData varTakeOver) {
+        if (this.testCase.isNestedChain() && !chainTo.isNestedChain() && !varTakeOver.isLastRow()) {
+            return true;
+        }
         if (this.scenario.hasChain(chainTo)) {
             return this.chainRun(this.scenario.getChainTo(chainTo), varTakeOver);
         }
