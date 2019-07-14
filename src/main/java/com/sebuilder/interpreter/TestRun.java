@@ -222,6 +222,7 @@ public class TestRun {
 
     public boolean processTestError(Throwable e) {
         this.getListener().addError(e);
+        this.getAdvice().invokeFailure(this);
         throw new AssertionError(currentStepToString() + " failed.", e);
     }
 
