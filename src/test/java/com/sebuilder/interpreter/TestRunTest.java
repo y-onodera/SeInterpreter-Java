@@ -790,7 +790,8 @@ public class TestRunTest {
             this.interceptor = Mockito.spy(new Interceptor(
                     it -> "name".equals(it.getName())
                     , Lists.newArrayList(this.aspectBeforeStep)
-                    , Lists.newArrayList(this.aspectAfterStep)));
+                    , Lists.newArrayList(this.aspectAfterStep)
+                    , Lists.newArrayList()));
             final Aspect aspect = new Aspect(Lists.newArrayList(interceptor));
             Mockito.doReturn(new File(".", "result")).when(this.adviseListener).getResultDir();
             Mockito.doReturn(new File(".", "screenshot")).when(this.adviseListener).getScreenShotOutputDirectory();
@@ -887,7 +888,8 @@ public class TestRunTest {
             this.interceptor = Mockito.spy(new Interceptor(
                     it -> "chain".equals(it.getName())
                     , Lists.newArrayList(this.aspectBeforeStep)
-                    , Lists.newArrayList(this.aspectAfterStep)));
+                    , Lists.newArrayList(this.aspectAfterStep)
+                    , Lists.newArrayList()));
             final Aspect aAspect = new Aspect(Lists.newArrayList(interceptor));
             Context.getInstance().setAspect(aAspect);
             Mockito.doReturn(new File(".", "result")).when(this.adviseListener).getResultDir();
@@ -997,7 +999,8 @@ public class TestRunTest {
             this.interceptor = Mockito.spy(new Interceptor(
                     it -> "name".equals(it.getName())
                     , Lists.newArrayList(this.aspectBeforeStep)
-                    , Lists.newArrayList(this.aspectAfterStep)));
+                    , Lists.newArrayList(this.aspectAfterStep)
+                    , Lists.newArrayList()));
             final Aspect aspect = new Aspect(Lists.newArrayList(interceptor));
             Mockito.doReturn(new File(".", "result")).when(this.adviseListener).getResultDir();
             Mockito.doReturn(new File(".", "screenshot")).when(this.adviseListener).getScreenShotOutputDirectory();
@@ -1009,7 +1012,8 @@ public class TestRunTest {
             this.contextInterceptor = Mockito.spy(new Interceptor(
                     it -> "chain".equals(it.getName())
                     , Lists.newArrayList(this.contextAspectBeforeStep)
-                    , Lists.newArrayList(this.contextAspectAfterStep)));
+                    , Lists.newArrayList(this.contextAspectAfterStep)
+                    , Lists.newArrayList()));
             final Aspect aAspect = new Aspect(Lists.newArrayList(contextInterceptor));
             Context.getInstance().setAspect(aAspect);
             Mockito.doReturn(new File(".", "result")).when(this.contextAdviseListener).getResultDir();
