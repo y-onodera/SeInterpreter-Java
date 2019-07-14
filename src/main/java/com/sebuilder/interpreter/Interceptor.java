@@ -23,6 +23,9 @@ public class Interceptor {
     }
 
     public boolean isPointcut(Step step) {
+        if (this.pointcut == Aspect.NONE) {
+            return this.beforeStep.size() == 0 && this.afterStep.size() == 0 && this.failureStep.size() > 0;
+        }
         return this.pointcut.test(step);
     }
 
