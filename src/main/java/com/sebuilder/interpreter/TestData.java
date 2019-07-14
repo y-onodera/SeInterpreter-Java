@@ -2,6 +2,7 @@ package com.sebuilder.interpreter;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.Maps;
+import org.apache.commons.jexl3.*;
 import org.openqa.selenium.Keys;
 
 import java.util.HashMap;
@@ -66,6 +67,18 @@ public class TestData {
         return new TestData(this.row, isLastRow);
     }
 
+    public boolean evaluate(String target) {
+        String result = this.bind(target);
+        String exp = this.extractExpression(result);
+        if (Objects.equal(result, exp)) {
+            return Boolean.valueOf(result);
+        }
+        JexlEngine jexl = new JexlBuilder().create();
+        JexlExpression expression = jexl.createExpression(exp);
+        JexlContext jc = new MapContext(new HashMap(this.row));
+        return Boolean.valueOf(expression.evaluate(jc).toString());
+    }
+
     public String bind(String s) {
         // Sub special keys using the !{keyname} syntax.
         String result = this.replaceKeys(s);
@@ -105,6 +118,10 @@ public class TestData {
             variable = variable.replace("${" + v.getKey() + "}", v.getValue());
         }
         return variable;
+    }
+
+    private String extractExpression(String result) {
+        return result.replaceAll("\\$\\{(.+)\\}", "$1");
     }
 
     @Override

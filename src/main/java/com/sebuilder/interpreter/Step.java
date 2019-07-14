@@ -72,7 +72,7 @@ public class Step {
 
     public boolean isSkip(TestData vars) {
         if (this.isSkippable()) {
-            return Boolean.parseBoolean(vars.bind(this.getParam("skip")));
+            return vars.evaluate(this.getParam("skip"));
         }
         return false;
     }

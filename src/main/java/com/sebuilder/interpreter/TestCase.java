@@ -154,7 +154,7 @@ public class TestCase implements TestRunnable {
     }
 
     public boolean skipRunning(TestData testData) {
-        return Boolean.valueOf(testData.bind(this.skip));
+        return testData.evaluate(this.skip);
     }
 
     public TestCase rename(String aName) {
