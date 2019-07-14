@@ -277,15 +277,22 @@ public class TestRun {
         if (chainTo.skipRunning(varTakeOver)) {
             return this.nextChain(chainTo, varTakeOver);
         }
+        if (chainTo.isBreakNestedChain() && !varTakeOver.isLastRow()) {
+            return true;
+        }
         TestData takeOver = varTakeOver;
         for (TestData data : chainTo.loadData(varTakeOver)) {
             TestData chainData = varTakeOver.clearRowNumber().add(data);
+            if (chainTo.isNestedChain()) {
+                chainData = chainData.lastRow(data.isLastRow());
+            }
             TestRun testRun = createChainRun(chainTo, chainData);
             takeOver = testRun.vars;
             if (!testRun.finish()) {
                 return false;
             }
         }
+        takeOver = takeOver.lastRow(varTakeOver.isLastRow());
         return chainTo.isNestedChain() || this.nextChain(chainTo, takeOver);
     }
 
@@ -300,9 +307,6 @@ public class TestRun {
     }
 
     protected boolean nextChain(TestCase chainTo, TestData varTakeOver) {
-        if (this.testCase.isNestedChain() && !chainTo.isNestedChain() && !varTakeOver.isLastRow()) {
-            return true;
-        }
         if (this.scenario.hasChain(chainTo)) {
             return this.chainRun(this.scenario.getChainTo(chainTo), varTakeOver);
         }

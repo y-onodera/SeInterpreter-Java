@@ -17,6 +17,7 @@ public class TestCaseBuilder {
     private String skip;
     private ScriptFile scriptFile;
     private boolean nestedChain;
+    private boolean breakNestedChain;
 
     public TestCaseBuilder() {
         this.steps = new ArrayList<>();
@@ -43,6 +44,7 @@ public class TestCaseBuilder {
         this.overrideDataSourceConfig = currentDisplay.overrideDataSourceConfig();
         this.skip = currentDisplay.skip();
         this.nestedChain = currentDisplay.isNestedChain();
+        this.breakNestedChain = currentDisplay.isBreakNestedChain();
     }
 
     public static TestCase lazyLoad(String beforeReplace, Function<TestData, TestCase> lazyLoad) {
@@ -108,6 +110,10 @@ public class TestCaseBuilder {
         return this.nestedChain;
     }
 
+    public boolean isBreakNestedChain() {
+        return this.breakNestedChain;
+    }
+
     public TestCaseBuilder clearStep() {
         this.steps.clear();
         return this;
@@ -152,6 +158,11 @@ public class TestCaseBuilder {
 
     public TestCaseBuilder isNestedChain(boolean nestedChain) {
         this.nestedChain = nestedChain;
+        return this;
+    }
+
+    public TestCaseBuilder isBreakNestedChain(boolean breakNestedChain) {
+        this.breakNestedChain = breakNestedChain;
         return this;
     }
 

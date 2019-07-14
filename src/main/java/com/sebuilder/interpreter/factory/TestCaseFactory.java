@@ -226,7 +226,10 @@ public class TestCaseFactory {
                     .overrideDataSource(dataSource, config)
                     .build();
         }
-        resultTestCase = resultTestCase.skip(this.getSkip(script)).nestedChain(this.isNestedChain(script));
+        resultTestCase = resultTestCase.skip(this.getSkip(script))
+                .nestedChain(this.isNestedChain(script))
+                .breakNestedChain(this.isBreakNestedChain(script))
+        ;
         return resultTestCase;
     }
 
@@ -234,6 +237,14 @@ public class TestCaseFactory {
         boolean result = false;
         if (script.has("nestedChain")) {
             result = script.getBoolean("nestedChain");
+        }
+        return result;
+    }
+
+    private boolean isBreakNestedChain(JSONObject script) throws JSONException {
+        boolean result = false;
+        if (script.has("breakNestedChain")) {
+            result = script.getBoolean("breakNestedChain");
         }
         return result;
     }

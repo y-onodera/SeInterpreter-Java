@@ -45,6 +45,7 @@ public class TestCase implements TestRunnable {
     private final String skip;
     private final ScriptFile scriptFile;
     private boolean nestedChain;
+    private boolean breakNestedChain;
 
     public TestCase(TestCaseBuilder testCaseBuilder) {
         this.steps = testCaseBuilder.getSteps();
@@ -56,6 +57,7 @@ public class TestCase implements TestRunnable {
         this.overrideDataSet = testCaseBuilder.getOverrideDataSet();
         this.skip = testCaseBuilder.getSkip();
         this.nestedChain = testCaseBuilder.isNestedChain();
+        this.breakNestedChain = testCaseBuilder.isBreakNestedChain();
     }
 
     @Override
@@ -143,6 +145,10 @@ public class TestCase implements TestRunnable {
 
     public boolean isNestedChain() {
         return this.nestedChain;
+    }
+
+    public boolean isBreakNestedChain() {
+        return this.breakNestedChain;
     }
 
     public boolean isLazyLoad() {
@@ -280,6 +286,12 @@ public class TestCase implements TestRunnable {
     public TestCase nestedChain(boolean nestedChain) {
         return this.builder()
                 .isNestedChain(nestedChain)
+                .build();
+    }
+
+    public TestCase breakNestedChain(boolean breakNestedChain) {
+        return this.builder()
+                .isBreakNestedChain(nestedChain)
                 .build();
     }
 

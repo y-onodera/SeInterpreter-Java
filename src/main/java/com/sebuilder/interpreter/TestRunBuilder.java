@@ -106,7 +106,7 @@ public class TestRunBuilder {
     }
 
     public TestRun createTestRun(Logger log, RemoteWebDriver driver, TestData initialVars, TestRunListener seInterpreterTestListener) {
-        TestData data = this.shareInput.add(initialVars);
+        TestData data = this.shareInput.add(initialVars).lastRow(initialVars.isLastRow());
         return new TestRun(this, log, driver, data, seInterpreterTestListener);
     }
 
