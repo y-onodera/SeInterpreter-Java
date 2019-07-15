@@ -6,11 +6,12 @@
 
 package com.sebuilder.interpreter.datasource;
 
+import com.google.common.collect.Lists;
 import com.sebuilder.interpreter.DataSource;
 import com.sebuilder.interpreter.TestData;
 
 import java.io.File;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -22,11 +23,12 @@ import java.util.Map;
 public class Manual implements DataSource {
     @Override
     public List<TestData> getData(Map<String, String> config, File relativeTo, TestData vars) {
-        config.put(TestData.ROW_NUMBER, String.valueOf(1));
+        Map<String, String> row = new HashMap<>(config);
+        row.put(TestData.ROW_NUMBER, String.valueOf(1));
         config.keySet()
                 .stream()
-                .forEach(key -> config.put(key, vars.bind(config.get(key))));
-        return Collections.singletonList(new TestData(config).lastRow(true));
+                .forEach(key -> row.put(key, vars.bind(config.get(key))));
+        return Lists.newArrayList(new TestData(row).lastRow(true));
     }
 
     @Override
