@@ -42,6 +42,9 @@ public class Interceptor {
     }
 
     protected boolean invokeAdvise(TestRun testRun, ArrayList<Step> steps, String testRunName) {
+        if (steps.size() == 0) {
+            return true;
+        }
         final TestCase adviseCase = this.createAdviseCase(steps, testRunName);
         TestRun interceptRun = this.createInterceptorRun(testRun, adviseCase);
         return interceptRun.finish();
