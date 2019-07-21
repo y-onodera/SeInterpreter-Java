@@ -5,7 +5,7 @@ import org.openqa.selenium.WebElement;
 
 import java.awt.image.BufferedImage;
 
-public class Frame extends InnerElement {
+public class Frame extends AbstractInnerElement {
 
     public Frame(Printable parentPage
             , WebElement element

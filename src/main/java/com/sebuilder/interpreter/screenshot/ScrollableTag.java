@@ -2,7 +2,7 @@ package com.sebuilder.interpreter.screenshot;
 
 import org.openqa.selenium.WebElement;
 
-public class ScrollableTag extends InnerElement {
+public class ScrollableTag extends AbstractInnerElement {
 
     public ScrollableTag(Printable parentPage
             , WebElement element
@@ -27,7 +27,7 @@ public class ScrollableTag extends InnerElement {
 
     @Override
     public int scrollOutVertically(int printedHeight, int scrolledHeight) {
-        if (this.getScrollHeight() <= scrolledHeight && this.getParent().hasVerticalScroll()) {
+        if (this.getScrollHeight() < scrolledHeight && this.getParent().hasVerticalScroll()) {
             return this.getParent().scrollOutVertically(printedHeight, this.getPointY() + scrolledHeight - this.getScrollHeight());
         }
         int couldNotScroll = super.scrollOutVertically(printedHeight, scrolledHeight);

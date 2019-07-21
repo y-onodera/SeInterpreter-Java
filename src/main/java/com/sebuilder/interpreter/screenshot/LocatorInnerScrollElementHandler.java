@@ -87,49 +87,59 @@ public class LocatorInnerScrollElementHandler implements InnerScrollElementHandl
                 .collect(Collectors.toList());
 
         for (WebElement targetDiv : divs) {
-            Point framePoint = targetDiv.getLocation();
-
-            int height = new BigDecimal(targetDiv.getCssValue("height").replaceAll("[^0-9\\.]", "")).intValue();
-            int clientHeight = Integer.valueOf(targetDiv.getAttribute("clientHeight"));
-            int scrollableDivHeight = Integer.valueOf(targetDiv.getAttribute("scrollHeight"));
-
-            int width = new BigDecimal(targetDiv.getCssValue("width").replaceAll("[^0-9\\.]", "")).intValue();
-            int clientWidth = Integer.valueOf(targetDiv.getAttribute("clientWidth"));
-            int scrollableDivWidth = Integer.valueOf(targetDiv.getAttribute("scrollWidth"));
-
-            int borderHeight = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('border-top-width'));", targetDiv)).intValue();
-            int pointY = framePoint.getY() + borderHeight;
-            int borderWidth = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('border-left-width'));", targetDiv)).intValue();
-            int pointX = framePoint.getX() + borderWidth;
-            if (Objects.equal(targetDiv.getCssValue("box-sizing"), "border-box")) {
-                height = height - borderHeight * 2;
-                width = width - borderWidth * 2;
+            ScrollableTag tag = getScrollableTag(parent, testRun, targetDiv);
+            if (testRun.currentStep().locatorContains("locatorHeader")) {
+                InnerElement headerArea = getScrollableTag(parent, testRun, testRun.locator("locatorHeader").find(testRun));
+                InnerElement withHeader = new InnerElementWithHeader(tag, headerArea);
+                innerPrintableElement.put(withHeader.getPointY(), withHeader);
             } else {
-                int paddingTop = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-top') || document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding'));", targetDiv)).intValue();
-                pointY = pointY + paddingTop;
-                int paddingLeft = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-left') || document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding'));", targetDiv)).intValue();
-                pointX = pointX + paddingLeft;
+                innerPrintableElement.put(tag.getPointY(), tag);
             }
-            if (testRun.driver() instanceof FirefoxDriver) {
-                int paddingBottom = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-bottom') || document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding'));", targetDiv)).intValue();
-                height = height - paddingBottom;
-                int paddingRight = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-right') || document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding'));", targetDiv)).intValue();
-                width = width - paddingRight;
-            }
-            scrollableDivHeight = scrollableDivHeight - (clientHeight - height);
-            scrollableDivWidth = scrollableDivWidth - (clientWidth - width);
-
-            ScrollableTag tag = new ScrollableTag(parent
-                    , targetDiv
-                    , pointY
-                    , scrollableDivHeight
-                    , height
-                    , pointX
-                    , scrollableDivWidth
-                    , width
-            );
-            innerPrintableElement.put(tag.getPointY(), tag);
         }
+    }
+
+    protected ScrollableTag getScrollableTag(Printable parent, TestRun testRun, WebElement targetDiv) {
+        Point framePoint = targetDiv.getLocation();
+
+        int height = new BigDecimal(targetDiv.getCssValue("height").replaceAll("[^0-9\\.]", "")).intValue();
+        int clientHeight = Integer.valueOf(targetDiv.getAttribute("clientHeight"));
+        int scrollableDivHeight = Integer.valueOf(targetDiv.getAttribute("scrollHeight"));
+
+        int width = new BigDecimal(targetDiv.getCssValue("width").replaceAll("[^0-9\\.]", "")).intValue();
+        int clientWidth = Integer.valueOf(targetDiv.getAttribute("clientWidth"));
+        int scrollableDivWidth = Integer.valueOf(targetDiv.getAttribute("scrollWidth"));
+
+        int borderHeight = ((Number) JavascriptExecutor.class.cast(testRun.driver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('border-top-width'));", targetDiv)).intValue();
+        int pointY = framePoint.getY() + borderHeight;
+        int borderWidth = ((Number) JavascriptExecutor.class.cast(testRun.driver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('border-left-width'));", targetDiv)).intValue();
+        int pointX = framePoint.getX() + borderWidth;
+        if (Objects.equal(targetDiv.getCssValue("box-sizing"), "border-box")) {
+            height = height - borderHeight * 2;
+            width = width - borderWidth * 2;
+        } else {
+            int paddingTop = ((Number) JavascriptExecutor.class.cast(testRun.driver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-top') || document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding'));", targetDiv)).intValue();
+            pointY = pointY + paddingTop;
+            int paddingLeft = ((Number) JavascriptExecutor.class.cast(testRun.driver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-left') || document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding'));", targetDiv)).intValue();
+            pointX = pointX + paddingLeft;
+        }
+        if (testRun.driver() instanceof FirefoxDriver) {
+            int paddingBottom = ((Number) JavascriptExecutor.class.cast(testRun.driver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-bottom') || document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding'));", targetDiv)).intValue();
+            height = height - paddingBottom;
+            int paddingRight = ((Number) JavascriptExecutor.class.cast(testRun.driver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-right') || document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding'));", targetDiv)).intValue();
+            width = width - paddingRight;
+        }
+        scrollableDivHeight = scrollableDivHeight - (clientHeight - height);
+        scrollableDivWidth = scrollableDivWidth - (clientWidth - width);
+
+        return new ScrollableTag(parent
+                , targetDiv
+                , pointY
+                , scrollableDivHeight
+                , height
+                , pointX
+                , scrollableDivWidth
+                , width
+        );
     }
 
     protected int getPointY(WebElement targetFrame, int border, RemoteWebDriver wd) {
