@@ -46,8 +46,12 @@ public class InnerElementWithHeader implements InnerElement {
                 , headerImage.getWidth()
                 , element.convertImageHeight(this.element.getPointY() - this.headerElement.getPointY()));
         graphics.drawImage(headerImage, 0, 0, null);
+        int mainImageStartFrom = element.convertDocumentHeight(headerImage.getHeight());
+        if (!this.element.getParent().hasVerticalScroll()) {
+            mainImageStartFrom = mainImageStartFrom + fromPointY;
+        }
         graphics.drawImage(this.element.printImage(aPrinter
-                , element.convertDocumentHeight(headerImage.getHeight()))
+                , mainImageStartFrom)
                 , 0
                 , headerImage.getHeight()
                 , null);
