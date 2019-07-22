@@ -101,7 +101,12 @@ public class FileDownload implements ConditionalStep, LocatorHolder {
     public void downLoadFile(TestRun ctx, String outputFilePath, Response response) throws IOException {
         ResponseBody body = response.body();
         if (body != null) {
-            File outputFile = new File(ctx.getListener().getDownloadDirectory(), ctx.getTestRunName() + "_" + outputFilePath);
+            File outputFile;
+            if (ctx.getBoolean("fixedPath")) {
+                outputFile = new File(ctx.getListener().getDownloadDirectory(), outputFilePath);
+            } else {
+                outputFile = new File(ctx.getListener().getDownloadDirectory(), ctx.getTestRunName() + "_" + outputFilePath);
+            }
             try (InputStream inputStream = body.byteStream(); FileOutputStream fileOutputStream = new FileOutputStream(outputFile)) {
                 int read;
                 byte[] bytes = new byte[1024];
