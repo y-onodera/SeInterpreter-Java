@@ -61,6 +61,9 @@ public class TestRun {
                 .add("_downloadDir", seInterpreterTestListener.getDownloadDirectory().getAbsolutePath())
                 .add("_templateDir", seInterpreterTestListener.getTemplateOutputDirectory().getAbsolutePath())
                 .build();
+        if (this.testCase.relativePath() != null) {
+            this.vars = this.vars.add("_relativePath", this.testCase.relativePath().getAbsolutePath());
+        }
         this.scenario = testRunBuilder.getScenario();
         this.aspect = this.scenario.aspect();
         this.preventContextAspect = testRunBuilder.isPreventContextAspect();
