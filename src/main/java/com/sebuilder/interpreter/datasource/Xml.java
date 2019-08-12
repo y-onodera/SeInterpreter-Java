@@ -31,7 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.sebuilder.interpreter.datasource.Utils.findFile;
+import static com.sebuilder.interpreter.Utils.findFile;
 
 /**
  * XML data source compatible with the standard IDE approach.

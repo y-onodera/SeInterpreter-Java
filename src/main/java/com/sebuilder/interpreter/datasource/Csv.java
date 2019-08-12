@@ -27,7 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.sebuilder.interpreter.datasource.Utils.findFile;
+import static com.sebuilder.interpreter.Utils.findFile;
 
 /**
  * CSV-based data source.

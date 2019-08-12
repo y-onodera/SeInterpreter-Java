@@ -29,7 +29,7 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.*;
 
-import static com.sebuilder.interpreter.datasource.Utils.findFile;
+import static com.sebuilder.interpreter.Utils.findFile;
 
 /**
  * JSON-based data source.

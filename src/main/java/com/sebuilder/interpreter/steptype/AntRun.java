@@ -3,6 +3,7 @@ package com.sebuilder.interpreter.steptype;
 import com.google.common.base.Strings;
 import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
+import com.sebuilder.interpreter.Utils;
 import com.sebuilder.interpreter.step.Getter;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.ProjectHelper;
@@ -18,7 +19,7 @@ public class AntRun implements Getter {
      */
     @Override
     public String get(TestRun ctx) {
-        File buildFile = new File(ctx.string("build.xml"));
+        File buildFile = Utils.findFile(ctx.getRelativePath(), ctx.string("build.xml"));
         Project p = new Project();
         p.setUserProperty("ant.file", buildFile.getAbsolutePath());
         p.init();

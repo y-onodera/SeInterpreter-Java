@@ -21,6 +21,7 @@ import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import javax.annotation.Nonnull;
+import java.io.File;
 
 /**
  * A single run of a test testCase.
@@ -64,6 +65,10 @@ public class TestRun {
         this.aspect = this.scenario.aspect();
         this.preventContextAspect = testRunBuilder.isPreventContextAspect();
         this.testRunStatus = TestRunStatus.of(this.scenario, this.testCase);
+    }
+
+    public File getRelativePath() {
+        return this.testCase.relativePath();
     }
 
     public void putVars(@Nonnull String key, String value) {
@@ -323,5 +328,4 @@ public class TestRun {
             }
         }
     }
-
 }

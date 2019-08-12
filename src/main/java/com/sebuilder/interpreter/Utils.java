@@ -15,9 +15,7 @@
  */
 
 
-package com.sebuilder.interpreter.datasource;
-
-import com.sebuilder.interpreter.Context;
+package com.sebuilder.interpreter;
 
 import java.io.File;
 
