@@ -1,50 +1,27 @@
 package com.sebuilder.interpreter.steptype;
 
-import com.google.common.base.Strings;
 import com.sebuilder.interpreter.StepBuilder;
-import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
+import com.sebuilder.interpreter.step.Getter;
+import com.sebuilder.interpreter.step.GetterUseStep;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.util.Objects;
 
-public class ExecCmd implements StepType {
+public class ExecCmd implements GetterUseStep {
 
-    /**
-     * Perform the action this step consists of.
-     *
-     * @param ctx Current test run.
-     * @return Whether the step succeeded. This should be true except for failed verify steps, which
-     * should return false. Other failures should throw a RuntimeException.
-     */
+    private Cmd cmd = new Cmd();
+
+    @Override
+    public Getter getGetter() {
+        return this.cmd;
+    }
+
     @Override
     public boolean run(TestRun ctx) {
-        String[] cmd = ctx.string("cmd").split(",");
-        ProcessBuilder pb = new ProcessBuilder(cmd);
-        // 標準エラー出力を標準出力にマージする
-        pb.redirectErrorStream(true);
-        try {
-            Process process = pb.start();
-            InputStream in = process.getInputStream();
-            BufferedReader br = new BufferedReader(new InputStreamReader(in, "MS932"));
-            String stdout = "";
-            while ((stdout = br.readLine()) != null) {
-                // 不要なメッセージを表示しない
-                if (Strings.isNullOrEmpty(stdout))
-                    continue;
-                if (stdout.contains("echo off "))
-                    continue;
-                if (stdout.contains("続行するには何かキーを押してください "))
-                    continue;
-                ctx.log().info(stdout);
-            }
-            return process.waitFor() == 0;
-        } catch (InterruptedException | IOException e) {
-            ctx.log().error(e);
-            return false;
+        if (ctx.containsKey(this.getGetter().cmpParamName())) {
+            return this.test(ctx);
         }
+        return Objects.equals("0", this.getGetter().get(ctx));
     }
 
     @Override
