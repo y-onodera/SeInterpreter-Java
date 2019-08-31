@@ -55,10 +55,12 @@ public class Json implements DataSource {
                 }
                 data.add(new TestData(row));
             }
-            final int lastRowNumber = a.length() - 1;
-            TestData lastRow = data.get(lastRowNumber).lastRow(true);
-            data.remove(lastRowNumber);
-            data.add(lastRow);
+            if (a.length() > 0) {
+                final int lastRowNumber = a.length() - 1;
+                TestData lastRow = data.get(lastRowNumber).lastRow(true);
+                data.remove(lastRowNumber);
+                data.add(lastRow);
+            }
         } catch (Exception e) {
             throw new RuntimeException("Unable to get data.", e);
         }
