@@ -73,10 +73,14 @@ public class TestData {
         if (Objects.equal(result, exp)) {
             return Boolean.valueOf(result);
         }
-        JexlEngine jexl = new JexlBuilder().create();
-        JexlExpression expression = jexl.createExpression(exp);
-        JexlContext jc = new MapContext(new HashMap(this.row));
-        return Boolean.valueOf(expression.evaluate(jc).toString());
+        try {
+            JexlEngine jexl = new JexlBuilder().create();
+            JexlExpression expression = jexl.createExpression(exp);
+            JexlContext jc = new MapContext(new HashMap(this.row));
+            return Boolean.valueOf(expression.evaluate(jc).toString());
+        } catch (JexlException ex) {
+            return false;
+        }
     }
 
     public String bind(String s) {
