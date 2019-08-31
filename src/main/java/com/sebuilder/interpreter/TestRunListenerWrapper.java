@@ -12,31 +12,6 @@ public class TestRunListenerWrapper implements TestRunListener {
     }
 
     @Override
-    public void cleanResult() {
-        delegate.cleanResult();
-    }
-
-    @Override
-    public void cleanResult(File dest) {
-        delegate.cleanResult(dest);
-    }
-
-    @Override
-    public void cleanDir() {
-        delegate.cleanDir();
-    }
-
-    @Override
-    public void cleanDir(File dest) {
-        delegate.cleanDir(dest);
-    }
-
-    @Override
-    public void setUpDir(File dest) {
-        delegate.setUpDir(dest);
-    }
-
-    @Override
     public Logger getLog() {
         return delegate.getLog();
     }
@@ -59,6 +34,31 @@ public class TestRunListenerWrapper implements TestRunListener {
     @Override
     public File getTemplateOutputDirectory() {
         return delegate.getTemplateOutputDirectory();
+    }
+
+    @Override
+    public void cleanResult() {
+        delegate.cleanResult();
+    }
+
+    @Override
+    public void cleanResult(File dest) {
+        delegate.cleanResult(dest);
+    }
+
+    @Override
+    public void cleanDir() {
+        delegate.cleanDir();
+    }
+
+    @Override
+    public void cleanDir(File dest) {
+        delegate.cleanDir(dest);
+    }
+
+    @Override
+    public void setUpDir(File dest) {
+        delegate.setUpDir(dest);
     }
 
     @Override

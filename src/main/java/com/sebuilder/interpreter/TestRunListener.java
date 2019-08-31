@@ -5,15 +5,6 @@ import org.apache.logging.log4j.Logger;
 import java.io.File;
 
 public interface TestRunListener {
-    void cleanResult();
-
-    void cleanResult(File dest);
-
-    void cleanDir();
-
-    void cleanDir(File dest);
-
-    void setUpDir(File dest);
 
     Logger getLog();
 
@@ -24,6 +15,16 @@ public interface TestRunListener {
     File getScreenShotOutputDirectory();
 
     File getTemplateOutputDirectory();
+
+    void cleanResult();
+
+    void cleanResult(File dest);
+
+    void cleanDir();
+
+    void cleanDir(File dest);
+
+    void setUpDir(File dest);
 
     boolean openTestSuite(TestCase testCase, String testRunName, TestData aProperty);
 

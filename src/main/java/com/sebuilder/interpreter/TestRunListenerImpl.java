@@ -73,6 +73,31 @@ public class TestRunListenerImpl implements TestRunListener {
     }
 
     @Override
+    public Logger getLog() {
+        return log;
+    }
+
+    @Override
+    public File getResultDir() {
+        return resultDir;
+    }
+
+    @Override
+    public File getDownloadDirectory() {
+        return downloadDirectory;
+    }
+
+    @Override
+    public File getScreenShotOutputDirectory() {
+        return screenShotOutputDirectory;
+    }
+
+    @Override
+    public File getTemplateOutputDirectory() {
+        return templateOutputDirectory;
+    }
+
+    @Override
     public void cleanResult() {
         this.cleanResult(Context.getInstance().getResultOutputDirectory());
     }
@@ -115,31 +140,6 @@ public class TestRunListenerImpl implements TestRunListener {
         this.templateOutputDirectory = new File(resultDir, Context.getInstance().getTemplateOutputDirectory()).getAbsoluteFile();
         mkdir.setDir(this.templateOutputDirectory);
         mkdir.execute();
-    }
-
-    @Override
-    public Logger getLog() {
-        return log;
-    }
-
-    @Override
-    public File getResultDir() {
-        return resultDir;
-    }
-
-    @Override
-    public File getDownloadDirectory() {
-        return downloadDirectory;
-    }
-
-    @Override
-    public File getScreenShotOutputDirectory() {
-        return screenShotOutputDirectory;
-    }
-
-    @Override
-    public File getTemplateOutputDirectory() {
-        return templateOutputDirectory;
     }
 
     @Override

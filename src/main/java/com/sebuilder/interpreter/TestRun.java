@@ -149,6 +149,10 @@ public class TestRun {
         return this.testRunStatus.isStopped();
     }
 
+    public void stop() {
+        this.testRunStatus = this.testRunStatus.stop();
+    }
+
     /**
      * Runs the entire (rest of the) testCase.
      *
@@ -170,10 +174,6 @@ public class TestRun {
         } finally {
             this.testRunStatus = this.testRunStatus.finish();
         }
-    }
-
-    public void stop() {
-        this.testRunStatus = this.testRunStatus.stop();
     }
 
     public boolean next() {
