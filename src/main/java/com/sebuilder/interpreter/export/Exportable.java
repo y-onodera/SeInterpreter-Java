@@ -1,5 +1,6 @@
 package com.sebuilder.interpreter.export;
 
+import com.sebuilder.interpreter.step.type.ExportResourceBuilder;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
 

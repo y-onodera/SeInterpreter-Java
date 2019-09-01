@@ -35,7 +35,8 @@ import java.util.HashMap;
  * @author jkowalczyk
  */
 public class StepTypeFactory {
-    public static final String DEFAULT_PACKAGE = "com.sebuilder.interpreter.steptype";
+
+    public static final String DEFAULT_PACKAGE = "com.sebuilder.interpreter.step";
 
     /**
      * Primary package used to load stepType instances
@@ -106,21 +107,11 @@ public class StepTypeFactory {
                     className = className.substring("retry".length());
                     rawStepType = false;
                 }
-                if (name.equals("loop")) {
-                    className = "Loop";
-                    rawStepType = false;
-                }
                 Class<?> c = null;
-                try {
-                    c = Class.forName(this.primaryPackage + "." + className);
-                } catch (ClassNotFoundException cnfe) {
-                    try {
-                        if (this.secondaryPackage != null) {
-                            c = Class.forName(this.secondaryPackage + "." + className);
-                        }
-                    } catch (ClassNotFoundException cnfe2) {
-                        throw new RuntimeException("No implementation class for step type \"" + name + "\" could be found.", cnfe);
-                    }
+                if (rawStepType) {
+                    c = newStepType(name, className);
+                } else {
+                    c = newGetter(name, className);
                 }
                 if (c != null) try {
                     Object o = c.getDeclaredConstructor().newInstance();
@@ -152,6 +143,34 @@ public class StepTypeFactory {
         } catch (Exception e) {
             throw new RuntimeException("Step type \"" + name + "\" is not implemented.", e);
         }
+    }
+
+    protected Class<?> newGetter(String name, String className) {
+        final String errorMessage = "No implementation class for getter \"" + name + "\" could be found.";
+        final String subPackage = ".getter.";
+        return newInstance(className, errorMessage, subPackage);
+    }
+
+    protected Class<?> newStepType(String name, String className) {
+        final String errorMessage = "No implementation class for step type \"" + name + "\" could be found.";
+        final String subPackage = ".type.";
+        return newInstance(className, errorMessage, subPackage);
+    }
+
+    private Class<?> newInstance(String className, String errorMessage, String subPackage) {
+        Class<?> c = null;
+        try {
+            c = Class.forName(this.primaryPackage + subPackage + className);
+        } catch (ClassNotFoundException cnfe) {
+            try {
+                if (this.secondaryPackage != null) {
+                    c = Class.forName(this.secondaryPackage + subPackage + className);
+                }
+            } catch (ClassNotFoundException cnfe2) {
+                throw new RuntimeException(errorMessage, cnfe);
+            }
+        }
+        return c;
     }
 
     /**

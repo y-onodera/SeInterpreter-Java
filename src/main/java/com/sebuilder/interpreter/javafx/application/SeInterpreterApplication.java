@@ -19,7 +19,7 @@ import com.sebuilder.interpreter.javafx.event.file.*;
 import com.sebuilder.interpreter.javafx.event.replay.*;
 import com.sebuilder.interpreter.javafx.event.script.*;
 import com.sebuilder.interpreter.javafx.event.view.*;
-import com.sebuilder.interpreter.steptype.Get;
+import com.sebuilder.interpreter.step.type.Get;
 import javafx.application.Application;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;

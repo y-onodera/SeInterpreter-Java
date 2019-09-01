@@ -41,4 +41,8 @@ public interface StepType extends StepElement {
         return new StepBuilder(this);
     }
 
+    default boolean isContinueFailure() {
+        return false;
+    }
+
 }

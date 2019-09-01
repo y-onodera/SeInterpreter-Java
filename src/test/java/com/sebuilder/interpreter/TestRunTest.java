@@ -2,10 +2,10 @@ package com.sebuilder.interpreter;
 
 import com.google.common.collect.Lists;
 import com.sebuilder.interpreter.datasource.Csv;
-import com.sebuilder.interpreter.steptype.ClickElement;
-import com.sebuilder.interpreter.steptype.DoubleClickElement;
-import com.sebuilder.interpreter.steptype.ElementAttribute;
-import com.sebuilder.interpreter.steptype.SetElementText;
+import com.sebuilder.interpreter.step.getter.ElementAttribute;
+import com.sebuilder.interpreter.step.type.ClickElement;
+import com.sebuilder.interpreter.step.type.DoubleClickElement;
+import com.sebuilder.interpreter.step.type.SetElementText;
 import org.apache.logging.log4j.Logger;
 import org.hamcrest.CoreMatchers;
 import org.junit.*;

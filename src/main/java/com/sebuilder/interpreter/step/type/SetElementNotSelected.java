@@ -14,36 +14,31 @@
  * limitations under the License.
  */
 
-package com.sebuilder.interpreter.step;
+package com.sebuilder.interpreter.step.type;
 
-import com.google.common.base.Objects;
+import com.sebuilder.interpreter.TestRun;
+import com.sebuilder.interpreter.step.LocatorHolder;
+import org.openqa.selenium.WebElement;
 
-/**
- * Generic Verify that wraps a getter.
- *
- * @author zarkonnen
- */
-public class Verify extends Assert {
-
-    public Verify(Getter getter) {
-        super(getter);
-    }
-
+public class SetElementNotSelected implements ConditionalStep, LocatorHolder {
     @Override
-    public boolean isContinueFailure() {
+    public boolean doRun(TestRun ctx) {
+        WebElement e = ctx.locator().find(ctx);
+        if (e.isSelected()) {
+            e.click();
+        }
         return true;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Verify verify = (Verify) o;
-        return Objects.equal(getter, verify.getter);
+        if (o == null) return false;
+        return this.getClass() == o.getClass();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getter);
+        return this.getClass().getSimpleName().hashCode();
     }
 }

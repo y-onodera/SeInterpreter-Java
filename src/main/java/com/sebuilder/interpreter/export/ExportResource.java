@@ -2,7 +2,6 @@ package com.sebuilder.interpreter.export;
 
 import com.opencsv.CSVWriter;
 import com.sebuilder.interpreter.Context;
-import com.sebuilder.interpreter.TestRun;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -21,10 +20,6 @@ public class ExportResource {
         this.script = script;
         this.variables = new LinkedHashMap<>(variables);
         this.dataSourceFile = dataSourceFile;
-    }
-
-    public static ExportResourceBuilder builder(TestRun ctx) {
-        return new ExportResourceBuilder(ctx);
     }
 
     public Map<String, String> getVariables() {
