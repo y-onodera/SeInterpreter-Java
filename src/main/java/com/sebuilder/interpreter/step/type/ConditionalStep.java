@@ -33,7 +33,7 @@ public interface ConditionalStep extends StepType {
 
     boolean doRun(TestRun ctx);
 
-    default WaitFor waitForReady(){
-            return waitForActive;
+    default WaitFor waitForReady() {
+        return waitForActive;
     }
 }

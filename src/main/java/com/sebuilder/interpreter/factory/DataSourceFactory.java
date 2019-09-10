@@ -27,26 +27,29 @@ import java.util.Iterator;
 
 /**
  * Factory for data sources.
+ *
  * @author zarkonnen
  */
 public class DataSourceFactory {
-	public static final String DEFAULT_DATA_SOURCE_PACKAGE = "com.sebuilder.interpreter.datasource";
+    public static final String DEFAULT_DATA_SOURCE_PACKAGE = "com.sebuilder.interpreter.datasource";
 
     /**
      * Lazily loaded map of data sources.
      */
     private final HashMap<String, DataSource> sourcesMap = new HashMap<String, DataSource>();
 
-	private String customDataSourcePackage = null;
+    private String customDataSourcePackage = null;
 
-	public String getCustomDataSourcePackage() {
-		return customDataSourcePackage;
-	}
+    public String getCustomDataSourcePackage() {
+        return customDataSourcePackage;
+    }
 
-	/** Package from which the factory preferentially loads in data sources. */
-	public void setCustomDataSourcePackage(String customDataSourcePackage) {
-		this.customDataSourcePackage = customDataSourcePackage;
-	}
+    /**
+     * Package from which the factory preferentially loads in data sources.
+     */
+    public void setCustomDataSourcePackage(String customDataSourcePackage) {
+        this.customDataSourcePackage = customDataSourcePackage;
+    }
 
     public DataSource getDataSource(String sourceName) {
         this.loadDataSource(sourceName);
@@ -54,33 +57,33 @@ public class DataSourceFactory {
     }
 
     protected void loadDataSource(String sourceName) {
-		if (!sourcesMap.containsKey(sourceName)) {
-			String className = sourceName.substring(0, 1).toUpperCase() + sourceName.substring(1).toLowerCase();
-			Class c = null;
-			if (customDataSourcePackage != null) {
-				try {
-					c = Class.forName(customDataSourcePackage + "." + className);
-				} catch (ClassNotFoundException cnfe) {
-					// Ignore this exception.
-				}
-			}
-			if (c == null) {
-				try {
-					c = Class.forName(DEFAULT_DATA_SOURCE_PACKAGE + "." + className);
-				} catch (ClassNotFoundException cnfe) {
-					throw new RuntimeException("No implementation class for data source \"" + sourceName + "\" could be found.", cnfe);
-				}
-			}
-			if (c != null) {
-				try {
-					Object o = c.getDeclaredConstructor().newInstance();
-					sourcesMap.put(sourceName, (DataSource) o);
-				} catch (InstantiationException | IllegalAccessException |NoSuchMethodException | InvocationTargetException ie) {
-					throw new RuntimeException(c.getName() + " could not be instantiated.", ie);
-				} catch (ClassCastException cce) {
-					throw new RuntimeException(c.getName() + " does not extend DataSource.", cce);
-				}
-			}
+        if (!sourcesMap.containsKey(sourceName)) {
+            String className = sourceName.substring(0, 1).toUpperCase() + sourceName.substring(1).toLowerCase();
+            Class c = null;
+            if (customDataSourcePackage != null) {
+                try {
+                    c = Class.forName(customDataSourcePackage + "." + className);
+                } catch (ClassNotFoundException cnfe) {
+                    // Ignore this exception.
+                }
+            }
+            if (c == null) {
+                try {
+                    c = Class.forName(DEFAULT_DATA_SOURCE_PACKAGE + "." + className);
+                } catch (ClassNotFoundException cnfe) {
+                    throw new RuntimeException("No implementation class for data source \"" + sourceName + "\" could be found.", cnfe);
+                }
+            }
+            if (c != null) {
+                try {
+                    Object o = c.getDeclaredConstructor().newInstance();
+                    sourcesMap.put(sourceName, (DataSource) o);
+                } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException ie) {
+                    throw new RuntimeException(c.getName() + " could not be instantiated.", ie);
+                } catch (ClassCastException cce) {
+                    throw new RuntimeException(c.getName() + " does not extend DataSource.", cce);
+                }
+            }
         }
     }
 
