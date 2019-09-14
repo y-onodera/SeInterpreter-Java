@@ -20,7 +20,6 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
-import org.json.JSONException;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -59,6 +58,7 @@ public class StepEditController {
             , "ifEval"
             , "ifAntRun"
             , "ifDocumentReady"
+            , "ifWindowHandle"
             , "retryElementPresent"
             , "retryElementVisible"
             , "retryElementEnable"
@@ -78,6 +78,7 @@ public class StepEditController {
             , "retryEval"
             , "retryAntRun"
             , "retryDocumentReady"
+            , "retryWindowHandle"
             , "Store"
             , "storeElementPresent"
             , "storeElementVisible"
@@ -93,6 +94,7 @@ public class StepEditController {
             , "storeCmd"
             , "storeEval"
             , "storeAntRun"
+            , "storeWindowHandle"
             , "Print"
             , "printElementPresent"
             , "printElementVisible"
@@ -110,6 +112,7 @@ public class StepEditController {
             , "printCmd"
             , "printEval"
             , "printAntRun"
+            , "printWindowHandle"
             , "waitForElementPresent"
             , "waitForElementVisible"
             , "waitForElementEnable"
@@ -129,6 +132,7 @@ public class StepEditController {
             , "waitForEval"
             , "waitForAntRun"
             , "waitForDocumentReady"
+            , "waitForWindowHandle"
             , "verifyElementPresent"
             , "verifyElementVisible"
             , "verifyElementEnable"
@@ -148,6 +152,7 @@ public class StepEditController {
             , "verifyEval"
             , "verifyAntRun"
             , "verifyDocumentReady"
+            , "verifyWindowHandle"
             , "assertElementPresent"
             , "assertElementVisible"
             , "assertElementEnable"
@@ -166,6 +171,7 @@ public class StepEditController {
             , "assertEval"
             , "assertAntRun"
             , "assertDocumentReady"
+            , "assertWindowHandle"
             , "AcceptAlert"
             , "AnswerAlert"
             , "DismissAlert"
@@ -283,7 +289,7 @@ public class StepEditController {
         return key.equals("locator");
     }
 
-    private int constructLocatorParamView(Step step, int row) throws JSONException {
+    private int constructLocatorParamView(Step step, int row) {
         for (String key : step.locatorKeys()) {
             if (this.isDefaultLocator(key)) {
                 continue;
@@ -293,7 +299,7 @@ public class StepEditController {
         return row;
     }
 
-    private int constructStringParamView(Step step, int row, String typeName) throws JSONException {
+    private int constructStringParamView(Step step, int row, String typeName) {
         for (String key : step.paramKeys()) {
             if (key.equals("type") || key.equals("skip")
                     || (key.equals("negated") && !hasGetterType(typeName))) {
@@ -339,7 +345,7 @@ public class StepEditController {
         }
     }
 
-    private String resetStepType(Step step) throws JSONException {
+    private String resetStepType(Step step) {
         String typeName = step.getType().getStepTypeName();
         if (typeName.equals(this.selectedStepType)) {
             return this.selectedStepType;
@@ -349,7 +355,7 @@ public class StepEditController {
         return typeName;
     }
 
-    private int addLocator(Step step, int row, String locator) throws JSONException {
+    private int addLocator(Step step, int row, String locator) {
         if (step.locatorContains(locator)) {
             Label stepEditLabel = new Label();
             stepEditLabel.setText(locator);
@@ -376,7 +382,7 @@ public class StepEditController {
         return row;
     }
 
-    private ComboBox<String> resetLocatorSelect(Step step, String locator) throws JSONException {
+    private ComboBox<String> resetLocatorSelect(Step step, String locator) {
         ComboBox<String> select = new ComboBox<>();
         select.getItems().add("");
         select.getItems().add("id");
@@ -401,7 +407,7 @@ public class StepEditController {
         return select;
     }
 
-    private TextField resetLocatorText(Step step, String locator) throws JSONException {
+    private TextField resetLocatorText(Step step, String locator) {
         TextField text = new TextField();
         String value = step.getLocator(locator).value;
         if (this.isDefaultLocator(locator)) {
@@ -420,7 +426,7 @@ public class StepEditController {
         return text;
     }
 
-    private int addCheckBox(Step step, int row, String key) throws JSONException {
+    private int addCheckBox(Step step, int row, String key) {
         Label label = new Label();
         label.setText(key);
         CheckBox checkbox = new CheckBox();
@@ -431,7 +437,7 @@ public class StepEditController {
         return row;
     }
 
-    private int addTextBox(Step step, int row, String key) throws JSONException {
+    private int addTextBox(Step step, int row, String key) {
         Label label = new Label();
         label.setText(key);
         TextField text = new TextField();
