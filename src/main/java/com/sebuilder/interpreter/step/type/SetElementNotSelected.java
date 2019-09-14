@@ -20,7 +20,7 @@ import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.step.LocatorHolder;
 import org.openqa.selenium.WebElement;
 
-public class SetElementNotSelected implements ConditionalStep, LocatorHolder {
+public class SetElementNotSelected extends AbstractStepType implements ConditionalStep, LocatorHolder {
     @Override
     public boolean doRun(TestRun ctx) {
         WebElement e = ctx.locator().find(ctx);
@@ -28,17 +28,5 @@ public class SetElementNotSelected implements ConditionalStep, LocatorHolder {
             e.click();
         }
         return true;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null) return false;
-        return this.getClass() == o.getClass();
-    }
-
-    @Override
-    public int hashCode() {
-        return this.getClass().getSimpleName().hashCode();
     }
 }

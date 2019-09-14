@@ -24,7 +24,7 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
-public class SetElementText implements ConditionalStep, Exportable, LocatorHolder {
+public class SetElementText extends AbstractStepType implements ConditionalStep, Exportable, LocatorHolder {
 
     @Override
     public boolean doRun(TestRun ctx) {
@@ -67,15 +67,4 @@ public class SetElementText implements ConditionalStep, Exportable, LocatorHolde
         return '\uFF65' <= c && c <= '\uFF9F';
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null) return false;
-        return this.getClass() == o.getClass();
-    }
-
-    @Override
-    public int hashCode() {
-        return this.getClass().getSimpleName().hashCode();
-    }
 }

@@ -17,7 +17,6 @@
 package com.sebuilder.interpreter.step.type;
 
 import com.sebuilder.interpreter.StepBuilder;
-import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.screenshot.LocatorInnerScrollElementHandler;
 import com.sebuilder.interpreter.screenshot.Page;
@@ -32,7 +31,7 @@ import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
 
-public class SaveScreenshot implements StepType, LocatorHolder {
+public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
 
     @Override
     public boolean run(TestRun ctx) {
@@ -81,17 +80,5 @@ public class SaveScreenshot implements StepType, LocatorHolder {
         } catch (InterruptedException var2) {
             throw new IllegalStateException("Exception while waiting for repaint", var2);
         }
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null) return false;
-        return this.getClass() == o.getClass();
-    }
-
-    @Override
-    public int hashCode() {
-        return this.getClass().getSimpleName().hashCode();
     }
 }

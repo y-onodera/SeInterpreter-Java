@@ -4,19 +4,14 @@ import com.google.common.base.Strings;
 import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.Utils;
-import com.sebuilder.interpreter.step.Getter;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.ProjectHelper;
 
 import java.io.File;
 import java.util.Objects;
 
-public class AntRun implements Getter {
+public class AntRun extends AbstractGetter {
 
-    /**
-     * @param ctx Current test run.
-     * @return The value this getter gets, eg the page title.
-     */
     @Override
     public String get(TestRun ctx) {
         File buildFile = Utils.findFile(ctx.getRelativePath(), ctx.string("build.xml"));
@@ -51,18 +46,6 @@ public class AntRun implements Getter {
         if (!o.containsStringParam("resultProperty")) {
             o.put("resultProperty", "resultProperty");
         }
-        return Getter.super.addDefaultParam(o);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null) return false;
-        return this.getClass() == o.getClass();
-    }
-
-    @Override
-    public int hashCode() {
-        return this.getClass().getSimpleName().hashCode();
+        return super.addDefaultParam(o);
     }
 }

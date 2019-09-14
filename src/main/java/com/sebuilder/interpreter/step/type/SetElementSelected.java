@@ -23,7 +23,7 @@ import com.sebuilder.interpreter.step.LocatorHolder;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
-public class SetElementSelected implements ConditionalStep, Exportable, LocatorHolder {
+public class SetElementSelected extends AbstractStepType implements ConditionalStep, Exportable, LocatorHolder {
 
     @Override
     public boolean doRun(TestRun ctx) {
@@ -53,15 +53,4 @@ public class SetElementSelected implements ConditionalStep, Exportable, LocatorH
         return o.apply(LocatorHolder.super::addDefaultParam);
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null) return false;
-        return this.getClass() == o.getClass();
-    }
-
-    @Override
-    public int hashCode() {
-        return this.getClass().getSimpleName().hashCode();
-    }
 }

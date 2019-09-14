@@ -18,17 +18,11 @@ package com.sebuilder.interpreter.step.getter;
 
 import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
-import com.sebuilder.interpreter.step.Getter;
 
-public class TextPresent implements Getter {
+public class TextPresent extends AbstractGetter {
     @Override
     public String get(TestRun ctx) {
         return "" + ctx.driver().findElementByTagName("html").getText().contains(ctx.text());
-    }
-
-    @Override
-    public String cmpParamName() {
-        return null;
     }
 
     @Override
@@ -36,18 +30,7 @@ public class TextPresent implements Getter {
         if (!o.containsStringParam("text")) {
             o.put("text", "");
         }
-        return o.apply(Getter.super::addDefaultParam);
+        return o.apply(super::addDefaultParam);
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null) return false;
-        return this.getClass() == o.getClass();
-    }
-
-    @Override
-    public int hashCode() {
-        return this.getClass().getSimpleName().hashCode();
-    }
 }

@@ -8,7 +8,7 @@ import com.sebuilder.interpreter.step.getter.Cmd;
 
 import java.util.Objects;
 
-public class ExecCmd implements GetterUseStep {
+public class ExecCmd extends AbstractStepType implements GetterUseStep {
 
     private Cmd cmd = new Cmd();
 
@@ -33,15 +33,4 @@ public class ExecCmd implements GetterUseStep {
         return o;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null) return false;
-        return this.getClass() == o.getClass();
-    }
-
-    @Override
-    public int hashCode() {
-        return this.getClass().getSimpleName().hashCode();
-    }
 }

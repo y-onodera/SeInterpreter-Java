@@ -2,18 +2,14 @@ package com.sebuilder.interpreter.step.getter;
 
 import com.google.common.base.Strings;
 import com.sebuilder.interpreter.TestRun;
-import com.sebuilder.interpreter.step.Getter;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-public class Cmd implements Getter {
-    /**
-     * @param ctx Current test run.
-     * @return The value this getter gets, eg the page title.
-     */
+public class Cmd extends AbstractGetter {
+
     @Override
     public String get(TestRun ctx) {
         String[] cmd = ctx.string("cmd").split(",");
@@ -42,10 +38,6 @@ public class Cmd implements Getter {
         }
     }
 
-    /**
-     * @return The name of the parameter to compare the result of the get to, or null if the get
-     * returns a boolean "true"/"false".
-     */
     @Override
     public String cmpParamName() {
         return "value";

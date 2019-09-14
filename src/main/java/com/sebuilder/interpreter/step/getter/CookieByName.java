@@ -18,9 +18,8 @@ package com.sebuilder.interpreter.step.getter;
 
 import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
-import com.sebuilder.interpreter.step.Getter;
 
-public class CookieByName implements Getter {
+public class CookieByName extends AbstractGetter {
     @Override
     public String get(TestRun ctx) {
         return ctx.driver().manage().getCookieNamed(ctx.string("name")).getValue();
@@ -36,18 +35,6 @@ public class CookieByName implements Getter {
         if (!o.containsStringParam("name")) {
             o.put("name", "");
         }
-        return Getter.super.addDefaultParam(o);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null) return false;
-        return this.getClass() == o.getClass();
-    }
-
-    @Override
-    public int hashCode() {
-        return this.getClass().getSimpleName().hashCode();
+        return super.addDefaultParam(o);
     }
 }

@@ -17,9 +17,8 @@
 package com.sebuilder.interpreter.step.getter;
 
 import com.sebuilder.interpreter.TestRun;
-import com.sebuilder.interpreter.step.Getter;
 
-public class PageSource implements Getter {
+public class PageSource extends AbstractGetter {
     @Override
     public String get(TestRun ctx) {
         return ctx.driver().getPageSource();
@@ -30,15 +29,4 @@ public class PageSource implements Getter {
         return "source";
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null) return false;
-        return this.getClass() == o.getClass();
-    }
-
-    @Override
-    public int hashCode() {
-        return this.getClass().getSimpleName().hashCode();
-    }
 }

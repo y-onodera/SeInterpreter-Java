@@ -18,10 +18,9 @@ package com.sebuilder.interpreter.step.getter;
 
 import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
-import com.sebuilder.interpreter.step.Getter;
 import com.sebuilder.interpreter.step.LocatorHolder;
 
-public class Text implements Getter, LocatorHolder {
+public class Text extends AbstractGetter implements LocatorHolder {
     @Override
     public String get(TestRun ctx) {
         return ctx.locator().find(ctx).getText();
@@ -35,18 +34,7 @@ public class Text implements Getter, LocatorHolder {
     @Override
     public StepBuilder addDefaultParam(StepBuilder o) {
         return o.apply(LocatorHolder.super::addDefaultParam)
-                .apply(Getter.super::addDefaultParam);
+                .apply(super::addDefaultParam);
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null) return false;
-        return this.getClass() == o.getClass();
-    }
-
-    @Override
-    public int hashCode() {
-        return this.getClass().getSimpleName().hashCode();
-    }
 }

@@ -24,7 +24,7 @@ import org.openqa.selenium.WebElement;
 import java.io.File;
 import java.io.IOException;
 
-public class SendKeysToPathElement implements ConditionalStep, LocatorHolder {
+public class SendKeysToPathElement extends AbstractStepType implements ConditionalStep, LocatorHolder {
 
     @Override
     public boolean doRun(TestRun ctx) {
@@ -44,18 +44,6 @@ public class SendKeysToPathElement implements ConditionalStep, LocatorHolder {
             o.put("text", "");
         }
         return o.apply(LocatorHolder.super::addDefaultParam);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null) return false;
-        return this.getClass() == o.getClass();
-    }
-
-    @Override
-    public int hashCode() {
-        return this.getClass().getSimpleName().hashCode();
     }
 
 }

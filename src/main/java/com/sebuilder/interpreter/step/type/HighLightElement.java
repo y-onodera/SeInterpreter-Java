@@ -2,7 +2,6 @@ package com.sebuilder.interpreter.step.type;
 
 import com.google.common.collect.Maps;
 import com.sebuilder.interpreter.Locator;
-import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.step.LocatorHolder;
 import org.openqa.selenium.WebElement;
@@ -10,14 +9,8 @@ import org.openqa.selenium.WebElement;
 import java.util.Map;
 import java.util.Objects;
 
-public class HighLightElement implements StepType, LocatorHolder {
-    /**
-     * Perform the action this step consists of.
-     *
-     * @param ctx Current test run.
-     * @return Whether the step succeeded. This should be true except for failed verify steps, which
-     * should return false. Other failures should throw a RuntimeException.
-     */
+public class HighLightElement extends AbstractStepType implements LocatorHolder {
+
     @Override
     public boolean run(TestRun ctx) {
         Cache.reflesh(ctx);
@@ -26,18 +19,6 @@ public class HighLightElement implements StepType, LocatorHolder {
             toggleHighlight(ctx, element, "2px solid red");
         }
         return true;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null) return false;
-        return this.getClass() == o.getClass();
-    }
-
-    @Override
-    public int hashCode() {
-        return this.getClass().getSimpleName().hashCode();
     }
 
     static void toggleHighlight(TestRun ctx, WebElement element, String aStyle) {

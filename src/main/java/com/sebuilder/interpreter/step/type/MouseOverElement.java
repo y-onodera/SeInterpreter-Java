@@ -22,7 +22,7 @@ import com.sebuilder.interpreter.step.WaitFor;
 import com.sebuilder.interpreter.step.getter.ElementVisible;
 import org.openqa.selenium.interactions.Actions;
 
-public class MouseOverElement implements ConditionalStep, LocatorHolder {
+public class MouseOverElement extends AbstractStepType implements ConditionalStep, LocatorHolder {
     @Override
     public boolean doRun(TestRun ctx) {
         new Actions(ctx.driver()).moveToElement(ctx.locator().find(ctx)).build().perform();
@@ -34,15 +34,4 @@ public class MouseOverElement implements ConditionalStep, LocatorHolder {
         return new WaitFor(new ElementVisible());
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null) return false;
-        return this.getClass() == o.getClass();
-    }
-
-    @Override
-    public int hashCode() {
-        return this.getClass().getSimpleName().hashCode();
-    }
 }

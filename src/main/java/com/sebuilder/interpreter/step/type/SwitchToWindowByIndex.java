@@ -17,12 +17,11 @@
 package com.sebuilder.interpreter.step.type;
 
 import com.sebuilder.interpreter.StepBuilder;
-import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
 
 import java.util.ArrayList;
 
-public class SwitchToWindowByIndex implements StepType {
+public class SwitchToWindowByIndex extends AbstractStepType {
     @Override
     public boolean run(TestRun ctx) {
         // Converting the set into a List is hopefully OK because it's a
@@ -45,15 +44,4 @@ public class SwitchToWindowByIndex implements StepType {
         return o;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null) return false;
-        return this.getClass() == o.getClass();
-    }
-
-    @Override
-    public int hashCode() {
-        return this.getClass().getSimpleName().hashCode();
-    }
 }

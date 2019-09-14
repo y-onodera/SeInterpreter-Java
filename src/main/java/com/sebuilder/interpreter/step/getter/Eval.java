@@ -18,9 +18,8 @@ package com.sebuilder.interpreter.step.getter;
 
 import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
-import com.sebuilder.interpreter.step.Getter;
 
-public class Eval implements Getter {
+public class Eval extends AbstractGetter {
     @Override
     public String get(TestRun ctx) {
         Object result = ctx.driver().executeScript(ctx.string("script"));
@@ -37,18 +36,7 @@ public class Eval implements Getter {
         if (!o.containsStringParam("script")) {
             o.put("script", "return true;");
         }
-        return o.apply(Getter.super::addDefaultParam);
+        return o.apply(super::addDefaultParam);
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null) return false;
-        return this.getClass() == o.getClass();
-    }
-
-    @Override
-    public int hashCode() {
-        return this.getClass().getSimpleName().hashCode();
-    }
 }

@@ -8,7 +8,7 @@ import com.sebuilder.interpreter.step.WaitFor;
 
 import java.util.List;
 
-public class ComplexCondition implements Getter {
+public class ComplexCondition extends AbstractGetter {
     private final List<WaitFor> conditions = Lists.newArrayList();
 
     public ComplexCondition(List<WaitFor> conditions) {
@@ -19,10 +19,6 @@ public class ComplexCondition implements Getter {
         return new Builder();
     }
 
-    /**
-     * @param ctx Current test run.
-     * @return The value this getter gets, eg the page title.
-     */
     @Override
     public String get(TestRun ctx) {
         for (WaitFor condition : this.conditions) {
@@ -31,15 +27,6 @@ public class ComplexCondition implements Getter {
             }
         }
         return "true";
-    }
-
-    /**
-     * @return The name of the parameter to compare the result of the get to, or null if the get
-     * returns a boolean "true"/"false".
-     */
-    @Override
-    public String cmpParamName() {
-        return null;
     }
 
     public static class Builder {

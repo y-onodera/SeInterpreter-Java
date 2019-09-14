@@ -17,11 +17,10 @@
 package com.sebuilder.interpreter.step.type;
 
 import com.sebuilder.interpreter.StepBuilder;
-import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
 import org.openqa.selenium.Cookie;
 
-public class DeleteCookie implements StepType {
+public class DeleteCookie extends AbstractStepType {
     @Override
     public boolean run(TestRun ctx) {
         Cookie c = ctx.driver().manage().getCookieNamed(ctx.string("name"));
@@ -39,15 +38,4 @@ public class DeleteCookie implements StepType {
         return o;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null) return false;
-        return this.getClass() == o.getClass();
-    }
-
-    @Override
-    public int hashCode() {
-        return this.getClass().getSimpleName().hashCode();
-    }
 }

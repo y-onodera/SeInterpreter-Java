@@ -20,22 +20,11 @@ import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.step.LocatorHolder;
 import org.openqa.selenium.support.ui.Select;
 
-public class ClearSelections implements ConditionalStep, LocatorHolder {
+public class ClearSelections extends AbstractStepType implements ConditionalStep, LocatorHolder {
     @Override
     public boolean doRun(TestRun ctx) {
         new Select(ctx.locator().find(ctx)).deselectAll();
         return true;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null) return false;
-        return this.getClass() == o.getClass();
-    }
-
-    @Override
-    public int hashCode() {
-        return this.getClass().getSimpleName().hashCode();
-    }
 }

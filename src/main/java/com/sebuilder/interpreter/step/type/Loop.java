@@ -4,14 +4,8 @@ import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.step.FlowStep;
 
-public class Loop implements FlowStep {
-    /**
-     * Perform the action this step consists of.
-     *
-     * @param ctx Current test run.
-     * @return Whether the step succeeded. This should be true except for failed verify steps, which
-     * should return false. Other failures should throw a RuntimeException.
-     */
+public class Loop extends AbstractStepType implements FlowStep {
+
     @Override
     public boolean run(TestRun ctx) {
         ctx.processTestSuccess();
@@ -37,18 +31,6 @@ public class Loop implements FlowStep {
             o.put("count", "");
         }
         return FlowStep.super.addDefaultParam(o);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null) return false;
-        return this.getClass() == o.getClass();
-    }
-
-    @Override
-    public int hashCode() {
-        return this.getClass().getSimpleName().hashCode();
     }
 
 }

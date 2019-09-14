@@ -17,10 +17,9 @@
 package com.sebuilder.interpreter.step.type;
 
 import com.sebuilder.interpreter.StepBuilder;
-import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
 
-public class SwitchToWindow implements StepType {
+public class SwitchToWindow extends AbstractStepType {
     @Override
     public boolean run(TestRun ctx) {
         ctx.driver().switchTo().window(ctx.string("name"));
@@ -33,17 +32,5 @@ public class SwitchToWindow implements StepType {
             o.put("name", "");
         }
         return o;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null) return false;
-        return this.getClass() == o.getClass();
-    }
-
-    @Override
-    public int hashCode() {
-        return this.getClass().getSimpleName().hashCode();
     }
 }

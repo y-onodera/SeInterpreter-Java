@@ -20,15 +20,8 @@ import java.util.Set;
 
 import static java.net.CookiePolicy.ACCEPT_ALL;
 
-public class FileDownload implements ConditionalStep, LocatorHolder {
+public class FileDownload extends AbstractStepType implements ConditionalStep, LocatorHolder {
 
-    /**
-     * Perform the action this step consists of.
-     *
-     * @param ctx Current test run.
-     * @return Whether the step succeeded. This should be true except for failed verify steps, which
-     * should return false. Other failures should throw a RuntimeException.
-     */
     @Override
     public boolean doRun(TestRun ctx) {
         if (ctx.containsKey("post")) {
@@ -146,18 +139,6 @@ public class FileDownload implements ConditionalStep, LocatorHolder {
         CookieJar cookieJar = new JavaNetCookieJar(cookieManager);
         cookieJar.saveFromResponse(HttpUrl.parse(downloadUrl), cookies);
         return new OkHttpClient().newBuilder().cookieJar(cookieJar).build();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null) return false;
-        return this.getClass() == o.getClass();
-    }
-
-    @Override
-    public int hashCode() {
-        return this.getClass().getSimpleName().hashCode();
     }
 
 }

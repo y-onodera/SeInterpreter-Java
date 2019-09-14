@@ -16,15 +16,13 @@
 
 package com.sebuilder.interpreter.step.type;
 
-import com.google.common.base.Objects;
 import com.sebuilder.interpreter.StepBuilder;
-import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
 import org.openqa.selenium.Cookie;
 
 import java.util.Date;
 
-public class AddCookie implements StepType {
+public class AddCookie extends AbstractStepType {
     @Override
     public boolean run(TestRun ctx) {
         Cookie.Builder cb = new Cookie.Builder(ctx.string("name"), ctx.string("value"));
@@ -59,15 +57,4 @@ public class AddCookie implements StepType {
         return o;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null) return false;
-        return this.getClass() == o.getClass();
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(this.getClass().getSimpleName());
-    }
 }

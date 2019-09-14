@@ -20,22 +20,11 @@ import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.step.LocatorHolder;
 import org.openqa.selenium.interactions.Actions;
 
-public class DoubleClickElement implements ConditionalStep, LocatorHolder {
+public class DoubleClickElement extends AbstractStepType implements ConditionalStep, LocatorHolder {
     @Override
     public boolean doRun(TestRun ctx) {
         new Actions(ctx.driver()).doubleClick(ctx.locator().find(ctx)).build().perform();
         return true;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null) return false;
-        return this.getClass() == o.getClass();
-    }
-
-    @Override
-    public int hashCode() {
-        return this.getClass().getSimpleName().hashCode();
-    }
 }

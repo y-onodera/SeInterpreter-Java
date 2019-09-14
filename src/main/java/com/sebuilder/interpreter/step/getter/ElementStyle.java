@@ -18,10 +18,9 @@ package com.sebuilder.interpreter.step.getter;
 
 import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
-import com.sebuilder.interpreter.step.Getter;
 import com.sebuilder.interpreter.step.LocatorHolder;
 
-public class ElementStyle implements Getter, LocatorHolder {
+public class ElementStyle extends AbstractGetter implements LocatorHolder {
     @Override
     public String get(TestRun ctx) {
         return ctx.locator().find(ctx).getCssValue(ctx.string("propertyName"));
@@ -38,18 +37,6 @@ public class ElementStyle implements Getter, LocatorHolder {
             o.put("propertyName", "");
         }
         return o.apply(LocatorHolder.super::addDefaultParam)
-                .apply(Getter.super::addDefaultParam);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null) return false;
-        return this.getClass() == o.getClass();
-    }
-
-    @Override
-    public int hashCode() {
-        return this.getClass().getSimpleName().hashCode();
+                .apply(super::addDefaultParam);
     }
 }
