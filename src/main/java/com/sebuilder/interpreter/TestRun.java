@@ -220,7 +220,7 @@ public class TestRun {
         this.getListener().addFailure(currentStepToString() + " failed.");
         this.getAdvice().invokeFailure(this);
         // If a verify failed, we just note this but continue.
-        if (this.currentStep().getType().isContinueFailure()) {
+        if (this.currentStep().getType().isContinueAtFailure()) {
             return false;
         }
         // In all other cases, we throw an exception to stop the run.

@@ -28,7 +28,7 @@ public class Verify extends Assert {
     }
 
     @Override
-    public boolean isContinueFailure() {
+    public boolean isContinueAtFailure() {
         return true;
     }
 
