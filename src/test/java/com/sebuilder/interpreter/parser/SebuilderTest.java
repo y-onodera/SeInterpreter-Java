@@ -32,8 +32,9 @@ import static org.junit.Assert.assertSame;
 public class SebuilderTest {
 
     static {
-        Context.getInstance().setStepTypeFactory(new StepTypeFactoryImpl());
-        Context.getInstance().setDataSourceFactory(new DataSourceFactoryImpl());
+        Context.getInstance()
+                .setStepTypeFactory(new StepTypeFactoryImpl())
+                .setDataSourceFactory(new DataSourceFactoryImpl());
     }
 
     private static String baseDir = SebuilderTest.class.getResource(".").getPath();
