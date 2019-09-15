@@ -4,7 +4,6 @@ import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.TestCase;
 import com.sebuilder.interpreter.TestData;
 import com.sebuilder.interpreter.TestRunListener;
-import junit.framework.AssertionFailedError;
 import org.apache.logging.log4j.Logger;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.Delete;
@@ -212,7 +211,7 @@ public class TestRunListenerImpl implements TestRunListener {
         this.log.info("result failure:" + this.test.getName());
         this.log.info("cause :" + message);
         this.failed++;
-        this.formatter.addFailure(this.test, new AssertionFailedError(message));
+        this.formatter.addFailure(this.test, new AssertionError(message));
     }
 
     @Override

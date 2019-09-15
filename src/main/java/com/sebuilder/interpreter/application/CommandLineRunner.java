@@ -8,7 +8,6 @@ import com.sebuilder.interpreter.webdriverfactory.Chrome;
 import com.sebuilder.interpreter.webdriverfactory.WebDriverFactory;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.util.Strings;
-import org.json.JSONException;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.io.File;
@@ -111,7 +110,7 @@ public abstract class CommandLineRunner {
         if (Strings.isNotEmpty(aspectFileName)) {
             try {
                 this.setAspect(new File(Context.getBaseDirectory(), aspectFileName));
-            } catch (JSONException | IOException e) {
+            } catch (IOException e) {
                 this.log.fatal(e);
                 System.exit(1);
             }
@@ -151,7 +150,7 @@ public abstract class CommandLineRunner {
         }
     }
 
-    protected void setAspect(File aSource) throws IOException, JSONException {
+    protected void setAspect(File aSource) throws IOException {
         Context.getInstance().setAspect(Context.getScriptParser().loadAspect(aSource));
     }
 

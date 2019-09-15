@@ -16,13 +16,9 @@
 
 package com.sebuilder.interpreter.application;
 
-import com.sebuilder.interpreter.Suite;
-import com.sebuilder.interpreter.TestData;
-import com.sebuilder.interpreter.TestRunBuilder;
-import com.sebuilder.interpreter.TestRunListener;
+import com.sebuilder.interpreter.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.json.JSONException;
 
 import java.io.File;
 import java.io.IOException;
@@ -69,7 +65,7 @@ public class SeInterpreter extends CommandLineRunner {
         this.paths.add(s);
     }
 
-    private void runScripts() throws IOException, JSONException {
+    private void runScripts() throws IOException {
         this.testRunListener.cleanResult();
         try {
             for (String path : this.paths) {
@@ -83,8 +79,8 @@ public class SeInterpreter extends CommandLineRunner {
         }
     }
 
-    private void runScripts(String path) throws IOException, JSONException {
-        Suite suite = this.sf.load(new File(path));
+    private void runScripts(String path) throws IOException {
+        Suite suite = Context.getScriptParser().load(new File(path));
         for (TestRunBuilder script : suite.getTestRuns()) {
             this.runScript(script);
         }
