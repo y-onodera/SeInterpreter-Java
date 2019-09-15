@@ -3,6 +3,7 @@ package com.sebuilder.interpreter.step.type;
 import com.google.common.collect.Maps;
 import com.sebuilder.interpreter.Locator;
 import com.sebuilder.interpreter.TestRun;
+import com.sebuilder.interpreter.step.AbstractStepType;
 import com.sebuilder.interpreter.step.LocatorHolder;
 import org.openqa.selenium.WebElement;
 

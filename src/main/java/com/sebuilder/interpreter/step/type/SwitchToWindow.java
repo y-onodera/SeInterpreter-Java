@@ -18,6 +18,7 @@ package com.sebuilder.interpreter.step.type;
 
 import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
+import com.sebuilder.interpreter.step.AbstractStepType;
 
 public class SwitchToWindow extends AbstractStepType {
     @Override

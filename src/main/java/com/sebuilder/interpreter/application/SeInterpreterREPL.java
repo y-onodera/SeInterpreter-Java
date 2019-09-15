@@ -80,7 +80,7 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
     public Iterable<TestCase> loadScript(String file) {
         Iterable<TestCase> result = Lists.newArrayList();
         try {
-            result = this.sf.parse(new File(file));
+            result = this.sf.load(new File(file));
         } catch (Throwable e) {
             this.log.error(e);
         }
@@ -88,17 +88,17 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
     }
 
     public TestCase toTestCase(String cmdInput) {
-        this.log.info("start parse input");
+        this.log.info("start load input");
         TestCase result = null;
         try {
-            result = this.sf.parse(cmdInput);
+            result = this.sf.load(cmdInput);
         } catch (Throwable e) {
             this.log.error(e);
         }
         if (result == null) {
             this.log.error("invalid input:" + cmdInput);
         }
-        this.log.info("finish parse input");
+        this.log.info("finish load input");
         return result;
     }
 

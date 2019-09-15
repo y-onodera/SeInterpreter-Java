@@ -4,6 +4,7 @@ import com.google.common.io.Files;
 import com.sebuilder.interpreter.*;
 import com.sebuilder.interpreter.application.CommandLineArgument;
 import com.sebuilder.interpreter.application.SeInterpreterREPL;
+import com.sebuilder.interpreter.application.TestRunListenerImpl;
 import com.sebuilder.interpreter.step.type.ExportTemplate;
 import com.sebuilder.interpreter.step.type.HighLightElement;
 import javafx.concurrent.Task;

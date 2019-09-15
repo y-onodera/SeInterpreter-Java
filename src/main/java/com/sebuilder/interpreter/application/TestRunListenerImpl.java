@@ -1,6 +1,9 @@
-package com.sebuilder.interpreter;
+package com.sebuilder.interpreter.application;
 
-import com.sebuilder.interpreter.application.SeInterpreterTestResultFormatter;
+import com.sebuilder.interpreter.Context;
+import com.sebuilder.interpreter.TestCase;
+import com.sebuilder.interpreter.TestData;
+import com.sebuilder.interpreter.TestRunListener;
 import junit.framework.AssertionFailedError;
 import org.apache.logging.log4j.Logger;
 import org.apache.tools.ant.Project;
@@ -20,7 +23,7 @@ import java.util.Hashtable;
 import java.util.stream.Collectors;
 
 public class TestRunListenerImpl implements TestRunListener {
-    private final SeInterpreterTestResultFormatter formatter;
+    private final TestResultFormatter formatter;
     private Project project;
     private File resultDir;
     private File downloadDirectory;
@@ -40,7 +43,7 @@ public class TestRunListenerImpl implements TestRunListener {
         this.project.setName("se-interpreter");
         this.project.setBaseDir(new File("."));
         this.project.setProperty("java.io.tmpdir", System.getProperty("java.io.tmpdir"));
-        this.formatter = new SeInterpreterTestResultFormatter();
+        this.formatter = new TestResultFormatter();
         this.suite = null;
         this.test = null;
         this.runTest = 0;
@@ -59,7 +62,7 @@ public class TestRunListenerImpl implements TestRunListener {
         this.project.setName("se-interpreter");
         this.project.setBaseDir(new File("."));
         this.project.setProperty("java.io.tmpdir", System.getProperty("java.io.tmpdir"));
-        this.formatter = new SeInterpreterTestResultFormatter();
+        this.formatter = new TestResultFormatter();
         this.suite = null;
         this.test = null;
         this.runTest = 0;
@@ -70,6 +73,11 @@ public class TestRunListenerImpl implements TestRunListener {
         this.downloadDirectory = extendFrom.getDownloadDirectory();
         this.screenShotOutputDirectory = extendFrom.getScreenShotOutputDirectory();
         this.templateOutputDirectory = extendFrom.getTemplateOutputDirectory();
+    }
+
+    @Override
+    public TestRunListener copy() {
+        return new TestRunListenerImpl(this);
     }
 
     @Override

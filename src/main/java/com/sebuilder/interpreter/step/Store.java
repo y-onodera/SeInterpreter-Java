@@ -25,7 +25,7 @@ import com.sebuilder.interpreter.TestRun;
  *
  * @author zarkonnen
  */
-public class Store implements GetterUseStep {
+public class Store extends AbstractStepType implements GetterUseStep {
     public final Getter getter;
 
     public Store(Getter getter) {
@@ -66,14 +66,15 @@ public class Store implements GetterUseStep {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) {
+            return false;
+        }
         Store store = (Store) o;
-        return Objects.equal(getter, store.getter);
+        return Objects.equal(getGetter(), store.getGetter());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getter);
+        return Objects.hashCode(super.hashCode(), getGetter());
     }
 }

@@ -14,23 +14,19 @@
  * limitations under the License.
  */
 
-package com.sebuilder.interpreter.factory;
+package com.sebuilder.interpreter.datasource;
 
-import com.google.common.collect.Maps;
 import com.sebuilder.interpreter.DataSource;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
-import java.util.Iterator;
 
 /**
  * Factory for data sources.
  *
  * @author zarkonnen
  */
-public class DataSourceFactory {
+public class DataSourceFactoryImpl implements com.sebuilder.interpreter.DataSourceFactory {
     public static final String DEFAULT_DATA_SOURCE_PACKAGE = "com.sebuilder.interpreter.datasource";
 
     /**
@@ -40,6 +36,7 @@ public class DataSourceFactory {
 
     private String customDataSourcePackage = null;
 
+    @Override
     public String getCustomDataSourcePackage() {
         return customDataSourcePackage;
     }
@@ -47,10 +44,12 @@ public class DataSourceFactory {
     /**
      * Package from which the factory preferentially loads in data sources.
      */
+    @Override
     public void setCustomDataSourcePackage(String customDataSourcePackage) {
         this.customDataSourcePackage = customDataSourcePackage;
     }
 
+    @Override
     public DataSource getDataSource(String sourceName) {
         this.loadDataSource(sourceName);
         return sourcesMap.get(sourceName);
@@ -87,28 +86,4 @@ public class DataSourceFactory {
         }
     }
 
-    DataSource getDataSource(JSONObject o) throws JSONException {
-        if (!o.has("data")) {
-            return null;
-        }
-        JSONObject data = o.getJSONObject("data");
-        return this.getDataSource(data.getString("source"));
-    }
-
-    HashMap<String, String> getDataSourceConfig(JSONObject o) throws JSONException {
-        if (!o.has("data")) {
-            return Maps.newHashMap();
-        }
-        JSONObject data = o.getJSONObject("data");
-        String sourceName = data.getString("source");
-        HashMap<String, String> config = new HashMap<>();
-        if (data.has("configs") && data.getJSONObject("configs").has(sourceName)) {
-            JSONObject cfg = data.getJSONObject("configs").getJSONObject(sourceName);
-            for (Iterator<String> it = cfg.keys(); it.hasNext(); ) {
-                String key = it.next();
-                config.put(key, cfg.getString(key));
-            }
-        }
-        return config;
-    }
 }

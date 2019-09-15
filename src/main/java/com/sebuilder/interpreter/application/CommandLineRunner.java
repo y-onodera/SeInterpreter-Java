@@ -1,8 +1,10 @@
 package com.sebuilder.interpreter.application;
 
 import com.sebuilder.interpreter.*;
-import com.sebuilder.interpreter.factory.TestCaseFactory;
-import com.sebuilder.interpreter.webdriverfactory.Firefox;
+import com.sebuilder.interpreter.datasource.DataSourceFactoryImpl;
+import com.sebuilder.interpreter.parser.Sebuilder;
+import com.sebuilder.interpreter.step.StepTypeFactoryImpl;
+import com.sebuilder.interpreter.webdriverfactory.Chrome;
 import com.sebuilder.interpreter.webdriverfactory.WebDriverFactory;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.util.Strings;
@@ -15,10 +17,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 
 public abstract class CommandLineRunner {
-    protected static WebDriverFactory DEFAULT_DRIVER_FACTORY = new Firefox();
-    protected TestCaseFactory sf;
-    protected HashMap<String, String> driverConfig;
+    protected static WebDriverFactory DEFAULT_DRIVER_FACTORY = new Chrome();
     protected WebDriverFactory wdf;
+    protected ScriptParser sf;
+    protected HashMap<String, String> driverConfig;
     protected TestRun lastRun;
     protected TestRunListener seInterpreterTestListener;
     protected Logger log;
@@ -28,7 +30,11 @@ public abstract class CommandLineRunner {
 
     protected CommandLineRunner(String[] args, Logger log) {
         this.log = log;
-        this.sf = new TestCaseFactory();
+        this.sf = new Sebuilder();
+        Context.getInstance()
+                .setDefaultScriptParser(this.sf)
+                .setDataSourceFactory(new DataSourceFactoryImpl())
+                .setStepTypeFactory(new StepTypeFactoryImpl());
         this.driverConfig = new HashMap<>();
         this.wdf = DEFAULT_DRIVER_FACTORY;
         this.implicitlyWaitTime = Long.valueOf(-1);
@@ -74,11 +80,15 @@ public abstract class CommandLineRunner {
                 } else if (s.startsWith(CommandLineArgument.PAGE_LOAD_TIMEOUT.key())) {
                     this.pageLoadWaitTime = Long.valueOf(kv[1]);
                 } else if (s.startsWith(CommandLineArgument.STEP_TYPE_PACKAGE.key())) {
-                    this.sf.getStepTypeFactory().setPrimaryPackage(kv[1]);
+                    Context.getStepTypeFactory().setPrimaryPackage(kv[1]);
+                } else if (s.startsWith(CommandLineArgument.STEP_TYPE_PACKAGE2.key())) {
+                    Context.getStepTypeFactory().setSecondaryPackage(kv[1]);
                 } else if (s.startsWith(CommandLineArgument.DRIVER_CONFIG_PREFIX.key())) {
                     this.driverConfig.put(kv[0].substring(CommandLineArgument.DRIVER_CONFIG_PREFIX.key().length()), kv[1]);
                 } else if (s.startsWith(CommandLineArgument.DRIVER.key())) {
                     resetDriverFactory(kv[1]);
+                } else if (s.startsWith(CommandLineArgument.DATASOURCE_PACKAGE.key())) {
+                    Context.getDataSourceFactory().setCustomDataSourcePackage(kv[1]);
                 } else if (s.startsWith(CommandLineArgument.DATASOURCE_ENCODING.key())) {
                     Context.getInstance().setDataSourceEncoding(kv[1]);
                 } else if (s.startsWith(CommandLineArgument.DATASOURCE_DIRECTORY.key())) {
@@ -144,7 +154,7 @@ public abstract class CommandLineRunner {
     }
 
     protected void setAspect(File aSource) throws IOException, JSONException {
-        Context.getInstance().setAspect(this.sf.getAspectFactory().getAspect(aSource));
+        Context.getInstance().setAspect(this.sf.loadAspect(aSource));
     }
 
     protected TestRunBuilder createTestRunBuilder(TestCase testCase) {

@@ -8,7 +8,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 
-public class DataSet {
+public class TestDataSet {
 
     private final DataSource dataSource;
 
@@ -16,7 +16,7 @@ public class DataSet {
 
     private final File relativePath;
 
-    public DataSet(DataSource dataSource, Map<String, String> dataSourceConfig, File relativePath) {
+    public TestDataSet(DataSource dataSource, Map<String, String> dataSourceConfig, File relativePath) {
         this.dataSource = dataSource;
         if (dataSourceConfig != null) {
             this.dataSourceConfig = Maps.newHashMap(dataSourceConfig);
@@ -53,10 +53,10 @@ public class DataSet {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        DataSet dataSet = (DataSet) o;
-        return Objects.equal(getDataSource(), dataSet.getDataSource()) &&
-                Objects.equal(getDataSourceConfig(), dataSet.getDataSourceConfig()) &&
-                Objects.equal(getRelativePath(), dataSet.getRelativePath());
+        TestDataSet testDataSet = (TestDataSet) o;
+        return Objects.equal(getDataSource(), testDataSet.getDataSource()) &&
+                Objects.equal(getDataSourceConfig(), testDataSet.getDataSourceConfig()) &&
+                Objects.equal(getRelativePath(), testDataSet.getRelativePath());
     }
 
     @Override
@@ -66,7 +66,7 @@ public class DataSet {
 
     @Override
     public String toString() {
-        return "DataSet{" +
+        return "TestDataSet{" +
                 "dataSource=" + dataSource +
                 ", dataSourceConfig=" + dataSourceConfig +
                 ", relativePath=" + relativePath +

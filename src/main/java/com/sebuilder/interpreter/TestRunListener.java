@@ -6,6 +6,8 @@ import java.io.File;
 
 public interface TestRunListener {
 
+    TestRunListener copy();
+
     Logger getLog();
 
     File getResultDir();

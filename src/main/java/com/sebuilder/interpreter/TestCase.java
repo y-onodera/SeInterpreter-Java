@@ -40,8 +40,8 @@ public class TestCase implements TestRunnable {
     private final Function<TestData, TestCase> lazyLoad;
     private final boolean usePreviousDriverAndVars;
     private final boolean closeDriver;
-    private final DataSet dataSet;
-    private final DataSet overrideDataSet;
+    private final TestDataSet testDataSet;
+    private final TestDataSet overrideTestDataSet;
     private final String skip;
     private final ScriptFile scriptFile;
     private boolean nestedChain;
@@ -53,8 +53,8 @@ public class TestCase implements TestRunnable {
         this.scriptFile = testCaseBuilder.getScriptFile();
         this.usePreviousDriverAndVars = testCaseBuilder.isUsePreviousDriverAndVars();
         this.closeDriver = testCaseBuilder.isCloseDriver();
-        this.dataSet = testCaseBuilder.getDataSet();
-        this.overrideDataSet = testCaseBuilder.getOverrideDataSet();
+        this.testDataSet = testCaseBuilder.getDataSet();
+        this.overrideTestDataSet = testCaseBuilder.getOverrideDataSet();
         this.skip = testCaseBuilder.getSkip();
         this.nestedChain = testCaseBuilder.isNestedChain();
         this.breakNestedChain = testCaseBuilder.isBreakNestedChain();
@@ -112,35 +112,35 @@ public class TestCase implements TestRunnable {
         return this.scriptFile.path();
     }
 
-    public DataSet getDataSet() {
-        return dataSet;
+    public TestDataSet getTestDataSet() {
+        return testDataSet;
     }
 
     public DataSource dataSource() {
-        return this.dataSet.getDataSource();
+        return this.testDataSet.getDataSource();
     }
 
     public Map<String, String> dataSourceConfig() {
-        return this.dataSet.getDataSourceConfig();
+        return this.testDataSet.getDataSourceConfig();
     }
 
-    public DataSet getOverrideDataSet() {
-        return overrideDataSet;
+    public TestDataSet getOverrideTestDataSet() {
+        return overrideTestDataSet;
     }
 
     public DataSource overrideDataSource() {
-        return this.overrideDataSet.getDataSource();
+        return this.overrideTestDataSet.getDataSource();
     }
 
     public Map<String, String> overrideDataSourceConfig() {
-        return this.overrideDataSet.getDataSourceConfig();
+        return this.overrideTestDataSet.getDataSourceConfig();
     }
 
     public List<TestData> loadData(TestData vars) {
         if (this.overrideDataSource() != null) {
-            return this.overrideDataSet.loadData(vars);
+            return this.overrideTestDataSet.loadData(vars);
         }
-        return this.dataSet.loadData();
+        return this.testDataSet.loadData();
     }
 
     public boolean isNestedChain() {
@@ -308,14 +308,14 @@ public class TestCase implements TestRunnable {
                 closeDriver == testCase.closeDriver &&
                 com.google.common.base.Objects.equal(steps, testCase.steps) &&
                 com.google.common.base.Objects.equal(isLazyLoad(), testCase.isLazyLoad()) &&
-                com.google.common.base.Objects.equal(dataSet, testCase.dataSet) &&
-                com.google.common.base.Objects.equal(overrideDataSet, testCase.overrideDataSet) &&
+                com.google.common.base.Objects.equal(testDataSet, testCase.testDataSet) &&
+                com.google.common.base.Objects.equal(overrideTestDataSet, testCase.overrideTestDataSet) &&
                 com.google.common.base.Objects.equal(skip, testCase.skip) &&
                 com.google.common.base.Objects.equal(scriptFile, testCase.scriptFile);
     }
 
     @Override
     public int hashCode() {
-        return com.google.common.base.Objects.hashCode(steps, isLazyLoad(), usePreviousDriverAndVars, closeDriver, dataSet, overrideDataSet, skip, scriptFile);
+        return com.google.common.base.Objects.hashCode(steps, isLazyLoad(), usePreviousDriverAndVars, closeDriver, testDataSet, overrideTestDataSet, skip, scriptFile);
     }
 }

@@ -3,17 +3,14 @@ package com.sebuilder.interpreter.javafx.controller;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.google.common.eventbus.Subscribe;
-import com.sebuilder.interpreter.Locator;
-import com.sebuilder.interpreter.Step;
-import com.sebuilder.interpreter.StepBuilder;
-import com.sebuilder.interpreter.StepType;
-import com.sebuilder.interpreter.factory.StepTypeFactory;
+import com.sebuilder.interpreter.*;
 import com.sebuilder.interpreter.javafx.EventBus;
 import com.sebuilder.interpreter.javafx.event.ReportErrorEvent;
 import com.sebuilder.interpreter.javafx.event.replay.ElementHighLightEvent;
 import com.sebuilder.interpreter.javafx.event.script.StepAddEvent;
 import com.sebuilder.interpreter.javafx.event.script.StepEditEvent;
 import com.sebuilder.interpreter.javafx.event.view.RefreshStepEditViewEvent;
+import com.sebuilder.interpreter.step.StepTypeFactoryImpl;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -228,7 +225,7 @@ public class StepEditController {
 
     private String action;
 
-    private StepTypeFactory stepTypeFactory = new StepTypeFactory();
+    private StepTypeFactory stepTypeFactory = new StepTypeFactoryImpl();
 
     public void init(Stage dialog, int stepIndex, String action) {
         this.dialog = dialog;

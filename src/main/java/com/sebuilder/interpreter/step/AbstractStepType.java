@@ -1,4 +1,4 @@
-package com.sebuilder.interpreter.step.type;
+package com.sebuilder.interpreter.step;
 
 import com.sebuilder.interpreter.StepType;
 

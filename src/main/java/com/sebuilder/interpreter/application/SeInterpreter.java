@@ -84,7 +84,7 @@ public class SeInterpreter extends CommandLineRunner {
     }
 
     private void runScripts(String path) throws IOException, JSONException {
-        Suite suite = this.sf.parse(new File(path));
+        Suite suite = this.sf.load(new File(path));
         for (TestRunBuilder script : suite.getTestRuns()) {
             this.runScript(script);
         }

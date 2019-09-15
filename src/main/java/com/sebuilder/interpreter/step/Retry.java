@@ -4,7 +4,7 @@ import com.google.common.base.Objects;
 import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
 
-public class Retry implements FlowStep, GetterUseStep {
+public class Retry extends AbstractStepType implements FlowStep, GetterUseStep {
 
     private final Getter getter;
 
@@ -49,14 +49,15 @@ public class Retry implements FlowStep, GetterUseStep {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) {
+            return false;
+        }
         Retry retry = (Retry) o;
         return Objects.equal(getGetter(), retry.getGetter());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getGetter());
+        return Objects.hashCode(super.hashCode(), getGetter());
     }
 }

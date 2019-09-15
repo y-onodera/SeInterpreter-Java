@@ -2,14 +2,9 @@ package com.sebuilder.interpreter.step.type;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.sebuilder.interpreter.Locator;
-import com.sebuilder.interpreter.StepBuilder;
-import com.sebuilder.interpreter.TestCaseBuilder;
-import com.sebuilder.interpreter.TestRun;
-import com.sebuilder.interpreter.export.ExportResource;
-import com.sebuilder.interpreter.export.Exportable;
-import com.sebuilder.interpreter.factory.ScriptConverter;
-import com.sebuilder.interpreter.factory.TestCaseFactory;
+import com.sebuilder.interpreter.*;
+import com.sebuilder.interpreter.datasource.DataSourceFactoryImpl;
+import com.sebuilder.interpreter.step.StepTypeFactoryImpl;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -22,6 +17,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ExportResourceBuilder {
+    private StepTypeFactory stepTypeFactory = new StepTypeFactoryImpl();
+    private DataSourceFactory dataSourceFactory = new DataSourceFactoryImpl();
     private final TestRun ctx;
     private final Map<String, String> variables;
     private final Map<String, Integer> duplicate;
@@ -31,8 +28,7 @@ public class ExportResourceBuilder {
     private final boolean needDataSource;
     private final Locator locator;
     private final WebElement extractFrom;
-    private final TestCaseFactory testCaseFactory = new TestCaseFactory();
-    private final ScriptConverter scriptExporter = new ScriptConverter();
+
 
     public ExportResourceBuilder(TestRun aCtx) {
         this.variables = new LinkedHashMap<>();
@@ -58,10 +54,9 @@ public class ExportResourceBuilder {
         if (this.needDataSource) {
             final String fileName = this.ctx.string("datasource");
             dataSourceFile = new File(this.ctx.getListener().getTemplateOutputDirectory(), fileName);
-            this.source.setDataSource(this.testCaseFactory.getDataSourceFactory()
-                    .getDataSource("csv"), Map.of("path", fileName));
+            this.source.setDataSource(this.dataSourceFactory.getDataSource("csv"), Map.of("path", fileName));
         }
-        return new ExportResource(this.scriptExporter.toString(source.build()), this.variables, dataSourceFile);
+        return new ExportResource(source.build(), this.variables, dataSourceFile);
     }
 
     public ExportResourceBuilder addInputStep(boolean aIsAppend) {
@@ -175,7 +170,7 @@ public class ExportResourceBuilder {
     }
 
     public ExportResourceBuilder addStep(String typeName) {
-        this.currentStep = new StepBuilder(this.testCaseFactory.getStepTypeFactory().getStepTypeOfName(typeName));
+        this.currentStep = new StepBuilder(this.stepTypeFactory.getStepTypeOfName(typeName));
         this.steps.add(this.currentStep);
         return this;
     }

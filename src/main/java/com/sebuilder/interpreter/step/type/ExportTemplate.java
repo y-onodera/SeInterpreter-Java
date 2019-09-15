@@ -2,9 +2,10 @@ package com.sebuilder.interpreter.step.type;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
+import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
-import com.sebuilder.interpreter.export.ExportResource;
+import com.sebuilder.interpreter.step.AbstractStepType;
 import com.sebuilder.interpreter.step.LocatorHolder;
 
 import java.io.File;
@@ -20,7 +21,7 @@ public class ExportTemplate extends AbstractStepType implements LocatorHolder {
             if (toExport.hasDataSource()) {
                 toExport.outputDataSourceTemplate();
             }
-            String result = toExport.getScript();
+            String result = Context.getInstance().getScriptParser().toString(toExport.getScript());
             ctx.log().info(result);
             if (ctx.containsKey("file")) {
                 String fileName = ctx.string("file");

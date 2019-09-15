@@ -43,7 +43,7 @@ public interface DocumentSurvey {
         try (ByteArrayInputStream imageArrayStream = new ByteArrayInputStream(this.getWebDriver().getScreenshotAs(OutputType.BYTES))) {
             return ImageIO.read(imageArrayStream);
         } catch (IOException var9) {
-            throw new RuntimeException("Can not parse screenshot data", var9);
+            throw new RuntimeException("Can not load screenshot data", var9);
         }
     }
 

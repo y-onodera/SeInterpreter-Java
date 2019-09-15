@@ -25,7 +25,7 @@ import com.sebuilder.interpreter.TestRun;
  *
  * @author zarkonnen
  */
-public class WaitFor implements GetterUseStep {
+public class WaitFor extends AbstractStepType implements GetterUseStep {
     public final Getter getter;
 
     public WaitFor(Getter getter) {
@@ -74,14 +74,15 @@ public class WaitFor implements GetterUseStep {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) {
+            return false;
+        }
         WaitFor waitFor = (WaitFor) o;
-        return Objects.equal(getter, waitFor.getter);
+        return Objects.equal(getGetter(), waitFor.getGetter());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getter);
+        return Objects.hashCode(super.hashCode(), getGetter());
     }
 }

@@ -4,7 +4,7 @@ import com.google.common.base.Objects;
 import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
 
-public class Print implements GetterUseStep {
+public class Print extends AbstractStepType implements GetterUseStep {
     public final Getter getter;
 
     public Print(Getter getter) {
@@ -33,14 +33,15 @@ public class Print implements GetterUseStep {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) {
+            return false;
+        }
         Print print = (Print) o;
-        return Objects.equal(getter, print.getter);
+        return Objects.equal(getGetter(), print.getGetter());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getter);
+        return Objects.hashCode(super.hashCode(), getGetter());
     }
 }

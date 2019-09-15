@@ -1,7 +1,8 @@
-package com.sebuilder.interpreter.export;
+package com.sebuilder.interpreter.step.type;
 
 import com.opencsv.CSVWriter;
 import com.sebuilder.interpreter.Context;
+import com.sebuilder.interpreter.TestCase;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -13,10 +14,10 @@ import java.util.Map;
 
 public class ExportResource {
     private final Map<String, String> variables;
-    private final String script;
+    private final TestCase script;
     private final File dataSourceFile;
 
-    public ExportResource(String script, Map<String, String> variables, File dataSourceFile) {
+    public ExportResource(TestCase script, Map<String, String> variables, File dataSourceFile) {
         this.script = script;
         this.variables = new LinkedHashMap<>(variables);
         this.dataSourceFile = dataSourceFile;
@@ -26,8 +27,12 @@ public class ExportResource {
         return variables;
     }
 
-    public String getScript() {
+    public TestCase getScript() {
         return script;
+    }
+
+    public File getDataSourceFile() {
+        return dataSourceFile;
     }
 
     public boolean hasDataSource() {

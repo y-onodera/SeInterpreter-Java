@@ -1,4 +1,4 @@
-package com.sebuilder.interpreter.factory;
+package com.sebuilder.interpreter.parser;
 
 import com.sebuilder.interpreter.*;
 import org.json.JSONArray;
@@ -8,12 +8,12 @@ import org.json.JSONObject;
 import java.util.Map;
 import java.util.Objects;
 
-public class ScriptConverter {
+public class SebuilderToStringConverter {
 
-    public String toString(Suite target) {
+    protected String toString(Suite target) {
         try {
             JSONObject o = new JSONObject();
-            JSONObject data = toJson(target.getDataSet());
+            JSONObject data = toJson(target.getTestDataSet());
             if (data != null) {
                 o.put("data", data);
             }
@@ -26,7 +26,7 @@ public class ScriptConverter {
         }
     }
 
-    public String toString(TestCase target) {
+    protected String toString(TestCase target) {
         try {
             JSONObject o = new JSONObject();
             JSONArray stepsA = new JSONArray();
@@ -34,7 +34,7 @@ public class ScriptConverter {
                 stepsA.put(this.toJSON(s));
             }
             o.put("steps", stepsA);
-            JSONObject data = this.toJson(target.getDataSet());
+            JSONObject data = this.toJson(target.getTestDataSet());
             if (data != null) {
                 o.put("data", data);
             }
@@ -71,7 +71,7 @@ public class ScriptConverter {
         return o;
     }
 
-    private JSONObject toJson(DataSet target) throws JSONException {
+    private JSONObject toJson(TestDataSet target) throws JSONException {
         final DataSource dataSource = target.getDataSource();
         final Map<String, String> dataSourceConfig = target.getDataSourceConfig();
         if (dataSource != null) {
@@ -120,7 +120,7 @@ public class ScriptConverter {
         if (testCase.isNestedChain()) {
             scriptPath.put("nestedChain", testCase.isNestedChain());
         }
-        JSONObject data = this.toJson(testCase.getOverrideDataSet());
+        JSONObject data = this.toJson(testCase.getOverrideTestDataSet());
         if (data != null) {
             scriptPath.put("data", data);
         }

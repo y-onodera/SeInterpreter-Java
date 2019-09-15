@@ -6,8 +6,7 @@ import com.google.common.collect.Lists;
 import com.google.common.eventbus.Subscribe;
 import com.google.common.io.Files;
 import com.sebuilder.interpreter.*;
-import com.sebuilder.interpreter.factory.ScriptConverter;
-import com.sebuilder.interpreter.factory.TestCaseFactory;
+import com.sebuilder.interpreter.application.TestRunListenerImpl;
 import com.sebuilder.interpreter.javafx.EventBus;
 import com.sebuilder.interpreter.javafx.controller.RunningProgressController;
 import com.sebuilder.interpreter.javafx.event.ReportErrorEvent;
@@ -47,8 +46,6 @@ public class SeInterpreterApplication extends Application {
 
     private Scene scene;
 
-    private TestCaseFactory testCaseFactory = new TestCaseFactory();
-
     public static void main(String[] args) {
         launch(args);
     }
@@ -71,7 +68,7 @@ public class SeInterpreterApplication extends Application {
         this.runner = new SeInterpreterRunner(parameters.getRaw());
         final List<String> unnamed = parameters.getUnnamed();
         if (unnamed.size() > 0) {
-            Suite newSuite = getTestcaseFactory().parse(new File(unnamed.get(0)));
+            Suite newSuite = getScriptParser().load(new File(unnamed.get(0)));
             this.resetSuite(newSuite, newSuite.iterator().next());
         }
     }
@@ -94,7 +91,7 @@ public class SeInterpreterApplication extends Application {
     public void scriptReLoad(FileLoadEvent event) {
         File file = event.getFile();
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
-            Suite newSuite = getTestcaseFactory().parse(file);
+            Suite newSuite = getScriptParser().load(file);
             this.resetSuite(newSuite, newSuite.iterator().next());
         });
 
@@ -127,7 +124,7 @@ public class SeInterpreterApplication extends Application {
     public void scriptImport(ScriptImportEvent event) {
         File file = event.getFile();
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
-            TestCase testCase = getTestcaseFactory().parse(file).get(0);
+            TestCase testCase = getScriptParser().load(file).get(0);
             addScript(testCase);
         });
 
@@ -150,7 +147,7 @@ public class SeInterpreterApplication extends Application {
     @Subscribe
     public void replaceScript(ScriptReplaceEvent event) {
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
-            TestCase newTestCase = getTestcaseFactory().parse(event.getScript());
+            TestCase newTestCase = getScriptParser().load(event.getScript());
             this.currentDisplay = newTestCase.builder()
                     .associateWith(new File(this.currentDisplay.path()))
                     .setName(this.currentDisplay.name())
@@ -204,7 +201,7 @@ public class SeInterpreterApplication extends Application {
 
     @Subscribe
     public void createStep(StepAddEvent event) {
-        TestCase templateTestCase = getTestcaseFactory()
+        TestCase templateTestCase = Context
                 .getStepTypeFactory()
                 .getStepTypeOfName(event.getStepType())
                 .toStep()
@@ -225,7 +222,7 @@ public class SeInterpreterApplication extends Application {
             EventBus.publish(new OpenScriptSaveChooserEvent());
         } else {
             File target = new File(this.currentDisplay.path());
-            this.saveContents(target, new ScriptConverter().toString(this.currentDisplay));
+            this.saveContents(target, this.getScriptParser().toString(this.currentDisplay));
         }
     }
 
@@ -316,8 +313,8 @@ public class SeInterpreterApplication extends Application {
         this.runner.close();
     }
 
-    protected TestCaseFactory getTestcaseFactory() {
-        return this.testCaseFactory;
+    protected ScriptParser getScriptParser() {
+        return Context.getInstance().getScriptParser();
     }
 
     private TestCase templateScript() {
@@ -360,7 +357,7 @@ public class SeInterpreterApplication extends Application {
                 this.currentDisplay = this.suite.get(newName);
             }
         });
-        this.saveContents(target, new ScriptConverter().toString(this.suite));
+        this.saveContents(target, this.getScriptParser().toString(this.suite));
         this.resetSuite(this.suite, this.currentDisplay);
     }
 
@@ -369,7 +366,7 @@ public class SeInterpreterApplication extends Application {
         if (Strings.isNullOrEmpty(oldPath)) {
             save = this.copyDataSourceTemplate(exportTo);
         }
-        this.saveContents(target, new ScriptConverter().toString(save));
+        this.saveContents(target, this.getScriptParser().toString(save));
         return save;
     }
 

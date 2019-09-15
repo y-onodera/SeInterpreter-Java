@@ -16,7 +16,7 @@ public class Suite implements Iterable<TestCase>, TestRunnable {
 
     private final Scenario scenario;
 
-    private final DataSet dataSet;
+    private final TestDataSet testDataSet;
 
     private final boolean shareState;
 
@@ -28,7 +28,7 @@ public class Suite implements Iterable<TestCase>, TestRunnable {
         this.scriptFile = ScriptFile.of(suiteFile, DEFAULT_NAME);
         this.shareState = shareState;
         this.scenario = scenario;
-        this.dataSet = new DataSet(dataSource, config, this.getRelativePath());
+        this.testDataSet = new TestDataSet(dataSource, config, this.getRelativePath());
     }
 
     @Override
@@ -42,7 +42,7 @@ public class Suite implements Iterable<TestCase>, TestRunnable {
     }
 
     public List<TestData> loadData() {
-        return this.dataSet.loadData();
+        return this.testDataSet.loadData();
     }
 
     public ScriptFile getScriptFile() {
@@ -85,16 +85,16 @@ public class Suite implements Iterable<TestCase>, TestRunnable {
         return this.shareState;
     }
 
-    public DataSet getDataSet() {
-        return this.dataSet;
+    public TestDataSet getTestDataSet() {
+        return this.testDataSet;
     }
 
     public Map<String, String> getDataSourceConfig() {
-        return this.dataSet.getDataSourceConfig();
+        return this.testDataSet.getDataSourceConfig();
     }
 
     public DataSource getDataSource() {
-        return this.dataSet.getDataSource();
+        return this.testDataSet.getDataSource();
     }
 
     public List<TestRunBuilder> getTestRuns() {
@@ -165,12 +165,12 @@ public class Suite implements Iterable<TestCase>, TestRunnable {
         return isShareState() == testCases.isShareState() &&
                 Objects.equal(getScriptFile(), testCases.getScriptFile()) &&
                 Objects.equal(getScenario(), testCases.getScenario()) &&
-                Objects.equal(dataSet, testCases.dataSet);
+                Objects.equal(testDataSet, testCases.testDataSet);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getScriptFile(), getScenario(), dataSet, isShareState());
+        return Objects.hashCode(getScriptFile(), getScenario(), testDataSet, isShareState());
     }
 
 }

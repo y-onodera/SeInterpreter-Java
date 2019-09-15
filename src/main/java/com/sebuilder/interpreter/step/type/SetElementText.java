@@ -18,7 +18,7 @@ package com.sebuilder.interpreter.step.type;
 
 import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
-import com.sebuilder.interpreter.export.Exportable;
+import com.sebuilder.interpreter.step.AbstractStepType;
 import com.sebuilder.interpreter.step.LocatorHolder;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;

@@ -17,6 +17,7 @@
 package com.sebuilder.interpreter.step.type;
 
 import com.sebuilder.interpreter.TestRun;
+import com.sebuilder.interpreter.step.AbstractStepType;
 import com.sebuilder.interpreter.step.LocatorHolder;
 import org.openqa.selenium.support.ui.Select;
 

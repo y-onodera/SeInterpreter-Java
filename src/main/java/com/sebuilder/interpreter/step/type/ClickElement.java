@@ -17,7 +17,7 @@
 package com.sebuilder.interpreter.step.type;
 
 import com.sebuilder.interpreter.TestRun;
-import com.sebuilder.interpreter.export.Exportable;
+import com.sebuilder.interpreter.step.AbstractStepType;
 import com.sebuilder.interpreter.step.LocatorHolder;
 
 public class ClickElement extends AbstractStepType implements ConditionalStep, Exportable, LocatorHolder {

@@ -78,7 +78,7 @@ public final class TextAreaAppender extends AbstractAppender {
     }
 
     /**
-     * Factory method. Log4j will parse the configuration and call this factory
+     * Factory method. Log4j will load the configuration and call this factory
      * method to construct the appender with
      * the configured attributes.
      *

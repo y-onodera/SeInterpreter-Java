@@ -18,6 +18,7 @@ package com.sebuilder.interpreter.step.type;
 
 import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
+import com.sebuilder.interpreter.step.AbstractStepType;
 import org.openqa.selenium.Cookie;
 
 public class DeleteCookie extends AbstractStepType {

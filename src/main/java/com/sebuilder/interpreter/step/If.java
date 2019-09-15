@@ -4,7 +4,7 @@ import com.google.common.base.Objects;
 import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
 
-public class If implements FlowStep, GetterUseStep {
+public class If extends AbstractStepType implements FlowStep, GetterUseStep {
 
     private final Getter getter;
 
@@ -17,13 +17,7 @@ public class If implements FlowStep, GetterUseStep {
         return getter;
     }
 
-    /**
-     * Perform the action this step consists of.
-     *
-     * @param ctx Current test run.
-     * @return Whether the step succeeded. This should be true except for failed verify steps, which
-     * should return false. Other failures should throw a RuntimeException.
-     */
+    @Override
     public boolean run(TestRun ctx) {
         int actions = getSubSteps(ctx);
         if (this.test(ctx)) {
@@ -49,12 +43,13 @@ public class If implements FlowStep, GetterUseStep {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
         If anIf = (If) o;
         return Objects.equal(getGetter(), anIf.getGetter());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getGetter());
+        return Objects.hashCode(super.hashCode(), getGetter());
     }
 }

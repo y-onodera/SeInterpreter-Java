@@ -24,7 +24,7 @@ import com.sebuilder.interpreter.TestRun;
  *
  * @author zarkonnen
  */
-public class Assert implements GetterUseStep {
+public class Assert extends AbstractStepType implements GetterUseStep {
     public final Getter getter;
 
     public Assert(Getter getter) {
@@ -43,14 +43,15 @@ public class Assert implements GetterUseStep {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) {
+            return false;
+        }
         Assert anAssert = (Assert) o;
-        return Objects.equal(getter, anAssert.getter);
+        return Objects.equal(getGetter(), anAssert.getGetter());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getter);
+        return Objects.hashCode(super.hashCode(), getGetter());
     }
 }

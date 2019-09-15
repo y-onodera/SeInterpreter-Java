@@ -2,7 +2,7 @@ package com.sebuilder.interpreter.javafx.controller;
 
 import com.google.common.base.Throwables;
 import com.google.common.eventbus.Subscribe;
-import com.sebuilder.interpreter.factory.ScriptConverter;
+import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.javafx.EventBus;
 import com.sebuilder.interpreter.javafx.TextAreaAppender;
 import com.sebuilder.interpreter.javafx.event.ReportErrorEvent;
@@ -63,7 +63,7 @@ public class SeInterpreterController {
     public void showScriptAsText(RefreshStepTextViewEvent event) {
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
             this.textAreaStep.clear();
-            this.textAreaStep.setText(new ScriptConverter().toString(event.getTestCase()));
+            this.textAreaStep.setText(Context.getScriptParser().toString(event.getTestCase()));
         });
     }
 

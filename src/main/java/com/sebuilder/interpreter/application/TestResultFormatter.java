@@ -11,7 +11,7 @@ import java.lang.reflect.Field;
 import java.util.Hashtable;
 import java.util.Map;
 
-public class SeInterpreterTestResultFormatter extends XMLJUnitResultFormatter {
+public class TestResultFormatter extends XMLJUnitResultFormatter {
 
     private String classname;
 

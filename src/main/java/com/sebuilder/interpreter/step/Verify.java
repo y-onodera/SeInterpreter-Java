@@ -16,8 +16,6 @@
 
 package com.sebuilder.interpreter.step;
 
-import com.google.common.base.Objects;
-
 /**
  * Generic Verify that wraps a getter.
  *
@@ -34,16 +32,4 @@ public class Verify extends Assert {
         return true;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Verify verify = (Verify) o;
-        return Objects.equal(getter, verify.getter);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(getter);
-    }
 }

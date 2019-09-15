@@ -63,12 +63,12 @@ public class SuiteAssert {
     }
 
     public static void assertEqualsNoDataSource(Suite actual) {
-        assertNull(actual.getDataSet().getDataSource());
-        assertEquals(0, actual.getDataSet().getDataSourceConfig().size());
+        assertNull(actual.getTestDataSet().getDataSource());
+        assertEquals(0, actual.getTestDataSet().getDataSourceConfig().size());
     }
 
-    public static Consumer<Suite> assertEqualsDataSet(DataSet dataSource) {
-        return (Suite actual) -> assertEquals(dataSource, actual.getDataSet());
+    public static Consumer<Suite> assertEqualsDataSet(TestDataSet dataSource) {
+        return (Suite actual) -> assertEquals(dataSource, actual.getTestDataSet());
     }
 
     public static Consumer<Suite> assertEqualsChain(int aChainFrom, int aChainTo) {

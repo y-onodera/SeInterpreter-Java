@@ -21,6 +21,7 @@ import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.screenshot.LocatorInnerScrollElementHandler;
 import com.sebuilder.interpreter.screenshot.Page;
 import com.sebuilder.interpreter.screenshot.VerticalPrinter;
+import com.sebuilder.interpreter.step.AbstractStepType;
 import com.sebuilder.interpreter.step.LocatorHolder;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.edge.EdgeDriver;

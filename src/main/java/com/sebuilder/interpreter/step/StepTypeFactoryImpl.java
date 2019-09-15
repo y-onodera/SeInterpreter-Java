@@ -13,18 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.sebuilder.interpreter.factory;
+package com.sebuilder.interpreter.step;
 
-import com.sebuilder.interpreter.Locator;
-import com.sebuilder.interpreter.Step;
-import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.StepType;
-import com.sebuilder.interpreter.step.Getter;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -34,7 +26,7 @@ import java.util.HashMap;
  *
  * @author jkowalczyk
  */
-public class StepTypeFactory {
+public class StepTypeFactoryImpl implements com.sebuilder.interpreter.StepTypeFactory {
 
     public static final String DEFAULT_PACKAGE = "com.sebuilder.interpreter.step";
 
@@ -62,10 +54,12 @@ public class StepTypeFactory {
      */
     private final HashMap<String, StepType> typesMap = new HashMap<String, StepType>();
 
+    @Override
     public void setPrimaryPackage(String primaryPackage) {
         this.primaryPackage = primaryPackage;
     }
 
+    @Override
     public void setSecondaryPackage(String secondaryPackage) {
         this.secondaryPackage = secondaryPackage;
     }
@@ -74,6 +68,7 @@ public class StepTypeFactory {
      * @param name
      * @return a stepType instance for a given name
      */
+    @Override
     public StepType getStepTypeOfName(String name) {
         try {
             if (!this.typesMap.containsKey(name)) {
@@ -107,13 +102,15 @@ public class StepTypeFactory {
                     className = className.substring("retry".length());
                     rawStepType = false;
                 }
-                Class<?> c = null;
-                if (rawStepType) {
+                Class<?> c;
+                if (className.equals("Loop")) {
+                    c = Loop.class;
+                } else if (rawStepType) {
                     c = newStepType(name, className);
                 } else {
                     c = newGetter(name, className);
                 }
-                if (c != null) try {
+                try {
                     Object o = c.getDeclaredConstructor().newInstance();
                     if (name.startsWith("assert")) {
                         this.typesMap.put(name, Getter.class.cast(o).toAssert());
@@ -173,67 +170,4 @@ public class StepTypeFactory {
         return c;
     }
 
-    /**
-     * @param o json object step load from
-     * @throws JSONException If anything goes wrong with interpreting the JSON.
-     */
-    ArrayList<Step> parseStep(JSONObject o) throws JSONException {
-        JSONArray stepsA = o.getJSONArray("steps");
-        ArrayList<Step> steps = new ArrayList<>();
-        for (int i = 0; i < stepsA.length(); i++) {
-            this.parseStep(steps, stepsA.getJSONObject(i));
-        }
-        return steps;
-    }
-
-    /**
-     * @param stepO json object step load from
-     * @throws JSONException If anything goes wrong with interpreting the JSON.
-     */
-    private void parseStep(ArrayList<Step> steps, JSONObject stepO) throws JSONException {
-        StepBuilder step = this.createStep(stepO);
-        this.configureStep(stepO, step);
-        steps.add(step.build());
-    }
-
-    /**
-     * @param stepO json object step load from
-     * @return A new instance of step
-     * @throws JSONException If anything goes wrong with interpreting the JSON.
-     */
-    private StepBuilder createStep(JSONObject stepO) throws JSONException {
-        StepType type = this.getStepTypeOfName(stepO.getString("type"));
-        boolean isNegated = stepO.optBoolean("negated", false);
-        String name = stepO.optString("step_name", null);
-        return new StepBuilder(name, type, isNegated);
-    }
-
-    /**
-     * @param stepO json object step configuration load from
-     * @param step  step configuration to
-     * @throws JSONException If anything goes wrong with interpreting the JSON.
-     */
-    private void configureStep(JSONObject stepO, StepBuilder step) throws JSONException {
-        JSONArray keysA = stepO.names();
-        for (int j = 0; j < keysA.length(); j++) {
-            this.configureStep(stepO, step, keysA.getString(j));
-        }
-    }
-
-    /**
-     * @param stepO json object step configuration load from
-     * @param step  step configuration to
-     * @param key   configuration key
-     * @throws JSONException If anything goes wrong with interpreting the JSON.
-     */
-    private void configureStep(JSONObject stepO, StepBuilder step, String key) throws JSONException {
-        if (key.equals("type") || key.equals("negated")) {
-            return;
-        }
-        if (stepO.optJSONObject(key) != null && key.startsWith("locator")) {
-            step.put(key, new Locator(stepO.getJSONObject(key).getString("type"), stepO.getJSONObject(key).getString("value")));
-        } else {
-            step.put(key, stepO.getString(key));
-        }
-    }
 }

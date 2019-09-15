@@ -18,7 +18,6 @@ package com.sebuilder.interpreter;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -155,17 +154,6 @@ public class Locator {
             @Override
             public List<WebElement> findElements(String value, TestRun ctx) {
                 return ctx.driver().findElementsByXPath(value);
-            }
-        },
-        FOCUS {
-            @Override
-            public WebElement find(String value, TestRun ctx) {
-                return ctx.driver().switchTo().activeElement();
-            }
-
-            @Override
-            public List<WebElement> findElements(String value, TestRun ctx) {
-                return Lists.newArrayList(ctx.driver().switchTo().activeElement());
             }
         };
 

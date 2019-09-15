@@ -2,7 +2,7 @@ package com.sebuilder.interpreter.javafx.application;
 
 import com.sebuilder.interpreter.TestCase;
 import com.sebuilder.interpreter.TestData;
-import com.sebuilder.interpreter.TestRunListenerImpl;
+import com.sebuilder.interpreter.application.TestRunListenerImpl;
 import com.sebuilder.interpreter.javafx.EventBus;
 import com.sebuilder.interpreter.javafx.Result;
 import com.sebuilder.interpreter.javafx.event.replay.StepResultSetEvent;

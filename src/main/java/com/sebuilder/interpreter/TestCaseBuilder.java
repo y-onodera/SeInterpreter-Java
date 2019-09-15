@@ -98,12 +98,12 @@ public class TestCaseBuilder {
         return this.skip;
     }
 
-    public DataSet getDataSet() {
-        return new DataSet(this.getDataSource(), this.getDataSourceConfig(), this.getRelativePath());
+    public TestDataSet getDataSet() {
+        return new TestDataSet(this.getDataSource(), this.getDataSourceConfig(), this.getRelativePath());
     }
 
-    public DataSet getOverrideDataSet() {
-        return new DataSet(this.getOverrideDataSource(), this.getOverrideDataSourceConfig(), this.getRelativePath());
+    public TestDataSet getOverrideDataSet() {
+        return new TestDataSet(this.getOverrideDataSource(), this.getOverrideDataSourceConfig(), this.getRelativePath());
     }
 
     public boolean isNestedChain() {
