@@ -113,9 +113,9 @@ public class TestRunTest {
         public void vars() {
             TestData actual = this.target.vars();
             assertEquals(7, actual.entrySet().size());
-            assertEquals(Context.getInstance().getBrowser(), actual.get("_browser"));
-            assertEquals(Context.getInstance().getBaseDirectory().getAbsolutePath(), actual.get("_baseDir"));
-            assertEquals(Context.getInstance().getDataSourceDirectory().getAbsolutePath(), actual.get("_dataSourceDir"));
+            assertEquals(Context.getBrowser(), actual.get("_browser"));
+            assertEquals(Context.getBaseDirectory().getAbsolutePath(), actual.get("_baseDir"));
+            assertEquals(Context.getDataSourceDirectory().getAbsolutePath(), actual.get("_dataSourceDir"));
             assertEquals(this.listener.getResultDir().getAbsolutePath(), actual.get("_resultDir"));
             assertEquals(this.listener.getScreenShotOutputDirectory().getAbsolutePath(), actual.get("_screenShotDir"));
             assertEquals(this.listener.getDownloadDirectory().getAbsolutePath(), actual.get("_downloadDir"));
@@ -124,7 +124,7 @@ public class TestRunTest {
 
         @Test
         public void bindRuntimeVariables() {
-            assertEquals(Context.getInstance().getBrowser(), this.target.bindRuntimeVariables("${_browser}"));
+            assertEquals(Context.getBrowser(), this.target.bindRuntimeVariables("${_browser}"));
         }
 
         @Test
@@ -147,9 +147,9 @@ public class TestRunTest {
         public void vars() {
             TestData actual = this.target.vars();
             assertEquals(8, actual.entrySet().size());
-            assertEquals(Context.getInstance().getBrowser(), actual.get("_browser"));
-            assertEquals(Context.getInstance().getBaseDirectory().getAbsolutePath(), actual.get("_baseDir"));
-            assertEquals(Context.getInstance().getDataSourceDirectory().getAbsolutePath(), actual.get("_dataSourceDir"));
+            assertEquals(Context.getBrowser(), actual.get("_browser"));
+            assertEquals(Context.getBaseDirectory().getAbsolutePath(), actual.get("_baseDir"));
+            assertEquals(Context.getDataSourceDirectory().getAbsolutePath(), actual.get("_dataSourceDir"));
             assertEquals(this.listener.getResultDir().getAbsolutePath(), actual.get("_resultDir"));
             assertEquals(this.listener.getScreenShotOutputDirectory().getAbsolutePath(), actual.get("_screenShotDir"));
             assertEquals(this.listener.getDownloadDirectory().getAbsolutePath(), actual.get("_downloadDir"));
