@@ -42,7 +42,7 @@ public class ExportResource {
     public void outputDataSourceTemplate() throws IOException {
         Map<String, String> valuables = this.getVariables();
         CSVWriter writer = new CSVWriter(new OutputStreamWriter(new FileOutputStream(this.dataSourceFile),
-                Charset.forName(Context.getInstance().getDataSourceEncoding())));
+                Charset.forName(Context.getDataSourceEncoding())));
         writer.writeNext(valuables.keySet().toArray(new String[valuables.keySet().size()]));
         writer.writeNext(valuables.values().toArray(new String[valuables.values().size()]));
         writer.flush();

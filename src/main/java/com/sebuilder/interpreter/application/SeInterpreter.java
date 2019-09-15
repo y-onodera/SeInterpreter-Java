@@ -70,7 +70,7 @@ public class SeInterpreter extends CommandLineRunner {
     }
 
     private void runScripts() throws IOException, JSONException {
-        this.seInterpreterTestListener.cleanResult();
+        this.testRunListener.cleanResult();
         try {
             for (String path : this.paths) {
                 this.runScripts(path);
@@ -79,7 +79,7 @@ public class SeInterpreter extends CommandLineRunner {
             if (this.driver != null && this.closeDriver) {
                 this.driver.quit();
             }
-            this.seInterpreterTestListener.aggregateResult();
+            this.testRunListener.aggregateResult();
         }
     }
 
@@ -92,7 +92,7 @@ public class SeInterpreter extends CommandLineRunner {
 
     private void runScript(TestRunBuilder testRunBuilder) {
         for (TestData data : testRunBuilder.loadData()) {
-            this.runScript(testRunBuilder, data, this.seInterpreterTestListener);
+            this.runScript(testRunBuilder, data, this.testRunListener);
         }
     }
 

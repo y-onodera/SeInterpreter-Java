@@ -27,10 +27,10 @@ public class ScriptSettingController {
         assert datasourceSearchButton != null : "fx:id=\"datasourceSearchButton\" was not injected: check your FXML file 'browsersetting.fxml'.";
         assert editButton != null : "fx:id=\"editButton\" was not injected: check your FXML file 'browsersetting.fxml'.";
 
-        if (Context.getInstance().getDataSourceDirectory().exists()) {
-            this.datasourceText.setText(Context.getInstance().getDataSourceDirectory().getAbsolutePath());
+        if (Context.getDataSourceDirectory().exists()) {
+            this.datasourceText.setText(Context.getDataSourceDirectory().getAbsolutePath());
         } else {
-            this.datasourceText.setText(Context.getInstance().getBaseDirectory().getAbsolutePath());
+            this.datasourceText.setText(Context.getBaseDirectory().getAbsolutePath());
         }
     }
 

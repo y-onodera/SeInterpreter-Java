@@ -314,7 +314,7 @@ public class SeInterpreterApplication extends Application {
     }
 
     protected ScriptParser getScriptParser() {
-        return Context.getInstance().getScriptParser();
+        return Context.getScriptParser();
     }
 
     private TestCase templateScript() {

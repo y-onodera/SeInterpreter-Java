@@ -30,11 +30,11 @@ public class SeInterpreterRunner {
         this.repl = new SeInterpreterREPL(raw.toArray(new String[raw.size()]), log);
         this.repl.setUpREPL();
         this.globalListener = new TestRunListenerImpl(this.log);
-        this.globalListener.setUpDir(Context.getInstance().getResultOutputDirectory());
+        this.globalListener.setUpDir(Context.getResultOutputDirectory());
     }
 
     public File getDataSourceDirectory() {
-        return Context.getInstance().getDataSourceDirectory();
+        return Context.getDataSourceDirectory();
     }
 
     public File getTemplateOutputDirectory() {
@@ -132,7 +132,7 @@ public class SeInterpreterRunner {
 
     private void setUp() {
         if (this.repl == null) {
-            String[] args = new String[]{CommandLineArgument.DRIVER.getArgument(Context.getInstance().getBrowser())};
+            String[] args = new String[]{CommandLineArgument.DRIVER.getArgument(Context.getBrowser())};
             this.repl = new SeInterpreterREPL(args, log);
             this.repl.setUpREPL();
         }

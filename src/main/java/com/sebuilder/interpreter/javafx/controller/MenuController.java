@@ -48,7 +48,7 @@ public class MenuController {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open Resource File");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("json format (*.json)", "*.json"));
-        fileChooser.setInitialDirectory(Context.getInstance().getBaseDirectory());
+        fileChooser.setInitialDirectory(Context.getBaseDirectory());
         Stage stage = new Stage();
         stage.initOwner(paneSeInterpreterMenu.getScene().getWindow());
         File file = fileChooser.showOpenDialog(stage);
@@ -67,7 +67,7 @@ public class MenuController {
         FileChooser fileSave = new FileChooser();
         fileSave.setTitle("Save Suite File");
         fileSave.getExtensionFilters().add(new FileChooser.ExtensionFilter("json format (*.json)", "*.json"));
-        fileSave.setInitialDirectory(Context.getInstance().getBaseDirectory());
+        fileSave.setInitialDirectory(Context.getBaseDirectory());
         Stage stage = new Stage();
         stage.initOwner(this.paneSeInterpreterMenu.getScene().getWindow());
         File file = fileSave.showSaveDialog(stage);

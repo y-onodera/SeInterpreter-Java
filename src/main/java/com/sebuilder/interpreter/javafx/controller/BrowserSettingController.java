@@ -112,9 +112,9 @@ public class BrowserSettingController {
             driverName = "IEDriverServer.exe";
         }
         if (parentDir == null || !parentDir.exists()) {
-            File driverParent = new File(Context.getInstance().getBaseDirectory(), "exe/");
+            File driverParent = new File(Context.getBaseDirectory(), "exe/");
             if (!driverParent.exists()) {
-                driverParent = Context.getInstance().getBaseDirectory();
+                driverParent = Context.getBaseDirectory();
             }
             this.parentDir = driverParent.getAbsoluteFile();
         }

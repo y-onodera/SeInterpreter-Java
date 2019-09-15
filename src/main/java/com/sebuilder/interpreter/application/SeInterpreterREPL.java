@@ -37,7 +37,7 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
     }
 
     public void setUpREPL() {
-        this.seInterpreterTestListener.cleanDir();
+        this.testRunListener.cleanDir();
     }
 
     public void runningREPL() {
@@ -80,7 +80,7 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
     public Iterable<TestCase> loadScript(String file) {
         Iterable<TestCase> result = Lists.newArrayList();
         try {
-            result = this.sf.load(new File(file));
+            result = Context.getScriptParser().load(new File(file));
         } catch (Throwable e) {
             this.log.error(e);
         }
@@ -91,7 +91,7 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
         this.log.info("start load input");
         TestCase result = null;
         try {
-            result = this.sf.load(cmdInput);
+            result = Context.getScriptParser().load(cmdInput);
         } catch (Throwable e) {
             this.log.error(e);
         }
@@ -103,12 +103,12 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
     }
 
     public void execute(TestCase testCase) {
-        this.execute(createTestRunBuilder(testCase), this.seInterpreterTestListener);
+        this.execute(createTestRunBuilder(testCase), this.testRunListener);
     }
 
     @Override
     public void execute(Suite suite, TestRunListener seInterpreterTestListener) {
-        seInterpreterTestListener.cleanResult(new File(Context.getInstance().getResultOutputDirectory(), String.valueOf(execCount++)));
+        seInterpreterTestListener.cleanResult(new File(Context.getResultOutputDirectory(), String.valueOf(execCount++)));
         try {
             for (TestRunBuilder builder : suite.getTestRuns()) {
                 boolean stop = this.execute(builder, seInterpreterTestListener);
@@ -125,7 +125,7 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
 
     @Override
     public void execute(TestCase testCase, TestRunListener seInterpreterTestListener) {
-        seInterpreterTestListener.cleanResult(new File(Context.getInstance().getResultOutputDirectory(), String.valueOf(execCount++)));
+        seInterpreterTestListener.cleanResult(new File(Context.getResultOutputDirectory(), String.valueOf(execCount++)));
         try {
             this.execute(createTestRunBuilder(testCase), seInterpreterTestListener);
         } catch (Throwable t) {

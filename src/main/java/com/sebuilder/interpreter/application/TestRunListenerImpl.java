@@ -107,7 +107,7 @@ public class TestRunListenerImpl implements TestRunListener {
 
     @Override
     public void cleanResult() {
-        this.cleanResult(Context.getInstance().getResultOutputDirectory());
+        this.cleanResult(Context.getResultOutputDirectory());
     }
 
     @Override
@@ -118,7 +118,7 @@ public class TestRunListenerImpl implements TestRunListener {
 
     @Override
     public void cleanDir() {
-        this.cleanDir(Context.getInstance().getResultOutputDirectory());
+        this.cleanDir(Context.getResultOutputDirectory());
     }
 
     @Override
@@ -139,13 +139,13 @@ public class TestRunListenerImpl implements TestRunListener {
         mkdir.setProject(this.project);
         mkdir.setDir(this.resultDir);
         mkdir.execute();
-        this.downloadDirectory = new File(resultDir, Context.getInstance().getDownloadDirectory()).getAbsoluteFile();
+        this.downloadDirectory = new File(resultDir, Context.getDownloadDirectory()).getAbsoluteFile();
         mkdir.setDir(this.downloadDirectory);
         mkdir.execute();
-        this.screenShotOutputDirectory = new File(resultDir, Context.getInstance().getScreenShotOutputDirectory()).getAbsoluteFile();
+        this.screenShotOutputDirectory = new File(resultDir, Context.getScreenShotOutputDirectory()).getAbsoluteFile();
         mkdir.setDir(this.screenShotOutputDirectory);
         mkdir.execute();
-        this.templateOutputDirectory = new File(resultDir, Context.getInstance().getTemplateOutputDirectory()).getAbsoluteFile();
+        this.templateOutputDirectory = new File(resultDir, Context.getTemplateOutputDirectory()).getAbsoluteFile();
         mkdir.setDir(this.templateOutputDirectory);
         mkdir.execute();
     }

@@ -70,7 +70,7 @@ public class ScriptViewController {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open Resource File");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("json format (*.json)", "*.json"));
-        fileChooser.setInitialDirectory(Context.getInstance().getBaseDirectory());
+        fileChooser.setInitialDirectory(Context.getBaseDirectory());
         Stage stage = new Stage();
         stage.initOwner(treeViewScriptName.getScene().getWindow());
         File file = fileChooser.showOpenDialog(stage);
@@ -95,7 +95,7 @@ public class ScriptViewController {
         FileChooser fileSave = new FileChooser();
         fileSave.setTitle("Save TestCase File");
         fileSave.getExtensionFilters().add(new FileChooser.ExtensionFilter("json format (*.json)", "*.json"));
-        fileSave.setInitialDirectory(Context.getInstance().getBaseDirectory());
+        fileSave.setInitialDirectory(Context.getBaseDirectory());
         File file = fileSave.showSaveDialog(treeViewScriptName.getScene().getWindow());
         if (file != null) {
             EventBus.publish(new FileSaveAsEvent(file));

@@ -24,7 +24,7 @@ public final class Utils {
     }
 
     public static File findFile(File relativeTo, String path) {
-        File precedence = new File(Context.getInstance().getDataSourceDirectory(), path);
+        File precedence = new File(Context.getDataSourceDirectory(), path);
         if (precedence.exists()) {
             return precedence;
         }

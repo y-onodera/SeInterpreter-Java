@@ -19,10 +19,9 @@ import java.util.HashMap;
 public abstract class CommandLineRunner {
     protected static WebDriverFactory DEFAULT_DRIVER_FACTORY = new Chrome();
     protected WebDriverFactory wdf;
-    protected ScriptParser sf;
     protected HashMap<String, String> driverConfig;
     protected TestRun lastRun;
-    protected TestRunListener seInterpreterTestListener;
+    protected TestRunListener testRunListener;
     protected Logger log;
     protected RemoteWebDriver driver;
     protected Long implicitlyWaitTime;
@@ -30,9 +29,8 @@ public abstract class CommandLineRunner {
 
     protected CommandLineRunner(String[] args, Logger log) {
         this.log = log;
-        this.sf = new Sebuilder();
         Context.getInstance()
-                .setDefaultScriptParser(this.sf)
+                .setDefaultScriptParser(new Sebuilder())
                 .setDataSourceFactory(new DataSourceFactoryImpl())
                 .setStepTypeFactory(new StepTypeFactoryImpl());
         this.driverConfig = new HashMap<>();
@@ -50,8 +48,8 @@ public abstract class CommandLineRunner {
         return this.pageLoadWaitTime;
     }
 
-    public void setSeInterpreterTestListener(TestRunListener seInterpreterTestListener) {
-        this.seInterpreterTestListener = seInterpreterTestListener;
+    public void setTestRunListener(TestRunListener testRunListener) {
+        this.testRunListener = testRunListener;
     }
 
     public void reloadBrowserSetting(String browserName, String driverPath) {
@@ -112,13 +110,13 @@ public abstract class CommandLineRunner {
         }
         if (Strings.isNotEmpty(aspectFileName)) {
             try {
-                this.setAspect(new File(Context.getInstance().getBaseDirectory(), aspectFileName));
+                this.setAspect(new File(Context.getBaseDirectory(), aspectFileName));
             } catch (JSONException | IOException e) {
                 this.log.fatal(e);
                 System.exit(1);
             }
         }
-        this.seInterpreterTestListener = new TestRunListenerImpl(this.log);
+        this.testRunListener = new TestRunListenerImpl(this.log);
         this.log.info("setUp finish");
     }
 
@@ -126,8 +124,8 @@ public abstract class CommandLineRunner {
         return script.createTestRun(this.log
                 , this.wdf
                 , this.driverConfig
-                , this.implicitlyWaitTime
-                , this.pageLoadWaitTime
+                , this.getImplicitlyWaitTime()
+                , this.getPageLoadWaitTime()
                 , data
                 , this.lastRun
                 , seInterpreterTestListener);
@@ -154,7 +152,7 @@ public abstract class CommandLineRunner {
     }
 
     protected void setAspect(File aSource) throws IOException, JSONException {
-        Context.getInstance().setAspect(this.sf.loadAspect(aSource));
+        Context.getInstance().setAspect(Context.getScriptParser().loadAspect(aSource));
     }
 
     protected TestRunBuilder createTestRunBuilder(TestCase testCase) {

@@ -52,9 +52,9 @@ public class TestRun {
         this.driver = driver;
         this.listener = seInterpreterTestListener;
         this.vars = initialVars.builder()
-                .add("_browser", Context.getInstance().getBrowser())
-                .add("_baseDir", Context.getInstance().getBaseDirectory().getAbsolutePath())
-                .add("_dataSourceDir", Context.getInstance().getDataSourceDirectory().getAbsolutePath())
+                .add("_browser", Context.getBrowser())
+                .add("_baseDir", Context.getBaseDirectory().getAbsolutePath())
+                .add("_dataSourceDir", Context.getDataSourceDirectory().getAbsolutePath())
                 .add("_resultDir", seInterpreterTestListener.getResultDir().getAbsolutePath())
                 .add("_screenShotDir", seInterpreterTestListener.getScreenShotOutputDirectory().getAbsolutePath())
                 .add("_downloadDir", seInterpreterTestListener.getDownloadDirectory().getAbsolutePath())
@@ -273,7 +273,7 @@ public class TestRun {
         Aspect weaver = this.aspect;
         if (!this.preventContextAspect) {
             weaver = this.aspect.builder()
-                    .add(Context.getInstance().getAspect())
+                    .add(Context.getAspect())
                     .build();
         }
         return weaver.advice(this.currentStep());
