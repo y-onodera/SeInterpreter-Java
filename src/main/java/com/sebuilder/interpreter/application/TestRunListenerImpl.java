@@ -29,7 +29,7 @@ public class TestRunListenerImpl implements TestRunListener {
     private File screenShotOutputDirectory;
     private File templateOutputDirectory;
     private JUnitTest suite;
-    private junit.framework.TestCase test;
+    private ScreenShootableTestCase test;
     private int stepNo;
     private int runTest;
     private int error;
@@ -152,10 +152,11 @@ public class TestRunListenerImpl implements TestRunListener {
     @Override
     public boolean openTestSuite(TestCase testCase, String testRunName, TestData aProperty) {
         String baseName = testRunName;
-        String testName = baseName.replace("\\", ".").replace("/", ".").replaceAll("^\\.+", "");
+        String testName = baseName.replace("_", ".");
         this.log.info("open suite:" + testName);
         this.suite = new JUnitTest();
         this.suite.setName(testName);
+        this.suite.setRunTime(new Date().getTime());
         this.suite.setProperties(new Hashtable<>(
                 aProperty.entrySet()
                         .stream()
@@ -163,7 +164,6 @@ public class TestRunListenerImpl implements TestRunListener {
                                 entry -> entry.getKey().replace("'", "\\'")
                                 , entry -> entry.getValue())
                         )));
-        this.suite.setRunTime(new Date().getTime());
         this.test = null;
         this.runTest = 0;
         this.error = 0;
@@ -182,8 +182,7 @@ public class TestRunListenerImpl implements TestRunListener {
     public void startTest(String testName) {
         this.log.info("start test:" + testName);
         this.runTest++;
-        this.test = new junit.framework.TestCase(testName) {
-        };
+        this.test = new ScreenShootableTestCase(testName);
         this.formatter.setClassname(this.suite.getName().replace("_", "."));
         this.formatter.startTest(this.test);
     }
@@ -196,6 +195,15 @@ public class TestRunListenerImpl implements TestRunListener {
     @Override
     public int getStepNo() {
         return this.stepNo;
+    }
+
+    @Override
+    public File addScreenshot(String file) {
+        File result = new File(this.getScreenShotOutputDirectory(), file);
+        this.test.setScreenshotPath(this.resultDir.getAbsoluteFile().toPath()
+                .relativize(result.getAbsoluteFile().toPath())
+                .toString());
+        return result;
     }
 
     @Override
@@ -248,6 +256,7 @@ public class TestRunListenerImpl implements TestRunListener {
         transformer.setTodir(this.resultDir);
         AggregateTransformer.Format noFrame = new AggregateTransformer.Format();
         noFrame.setValue(AggregateTransformer.NOFRAMES);
+        transformer.setStyledir(new File(this.getClass().getResource("/report/junit-noframes.xsl").getFile()).getParentFile());
         transformer.setFormat(noFrame);
         aggregator.execute();
         Delete delete = new Delete();
@@ -256,4 +265,19 @@ public class TestRunListenerImpl implements TestRunListener {
         delete.execute();
     }
 
+    static class ScreenShootableTestCase extends junit.framework.TestCase {
+        private String screenshotPath = "";
+
+        public ScreenShootableTestCase(String testName) {
+            super(testName);
+        }
+
+        public String getScreenshotPath() {
+            return screenshotPath;
+        }
+
+        public void setScreenshotPath(String screenshotPath) {
+            this.screenshotPath = screenshotPath;
+        }
+    }
 }

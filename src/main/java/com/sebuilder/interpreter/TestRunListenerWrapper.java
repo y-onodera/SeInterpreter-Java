@@ -87,6 +87,11 @@ public class TestRunListenerWrapper implements TestRunListener {
     }
 
     @Override
+    public File addScreenshot(String file) {
+        return this.delegate.addScreenshot(file);
+    }
+
+    @Override
     public void addError(Throwable throwable) {
         delegate.addError(throwable);
     }

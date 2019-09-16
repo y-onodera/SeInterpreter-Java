@@ -36,6 +36,8 @@ public interface TestRunListener {
 
     int getStepNo();
 
+    File addScreenshot(String file);
+
     void addError(Throwable throwable);
 
     void addFailure(String message);
