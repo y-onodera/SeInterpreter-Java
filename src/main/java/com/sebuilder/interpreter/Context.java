@@ -1,5 +1,8 @@
 package com.sebuilder.interpreter;
 
+import com.google.common.collect.Lists;
+import com.sebuilder.interpreter.step.type.SaveScreenshot;
+
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -21,7 +24,11 @@ public enum Context {
     private String templateOutputDirectory = "template";
     private String browser = "Chrome";
     private String defaultScript = "sebuilder";
-    private Aspect aspect = new Aspect();
+    private Aspect aspect = new Aspect().builder()
+            .interceptor()
+            .addFailure(Lists.newArrayList(new SaveScreenshot().toStep().put("file", "failure.png").build()))
+            .build()
+            .build();
 
     public static Context getInstance() {
         return INSTANCE;
