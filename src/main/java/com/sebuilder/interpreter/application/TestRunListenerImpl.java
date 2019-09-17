@@ -12,6 +12,8 @@ import org.apache.tools.ant.taskdefs.optional.junit.AggregateTransformer;
 import org.apache.tools.ant.taskdefs.optional.junit.JUnitTest;
 import org.apache.tools.ant.taskdefs.optional.junit.XMLResultAggregator;
 import org.apache.tools.ant.types.FileSet;
+import org.apache.tools.ant.types.Resource;
+import org.apache.tools.ant.types.resources.URLResource;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -244,7 +246,19 @@ public class TestRunListenerImpl implements TestRunListener {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        XMLResultAggregator aggregator = new XMLResultAggregator();
+        XMLResultAggregator aggregator = new XMLResultAggregator() {
+            @Override
+            public AggregateTransformer createReport() {
+                AggregateTransformer transformer = new AggregateTransformer(this) {
+                    @Override
+                    protected Resource getStylesheet() {
+                        return new URLResource(this.getClass().getResource("/report/junit-noframes.xsl"));
+                    }
+                };
+                this.transformers.add(transformer);
+                return transformer;
+            }
+        };
         aggregator.setProject(this.project);
         aggregator.setTodir(this.resultDir);
         aggregator.setTofile("TEST-SeBuilder-result.xml");
@@ -256,7 +270,6 @@ public class TestRunListenerImpl implements TestRunListener {
         transformer.setTodir(this.resultDir);
         AggregateTransformer.Format noFrame = new AggregateTransformer.Format();
         noFrame.setValue(AggregateTransformer.NOFRAMES);
-        transformer.setStyledir(new File(this.getClass().getResource("/report/junit-noframes.xsl").getFile()).getParentFile());
         transformer.setFormat(noFrame);
         aggregator.execute();
         Delete delete = new Delete();
