@@ -1,50 +1,32 @@
 package com.sebuilder.interpreter.application;
 
 import com.sebuilder.interpreter.*;
+import com.sebuilder.interpreter.browser.Chrome;
 import com.sebuilder.interpreter.datasource.DataSourceFactoryImpl;
-import com.sebuilder.interpreter.parser.Sebuilder;
+import com.sebuilder.interpreter.script.Sebuilder;
 import com.sebuilder.interpreter.step.StepTypeFactoryImpl;
-import com.sebuilder.interpreter.webdriverfactory.Chrome;
-import com.sebuilder.interpreter.webdriverfactory.WebDriverFactory;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.util.Strings;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
-import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
 
 public abstract class CommandLineRunner {
     protected static WebDriverFactory DEFAULT_DRIVER_FACTORY = new Chrome();
-    protected WebDriverFactory wdf;
-    protected HashMap<String, String> driverConfig;
     protected TestRun lastRun;
     protected TestRunListener testRunListener;
-    protected Logger log;
     protected RemoteWebDriver driver;
-    protected Long implicitlyWaitTime;
-    protected Long pageLoadWaitTime;
+    protected Logger log;
 
     protected CommandLineRunner(String[] args, Logger log) {
         this.log = log;
         Context.getInstance()
+                .setWebDriverFactory(DEFAULT_DRIVER_FACTORY)
                 .setDefaultScriptParser(new Sebuilder())
                 .setDataSourceFactory(new DataSourceFactoryImpl())
-                .setStepTypeFactory(new StepTypeFactoryImpl());
-        this.driverConfig = new HashMap<>();
-        this.wdf = DEFAULT_DRIVER_FACTORY;
-        this.implicitlyWaitTime = Long.valueOf(-1);
-        this.pageLoadWaitTime = Long.valueOf(-1);
+                .setStepTypeFactory(new StepTypeFactoryImpl())
+        ;
         setUp(args);
-    }
-
-    public Long getImplicitlyWaitTime() {
-        return this.implicitlyWaitTime;
-    }
-
-    public Long getPageLoadWaitTime() {
-        return this.pageLoadWaitTime;
     }
 
     public void setTestRunListener(TestRunListener testRunListener) {
@@ -52,8 +34,7 @@ public abstract class CommandLineRunner {
     }
 
     public void reloadBrowserSetting(String browserName, String driverPath) {
-        this.resetDriverFactory(browserName);
-        this.wdf.setDriverPath(driverPath);
+        Context.getInstance().setBrowser(browserName, driverPath);
     }
 
     public void setUp(String[] args) {
@@ -73,17 +54,17 @@ public abstract class CommandLineRunner {
                     System.exit(1);
                 }
                 if (s.startsWith(CommandLineArgument.IMPLICITLY_WAIT.key())) {
-                    this.implicitlyWaitTime = Long.valueOf(kv[1]);
+                    Context.getInstance().setImplicitlyWaitTime(Long.valueOf(kv[1]));
                 } else if (s.startsWith(CommandLineArgument.PAGE_LOAD_TIMEOUT.key())) {
-                    this.pageLoadWaitTime = Long.valueOf(kv[1]);
+                    Context.getInstance().setPageLoadWaitTime(Long.valueOf(kv[1]));
                 } else if (s.startsWith(CommandLineArgument.STEP_TYPE_PACKAGE.key())) {
                     Context.getStepTypeFactory().setPrimaryPackage(kv[1]);
                 } else if (s.startsWith(CommandLineArgument.STEP_TYPE_PACKAGE2.key())) {
                     Context.getStepTypeFactory().setSecondaryPackage(kv[1]);
                 } else if (s.startsWith(CommandLineArgument.DRIVER_CONFIG_PREFIX.key())) {
-                    this.driverConfig.put(kv[0].substring(CommandLineArgument.DRIVER_CONFIG_PREFIX.key().length()), kv[1]);
+                    Context.getDriverConfig().put(kv[0].substring(CommandLineArgument.DRIVER_CONFIG_PREFIX.key().length()), kv[1]);
                 } else if (s.startsWith(CommandLineArgument.DRIVER.key())) {
-                    resetDriverFactory(kv[1]);
+                    Context.getInstance().setBrowser(kv[1]);
                 } else if (s.startsWith(CommandLineArgument.DATASOURCE_PACKAGE.key())) {
                     Context.getDataSourceFactory().setCustomDataSourcePackage(kv[1]);
                 } else if (s.startsWith(CommandLineArgument.DATASOURCE_ENCODING.key())) {
@@ -109,7 +90,7 @@ public abstract class CommandLineRunner {
         }
         if (Strings.isNotEmpty(aspectFileName)) {
             try {
-                this.setAspect(new File(Context.getBaseDirectory(), aspectFileName));
+                Context.getInstance().setAspect(aspectFileName);
             } catch (IOException e) {
                 this.log.fatal(e);
                 System.exit(1);
@@ -121,10 +102,10 @@ public abstract class CommandLineRunner {
 
     protected TestRun getTestRun(TestRunBuilder script, TestData data, TestRunListener seInterpreterTestListener) {
         return script.createTestRun(this.log
-                , this.wdf
-                , this.driverConfig
-                , this.getImplicitlyWaitTime()
-                , this.getPageLoadWaitTime()
+                , Context.getWebDriverFactory()
+                , Context.getDriverConfig()
+                , Context.getImplicitlyWaitTime()
+                , Context.getPageLoadWaitTime()
                 , data
                 , this.lastRun
                 , seInterpreterTestListener);
@@ -137,21 +118,6 @@ public abstract class CommandLineRunner {
     }
 
     protected void configureOption(String s) {
-    }
-
-    protected void resetDriverFactory(String s) {
-        Context.getInstance().setBrowser(s);
-        try {
-            this.wdf = (WebDriverFactory) Class.forName("com.sebuilder.interpreter.webdriverfactory." + s).getDeclaredConstructor().newInstance();
-        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
-            this.log.fatal("Unknown WebDriverFactory: " + "com.sebuilder.interpreter.webdriverfactory." + s, e);
-        } catch (InstantiationException | IllegalAccessException e) {
-            this.log.fatal("Could not instantiate WebDriverFactory " + "com.sebuilder.interpreter.webdriverfactory." + s, e);
-        }
-    }
-
-    protected void setAspect(File aSource) throws IOException {
-        Context.getInstance().setAspect(Context.getScriptParser().loadAspect(aSource));
     }
 
     protected TestRunBuilder createTestRunBuilder(TestCase testCase) {

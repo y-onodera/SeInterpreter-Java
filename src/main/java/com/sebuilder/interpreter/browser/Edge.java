@@ -1,11 +1,13 @@
-package com.sebuilder.interpreter.webdriverfactory;
+package com.sebuilder.interpreter.browser;
 
+import com.sebuilder.interpreter.WebDriverFactory;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class Edge implements WebDriverFactory {
     /**
@@ -13,7 +15,7 @@ public class Edge implements WebDriverFactory {
      * @return A RemoteWebDriver of the type produced by this factory.
      */
     @Override
-    public RemoteWebDriver make(HashMap<String, String> config) throws Exception {
+    public RemoteWebDriver make(Map<String, String> config) throws Exception {
         HashMap<String, String> caps = new HashMap<String, String>(config);
         DesiredCapabilities capabilities = new DesiredCapabilities(caps);
         EdgeOptions options = new EdgeOptions().merge(capabilities);

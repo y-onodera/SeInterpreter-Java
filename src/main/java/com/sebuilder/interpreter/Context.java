@@ -4,6 +4,8 @@ import com.google.common.collect.Lists;
 import com.sebuilder.interpreter.step.type.SaveScreenshot;
 
 import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,8 +15,11 @@ public enum Context {
     INSTANCE;
 
     private final File baseDirectory = Paths.get(".").toAbsolutePath().normalize().toFile();
-    private Map<String, ScriptParser> scriptParsers = new HashMap<>();
-    private StepTypeFactory stepTypeFactory;
+    private String browser = "Chrome";
+    public final HashMap<String, String> getDriverConfig = new HashMap();
+    private WebDriverFactory wdf;
+    private Long implicitlyWaitTime = Long.valueOf(-1);
+    private Long pageLoadWaitTime = Long.valueOf(-1);
     private DataSourceFactory dataSourceFactory;
     private String dataSourceDirectory = "input";
     private String dataSourceEncoding = "UTF-8";
@@ -22,8 +27,9 @@ public enum Context {
     private String downloadDirectory = "download";
     private String screenShotOutputDirectory = "screenshot";
     private String templateOutputDirectory = "template";
-    private String browser = "Chrome";
     private String defaultScript = "sebuilder";
+    private Map<String, ScriptParser> scriptParsers = new HashMap<>();
+    private StepTypeFactory stepTypeFactory;
     private Aspect aspect = new Aspect().builder()
             .interceptor()
             .addFailure(Lists.newArrayList(new SaveScreenshot().toStep().put("file", "failure.png").build()))
@@ -34,8 +40,24 @@ public enum Context {
         return INSTANCE;
     }
 
+    public static Long getImplicitlyWaitTime() {
+        return getInstance().implicitlyWaitTime;
+    }
+
+    public static Long getPageLoadWaitTime() {
+        return getInstance().pageLoadWaitTime;
+    }
+
     public static String getBrowser() {
         return getInstance().browser;
+    }
+
+    public static Map<String, String> getDriverConfig() {
+        return getInstance().getDriverConfig;
+    }
+
+    public static WebDriverFactory getWebDriverFactory() {
+        return getInstance().wdf;
     }
 
     public static ScriptParser getScriptParser() {
@@ -90,8 +112,36 @@ public enum Context {
         return getInstance().aspect;
     }
 
+    public Context setImplicitlyWaitTime(Long aLong) {
+        this.implicitlyWaitTime = aLong;
+        return this;
+    }
+
+    public Context setPageLoadWaitTime(Long aLong) {
+        this.pageLoadWaitTime = aLong;
+        return this;
+    }
+
+    public Context setBrowser(String browserName, String driverPath) {
+        this.setBrowser(browserName);
+        this.wdf.setDriverPath(driverPath);
+        return this;
+    }
+
     public Context setBrowser(String browser) {
-        this.browser = browser;
+        try {
+            setWebDriverFactory((WebDriverFactory) Class.forName("com.sebuilder.interpreter.browser." + browser).getDeclaredConstructor().newInstance());
+        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
+            throw new AssertionError("Unknown WebDriverFactory: " + "com.sebuilder.interpreter.browser." + browser, e);
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new AssertionError("Could not instantiate WebDriverFactory " + "com.sebuilder.interpreter.browser." + browser, e);
+        }
+        return this;
+    }
+
+    public Context setWebDriverFactory(WebDriverFactory webDriverFactory) {
+        this.wdf = webDriverFactory;
+        this.browser = webDriverFactory.targetBrowser();
         return this;
     }
 
@@ -142,6 +192,11 @@ public enum Context {
 
     public Context setTemplateOutputDirectory(String aTemplateOutputDirectory) {
         this.templateOutputDirectory = aTemplateOutputDirectory;
+        return this;
+    }
+
+    public Context setAspect(String aspectFileName) throws IOException {
+        this.aspect = this.getScriptParser().loadAspect(new File(this.getBaseDirectory(), aspectFileName));
         return this;
     }
 

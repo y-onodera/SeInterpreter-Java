@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.sebuilder.interpreter.webdriverfactory;
+package com.sebuilder.interpreter.browser;
 
+import com.sebuilder.interpreter.WebDriverFactory;
 import org.openqa.selenium.firefox.FirefoxBinary;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
@@ -25,6 +26,7 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.Map;
 
 public class Firefox implements WebDriverFactory {
     /**
@@ -36,7 +38,7 @@ public class Firefox implements WebDriverFactory {
      * @return A FirefoxDriver.
      */
     @Override
-    public RemoteWebDriver make(HashMap<String, String> config) {
+    public RemoteWebDriver make(Map<String, String> config) {
         FirefoxBinary fb = config.containsKey("binary")
                 ? new FirefoxBinary(new File(config.get("binary")))
                 : new FirefoxBinary();

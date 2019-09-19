@@ -1,11 +1,10 @@
 package com.sebuilder.interpreter;
 
-import com.sebuilder.interpreter.webdriverfactory.WebDriverFactory;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -85,7 +84,7 @@ public class TestRunBuilder {
         return this.testCase.loadData(this.shareInput);
     }
 
-    public TestRun createTestRun(Logger log, WebDriverFactory webDriverFactory, HashMap<String, String> webDriverConfig, Long implicitWaitTime, Long pageLoadWaitTime, TestData initialVars, TestRun previousRun, TestRunListener seInterpreterTestListener) {
+    public TestRun createTestRun(Logger log, WebDriverFactory webDriverFactory, Map<String, String> webDriverConfig, Long implicitWaitTime, Long pageLoadWaitTime, TestData initialVars, TestRun previousRun, TestRunListener seInterpreterTestListener) {
         final RemoteWebDriver driver;
         if (this.testCase.usePreviousDriverAndVars() && previousRun != null && previousRun.driver() != null) {
             driver = previousRun.driver();
@@ -132,7 +131,7 @@ public class TestRunBuilder {
         return result;
     }
 
-    private RemoteWebDriver createDriver(Logger log, WebDriverFactory webDriverFactory, HashMap<String, String> webDriverConfig) {
+    private RemoteWebDriver createDriver(Logger log, WebDriverFactory webDriverFactory, Map<String, String> webDriverConfig) {
         log.debug("Initialising driver.");
         try {
             return webDriverFactory.make(webDriverConfig);

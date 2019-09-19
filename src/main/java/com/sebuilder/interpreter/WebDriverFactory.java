@@ -14,18 +14,22 @@
  * limitations under the License.
  */
 
-package com.sebuilder.interpreter.webdriverfactory;
+package com.sebuilder.interpreter;
 
 import org.openqa.selenium.remote.RemoteWebDriver;
 
-import java.util.HashMap;
+import java.util.Map;
 
 public interface WebDriverFactory {
     /**
      * @param config A key/value mapping of configuration options specific to this factory.
      * @return A RemoteWebDriver of the type produced by this factory.
      */
-    RemoteWebDriver make(HashMap<String, String> config) throws Exception;
+    RemoteWebDriver make(Map<String, String> config) throws Exception;
 
     void setDriverPath(String driverPath);
+
+    default String targetBrowser() {
+        return this.getClass().getSimpleName();
+    }
 }

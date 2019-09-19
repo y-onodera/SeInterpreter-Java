@@ -1,4 +1,4 @@
-package com.sebuilder.interpreter.parser;
+package com.sebuilder.interpreter.script;
 
 import com.google.common.base.Strings;
 import com.sebuilder.interpreter.*;

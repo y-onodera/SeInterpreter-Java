@@ -1,4 +1,4 @@
-package com.sebuilder.interpreter.parser;
+package com.sebuilder.interpreter.script;
 
 import com.sebuilder.interpreter.*;
 import org.json.JSONArray;
