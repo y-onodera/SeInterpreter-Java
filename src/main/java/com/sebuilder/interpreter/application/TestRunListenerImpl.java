@@ -21,12 +21,15 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.stream.Collectors;
 
 public class TestRunListenerImpl implements TestRunListener {
     private final TestResultFormatter formatter;
+    private String startTime;
     private Project project;
     private File resultDir;
     private File downloadDirectory;
@@ -136,6 +139,7 @@ public class TestRunListenerImpl implements TestRunListener {
 
     @Override
     public void setUpDir(File dest) {
+        this.startTime = "start" + DateTimeFormatter.ofPattern("yyyyMMddhhmmss").format(LocalDateTime.now());
         // create directory result save in
         this.resultDir = dest;
         Mkdir mkdir = new Mkdir();
@@ -156,7 +160,7 @@ public class TestRunListenerImpl implements TestRunListener {
     @Override
     public boolean openTestSuite(TestCase testCase, String testRunName, TestData aProperty) {
         String baseName = testRunName;
-        String testName = baseName.replace("_", ".");
+        String testName = this.startTime + "." + baseName.replace("_", ".");
         this.log.info("open suite:" + testName);
         this.suite = new JUnitTest();
         this.suite.setName(testName);
