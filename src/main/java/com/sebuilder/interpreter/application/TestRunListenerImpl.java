@@ -9,11 +9,13 @@ import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.Delete;
 import org.apache.tools.ant.taskdefs.Mkdir;
 import org.apache.tools.ant.taskdefs.optional.junit.AggregateTransformer;
+import org.apache.tools.ant.taskdefs.optional.junit.DOMUtil;
 import org.apache.tools.ant.taskdefs.optional.junit.JUnitTest;
 import org.apache.tools.ant.taskdefs.optional.junit.XMLResultAggregator;
 import org.apache.tools.ant.types.FileSet;
 import org.apache.tools.ant.types.Resource;
 import org.apache.tools.ant.types.resources.URLResource;
+import org.w3c.dom.Element;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -258,6 +260,14 @@ public class TestRunListenerImpl implements TestRunListener {
                 this.transformers.add(transformer);
                 return transformer;
             }
+
+            @Override
+            protected void addTestSuite(Element root, Element testsuite) {
+                Element copy = (Element) DOMUtil.importNode(root, testsuite);
+                copy.setAttribute("name", testsuite.getAttribute("name"));
+                copy.setAttribute("id", Integer.toString(this.generatedId));
+            }
+
         };
         aggregator.setProject(this.project);
         aggregator.setTodir(this.resultDir);

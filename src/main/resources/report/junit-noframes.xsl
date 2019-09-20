@@ -133,9 +133,6 @@
                 <!-- Package List part -->
                 <xsl:call-template name="packagelist"/>
                 <hr size="1" width="95%" align="left"/>
-                <!-- For each package create its part -->
-                <xsl:call-template name="packages"/>
-                <hr size="1" width="95%" align="left"/>
                 <!-- For each class create the  part -->
                 <xsl:call-template name="classes"/>
             </body>
@@ -151,10 +148,10 @@
         <table class="details" border="0" cellpadding="5" cellspacing="2" width="95%">
             <xsl:call-template name="testsuite.test.header"/>
             <!-- list all packages recursively -->
-            <xsl:for-each select="./testsuite[not(./@package = preceding-sibling::testsuite/@package)]">
+            <xsl:for-each select="testsuite">
                 <xsl:sort select="@timestamp"/>
                 <xsl:variable name="testsuites-in-package"
-                              select="/testsuites/testsuite[./@package = current()/@package]"/>
+                              select="/testsuites/testsuite[./@name = current()/@name]"/>
                 <xsl:variable name="testCount" select="sum($testsuites-in-package/@tests)"/>
                 <xsl:variable name="errorCount" select="sum($testsuites-in-package/@errors)"/>
                 <xsl:variable name="failureCount" select="sum($testsuites-in-package/@failures)"/>
@@ -171,8 +168,8 @@
                         </xsl:choose>
                     </xsl:attribute>
                     <td>
-                        <a href="#{@package}">
-                            <xsl:value-of select="@package"/>
+                        <a href="#{@name}">
+                            <xsl:value-of select="@name"/>
                         </a>
                     </td>
                     <td>
@@ -202,31 +199,6 @@
             </xsl:for-each>
         </table>
     </xsl:template>
-    <!-- ================================================================== -->
-    <!-- Write a package level report                                       -->
-    <!-- It creates a table with values from the document:                  -->
-    <!-- Name | Tests | Errors | Failures | Time                            -->
-    <!-- ================================================================== -->
-    <xsl:template name="packages">
-        <!-- create an anchor to this package name -->
-        <xsl:for-each select="/testsuites/testsuite[not(./@package = preceding-sibling::testsuite/@package)]">
-            <xsl:sort select="@timestamp"/>
-            <a name="{@package}"></a>
-            <h3>Package
-                <xsl:value-of select="@package"/>
-            </h3>
-            <table class="details" border="0" cellpadding="5" cellspacing="2" width="95%">
-                <xsl:call-template name="testsuite.test.header"/>
-                <!-- match the testsuites of this package -->
-                <xsl:apply-templates select="/testsuites/testsuite[./@package = current()/@package]" mode="print.test">
-                    <xsl:sort select="@timestamp"/>
-                </xsl:apply-templates>
-            </table>
-            <a href="#top">Back to top</a>
-            <p/>
-            <p/>
-        </xsl:for-each>
-    </xsl:template>
     <xsl:template name="classes">
         <xsl:for-each select="testsuite">
             <xsl:sort select="@timestamp"/>
@@ -253,7 +225,7 @@
             <div class="Properties">
                 <a>
                     <xsl:attribute name="href">javascript:displayProperties('<xsl:value-of
-                            select="@package"/>.<xsl:value-of select="@name"/>');
+                            select="@name"/>');
                     </xsl:attribute>
                     Properties &#187;
                 </a>
@@ -325,7 +297,7 @@
      This is based on the original idea by Erik Hatcher (ehatcher@apache.org)
      -->
     <xsl:template match="properties">
-        cur = TestCases['<xsl:value-of select="../@package"/>.<xsl:value-of select="../@name"/>'] = new Array();
+        cur = TestCases['<xsl:value-of select="../@name"/>'] = new Array();
         <xsl:for-each select="property">
             <xsl:sort select="@name"/>
             cur['<xsl:value-of select="@name"/>'] = '
