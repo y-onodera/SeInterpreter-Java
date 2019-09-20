@@ -225,8 +225,7 @@
             <div class="Properties">
                 <a>
                     <xsl:attribute name="href">javascript:displayProperties('<xsl:value-of
-                            select="@name"/>');
-                    </xsl:attribute>
+                            select="@name"/>');</xsl:attribute>
                     Properties &#187;
                 </a>
             </div>
@@ -300,11 +299,7 @@
         cur = TestCases['<xsl:value-of select="../@name"/>'] = new Array();
         <xsl:for-each select="property">
             <xsl:sort select="@name"/>
-            cur['<xsl:value-of select="@name"/>'] = '
-            <xsl:call-template name="JS-escape">
-                <xsl:with-param name="string" select="@value"/>
-            </xsl:call-template>
-            ';
+            cur['<xsl:value-of select="@name"/>'] = '<xsl:call-template name="JS-escape"><xsl:with-param name="string" select="@value"/></xsl:call-template>';
         </xsl:for-each>
     </xsl:template>
     <!-- Page HEADER -->
