@@ -345,9 +345,10 @@
         <tr valign="top">
             <th>Name</th>
             <th>Status</th>
-            <th width="80%">Type</th>
+            <th>Type</th>
             <th nowrap="nowrap">Time(s)</th>
             <th nowrap="nowrap">Screen Shot</th>
+            <th nowrap="nowrap">Download File</th>
         </tr>
     </xsl:template>
     <!-- class information -->
@@ -433,6 +434,11 @@
             <td>
                 <a href="{@screenshot}">
                     <xsl:value-of select="@screenshot"/>
+                </a>
+            </td>
+            <td>
+                <a href="{@download}">
+                    <xsl:value-of select="@download"/>
                 </a>
             </td>
         </tr>

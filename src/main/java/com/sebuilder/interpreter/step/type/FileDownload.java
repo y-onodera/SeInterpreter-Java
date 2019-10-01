@@ -34,7 +34,7 @@ public class FileDownload extends AbstractStepType implements ConditionalStep, L
     public boolean get(TestRun ctx) {
         WebElement el = ctx.locator().find(ctx);
         try {
-            getDownloadFile(ctx, el.getAttribute("href"), ctx.string("filepath"));
+            this.getDownloadFile(ctx, el.getAttribute("href"), ctx.string("filepath"));
         } catch (IOException e) {
             ctx.log().error(e);
             return false;
@@ -44,7 +44,7 @@ public class FileDownload extends AbstractStepType implements ConditionalStep, L
 
     public boolean post(TestRun ctx) {
         try {
-            postDownloadFile(ctx, ctx.string("post"), ctx.string("filepath"));
+            this.postDownloadFile(ctx, ctx.string("post"), ctx.string("filepath"));
         } catch (IOException e) {
             ctx.log().error(e);
             return false;
@@ -64,7 +64,7 @@ public class FileDownload extends AbstractStepType implements ConditionalStep, L
                 });
         Request request = new Request.Builder().url(downloadUrl).post(requestBody.build()).build();
         Response response = client.newCall(request).execute();
-        downLoadFile(ctx, outputFilePath, response);
+        this.downLoadFile(ctx, outputFilePath, response);
     }
 
     @Override
@@ -89,7 +89,7 @@ public class FileDownload extends AbstractStepType implements ConditionalStep, L
         Request request = new Request.Builder().url(downloadUrl).build();
         Call call = client.newCall(request);
         Response response = call.execute();
-        downLoadFile(ctx, outputFilePath, response);
+        this.downLoadFile(ctx, outputFilePath, response);
     }
 
     public void downLoadFile(TestRun ctx, String outputFilePath, Response response) throws IOException {
@@ -97,9 +97,9 @@ public class FileDownload extends AbstractStepType implements ConditionalStep, L
         if (body != null) {
             File outputFile;
             if (ctx.getBoolean("fixedPath")) {
-                outputFile = new File(ctx.getListener().getDownloadDirectory(), outputFilePath);
+                outputFile = ctx.getListener().addDownloadFile(outputFilePath);
             } else {
-                outputFile = new File(ctx.getListener().getDownloadDirectory(), ctx.getTestRunName() + "_" + outputFilePath);
+                outputFile = ctx.getListener().addDownloadFile(ctx.getTestRunName() + "_" + outputFilePath);
             }
             try (InputStream inputStream = body.byteStream(); FileOutputStream fileOutputStream = new FileOutputStream(outputFile)) {
                 int read;

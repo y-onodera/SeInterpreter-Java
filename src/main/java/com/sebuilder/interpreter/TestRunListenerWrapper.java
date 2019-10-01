@@ -97,6 +97,11 @@ public class TestRunListenerWrapper implements TestRunListener {
     }
 
     @Override
+    public File addDownloadFile(String file) {
+        return delegate.addDownloadFile(file);
+    }
+
+    @Override
     public void addError(Throwable throwable) {
         delegate.addError(throwable);
     }

@@ -36,11 +36,14 @@ public class TestResultFormatter extends XMLJUnitResultFormatter {
 
         Long l = this.getTestStarts().get(createDescription(test));
         currentTest.setAttribute("time", Double.toString((double) (System.currentTimeMillis() - l) / 1000.0D));
+        String downloadPath = "";
         String screenshotPath = "";
-        if (test instanceof TestRunListenerImpl.ScreenShootableTestCase) {
-            screenshotPath = TestRunListenerImpl.ScreenShootableTestCase.class.cast(test).getScreenshotPath();
+        if (test instanceof TestRunListenerImpl.ResultReportableTestCase) {
+            screenshotPath = TestRunListenerImpl.ResultReportableTestCase.class.cast(test).getScreenshotPath();
+            downloadPath= TestRunListenerImpl.ResultReportableTestCase.class.cast(test).getDownloadPath();
         }
         currentTest.setAttribute("screenshot", screenshotPath);
+        currentTest.setAttribute("download", downloadPath);
     }
 
     public String getClassname() {

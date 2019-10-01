@@ -36,7 +36,7 @@ public class TestRunListenerImpl implements TestRunListener {
     private File screenShotOutputDirectory;
     private File templateOutputDirectory;
     private JUnitTest suite;
-    private ScreenShootableTestCase test;
+    private ResultReportableTestCase test;
     private int stepNo;
     private int runTest;
     private int error;
@@ -196,7 +196,7 @@ public class TestRunListenerImpl implements TestRunListener {
     public void startTest(String testName) {
         this.log.info("start test:" + testName);
         this.runTest++;
-        this.test = new ScreenShootableTestCase(testName);
+        this.test = new ResultReportableTestCase(testName);
         this.formatter.setClassname(this.suite.getName().replace("_", "."));
         this.formatter.startTest(this.test);
     }
@@ -218,6 +218,15 @@ public class TestRunListenerImpl implements TestRunListener {
                 .relativize(result.getAbsoluteFile().toPath())
                 .toString());
         return result;
+    }
+
+    @Override
+    public File addDownloadFile(String file) {
+        File result  = new File(this.getDownloadDirectory(), file);
+        this.test.setDownloadPath(this.resultDir.getAbsoluteFile().toPath()
+                .relativize(result.getAbsoluteFile().toPath())
+                .toString());
+        return result ;
     }
 
     @Override
@@ -298,10 +307,11 @@ public class TestRunListenerImpl implements TestRunListener {
         delete.execute();
     }
 
-    static class ScreenShootableTestCase extends junit.framework.TestCase {
+    static class ResultReportableTestCase extends junit.framework.TestCase {
+        private String downloadPath = "";
         private String screenshotPath = "";
 
-        public ScreenShootableTestCase(String testName) {
+        public ResultReportableTestCase(String testName) {
             super(testName);
         }
 
@@ -312,5 +322,14 @@ public class TestRunListenerImpl implements TestRunListener {
         public void setScreenshotPath(String screenshotPath) {
             this.screenshotPath = screenshotPath;
         }
+
+        public String getDownloadPath() {
+            return this.downloadPath;
+        }
+
+        public void setDownloadPath(String downloadPath) {
+            this.downloadPath = downloadPath;
+        }
     }
+
 }
