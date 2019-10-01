@@ -46,8 +46,14 @@ public class Firefox implements WebDriverFactory {
                 ? new FirefoxProfile(new File(config.get("profile")))
                 : new FirefoxProfile();
         fp.setPreference("marionette", "true");
-
-        HashMap<String, String> caps = new HashMap<String, String>(config);
+        Map<String, String> caps = new HashMap<String, String>();
+        config.forEach((key, value) -> {
+            if (key.startsWith("firefox.options.")) {
+                fb.addCommandLineOptions("--" + key.substring("firefox.options.".length()));
+            } else {
+                caps.put(key, value);
+            }
+        });
         DesiredCapabilities capabilities = new DesiredCapabilities(caps);
         capabilities.setCapability(FirefoxDriver.BINARY, fb);
         capabilities.setCapability(FirefoxDriver.PROFILE, fp);
