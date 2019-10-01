@@ -6,6 +6,8 @@ import java.io.File;
 
 public interface TestRunListener {
 
+    String getStartTime();
+
     TestRunListener copy();
 
     Logger getLog();

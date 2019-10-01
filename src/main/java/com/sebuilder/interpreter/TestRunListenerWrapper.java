@@ -22,6 +22,11 @@ public class TestRunListenerWrapper implements TestRunListener {
     }
 
     @Override
+    public String getStartTime() {
+        return delegate.getStartTime();
+    }
+
+    @Override
     public File getResultDir() {
         return delegate.getResultDir();
     }

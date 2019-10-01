@@ -75,6 +75,7 @@ public class TestRunListenerImpl implements TestRunListener {
         this.error = 0;
         this.failed = 0;
         this.stepNo = 0;
+        this.startTime = extendFrom.getStartTime();
         this.resultDir = extendFrom.getResultDir();
         this.downloadDirectory = extendFrom.getDownloadDirectory();
         this.screenShotOutputDirectory = extendFrom.getScreenShotOutputDirectory();
@@ -89,6 +90,11 @@ public class TestRunListenerImpl implements TestRunListener {
     @Override
     public Logger getLog() {
         return log;
+    }
+
+    @Override
+    public String getStartTime() {
+        return startTime;
     }
 
     @Override
