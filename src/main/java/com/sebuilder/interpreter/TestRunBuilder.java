@@ -86,7 +86,7 @@ public class TestRunBuilder {
 
     public TestRun createTestRun(Logger log, WebDriverFactory webDriverFactory, Map<String, String> webDriverConfig, Long implicitWaitTime, Long pageLoadWaitTime, TestData initialVars, TestRun previousRun, TestRunListener seInterpreterTestListener) {
         final RemoteWebDriver driver;
-        if (this.testCase.usePreviousDriverAndVars() && previousRun != null && previousRun.driver() != null) {
+        if (this.testCase.isShareState() && previousRun != null && previousRun.driver() != null) {
             driver = previousRun.driver();
         } else {
             driver = createDriver(log, webDriverFactory, webDriverConfig);

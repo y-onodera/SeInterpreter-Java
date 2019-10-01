@@ -82,7 +82,7 @@ public class SeInterpreterApplication extends Application {
     @Subscribe
     public void reset(ScriptResetEvent event) {
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
-            Suite newSuite = new SuiteBuilder(this.templateScript()).createSuite();
+            Suite newSuite = new SuiteBuilder(this.templateScript()).build();
             this.resetSuite(newSuite, newSuite.iterator().next());
         });
     }
@@ -138,7 +138,7 @@ public class SeInterpreterApplication extends Application {
 
     @Subscribe
     public void changeCurrentScript(ScriptSelectEvent event) {
-        if (!event.getScriptName().equals(this.suite.getName())) {
+        if (!event.getScriptName().equals(this.suite.name())) {
             this.currentDisplay = this.suite.get(event.getScriptName());
             this.refreshMainView();
         }
@@ -241,7 +241,7 @@ public class SeInterpreterApplication extends Application {
 
     @Subscribe
     public void saveSuite(FileSaveSuiteAsEvent event) {
-        if (Strings.isNullOrEmpty(this.suite.getPath())) {
+        if (Strings.isNullOrEmpty(this.suite.path())) {
             EventBus.publish(new OpenSuiteSaveChooserEvent());
         } else {
             this.saveSuite();
@@ -254,7 +254,7 @@ public class SeInterpreterApplication extends Application {
         File target = event.getFile();
         this.suite = this.suite.builder()
                 .associateWith(target)
-                .createSuite();
+                .build();
         this.saveSuite();
     }
 
@@ -333,7 +333,7 @@ public class SeInterpreterApplication extends Application {
     }
 
     private void saveSuite() {
-        File target = new File(this.suite.getPath());
+        File target = new File(this.suite.path());
         List<TestCase> notAssociateFile = Lists.newArrayList();
         this.suite.forEach(it -> {
             if (Strings.isNullOrEmpty(it.path())) {
@@ -380,8 +380,8 @@ public class SeInterpreterApplication extends Application {
     }
 
     private TestCase copyDataSourceTemplate(TestCase it) {
-        if (it.dataSourceConfig().containsKey("path")) {
-            File src = new File(this.runner.getTemplateOutputDirectory(), it.dataSourceConfig().get("path"));
+        if (it.getTestDataSet().getDataSourceConfig().containsKey("path")) {
+            File src = new File(this.runner.getTemplateOutputDirectory(), it.getTestDataSet().getDataSourceConfig().get("path"));
             final String newDataSourceName = it.name().replace(".json", ".csv");
             File dest = new File(this.runner.getDataSourceDirectory(), newDataSourceName);
             if (src.exists() && !dest.exists()) {

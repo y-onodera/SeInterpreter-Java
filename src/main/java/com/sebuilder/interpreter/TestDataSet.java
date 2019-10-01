@@ -38,10 +38,6 @@ public class TestDataSet {
         return this.relativePath;
     }
 
-    public List<TestData> loadData() {
-        return this.loadData(new TestData());
-    }
-
     public List<TestData> loadData(TestData vars) {
         if (this.dataSource == null) {
             return Lists.newArrayList(new TestData());

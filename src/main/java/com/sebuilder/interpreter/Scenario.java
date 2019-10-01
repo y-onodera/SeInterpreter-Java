@@ -151,34 +151,20 @@ public class Scenario implements Iterable<TestCase> {
     }
 
     public Scenario replaceTest(String oldName, TestCase aTestCase) {
-        ArrayList<TestCase> newTestCases = new ArrayList<>(this.testCases.size());
-        Map<TestCase, TestCase> newMap = this.chains;
-        for (TestCase testCase : this.testCases) {
-            TestCase newTestCase = testCase;
+        return this.map(testCase -> {
             if (testCase.name().equals(oldName)) {
-                newTestCase = aTestCase;
-                newMap = this.getReplaceMap(aTestCase, newTestCase);
+                return aTestCase;
             }
-            newTestCases.add(newTestCase);
-        }
-        return new Scenario(newTestCases, newMap, this.aspect);
+            return testCase;
+        });
+    }
+
+    public Scenario lazyLoad(TestData aSource) {
+        return this.map(testCase -> testCase.lazyLoad(aSource).testCase());
     }
 
     public Scenario addAspect(Aspect aspect) {
         return new Scenario(this.testCases, this.chains, this.aspect.builder().add(aspect).build());
-    }
-
-    public Scenario lazyLoad(TestData aSource) {
-        ArrayList<TestCase> newTestCases = new ArrayList<>(this.testCases.size());
-        Map<TestCase, TestCase> newMap = this.chains;
-        for (TestCase testCase : this.testCases) {
-            TestCase loaded = testCase.lazyLoad(aSource);
-            newTestCases.add(loaded);
-            if (testCase != loaded) {
-                newMap = this.getReplaceMap(testCase, loaded, newMap);
-            }
-        }
-        return new Scenario(newTestCases, newMap, this.aspect);
     }
 
     public Stream<TestRunBuilder> getTestRuns(TestData param, Function<TestRunBuilder, TestRunBuilder> aFunction) {
@@ -189,10 +175,6 @@ public class Scenario implements Iterable<TestCase> {
                 .map(script -> new TestRunBuilder(script, materialize)
                         .setShareInput(param)
                 ).map(aFunction);
-    }
-
-    private Map<TestCase, TestCase> getReplaceMap(TestCase oldTestCase, TestCase newTestCase) {
-        return getReplaceMap(oldTestCase, newTestCase, this.chains);
     }
 
     private Map<TestCase, TestCase> getReplaceMap(TestCase oldTestCase, TestCase newTestCase, Map<TestCase, TestCase> oldChain) {

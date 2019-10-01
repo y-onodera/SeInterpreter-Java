@@ -54,7 +54,7 @@ public class Interceptor {
         return new TestCaseBuilder()
                 .setName(testRunName)
                 .addSteps(steps)
-                .usePreviousDriverAndVars(true)
+                .isShareState(true)
                 .build();
     }
 

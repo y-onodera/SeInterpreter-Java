@@ -110,7 +110,7 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
     public void execute(Suite suite, TestRunListener seInterpreterTestListener) {
         seInterpreterTestListener.cleanResult(new File(Context.getResultOutputDirectory(), String.valueOf(execCount++)));
         try {
-            for (TestRunBuilder builder : suite.getTestRuns()) {
+            for (TestRunBuilder builder : suite.createTestRunBuilder()) {
                 boolean stop = this.execute(builder, seInterpreterTestListener);
                 if (stop) {
                     break;
@@ -144,7 +144,7 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
 
     @Override
     protected TestRunBuilder createTestRunBuilder(TestCase testCase) {
-        return super.createTestRunBuilder(testCase.usePreviousDriverAndVars(true));
+        return super.createTestRunBuilder(testCase.shareState(true));
     }
 
     private boolean execute(TestRunBuilder testRunBuilder, TestRunListener seInterpreterTestListener) {

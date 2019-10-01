@@ -2,116 +2,68 @@ package com.sebuilder.interpreter;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.function.Function;
 
-public class TestCaseBuilder {
+public class TestCaseBuilder extends AbstractTestRunnable.AbstractBuilder<TestCase, TestCaseBuilder> {
     private ArrayList<Step> steps;
-    private Function<TestData, TestCase> lazyLoad;
-    private boolean usePreviousDriverAndVars;
     private boolean closeDriver;
-    private DataSource dataSource;
-    private Map<String, String> dataSourceConfig;
-    private DataSource overrideDataSource;
-    private Map<String, String> overrideDataSourceConfig;
-    private String skip;
-    private ScriptFile scriptFile;
-    private boolean nestedChain;
-    private boolean breakNestedChain;
 
     public TestCaseBuilder() {
+        super(new ScriptFile(TestCase.DEFAULT_SCRIPT_NAME));
         this.steps = new ArrayList<>();
-        this.lazyLoad = null;
-        this.scriptFile = new ScriptFile(TestCase.DEFAULT_SCRIPT_NAME);
-        this.dataSource = null;
-        this.dataSourceConfig = null;
-        this.usePreviousDriverAndVars = false;
         this.closeDriver = true;
-        this.overrideDataSource = null;
-        this.overrideDataSourceConfig = null;
-        this.skip = "false";
+        this.setSkip("false");
     }
 
     public TestCaseBuilder(TestCase currentDisplay) {
+        super(currentDisplay);
         this.steps = new ArrayList<>(currentDisplay.steps());
-        this.lazyLoad = currentDisplay.lazyLoad();
-        this.scriptFile = currentDisplay.testCase();
-        this.dataSource = currentDisplay.dataSource();
-        this.dataSourceConfig = currentDisplay.dataSourceConfig();
-        this.usePreviousDriverAndVars = currentDisplay.usePreviousDriverAndVars();
         this.closeDriver = currentDisplay.closeDriver();
-        this.overrideDataSource = currentDisplay.overrideDataSource();
-        this.overrideDataSourceConfig = currentDisplay.overrideDataSourceConfig();
-        this.skip = currentDisplay.skip();
-        this.nestedChain = currentDisplay.isNestedChain();
-        this.breakNestedChain = currentDisplay.isBreakNestedChain();
     }
 
-    public static TestCase lazyLoad(String beforeReplace, Function<TestData, TestCase> lazyLoad) {
-        TestCaseBuilder builder = new TestCaseBuilder();
-        builder.setName(beforeReplace);
-        builder.lazyLoad = lazyLoad;
-        return builder.build();
+    public static TestCase lazyLoad(String beforeReplace, Function<TestData, TestRunnable> lazyLoad) {
+        return new TestCaseBuilder()
+                .setName(beforeReplace)
+                .setLazyLoad(lazyLoad)
+                .build();
+    }
+
+    @Override
+    public TestCase build() {
+        return new TestCase(this);
+    }
+
+    @Override
+    public TestCaseBuilder associateWith(File target) {
+        this.setScriptFile(ScriptFile.of(target, TestCase.DEFAULT_SCRIPT_NAME));
+        return this;
+    }
+
+    @Override
+    public TestCaseBuilder isShareState(boolean shareState) {
+        if (shareState) {
+            this.closeDriver = false;
+        } else {
+            this.closeDriver = true;
+        }
+        return super.isShareState(shareState);
+    }
+
+    @Override
+    protected TestCaseBuilder self() {
+        return this;
     }
 
     public ArrayList<Step> getSteps() {
         return this.steps;
     }
 
-    public Function<TestData, TestCase> getLazyLoad() {
-        return this.lazyLoad;
-    }
-
-    public ScriptFile getScriptFile() {
-        return this.scriptFile;
-    }
-
     public File getRelativePath() {
         return this.getScriptFile().relativePath();
     }
 
-    public boolean isUsePreviousDriverAndVars() {
-        return this.usePreviousDriverAndVars;
-    }
-
     public boolean isCloseDriver() {
         return this.closeDriver;
-    }
-
-    public DataSource getDataSource() {
-        return this.dataSource;
-    }
-
-    public Map<String, String> getDataSourceConfig() {
-        return this.dataSourceConfig;
-    }
-
-    public DataSource getOverrideDataSource() {
-        return this.overrideDataSource;
-    }
-
-    public Map<String, String> getOverrideDataSourceConfig() {
-        return this.overrideDataSourceConfig;
-    }
-
-    public String getSkip() {
-        return this.skip;
-    }
-
-    public TestDataSet getDataSet() {
-        return new TestDataSet(this.getDataSource(), this.getDataSourceConfig(), this.getRelativePath());
-    }
-
-    public TestDataSet getOverrideDataSet() {
-        return new TestDataSet(this.getOverrideDataSource(), this.getOverrideDataSourceConfig(), this.getRelativePath());
-    }
-
-    public boolean isNestedChain() {
-        return this.nestedChain;
-    }
-
-    public boolean isBreakNestedChain() {
-        return this.breakNestedChain;
     }
 
     public TestCaseBuilder clearStep() {
@@ -129,55 +81,4 @@ public class TestCaseBuilder {
         return this;
     }
 
-    public TestCaseBuilder associateWith(File target) {
-        this.scriptFile = ScriptFile.of(target, TestCase.DEFAULT_SCRIPT_NAME);
-        return this;
-    }
-
-    public TestCaseBuilder setName(String name) {
-        this.scriptFile = scriptFile.changeName(name);
-        return this;
-    }
-
-    public TestCaseBuilder setDataSource(DataSource dataSource, Map<String, String> config) {
-        this.dataSource = dataSource;
-        this.dataSourceConfig = config;
-        return this;
-    }
-
-    public TestCaseBuilder overrideDataSource(DataSource dataSource, Map<String, String> config) {
-        this.overrideDataSource = dataSource;
-        this.overrideDataSourceConfig = config;
-        return this;
-    }
-
-    public TestCaseBuilder setSkip(String skip) {
-        this.skip = skip;
-        return this;
-    }
-
-    public TestCaseBuilder isNestedChain(boolean nestedChain) {
-        this.nestedChain = nestedChain;
-        return this;
-    }
-
-    public TestCaseBuilder isBreakNestedChain(boolean breakNestedChain) {
-        this.breakNestedChain = breakNestedChain;
-        return this;
-    }
-
-    public TestCaseBuilder usePreviousDriverAndVars(boolean userPreviousDriverAndVars) {
-        if (userPreviousDriverAndVars) {
-            this.closeDriver = false;
-            this.usePreviousDriverAndVars = true;
-        } else {
-            this.closeDriver = true;
-            this.usePreviousDriverAndVars = false;
-        }
-        return this;
-    }
-
-    public TestCase build() {
-        return new TestCase(this);
-    }
 }

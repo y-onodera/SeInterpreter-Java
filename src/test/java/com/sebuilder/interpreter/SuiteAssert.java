@@ -35,15 +35,15 @@ public class SuiteAssert {
 
     public static Consumer<Suite> assertEqualsFileAttribute(File testSource) {
         return (Suite actual) -> {
-            assertEquals(testSource.getName(), actual.getName());
-            assertEquals(testSource.getAbsolutePath(), actual.getPath());
-            assertEquals(testSource.getParentFile().getAbsoluteFile(), actual.getRelativePath());
+            assertEquals(testSource.getName(), actual.name());
+            assertEquals(testSource.getAbsolutePath(), actual.path());
+            assertEquals(testSource.getParentFile().getAbsoluteFile(), actual.relativePath());
         };
     }
 
     public static void assertEqualsNoRelationFile(Suite result) {
-        assertEquals(Suite.DEFAULT_NAME, result.getName());
-        assertEquals("", result.getPath());
+        assertEquals(Suite.DEFAULT_NAME, result.name());
+        assertEquals("", result.path());
     }
 
     public static void assertEqualsNoScript(Suite actual) {

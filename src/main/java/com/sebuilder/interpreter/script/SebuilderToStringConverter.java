@@ -114,8 +114,8 @@ public class SebuilderToStringConverter {
         } else {
             scriptPath.put("path", target.getScriptFile().relativePath(testCase));
         }
-        if (!Objects.equals(testCase.skip(), "false")) {
-            scriptPath.put("skip", testCase.skip());
+        if (!Objects.equals(testCase.getSkip(), "false")) {
+            scriptPath.put("skip", testCase.getSkip());
         }
         if (testCase.isNestedChain()) {
             scriptPath.put("nestedChain", testCase.isNestedChain());

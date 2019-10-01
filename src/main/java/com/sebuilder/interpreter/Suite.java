@@ -2,38 +2,18 @@ package com.sebuilder.interpreter;
 
 import com.google.common.base.Objects;
 
-import java.io.File;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
-public class Suite implements Iterable<TestCase>, TestRunnable {
+public class Suite extends AbstractTestRunnable<Suite> implements Iterable<TestCase> {
 
     public static final String DEFAULT_NAME = "New_Suite";
 
-    private final ScriptFile scriptFile;
-
     private final Scenario scenario;
 
-    private final TestDataSet testDataSet;
-
-    private final boolean shareState;
-
-    public Suite(File suiteFile
-            , Scenario scenario
-            , DataSource dataSource
-            , Map<String, String> config
-            , boolean shareState) {
-        this.scriptFile = ScriptFile.of(suiteFile, DEFAULT_NAME);
-        this.shareState = shareState;
-        this.scenario = scenario;
-        this.testDataSet = new TestDataSet(dataSource, config, this.getRelativePath());
-    }
-
-    @Override
-    public void accept(TestRunner runner, TestRunListener testListener) {
-        runner.execute(this, testListener);
+    public Suite(SuiteBuilder builder) {
+        super(builder);
+        this.scenario = builder.getScenario();
     }
 
     @Override
@@ -41,24 +21,47 @@ public class Suite implements Iterable<TestCase>, TestRunnable {
         return this.scenario.testCaseIterator();
     }
 
-    public List<TestData> loadData() {
-        return this.testDataSet.loadData();
+    @Override
+    public void accept(TestRunner runner, TestRunListener testRunListener) {
+        runner.execute(this, testRunListener);
     }
 
-    public ScriptFile getScriptFile() {
-        return scriptFile;
+    @Override
+    public Iterable<TestRunBuilder> createTestRunBuilder() {
+        return this.createTestRunBuilder(this.scenario);
     }
 
-    public String getPath() {
-        return this.scriptFile.path();
+    @Override
+    public Iterable<TestRunBuilder> createTestRunBuilder(Scenario aScenario) {
+        final String suiteName = this.getScriptFile().nameExcludeExtention();
+        return this.loadData()
+                .stream()
+                .flatMap(it -> {
+                    String rowNum = it.rowNumber();
+                    TestData newRow = it.clearRowNumber();
+                    final String prefix;
+                    if (rowNum != null) {
+                        prefix = suiteName + "_" + rowNum;
+                    } else {
+                        prefix = suiteName;
+                    }
+                    return aScenario.getTestRuns(newRow, (TestRunBuilder result) -> result.addTestRunNamePrefix(prefix + "_"));
+                })
+                .collect(Collectors.toList());
     }
 
-    public String getName() {
-        return this.scriptFile.name();
+    @Override
+    public TestCase testCase() {
+        return iterator().next();
     }
 
-    public File getRelativePath() {
-        return this.scriptFile.relativePath();
+    @Override
+    public SuiteBuilder builder() {
+        return new SuiteBuilder(this);
+    }
+
+    public Scenario getScenario() {
+        return this.scenario;
     }
 
     public int scriptSize() {
@@ -77,74 +80,28 @@ public class Suite implements Iterable<TestCase>, TestRunnable {
         return this.scenario.get(index);
     }
 
-    public Scenario getScenario() {
-        return this.scenario;
-    }
-
-    public boolean isShareState() {
-        return this.shareState;
-    }
-
-    public TestDataSet getTestDataSet() {
-        return this.testDataSet;
-    }
-
-    public Map<String, String> getDataSourceConfig() {
-        return this.testDataSet.getDataSourceConfig();
-    }
-
-    public DataSource getDataSource() {
-        return this.testDataSet.getDataSource();
-    }
-
-    public List<TestRunBuilder> getTestRuns() {
-        final String suiteName = this.scriptFile.nameExcludeExtention();
-        return this.loadData()
-                .stream()
-                .flatMap(it -> {
-                    String rowNum = it.rowNumber();
-                    TestData newRow = it.clearRowNumber();
-                    final String prefix;
-                    if (rowNum != null) {
-                        prefix = suiteName + "_" + rowNum;
-                    } else {
-                        prefix = suiteName;
-                    }
-                    return this.scenario.getTestRuns(newRow, (TestRunBuilder result) -> result.addTestRunNamePrefix(prefix + "_"));
-                })
-                .collect(Collectors.toList());
-    }
-
-    public SuiteBuilder builder() {
-        return new SuiteBuilder(this);
-    }
-
-    public Suite skip(String skip) {
-        return builder()
-                .skip(skip)
-                .createSuite();
-    }
-
     public Suite insert(TestCase aTestCase, TestCase newTestCase) {
-        return builder().insertTest(aTestCase, newTestCase)
-                .createSuite();
+        return builder()
+                .insertTest(aTestCase, newTestCase)
+                .build();
     }
 
     public Suite add(TestCase aTestCase, TestCase newTestCase) {
-        return builder().addTest(aTestCase, newTestCase)
-                .createSuite();
+        return builder()
+                .addTest(aTestCase, newTestCase)
+                .build();
     }
 
     public Suite add(TestCase aTestCase) {
         return builder()
                 .addTest(aTestCase)
-                .createSuite();
+                .build();
     }
 
     public Suite delete(TestCase aTestCase) {
         return builder()
                 .removeTest(aTestCase)
-                .createSuite();
+                .build();
     }
 
     public Suite replace(TestCase aTestCase) {
@@ -154,23 +111,20 @@ public class Suite implements Iterable<TestCase>, TestRunnable {
     public Suite replace(String oldName, TestCase newValue) {
         return builder()
                 .replace(oldName, newValue)
-                .createSuite();
+                .build();
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
         Suite testCases = (Suite) o;
-        return isShareState() == testCases.isShareState() &&
-                Objects.equal(getScriptFile(), testCases.getScriptFile()) &&
-                Objects.equal(getScenario(), testCases.getScenario()) &&
-                Objects.equal(testDataSet, testCases.testDataSet);
+        return Objects.equal(getScenario(), testCases.getScenario());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getScriptFile(), getScenario(), testDataSet, isShareState());
+        return Objects.hashCode(super.hashCode(), getScenario());
     }
-
 }

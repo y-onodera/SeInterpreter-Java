@@ -133,11 +133,11 @@ public class Sebuilder implements ScriptParser {
             DataSource dataSource = this.getDataSource(o);
             HashMap<String, String> config = this.getDataSourceConfig(o);
             SuiteBuilder builder = new SuiteBuilder(suiteFile)
-                    .setShareState(o.optBoolean("shareState", true))
+                    .isShareState(o.optBoolean("shareState", true))
                     .setDataSource(dataSource, config);
             this.loadScripts(o, builder);
             return builder.setAspect(this.getAspect(o))
-                    .createSuite();
+                    .build();
         } catch (JSONException e) {
             throw new IOException("Could not load suite.", e);
         }
@@ -183,7 +183,7 @@ public class Sebuilder implements ScriptParser {
                 JSONArray scriptArrays = script.getJSONArray("chain");
                 this.loadScriptChain(scriptArrays, builder);
             } else {
-                builder.addTests(this.loadScript(script, builder.getSuiteFile()));
+                builder.addTests(this.loadScript(script, new File(builder.getScriptFile().path())));
             }
         }
     }
@@ -224,7 +224,7 @@ public class Sebuilder implements ScriptParser {
     protected void loadScriptChain(JSONArray scriptArrays, SuiteBuilder builder) throws JSONException, IOException {
         TestCase lastLoad = null;
         for (int j = 0; j < scriptArrays.length(); j++) {
-            for (TestCase loaded : this.loadScript(scriptArrays.getJSONObject(j), builder.getSuiteFile())) {
+            for (TestCase loaded : this.loadScript(scriptArrays.getJSONObject(j), new File(builder.getScriptFile().path()))) {
                 if (lastLoad != null) {
                     builder.testChain(lastLoad, loaded);
                 }
@@ -246,9 +246,7 @@ public class Sebuilder implements ScriptParser {
         DataSource dataSource = this.getDataSource(script);
         if (dataSource != null) {
             HashMap<String, String> config = this.getDataSourceConfig(script);
-            resultTestCase = resultTestCase.builder()
-                    .overrideDataSource(dataSource, config)
-                    .build();
+            resultTestCase = resultTestCase.overrideDataSource(dataSource, config);
         }
         resultTestCase = resultTestCase.skip(this.getSkip(script))
                 .nestedChain(this.isNestedChain(script))

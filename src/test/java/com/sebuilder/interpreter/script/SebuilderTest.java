@@ -88,7 +88,7 @@ public class SebuilderTest {
 
         @Test
         public void parseResultReversible() throws IOException {
-            Suite reverse = target.load(target.toString(this.result), Strings.isNullOrEmpty(this.result.getPath()) ? null : new File(this.result.getPath()));
+            Suite reverse = target.load(target.toString(this.result), Strings.isNullOrEmpty(this.result.path()) ? null : new File(this.result.path()));
             this.getSuiteAssert().run(reverse);
         }
 
@@ -522,6 +522,43 @@ public class SebuilderTest {
                     .assertDataSource(SuiteAssert.assertEqualsDataSet(new TestDataSet(new Manual()
                             , Map.of("script1", "scriptWithDataSource", "script3", "scriptWithNoContents", "dataSource3", "csv/override")
                             , new File(baseDir))))
+                    .create();
+        }
+    }
+
+    public static class ParseSuiteWithImportSuite extends ParseResultTest {
+
+        private final File testFile = new File(baseDir, "suiteWithImportSuite.json");
+
+        @Before
+        public void setUp() throws IOException {
+            this.result = target.load(this.testFile);
+        }
+
+        @Override
+        public SuiteAssert getSuiteAssert() {
+            return SuiteAssert.of()
+                    .assertFileAttribute(SuiteAssert.assertEqualsFileAttribute(testFile))
+                    .assertTestCaseCount(SuiteAssert.assertEqualsTestCaseCount(4))
+                    .assertTestCase(0, new ParseScriptNoContents().getTestCaseAssert()
+                            .builder()
+                            .assertOverrideDataSource(TestCaseAssert::assertEqualsNoOverrideDataSource)
+                            .create())
+                    .assertTestCase(1, new ParseScriptNoContents().getTestCaseAssert()
+                            .builder()
+                            .assertFileAttribute(TestCaseAssert.assertEqualsFileAttribute("scriptWithNoContents.json(1)", testFileScriptWithNoContents))
+                            .assertOverrideDataSource(TestCaseAssert.assertEqualsOverrideDataSst(DATA_SET_OVERRIDE_CSV))
+                            .create())
+                    .assertTestCase(2, new ParseScriptTypeWithSteps().getTestCaseAssert()
+                            .builder()
+                            .assertSkip(TestCaseAssert.assertEqualsSkip("true"))
+                            .create())
+                    .assertTestCase(3, new ParseScriptTypeWithDataSource().getTestCaseAssert()
+                            .builder()
+                            .assertOverrideDataSource(TestCaseAssert.assertEqualsOverrideDataSst(DATA_SET_NONE))
+                            .create())
+                    .assertChainCount(SuiteAssert::assertEqualsNoScriptChain)
+                    .assertDataSource(SuiteAssert::assertEqualsNoDataSource)
                     .create();
         }
     }

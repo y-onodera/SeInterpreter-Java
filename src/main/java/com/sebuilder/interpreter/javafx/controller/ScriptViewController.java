@@ -106,7 +106,7 @@ public class ScriptViewController {
     public void showScriptView(RefreshScriptViewEvent aEvent) {
         EventBus.publish(new StepResultResetEvent());
         Suite suite = aEvent.getSuite();
-        TreeItem<String> root = new TreeItem<>(suite.getName());
+        TreeItem<String> root = new TreeItem<>(suite.name());
         root.setExpanded(true);
         this.treeViewScriptName.setRoot(root);
         this.refreshScriptView(suite, aEvent.getSelectScriptName());

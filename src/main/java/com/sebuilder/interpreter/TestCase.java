@@ -18,10 +18,7 @@ package com.sebuilder.interpreter;
 
 import com.google.common.collect.Lists;
 
-import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -34,39 +31,41 @@ import java.util.stream.Collectors;
  *
  * @author zarkonnen
  */
-public class TestCase implements TestRunnable {
+public class TestCase extends AbstractTestRunnable<TestCase> {
+
     public static final String DEFAULT_SCRIPT_NAME = "New_Script";
     private final ArrayList<Step> steps;
-    private final Function<TestData, TestCase> lazyLoad;
-    private final boolean usePreviousDriverAndVars;
     private final boolean closeDriver;
-    private final TestDataSet testDataSet;
-    private final TestDataSet overrideTestDataSet;
-    private final String skip;
-    private final ScriptFile scriptFile;
-    private boolean nestedChain;
-    private boolean breakNestedChain;
 
-    public TestCase(TestCaseBuilder testCaseBuilder) {
-        this.steps = testCaseBuilder.getSteps();
-        this.lazyLoad = testCaseBuilder.getLazyLoad();
-        this.scriptFile = testCaseBuilder.getScriptFile();
-        this.usePreviousDriverAndVars = testCaseBuilder.isUsePreviousDriverAndVars();
-        this.closeDriver = testCaseBuilder.isCloseDriver();
-        this.testDataSet = testCaseBuilder.getDataSet();
-        this.overrideTestDataSet = testCaseBuilder.getOverrideDataSet();
-        this.skip = testCaseBuilder.getSkip();
-        this.nestedChain = testCaseBuilder.isNestedChain();
-        this.breakNestedChain = testCaseBuilder.isBreakNestedChain();
+    public TestCase(TestCaseBuilder builder) {
+        super(builder);
+        this.steps = builder.getSteps();
+        this.closeDriver = builder.isCloseDriver();
     }
 
     @Override
-    public void accept(TestRunner runner, TestRunListener testListener) {
-        runner.execute(this, testListener);
+    public void accept(TestRunner runner, TestRunListener testRunListener) {
+        runner.execute(this, testRunListener);
     }
 
+    @Override
+    public Iterable<TestRunBuilder> createTestRunBuilder() {
+        return Lists.newArrayList(new TestRunBuilder(this));
+    }
+
+    @Override
+    public Iterable<TestRunBuilder> createTestRunBuilder(Scenario scenario) {
+        return Lists.newArrayList(new TestRunBuilder(this, scenario));
+    }
+
+    @Override
     public TestCaseBuilder builder() {
         return new TestCaseBuilder(this);
+    }
+
+    @Override
+    public TestCase testCase() {
+        return this;
     }
 
     public ArrayList<Step> steps() {
@@ -77,107 +76,9 @@ public class TestCase implements TestRunnable {
         return this.closeDriver;
     }
 
-    public boolean usePreviousDriverAndVars() {
-        return this.usePreviousDriverAndVars;
-    }
-
-    public ScriptFile testCase() {
-        return this.scriptFile;
-    }
-
-    public File relativePath() {
-        return this.scriptFile.relativePath();
-    }
-
-    public String name() {
-        return this.scriptFile.name();
-    }
-
-    public Function<TestData, TestCase> lazyLoad() {
-        return this.lazyLoad;
-    }
-
-    public TestCase lazyLoad(TestData it) {
-        if (this.isLazyLoad()) {
-            return this.lazyLoad.apply(it)
-                    .builder()
-                    .overrideDataSource(this.overrideDataSource(), this.overrideDataSourceConfig())
-                    .setSkip(this.skip)
-                    .build();
-        }
-        return this;
-    }
-
-    public String path() {
-        return this.scriptFile.path();
-    }
-
-    public TestDataSet getTestDataSet() {
-        return testDataSet;
-    }
-
-    public DataSource dataSource() {
-        return this.testDataSet.getDataSource();
-    }
-
-    public Map<String, String> dataSourceConfig() {
-        return this.testDataSet.getDataSourceConfig();
-    }
-
-    public TestDataSet getOverrideTestDataSet() {
-        return overrideTestDataSet;
-    }
-
-    public DataSource overrideDataSource() {
-        return this.overrideTestDataSet.getDataSource();
-    }
-
-    public Map<String, String> overrideDataSourceConfig() {
-        return this.overrideTestDataSet.getDataSourceConfig();
-    }
-
-    public List<TestData> loadData(TestData vars) {
-        if (this.overrideDataSource() != null) {
-            return this.overrideTestDataSet.loadData(vars);
-        }
-        return this.testDataSet.loadData();
-    }
-
-    public boolean isNestedChain() {
-        return this.nestedChain;
-    }
-
-    public boolean isBreakNestedChain() {
-        return this.breakNestedChain;
-    }
-
-    public boolean isLazyLoad() {
-        return this.lazyLoad != null;
-    }
-
-    public String skip() {
-        return this.skip;
-    }
-
-    public boolean skipRunning(TestData testData) {
-        return testData.evaluate(this.skip);
-    }
-
-    public TestCase rename(String aName) {
-        return this.builder()
-                .setName(aName)
-                .build();
-    }
-
     public TestCase changeDataSourceConfig(String key, String value) {
-        TestCaseBuilder builder = this.builder();
-        builder.getDataSourceConfig().put(key, value);
-        return builder.build();
-    }
-
-    public TestCase usePreviousDriverAndVars(boolean userPreviousDriverAndVars) {
         return this.builder()
-                .usePreviousDriverAndVars(userPreviousDriverAndVars)
+                .addDataSourceConfig(key, value)
                 .build();
     }
 
@@ -277,45 +178,8 @@ public class TestCase implements TestRunnable {
         );
     }
 
-    public TestCase skip(String skip) {
-        return this.builder()
-                .setSkip(skip)
-                .build();
-    }
-
-    public TestCase nestedChain(boolean nestedChain) {
-        return this.builder()
-                .isNestedChain(nestedChain)
-                .build();
-    }
-
-    public TestCase breakNestedChain(boolean breakNestedChain) {
-        return this.builder()
-                .isBreakNestedChain(breakNestedChain)
-                .build();
-    }
-
     public Suite toSuite() {
-        return new SuiteBuilder(this).createSuite();
+        return new SuiteBuilder(this).build();
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        TestCase testCase = (TestCase) o;
-        return usePreviousDriverAndVars == testCase.usePreviousDriverAndVars &&
-                closeDriver == testCase.closeDriver &&
-                com.google.common.base.Objects.equal(steps, testCase.steps) &&
-                com.google.common.base.Objects.equal(isLazyLoad(), testCase.isLazyLoad()) &&
-                com.google.common.base.Objects.equal(testDataSet, testCase.testDataSet) &&
-                com.google.common.base.Objects.equal(overrideTestDataSet, testCase.overrideTestDataSet) &&
-                com.google.common.base.Objects.equal(skip, testCase.skip) &&
-                com.google.common.base.Objects.equal(scriptFile, testCase.scriptFile);
-    }
-
-    @Override
-    public int hashCode() {
-        return com.google.common.base.Objects.hashCode(steps, isLazyLoad(), usePreviousDriverAndVars, closeDriver, testDataSet, overrideTestDataSet, skip, scriptFile);
-    }
 }

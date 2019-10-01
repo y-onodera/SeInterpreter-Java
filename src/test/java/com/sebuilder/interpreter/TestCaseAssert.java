@@ -42,9 +42,16 @@ public class TestCaseAssert {
         };
     }
 
+    public static Consumer<TestCase> assertEqualsFileAttribute(String aName, File testFile) {
+        return (TestCase actual) -> {
+            assertEquals(aName, actual.name());
+            assertEquals(testFile.getParentFile(), actual.relativePath());
+        };
+    }
+
     public static void assertEqualsNoDataSource(TestCase actual) {
         assertNull(actual.getTestDataSet().getDataSource());
-        assertEquals(0, actual.dataSourceConfig().size());
+        assertEquals(0, actual.getTestDataSet().getDataSourceConfig().size());
     }
 
     public static Consumer<TestCase> assertEqualsDataSet(TestDataSet dataSource) {
@@ -69,7 +76,7 @@ public class TestCaseAssert {
     }
 
     public static Consumer<TestCase> assertEqualsSkip(String aSkip) {
-        return (TestCase actual) -> assertEquals(aSkip, actual.skip());
+        return (TestCase actual) -> assertEquals(aSkip, actual.getSkip());
     }
 
     public static void assertLazyLoad(TestCase actual) {

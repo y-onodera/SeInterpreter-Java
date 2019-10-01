@@ -81,7 +81,7 @@ public class SeInterpreter extends CommandLineRunner {
 
     private void runScripts(String path) throws IOException {
         Suite suite = Context.getScriptParser().load(new File(path));
-        for (TestRunBuilder script : suite.getTestRuns()) {
+        for (TestRunBuilder script : suite.createTestRunBuilder()) {
             this.runScript(script);
         }
     }

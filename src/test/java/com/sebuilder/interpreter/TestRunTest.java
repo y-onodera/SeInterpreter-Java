@@ -1967,7 +1967,7 @@ public class TestRunTest {
 
         @Test
         public void quit_withParentDriver() {
-            this.testCase = this.testCase.builder().usePreviousDriverAndVars(true).build();
+            this.testCase = this.testCase.builder().isShareState(true).build();
             resetTestRun();
             this.target.quit();
             Mockito.verify(this.driver, Mockito.never()).quit();
