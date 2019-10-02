@@ -80,7 +80,7 @@ public class SuiteBuilder extends AbstractTestRunnable.AbstractBuilder<Suite, Su
         return this;
     }
 
-    public SuiteBuilder testChain(TestCase from, TestCase to) {
+    public SuiteBuilder chain(TestCase from, TestCase to) {
         this.scenario = this.scenario.appendNewChain(from, to);
         return this;
     }

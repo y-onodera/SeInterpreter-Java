@@ -1,6 +1,5 @@
 package com.sebuilder.interpreter;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -93,20 +92,25 @@ public class Scenario implements Iterable<TestCase> {
     }
 
     public Scenario append(Iterable<TestCase> aScripts) {
-        ArrayList<TestCase> newList = Lists.newArrayList(this.testCases);
-        Iterables.addAll(newList, aScripts);
-        return new Scenario(newList, this.chains, this.aspect);
+        Scenario result = this;
+        for (TestCase addCase : aScripts) {
+            result = result.append(addCase);
+        }
+        return result;
     }
 
     public Scenario append(TestCase testCase) {
-        ArrayList<TestCase> newList = Lists.newArrayList(this.testCases);
-        newList.add(testCase);
-        return new Scenario(newList, this.chains, this.aspect);
+        return this.append(this.testCaseSize(), testCase);
     }
 
     public Scenario append(int aIndex, TestCase testCase) {
         ArrayList<TestCase> newList = Lists.newArrayList(this.testCases);
-        newList.add(aIndex, testCase);
+        int countDuplicate = (int) this.testCases.stream().filter(it -> it.equals(testCase)).count();
+        if (countDuplicate == 0) {
+            newList.add(aIndex, testCase);
+        } else {
+            newList.add(aIndex, this.renameDuplicateCase(testCase, countDuplicate));
+        }
         return new Scenario(newList, this.chains, this.aspect);
     }
 
@@ -121,6 +125,19 @@ public class Scenario implements Iterable<TestCase> {
                 .findFirst()
                 .ifPresent(entry -> newMap.remove(entry.getKey()));
         return new Scenario(newList, newMap, this.aspect);
+    }
+
+    public Scenario replaceTest(String oldName, TestCase aTestCase) {
+        return this.map(testCase -> {
+            if (testCase.name().equals(oldName)) {
+                return aTestCase;
+            }
+            return testCase;
+        });
+    }
+
+    public Scenario lazyLoad(TestData aSource) {
+        return this.map(testCase -> testCase.lazyLoad(aSource).testCase());
     }
 
     public Scenario map(Function<TestCase, TestCase> converter) {
@@ -139,7 +156,7 @@ public class Scenario implements Iterable<TestCase> {
                 if (entries.isPresent()) {
                     int nextCount = duplicate.get(copy.path()) + 1;
                     duplicate.put(copy.path(), nextCount);
-                    copy = copy.rename(entries.get() + String.format("(%d)", nextCount));
+                    copy = this.renameDuplicateCase(copy, nextCount);
                 }
             } else {
                 duplicate.put(copy.path(), 0);
@@ -148,19 +165,6 @@ public class Scenario implements Iterable<TestCase> {
             newChains = this.getReplaceMap(testCase, copy, newChains);
         }
         return new Scenario(newTestCases, newChains, this.aspect);
-    }
-
-    public Scenario replaceTest(String oldName, TestCase aTestCase) {
-        return this.map(testCase -> {
-            if (testCase.name().equals(oldName)) {
-                return aTestCase;
-            }
-            return testCase;
-        });
-    }
-
-    public Scenario lazyLoad(TestData aSource) {
-        return this.map(testCase -> testCase.lazyLoad(aSource).testCase());
     }
 
     public Scenario addAspect(Aspect aspect) {
@@ -175,6 +179,10 @@ public class Scenario implements Iterable<TestCase> {
                 .map(script -> new TestRunBuilder(script, materialize)
                         .setShareInput(param)
                 ).map(aFunction);
+    }
+
+    protected TestCase renameDuplicateCase(TestCase target, int nextCount) {
+        return target.rename(target.fileName() + String.format("(%d)", nextCount));
     }
 
     private Map<TestCase, TestCase> getReplaceMap(TestCase oldTestCase, TestCase newTestCase, Map<TestCase, TestCase> oldChain) {

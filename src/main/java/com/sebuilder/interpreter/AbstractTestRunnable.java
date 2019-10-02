@@ -63,6 +63,11 @@ public abstract class AbstractTestRunnable<T extends TestRunnable> implements Te
     }
 
     @Override
+    public String fileName() {
+        return this.getScriptFile().relativePath(this);
+    }
+
+    @Override
     public boolean isShareState() {
         return this.shareState;
     }

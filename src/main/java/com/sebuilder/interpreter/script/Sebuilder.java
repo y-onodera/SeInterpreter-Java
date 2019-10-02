@@ -225,11 +225,12 @@ public class Sebuilder implements ScriptParser {
         TestCase lastLoad = null;
         for (int j = 0; j < scriptArrays.length(); j++) {
             for (TestCase loaded : this.loadScript(scriptArrays.getJSONObject(j), new File(builder.getScriptFile().path()))) {
-                if (lastLoad != null) {
-                    builder.testChain(lastLoad, loaded);
-                }
                 builder.addTest(loaded);
-                lastLoad = loaded;
+                TestCase addTest = builder.getScenario().get(builder.getScenario().testCaseSize() - 1);
+                if (lastLoad != null) {
+                    builder.chain(lastLoad, addTest);
+                }
+                lastLoad = addTest;
             }
         }
     }

@@ -28,6 +28,8 @@ public interface TestRunnable<T extends TestRunnable> {
 
     String path();
 
+    String fileName();
+
     ScriptFile getScriptFile();
 
     default File relativePath() {

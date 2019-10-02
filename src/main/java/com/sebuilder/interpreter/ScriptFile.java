@@ -12,9 +12,9 @@ public class ScriptFile {
     private final String path;
     private final File relativePath;
 
-    public static ScriptFile of(File suiteFile, String defaultName) {
-        if (suiteFile != null) {
-            return new ScriptFile(suiteFile);
+    public static ScriptFile of(File file, String defaultName) {
+        if (file != null) {
+            return new ScriptFile(file);
         }
         return new ScriptFile(defaultName);
     }
@@ -23,8 +23,8 @@ public class ScriptFile {
         this(name, null, null);
     }
 
-    public ScriptFile(File suiteFile) {
-        this(suiteFile.getName(), suiteFile.getAbsolutePath(), suiteFile.getParentFile().getAbsoluteFile());
+    public ScriptFile(File file) {
+        this(file.getName(), file.getAbsolutePath(), file.getParentFile().getAbsoluteFile());
     }
 
     public ScriptFile(String name, String path, File relativePath) {
@@ -56,7 +56,7 @@ public class ScriptFile {
         return this.relativePath;
     }
 
-    public String relativePath(TestCase s) {
+    public String relativePath(TestRunnable s) {
         if (this.relativePath == null && !Strings.isNullOrEmpty(s.path())) {
             return s.path();
         } else if (Strings.isNullOrEmpty(s.path())) {

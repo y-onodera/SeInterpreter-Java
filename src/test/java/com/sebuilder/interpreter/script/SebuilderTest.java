@@ -374,6 +374,39 @@ public class SebuilderTest {
         }
     }
 
+    public static class ParseSuiteWithScriptChainContainsSameScript extends ParseResultTest {
+
+        private final File testFile = new File(baseDir, "suiteWithScriptChainContainsSameScript.json");
+
+        @Before
+        public void setUp() throws IOException {
+            this.result = target.load(this.testFile);
+        }
+
+        @Override
+        public SuiteAssert getSuiteAssert() {
+            return SuiteAssert.of()
+                    .assertFileAttribute(SuiteAssert.assertEqualsFileAttribute(testFile))
+                    .assertTestCaseCount(SuiteAssert.assertEqualsTestCaseCount(4))
+                    .assertTestCase(0, new ParseScriptNoContents().getTestCaseAssert())
+                    .assertTestCase(1, new ParseScriptTypeWithSteps().getTestCaseAssert())
+                    .assertTestCase(2, new ParseScriptNoContents().getTestCaseAssert()
+                            .builder()
+                            .assertFileAttribute(TestCaseAssert.assertEqualsFileAttribute("scriptWithNoContents.json(1)", testFileScriptWithNoContents))
+                            .create())
+                    .assertTestCase(3, new ParseScriptTypeWithSteps().getTestCaseAssert()
+                            .builder()
+                            .assertFileAttribute(TestCaseAssert.assertEqualsFileAttribute("scriptWithSteps.json(1)", testFileScriptWithSteps))
+                            .create())
+                    .assertChainCount(SuiteAssert.assertEqualsChainCount(3))
+                    .assertChain(SuiteAssert.assertEqualsChain(0, 1))
+                    .assertChain(SuiteAssert.assertEqualsChain(1, 2))
+                    .assertChain(SuiteAssert.assertEqualsChain(2, 3))
+                    .assertDataSource(SuiteAssert::assertEqualsNoDataSource)
+                    .create();
+        }
+    }
+
     public static class ParseSuiteWithNestedScriptChain extends ParseResultTest {
 
         private final File testFile = new File(baseDir, "suiteWithNestedScriptChain.json");
