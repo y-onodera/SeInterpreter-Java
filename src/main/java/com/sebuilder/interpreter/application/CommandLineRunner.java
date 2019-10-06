@@ -100,15 +100,15 @@ public abstract class CommandLineRunner {
         this.log.info("setUp finish");
     }
 
-    protected TestRun getTestRun(TestRunBuilder script, TestData data, TestRunListener seInterpreterTestListener) {
-        return script.createTestRun(this.log
+    protected TestRun getTestRun(TestRunBuilder script, TestData data, TestRunListener testRunListener) {
+        return script.createTestRun(testRunListener.getLog()
                 , Context.getWebDriverFactory()
                 , Context.getDriverConfig()
                 , Context.getImplicitlyWaitTime()
                 , Context.getPageLoadWaitTime()
                 , data
                 , this.lastRun
-                , seInterpreterTestListener);
+                , testRunListener);
     }
 
     protected void preSetUp() {

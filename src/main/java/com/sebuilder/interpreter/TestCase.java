@@ -16,9 +16,12 @@
 
 package com.sebuilder.interpreter;
 
+import com.google.common.base.Objects;
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -44,28 +47,33 @@ public class TestCase extends AbstractTestRunnable<TestCase> {
     }
 
     @Override
-    public void accept(TestRunner runner, TestRunListener testRunListener) {
-        runner.execute(this, testRunListener);
+    public Iterator<TestCase> iterator() {
+        return Iterators.singletonIterator(this);
     }
 
     @Override
-    public Iterable<TestRunBuilder> createTestRunBuilder() {
-        return Lists.newArrayList(new TestRunBuilder(this));
+    public TestCase head() {
+        return this;
     }
 
     @Override
-    public Iterable<TestRunBuilder> createTestRunBuilder(Scenario scenario) {
-        return Lists.newArrayList(new TestRunBuilder(this, scenario));
+    public Suite toSuite() {
+        return new SuiteBuilder(this).build();
+    }
+
+    @Override
+    public TestRunBuilder[] createTestRunBuilder() {
+        return new TestRunBuilder[]{new TestRunBuilder(this)};
+    }
+
+    @Override
+    public TestRunBuilder[] createTestRunBuilder(Scenario aScenario) {
+        return new TestRunBuilder[]{new TestRunBuilder(this, aScenario)};
     }
 
     @Override
     public TestCaseBuilder builder() {
         return new TestCaseBuilder(this);
-    }
-
-    @Override
-    public TestCase testCase() {
-        return this;
     }
 
     public ArrayList<Step> steps() {
@@ -76,27 +84,16 @@ public class TestCase extends AbstractTestRunnable<TestCase> {
         return this.closeDriver;
     }
 
-    public TestCase changeDataSourceConfig(String key, String value) {
-        return this.builder()
-                .addDataSourceConfig(key, value)
-                .build();
-    }
-
-    public TestCase editStep(Function<ArrayList<Step>, ArrayList<Step>> converter) {
-        return this.replaceStep(converter.apply(this.steps));
-    }
-
-    public TestCase filterStep(Predicate<Step> filter) {
-        return this.editStep(it -> it.stream()
-                .filter(filter)
-                .collect(Collectors.toCollection(ArrayList::new))
-        );
-    }
-
     public TestCase copy() {
         return this.editStep((ArrayList<Step> it) -> it.stream()
                 .map(step -> step.copy())
                 .collect(Collectors.toCollection(ArrayList::new)));
+    }
+
+    public TestCase changeDataSourceConfig(String key, String value) {
+        return this.builder()
+                .addDataSourceConfig(key, value)
+                .build();
     }
 
     public TestCase removeStep(int stepIndex) {
@@ -150,20 +147,7 @@ public class TestCase extends AbstractTestRunnable<TestCase> {
         );
     }
 
-    public TestCase addStep(TestCase export) {
-        ArrayList newStep = Lists.newArrayList(this.steps);
-        newStep.addAll(export.steps);
-        return this.replaceStep(newStep);
-    }
-
-    public TestCase replaceStep(ArrayList<Step> newStep) {
-        return new TestCaseBuilder(this)
-                .clearStep()
-                .addSteps(newStep)
-                .build();
-    }
-
-    public TestCase replaceStep(int stepIndex, Step newStep) {
+    public TestCase setSteps(int stepIndex, Step newStep) {
         return this.editStep(it -> {
                     final ArrayList<Step> newSteps = new ArrayList<>();
                     for (int i = 0, j = this.steps.size(); i < j; i++) {
@@ -178,8 +162,29 @@ public class TestCase extends AbstractTestRunnable<TestCase> {
         );
     }
 
-    public Suite toSuite() {
-        return new SuiteBuilder(this).build();
+    public TestCase editStep(Function<ArrayList<Step>, ArrayList<Step>> converter) {
+        return this.setSteps(converter.apply(this.steps));
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        TestCase testCase = (TestCase) o;
+        return closeDriver == testCase.closeDriver &&
+                Objects.equal(steps, testCase.steps);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(super.hashCode(), steps, closeDriver);
+    }
+
+    protected TestCase setSteps(ArrayList<Step> newStep) {
+        return new TestCaseBuilder(this)
+                .clearStep()
+                .addSteps(newStep)
+                .build();
+    }
 }

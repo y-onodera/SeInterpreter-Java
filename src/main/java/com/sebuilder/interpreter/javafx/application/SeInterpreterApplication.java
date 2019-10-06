@@ -68,7 +68,7 @@ public class SeInterpreterApplication extends Application {
         this.runner = new SeInterpreterRunner(parameters.getRaw());
         final List<String> unnamed = parameters.getUnnamed();
         if (unnamed.size() > 0) {
-            Suite newSuite = getScriptParser().load(new File(unnamed.get(0)));
+            Suite newSuite = getScriptParser().load(new File(unnamed.get(0))).toSuite();
             this.resetSuite(newSuite, newSuite.iterator().next());
         }
     }
@@ -82,7 +82,7 @@ public class SeInterpreterApplication extends Application {
     @Subscribe
     public void reset(ScriptResetEvent event) {
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
-            Suite newSuite = new SuiteBuilder(this.templateScript()).build();
+            Suite newSuite = this.templateScript().toSuite();
             this.resetSuite(newSuite, newSuite.iterator().next());
         });
     }
@@ -91,7 +91,7 @@ public class SeInterpreterApplication extends Application {
     public void scriptReLoad(FileLoadEvent event) {
         File file = event.getFile();
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
-            Suite newSuite = getScriptParser().load(file);
+            Suite newSuite = getScriptParser().load(file).toSuite();
             this.resetSuite(newSuite, newSuite.iterator().next());
         });
 
@@ -124,7 +124,7 @@ public class SeInterpreterApplication extends Application {
     public void scriptImport(ScriptImportEvent event) {
         File file = event.getFile();
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
-            TestCase testCase = getScriptParser().load(file).get(0);
+            TestCase testCase = getScriptParser().load(file).head();
             addScript(testCase);
         });
 
@@ -189,7 +189,7 @@ public class SeInterpreterApplication extends Application {
     public void editStep(StepEditEvent event) {
         Step newStep = event.getStepSource();
         if (event.getEditAction().equals("change")) {
-            this.currentDisplay = this.currentDisplay.replaceStep(event.getStepIndex(), newStep);
+            this.currentDisplay = this.currentDisplay.setSteps(event.getStepIndex(), newStep);
         } else if (event.getEditAction().equals("insert")) {
             this.currentDisplay = this.currentDisplay.insertStep(event.getStepIndex(), newStep);
         } else {

@@ -89,7 +89,7 @@ public class SeInterpreterRunner {
                 }
             }
         }
-        TestCase result = this.repl.loadScript(exported.getAbsolutePath()).iterator().next();
+        TestCase result = this.repl.loadScript(exported.getAbsolutePath()).head();
         return result.builder()
                 .associateWith(null)
                 .setName(result.name())

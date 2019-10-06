@@ -12,23 +12,19 @@ import java.util.stream.Stream;
 
 public class Scenario implements Iterable<TestCase> {
 
-    private final ArrayList<TestCase> testCases;
-    private final Map<TestCase, TestCase> chains;
+    private final ArrayList<? extends TestRunnable> testCases;
+    private final Map<? extends TestRunnable, ? extends TestRunnable> chains;
     private Aspect aspect;
 
     public Scenario() {
         this(Lists.newArrayList(), Maps.newHashMap(), new Aspect());
     }
 
-    public Scenario(TestCase testCase) {
+    public Scenario(TestRunnable testCase) {
         this(Lists.newArrayList(testCase), Maps.newHashMap(), new Aspect());
     }
 
-    public Scenario(ArrayList<TestCase> aTestCases) {
-        this(Lists.newArrayList(aTestCases), Maps.newHashMap(), new Aspect());
-    }
-
-    private Scenario(ArrayList<TestCase> newScripts, Map<TestCase, TestCase> newMap, Aspect newAspect) {
+    private Scenario(ArrayList<? extends TestRunnable> newScripts, Map<? extends TestRunnable, ? extends TestRunnable> newMap, Aspect newAspect) {
         this.chains = newMap;
         this.testCases = newScripts;
         this.aspect = newAspect;
@@ -44,7 +40,9 @@ public class Scenario implements Iterable<TestCase> {
     }
 
     public Iterator<TestCase> testCaseIterator() {
-        return this.testCases.iterator();
+        return this.testCases.stream()
+                .map(TestRunnable::head)
+                .iterator();
     }
 
     public int testCaseSize() {
@@ -55,56 +53,49 @@ public class Scenario implements Iterable<TestCase> {
         return this.chains.size();
     }
 
-    public boolean hasChain(TestCase s) {
+    public boolean hasChain(TestRunnable s) {
         return this.chains.containsKey(s);
     }
 
-    public boolean isChainTarget(TestCase testCase) {
+    public boolean isChainTarget(TestRunnable testCase) {
         return this.chains.containsValue(testCase);
     }
 
-    public TestCase getChainTo(TestCase testCaseFrom) {
-        return this.chains.get(testCaseFrom);
+    public TestCase getChainTo(TestRunnable testCaseFrom) {
+        return this.chains.get(testCaseFrom).head();
     }
 
     public TestCase get(String scriptName) {
         return this.testCases.stream()
                 .filter(it -> it.name().equals(scriptName))
+                .map(TestRunnable::head)
                 .findFirst()
                 .orElse(null);
     }
 
     public TestCase get(int index) {
-        return this.testCases.get(index);
+        return this.testCases.get(index).head();
     }
 
     public int indexOf(TestCase aTestCase) {
         return this.testCases.indexOf(aTestCase);
     }
 
-    public Scenario appendNewChain(TestCase chainFrom, TestCase to) {
+    public Scenario appendNewChain(TestRunnable chainFrom, TestRunnable to) {
         if (!this.testCases.contains(chainFrom) && !this.chains.containsValue(chainFrom)) {
-            throw new IllegalArgumentException("testCases and chains not include" + chainFrom);
+            throw new IllegalArgumentException("testCases and chains not include " + chainFrom);
         }
-        Map<TestCase, TestCase> newChain = Maps.newHashMap(this.chains);
+        Map<TestRunnable, TestRunnable> newChain = Maps.newHashMap(this.chains);
         newChain.put(chainFrom, to);
         return new Scenario(this.testCases, newChain, this.aspect);
     }
 
-    public Scenario append(Iterable<TestCase> aScripts) {
-        Scenario result = this;
-        for (TestCase addCase : aScripts) {
-            result = result.append(addCase);
-        }
-        return result;
-    }
-
-    public Scenario append(TestCase testCase) {
+    public Scenario append(TestRunnable testCase) {
         return this.append(this.testCaseSize(), testCase);
     }
 
-    public Scenario append(int aIndex, TestCase testCase) {
-        ArrayList<TestCase> newList = Lists.newArrayList(this.testCases);
+    public Scenario append(int aIndex, TestRunnable testCase) {
+        ArrayList<TestRunnable> newList = Lists.newArrayList(this.testCases);
         int countDuplicate = (int) this.testCases.stream().filter(it -> it.equals(testCase)).count();
         if (countDuplicate == 0) {
             newList.add(aIndex, testCase);
@@ -115,8 +106,8 @@ public class Scenario implements Iterable<TestCase> {
     }
 
     public Scenario minus(TestCase aTestCase) {
-        ArrayList<TestCase> newList = Lists.newArrayList(this.testCases);
-        Map<TestCase, TestCase> newMap = Maps.newHashMap(this.chains);
+        ArrayList<TestRunnable> newList = Lists.newArrayList(this.testCases);
+        Map<TestRunnable, TestRunnable> newMap = Maps.newHashMap(this.chains);
         newList.remove(aTestCase);
         newMap.remove(aTestCase);
         this.chains.entrySet()
@@ -127,7 +118,7 @@ public class Scenario implements Iterable<TestCase> {
         return new Scenario(newList, newMap, this.aspect);
     }
 
-    public Scenario replaceTest(String oldName, TestCase aTestCase) {
+    public Scenario replaceTest(String oldName, TestRunnable aTestCase) {
         return this.map(testCase -> {
             if (testCase.name().equals(oldName)) {
                 return aTestCase;
@@ -137,32 +128,34 @@ public class Scenario implements Iterable<TestCase> {
     }
 
     public Scenario lazyLoad(TestData aSource) {
-        return this.map(testCase -> testCase.lazyLoad(aSource).testCase());
+        return this.map(testCase -> testCase.lazyLoad(aSource).head());
     }
 
-    public Scenario map(Function<TestCase, TestCase> converter) {
-        ArrayList<TestCase> newTestCases = Lists.newArrayList();
-        Map<TestCase, TestCase> newChains = this.chains;
+    public Scenario map(Function<TestRunnable, TestRunnable> converter) {
+        ArrayList<TestRunnable> newTestCases = Lists.newArrayList();
+        Map<TestRunnable, TestRunnable> newChains = Maps.newHashMap(this.chains);
         Map<String, Integer> duplicate = Maps.newHashMap();
-        for (TestCase testCase : this.testCases) {
-            TestCase copy = converter.apply(testCase);
-            final String scriptName = copy.name();
-            if (duplicate.containsKey(copy.path())) {
-                Optional<String> entries = newTestCases
-                        .stream()
-                        .map(it -> it.name())
-                        .filter(it -> scriptName.startsWith(it))
-                        .findFirst();
-                if (entries.isPresent()) {
-                    int nextCount = duplicate.get(copy.path()) + 1;
-                    duplicate.put(copy.path(), nextCount);
-                    copy = this.renameDuplicateCase(copy, nextCount);
+        for (Iterable<TestRunnable> testCases : this.testCases) {
+            for (TestRunnable testCase : testCases) {
+                TestRunnable copy = converter.apply(testCase);
+                final String scriptName = copy.name();
+                if (duplicate.containsKey(copy.path())) {
+                    Optional<String> entries = newTestCases
+                            .stream()
+                            .map(it -> it.name())
+                            .filter(it -> scriptName.startsWith(it))
+                            .findFirst();
+                    if (entries.isPresent()) {
+                        int nextCount = duplicate.get(copy.path()) + 1;
+                        duplicate.put(copy.path(), nextCount);
+                        copy = this.renameDuplicateCase(copy, nextCount);
+                    }
+                } else {
+                    duplicate.put(copy.path(), 0);
                 }
-            } else {
-                duplicate.put(copy.path(), 0);
+                newTestCases.add(copy);
+                newChains = this.getReplaceMap(testCase, copy, newChains);
             }
-            newTestCases.add(copy);
-            newChains = this.getReplaceMap(testCase, copy, newChains);
         }
         return new Scenario(newTestCases, newChains, this.aspect);
     }
@@ -181,14 +174,14 @@ public class Scenario implements Iterable<TestCase> {
                 ).map(aFunction);
     }
 
-    protected TestCase renameDuplicateCase(TestCase target, int nextCount) {
+    protected <T extends TestRunnable> T renameDuplicateCase(TestRunnable<T> target, int nextCount) {
         return target.rename(target.fileName() + String.format("(%d)", nextCount));
     }
 
-    private Map<TestCase, TestCase> getReplaceMap(TestCase oldTestCase, TestCase newTestCase, Map<TestCase, TestCase> oldChain) {
-        Map<TestCase, TestCase> newChain = Maps.newHashMap(oldChain);
+    private Map<TestRunnable, TestRunnable> getReplaceMap(TestRunnable oldTestCase, TestRunnable newTestCase, Map<TestRunnable, TestRunnable> oldChain) {
+        Map<TestRunnable, TestRunnable> newChain = Maps.newHashMap(oldChain);
         if (newChain.containsKey(oldTestCase) || newChain.containsValue(oldTestCase)) {
-            for (Map.Entry<TestCase, TestCase> entry : oldChain.entrySet()) {
+            for (Map.Entry<TestRunnable, TestRunnable> entry : oldChain.entrySet()) {
                 if (entry.getKey() == oldTestCase) {
                     newChain.remove(oldTestCase);
                     newChain.put(newTestCase, entry.getValue());
@@ -202,7 +195,8 @@ public class Scenario implements Iterable<TestCase> {
 
     private Stream<TestCase> testRunStreams() {
         return this.testCases.stream()
-                .filter(script -> !this.isChainTarget(script));
+                .filter(script -> !this.isChainTarget(script))
+                .map(TestRunnable::head);
     }
 
     @Override

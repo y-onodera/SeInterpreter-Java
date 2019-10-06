@@ -25,7 +25,7 @@ public class SeInterpreterRunTask extends Task<String> {
         try {
             this.log.info("operation recieve");
             updateMessage("setup running....");
-            this.runnable.accept(this.repl, new TestRunListenerWrapper(this.listener) {
+            this.repl.execute(this.runnable, new TestRunListenerWrapper(this.listener) {
                 private int currentScriptSteps;
 
                 @Override

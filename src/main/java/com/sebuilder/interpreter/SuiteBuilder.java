@@ -1,15 +1,13 @@
 package com.sebuilder.interpreter;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.function.Function;
 
 public class SuiteBuilder extends AbstractTestRunnable.AbstractBuilder<Suite, SuiteBuilder> {
     private Scenario scenario;
-    private Function<TestCase, TestCase> converter = script -> {
+    private Function<TestRunnable, TestRunnable> converter = script -> {
         if (script.isShareState() != this.isShareState()) {
             return script.shareState(this.isShareState());
         }
@@ -21,17 +19,13 @@ public class SuiteBuilder extends AbstractTestRunnable.AbstractBuilder<Suite, Su
         this.scenario = suite.getScenario();
     }
 
-    public SuiteBuilder(TestCase testCase) {
-        this(Lists.newArrayList(testCase));
-    }
-
-    public SuiteBuilder(ArrayList<TestCase> aTestCases) {
-        this(new ScriptFile(Suite.DEFAULT_NAME), new Scenario(aTestCases));
-        this.isShareState(true);
-    }
-
     public SuiteBuilder(File suiteFile) {
         this(ScriptFile.of(suiteFile, Suite.DEFAULT_NAME), new Scenario());
+    }
+
+    SuiteBuilder(TestCase testCase) {
+        this(new ScriptFile(Suite.DEFAULT_NAME), new Scenario(testCase));
+        this.isShareState(true);
     }
 
     private SuiteBuilder(ScriptFile scriptFile, Scenario scenario) {
@@ -55,12 +49,7 @@ public class SuiteBuilder extends AbstractTestRunnable.AbstractBuilder<Suite, Su
         return this.scenario.map(this.converter);
     }
 
-    public SuiteBuilder addTests(Suite s) {
-        this.scenario = this.scenario.append(s);
-        return this;
-    }
-
-    public SuiteBuilder addTest(TestCase s) {
+    public SuiteBuilder addTest(TestRunnable s) {
         this.scenario = this.scenario.append(s);
         return this;
     }
@@ -85,7 +74,7 @@ public class SuiteBuilder extends AbstractTestRunnable.AbstractBuilder<Suite, Su
         return this;
     }
 
-    public SuiteBuilder replace(String oldName, TestCase aTestCase) {
+    public SuiteBuilder replace(String oldName, TestRunnable aTestCase) {
         this.scenario = this.scenario.replaceTest(oldName, aTestCase);
         return this;
     }

@@ -79,17 +79,17 @@ public class SebuilderTest {
     }
 
     public static abstract class ParseResultTest {
-        protected Suite result;
+        protected TestRunnable result;
 
         @Test
         public void parseResultContents() {
-            this.getSuiteAssert().run(result);
+            this.getSuiteAssert().run(result.toSuite());
         }
 
         @Test
         public void parseResultReversible() throws IOException {
-            Suite reverse = target.load(target.toString(this.result), Strings.isNullOrEmpty(this.result.path()) ? null : new File(this.result.path()));
-            this.getSuiteAssert().run(reverse);
+            TestRunnable reverse = target.load(target.toString(this.result.toSuite()), Strings.isNullOrEmpty(this.result.path()) ? null : new File(this.result.path()));
+            this.getSuiteAssert().run(reverse.toSuite());
         }
 
         public abstract SuiteAssert getSuiteAssert();

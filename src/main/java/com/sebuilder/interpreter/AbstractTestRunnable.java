@@ -8,6 +8,7 @@ import java.util.function.Function;
 public abstract class AbstractTestRunnable<T extends TestRunnable> implements TestRunnable<T> {
 
     private final ScriptFile scriptFile;
+    private final TestData shareInput;
     private final TestDataSet testDataSet;
     private final boolean shareState;
     private final String skip;
@@ -18,6 +19,7 @@ public abstract class AbstractTestRunnable<T extends TestRunnable> implements Te
 
     protected AbstractTestRunnable(Builder builder) {
         this.scriptFile = builder.getScriptFile();
+        this.shareInput = builder.getShareInput();
         this.testDataSet = builder.getTestDataSet();
         this.shareState = builder.isShareState();
         this.skip = builder.getSkip();
@@ -30,6 +32,14 @@ public abstract class AbstractTestRunnable<T extends TestRunnable> implements Te
     @Override
     public ScriptFile getScriptFile() {
         return scriptFile;
+    }
+
+    @Override
+    public TestData getShareInput() {
+        if (this.shareInput == null) {
+            return new TestData();
+        }
+        return this.shareInput;
     }
 
     @Override
@@ -121,6 +131,13 @@ public abstract class AbstractTestRunnable<T extends TestRunnable> implements Te
     }
 
     @Override
+    public T shareInput(TestData testData) {
+        return this.builder()
+                .setShareInput(testData)
+                .build();
+    }
+
+    @Override
     public T overrideDataSource(DataSource dataSource, Map<String, String> config) {
         return this.builder()
                 .setOverrideTestDataSet(dataSource, config)
@@ -163,6 +180,7 @@ public abstract class AbstractTestRunnable<T extends TestRunnable> implements Te
 
     public static abstract class AbstractBuilder<T extends TestRunnable, S extends Builder> implements Builder<T> {
         private ScriptFile scriptFile;
+        private TestData shareInput;
         private DataSource dataSource;
         private Map<String, String> dataSourceConfig;
         private boolean shareState;
@@ -179,6 +197,7 @@ public abstract class AbstractTestRunnable<T extends TestRunnable> implements Te
 
         protected AbstractBuilder(T test) {
             this.scriptFile = test.getScriptFile();
+            this.shareInput = test.getShareInput();
             this.dataSource = test.getTestDataSet().getDataSource();
             this.dataSourceConfig = test.getTestDataSet().getDataSourceConfig();
             this.shareState = test.isShareState();
@@ -200,6 +219,12 @@ public abstract class AbstractTestRunnable<T extends TestRunnable> implements Te
         public S setName(String newName) {
             this.scriptFile = this.scriptFile.changeName(newName);
             return this.self();
+        }
+
+        @Override
+        public Builder<T> setShareInput(TestData testData) {
+            this.shareInput = testData;
+            return this;
         }
 
         @Override
@@ -255,6 +280,11 @@ public abstract class AbstractTestRunnable<T extends TestRunnable> implements Te
         @Override
         public ScriptFile getScriptFile() {
             return this.scriptFile;
+        }
+
+        @Override
+        public TestData getShareInput() {
+            return this.shareInput;
         }
 
         @Override

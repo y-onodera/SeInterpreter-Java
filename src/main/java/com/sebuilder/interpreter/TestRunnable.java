@@ -5,12 +5,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-public interface TestRunnable<T extends TestRunnable> {
+public interface TestRunnable<T extends TestRunnable> extends Iterable<TestCase> {
 
-    void accept(TestRunner runner, TestRunListener testRunListener);
+    default void run(TestRunner runner, TestRunListener testRunListener) {
+        for (TestRunBuilder testRunBuilder : this.createTestRunBuilder()) {
+            for (TestData data : testRunBuilder.loadData()) {
+                boolean stop = runner.execute(testRunBuilder.copy(), data, testRunListener);
+                if (stop) {
+                    break;
+                }
+            }
+        }
+    }
 
     default List<TestData> loadData() {
-        return this.loadData(new TestData());
+        return this.loadData(this.getShareInput());
     }
 
     default List<TestData> loadData(TestData vars) {
@@ -20,9 +29,13 @@ public interface TestRunnable<T extends TestRunnable> {
         return this.getTestDataSet().loadData(vars);
     }
 
-    Iterable<TestRunBuilder> createTestRunBuilder();
+    Suite toSuite();
 
-    Iterable<TestRunBuilder> createTestRunBuilder(Scenario scenario);
+    TestCase head();
+
+    TestRunBuilder[] createTestRunBuilder();
+
+    TestRunBuilder[] createTestRunBuilder(Scenario aScenario);
 
     String name();
 
@@ -35,6 +48,8 @@ public interface TestRunnable<T extends TestRunnable> {
     default File relativePath() {
         return this.getScriptFile().relativePath();
     }
+
+    TestData getShareInput();
 
     TestDataSet getTestDataSet();
 
@@ -64,6 +79,8 @@ public interface TestRunnable<T extends TestRunnable> {
 
     T skip(String skip);
 
+    T shareInput(TestData testData);
+
     T overrideDataSource(DataSource dataSource, Map<String, String> config);
 
     T nestedChain(boolean nestedChain);
@@ -71,8 +88,6 @@ public interface TestRunnable<T extends TestRunnable> {
     T breakNestedChain(boolean breakNestedChain);
 
     Builder<T> builder();
-
-    TestCase testCase();
 
     interface Builder<T extends TestRunnable> {
 
@@ -83,6 +98,8 @@ public interface TestRunnable<T extends TestRunnable> {
         Builder<T> setName(String newName);
 
         Builder<T> associateWith(File target);
+
+        Builder<T> setShareInput(TestData testData);
 
         Builder<T> addDataSourceConfig(String key, String value);
 
@@ -101,6 +118,8 @@ public interface TestRunnable<T extends TestRunnable> {
         Builder<T> isBreakNestedChain(boolean breakNestedChain);
 
         ScriptFile getScriptFile();
+
+        TestData getShareInput();
 
         TestDataSet getTestDataSet();
 

@@ -13,9 +13,9 @@ public interface ScriptParser {
 
     String toString(TestCase target);
 
-    Suite load(File f) throws IOException;
+    TestRunnable load(File f) throws IOException;
 
-    Suite load(String json, File file) throws IOException;
+    TestRunnable load(String json, File file) throws IOException;
 
     TestCase load(String jsonString);
 

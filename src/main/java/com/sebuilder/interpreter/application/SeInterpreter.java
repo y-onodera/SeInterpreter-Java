@@ -30,7 +30,7 @@ import java.util.ArrayList;
  *
  * @author zarkonnen
  */
-public class SeInterpreter extends CommandLineRunner {
+public class SeInterpreter extends CommandLineRunner implements TestRunner {
 
     private ArrayList<String> paths;
 
@@ -55,21 +55,11 @@ public class SeInterpreter extends CommandLineRunner {
         }
     }
 
-    @Override
-    protected void preSetUp() {
-        paths = new ArrayList<>();
-    }
-
-    @Override
-    protected void configureOption(String s) {
-        this.paths.add(s);
-    }
-
-    private void runScripts() throws IOException {
+    public void runScripts() throws IOException {
         this.testRunListener.cleanResult();
         try {
             for (String path : this.paths) {
-                this.runScripts(path);
+                Context.getScriptParser().load(new File(path)).run(this, this.testRunListener);
             }
         } finally {
             if (this.driver != null && this.closeDriver) {
@@ -79,22 +69,10 @@ public class SeInterpreter extends CommandLineRunner {
         }
     }
 
-    private void runScripts(String path) throws IOException {
-        Suite suite = Context.getScriptParser().load(new File(path));
-        for (TestRunBuilder script : suite.createTestRunBuilder()) {
-            this.runScript(script);
-        }
-    }
-
-    private void runScript(TestRunBuilder testRunBuilder) {
-        for (TestData data : testRunBuilder.loadData()) {
-            this.runScript(testRunBuilder, data, this.testRunListener);
-        }
-    }
-
-    private void runScript(TestRunBuilder testRunBuilder, TestData data, TestRunListener seInterpreterTestListener) {
+    @Override
+    public boolean execute(TestRunBuilder testRunBuilder, TestData data, TestRunListener aTestRunListener) {
         try {
-            this.lastRun = getTestRun(testRunBuilder, data, seInterpreterTestListener);
+            this.lastRun = getTestRun(testRunBuilder, data, aTestRunListener);
             if (this.lastRun.finish()) {
                 this.log.info(testRunBuilder.getScriptName() + " succeeded");
             } else {
@@ -113,6 +91,18 @@ public class SeInterpreter extends CommandLineRunner {
             this.driver = null;
             this.closeDriver = false;
         }
+        return false;
     }
+
+    @Override
+    protected void preSetUp() {
+        paths = new ArrayList<>();
+    }
+
+    @Override
+    protected void configureOption(String s) {
+        this.paths.add(s);
+    }
+
 
 }

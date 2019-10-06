@@ -183,7 +183,7 @@ public class Sebuilder implements ScriptParser {
                 JSONArray scriptArrays = script.getJSONArray("chain");
                 this.loadScriptChain(scriptArrays, builder);
             } else {
-                builder.addTests(this.loadScript(script, new File(builder.getScriptFile().path())));
+                builder.addTest(this.loadScript(script, new File(builder.getScriptFile().path())));
             }
         }
     }

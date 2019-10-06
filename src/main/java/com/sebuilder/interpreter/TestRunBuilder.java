@@ -54,24 +54,33 @@ public class TestRunBuilder {
         return this.preventContextAspect;
     }
 
+    public TestRunBuilder setScenario(Scenario aScenario) {
+        this.scenario = aScenario;
+        return this;
+    }
+
     public TestRunBuilder setShareInput(TestData shareInput) {
         this.shareInput = this.shareInput.add(shareInput);
         return this;
     }
 
-    public TestRunBuilder addTestRunNameSuffix(String testRunNameSuffix) {
+    public TestRunBuilder addTestRunNameSuffix(String aTestRunNameSuffix) {
         if (this.testRunNameSuffix == null) {
             this.testRunNameSuffix = "";
         }
-        this.testRunNameSuffix = this.testRunNameSuffix + testRunNameSuffix;
+        if (aTestRunNameSuffix != null) {
+            this.testRunNameSuffix = this.testRunNameSuffix + aTestRunNameSuffix;
+        }
         return this;
     }
 
-    public TestRunBuilder addTestRunNamePrefix(String testRunNamePrefix) {
+    public TestRunBuilder addTestRunNamePrefix(String aTestRunNamePrefix) {
         if (this.testRunNamePrefix == null) {
             this.testRunNamePrefix = "";
         }
-        this.testRunNamePrefix = this.testRunNamePrefix + testRunNamePrefix;
+        if (aTestRunNamePrefix != null) {
+            this.testRunNamePrefix = this.testRunNamePrefix + aTestRunNamePrefix;
+        }
         return this;
     }
 
@@ -129,6 +138,14 @@ public class TestRunBuilder {
             result = result + "_row_" + initialVars.rowNumber();
         }
         return result;
+    }
+
+    public TestRunBuilder copy() {
+        return new TestRunBuilder(this.testCase, this.scenario)
+                .setShareInput(this.shareInput)
+                .addTestRunNamePrefix(this.testRunNamePrefix)
+                .addTestRunNameSuffix(this.testRunNameSuffix)
+                .preventContextAspect(this.preventContextAspect);
     }
 
     private RemoteWebDriver createDriver(Logger log, WebDriverFactory webDriverFactory, Map<String, String> webDriverConfig) {

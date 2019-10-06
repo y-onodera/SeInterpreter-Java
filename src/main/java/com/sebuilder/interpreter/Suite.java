@@ -3,7 +3,6 @@ package com.sebuilder.interpreter;
 import com.google.common.base.Objects;
 
 import java.util.Iterator;
-import java.util.stream.Collectors;
 
 public class Suite extends AbstractTestRunnable<Suite> implements Iterable<TestCase> {
 
@@ -22,17 +21,22 @@ public class Suite extends AbstractTestRunnable<Suite> implements Iterable<TestC
     }
 
     @Override
-    public void accept(TestRunner runner, TestRunListener testRunListener) {
-        runner.execute(this, testRunListener);
+    public TestCase head() {
+        return iterator().next();
     }
 
     @Override
-    public Iterable<TestRunBuilder> createTestRunBuilder() {
+    public Suite toSuite() {
+        return this;
+    }
+
+    @Override
+    public TestRunBuilder[] createTestRunBuilder() {
         return this.createTestRunBuilder(this.scenario);
     }
 
     @Override
-    public Iterable<TestRunBuilder> createTestRunBuilder(Scenario aScenario) {
+    public TestRunBuilder[] createTestRunBuilder(Scenario aScenario) {
         final String suiteName = this.getScriptFile().nameExcludeExtention();
         return this.loadData()
                 .stream()
@@ -47,12 +51,7 @@ public class Suite extends AbstractTestRunnable<Suite> implements Iterable<TestC
                     }
                     return aScenario.getTestRuns(newRow, (TestRunBuilder result) -> result.addTestRunNamePrefix(prefix + "_"));
                 })
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public TestCase testCase() {
-        return iterator().next();
+                .toArray(TestRunBuilder[]::new);
     }
 
     @Override
@@ -104,11 +103,11 @@ public class Suite extends AbstractTestRunnable<Suite> implements Iterable<TestC
                 .build();
     }
 
-    public Suite replace(TestCase aTestCase) {
+    public Suite replace(TestRunnable aTestCase) {
         return this.replace(aTestCase.name(), aTestCase);
     }
 
-    public Suite replace(String oldName, TestCase newValue) {
+    public Suite replace(String oldName, TestRunnable newValue) {
         return builder()
                 .replace(oldName, newValue)
                 .build();

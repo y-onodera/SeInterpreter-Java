@@ -23,7 +23,7 @@ import javax.annotation.Nonnull;
 import java.io.File;
 
 /**
- * A single run of a test testCase.
+ * A single run of a test head.
  *
  * @author zarkonnen
  */
@@ -97,6 +97,14 @@ public class TestRun {
         return this.vars;
     }
 
+    public Scenario getScenario() {
+        return this.scenario;
+    }
+
+    public Aspect getAspect() {
+        return aspect;
+    }
+
     public int currentStepIndex() {
         return this.testRunStatus.stepIndex();
     }
@@ -153,11 +161,11 @@ public class TestRun {
     }
 
     /**
-     * Runs the entire (rest of the) testCase.
+     * Runs the entire (rest of the) head.
      *
-     * @return True if the testCase ran successfully, false if a verification failed.
+     * @return True if the head ran successfully, false if a verification failed.
      * Any other failure throws an exception.
-     * @throws RuntimeException if the testCase failed.
+     * @throws RuntimeException if the head failed.
      */
     public boolean finish() {
         try {
@@ -264,7 +272,7 @@ public class TestRun {
 
     protected boolean absent(Throwable e) {
         this.getListener().closeTestSuite();
-        // If the testCase terminates, the driver will be closed automatically.
+        // If the head terminates, the driver will be closed automatically.
         this.quit();
         throw new AssertionError(e);
     }
@@ -279,7 +287,7 @@ public class TestRun {
         return weaver.advice(this.currentStep());
     }
 
-    protected boolean chainRun(TestCase chainTo, TestData varTakeOver) {
+    protected boolean chainRun(TestRunnable chainTo, TestData varTakeOver) {
         this.testRunStatus = this.testRunStatus.chainCalled();
         if (chainTo.skipRunning(varTakeOver)) {
             return this.nextChain(chainTo, varTakeOver);
@@ -287,33 +295,36 @@ public class TestRun {
         if (chainTo.isBreakNestedChain() && !varTakeOver.isLastRow()) {
             return true;
         }
-        TestData takeOver = varTakeOver;
-        for (TestData data : chainTo.loadData(varTakeOver)) {
-            TestData chainData = varTakeOver.clearRowNumber().add(data);
-            if (chainTo.isNestedChain()) {
-                chainData = chainData.lastRow(data.isLastRow());
-            }
-            TestRun testRun = createChainRun(chainTo, chainData);
-            takeOver = testRun.vars;
-            if (!testRun.finish()) {
-                return false;
-            }
-        }
-        takeOver = takeOver.lastRow(varTakeOver.isLastRow());
-        return chainTo.isNestedChain() || this.nextChain(chainTo, takeOver);
-    }
-
-    protected TestRun createChainRun(TestCase chainTo, TestData data) {
-        Scenario chainScenario = this.scenario;
+        final Scenario chainScenario;
         if (!chainTo.isNestedChain()) {
-            chainScenario = new Scenario(chainTo).addAspect(this.aspect);
+            chainScenario = new Scenario(chainTo).addAspect(this.getAspect());
+        } else {
+            chainScenario = this.getScenario();
         }
-        return new TestRunBuilder(chainTo, chainScenario)
-                .addTestRunNamePrefix(this.testRunName + "_")
-                .createTestRun(data, this);
+        TestRun previous = this;
+        TestData[] lastInput = new TestData[]{varTakeOver};
+        chainTo.shareInput(varTakeOver).run(new TestRunner() {
+            @Override
+            public boolean execute(TestRunBuilder testRunBuilder, TestData data, TestRunListener testRunListener) {
+                TestData chainData = varTakeOver.clearRowNumber().add(data);
+                if (chainTo.isNestedChain()) {
+                    chainData = chainData.lastRow(data.isLastRow());
+                }
+                TestRun chainRun = testRunBuilder
+                        .setScenario(chainScenario)
+                        .addTestRunNamePrefix(getTestRunName() + "_")
+                        .createTestRun(chainData, previous);
+                lastInput[0] = chainRun.vars();
+                if (!chainRun.finish()) {
+                    return true;
+                }
+                return chainRun.isStopped();
+            }
+        }, this.getListener());
+        return chainTo.isNestedChain() || this.nextChain(chainTo, lastInput[0].lastRow(varTakeOver.isLastRow()));
     }
 
-    protected boolean nextChain(TestCase chainTo, TestData varTakeOver) {
+    protected boolean nextChain(TestRunnable chainTo, TestData varTakeOver) {
         if (this.scenario.hasChain(chainTo)) {
             return this.chainRun(this.scenario.getChainTo(chainTo), varTakeOver);
         }
@@ -330,4 +341,5 @@ public class TestRun {
             }
         }
     }
+
 }
