@@ -65,7 +65,7 @@ public class TestDataSet {
         return "TestDataSet{" +
                 "dataSource=" + dataSource +
                 ", dataSourceConfig=" + dataSourceConfig +
-                ", relativePath=" + relativePath +
+                ", relativize=" + relativePath +
                 '}';
     }
 }

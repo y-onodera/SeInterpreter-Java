@@ -17,7 +17,7 @@
 package com.sebuilder.interpreter;
 
 /**
- * Interface for classes that define how to run a step of a particular type. Implementing classes
+ * Interface for classes that define how to finish a step of a particular type. Implementing classes
  * should be located in com.sebuilder.interpreter.steptype.
  *
  * @author zarkonnen
@@ -27,7 +27,7 @@ public interface StepType extends StepElement {
     /**
      * Perform the action this step consists of.
      *
-     * @param ctx Current test run.
+     * @param ctx Current test finish.
      * @return Whether the step succeeded. This should be true except for failed verify steps, which
      * should return false. Other failures should throw a RuntimeException.
      */

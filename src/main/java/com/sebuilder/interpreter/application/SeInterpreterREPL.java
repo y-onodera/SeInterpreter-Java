@@ -75,16 +75,16 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
         }
     }
 
-    public TestRunnable loadScript(String file) {
+    public TestCase loadScript(String file) {
         try {
             return Context.getScriptParser().load(new File(file));
         } catch (Throwable e) {
             this.log.error(e);
         }
-        return new TestCaseBuilder().build().toSuite();
+        return new TestCaseBuilder().build();
     }
 
-    public void execute(TestRunnable target, TestRunListener seInterpreterTestListener) {
+    public void execute(TestCase target, TestRunListener seInterpreterTestListener) {
         seInterpreterTestListener.cleanResult(new File(Context.getResultOutputDirectory(), String.valueOf(execCount++)));
         try {
             target.shareState(true)
@@ -97,15 +97,20 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
     }
 
     @Override
-    public boolean execute(TestRunBuilder testRunBuilder, TestData data, TestRunListener seInterpreterTestListener) {
+    public STATUS execute(TestRunBuilder testRunBuilder, TestData data, TestRunListener seInterpreterTestListener) {
         this.lastRun = this.getTestRun(testRunBuilder, data, seInterpreterTestListener);
         this.log.info("start execute test");
-        this.lastRun.finish();
+        boolean result = this.lastRun.finish();
         this.log.info("finish execute test");
         if (this.driver == null && lastRun != null) {
             this.driver = this.lastRun.driver();
         }
-        return this.lastRun.isStopped();
+        if (!result) {
+            return STATUS.FAILED;
+        } else if (this.lastRun.isStopped()) {
+            return STATUS.STOPPED;
+        }
+        return STATUS.SUCCESS;
     }
 
     public void stopRunning() {
@@ -135,13 +140,13 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
     }
 
     private StringBuilder startScript() {
-        this.log.info("start input run");
+        this.log.info("start input finish");
         return new StringBuilder().append("{\"steps\":[");
     }
 
     private void closeScript(StringBuilder script) {
         script.append("]}");
-        this.log.info("finish input run");
+        this.log.info("finish input finish");
     }
 
 }

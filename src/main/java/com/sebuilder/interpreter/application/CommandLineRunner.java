@@ -19,6 +19,14 @@ public abstract class CommandLineRunner {
     protected Logger log;
 
     protected CommandLineRunner(String[] args, Logger log) {
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+                if (driver != null) {
+                    driver.quit();
+                }
+            }
+        });
         this.log = log;
         Context.getInstance()
                 .setWebDriverFactory(DEFAULT_DRIVER_FACTORY)
@@ -40,10 +48,10 @@ public abstract class CommandLineRunner {
     public void setUp(String[] args) {
         this.log.info("setUp start");
         if (args.length == 0) {
-            log.info("Usage: [--driver=<drivername] [--driver.<configkey>=<configvalue>...] [--implicitlyWait=<ms>] [--pageLoadTimeout=<ms>] [--stepTypePackage=<package name>] <script path>...");
+            this.log.info("Usage: [--driver=<drivername] [--driver.<configkey>=<configvalue>...] [--implicitlyWait=<ms>] [--pageLoadTimeout=<ms>] [--stepTypePackage=<package name>] <script path>...");
             System.exit(0);
         }
-        preSetUp();
+        this.preSetUp();
         this.lastRun = null;
         String aspectFileName = null;
         for (String s : args) {
@@ -96,7 +104,7 @@ public abstract class CommandLineRunner {
                 System.exit(1);
             }
         }
-        this.testRunListener = new TestRunListenerImpl(this.log);
+        this.setTestRunListener(new TestRunListenerImpl(this.log));
         this.log.info("setUp finish");
     }
 
@@ -114,14 +122,10 @@ public abstract class CommandLineRunner {
     protected void preSetUp() {
     }
 
-    protected void configureOption(String s, String[] kv) {
-    }
-
     protected void configureOption(String s) {
     }
 
-    protected TestRunBuilder createTestRunBuilder(TestCase testCase) {
-        return new TestRunBuilder(testCase);
+    protected void configureOption(String s, String[] kv) {
     }
 
 }

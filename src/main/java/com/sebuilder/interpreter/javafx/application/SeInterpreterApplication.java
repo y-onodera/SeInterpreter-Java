@@ -68,8 +68,8 @@ public class SeInterpreterApplication extends Application {
         this.runner = new SeInterpreterRunner(parameters.getRaw());
         final List<String> unnamed = parameters.getUnnamed();
         if (unnamed.size() > 0) {
-            Suite newSuite = getScriptParser().load(new File(unnamed.get(0))).toSuite();
-            this.resetSuite(newSuite, newSuite.iterator().next());
+            TestCase newSuite = getScriptParser().load(new File(unnamed.get(0)));
+            this.resetSuite(newSuite.toSuite(), newSuite);
         }
     }
 
@@ -83,7 +83,7 @@ public class SeInterpreterApplication extends Application {
     public void reset(ScriptResetEvent event) {
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
             Suite newSuite = this.templateScript().toSuite();
-            this.resetSuite(newSuite, newSuite.iterator().next());
+            this.resetSuite(newSuite, newSuite.head());
         });
     }
 
@@ -92,7 +92,7 @@ public class SeInterpreterApplication extends Application {
         File file = event.getFile();
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
             Suite newSuite = getScriptParser().load(file).toSuite();
-            this.resetSuite(newSuite, newSuite.iterator().next());
+            this.resetSuite(newSuite, newSuite.head());
         });
 
     }
@@ -124,7 +124,7 @@ public class SeInterpreterApplication extends Application {
     public void scriptImport(ScriptImportEvent event) {
         File file = event.getFile();
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
-            TestCase testCase = getScriptParser().load(file).head();
+            TestCase testCase = getScriptParser().load(file);
             addScript(testCase);
         });
 
@@ -133,15 +133,13 @@ public class SeInterpreterApplication extends Application {
     @Subscribe
     public void deleteScript(ScriptDeleteEvent event) {
         Suite newSuite = this.suite.delete(this.currentDisplay);
-        this.resetSuite(newSuite, newSuite.iterator().next());
+        this.resetSuite(newSuite, newSuite.head());
     }
 
     @Subscribe
     public void changeCurrentScript(ScriptSelectEvent event) {
-        if (!event.getScriptName().equals(this.suite.name())) {
-            this.currentDisplay = this.suite.get(event.getScriptName());
-            this.refreshMainView();
-        }
+        this.currentDisplay = this.suite.get(event.getScriptName());
+        this.refreshMainView();
     }
 
     @Subscribe
@@ -254,7 +252,8 @@ public class SeInterpreterApplication extends Application {
         File target = event.getFile();
         this.suite = this.suite.builder()
                 .associateWith(target)
-                .build();
+                .build()
+                .toSuite();
         this.saveSuite();
     }
 
@@ -299,7 +298,7 @@ public class SeInterpreterApplication extends Application {
 
     @Subscribe
     public void runSuite(RunSuiteEvent event) {
-        Task task = this.runner.createRunSuiteTask(this.suite);
+        Task task = this.runner.createRunScriptTask(this.suite.head());
         this.executeTask(task);
     }
 
@@ -335,7 +334,7 @@ public class SeInterpreterApplication extends Application {
     private void saveSuite() {
         File target = new File(this.suite.path());
         List<TestCase> notAssociateFile = Lists.newArrayList();
-        this.suite.forEach(it -> {
+        this.suite.getChains().forEach(it -> {
             if (Strings.isNullOrEmpty(it.path())) {
                 notAssociateFile.add(it);
             }

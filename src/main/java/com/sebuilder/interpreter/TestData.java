@@ -133,18 +133,20 @@ public class TestData {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TestData testData = (TestData) o;
-        return Objects.equal(row, testData.row);
+        return isLastRow() == testData.isLastRow() &&
+                Objects.equal(row, testData.row);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(row);
+        return Objects.hashCode(row, isLastRow());
     }
 
     @Override
     public String toString() {
         return "TestData{" +
                 "row=" + row +
+                ", lastRow=" + lastRow +
                 '}';
     }
 

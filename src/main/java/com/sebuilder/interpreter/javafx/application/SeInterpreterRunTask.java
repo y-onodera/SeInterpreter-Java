@@ -1,6 +1,9 @@
 package com.sebuilder.interpreter.javafx.application;
 
-import com.sebuilder.interpreter.*;
+import com.sebuilder.interpreter.TestCase;
+import com.sebuilder.interpreter.TestData;
+import com.sebuilder.interpreter.TestRunListener;
+import com.sebuilder.interpreter.TestRunListenerWrapper;
 import com.sebuilder.interpreter.application.SeInterpreterREPL;
 import javafx.concurrent.Task;
 import org.apache.logging.log4j.Logger;
@@ -10,13 +13,13 @@ public class SeInterpreterRunTask extends Task<String> {
     private final Logger log;
     private final TestRunListener listener;
     private final SeInterpreterREPL repl;
-    private final TestRunnable runnable;
+    private final TestCase target;
 
-    public SeInterpreterRunTask(Logger log, TestRunListener listener, SeInterpreterREPL repl, TestRunnable runnable) {
+    public SeInterpreterRunTask(Logger log, TestRunListener listener, SeInterpreterREPL repl, TestCase target) {
         this.log = log;
         this.listener = listener;
         this.repl = repl;
-        this.runnable = runnable;
+        this.target = target;
     }
 
     @Override
@@ -25,7 +28,7 @@ public class SeInterpreterRunTask extends Task<String> {
         try {
             this.log.info("operation recieve");
             updateMessage("setup running....");
-            this.repl.execute(this.runnable, new TestRunListenerWrapper(this.listener) {
+            this.repl.execute(this.target, new TestRunListenerWrapper(this.listener) {
                 private int currentScriptSteps;
 
                 @Override

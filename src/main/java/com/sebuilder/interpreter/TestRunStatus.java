@@ -13,8 +13,8 @@ public class TestRunStatus {
         this.stopped = stop;
     }
 
-    public static TestRunStatus of(Scenario scenario, TestCase testCase) {
-        return new TestRunStatus(-1, scenario.hasChain(testCase), false, false);
+    public static TestRunStatus of(TestCase testCase) {
+        return new TestRunStatus(-1, testCase.hasChain(), false, false);
     }
 
     public TestRunStatus start() {

@@ -4,6 +4,7 @@ import com.google.common.eventbus.Subscribe;
 import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.Suite;
 import com.sebuilder.interpreter.TestCase;
+import com.sebuilder.interpreter.TestCaseChains;
 import com.sebuilder.interpreter.javafx.EventBus;
 import com.sebuilder.interpreter.javafx.event.ReportErrorEvent;
 import com.sebuilder.interpreter.javafx.event.file.FileSaveAsEvent;
@@ -120,27 +121,7 @@ public class ScriptViewController {
     private void refreshScriptView(Suite suite, String selectScriptName) {
         this.treeViewScriptName.getRoot().getChildren().clear();
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
-            for (TestCase testCase : suite) {
-                String name = testCase.name();
-                TreeItem<String> item = new TreeItem<>(name);
-                if (!suite.getScenario().isChainTarget(testCase)) {
-                    this.treeViewScriptName.getRoot().getChildren().add(item);
-                    if (name.equals(selectScriptName)) {
-                        this.treeViewScriptName.getSelectionModel().select(item);
-                    }
-                }
-                if (suite.getScenario().hasChain(testCase)) {
-                    TestCase before = testCase;
-                    while (suite.getScenario().hasChain(before)) {
-                        TreeItem<String> chainItem = new TreeItem(suite.getScenario().getChainTo(before).name());
-                        item.getChildren().add(chainItem);
-                        if (chainItem.getValue().equals(selectScriptName)) {
-                            this.treeViewScriptName.getSelectionModel().select(chainItem);
-                        }
-                        before = suite.getScenario().getChainTo(before);
-                    }
-                }
-            }
+            addChainToTreeView(selectScriptName, suite.getChains(), this.treeViewScriptName.getRoot());
             this.treeViewScriptName.getSelectionModel()
                     .selectedItemProperty()
                     .addListener((observable, oldValue, newValue) -> {
@@ -150,5 +131,17 @@ public class ScriptViewController {
                     });
             EventBus.publish(new ScriptSelectEvent(selectScriptName));
         });
+    }
+
+    private void addChainToTreeView(String selectScriptName, TestCaseChains chains, TreeItem<String> parent) {
+        for (TestCase testCase : chains) {
+            String name = testCase.name();
+            TreeItem<String> item = new TreeItem<>(name);
+            parent.getChildren().add(item);
+            if (name.equals(selectScriptName)) {
+                this.treeViewScriptName.getSelectionModel().select(item);
+            }
+            addChainToTreeView(selectScriptName, testCase.getChains(), item);
+        }
     }
 }

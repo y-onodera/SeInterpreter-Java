@@ -17,71 +17,169 @@
 package com.sebuilder.interpreter;
 
 import com.google.common.base.Objects;
-import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 
+import java.io.File;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
- * A Selenium 2 script. To create and run a test, instantiate a TestCase object,
- * appendNewChain some TestCase.Steps to its steps, then invoke "run". If you want to be able
- * to run the script step by step, invoke "start", which will return a TestRun
+ * A Selenium 2 script. To create and finish a test, instantiate a TestCase object,
+ * appendNewChain some TestCase.Steps to its steps, then invoke "finish". If you want to be able
+ * to finish the script step by step, invoke "start", which will return a TestRun
  * object.
  *
  * @author zarkonnen
  */
-public class TestCase extends AbstractTestRunnable<TestCase> {
+public class TestCase {
 
-    public static final String DEFAULT_SCRIPT_NAME = "New_Script";
+    private final ScriptFile scriptFile;
+    private final TestData shareInput;
+    private final TestDataSet testDataSet;
+    private final boolean shareState;
+    private final String skip;
+    private final TestDataSet overrideTestDataSet;
+    private final Function<TestData, TestCase> lazyLoad;
+    private final boolean nestedChain;
+    private final boolean breakNestedChain;
+    private final TestCaseChains chains;
+    private final Aspect aspect;
     private final ArrayList<Step> steps;
-    private final boolean closeDriver;
 
     public TestCase(TestCaseBuilder builder) {
-        super(builder);
+        this.scriptFile = builder.getScriptFile();
+        this.shareInput = builder.getShareInput();
+        this.testDataSet = builder.getTestDataSet();
+        this.shareState = builder.isShareState();
+        this.skip = builder.getSkip();
+        this.overrideTestDataSet = builder.getOverrideTestDataSet();
+        this.lazyLoad = builder.getLazyLoad();
+        this.nestedChain = builder.isNestedChain();
+        this.breakNestedChain = builder.isBreakNestedChain();
+        this.chains = builder.getChains();
+        this.aspect = builder.getAspect();
         this.steps = builder.getSteps();
-        this.closeDriver = builder.isCloseDriver();
     }
 
-    @Override
-    public Iterator<TestCase> iterator() {
-        return Iterators.singletonIterator(this);
+    public boolean run(TestRunner runner, TestRunListener testRunListener) {
+        if (this.skipRunning(this.getShareInput())) {
+            return true;
+        }
+        for (TestRunBuilder testRunBuilder : this.createTestRunBuilder()) {
+            for (TestData data : testRunBuilder.loadData()) {
+                TestRunner.STATUS result = runner.execute(testRunBuilder.copy(), data, testRunListener);
+                if (result != TestRunner.STATUS.SUCCESS) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
-    @Override
-    public TestCase head() {
-        return this;
+    public List<TestData> loadData(TestData vars) {
+        if (this.getOverrideTestDataSet().getDataSource() != null) {
+            return this.getOverrideTestDataSet().loadData(vars);
+        }
+        return this.getTestDataSet().loadData(vars);
     }
 
-    @Override
-    public Suite toSuite() {
-        return new SuiteBuilder(this).build();
-    }
-
-    @Override
     public TestRunBuilder[] createTestRunBuilder() {
-        return new TestRunBuilder[]{new TestRunBuilder(this)};
+        TestCase materialized = this;
+        if (this.isLazyLoad()) {
+            materialized = this.getLazyLoad().apply(this.getShareInput());
+        }
+        return new TestRunBuilder[]{new TestRunBuilder(materialized)};
     }
 
-    @Override
-    public TestRunBuilder[] createTestRunBuilder(Scenario aScenario) {
-        return new TestRunBuilder[]{new TestRunBuilder(this, aScenario)};
+    public Suite toSuite() {
+        return new Suite(this);
     }
 
-    @Override
     public TestCaseBuilder builder() {
         return new TestCaseBuilder(this);
     }
 
-    public ArrayList<Step> steps() {
-        return Lists.newArrayList(this.steps);
+    public ScriptFile getScriptFile() {
+        return scriptFile;
     }
 
-    public boolean closeDriver() {
-        return this.closeDriver;
+    public File relativePath() {
+        return this.getScriptFile().relativePath();
+    }
+
+    public TestData getShareInput() {
+        if (this.shareInput == null) {
+            return new TestData();
+        }
+        return this.shareInput;
+    }
+
+    public TestDataSet getTestDataSet() {
+        return testDataSet;
+    }
+
+    public TestDataSet getOverrideTestDataSet() {
+        return overrideTestDataSet;
+    }
+
+    public String getSkip() {
+        return skip;
+    }
+
+    public boolean isLazyLoad() {
+        return this.getLazyLoad() != null;
+    }
+
+    public Function<TestData, TestCase> getLazyLoad() {
+        return lazyLoad;
+    }
+
+    public String name() {
+        return this.scriptFile.name();
+    }
+
+    public String path() {
+        return this.scriptFile.path();
+    }
+
+    public String fileName() {
+        return this.getScriptFile().relativize(this);
+    }
+
+    public boolean isShareState() {
+        return this.shareState;
+    }
+
+    public boolean skipRunning(TestData param) {
+        return param.evaluate(this.skip);
+    }
+
+    public boolean isNestedChain() {
+        return this.nestedChain;
+    }
+
+    public boolean isBreakNestedChain() {
+        return this.breakNestedChain;
+    }
+
+    public boolean hasChain() {
+        return this.getChains().size() > 0;
+    }
+
+    public TestCaseChains getChains() {
+        return this.chains;
+    }
+
+    public Aspect getAspect() {
+        return this.aspect;
+    }
+
+    public ArrayList<Step> steps() {
+        return Lists.newArrayList(this.steps);
     }
 
     public TestCase copy() {
@@ -93,6 +191,72 @@ public class TestCase extends AbstractTestRunnable<TestCase> {
     public TestCase changeDataSourceConfig(String key, String value) {
         return this.builder()
                 .addDataSourceConfig(key, value)
+                .build();
+    }
+
+    public TestCase rename(String s) {
+        return this.builder()
+                .setName(s)
+                .build();
+    }
+
+    public TestCase shareState(boolean isShareState) {
+        return this.builder()
+                .isShareState(isShareState)
+                .build();
+    }
+
+    public TestCase skip(String skip) {
+        return this.builder()
+                .setSkip(skip)
+                .build();
+    }
+
+    public TestCase shareInput(TestData testData) {
+        return this.builder()
+                .setShareInput(testData)
+                .build();
+    }
+
+    public TestCase overrideDataSource(DataSource dataSource, Map<String, String> config) {
+        return this.builder()
+                .setOverrideTestDataSet(dataSource, config)
+                .build();
+    }
+
+    public TestCase isChainTakeOverLastRun(boolean b) {
+        return this.builder()
+                .isChainTakeOverLastRun(b)
+                .build();
+    }
+
+    public TestCase nestedChain(boolean nestedChain) {
+        return this.builder()
+                .isNestedChain(nestedChain)
+                .build();
+    }
+
+    public TestCase breakNestedChain(boolean breakNestedChain) {
+        return this.builder()
+                .isBreakNestedChain(breakNestedChain)
+                .build();
+    }
+
+    public TestCase replaceChains(TestCaseChains loaded) {
+        return this.builder()
+                .setChains(loaded)
+                .build();
+    }
+
+    public TestCase addChain(TestCase loaded) {
+        return this.builder()
+                .addChain(loaded)
+                .build();
+    }
+
+    public TestCase addAspect(Aspect aspect) {
+        return this.builder()
+                .addAspect(aspect)
                 .build();
     }
 
@@ -166,25 +330,53 @@ public class TestCase extends AbstractTestRunnable<TestCase> {
         return this.setSteps(converter.apply(this.steps));
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        TestCase testCase = (TestCase) o;
-        return closeDriver == testCase.closeDriver &&
-                Objects.equal(steps, testCase.steps);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(super.hashCode(), steps, closeDriver);
-    }
-
     protected TestCase setSteps(ArrayList<Step> newStep) {
         return new TestCaseBuilder(this)
                 .clearStep()
                 .addSteps(newStep)
                 .build();
     }
+
+    @Override
+    public String toString() {
+        return "TestCase{" +
+                "scriptFile=" + scriptFile +
+                ", shareInput=" + shareInput +
+                ", testDataSet=" + testDataSet +
+                ", shareState=" + shareState +
+                ", skip='" + skip + '\'' +
+                ", overrideTestDataSet=" + overrideTestDataSet +
+                ", lazyLoad=" + lazyLoad +
+                ", nestedChain=" + nestedChain +
+                ", breakNestedChain=" + breakNestedChain +
+                ", chains=" + chains +
+                ", aspect=" + aspect +
+                ", steps=" + steps +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TestCase testCase = (TestCase) o;
+        return isShareState() == testCase.isShareState() &&
+                isNestedChain() == testCase.isNestedChain() &&
+                isBreakNestedChain() == testCase.isBreakNestedChain() &&
+                Objects.equal(getScriptFile(), testCase.getScriptFile()) &&
+                Objects.equal(getShareInput(), testCase.getShareInput()) &&
+                Objects.equal(getTestDataSet(), testCase.getTestDataSet()) &&
+                Objects.equal(getSkip(), testCase.getSkip()) &&
+                Objects.equal(getOverrideTestDataSet(), testCase.getOverrideTestDataSet()) &&
+                Objects.equal(isLazyLoad(), testCase.isLazyLoad()) &&
+                Objects.equal(getChains(), testCase.getChains()) &&
+                Objects.equal(getAspect(), testCase.getAspect()) &&
+                Objects.equal(steps, testCase.steps);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(getScriptFile(), getShareInput(), getTestDataSet(), isShareState(), getSkip(), getOverrideTestDataSet(), isLazyLoad(), isNestedChain(), isBreakNestedChain(), getChains(), getAspect(), this.steps);
+    }
+
 }

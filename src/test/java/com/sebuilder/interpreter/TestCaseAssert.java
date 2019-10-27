@@ -1,6 +1,9 @@
 package com.sebuilder.interpreter;
 
+import com.google.common.collect.Maps;
+
 import java.io.File;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import static org.junit.Assert.*;
@@ -13,6 +16,8 @@ public class TestCaseAssert {
     private Consumer<TestCase> assertOverrideDataSource;
     private Consumer<TestCase> assertLazy;
     private Consumer<TestCase> assertNestedChain;
+    private Consumer<TestCase> assertChainCaseCounts;
+    private Map<Integer, TestCaseAssert> assertChainCases = Maps.newHashMap();
 
     public TestCaseAssert(Builder aBuilder) {
         this.assertFileAttribute = aBuilder.assertFileAttribute;
@@ -22,10 +27,17 @@ public class TestCaseAssert {
         this.assertOverrideDataSource = aBuilder.assertOverrideDataSource;
         this.assertLazy = aBuilder.assertLazy;
         this.assertNestedChain = aBuilder.assertNestedChain;
+        this.assertChainCaseCounts = aBuilder.assertChainCaseCounts;
+        this.assertChainCases.putAll(aBuilder.assertChainCases);
     }
 
     public static Builder of() {
         return new Builder();
+    }
+
+    public static void assertEqualsNoRelationFile(TestCase result) {
+        assertEquals(ScriptFile.Type.TEST.getDefaultName(), result.name());
+        assertEquals("", result.path());
     }
 
     public static Consumer<TestCase> assertEqualsFileAttribute(File testFile) {
@@ -58,9 +70,12 @@ public class TestCaseAssert {
         return (TestCase actual) -> assertEquals(dataSource, actual.getTestDataSet());
     }
 
-    public static void assertEqualsNoOverrideDataSource(TestCase actual) {
-        assertNull(actual.getOverrideTestDataSet().getDataSource());
-        assertEquals(0, actual.getOverrideTestDataSet().getDataSourceConfig().size());
+    public static void assertEqualsNoChainCase(TestCase actual) {
+        assertEquals(0, actual.getChains().size());
+    }
+
+    public static Consumer<TestCase> assertEqualsChainCaseCount(int count) {
+        return (TestCase actual) -> assertEquals(count, actual.getChains().size());
     }
 
     public static void assertEqualsNoStep(TestCase actual) {
@@ -71,8 +86,17 @@ public class TestCaseAssert {
         return (TestCase actual) -> assertEquals(i, actual.steps().size());
     }
 
+    public static void assertEqualsNoOverrideDataSource(TestCase actual) {
+        assertNull(actual.getOverrideTestDataSet().getDataSource());
+        assertEquals(0, actual.getOverrideTestDataSet().getDataSourceConfig().size());
+    }
+
     public static Consumer<TestCase> assertEqualsOverrideDataSst(TestDataSet testDataSet) {
         return (TestCase actual) -> assertEquals(testDataSet, actual.getOverrideTestDataSet());
+    }
+
+    public static Consumer<TestCase> assertEqualsNoSkip() {
+        return assertEqualsSkip("false");
     }
 
     public static Consumer<TestCase> assertEqualsSkip(String aSkip) {
@@ -103,6 +127,9 @@ public class TestCaseAssert {
         this.assertOverrideDataSource.accept(target);
         this.assertLazy.accept(target);
         this.assertNestedChain.accept(target);
+        this.assertChainCaseCounts.accept(target);
+        this.assertChainCases.entrySet()
+                .forEach(entry -> entry.getValue().run(target.getChains().get(entry.getKey())));
     }
 
     public Builder builder() {
@@ -116,9 +143,19 @@ public class TestCaseAssert {
         private Consumer<TestCase> assertSkip;
         private Consumer<TestCase> assertOverrideDataSource;
         private Consumer<TestCase> assertLazy;
-        public Consumer<TestCase> assertNestedChain;
+        private Consumer<TestCase> assertNestedChain;
+        private Consumer<TestCase> assertChainCaseCounts;
+        private Map<Integer, TestCaseAssert> assertChainCases = Maps.newHashMap();
 
         public Builder() {
+            this.assertFileAttribute = TestCaseAssert::assertEqualsNoRelationFile;
+            this.assertStep = TestCaseAssert::assertEqualsNoStep;
+            this.assertDataSource = TestCaseAssert::assertEqualsNoDataSource;
+            this.assertSkip = TestCaseAssert.assertEqualsNoSkip();
+            this.assertOverrideDataSource = TestCaseAssert::assertEqualsNoOverrideDataSource;
+            this.assertLazy = TestCaseAssert::assertNotLazyLoad;
+            this.assertNestedChain = TestCaseAssert::assertNotNestedChain;
+            this.assertChainCaseCounts = TestCaseAssert::assertEqualsNoChainCase;
         }
 
         public Builder(TestCaseAssert testCaseAssert) {
@@ -129,6 +166,8 @@ public class TestCaseAssert {
             this.assertOverrideDataSource = testCaseAssert.assertOverrideDataSource;
             this.assertLazy = testCaseAssert.assertLazy;
             this.assertNestedChain = testCaseAssert.assertNestedChain;
+            this.assertChainCaseCounts = testCaseAssert.assertChainCaseCounts;
+            this.assertChainCases.putAll(testCaseAssert.assertChainCases);
         }
 
         public Builder assertFileAttribute(Consumer<TestCase> assertion) {
@@ -166,9 +205,24 @@ public class TestCaseAssert {
             return this;
         }
 
+        public Builder assertChainCaseCounts(int i) {
+            return this.assertChainCaseCounts(TestCaseAssert.assertEqualsChainCaseCount(i));
+        }
+
+        public Builder assertChainCaseCounts(Consumer<TestCase> assertion) {
+            this.assertChainCaseCounts = assertion;
+            return this;
+        }
+
+        public Builder assertChainCase(int i, TestCaseAssert testCaseAssert) {
+            this.assertChainCases.put(i, testCaseAssert);
+            return this;
+        }
+
         public TestCaseAssert create() {
             return new TestCaseAssert(this);
         }
+
     }
 
 }

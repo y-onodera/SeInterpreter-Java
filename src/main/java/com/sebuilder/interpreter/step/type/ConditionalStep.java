@@ -18,7 +18,7 @@ public interface ConditionalStep extends StepType {
     /**
      * Perform the action this step consists of.
      *
-     * @param ctx Current test run.
+     * @param ctx Current test finish.
      * @return Whether the step succeeded. This should be true except for failed verify steps, which
      * should return false. Other failures should throw a RuntimeException.
      */

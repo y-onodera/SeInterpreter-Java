@@ -70,10 +70,12 @@ public class SeInterpreter extends CommandLineRunner implements TestRunner {
     }
 
     @Override
-    public boolean execute(TestRunBuilder testRunBuilder, TestData data, TestRunListener aTestRunListener) {
+    public STATUS execute(TestRunBuilder testRunBuilder, TestData data, TestRunListener aTestRunListener) {
+        boolean success = false;
         try {
             this.lastRun = getTestRun(testRunBuilder, data, aTestRunListener);
             if (this.lastRun.finish()) {
+                success = true;
                 this.log.info(testRunBuilder.getScriptName() + " succeeded");
             } else {
                 this.log.info(testRunBuilder.getScriptName() + " failed");
@@ -81,17 +83,20 @@ public class SeInterpreter extends CommandLineRunner implements TestRunner {
         } catch (AssertionError e) {
             this.log.info(testRunBuilder.getScriptName() + " failed", e);
         }
-        if (!testRunBuilder.closeDriver()) {
-            if (this.lastRun != null) {
-                this.driver = this.lastRun.driver();
-            }
+        if (this.lastRun != null && !this.lastRun.isCloseDriver()) {
+            this.driver = this.lastRun.driver();
             this.closeDriver = true;
         } else {
             this.lastRun = null;
             this.driver = null;
             this.closeDriver = false;
         }
-        return false;
+        if (!success) {
+            return STATUS.FAILED;
+        } else if (this.lastRun.isStopped()) {
+            return STATUS.STOPPED;
+        }
+        return STATUS.SUCCESS;
     }
 
     @Override

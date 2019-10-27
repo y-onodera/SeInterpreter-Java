@@ -2,8 +2,10 @@ package com.sebuilder.interpreter;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -20,7 +22,7 @@ public class Aspect {
         this(Lists.newArrayList());
     }
 
-    public Aspect(List<Interceptor> interceptors) {
+    public Aspect(Collection<Interceptor> interceptors) {
         this.interceptors = Lists.newArrayList(interceptors);
     }
 
@@ -85,10 +87,10 @@ public class Aspect {
 
     public static class Builder {
 
-        private List<Interceptor> interceptors;
+        private LinkedHashSet<Interceptor> interceptors;
 
-        public Builder(List<Interceptor> interceptors) {
-            this.interceptors = Lists.newArrayList(interceptors);
+        public Builder(Collection<Interceptor> interceptors) {
+            this.interceptors = Sets.newLinkedHashSet(interceptors);
         }
 
         public Interceptor.Builder interceptor() {

@@ -2,128 +2,98 @@ package com.sebuilder.interpreter;
 
 import com.google.common.base.Objects;
 
-import java.util.Iterator;
+public class Suite {
 
-public class Suite extends AbstractTestRunnable<Suite> implements Iterable<TestCase> {
+    private final TestCase head;
 
-    public static final String DEFAULT_NAME = "New_Suite";
-
-    private final Scenario scenario;
-
-    public Suite(SuiteBuilder builder) {
-        super(builder);
-        this.scenario = builder.getScenario();
+    public Suite(TestCase head) {
+        this.head = head;
     }
 
-    @Override
-    public Iterator<TestCase> iterator() {
-        return this.scenario.testCaseIterator();
+    public String name() {
+        return this.head().name();
     }
 
-    @Override
+    public String path() {
+        return this.head().path();
+    }
+
     public TestCase head() {
-        return iterator().next();
+        return this.head;
     }
 
-    @Override
-    public Suite toSuite() {
-        return this;
-    }
-
-    @Override
-    public TestRunBuilder[] createTestRunBuilder() {
-        return this.createTestRunBuilder(this.scenario);
-    }
-
-    @Override
-    public TestRunBuilder[] createTestRunBuilder(Scenario aScenario) {
-        final String suiteName = this.getScriptFile().nameExcludeExtention();
-        return this.loadData()
-                .stream()
-                .flatMap(it -> {
-                    String rowNum = it.rowNumber();
-                    TestData newRow = it.clearRowNumber();
-                    final String prefix;
-                    if (rowNum != null) {
-                        prefix = suiteName + "_" + rowNum;
-                    } else {
-                        prefix = suiteName;
-                    }
-                    return aScenario.getTestRuns(newRow, (TestRunBuilder result) -> result.addTestRunNamePrefix(prefix + "_"));
-                })
-                .toArray(TestRunBuilder[]::new);
-    }
-
-    @Override
-    public SuiteBuilder builder() {
-        return new SuiteBuilder(this);
-    }
-
-    public Scenario getScenario() {
-        return this.scenario;
-    }
-
-    public int scriptSize() {
-        return this.scenario.testCaseSize();
-    }
-
-    public int getIndex(TestCase testCase) {
-        return this.scenario.indexOf(testCase);
+    public TestCaseChains getChains() {
+        return this.head().getChains();
     }
 
     public TestCase get(String scriptName) {
-        return this.scenario.get(scriptName);
+        if(this.head().name().equals(scriptName)){
+            return this.head();
+        }
+        return this.head().getChains().get(scriptName);
     }
 
     public TestCase get(int index) {
-        return this.scenario.get(index);
+        return this.head().getChains().get(index);
+    }
+
+    public int getIndex(TestCase testCase) {
+        return this.head().getChains().indexOf(testCase);
+    }
+
+    public TestCaseBuilder builder() {
+        return new TestCaseBuilder(this.head());
     }
 
     public Suite insert(TestCase aTestCase, TestCase newTestCase) {
         return builder()
                 .insertTest(aTestCase, newTestCase)
-                .build();
+                .build()
+                .toSuite();
     }
 
     public Suite add(TestCase aTestCase, TestCase newTestCase) {
         return builder()
-                .addTest(aTestCase, newTestCase)
-                .build();
+                .addChain(aTestCase, newTestCase)
+                .build()
+                .toSuite();
     }
 
     public Suite add(TestCase aTestCase) {
         return builder()
-                .addTest(aTestCase)
-                .build();
+                .addChain(aTestCase)
+                .build()
+                .toSuite();
     }
 
     public Suite delete(TestCase aTestCase) {
         return builder()
-                .removeTest(aTestCase)
-                .build();
+                .remove(aTestCase)
+                .build()
+                .toSuite();
     }
 
-    public Suite replace(TestRunnable aTestCase) {
+    public Suite replace(TestCase aTestCase) {
         return this.replace(aTestCase.name(), aTestCase);
     }
 
-    public Suite replace(String oldName, TestRunnable newValue) {
+    public Suite replace(String oldName, TestCase newValue) {
         return builder()
                 .replace(oldName, newValue)
-                .build();
+                .build()
+                .toSuite();
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        Suite testCases = (Suite) o;
-        return Objects.equal(getScenario(), testCases.getScenario());
+        Suite suite = (Suite) o;
+        return Objects.equal(head, suite.head);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(super.hashCode(), getScenario());
+        return Objects.hashCode(head);
     }
 }

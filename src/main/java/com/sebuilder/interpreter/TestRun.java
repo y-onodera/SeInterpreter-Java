@@ -23,7 +23,7 @@ import javax.annotation.Nonnull;
 import java.io.File;
 
 /**
- * A single run of a test head.
+ * A single finish of a test head.
  *
  * @author zarkonnen
  */
@@ -33,20 +33,22 @@ public class TestRun {
     private final RemoteWebDriver driver;
     private final Logger log;
     private final TestRunListener listener;
-    private final Scenario scenario;
     private final Aspect aspect;
     private final boolean preventContextAspect;
     private TestData vars;
     private TestRunStatus testRunStatus;
+    private ChainRunner chainRunner;
+    private boolean closeDriver;
 
     public TestRun(
+            String testRunName,
             TestRunBuilder testRunBuilder,
             Logger log,
             RemoteWebDriver driver,
             TestData initialVars,
             TestRunListener seInterpreterTestListener
     ) {
-        this.testRunName = testRunBuilder.getTestRunName(initialVars);
+        this.testRunName = testRunName;
         this.testCase = testRunBuilder.getTestCase();
         this.log = log;
         this.driver = driver;
@@ -63,10 +65,9 @@ public class TestRun {
         if (this.testCase.relativePath() != null) {
             this.vars = this.vars.add("_relativePath", this.testCase.relativePath().getAbsolutePath());
         }
-        this.scenario = testRunBuilder.getScenario();
-        this.aspect = this.scenario.aspect();
+        this.aspect = this.testCase.getAspect();
         this.preventContextAspect = testRunBuilder.isPreventContextAspect();
-        this.testRunStatus = TestRunStatus.of(this.scenario, this.testCase);
+        this.testRunStatus = TestRunStatus.of(this.testCase);
     }
 
     public File getRelativePath() {
@@ -97,12 +98,8 @@ public class TestRun {
         return this.vars;
     }
 
-    public Scenario getScenario() {
-        return this.scenario;
-    }
-
     public Aspect getAspect() {
-        return aspect;
+        return this.aspect;
     }
 
     public int currentStepIndex() {
@@ -158,6 +155,13 @@ public class TestRun {
 
     public void stop() {
         this.testRunStatus = this.testRunStatus.stop();
+        if (this.chainRunner != null) {
+            this.chainRunner.stopRunning();
+        }
+    }
+
+    public boolean isCloseDriver() {
+        return this.closeDriver;
     }
 
     /**
@@ -231,7 +235,7 @@ public class TestRun {
         if (this.currentStep().getType().isContinueAtFailure()) {
             return false;
         }
-        // In all other cases, we throw an exception to stop the run.
+        // In all other cases, we throw an exception to stop the finish.
         throw new AssertionError(currentStepToString() + " failed.");
     }
 
@@ -251,11 +255,7 @@ public class TestRun {
     }
 
     protected boolean hasNext() {
-        boolean hasNext = this.stepRest();
-        if (!hasNext && this.driver != null) {
-            this.quit();
-        }
-        return hasNext;
+        return this.stepRest();
     }
 
     protected boolean stepRest() {
@@ -265,8 +265,9 @@ public class TestRun {
     protected boolean end(boolean success) {
         this.getListener().closeTestSuite();
         if (success && this.testRunStatus.isNeedChain()) {
-            return this.chainRun(this.scenario.getChainTo(this.testCase), this.vars);
+            return this.chainRun();
         }
+        this.quit();
         return success;
     }
 
@@ -287,59 +288,80 @@ public class TestRun {
         return weaver.advice(this.currentStep());
     }
 
-    protected boolean chainRun(TestRunnable chainTo, TestData varTakeOver) {
+    protected boolean chainRun() {
         this.testRunStatus = this.testRunStatus.chainCalled();
-        if (chainTo.skipRunning(varTakeOver)) {
-            return this.nextChain(chainTo, varTakeOver);
-        }
-        if (chainTo.isBreakNestedChain() && !varTakeOver.isLastRow()) {
-            return true;
-        }
-        final Scenario chainScenario;
-        if (!chainTo.isNestedChain()) {
-            chainScenario = new Scenario(chainTo).addAspect(this.getAspect());
-        } else {
-            chainScenario = this.getScenario();
-        }
-        TestRun previous = this;
-        TestData[] lastInput = new TestData[]{varTakeOver};
-        chainTo.shareInput(varTakeOver).run(new TestRunner() {
-            @Override
-            public boolean execute(TestRunBuilder testRunBuilder, TestData data, TestRunListener testRunListener) {
-                TestData chainData = varTakeOver.clearRowNumber().add(data);
-                if (chainTo.isNestedChain()) {
-                    chainData = chainData.lastRow(data.isLastRow());
-                }
-                TestRun chainRun = testRunBuilder
-                        .setScenario(chainScenario)
-                        .addTestRunNamePrefix(getTestRunName() + "_")
-                        .createTestRun(chainData, previous);
-                lastInput[0] = chainRun.vars();
-                if (!chainRun.finish()) {
-                    return true;
-                }
-                return chainRun.isStopped();
-            }
-        }, this.getListener());
-        return chainTo.isNestedChain() || this.nextChain(chainTo, lastInput[0].lastRow(varTakeOver.isLastRow()));
+        this.chainRunner = this.createChainRunner();
+        return this.chainRunner.finish();
     }
 
-    protected boolean nextChain(TestRunnable chainTo, TestData varTakeOver) {
-        if (this.scenario.hasChain(chainTo)) {
-            return this.chainRun(this.scenario.getChainTo(chainTo), varTakeOver);
-        }
-        return true;
+    protected ChainRunner createChainRunner() {
+        return new ChainRunner(this);
     }
 
     protected void quit() {
-        if (this.testCase.closeDriver()) {
+        if (!this.testCase.isShareState()) {
             this.log.debug("Quitting driver.");
             try {
                 this.driver.quit();
+                this.closeDriver = true;
             } catch (Exception e2) {
                 //
             }
         }
     }
 
+    protected class ChainRunner implements TestRunner {
+        private final TestRun parent;
+        private final TestCaseChains chains;
+        private TestRun lastRun;
+        private TestData lastRunVar;
+
+        public ChainRunner(TestRun parent) {
+            this.parent = parent;
+            this.chains = parent.testCase.getChains();
+        }
+
+        public boolean finish() {
+            TestData chainInitialVar = this.parent.vars();
+            for (TestCase nextChain : this.chains) {
+                if (!nextChain.addAspect(this.parent.getAspect())
+                        .shareInput(chainInitialVar)
+                        .run(this, this.parent.getListener())) {
+                    return false;
+                }
+                if (this.chains.isTakeOverLastRun() && this.lastRunVar != null) {
+                    chainInitialVar = this.lastRunVar;
+                }
+            }
+            return true;
+        }
+
+        @Override
+        public STATUS execute(TestRunBuilder testRunBuilder, TestData data, TestRunListener testRunListener) {
+            if (this.isStopped()) {
+                return STATUS.STOPPED;
+            }
+            TestData chainData = data;
+            this.lastRun = testRunBuilder.createTestRun(chainData, this.parent);
+            if (!this.lastRun.finish()) {
+                return STATUS.FAILED;
+            } else if (lastRun.isStopped()) {
+                return STATUS.STOPPED;
+            }
+            if (this.chains.isTakeOverLastRun() && data.isLastRow()) {
+                this.lastRunVar = lastRun.vars();
+            }
+            return STATUS.SUCCESS;
+        }
+
+        protected boolean isStopped() {
+            return this.parent.isStopped();
+        }
+
+        protected void stopRunning() {
+            if (this.lastRun != null) {
+                lastRun.stop();
+            }
+        }
+    }
 }

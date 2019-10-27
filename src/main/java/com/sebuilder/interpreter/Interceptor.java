@@ -59,7 +59,7 @@ public class Interceptor {
     }
 
     protected TestRun createInterceptorRun(TestRun testRun, TestCase invokeCase) {
-        return new TestRunBuilder(invokeCase, new Scenario(invokeCase))
+        return new TestRunBuilder(invokeCase)
                 .addTestRunNamePrefix(this.getInterceptCaseName(testRun))
                 .preventContextAspect(true)
                 .createTestRun(testRun.log(), testRun.driver(), testRun.vars(), this.createAdviseListener(testRun));
@@ -78,14 +78,15 @@ public class Interceptor {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Interceptor that = (Interceptor) o;
-        return Objects.equal(pointcut, that.pointcut) &&
-                Objects.equal(beforeStep, that.beforeStep) &&
-                Objects.equal(afterStep, that.afterStep);
+        return Objects.equal(this.pointcut, that.pointcut) &&
+                Objects.equal(this.beforeStep, that.beforeStep) &&
+                Objects.equal(this.afterStep, that.afterStep) &&
+                Objects.equal(this.failureStep, that.failureStep);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(pointcut, beforeStep, afterStep);
+        return Objects.hashCode(this.pointcut, this.beforeStep, this.afterStep, this.failureStep);
     }
 
     public static class Builder {

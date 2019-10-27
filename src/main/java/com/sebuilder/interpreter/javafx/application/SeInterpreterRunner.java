@@ -89,7 +89,7 @@ public class SeInterpreterRunner {
                 }
             }
         }
-        TestCase result = this.repl.loadScript(exported.getAbsolutePath()).head();
+        TestCase result = this.repl.loadScript(exported.getAbsolutePath());
         return result.builder()
                 .associateWith(null)
                 .setName(result.name())
@@ -114,10 +114,6 @@ public class SeInterpreterRunner {
         return this.createBackgroundTask(currentDisplay, listenerFactory.apply(this.log));
     }
 
-    public Task createRunSuiteTask(Suite suite) {
-        return this.createBackgroundTask(suite, new GUITestRunListener(this.log));
-    }
-
     public void stopRunning() {
         this.repl.stopRunning();
     }
@@ -138,10 +134,10 @@ public class SeInterpreterRunner {
         }
     }
 
-    private Task createBackgroundTask(TestRunnable runnable, TestRunListener listener) {
+    private Task createBackgroundTask(TestCase testCase, TestRunListener listener) {
         if (!this.isOpen()) {
             this.setUp();
         }
-        return new SeInterpreterRunTask(this.log, listener, this.repl, runnable);
+        return new SeInterpreterRunTask(this.log, listener, this.repl, testCase);
     }
 }

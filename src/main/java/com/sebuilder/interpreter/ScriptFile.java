@@ -11,37 +11,39 @@ public class ScriptFile {
     private final String name;
     private final String path;
     private final File relativePath;
+    private final Type type;
 
-    public static ScriptFile of(File file, String defaultName) {
+    public static ScriptFile of(File file, Type type) {
         if (file != null) {
-            return new ScriptFile(file);
+            return new ScriptFile(file, type);
         }
-        return new ScriptFile(defaultName);
+        return new ScriptFile(type.getDefaultName(), type);
     }
 
-    public ScriptFile(String name) {
-        this(name, null, null);
+    public static ScriptFile of(File file, String defaultName, Type type) {
+        if (file != null) {
+            return new ScriptFile(file, type);
+        }
+        return new ScriptFile(defaultName, type);
     }
 
-    public ScriptFile(File file) {
-        this(file.getName(), file.getAbsolutePath(), file.getParentFile().getAbsoluteFile());
+    public ScriptFile(Type type) {
+        this(type.getDefaultName(), type);
     }
 
-    public ScriptFile(String name, String path, File relativePath) {
+    public ScriptFile(String name, Type type) {
+        this(name, null, null, type);
+    }
+
+    public ScriptFile(File file, Type type) {
+        this(file.getName(), file.getAbsolutePath(), file.getParentFile().getAbsoluteFile(), type);
+    }
+
+    public ScriptFile(String name, String path, File relativePath, Type type) {
         this.name = name;
         this.path = path;
         this.relativePath = relativePath;
-    }
-
-    public ScriptFile changeName(String name) {
-        return new ScriptFile(name, this.path, this.relativePath);
-    }
-
-    public String nameExcludeExtention() {
-        if (this.path != null && this.name().contains(".")) {
-            return this.name().substring(0, this.name().lastIndexOf("."));
-        }
-        return this.name();
+        this.type = type;
     }
 
     public String name() {
@@ -56,13 +58,31 @@ public class ScriptFile {
         return this.relativePath;
     }
 
-    public String relativePath(TestRunnable s) {
+    public Type type() {
+        return type;
+    }
+
+    public String relativize(TestCase s) {
         if (this.relativePath == null && !Strings.isNullOrEmpty(s.path())) {
             return s.path();
         } else if (Strings.isNullOrEmpty(s.path())) {
-            return "script/" + s.name();
+            return s.name();
         }
         return this.relativePath.toPath().relativize(Paths.get(s.path()).toAbsolutePath()).toString().replace("\\", "/");
+    }
+
+    public ScriptFile changeName(String name) {
+        return new ScriptFile(name, this.path, this.relativePath, this.type);
+    }
+
+    @Override
+    public String toString() {
+        return "ScriptFile{" +
+                "name='" + name + '\'' +
+                ", path='" + path + '\'' +
+                ", relativePath=" + relativePath +
+                ", type=" + type +
+                '}';
     }
 
     @Override
@@ -72,11 +92,26 @@ public class ScriptFile {
         ScriptFile that = (ScriptFile) o;
         return Objects.equal(name, that.name) &&
                 Objects.equal(path, that.path) &&
-                Objects.equal(relativePath, that.relativePath);
+                Objects.equal(relativePath, that.relativePath) &&
+                type == that.type;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(name, path, relativePath);
+        return Objects.hashCode(name, path, relativePath, type);
+    }
+
+    public enum Type {
+        SUITE("New_Suite"), TEST("New_Script");
+
+        private final String defaultName;
+
+        Type(String defaultName) {
+            this.defaultName = defaultName;
+        }
+
+        public String getDefaultName() {
+            return this.defaultName;
+        }
     }
 }

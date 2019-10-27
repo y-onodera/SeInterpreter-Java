@@ -2,68 +2,238 @@ package com.sebuilder.interpreter;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.function.Function;
 
-public class TestCaseBuilder extends AbstractTestRunnable.AbstractBuilder<TestCase, TestCaseBuilder> {
+public class TestCaseBuilder {
+
+    private ScriptFile scriptFile;
+    private DataSource dataSource;
+    private Map<String, String> dataSourceConfig;
+    private TestData shareInput;
+    private boolean shareState;
+    private String skip;
+    private DataSource overrideDataSource;
+    private Map<String, String> overrideDataSourceConfig;
+    private Function<TestData, TestCase> lazyLoad;
+    private boolean nestedChain;
+    private boolean breakNestedChain;
+    private TestCaseChains chains;
+    private Aspect aspect;
+    private Function<TestCase, TestCase> converter = script -> {
+        if (script.isShareState() != this.isShareState()) {
+            return script.shareState(this.isShareState());
+        }
+        return script;
+    };
     private ArrayList<Step> steps;
-    private boolean closeDriver;
 
     public TestCaseBuilder() {
-        super(new ScriptFile(TestCase.DEFAULT_SCRIPT_NAME));
+        this(new ScriptFile(ScriptFile.Type.TEST));
+    }
+
+    public TestCaseBuilder(ScriptFile scriptFile) {
+        this.scriptFile = scriptFile;
+        this.chains = new TestCaseChains();
+        this.aspect = new Aspect();
+        this.skip = "false";
         this.steps = new ArrayList<>();
-        this.closeDriver = true;
-        this.setSkip("false");
     }
 
-    public TestCaseBuilder(TestCase currentDisplay) {
-        super(currentDisplay);
-        this.steps = new ArrayList<>(currentDisplay.steps());
-        this.closeDriver = currentDisplay.closeDriver();
+
+    public TestCaseBuilder(TestCase test) {
+        this.scriptFile = test.getScriptFile();
+        this.shareInput = test.getShareInput();
+        this.dataSource = test.getTestDataSet().getDataSource();
+        this.dataSourceConfig = test.getTestDataSet().getDataSourceConfig();
+        this.shareState = test.isShareState();
+        this.skip = test.getSkip();
+        this.overrideDataSource = test.getOverrideTestDataSet().getDataSource();
+        this.overrideDataSourceConfig = test.getOverrideTestDataSet().getDataSourceConfig();
+        this.lazyLoad = test.getLazyLoad();
+        this.nestedChain = test.isNestedChain();
+        this.breakNestedChain = test.isBreakNestedChain();
+        this.chains = test.getChains();
+        this.aspect = test.getAspect();
+        this.steps = new ArrayList<>(test.steps());
     }
 
-    public static TestCase lazyLoad(String beforeReplace, Function<TestData, TestRunnable> lazyLoad) {
+    public static TestCaseBuilder suite(File suiteFile) {
+        return new TestCaseBuilder(ScriptFile.of(suiteFile, ScriptFile.Type.SUITE))
+                .isShareState(true);
+    }
+
+    public static TestCase lazyLoad(String beforeReplace, Function<TestData, TestCase> lazyLoad) {
         return new TestCaseBuilder()
                 .setName(beforeReplace)
                 .setLazyLoad(lazyLoad)
                 .build();
     }
 
-    @Override
     public TestCase build() {
         return new TestCase(this);
     }
 
-    @Override
-    public TestCaseBuilder associateWith(File target) {
-        this.setScriptFile(ScriptFile.of(target, TestCase.DEFAULT_SCRIPT_NAME));
+    public TestCaseBuilder setScriptFile(ScriptFile scriptFile) {
+        this.scriptFile = scriptFile;
         return this;
     }
 
-    @Override
-    public TestCaseBuilder isShareState(boolean shareState) {
-        if (shareState) {
-            this.closeDriver = false;
-        } else {
-            this.closeDriver = true;
-        }
-        return super.isShareState(shareState);
+    public TestCaseBuilder setName(String newName) {
+        this.scriptFile = this.scriptFile.changeName(newName);
+        return this;
     }
 
-    @Override
-    protected TestCaseBuilder self() {
+    public TestCaseBuilder setShareInput(TestData testData) {
+        this.shareInput = testData;
+        return this;
+    }
+
+    public TestCaseBuilder setDataSource(DataSource dataSource, Map<String, String> config) {
+        this.dataSource = dataSource;
+        this.dataSourceConfig = config;
+        return this;
+    }
+
+    public TestCaseBuilder addDataSourceConfig(String key, String value) {
+        this.dataSourceConfig.put(key, value);
+        return this;
+    }
+
+    public TestCaseBuilder isShareState(boolean shareState) {
+        this.shareState = shareState;
+        return this;
+    }
+
+    public TestCaseBuilder setSkip(String skip) {
+        this.skip = skip;
+        return this;
+    }
+
+    public TestCaseBuilder setOverrideTestDataSet(DataSource dataSource, Map<String, String> config) {
+        this.overrideDataSource = dataSource;
+        this.overrideDataSourceConfig = config;
+        return this;
+    }
+
+    public TestCaseBuilder setLazyLoad(Function<TestData, TestCase> lazyLoad) {
+        this.lazyLoad = lazyLoad;
+        return this;
+    }
+
+    public TestCaseBuilder isNestedChain(boolean nestedChain) {
+        this.nestedChain = nestedChain;
+        return this;
+    }
+
+    public TestCaseBuilder isBreakNestedChain(boolean breakNestedChain) {
+        this.breakNestedChain = breakNestedChain;
+        return this;
+    }
+
+    public TestCaseBuilder isChainTakeOverLastRun(boolean b) {
+        this.chains = this.chains.takeOverLastRun(b);
+        return this;
+    }
+
+    public TestCaseBuilder setChains(TestCaseChains testCaseChain) {
+        this.chains = testCaseChain;
+        return this;
+    }
+
+    public TestCaseBuilder addChain(TestCase s) {
+        this.chains = this.chains.append(s);
+        return this;
+    }
+
+    public TestCaseBuilder addChain(TestCase aTestCase, TestCase newTestCase) {
+        final int index = this.chains.indexOf(aTestCase) + 1;
+        return addChain(newTestCase, index);
+    }
+
+    public TestCaseBuilder insertTest(TestCase aTestCase, TestCase newTestCase) {
+        final int index = this.chains.indexOf(aTestCase);
+        return addChain(newTestCase, index);
+    }
+
+    public TestCaseBuilder addChain(TestCase newTestCase, int index) {
+        this.chains = this.chains.append(index, newTestCase);
+        return this;
+    }
+
+    public TestCaseBuilder remove(TestCase aTestCase) {
+        this.chains = this.chains.remove(aTestCase);
+        return this;
+    }
+
+    public TestCaseBuilder replace(String oldName, TestCase aTestCase) {
+        this.chains = this.chains.replaceTest(oldName, aTestCase);
+        return this;
+    }
+
+    public TestCaseBuilder addAspect(Aspect aspect) {
+        this.aspect = this.aspect.builder()
+                .add(aspect)
+                .build();
+        return this;
+    }
+
+    public TestCaseBuilder setAspect(Aspect aspect) {
+        this.aspect = aspect;
+        return this;
+    }
+
+    public ScriptFile getScriptFile() {
+        return this.scriptFile;
+    }
+
+    public TestData getShareInput() {
+        return this.shareInput;
+    }
+
+    public TestDataSet getTestDataSet() {
+        return new TestDataSet(this.dataSource, this.dataSourceConfig, this.scriptFile.relativePath());
+    }
+
+    public boolean isShareState() {
+        return this.shareState;
+    }
+
+    public String getSkip() {
+        return this.skip;
+    }
+
+    public TestDataSet getOverrideTestDataSet() {
+        return new TestDataSet(this.overrideDataSource, this.overrideDataSourceConfig, this.scriptFile.relativePath());
+    }
+
+    public Function<TestData, TestCase> getLazyLoad() {
+        return this.lazyLoad;
+    }
+
+    public boolean isNestedChain() {
+        return this.nestedChain;
+    }
+
+    public boolean isBreakNestedChain() {
+        return this.breakNestedChain;
+    }
+
+    public TestCaseChains getChains() {
+        return this.chains.map(this.converter);
+    }
+
+    public Aspect getAspect() {
+        return this.aspect;
+    }
+
+    public TestCaseBuilder associateWith(File target) {
+        this.setScriptFile(ScriptFile.of(target, this.getScriptFile().type()));
         return this;
     }
 
     public ArrayList<Step> getSteps() {
         return this.steps;
-    }
-
-    public File getRelativePath() {
-        return this.getScriptFile().relativePath();
-    }
-
-    public boolean isCloseDriver() {
-        return this.closeDriver;
     }
 
     public TestCaseBuilder clearStep() {
