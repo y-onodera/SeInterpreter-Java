@@ -72,7 +72,7 @@ public class TestCase {
         for (TestRunBuilder testRunBuilder : this.createTestRunBuilder()) {
             for (TestData data : testRunBuilder.loadData()) {
                 TestRunner.STATUS result = runner.execute(testRunBuilder.copy(), data, testRunListener);
-                if (result != TestRunner.STATUS.SUCCESS) {
+                if (result == TestRunner.STATUS.STOPPED) {
                     return false;
                 }
             }
