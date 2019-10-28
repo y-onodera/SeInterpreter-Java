@@ -112,6 +112,10 @@ public enum Context {
         return getInstance().aspect;
     }
 
+    public static File getExpectScreenShotDirectory() {
+        return new File(getDataSourceDirectory(), "screenshot");
+    }
+
     public Context setImplicitlyWaitTime(Long aLong) {
         this.implicitlyWaitTime = aLong;
         return this;

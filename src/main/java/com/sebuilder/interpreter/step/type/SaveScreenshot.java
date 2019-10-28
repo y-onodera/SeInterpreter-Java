@@ -16,6 +16,10 @@
 
 package com.sebuilder.interpreter.step.type;
 
+import com.github.romankh3.image.comparison.ImageComparisonUtil;
+import com.github.romankh3.image.comparison.model.ComparisonResult;
+import com.github.romankh3.image.comparison.model.ComparisonState;
+import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.screenshot.LocatorInnerScrollElementHandler;
@@ -29,6 +33,7 @@ import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
@@ -43,8 +48,16 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
         Page target = new Page(ctx, 100, new LocatorInnerScrollElementHandler(wd));
         try {
             File file = ctx.getListener().addScreenshot(ctx.getTestRunName() + "_" + ctx.string("file"));
-            ImageIO.write(target.printImage(new VerticalPrinter(), 0), "PNG", file);
+            BufferedImage actual = target.printImage(new VerticalPrinter(), 0);
             this.reverseWindowSize(wd, beforeSize);
+            if (ctx.getBoolean("verify")) {
+                BufferedImage expect = ImageComparisonUtil.readImageFromFile(new File(Context.getExpectScreenShotDirectory(), ctx.getTestRunName() + "_" + ctx.string("file")));
+                ComparisonResult result = new com.github.romankh3.image.comparison.ImageComparison(actual, expect, file)
+                        .setDrawExcludedRectangles(true)
+                        .compareImages();
+                return result.getComparisonState() == ComparisonState.MATCH;
+            }
+            ImageIO.write(actual, "PNG", file);
             return file.exists();
         } catch (IOException e) {
             ctx.log().error(e);
