@@ -91,10 +91,10 @@ public class SeInterpreter extends CommandLineRunner implements TestRunner {
             this.driver = null;
             this.closeDriver = false;
         }
-        if (!success) {
-            return STATUS.FAILED;
-        } else if (this.lastRun.isStopped()) {
+        if (this.lastRun.isStopped()) {
             return STATUS.STOPPED;
+        } else if (!success) {
+            return STATUS.FAILED;
         }
         return STATUS.SUCCESS;
     }

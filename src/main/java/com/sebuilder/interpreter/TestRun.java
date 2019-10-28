@@ -343,10 +343,11 @@ public class TestRun {
             }
             TestData chainData = data;
             this.lastRun = testRunBuilder.createTestRun(chainData, this.parent);
-            if (!this.lastRun.finish()) {
-                return STATUS.FAILED;
-            } else if (lastRun.isStopped()) {
+            boolean result = this.lastRun.finish();
+            if (this.lastRun.isStopped()) {
                 return STATUS.STOPPED;
+            } else if (!result) {
+                return STATUS.FAILED;
             }
             if (this.chains.isTakeOverLastRun() && data.isLastRow()) {
                 this.lastRunVar = lastRun.vars();

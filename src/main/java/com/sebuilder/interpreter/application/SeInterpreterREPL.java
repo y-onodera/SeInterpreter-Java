@@ -105,10 +105,10 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
         if (this.driver == null && lastRun != null) {
             this.driver = this.lastRun.driver();
         }
-        if (!result) {
-            return STATUS.FAILED;
-        } else if (this.lastRun.isStopped()) {
+        if (this.lastRun.isStopped()) {
             return STATUS.STOPPED;
+        } else if (!result) {
+            return STATUS.FAILED;
         }
         return STATUS.SUCCESS;
     }
