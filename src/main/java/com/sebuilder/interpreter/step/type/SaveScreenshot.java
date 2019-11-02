@@ -16,6 +16,7 @@
 
 package com.sebuilder.interpreter.step.type;
 
+import com.github.romankh3.image.comparison.ImageComparison;
 import com.github.romankh3.image.comparison.ImageComparisonUtil;
 import com.github.romankh3.image.comparison.model.ComparisonResult;
 import com.github.romankh3.image.comparison.model.ComparisonState;
@@ -33,11 +34,17 @@ import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
 public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
+
+    @Override
+    public boolean isContinueAtFailure() {
+        return true;
+    }
 
     @Override
     public boolean run(TestRun ctx) {
@@ -52,9 +59,13 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
             this.reverseWindowSize(wd, beforeSize);
             if (ctx.getBoolean("verify")) {
                 BufferedImage expect = ImageComparisonUtil.readImageFromFile(new File(Context.getExpectScreenShotDirectory(), ctx.getTestRunName() + "_" + ctx.string("file")));
-                ComparisonResult result = new com.github.romankh3.image.comparison.ImageComparison(actual, expect, file)
-                        .setDrawExcludedRectangles(true)
-                        .compareImages();
+                if (this.isSizeMissMatch(actual, expect)) {
+                    BufferedImage resizeActual = this.toSameSize(actual, expect.getWidth(), expect.getHeight());
+                    ImageIO.write(this.getComparisonResult(file, resizeActual, expect).getResult(), "PNG", file);
+                    return false;
+                }
+                ComparisonResult result = this.getComparisonResult(file, actual, expect);
+                ImageIO.write(result.getResult(), "PNG", file);
                 return result.getComparisonState() == ComparisonState.MATCH;
             }
             ImageIO.write(actual, "PNG", file);
@@ -66,37 +77,58 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
         }
     }
 
+    private BufferedImage toSameSize(BufferedImage actual, int expectWidth, int expectHeight) {
+        BufferedImage finalImage = new BufferedImage(expectWidth, expectHeight, BufferedImage.TYPE_3BYTE_BGR);
+        Graphics2D graphics = finalImage.createGraphics();
+        graphics.drawImage(actual, 0, 0, null);
+        graphics.dispose();
+        return finalImage;
+    }
+
     @Override
     public StepBuilder addDefaultParam(StepBuilder o) {
         if (!o.containsStringParam("file")) {
             o.put("file", "");
         }
+        if (!o.containsStringParam("verify")) {
+            o.put("verify", "false");
+        }
         return o.apply(LocatorHolder.super::addDefaultParam);
     }
 
-    private boolean needMaximize(RemoteWebDriver wd) {
+    protected boolean needMaximize(RemoteWebDriver wd) {
         return wd instanceof InternetExplorerDriver || wd instanceof EdgeDriver;
     }
 
-    protected void adjustWindowSize(RemoteWebDriver wd) {
-        if (this.needMaximize(wd)) {
-            wd.manage().window().maximize();
-            this.waitForRepaint();
-        }
-    }
-
-    private void reverseWindowSize(RemoteWebDriver wd, Dimension beforeSize) {
+    protected void reverseWindowSize(RemoteWebDriver wd, Dimension beforeSize) {
         if (this.needMaximize(wd)) {
             wd.manage().window().setSize(beforeSize);
             this.waitForRepaint();
         }
     }
 
-    private void waitForRepaint() {
+    protected void waitForRepaint() {
         try {
             Thread.sleep(600);
         } catch (InterruptedException var2) {
             throw new IllegalStateException("Exception while waiting for repaint", var2);
+        }
+    }
+
+    protected ComparisonResult getComparisonResult(File file, BufferedImage actual, BufferedImage expect) throws IOException {
+        return new ImageComparison(expect, actual, file)
+                .setDrawExcludedRectangles(true)
+                .compareImages();
+    }
+
+    protected boolean isSizeMissMatch(BufferedImage actual, BufferedImage expect) {
+        return actual.getHeight() != expect.getHeight() || actual.getWidth() != expect.getWidth();
+    }
+
+    protected void adjustWindowSize(RemoteWebDriver wd) {
+        if (this.needMaximize(wd)) {
+            wd.manage().window().maximize();
+            this.waitForRepaint();
         }
     }
 }
