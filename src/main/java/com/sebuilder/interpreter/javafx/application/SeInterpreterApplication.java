@@ -145,13 +145,16 @@ public class SeInterpreterApplication extends Application {
     @Subscribe
     public void replaceScript(ScriptReplaceEvent event) {
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
-            TestCase newTestCase = getScriptParser().load(event.getScript());
+            boolean replaceSuite = this.suite.head().equals(this.currentDisplay);
+            TestCase newTestCase = getScriptParser().load(event.getScript(), new File(this.currentDisplay.path()));
             this.currentDisplay = newTestCase.builder()
-                    .associateWith(new File(this.currentDisplay.path()))
                     .setName(this.currentDisplay.name())
                     .build();
-            this.suite = this.suite.replace(this.currentDisplay);
-            this.refreshMainView();
+            if (replaceSuite) {
+                this.resetSuite(this.currentDisplay.toSuite(), this.currentDisplay);
+            } else {
+                this.resetSuite(this.suite.replace(this.currentDisplay), this.currentDisplay);
+            }
         });
     }
 
