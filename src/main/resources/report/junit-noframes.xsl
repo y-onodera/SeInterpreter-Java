@@ -348,6 +348,7 @@
             <th>Type</th>
             <th nowrap="nowrap">Time(s)</th>
             <th nowrap="nowrap">Screen Shot</th>
+            <th nowrap="nowrap">Screen Shot(Expect)</th>
             <th nowrap="nowrap">Download File</th>
         </tr>
     </xsl:template>
@@ -434,6 +435,11 @@
             <td>
                 <a href="{@screenshot}">
                     <xsl:value-of select="@screenshot"/>
+                </a>
+            </td>
+            <td>
+                <a href="{@screenshotExpect}">
+                    <xsl:value-of select="@screenshotExpect"/>
                 </a>
             </td>
             <td>

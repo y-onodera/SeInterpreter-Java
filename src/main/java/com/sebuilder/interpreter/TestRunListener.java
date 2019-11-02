@@ -40,6 +40,8 @@ public interface TestRunListener {
 
     File addScreenshot(String file);
 
+    File saveExpectScreenshot();
+
     File addDownloadFile(String file);
 
     void addError(Throwable throwable);
@@ -51,5 +53,4 @@ public interface TestRunListener {
     void closeTestSuite();
 
     void aggregateResult();
-
 }

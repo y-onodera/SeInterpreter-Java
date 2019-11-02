@@ -54,19 +54,18 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
         wd.switchTo().defaultContent();
         Page target = new Page(ctx, 100, new LocatorInnerScrollElementHandler(wd));
         try {
-            File file = ctx.getListener().addScreenshot(ctx.getTestRunName() + "_" + ctx.string("file"));
+            final String fileName = ctx.getTestRunName() + "_" + ctx.string("file");
+            File file = ctx.getListener().addScreenshot(fileName);
             BufferedImage actual = target.printImage(new VerticalPrinter(), 0);
             this.reverseWindowSize(wd, beforeSize);
             if (ctx.getBoolean("verify")) {
-                BufferedImage expect = ImageComparisonUtil.readImageFromFile(new File(Context.getExpectScreenShotDirectory(), ctx.getTestRunName() + "_" + ctx.string("file")));
-                if (this.isSizeMissMatch(actual, expect)) {
-                    BufferedImage resizeActual = this.toSameSize(actual, expect.getWidth(), expect.getHeight());
-                    ImageIO.write(this.getComparisonResult(file, resizeActual, expect).getResult(), "PNG", file);
-                    return false;
+                BufferedImage expect = ImageComparisonUtil.readImageFromFile(new File(Context.getExpectScreenShotDirectory(), fileName));
+                boolean compareResult = this.compare(file, actual, expect);
+                if (!compareResult) {
+                    File expectFile = ctx.getListener().saveExpectScreenshot();
+                    ImageIO.write(expect, "PNG", expectFile);
                 }
-                ComparisonResult result = this.getComparisonResult(file, actual, expect);
-                ImageIO.write(result.getResult(), "PNG", file);
-                return result.getComparisonState() == ComparisonState.MATCH;
+                return compareResult;
             }
             ImageIO.write(actual, "PNG", file);
             return file.exists();
@@ -75,14 +74,6 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
             this.reverseWindowSize(wd, beforeSize);
             return false;
         }
-    }
-
-    private BufferedImage toSameSize(BufferedImage actual, int expectWidth, int expectHeight) {
-        BufferedImage finalImage = new BufferedImage(expectWidth, expectHeight, BufferedImage.TYPE_3BYTE_BGR);
-        Graphics2D graphics = finalImage.createGraphics();
-        graphics.drawImage(actual, 0, 0, null);
-        graphics.dispose();
-        return finalImage;
     }
 
     @Override
@@ -113,6 +104,25 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
         } catch (InterruptedException var2) {
             throw new IllegalStateException("Exception while waiting for repaint", var2);
         }
+    }
+
+    protected boolean compare(File file, BufferedImage actual, BufferedImage expect) throws IOException {
+        if (this.isSizeMissMatch(actual, expect)) {
+            BufferedImage resizeActual = this.toSameSize(actual, expect.getWidth(), expect.getHeight());
+            ImageIO.write(this.getComparisonResult(file, resizeActual, expect).getResult(), "PNG", file);
+            return false;
+        }
+        ComparisonResult result = this.getComparisonResult(file, actual, expect);
+        ImageIO.write(result.getResult(), "PNG", file);
+        return result.getComparisonState() == ComparisonState.MATCH;
+    }
+
+    protected BufferedImage toSameSize(BufferedImage actual, int expectWidth, int expectHeight) {
+        BufferedImage finalImage = new BufferedImage(expectWidth, expectHeight, BufferedImage.TYPE_3BYTE_BGR);
+        Graphics2D graphics = finalImage.createGraphics();
+        graphics.drawImage(actual, 0, 0, null);
+        graphics.dispose();
+        return finalImage;
     }
 
     protected ComparisonResult getComparisonResult(File file, BufferedImage actual, BufferedImage expect) throws IOException {

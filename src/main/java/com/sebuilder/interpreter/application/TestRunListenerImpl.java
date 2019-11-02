@@ -221,12 +221,18 @@ public class TestRunListenerImpl implements TestRunListener {
     }
 
     @Override
+    public File saveExpectScreenshot() {
+        this.test.setExpectScreenshotPath(this.test.getScreenshotPath().replaceAll("\\.png$", "") + "_expect.png");
+        return new File(this.resultDir, this.test.getExpectScreenshotPath());
+    }
+
+    @Override
     public File addDownloadFile(String file) {
-        File result  = new File(this.getDownloadDirectory(), file);
+        File result = new File(this.getDownloadDirectory(), file);
         this.test.setDownloadPath(this.resultDir.getAbsoluteFile().toPath()
                 .relativize(result.getAbsoluteFile().toPath())
                 .toString());
-        return result ;
+        return result;
     }
 
     @Override
@@ -310,6 +316,7 @@ public class TestRunListenerImpl implements TestRunListener {
     static class ResultReportableTestCase extends junit.framework.TestCase {
         private String downloadPath = "";
         private String screenshotPath = "";
+        private String expectScreenshotPath = "";
 
         public ResultReportableTestCase(String testName) {
             super(testName);
@@ -321,6 +328,14 @@ public class TestRunListenerImpl implements TestRunListener {
 
         public void setScreenshotPath(String screenshotPath) {
             this.screenshotPath = screenshotPath;
+        }
+
+        public String getExpectScreenshotPath() {
+            return this.expectScreenshotPath;
+        }
+
+        public void setExpectScreenshotPath(String expectScreenshotPath) {
+            this.expectScreenshotPath = expectScreenshotPath;
         }
 
         public String getDownloadPath() {
