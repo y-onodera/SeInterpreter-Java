@@ -7,7 +7,7 @@ public class ScriptReplaceEvent {
         this.script = script;
     }
 
-    public String getScript() {
+    public String getJsonString() {
         return script;
     }
 }

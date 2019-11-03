@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class TestCaseChains implements Iterable<TestCase> {
@@ -80,24 +81,24 @@ public class TestCaseChains implements Iterable<TestCase> {
         return new TestCaseChains(newList, this.takeOverLastRun);
     }
 
-    public TestCaseChains replaceTest(String oldName, TestCase aTestCase) {
+    public TestCaseChains replaceTest(TestCase oldTestCase, TestCase aTestCase) {
         return this.map(testCase -> {
-            if (testCase.name().equals(oldName)) {
+            if (testCase.equals(oldTestCase)) {
                 return aTestCase;
             }
             return testCase;
-        });
+        }, it -> !(it.equals(aTestCase) && aTestCase.getScriptFile().type() == ScriptFile.Type.SUITE));
     }
 
-    public TestCaseChains map(Function<TestCase, TestCase> converter) {
+    public TestCaseChains map(Function<TestCase, TestCase> converter, Predicate<TestCase> isChainConvert) {
         ArrayList<TestCase> newTestCases = Lists.newArrayList();
-        Map<Pair<String,String>, Integer> duplicate = Maps.newHashMap();
+        Map<Pair<String, String>, Integer> duplicate = Maps.newHashMap();
         for (TestCase testCase : this.testCases) {
             TestCase copy = converter
                     .apply(testCase)
-                    .replaceChains(testCase.getChains().map(converter));
+                    .changeWhenConditionMatch(isChainConvert, (TestCase matches) -> matches.replaceChains(testCase.getChains().map(converter, isChainConvert)));
             final String scriptName = copy.name();
-            Pair<String,String> key = Pair.of(copy.name(),copy.path());
+            Pair<String, String> key = Pair.of(copy.name(), copy.path());
             if (duplicate.containsKey(key)) {
                 Optional<String> entries = newTestCases
                         .stream()

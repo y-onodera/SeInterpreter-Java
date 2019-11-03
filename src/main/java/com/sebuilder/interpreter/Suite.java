@@ -27,7 +27,7 @@ public class Suite {
     }
 
     public TestCase get(String scriptName) {
-        if(this.head().name().equals(scriptName)){
+        if (this.head().name().equals(scriptName)) {
             return this.head();
         }
         return this.head().getChains().get(scriptName);
@@ -73,13 +73,12 @@ public class Suite {
                 .toSuite();
     }
 
-    public Suite replace(TestCase aTestCase) {
-        return this.replace(aTestCase.name(), aTestCase);
-    }
-
-    public Suite replace(String oldName, TestCase newValue) {
+    public Suite replace(TestCase oldCase, TestCase newValue) {
+        if (this.head.equals(oldCase)) {
+            return newValue.toSuite();
+        }
         return builder()
-                .replace(oldName, newValue)
+                .replace(oldCase, newValue)
                 .build()
                 .toSuite();
     }

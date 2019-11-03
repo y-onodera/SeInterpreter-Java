@@ -68,8 +68,7 @@ public class SeInterpreterApplication extends Application {
         this.runner = new SeInterpreterRunner(parameters.getRaw());
         final List<String> unnamed = parameters.getUnnamed();
         if (unnamed.size() > 0) {
-            TestCase newSuite = getScriptParser().load(new File(unnamed.get(0)));
-            this.resetSuite(newSuite.toSuite(), newSuite);
+            this.resetSuite(getScriptParser().load(new File(unnamed.get(0))).toSuite());
         }
     }
 
@@ -82,17 +81,14 @@ public class SeInterpreterApplication extends Application {
     @Subscribe
     public void reset(ScriptResetEvent event) {
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
-            Suite newSuite = this.templateScript().toSuite();
-            this.resetSuite(newSuite, newSuite.head());
+            this.resetSuite(this.templateScript().toSuite());
         });
     }
 
     @Subscribe
     public void scriptReLoad(FileLoadEvent event) {
-        File file = event.getFile();
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
-            Suite newSuite = getScriptParser().load(file).toSuite();
-            this.resetSuite(newSuite, newSuite.head());
+            this.resetSuite(getScriptParser().load(event.getFile()).toSuite());
         });
 
     }
@@ -109,31 +105,25 @@ public class SeInterpreterApplication extends Application {
     @Subscribe
     public void insertScript(ScriptInsertEvent event) {
         TestCase newTestCase = this.templateScript();
-        Suite newSuite = this.suite.insert(this.currentDisplay, newTestCase);
-        int index = newSuite.getIndex(this.currentDisplay);
-        this.resetSuite(newSuite, newSuite.get(index - 1));
+        this.resetScript(this.suite.insert(this.currentDisplay, newTestCase), newTestCase);
     }
 
     @Subscribe
     public void exportTemplate(TemplateLoadEvent event) {
-        TestCase exported = this.runner.exportTemplate(event.getParentLocator(), event.getTargetTag(), event.isWithDataSource());
-        this.addScript(exported);
+        this.addScript(this.runner.exportTemplate(event.getParentLocator(), event.getTargetTag(), event.isWithDataSource()));
     }
 
     @Subscribe
     public void scriptImport(ScriptImportEvent event) {
-        File file = event.getFile();
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
-            TestCase testCase = getScriptParser().load(file);
-            addScript(testCase);
+            addScript(getScriptParser().load(event.getFile()));
         });
 
     }
 
     @Subscribe
     public void deleteScript(ScriptDeleteEvent event) {
-        Suite newSuite = this.suite.delete(this.currentDisplay);
-        this.resetSuite(newSuite, newSuite.head());
+        this.resetSuite(this.suite.delete(this.currentDisplay));
     }
 
     @Subscribe
@@ -145,16 +135,9 @@ public class SeInterpreterApplication extends Application {
     @Subscribe
     public void replaceScript(ScriptReplaceEvent event) {
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
-            boolean replaceSuite = this.suite.head().equals(this.currentDisplay);
-            TestCase newTestCase = getScriptParser().load(event.getScript(), new File(this.currentDisplay.path()));
-            this.currentDisplay = newTestCase.builder()
-                    .setName(this.currentDisplay.name())
-                    .build();
-            if (replaceSuite) {
-                this.resetSuite(this.currentDisplay.toSuite(), this.currentDisplay);
-            } else {
-                this.resetSuite(this.suite.replace(this.currentDisplay), this.currentDisplay);
-            }
+            TestCase newTestCase = getScriptParser().load(event.getJsonString(), new File(this.currentDisplay.path()))
+                    .rename(this.currentDisplay.name());
+            this.resetScript(this.suite.replace(this.currentDisplay, newTestCase), newTestCase);
         });
     }
 
@@ -166,38 +149,37 @@ public class SeInterpreterApplication extends Application {
 
     @Subscribe
     public void deleteStep(StepDeleteEvent event) {
-        this.currentDisplay = this.currentDisplay.removeStep(event.getStepIndex());
-        this.suite = this.suite.replace(this.currentDisplay);
-        this.refreshMainView();
+        TestCase newCase = this.currentDisplay.removeStep(event.getStepIndex());
+        this.resetScript(this.suite.replace(this.currentDisplay, newCase), newCase);
     }
 
     @Subscribe
     public void moveStep(StepMoveEvent event) {
         Step step = this.currentDisplay.steps().get(event.getFrom());
         int indexTo = event.getTo();
+        TestCase newCase;
         if (event.getTo() > event.getFrom()) {
-            this.currentDisplay = this.currentDisplay.addStep(indexTo, step)
+            newCase = this.currentDisplay.addStep(indexTo, step)
                     .removeStep(event.getFrom());
         } else {
-            this.currentDisplay = this.currentDisplay.insertStep(indexTo, step)
+            newCase = this.currentDisplay.insertStep(indexTo, step)
                     .removeStep(event.getFrom() + 1);
         }
-        this.suite = this.suite.replace(this.currentDisplay);
-        this.refreshMainView();
+        this.resetScript(this.suite.replace(this.currentDisplay, newCase), newCase);
     }
 
     @Subscribe
     public void editStep(StepEditEvent event) {
         Step newStep = event.getStepSource();
+        TestCase newCase;
         if (event.getEditAction().equals("change")) {
-            this.currentDisplay = this.currentDisplay.setSteps(event.getStepIndex(), newStep);
+            newCase = this.currentDisplay.setSteps(event.getStepIndex(), newStep);
         } else if (event.getEditAction().equals("insert")) {
-            this.currentDisplay = this.currentDisplay.insertStep(event.getStepIndex(), newStep);
+            newCase = this.currentDisplay.insertStep(event.getStepIndex(), newStep);
         } else {
-            this.currentDisplay = this.currentDisplay.addStep(event.getStepIndex(), newStep);
+            newCase = this.currentDisplay.addStep(event.getStepIndex(), newStep);
         }
-        this.suite = this.suite.replace(this.currentDisplay);
-        this.refreshMainView();
+        this.resetScript(this.suite.replace(this.currentDisplay, newCase), newCase);
     }
 
     @Subscribe
@@ -213,8 +195,7 @@ public class SeInterpreterApplication extends Application {
 
     @Subscribe
     public void loadStep(StepLoadEvent event) {
-        Step step = this.currentDisplay.steps().get(event.getStepIndex());
-        EventBus.publish(RefreshStepEditViewEvent.change(step));
+        EventBus.publish(RefreshStepEditViewEvent.change(this.currentDisplay.steps().get(event.getStepIndex())));
     }
 
     @Subscribe
@@ -222,22 +203,19 @@ public class SeInterpreterApplication extends Application {
         if (Strings.isNullOrEmpty(this.currentDisplay.path())) {
             EventBus.publish(new OpenScriptSaveChooserEvent());
         } else {
-            File target = new File(this.currentDisplay.path());
-            this.saveContents(target, this.getScriptParser().toString(this.currentDisplay));
+            this.saveContents(new File(this.currentDisplay.path()), this.getScriptParser().toString(this.currentDisplay));
         }
     }
 
     @Subscribe
     public void saveScript(FileSaveAsEvent event) {
         File target = event.getFile();
-        String oldName = this.currentDisplay.name();
-        String oldPath = this.currentDisplay.path();
         TestCase save = this.saveContents(target
-                , new TestCaseBuilder(this.currentDisplay)
+                , this.currentDisplay.builder()
                         .associateWith(target)
                         .build()
-                , oldPath);
-        this.resetSuite(this.suite.replace(oldName, save), save);
+                , this.currentDisplay.path());
+        this.resetScript(this.suite.replace(this.currentDisplay, save), save);
     }
 
     @Subscribe
@@ -252,9 +230,8 @@ public class SeInterpreterApplication extends Application {
 
     @Subscribe
     public void saveSuite(FileSaveSuiteEvent event) {
-        File target = event.getFile();
         this.suite = this.suite.builder()
-                .associateWith(target)
+                .associateWith(event.getFile())
                 .build()
                 .toSuite();
         this.saveSuite();
@@ -262,18 +239,15 @@ public class SeInterpreterApplication extends Application {
 
     @Subscribe
     public void browserSetting(BrowserSettingEvent event) {
-        String browserName = event.getSelectedBrowser();
-        String driverPath = event.getDriverPath();
-        this.runner.reloadSetting(browserName, driverPath);
+        this.runner.reloadSetting(event.getSelectedBrowser(), event.getDriverPath());
         this.open(new BrowserOpenEvent());
     }
 
     @Subscribe
     public void open(BrowserOpenEvent event) {
-        Task task = this.runner.createRunScriptTask(this.templateScript(), logger -> {
+        this.executeTask(this.runner.createRunScriptTask(this.templateScript(), logger -> {
             return new TestRunListenerImpl(logger);
-        });
-        this.executeTask(task);
+        }));
     }
 
     @Subscribe
@@ -283,26 +257,23 @@ public class SeInterpreterApplication extends Application {
 
     @Subscribe
     public void runStep(RunStepEvent event) {
-        Task task = this.runner.createRunScriptTask(this.currentDisplay.removeStep(event.getFilter())
+        this.executeTask(this.runner.createRunScriptTask(this.currentDisplay.removeStep(event.getFilter())
                 , log -> new GUITestRunListener(log) {
                     @Override
                     public int getStepNo() {
                         return event.getStepNoFunction().apply(super.getStepNo());
                     }
-                });
-        this.executeTask(task);
+                }));
     }
 
     @Subscribe
     public void runScript(RunEvent event) {
-        Task task = this.runner.createRunScriptTask(this.currentDisplay);
-        this.executeTask(task);
+        this.executeTask(this.runner.createRunScriptTask(this.currentDisplay));
     }
 
     @Subscribe
     public void runSuite(RunSuiteEvent event) {
-        Task task = this.runner.createRunScriptTask(this.suite.head());
-        this.executeTask(task);
+        this.executeTask(this.runner.createRunScriptTask(this.suite.head()));
     }
 
     @Subscribe
@@ -324,13 +295,20 @@ public class SeInterpreterApplication extends Application {
     }
 
     private void addScript(TestCase newTestCase) {
-        Suite newSuite = this.suite.add(this.currentDisplay, newTestCase);
-        int index = newSuite.getIndex(this.currentDisplay);
-        this.resetSuite(newSuite, newSuite.get(index + 1));
+        this.resetScript(this.suite.add(this.currentDisplay, newTestCase), newTestCase);
     }
 
-    private void resetSuite(Suite aSuite, TestCase toSelect) {
+    private void resetSuite(Suite newSuite) {
+        resetScript(newSuite, newSuite.head());
+    }
+
+    private void resetScript(Suite aSuite, TestCase toSelect) {
         this.suite = aSuite;
+        if (this.currentDisplay != null && Objects.equals(this.currentDisplay.path(), toSelect.path())) {
+            this.currentDisplay = this.suite.get(this.currentDisplay.name());
+        } else {
+            this.currentDisplay = this.suite.get(toSelect.name());
+        }
         EventBus.publish(new RefreshScriptViewEvent(this.suite, toSelect.name()));
     }
 
@@ -354,13 +332,14 @@ public class SeInterpreterApplication extends Application {
             }
             File saveTo = new File(scriptSaveTo, newName);
             TestCase save = this.saveContents(saveTo, it.builder().associateWith(saveTo).build(), "");
-            this.suite = this.suite.replace(oldName, save);
+            Suite newSuite = this.suite.replace(it, save);
             if (it == this.currentDisplay) {
-                this.currentDisplay = this.suite.get(newName);
+                this.resetScript(newSuite, save);
+            } else {
+                this.resetScript(newSuite, this.currentDisplay);
             }
         });
         this.saveContents(target, this.getScriptParser().toString(this.suite));
-        this.resetSuite(this.suite, this.currentDisplay);
     }
 
     private TestCase saveContents(File target, TestCase exportTo, String oldPath) {

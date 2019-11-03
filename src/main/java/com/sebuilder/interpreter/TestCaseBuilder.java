@@ -1,5 +1,7 @@
 package com.sebuilder.interpreter;
 
+import com.google.common.base.Predicates;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Map;
@@ -166,8 +168,8 @@ public class TestCaseBuilder {
         return this;
     }
 
-    public TestCaseBuilder replace(String oldName, TestCase aTestCase) {
-        this.chains = this.chains.replaceTest(oldName, aTestCase);
+    public TestCaseBuilder replace(TestCase oldCase, TestCase aTestCase) {
+        this.chains = this.chains.replaceTest(oldCase, aTestCase);
         return this;
     }
 
@@ -220,7 +222,7 @@ public class TestCaseBuilder {
     }
 
     public TestCaseChains getChains() {
-        return this.chains.map(this.converter);
+        return this.chains.map(this.converter, Predicates.alwaysTrue());
     }
 
     public Aspect getAspect() {

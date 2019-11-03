@@ -188,6 +188,13 @@ public class TestCase {
                 .collect(Collectors.toCollection(ArrayList::new)));
     }
 
+    public TestCase changeWhenConditionMatch(Predicate<TestCase> condition, Function<TestCase, TestCase> function) {
+        if(condition.test(this)){
+            return function.apply(this);
+        }
+        return this;
+    }
+
     public TestCase changeDataSourceConfig(String key, String value) {
         return this.builder()
                 .addDataSourceConfig(key, value)

@@ -47,7 +47,7 @@ public abstract class CommandLineRunner {
 
     public void setUp(String[] args) {
         this.log.info("setUp start");
-        if (args.length == 0) {
+        if (!this.validateArgs(args)) {
             this.log.info("Usage: [--driver=<drivername] [--driver.<configkey>=<configvalue>...] [--implicitlyWait=<ms>] [--pageLoadTimeout=<ms>] [--stepTypePackage=<package name>] <script path>...");
             System.exit(0);
         }
@@ -128,6 +128,10 @@ public abstract class CommandLineRunner {
                 , data
                 , this.lastRun
                 , testRunListener);
+    }
+
+    protected boolean validateArgs(String[] args) {
+        return args.length > 0;
     }
 
     protected void preSetUp() {

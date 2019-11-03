@@ -120,6 +120,11 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
         }
     }
 
+    @Override
+    protected boolean validateArgs(String[] args) {
+        return true;
+    }
+
     private TestCase toTestCase(String cmdInput) {
         this.log.info("start load input");
         TestCase result = null;
