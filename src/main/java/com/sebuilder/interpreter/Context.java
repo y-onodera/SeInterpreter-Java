@@ -4,11 +4,13 @@ import com.google.common.collect.Lists;
 import com.sebuilder.interpreter.step.type.SaveScreenshot;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 public enum Context {
 
@@ -35,6 +37,18 @@ public enum Context {
             .addFailure(Lists.newArrayList(new SaveScreenshot().toStep().put("file", "failure.png").build()))
             .build()
             .build();
+    private Properties environmentProperties = new Properties();
+
+    Context() {
+        try {
+            File envPropertyFile = new File("env.properties");
+            if (envPropertyFile.exists()) {
+                environmentProperties.load(new FileInputStream(envPropertyFile));
+            }
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
+    }
 
     public static Context getInstance() {
         return INSTANCE;
@@ -116,6 +130,13 @@ public enum Context {
         return new File(getDataSourceDirectory(), "screenshot");
     }
 
+    public static String bindEnvironmentProperties(String variable) {
+        for (Map.Entry<Object, Object> v : INSTANCE.environmentProperties.entrySet()) {
+            variable = variable.replace("${env." + v.getKey().toString() + "}", v.getValue().toString());
+        }
+        return variable;
+    }
+
     public Context setImplicitlyWaitTime(Long aLong) {
         this.implicitlyWaitTime = aLong;
         return this;
@@ -128,7 +149,7 @@ public enum Context {
 
     public Context setBrowser(String browserName, String driverPath) {
         this.setBrowser(browserName);
-        this.wdf.setDriverPath(driverPath);
+        this.setWebDriverPath(driverPath);
         return this;
     }
 
@@ -140,6 +161,11 @@ public enum Context {
         } catch (InstantiationException | IllegalAccessException e) {
             throw new AssertionError("Could not instantiate WebDriverFactory " + "com.sebuilder.interpreter.browser." + browser, e);
         }
+        return this;
+    }
+
+    public Context setWebDriverPath(String driverPath) {
+        this.wdf.setDriverPath(driverPath);
         return this;
     }
 
@@ -206,6 +232,16 @@ public enum Context {
 
     public Context setAspect(Aspect aAspect) {
         this.aspect = aAspect;
+        return this;
+    }
+
+    public Context setEnvironmentProperties(String propertyFile) throws IOException {
+        this.environmentProperties.load(new FileInputStream(propertyFile));
+        return this;
+    }
+
+    public Context setEnvironmentProperty(String key, String value) {
+        this.environmentProperties.put(key, value);
         return this;
     }
 }

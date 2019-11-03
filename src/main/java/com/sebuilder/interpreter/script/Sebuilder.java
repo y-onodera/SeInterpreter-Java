@@ -204,9 +204,9 @@ public class Sebuilder implements ScriptParser {
             });
             return this.overrideSetting(script, resultTestCase);
         }
-        String path = script.getString("path");
+        String path = Context.bindEnvironmentProperties(script.getString("path"));
         if (script.has("where") && Strings.isNullOrEmpty(script.getString("where"))) {
-            File wherePath = new File(script.getString("where"), path);
+            File wherePath = new File(Context.bindEnvironmentProperties(script.getString("where")), path);
             return this.loadScriptIfExists(wherePath, script);
         }
         File f = new File(path);

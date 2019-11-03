@@ -91,6 +91,10 @@ public class TestData {
         if (!Objects.equal(s, result)) {
             return this.bind(result);
         }
+        result = Context.bindEnvironmentProperties(result);
+        if (!Objects.equal(s, result)) {
+            return this.bind(result);
+        }
         return result;
     }
 

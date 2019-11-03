@@ -71,8 +71,10 @@ public abstract class CommandLineRunner {
                     Context.getStepTypeFactory().setSecondaryPackage(kv[1]);
                 } else if (s.startsWith(CommandLineArgument.DRIVER_CONFIG_PREFIX.key())) {
                     Context.getDriverConfig().put(kv[0].substring(CommandLineArgument.DRIVER_CONFIG_PREFIX.key().length()), kv[1]);
-                } else if (s.startsWith(CommandLineArgument.DRIVER.key())) {
+                } else if (s.equals(CommandLineArgument.DRIVER.key())) {
                     Context.getInstance().setBrowser(kv[1]);
+                } else if (s.equals(CommandLineArgument.DRIVER_PATH.key())) {
+                    Context.getInstance().setWebDriverPath(kv[1]);
                 } else if (s.startsWith(CommandLineArgument.DATASOURCE_PACKAGE.key())) {
                     Context.getDataSourceFactory().setCustomDataSourcePackage(kv[1]);
                 } else if (s.startsWith(CommandLineArgument.DATASOURCE_ENCODING.key())) {
@@ -89,6 +91,15 @@ public abstract class CommandLineRunner {
                     Context.getInstance().setDownloadDirectory(kv[1]);
                 } else if (s.startsWith(CommandLineArgument.ASPECT.key())) {
                     aspectFileName = kv[1];
+                } else if (s.equals(CommandLineArgument.ENVIRONMENT_PROPERTIES.key())) {
+                    try {
+                        Context.getInstance().setEnvironmentProperties(kv[1]);
+                    } catch (IOException e) {
+                        this.log.fatal(e);
+                        System.exit(1);
+                    }
+                } else if (s.startsWith(CommandLineArgument.ENVIRONMENT_PROPERTIES_PREFIX.key())) {
+                    Context.getInstance().setEnvironmentProperty(kv[0].substring(CommandLineArgument.ENVIRONMENT_PROPERTIES_PREFIX.key().length()), kv[1]);
                 } else {
                     configureOption(s, kv);
                 }

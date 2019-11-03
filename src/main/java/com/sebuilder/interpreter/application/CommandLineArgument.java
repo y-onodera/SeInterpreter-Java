@@ -7,6 +7,7 @@ public enum CommandLineArgument {
     STEP_TYPE_PACKAGE("--stepTypePackage"),
     STEP_TYPE_PACKAGE2("--stepTypePackage2"),
     DRIVER("--driver"),
+    DRIVER_PATH("--driverPath"),
     DRIVER_CONFIG_PREFIX("--driver."),
     DATASOURCE_PACKAGE("--datasourcePackage"),
     DATASOURCE_ENCODING("--datasource.encoding"),
@@ -15,7 +16,10 @@ public enum CommandLineArgument {
     TEMPLATE_OUTPUT("--templateoutput"),
     RESULT_OUTPUT("--resultoutput"),
     DOWNLOAD_OUTPUT("--downloadoutput"),
-    ASPECT("--aspectFile"),;
+    ASPECT("--aspectFile"),
+    ENVIRONMENT_PROPERTIES("--env"),
+    ENVIRONMENT_PROPERTIES_PREFIX("--env."),
+    ;
 
     private String key;
 
