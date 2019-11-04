@@ -348,7 +348,6 @@
             <th>Type</th>
             <th nowrap="nowrap">Time(s)</th>
             <th nowrap="nowrap">Screen Shot</th>
-            <th nowrap="nowrap">Screen Shot(Expect)</th>
             <th nowrap="nowrap">Download File</th>
         </tr>
     </xsl:template>
@@ -394,40 +393,46 @@
         </tr>
     </xsl:template>
     <xsl:template match="testcase" mode="print.test">
+        <xsl:variable name="rowSpan">
+            <xsl:choose>
+                <xsl:when test="@screenshotExpect != ''">2</xsl:when>
+                <xsl:otherwise>1</xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
         <tr valign="top">
             <xsl:attribute name="class">
                 <xsl:choose>
                     <xsl:when test="failure | error">Error</xsl:when>
                 </xsl:choose>
             </xsl:attribute>
-            <td>
+            <td rowSpan="{$rowSpan}">
                 <xsl:value-of select="@name"/>
             </td>
             <xsl:choose>
                 <xsl:when test="failure">
-                    <td>Failure</td>
-                    <td>
+                    <td rowSpan="{$rowSpan}">Failure</td>
+                    <td rowSpan="{$rowSpan}">
                         <xsl:apply-templates select="failure"/>
                     </td>
                 </xsl:when>
                 <xsl:when test="error">
-                    <td>Error</td>
-                    <td>
+                    <td rowSpan="{$rowSpan}">Error</td>
+                    <td rowSpan="{$rowSpan}">
                         <xsl:apply-templates select="error"/>
                     </td>
                 </xsl:when>
                 <xsl:when test="skipped">
-                    <td>Skipped</td>
-                    <td>
+                    <td rowSpan="{$rowSpan}">Skipped</td>
+                    <td rowSpan="{$rowSpan}">
                         <xsl:apply-templates select="skipped"/>
                     </td>
                 </xsl:when>
                 <xsl:otherwise>
-                    <td>Success</td>
-                    <td></td>
+                    <td rowSpan="{$rowSpan}">Success</td>
+                    <td rowSpan="{$rowSpan}"></td>
                 </xsl:otherwise>
             </xsl:choose>
-            <td>
+            <td rowSpan="{$rowSpan}">
                 <xsl:call-template name="display-time">
                     <xsl:with-param name="value" select="@time"/>
                 </xsl:call-template>
@@ -437,17 +442,23 @@
                     <xsl:value-of select="@screenshot"/>
                 </a>
             </td>
-            <td>
-                <a href="{@screenshotExpect}">
-                    <xsl:value-of select="@screenshotExpect"/>
-                </a>
-            </td>
-            <td>
+            <td rowSpan="{$rowSpan}">
                 <a href="{@download}">
                     <xsl:value-of select="@download"/>
                 </a>
             </td>
         </tr>
+        <xsl:choose>
+            <xsl:when test="@screenshotExpect != ''">
+                <tr valign="top">
+                    <td>
+                        <a href="{@screenshotExpect}">
+                            <xsl:value-of select="@screenshotExpect"/>
+                        </a>
+                    </td>
+                </tr>
+            </xsl:when>
+        </xsl:choose>
     </xsl:template>
     <xsl:template match="failure">
         <xsl:call-template name="display-failures"/>
