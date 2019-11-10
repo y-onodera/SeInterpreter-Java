@@ -1,6 +1,7 @@
 package com.sebuilder.interpreter.browser;
 
 import com.sebuilder.interpreter.WebDriverFactory;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -19,6 +20,11 @@ public class Edge implements WebDriverFactory {
         HashMap<String, String> caps = new HashMap<String, String>(config);
         DesiredCapabilities capabilities = new DesiredCapabilities(caps);
         EdgeOptions options = new EdgeOptions().merge(capabilities);
+        if (config.containsKey("chromiumbinary")) {
+            ChromeOptions chromeOptions = new ChromeOptions();
+            chromeOptions.setBinary(config.get("chromiumbinary"));
+            options = options.merge(chromeOptions);
+        }
         return new EdgeDriver(options);
     }
 
