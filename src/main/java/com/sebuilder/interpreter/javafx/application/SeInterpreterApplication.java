@@ -136,7 +136,7 @@ public class SeInterpreterApplication extends Application {
     public void replaceScript(ScriptReplaceEvent event) {
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
             TestCase newTestCase = getScriptParser().load(event.getJsonString(), new File(this.currentDisplay.path()))
-                    .rename(this.currentDisplay.name());
+                    .map(builder -> builder.setName(this.currentDisplay.name()));
             this.resetScript(this.suite.replace(this.currentDisplay, newTestCase), newTestCase);
         });
     }
@@ -367,7 +367,7 @@ public class SeInterpreterApplication extends Application {
             File dest = new File(this.runner.getDataSourceDirectory(), newDataSourceName);
             if (src.exists() && !dest.exists()) {
                 ReportErrorEvent.publishIfExecuteThrowsException(() -> Files.copy(src, dest));
-                return it.changeDataSourceConfig("path", newDataSourceName);
+                return it.map(builder -> builder.addDataSourceConfig("path", newDataSourceName));
             }
         }
         return it;

@@ -75,7 +75,7 @@ public class TestCaseChains implements Iterable<TestCase> {
     public TestCaseChains remove(TestCase aTestCase) {
         ArrayList<TestCase> newList = this.testCases
                 .stream()
-                .map(it -> it.replaceChains(it.getChains().remove(aTestCase)))
+                .map(it -> it.map(builder -> builder.setChains(it.getChains().remove(aTestCase))))
                 .filter(it -> !it.name().equals(aTestCase.name()))
                 .collect(Collectors.toCollection(ArrayList::new));
         return new TestCaseChains(newList, this.takeOverLastRun);
@@ -96,7 +96,7 @@ public class TestCaseChains implements Iterable<TestCase> {
         for (TestCase testCase : this.testCases) {
             TestCase copy = converter
                     .apply(testCase)
-                    .changeWhenConditionMatch(isChainConvert, (TestCase matches) -> matches.replaceChains(testCase.getChains().map(converter, isChainConvert)));
+                    .changeWhenConditionMatch(isChainConvert, matches -> matches.map(it -> it.setChains(testCase.getChains().map(converter, isChainConvert))));
             final String scriptName = copy.name();
             Pair<String, String> key = Pair.of(copy.name(), copy.path());
             if (duplicate.containsKey(key)) {
@@ -132,7 +132,7 @@ public class TestCaseChains implements Iterable<TestCase> {
     }
 
     protected TestCase renameDuplicateCase(TestCase target, long nextCount) {
-        return target.rename(target.fileName() + String.format("(%d)", nextCount));
+        return target.map(builder -> builder.setName(target.fileName() + String.format("(%d)", nextCount)));
     }
 
     @Override

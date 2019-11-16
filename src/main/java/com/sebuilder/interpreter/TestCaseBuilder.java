@@ -24,7 +24,7 @@ public class TestCaseBuilder {
     private Aspect aspect;
     private Function<TestCase, TestCase> converter = script -> {
         if (script.isShareState() != this.isShareState()) {
-            return script.shareState(this.isShareState());
+            return script.map(it -> it.isShareState(this.isShareState()));
         }
         return script;
     };

@@ -22,7 +22,6 @@ import com.google.common.collect.Lists;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -189,82 +188,14 @@ public class TestCase {
     }
 
     public TestCase changeWhenConditionMatch(Predicate<TestCase> condition, Function<TestCase, TestCase> function) {
-        if(condition.test(this)){
+        if (condition.test(this)) {
             return function.apply(this);
         }
         return this;
     }
 
-    public TestCase changeDataSourceConfig(String key, String value) {
-        return this.builder()
-                .addDataSourceConfig(key, value)
-                .build();
-    }
-
-    public TestCase rename(String s) {
-        return this.builder()
-                .setName(s)
-                .build();
-    }
-
-    public TestCase shareState(boolean isShareState) {
-        return this.builder()
-                .isShareState(isShareState)
-                .build();
-    }
-
-    public TestCase skip(String skip) {
-        return this.builder()
-                .setSkip(skip)
-                .build();
-    }
-
-    public TestCase shareInput(TestData testData) {
-        return this.builder()
-                .setShareInput(testData)
-                .build();
-    }
-
-    public TestCase overrideDataSource(DataSource dataSource, Map<String, String> config) {
-        return this.builder()
-                .setOverrideTestDataSet(dataSource, config)
-                .build();
-    }
-
-    public TestCase isChainTakeOverLastRun(boolean b) {
-        return this.builder()
-                .isChainTakeOverLastRun(b)
-                .build();
-    }
-
-    public TestCase nestedChain(boolean nestedChain) {
-        return this.builder()
-                .isNestedChain(nestedChain)
-                .build();
-    }
-
-    public TestCase breakNestedChain(boolean breakNestedChain) {
-        return this.builder()
-                .isBreakNestedChain(breakNestedChain)
-                .build();
-    }
-
-    public TestCase replaceChains(TestCaseChains loaded) {
-        return this.builder()
-                .setChains(loaded)
-                .build();
-    }
-
-    public TestCase addChain(TestCase loaded) {
-        return this.builder()
-                .addChain(loaded)
-                .build();
-    }
-
-    public TestCase addAspect(Aspect aspect) {
-        return this.builder()
-                .addAspect(aspect)
-                .build();
+    public TestCase map(Function<TestCaseBuilder, TestCaseBuilder> function) {
+        return function.apply(this.builder()).build();
     }
 
     public TestCase removeStep(int stepIndex) {

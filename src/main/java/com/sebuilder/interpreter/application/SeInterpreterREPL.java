@@ -87,7 +87,7 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
     public void execute(TestCase target, TestRunListener seInterpreterTestListener) {
         seInterpreterTestListener.cleanResult(new File(Context.getResultOutputDirectory(), String.valueOf(execCount++)));
         try {
-            target.shareState(true)
+            target.map(it -> it.isShareState(true))
                     .run(this, seInterpreterTestListener);
         } catch (Throwable t) {
             log.error(Throwables.getStackTraceAsString(t));

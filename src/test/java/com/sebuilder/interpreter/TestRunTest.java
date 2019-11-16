@@ -284,7 +284,7 @@ public class TestRunTest {
 
         @Before
         public void setUp() {
-            TestRunBuilder builder = new TestRunBuilder(head.replaceChains(chains));
+            TestRunBuilder builder = new TestRunBuilder(head.map(it -> it.setChains(chains)));
             this.target = builder.createTestRun(log, driver, initialVars, listener);
         }
 
@@ -1134,7 +1134,7 @@ public class TestRunTest {
             this.chainCase = this.head.builder().setName("chainCase")
                     .setSkip("${skip}")
                     .clearStep().addStep(this.chainStep).build();
-            this.chainStart = this.chainStart.addChain(this.chainCase).isChainTakeOverLastRun(true);
+            this.chainStart = this.chainStart.map(it -> it.addChain(this.chainCase).isChainTakeOverLastRun(true));
             this.chains = this.chains.append(this.chainStart);
         }
 
@@ -1198,7 +1198,7 @@ public class TestRunTest {
             Mockito.verify(this.listener).startTest("name: ClickElement");
             Mockito.verify(this.step).run(Mockito.any());
             Mockito.verify(this.listener).endTest();
-            Mockito.verify(this.listener,Mockito.times(2)).closeTestSuite();
+            Mockito.verify(this.listener, Mockito.times(2)).closeTestSuite();
             Mockito.verify(this.listener, Mockito.never())
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase"), Mockito.any(TestData.class));
             Mockito.verify(this.listener, Mockito.never()).startTest("chain: ClickElement");
@@ -1284,7 +1284,7 @@ public class TestRunTest {
             this.step = Mockito.spy(new StepBuilder(new ClickElement())
                     .name("name")
                     .build());
-            this.chainStart= new TestCaseBuilder()
+            this.chainStart = new TestCaseBuilder()
                     .setName("chainStart")
                     .addStep(this.step)
                     .build();
@@ -1305,7 +1305,7 @@ public class TestRunTest {
                     .setSkip("${skipChain2}")
                     .addStep(this.chainStep2)
                     .build();
-            this.chainStart = this.chainStart.addChain(chainCase).addChain(chainCase2).isChainTakeOverLastRun(true);
+            this.chainStart = this.chainStart.map(it -> it.addChain(chainCase).addChain(chainCase2).isChainTakeOverLastRun(true));
             this.chains = this.chains.append(this.chainStart);
             this.initialVars = this.initialVars.add("key", "default");
         }
@@ -1586,8 +1586,8 @@ public class TestRunTest {
                     .setSkip("${skipChain2}")
                     .addStep(this.chainStep2)
                     .build();
-            this.chainCase = this.chainCase.addChain(this.chainCase2).isChainTakeOverLastRun(true);
-            this.chainStart = this.chainStart.addChain(this.chainCase);
+            this.chainCase = this.chainCase.map(it -> it.addChain(this.chainCase2).isChainTakeOverLastRun(true));
+            this.chainStart = this.chainStart.map(it -> it.addChain(this.chainCase));
             this.chains = this.chains.append(this.chainStart);
             this.initialVars = this.initialVars.add("key", "default");
         }
@@ -1773,7 +1773,7 @@ public class TestRunTest {
             Mockito.verify(this.listener, Mockito.never()).startTest("chain2: ClickElement key=default");
             Mockito.verify(this.chainStep2, Mockito.never()).run(Mockito.any());
             Mockito.verify(this.listener).endTest();
-            Mockito.verify(this.listener,Mockito.times(2)).closeTestSuite();
+            Mockito.verify(this.listener, Mockito.times(2)).closeTestSuite();
         }
 
         @Test
@@ -1891,8 +1891,8 @@ public class TestRunTest {
                     .isBreakNestedChain(true)
                     .addStep(this.chainStep3)
                     .build();
-            this.chainCase = this.chainCase.addChain(this.chainCase2).isChainTakeOverLastRun(true);
-            this.chainStart = this.chainStart.addChain(this.chainCase).addChain(this.chainCase3).isChainTakeOverLastRun(true);
+            this.chainCase = this.chainCase.map(it -> it.addChain(this.chainCase2).isChainTakeOverLastRun(true));
+            this.chainStart = this.chainStart.map(it -> it.addChain(this.chainCase).addChain(this.chainCase3).isChainTakeOverLastRun(true));
             this.chains = this.chains.append(this.chainStart);
             this.initialVars = this.initialVars.add("key", "default");
         }
@@ -2022,8 +2022,8 @@ public class TestRunTest {
             this.chainCase3 = this.head.builder().setName("chainCase3")
                     .addStep(this.chainStep3)
                     .build();
-            this.chainSuiteHeader = this.chainSuiteHeader.addChain(this.chainCase).addChain(this.chainCase2);
-            this.chainStart = this.chainStart.addChain(this.chainSuiteHeader).addChain(this.chainCase3).isChainTakeOverLastRun(true);
+            this.chainSuiteHeader = this.chainSuiteHeader.map(it -> it.addChain(this.chainCase).addChain(this.chainCase2));
+            this.chainStart = this.chainStart.map(it -> it.addChain(this.chainSuiteHeader).addChain(this.chainCase3).isChainTakeOverLastRun(true));
             this.chains = this.chains.append(this.chainStart);
             this.initialVars = this.initialVars.add("key", "default");
         }
@@ -2098,7 +2098,7 @@ public class TestRunTest {
     public static class Quit extends AbstractTestRunTest {
         @Test
         public void quit() {
-            TestRunBuilder builder = new TestRunBuilder(this.head.replaceChains(this.chains));
+            TestRunBuilder builder = new TestRunBuilder(this.head.map(it -> it.setChains(this.chains)));
             this.target = builder.createTestRun(this.log, this.driver, this.initialVars, this.listener);
             this.target.quit();
             Mockito.verify(this.log).debug("Quitting driver.");

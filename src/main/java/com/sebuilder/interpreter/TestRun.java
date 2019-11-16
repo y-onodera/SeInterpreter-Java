@@ -324,8 +324,8 @@ public class TestRun {
         public boolean finish() {
             TestData chainInitialVar = this.parent.vars();
             for (TestCase nextChain : this.chains) {
-                if (!nextChain.addAspect(this.parent.getAspect())
-                        .shareInput(chainInitialVar)
+                final TestData chainVar = chainInitialVar;
+                if (!nextChain.map(it -> it.addAspect(this.parent.getAspect()).setShareInput(chainVar))
                         .run(this, this.parent.getListener())) {
                     return false;
                 }

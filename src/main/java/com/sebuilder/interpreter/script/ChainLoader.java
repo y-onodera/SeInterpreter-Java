@@ -28,9 +28,10 @@ public class ChainLoader {
     public TestCase load() throws IOException, JSONException {
         TestCase result = this.next();
         while (this.hasNext()) {
-            result = result.addChain(this.next());
+            final TestCase next = this.next();
+            result = result.map(it -> it.addChain(next));
         }
-        return result.isChainTakeOverLastRun(true);
+        return result.map(it -> it.isChainTakeOverLastRun(true));
     }
 
     protected boolean hasNext() {
@@ -62,8 +63,9 @@ public class ChainLoader {
             if (next.isNestedChain()) {
                 next = this.loadNestedChain(next);
             }
-            result = result.addChain(next);
+            final TestCase nextCase = next;
+            result = result.map(it -> it.addChain(nextCase));
         }
-        return result.isChainTakeOverLastRun(true);
+        return result.map(it -> it.isChainTakeOverLastRun(true));
     }
 }

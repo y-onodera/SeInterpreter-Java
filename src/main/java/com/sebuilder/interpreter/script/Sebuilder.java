@@ -232,12 +232,15 @@ public class Sebuilder implements ScriptParser {
         DataSource dataSource = this.getDataSource(script);
         if (dataSource != null) {
             HashMap<String, String> config = this.getDataSourceConfig(script);
-            resultTestCase = resultTestCase.overrideDataSource(dataSource, config);
+            resultTestCase = resultTestCase.map(it -> it.setOverrideTestDataSet(dataSource, config));
         }
-        return resultTestCase.skip(this.getSkip(script))
-                .nestedChain(this.isNestedChain(script))
-                .breakNestedChain(this.isBreakNestedChain(script))
-                ;
+        final String skip = Sebuilder.this.getSkip(script);
+        final boolean nestedChain = this.isNestedChain(script);
+        final boolean breakNestedChain = this.isBreakNestedChain(script);
+        return resultTestCase.map(it -> it.setSkip(skip)
+                .isNestedChain(nestedChain)
+                .isBreakNestedChain(breakNestedChain)
+        );
     }
 
     protected boolean isNestedChain(JSONObject script) throws JSONException {
