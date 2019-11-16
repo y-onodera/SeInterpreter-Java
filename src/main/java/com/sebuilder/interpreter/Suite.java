@@ -2,6 +2,8 @@ package com.sebuilder.interpreter;
 
 import com.google.common.base.Objects;
 
+import java.util.function.Function;
+
 public class Suite {
 
     private final TestCase head;
@@ -37,50 +39,19 @@ public class Suite {
         return this.head().getChains().get(index);
     }
 
-    public int getIndex(TestCase testCase) {
-        return this.head().getChains().indexOf(testCase);
-    }
-
     public TestCaseBuilder builder() {
         return new TestCaseBuilder(this.head());
     }
 
-    public Suite insert(TestCase aTestCase, TestCase newTestCase) {
-        return builder()
-                .insertTest(aTestCase, newTestCase)
-                .build()
-                .toSuite();
-    }
-
-    public Suite add(TestCase aTestCase, TestCase newTestCase) {
-        return builder()
-                .addChain(aTestCase, newTestCase)
-                .build()
-                .toSuite();
-    }
-
-    public Suite add(TestCase aTestCase) {
-        return builder()
-                .addChain(aTestCase)
-                .build()
-                .toSuite();
-    }
-
-    public Suite delete(TestCase aTestCase) {
-        return builder()
-                .remove(aTestCase)
-                .build()
-                .toSuite();
+    public Suite map(Function<TestCaseBuilder, TestCaseBuilder> function) {
+        return function.apply(this.builder()).build().toSuite();
     }
 
     public Suite replace(TestCase oldCase, TestCase newValue) {
         if (this.head.equals(oldCase)) {
             return newValue.toSuite();
         }
-        return builder()
-                .replace(oldCase, newValue)
-                .build()
-                .toSuite();
+        return map(builder -> builder.replace(oldCase, newValue));
     }
 
     @Override

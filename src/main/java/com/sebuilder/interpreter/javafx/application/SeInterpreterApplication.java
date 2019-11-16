@@ -105,7 +105,7 @@ public class SeInterpreterApplication extends Application {
     @Subscribe
     public void insertScript(ScriptInsertEvent event) {
         TestCase newTestCase = this.templateScript();
-        this.resetScript(this.suite.insert(this.currentDisplay, newTestCase), newTestCase);
+        this.resetScript(this.suite.map(it -> it.insertTest(this.currentDisplay, newTestCase)), newTestCase);
     }
 
     @Subscribe
@@ -123,7 +123,7 @@ public class SeInterpreterApplication extends Application {
 
     @Subscribe
     public void deleteScript(ScriptDeleteEvent event) {
-        this.resetSuite(this.suite.delete(this.currentDisplay));
+        this.resetSuite(this.suite.map(it -> it.remove(this.currentDisplay)));
     }
 
     @Subscribe
@@ -295,7 +295,7 @@ public class SeInterpreterApplication extends Application {
     }
 
     private void addScript(TestCase newTestCase) {
-        this.resetScript(this.suite.add(this.currentDisplay, newTestCase), newTestCase);
+        this.resetScript(this.suite.map(it -> it.addChain(this.currentDisplay, newTestCase)), newTestCase);
     }
 
     private void resetSuite(Suite newSuite) {
