@@ -28,9 +28,6 @@ import com.sebuilder.interpreter.screenshot.Page;
 import com.sebuilder.interpreter.screenshot.VerticalPrinter;
 import com.sebuilder.interpreter.step.AbstractStepType;
 import com.sebuilder.interpreter.step.LocatorHolder;
-import org.openqa.selenium.Dimension;
-import org.openqa.selenium.edge.EdgeDriver;
-import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import javax.imageio.ImageIO;
@@ -49,15 +46,12 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
     @Override
     public boolean run(TestRun ctx) {
         RemoteWebDriver wd = ctx.driver();
-        Dimension beforeSize = wd.manage().window().getSize();
-        this.adjustWindowSize(wd);
         wd.switchTo().defaultContent();
         Page target = new Page(ctx, 100, new LocatorInnerScrollElementHandler(wd));
         try {
             final String fileName = ctx.getTestRunName() + "_" + ctx.string("file");
             File file = ctx.getListener().addScreenshot(fileName);
             BufferedImage actual = target.printImage(new VerticalPrinter(), 0);
-            this.reverseWindowSize(wd, beforeSize);
             if (ctx.getBoolean("verify")) {
                 BufferedImage expect = ImageComparisonUtil.readImageFromFile(new File(Context.getExpectScreenShotDirectory(), fileName));
                 boolean compareResult = this.compare(file, actual, expect);
@@ -71,7 +65,6 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
             return file.exists();
         } catch (IOException e) {
             ctx.log().error(e);
-            this.reverseWindowSize(wd, beforeSize);
             return false;
         }
     }
@@ -85,17 +78,6 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
             o.put("verify", "false");
         }
         return o.apply(LocatorHolder.super::addDefaultParam);
-    }
-
-    protected boolean needMaximize(RemoteWebDriver wd) {
-        return wd instanceof InternetExplorerDriver || wd instanceof EdgeDriver;
-    }
-
-    protected void reverseWindowSize(RemoteWebDriver wd, Dimension beforeSize) {
-        if (this.needMaximize(wd)) {
-            wd.manage().window().setSize(beforeSize);
-            this.waitForRepaint();
-        }
     }
 
     protected void waitForRepaint() {
@@ -135,10 +117,4 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
         return actual.getHeight() != expect.getHeight() || actual.getWidth() != expect.getWidth();
     }
 
-    protected void adjustWindowSize(RemoteWebDriver wd) {
-        if (this.needMaximize(wd)) {
-            wd.manage().window().maximize();
-            this.waitForRepaint();
-        }
-    }
 }
