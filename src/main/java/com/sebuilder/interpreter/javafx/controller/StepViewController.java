@@ -1,5 +1,6 @@
 package com.sebuilder.interpreter.javafx.controller;
 
+import com.google.common.base.Strings;
 import com.google.common.eventbus.Subscribe;
 import com.sebuilder.interpreter.Step;
 import com.sebuilder.interpreter.TestCase;
@@ -17,6 +18,7 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -25,16 +27,15 @@ import javafx.scene.Scene;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.util.Callback;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -56,65 +57,64 @@ public class StepViewController {
         assert tableColumnScriptBodyStep != null : "fx:id=\"tableColumnScriptBodyStep\" was not injected: check your FXML file 'seleniumbuilderscriptbody.fxml'.";
         assert tableColumnScriptBodyNo != null : "fx:id=\"tableColumnScriptBodyNo\" was not injected: check your FXML file 'seleniumbuilderscriptbody.fxml'.";
         assert tableViewScriptBody != null : "fx:id=\"tableViewScriptBody\" was not injected: check your FXML file 'seleniumbuilderscriptbody.fxml'.";
-        this.tableColumnScriptBodyNo.setCellValueFactory(new PropertyValueFactory<>("no"));
-        this.tableColumnScriptBodyStep.setCellValueFactory(new PropertyValueFactory<>("step"));
-        this.tableViewScriptBody.setRowFactory(new Callback<TableView<ScriptBody>, TableRow<ScriptBody>>() {
-            @Override
-            public TableRow<ScriptBody> call(TableView<ScriptBody> scriptBodyTableView) {
-                TableRow<ScriptBody> row = new TableRow<ScriptBody>() {
-                    @Override
-                    protected void updateItem(ScriptBody item, boolean empty) {
-                        super.updateItem(item, empty);
-                        if (item != null) {
+        this.tableColumnScriptBodyNo.setCellValueFactory(body -> body.getValue().noProperty().asObject());
+        this.tableColumnScriptBodyStep.setCellValueFactory(body -> body.getValue().stepProperty());
+        this.tableViewScriptBody.setRowFactory(scriptBodyTableView -> {
+            TableRow<ScriptBody> row = new TableRow<ScriptBody>() {
+                @Override
+                protected void updateItem(ScriptBody scriptBody, boolean b) {
+                    super.updateItem(scriptBody, b);
+                    for (Result result : Result.values()) {
+                        getStyleClass().remove(result.toString().toLowerCase());
+                    }
+                    if (!b && !isEmpty()) {
+                        getItem().runningResultProperty().addListener((ObservableValue<? extends String> observed, String oldValue, String newValue) -> {
                             for (Result result : Result.values()) {
-                                this.getStyleClass().remove(result.name().toLowerCase());
+                                getStyleClass().remove(result.toString().toLowerCase());
                             }
-                            if (item.getRunningResult() != null) {
-                                this.getStyleClass().add(item.getRunningResult().toLowerCase());
+                            if (!Strings.isNullOrEmpty(newValue)) {
+                                getStyleClass().add(newValue.toLowerCase());
                             }
-                        }
+                        });
                     }
-                };
-                row.setOnDragDetected(event -> {
-                    if (!row.isEmpty()) {
-                        Integer index = row.getIndex();
-                        Dragboard db = row.startDragAndDrop(TransferMode.MOVE);
-                        db.setDragView(row.snapshot(null, null));
-                        ClipboardContent cc = new ClipboardContent();
-                        cc.put(SERIALIZED_MIME_TYPE, index);
-                        db.setContent(cc);
+                }
+            };
+            row.setOnDragDetected(event -> {
+                if (!row.isEmpty()) {
+                    Integer index = row.getIndex();
+                    Dragboard db = row.startDragAndDrop(TransferMode.MOVE);
+                    db.setDragView(row.snapshot(null, null));
+                    ClipboardContent cc = new ClipboardContent();
+                    cc.put(SERIALIZED_MIME_TYPE, index);
+                    db.setContent(cc);
+                    event.consume();
+                }
+            });
+            row.setOnDragOver(event -> {
+                Dragboard db = event.getDragboard();
+                if (db.hasContent(SERIALIZED_MIME_TYPE)) {
+                    if (row.getIndex() != ((Integer) db.getContent(SERIALIZED_MIME_TYPE)).intValue()) {
+                        event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
                         event.consume();
                     }
-                });
-
-                row.setOnDragOver(event -> {
-                    Dragboard db = event.getDragboard();
-                    if (db.hasContent(SERIALIZED_MIME_TYPE)) {
-                        if (row.getIndex() != ((Integer) db.getContent(SERIALIZED_MIME_TYPE)).intValue()) {
-                            event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
-                            event.consume();
-                        }
+                }
+            });
+            row.setOnDragDropped(event -> {
+                Dragboard db = event.getDragboard();
+                if (db.hasContent(SERIALIZED_MIME_TYPE)) {
+                    int draggedIndex = (Integer) db.getContent(SERIALIZED_MIME_TYPE);
+                    int dropIndex;
+                    if (row.isEmpty()) {
+                        dropIndex = tableViewScriptBody.getItems().size() - 1;
+                    } else {
+                        dropIndex = row.getIndex();
                     }
-                });
-
-                row.setOnDragDropped(event -> {
-                    Dragboard db = event.getDragboard();
-                    if (db.hasContent(SERIALIZED_MIME_TYPE)) {
-                        int draggedIndex = (Integer) db.getContent(SERIALIZED_MIME_TYPE);
-                        int dropIndex;
-                        if (row.isEmpty()) {
-                            dropIndex = tableViewScriptBody.getItems().size() - 1;
-                        } else {
-                            dropIndex = row.getIndex();
-                        }
-                        event.setDropCompleted(true);
-                        event.consume();
-                        EventBus.publish(new StepMoveEvent(draggedIndex, dropIndex));
-                    }
-                });
-                return row;
-            }
-
+                    event.setDropCompleted(true);
+                    event.consume();
+                    EventBus.publish(new StepMoveEvent(draggedIndex, dropIndex));
+                }
+            });
+            return row;
         });
         EventBus.registSubscriber(this);
     }
@@ -179,7 +179,6 @@ public class StepViewController {
             ScriptBody target = bodies.get(event.getStepNo() - 1);
             target.setRunningResult(event.getResult().name());
         }
-        this.tableViewScriptBody.refresh();
     }
 
     @Subscribe
@@ -187,7 +186,6 @@ public class StepViewController {
         for (ScriptBody target : this.tableViewScriptBody.getItems()) {
             target.setRunningResult("");
         }
-        this.tableViewScriptBody.refresh();
     }
 
     private Stage initStepEditDialog(String action) throws IOException {
@@ -211,12 +209,13 @@ public class StepViewController {
 
     private void refreshTable(TestCase aTestCase) {
         ReportErrorEvent.publishIfExecuteThrowsException(() -> {
-            this.tableViewScriptBody.getItems().setAll(List.of());
+            this.tableViewScriptBody.getItems().setAll(new ArrayList<>());
             int no = 1;
             for (Step step : aTestCase.steps()) {
-                ScriptBody row = new ScriptBody(no++, step.toPrettyString(), null);
+                ScriptBody row = new ScriptBody(no++, step.toPrettyString(), "");
                 this.tableViewScriptBody.getItems().add(row);
             }
+            this.tableViewScriptBody.refresh();
         });
     }
 
@@ -256,6 +255,7 @@ public class StepViewController {
         public void setRunningResult(String runningResult) {
             this.runningResult.set(runningResult);
         }
+
     }
 }
 
