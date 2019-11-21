@@ -76,13 +76,28 @@ public class TestCaseBuilder {
         return new TestCase(this);
     }
 
-    public TestCaseBuilder setScriptFile(ScriptFile scriptFile) {
-        this.scriptFile = scriptFile;
+    public TestCaseBuilder associateWith(File target) {
+        this.scriptFile = ScriptFile.of(target, this.getScriptFile().type());
         return this;
     }
 
     public TestCaseBuilder setName(String newName) {
         this.scriptFile = this.scriptFile.changeName(newName);
+        return this;
+    }
+
+    public TestCaseBuilder clearStep() {
+        this.steps.clear();
+        return this;
+    }
+
+    public TestCaseBuilder addSteps(ArrayList<Step> steps) {
+        this.steps.addAll(steps);
+        return this;
+    }
+
+    public TestCaseBuilder addStep(Step aStep) {
+        this.steps.add(aStep);
         return this;
     }
 
@@ -190,6 +205,9 @@ public class TestCaseBuilder {
     }
 
     public TestData getShareInput() {
+        if (this.shareInput == null) {
+            return new TestData();
+        }
         return this.shareInput;
     }
 
@@ -229,28 +247,8 @@ public class TestCaseBuilder {
         return this.aspect;
     }
 
-    public TestCaseBuilder associateWith(File target) {
-        this.setScriptFile(ScriptFile.of(target, this.getScriptFile().type()));
-        return this;
-    }
-
     public ArrayList<Step> getSteps() {
         return this.steps;
-    }
-
-    public TestCaseBuilder clearStep() {
-        this.steps.clear();
-        return this;
-    }
-
-    public TestCaseBuilder addSteps(ArrayList<Step> steps) {
-        this.steps.addAll(steps);
-        return this;
-    }
-
-    public TestCaseBuilder addStep(Step aStep) {
-        this.steps.add(aStep);
-        return this;
     }
 
 }

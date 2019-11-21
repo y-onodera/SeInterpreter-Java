@@ -89,10 +89,19 @@ public class TestCase {
         return this.getScriptFile().relativePath();
     }
 
+    public String name() {
+        return this.scriptFile.name();
+    }
+
+    public String path() {
+        return this.scriptFile.path();
+    }
+
+    public String fileName() {
+        return this.getScriptFile().relativize(this);
+    }
+
     public TestData getShareInput() {
-        if (this.shareInput == null) {
-            return new TestData();
-        }
         return this.shareInput;
     }
 
@@ -114,18 +123,6 @@ public class TestCase {
 
     public Function<TestData, TestCase> getLazyLoad() {
         return lazyLoad;
-    }
-
-    public String name() {
-        return this.scriptFile.name();
-    }
-
-    public String path() {
-        return this.scriptFile.path();
-    }
-
-    public String fileName() {
-        return this.getScriptFile().relativize(this);
     }
 
     public boolean isShareState() {
