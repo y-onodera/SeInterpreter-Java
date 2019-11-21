@@ -3,7 +3,6 @@ package com.sebuilder.interpreter;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -68,10 +67,6 @@ public class TestRunBuilder {
     public TestRunBuilder preventContextAspect(boolean aPreventAspect) {
         this.preventContextAspect = aPreventAspect;
         return this;
-    }
-
-    public List<TestData> loadData() {
-        return this.testCase.loadData(this.shareInput);
     }
 
     public TestRun createTestRun(Logger log, WebDriverFactory webDriverFactory, Map<String, String> webDriverConfig, Long implicitWaitTime, Long pageLoadWaitTime, TestData initialVars, TestRun previousRun, TestRunListener seInterpreterTestListener) {

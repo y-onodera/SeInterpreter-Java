@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 /**
  * A Selenium 2 script. To create and finish a test, instantiate a TestCase object,
@@ -68,38 +67,18 @@ public class TestCase {
         if (this.skipRunning(this.getShareInput())) {
             return true;
         }
-        for (TestRunBuilder testRunBuilder : this.createTestRunBuilder()) {
-            for (TestData data : testRunBuilder.loadData()) {
-                TestRunner.STATUS result = runner.execute(testRunBuilder.copy(), data, testRunListener);
-                if (result == TestRunner.STATUS.STOPPED) {
-                    return false;
-                }
+        final TestCase materialized = this.materialized();
+        for (TestData data : materialized.loadData(this.getShareInput())) {
+            TestRunner.STATUS result = runner.execute(new TestRunBuilder(materialized), data, testRunListener);
+            if (result == TestRunner.STATUS.STOPPED) {
+                return false;
             }
         }
         return true;
     }
 
-    public List<TestData> loadData(TestData vars) {
-        if (this.getOverrideTestDataSet().getDataSource() != null) {
-            return this.getOverrideTestDataSet().loadData(vars);
-        }
-        return this.getTestDataSet().loadData(vars);
-    }
-
-    public TestRunBuilder[] createTestRunBuilder() {
-        TestCase materialized = this;
-        if (this.isLazyLoad()) {
-            materialized = this.getLazyLoad().apply(this.getShareInput());
-        }
-        return new TestRunBuilder[]{new TestRunBuilder(materialized)};
-    }
-
     public Suite toSuite() {
         return new Suite(this);
-    }
-
-    public TestCaseBuilder builder() {
-        return new TestCaseBuilder(this);
     }
 
     public ScriptFile getScriptFile() {
@@ -181,10 +160,12 @@ public class TestCase {
         return Lists.newArrayList(this.steps);
     }
 
-    public TestCase copy() {
-        return this.editStep((ArrayList<Step> it) -> it.stream()
-                .map(step -> step.copy())
-                .collect(Collectors.toCollection(ArrayList::new)));
+    public TestCaseBuilder builder() {
+        return new TestCaseBuilder(this);
+    }
+
+    public TestCase map(Function<TestCaseBuilder, TestCaseBuilder> function) {
+        return function.apply(this.builder()).build();
     }
 
     public TestCase changeWhenConditionMatch(Predicate<TestCase> condition, Function<TestCase, TestCase> function) {
@@ -192,10 +173,6 @@ public class TestCase {
             return function.apply(this);
         }
         return this;
-    }
-
-    public TestCase map(Function<TestCaseBuilder, TestCaseBuilder> function) {
-        return function.apply(this.builder()).build();
     }
 
     public TestCase removeStep(int stepIndex) {
@@ -265,14 +242,22 @@ public class TestCase {
     }
 
     public TestCase editStep(Function<ArrayList<Step>, ArrayList<Step>> converter) {
-        return this.setSteps(converter.apply(this.steps));
+        return this.map(it -> it.clearStep().addSteps(converter.apply(this.steps)));
     }
 
-    protected TestCase setSteps(ArrayList<Step> newStep) {
-        return new TestCaseBuilder(this)
-                .clearStep()
-                .addSteps(newStep)
-                .build();
+    protected TestCase materialized() {
+        TestCase materialized = this;
+        if (this.isLazyLoad()) {
+            materialized = this.getLazyLoad().apply(this.getShareInput());
+        }
+        return materialized;
+    }
+
+    protected List<TestData> loadData(TestData vars) {
+        if (this.getOverrideTestDataSet().getDataSource() != null) {
+            return this.getOverrideTestDataSet().loadData(vars);
+        }
+        return this.getTestDataSet().loadData(vars);
     }
 
     @Override
