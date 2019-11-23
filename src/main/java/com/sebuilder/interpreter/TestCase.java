@@ -36,23 +36,22 @@ import java.util.function.Predicate;
 public class TestCase {
 
     private final ScriptFile scriptFile;
-    private final TestData shareInput;
+    private final ArrayList<Step> steps;
     private final TestDataSet testDataSet;
-    private final boolean shareState;
     private final String skip;
     private final TestDataSet overrideTestDataSet;
-    private final Function<TestData, TestCase> lazyLoad;
+    private final Function<TestCase, TestCase> lazyLoad;
     private final boolean nestedChain;
     private final boolean breakNestedChain;
     private final TestCaseChains chains;
     private final Aspect aspect;
-    private final ArrayList<Step> steps;
+    private final boolean shareState;
+    private final TestData shareInput;
 
     public TestCase(TestCaseBuilder builder) {
         this.scriptFile = builder.getScriptFile();
-        this.shareInput = builder.getShareInput();
+        this.steps = builder.getSteps();
         this.testDataSet = builder.getTestDataSet();
-        this.shareState = builder.isShareState();
         this.skip = builder.getSkip();
         this.overrideTestDataSet = builder.getOverrideTestDataSet();
         this.lazyLoad = builder.getLazyLoad();
@@ -60,7 +59,8 @@ public class TestCase {
         this.breakNestedChain = builder.isBreakNestedChain();
         this.chains = builder.getChains();
         this.aspect = builder.getAspect();
-        this.steps = builder.getSteps();
+        this.shareState = builder.isShareState();
+        this.shareInput = builder.getShareInput();
     }
 
     public boolean run(TestRunner runner, TestRunListener testRunListener) {
@@ -68,7 +68,7 @@ public class TestCase {
             return true;
         }
         final TestCase materialized = this.materialized();
-        for (TestData data : materialized.loadData(this.getShareInput())) {
+        for (TestData data : materialized.loadData()) {
             TestRunner.STATUS result = runner.execute(new TestRunBuilder(materialized), data, testRunListener);
             if (result == TestRunner.STATUS.STOPPED) {
                 return false;
@@ -101,36 +101,28 @@ public class TestCase {
         return this.getScriptFile().relativize(this);
     }
 
-    public TestData getShareInput() {
-        return this.shareInput;
+    public ArrayList<Step> steps() {
+        return Lists.newArrayList(this.steps);
     }
 
     public TestDataSet getTestDataSet() {
         return testDataSet;
     }
 
-    public TestDataSet getOverrideTestDataSet() {
-        return overrideTestDataSet;
-    }
-
     public String getSkip() {
         return skip;
+    }
+
+    public TestDataSet getOverrideTestDataSet() {
+        return overrideTestDataSet;
     }
 
     public boolean isLazyLoad() {
         return this.getLazyLoad() != null;
     }
 
-    public Function<TestData, TestCase> getLazyLoad() {
+    public Function<TestCase, TestCase> getLazyLoad() {
         return lazyLoad;
-    }
-
-    public boolean isShareState() {
-        return this.shareState;
-    }
-
-    public boolean skipRunning(TestData param) {
-        return param.evaluate(this.skip);
     }
 
     public boolean isNestedChain() {
@@ -153,8 +145,16 @@ public class TestCase {
         return this.aspect;
     }
 
-    public ArrayList<Step> steps() {
-        return Lists.newArrayList(this.steps);
+    public boolean isShareState() {
+        return this.shareState;
+    }
+
+    public TestData getShareInput() {
+        return this.shareInput;
+    }
+
+    public boolean skipRunning(TestData param) {
+        return param.evaluate(this.skip);
     }
 
     public TestCaseBuilder builder() {
@@ -243,27 +243,27 @@ public class TestCase {
     }
 
     protected TestCase materialized() {
-        TestCase materialized = this;
-        if (this.isLazyLoad()) {
-            materialized = this.getLazyLoad().apply(this.getShareInput());
-        }
-        return materialized;
+        return this.changeWhenConditionMatch(TestCase::isLazyLoad
+                , matches -> matches.lazyLoad());
     }
 
-    protected List<TestData> loadData(TestData vars) {
+    protected TestCase lazyLoad() {
+        return this.getLazyLoad().apply(this);
+    }
+
+    protected List<TestData> loadData() {
         if (this.getOverrideTestDataSet().getDataSource() != null) {
-            return this.getOverrideTestDataSet().loadData(vars);
+            return this.getOverrideTestDataSet().loadData(this.getShareInput());
         }
-        return this.getTestDataSet().loadData(vars);
+        return this.getTestDataSet().loadData(this.getShareInput());
     }
 
     @Override
     public String toString() {
         return "TestCase{" +
                 "scriptFile=" + scriptFile +
-                ", shareInput=" + shareInput +
+                ", steps=" + steps +
                 ", testDataSet=" + testDataSet +
-                ", shareState=" + shareState +
                 ", skip='" + skip + '\'' +
                 ", overrideTestDataSet=" + overrideTestDataSet +
                 ", lazyLoad=" + lazyLoad +
@@ -271,7 +271,6 @@ public class TestCase {
                 ", breakNestedChain=" + breakNestedChain +
                 ", chains=" + chains +
                 ", aspect=" + aspect +
-                ", steps=" + steps +
                 '}';
     }
 
@@ -280,11 +279,9 @@ public class TestCase {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TestCase testCase = (TestCase) o;
-        return isShareState() == testCase.isShareState() &&
-                isNestedChain() == testCase.isNestedChain() &&
+        return isNestedChain() == testCase.isNestedChain() &&
                 isBreakNestedChain() == testCase.isBreakNestedChain() &&
                 Objects.equal(getScriptFile(), testCase.getScriptFile()) &&
-                Objects.equal(getShareInput(), testCase.getShareInput()) &&
                 Objects.equal(getTestDataSet(), testCase.getTestDataSet()) &&
                 Objects.equal(getSkip(), testCase.getSkip()) &&
                 Objects.equal(getOverrideTestDataSet(), testCase.getOverrideTestDataSet()) &&

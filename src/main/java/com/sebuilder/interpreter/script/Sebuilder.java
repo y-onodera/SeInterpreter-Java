@@ -192,17 +192,22 @@ public class Sebuilder implements ScriptParser {
     protected TestCase loadScript(JSONObject script, File suiteFile) throws JSONException, IOException {
         if (script.has("lazyLoad")) {
             String beforeReplace = script.getString("lazyLoad");
-            final TestCase resultTestCase = TestCaseBuilder.lazyLoad(beforeReplace, (TestData data) -> {
-                String fileName = data.bind(beforeReplace);
+            return this.overrideSetting(script, TestCaseBuilder.lazyLoad(beforeReplace, (TestCase runtimeBefore) -> {
+                String fileName = runtimeBefore.getShareInput().bind(beforeReplace);
                 JSONObject source = new JSONObject();
                 try {
-                    source.put("path", fileName);
-                    return loadScript(source, suiteFile);
+                    TestCase lazyLoad = loadScript(source.put("path", fileName), suiteFile);
+                    return runtimeBefore.map(it -> it
+                            .associateWith(lazyLoad.getScriptFile().toFile())
+                            .setName(lazyLoad.name())
+                            .addSteps(lazyLoad.steps())
+                            .setTestDataSet(lazyLoad.getTestDataSet())
+                            .addAspect(lazyLoad.getAspect())
+                    );
                 } catch (JSONException | IOException e) {
                     throw new AssertionError(e);
                 }
-            });
-            return this.overrideSetting(script, resultTestCase);
+            }));
         }
         String path = Context.bindEnvironmentProperties(script.getString("path"));
         if (script.has("where") && Strings.isNullOrEmpty(script.getString("where"))) {
@@ -229,17 +234,17 @@ public class Sebuilder implements ScriptParser {
     }
 
     protected TestCase overrideSetting(JSONObject script, TestCase resultTestCase) throws JSONException {
-        DataSource dataSource = this.getDataSource(script);
-        if (dataSource != null) {
-            HashMap<String, String> config = this.getDataSourceConfig(script);
-            resultTestCase = resultTestCase.map(it -> it.setOverrideTestDataSet(dataSource, config));
-        }
+        final DataSource dataSource = this.getDataSource(script);
+        final HashMap<String, String> config = this.getDataSourceConfig(script);
         final String skip = Sebuilder.this.getSkip(script);
         final boolean nestedChain = this.isNestedChain(script);
         final boolean breakNestedChain = this.isBreakNestedChain(script);
         return resultTestCase.map(it -> it.setSkip(skip)
                 .isNestedChain(nestedChain)
                 .isBreakNestedChain(breakNestedChain)
+                .changeWhenConditionMatch(target -> dataSource != null
+                        , matches -> matches.setOverrideTestDataSet(dataSource, config)
+                )
         );
     }
 

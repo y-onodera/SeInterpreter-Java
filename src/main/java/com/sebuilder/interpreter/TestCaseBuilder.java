@@ -6,29 +6,30 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class TestCaseBuilder {
 
     private ScriptFile scriptFile;
+    private ArrayList<Step> steps;
     private DataSource dataSource;
     private Map<String, String> dataSourceConfig;
-    private TestData shareInput;
-    private boolean shareState;
     private String skip;
     private DataSource overrideDataSource;
     private Map<String, String> overrideDataSourceConfig;
-    private Function<TestData, TestCase> lazyLoad;
+    private Function<TestCase, TestCase> lazyLoad;
     private boolean nestedChain;
     private boolean breakNestedChain;
     private TestCaseChains chains;
     private Aspect aspect;
+    private boolean shareState;
+    private TestData shareInput;
     private Function<TestCase, TestCase> converter = script -> {
         if (script.isShareState() != this.isShareState()) {
             return script.map(it -> it.isShareState(this.isShareState()));
         }
         return script;
     };
-    private ArrayList<Step> steps;
 
     public TestCaseBuilder() {
         this(new ScriptFile(ScriptFile.Type.TEST));
@@ -36,19 +37,17 @@ public class TestCaseBuilder {
 
     public TestCaseBuilder(ScriptFile scriptFile) {
         this.scriptFile = scriptFile;
+        this.steps = new ArrayList<>();
         this.chains = new TestCaseChains();
         this.aspect = new Aspect();
         this.skip = "false";
-        this.steps = new ArrayList<>();
     }
-
 
     public TestCaseBuilder(TestCase test) {
         this.scriptFile = test.getScriptFile();
-        this.shareInput = test.getShareInput();
+        this.steps = new ArrayList<>(test.steps());
         this.dataSource = test.getTestDataSet().getDataSource();
         this.dataSourceConfig = test.getTestDataSet().getDataSourceConfig();
-        this.shareState = test.isShareState();
         this.skip = test.getSkip();
         this.overrideDataSource = test.getOverrideTestDataSet().getDataSource();
         this.overrideDataSourceConfig = test.getOverrideTestDataSet().getDataSourceConfig();
@@ -57,7 +56,8 @@ public class TestCaseBuilder {
         this.breakNestedChain = test.isBreakNestedChain();
         this.chains = test.getChains();
         this.aspect = test.getAspect();
-        this.steps = new ArrayList<>(test.steps());
+        this.shareState = test.isShareState();
+        this.shareInput = test.getShareInput();
     }
 
     public static TestCaseBuilder suite(File suiteFile) {
@@ -65,7 +65,7 @@ public class TestCaseBuilder {
                 .isShareState(true);
     }
 
-    public static TestCase lazyLoad(String beforeReplace, Function<TestData, TestCase> lazyLoad) {
+    public static TestCase lazyLoad(String beforeReplace, Function<TestCase, TestCase> lazyLoad) {
         return new TestCaseBuilder()
                 .setName(beforeReplace)
                 .setLazyLoad(lazyLoad)
@@ -74,6 +74,13 @@ public class TestCaseBuilder {
 
     public TestCase build() {
         return new TestCase(this);
+    }
+
+    public TestCaseBuilder changeWhenConditionMatch(Predicate<TestCaseBuilder> condition, Function<TestCaseBuilder, TestCaseBuilder> function) {
+        if (condition.test(this)) {
+            return function.apply(this);
+        }
+        return this;
     }
 
     public TestCaseBuilder associateWith(File target) {
@@ -101,8 +108,9 @@ public class TestCaseBuilder {
         return this;
     }
 
-    public TestCaseBuilder setShareInput(TestData testData) {
-        this.shareInput = testData;
+    public TestCaseBuilder setTestDataSet(TestDataSet testDataSet) {
+        this.dataSource = testDataSet.getDataSource();
+        this.dataSourceConfig = testDataSet.getDataSourceConfig();
         return this;
     }
 
@@ -117,11 +125,6 @@ public class TestCaseBuilder {
         return this;
     }
 
-    public TestCaseBuilder isShareState(boolean shareState) {
-        this.shareState = shareState;
-        return this;
-    }
-
     public TestCaseBuilder setSkip(String skip) {
         this.skip = skip;
         return this;
@@ -133,7 +136,7 @@ public class TestCaseBuilder {
         return this;
     }
 
-    public TestCaseBuilder setLazyLoad(Function<TestData, TestCase> lazyLoad) {
+    public TestCaseBuilder setLazyLoad(Function<TestCase, TestCase> lazyLoad) {
         this.lazyLoad = lazyLoad;
         return this;
     }
@@ -165,12 +168,12 @@ public class TestCaseBuilder {
 
     public TestCaseBuilder addChain(TestCase aTestCase, TestCase newTestCase) {
         final int index = this.chains.indexOf(aTestCase) + 1;
-        return addChain(newTestCase, index);
+        return this.addChain(newTestCase, index);
     }
 
     public TestCaseBuilder insertTest(TestCase aTestCase, TestCase newTestCase) {
         final int index = this.chains.indexOf(aTestCase);
-        return addChain(newTestCase, index);
+        return this.addChain(newTestCase, index);
     }
 
     public TestCaseBuilder addChain(TestCase newTestCase, int index) {
@@ -188,6 +191,21 @@ public class TestCaseBuilder {
         return this;
     }
 
+    public TestCaseBuilder setAspect(Aspect aspect) {
+        this.aspect = aspect;
+        return this;
+    }
+
+    public TestCaseBuilder isShareState(boolean shareState) {
+        this.shareState = shareState;
+        return this;
+    }
+
+    public TestCaseBuilder setShareInput(TestData testData) {
+        this.shareInput = testData;
+        return this;
+    }
+
     public TestCaseBuilder addAspect(Aspect aspect) {
         this.aspect = this.aspect.builder()
                 .add(aspect)
@@ -195,28 +213,16 @@ public class TestCaseBuilder {
         return this;
     }
 
-    public TestCaseBuilder setAspect(Aspect aspect) {
-        this.aspect = aspect;
-        return this;
-    }
-
     public ScriptFile getScriptFile() {
         return this.scriptFile;
-    }
-
-    public TestData getShareInput() {
-        if (this.shareInput == null) {
-            return new TestData();
-        }
-        return this.shareInput;
     }
 
     public TestDataSet getTestDataSet() {
         return new TestDataSet(this.dataSource, this.dataSourceConfig, this.scriptFile.relativePath());
     }
 
-    public boolean isShareState() {
-        return this.shareState;
+    public ArrayList<Step> getSteps() {
+        return this.steps;
     }
 
     public String getSkip() {
@@ -227,7 +233,7 @@ public class TestCaseBuilder {
         return new TestDataSet(this.overrideDataSource, this.overrideDataSourceConfig, this.scriptFile.relativePath());
     }
 
-    public Function<TestData, TestCase> getLazyLoad() {
+    public Function<TestCase, TestCase> getLazyLoad() {
         return this.lazyLoad;
     }
 
@@ -247,8 +253,15 @@ public class TestCaseBuilder {
         return this.aspect;
     }
 
-    public ArrayList<Step> getSteps() {
-        return this.steps;
+    public boolean isShareState() {
+        return this.shareState;
+    }
+
+    public TestData getShareInput() {
+        if (this.shareInput == null) {
+            return new TestData();
+        }
+        return this.shareInput;
     }
 
 }

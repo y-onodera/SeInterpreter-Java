@@ -62,6 +62,10 @@ public class ScriptFile {
         return type;
     }
 
+    public File toFile() {
+        return new File(this.path);
+    }
+
     public String relativize(TestCase s) {
         if (this.relativePath == null && !Strings.isNullOrEmpty(s.path())) {
             return s.path();
