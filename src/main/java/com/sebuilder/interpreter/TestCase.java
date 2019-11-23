@@ -293,7 +293,7 @@ public class TestCase {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getScriptFile(), getShareInput(), getTestDataSet(), isShareState(), getSkip(), getOverrideTestDataSet(), isLazyLoad(), isNestedChain(), isBreakNestedChain(), getChains(), getAspect(), this.steps);
+        return Objects.hashCode(getScriptFile(), getTestDataSet(), getSkip(), getOverrideTestDataSet(), isLazyLoad(), isNestedChain(), isBreakNestedChain(), getChains(), getAspect(), this.steps);
     }
 
 }
