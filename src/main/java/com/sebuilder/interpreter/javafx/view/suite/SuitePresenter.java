@@ -1,6 +1,7 @@
 package com.sebuilder.interpreter.javafx.view.suite;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.Suite;
 import com.sebuilder.interpreter.TestCase;
@@ -15,7 +16,10 @@ import javafx.stage.Stage;
 
 import javax.inject.Inject;
 import java.io.File;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 public class SuitePresenter {
 
@@ -35,12 +39,7 @@ public class SuitePresenter {
             if (this.application.getSuite().name().equals(newValue.name())) {
                 this.treeViewScriptName.getSelectionModel().selectFirst();
             } else {
-                this.treeViewScriptName.getRoot()
-                        .getChildren()
-                        .stream()
-                        .filter(it -> newValue.name().equals(it.getValue()))
-                        .findFirst()
-                        .ifPresent(it -> this.treeViewScriptName.getSelectionModel().select(it));
+                this.findItem(newValue).ifPresent(it -> this.treeViewScriptName.getSelectionModel().select(it));
             }
         });
         this.showScriptView();
@@ -127,6 +126,31 @@ public class SuitePresenter {
             }
             addChainToTreeView(selectScriptName, testCase.getChains(), item);
         }
+    }
+
+    private Optional<TreeItem<String>> findItem(TestCase newValue) {
+        return this.treeItems()
+                .filter(it -> newValue.name().equals(it.getValue()))
+                .findFirst();
+    }
+
+    private Stream<TreeItem<String>> treeItems() {
+        List<TreeItem<String>> result = Lists.newArrayList();
+        this.collectItems(this.treeViewScriptName.getRoot().getChildren(), result);
+        return result.stream();
+    }
+
+    private void collectItems(List<TreeItem<String>> source, List<TreeItem<String>> result) {
+        source.forEach(collectItems(result));
+    }
+
+    private Consumer<TreeItem<String>> collectItems(List<TreeItem<String>> result) {
+        return it -> {
+            result.add(it);
+            if (it.getChildren().size() > 0) {
+                collectItems(it.getChildren(), result);
+            }
+        };
     }
 
     private void saveTestCaseToNewFile() {
