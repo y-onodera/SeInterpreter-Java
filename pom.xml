@@ -14,7 +14,6 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
-
     <dependencies>
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -75,7 +74,12 @@
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
             <version>20080701</version>
-            <scope>compile</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.dlsc.afterburner/afterburner.fx -->
+        <dependency>
+            <groupId>com.dlsc.afterburner</groupId>
+            <artifactId>afterburner.fx</artifactId>
+            <version>2.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
@@ -108,8 +112,16 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/java</directory>
+                <includes>
+                    <include>**/*.fxml</include>
+                    <include>**/*.css</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -192,8 +204,7 @@
                                 </transformer>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.sebuilder.interpreter.javafx.application.SeInterpreterApplication
-                                    </mainClass>
+                                    <mainClass>com.sebuilder.interpreter.javafx.application.SeInterpreterApplication</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>

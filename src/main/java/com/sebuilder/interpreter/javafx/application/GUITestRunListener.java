@@ -3,45 +3,45 @@ package com.sebuilder.interpreter.javafx.application;
 import com.sebuilder.interpreter.TestCase;
 import com.sebuilder.interpreter.TestData;
 import com.sebuilder.interpreter.application.TestRunListenerImpl;
-import com.sebuilder.interpreter.javafx.EventBus;
-import com.sebuilder.interpreter.javafx.Result;
-import com.sebuilder.interpreter.javafx.event.replay.StepResultSetEvent;
-import com.sebuilder.interpreter.javafx.event.script.ScriptSelectEvent;
 import org.apache.logging.log4j.Logger;
 
 public class GUITestRunListener extends TestRunListenerImpl {
+    private final SeInterpreterApplication application;
 
-    public GUITestRunListener(Logger aLog) {
+    public GUITestRunListener(Logger aLog, SeInterpreterApplication application) {
         super(aLog);
+        this.application = application;
     }
 
     @Override
     public boolean openTestSuite(TestCase testCase, String testRunName, TestData aProperty) {
-        EventBus.publish(new ScriptSelectEvent(testCase.name()));
+        if (this.application.getSuite().get(testCase.name()) != null) {
+            this.application.selectScript(testCase.name());
+        }
         return super.openTestSuite(testCase, testRunName, aProperty);
     }
 
     @Override
     public void startTest(String testName) {
         super.startTest(testName);
-        EventBus.publish(new StepResultSetEvent(this.getStepNo(), Result.START));
+        this.application.updateReplayStatus(this.getStepNo(), Result.START);
     }
 
     @Override
     public void addError(Throwable throwable) {
-        EventBus.publish(new StepResultSetEvent(this.getStepNo(), Result.ERROR));
+        this.application.updateReplayStatus(this.getStepNo(), Result.ERROR);
         super.addError(throwable);
     }
 
     @Override
     public void addFailure(String message) {
-        EventBus.publish(new StepResultSetEvent(this.getStepNo(), Result.FAILURE));
+        this.application.updateReplayStatus(this.getStepNo(), Result.FAILURE);
         super.addFailure(message);
     }
 
     @Override
     public void endTest() {
-        EventBus.publish(new StepResultSetEvent(this.getStepNo(), Result.SUCCESS));
+        this.application.updateReplayStatus(this.getStepNo(), Result.SUCCESS);
         super.endTest();
     }
 }

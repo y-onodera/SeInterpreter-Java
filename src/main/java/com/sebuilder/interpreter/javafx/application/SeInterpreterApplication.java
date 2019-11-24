@@ -1,48 +1,47 @@
 package com.sebuilder.interpreter.javafx.application;
 
+import com.airhacks.afterburner.injection.Injector;
 import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
+import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
-import com.google.common.eventbus.Subscribe;
 import com.google.common.io.Files;
 import com.sebuilder.interpreter.*;
 import com.sebuilder.interpreter.application.TestRunListenerImpl;
-import com.sebuilder.interpreter.javafx.EventBus;
-import com.sebuilder.interpreter.javafx.controller.RunningProgressController;
-import com.sebuilder.interpreter.javafx.event.ReportErrorEvent;
-import com.sebuilder.interpreter.javafx.event.ViewType;
-import com.sebuilder.interpreter.javafx.event.browser.BrowserCloseEvent;
-import com.sebuilder.interpreter.javafx.event.browser.BrowserOpenEvent;
-import com.sebuilder.interpreter.javafx.event.browser.BrowserSettingEvent;
-import com.sebuilder.interpreter.javafx.event.file.*;
-import com.sebuilder.interpreter.javafx.event.replay.*;
-import com.sebuilder.interpreter.javafx.event.script.*;
-import com.sebuilder.interpreter.javafx.event.view.*;
+import com.sebuilder.interpreter.javafx.view.replay.ReplayPresenter;
+import com.sebuilder.interpreter.javafx.view.replay.ReplayView;
 import com.sebuilder.interpreter.step.type.Get;
+import com.sebuilder.interpreter.step.type.HighLightElement;
 import javafx.application.Application;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.Window;
+import javafx.util.Pair;
 
 import java.io.File;
-import java.net.URL;
+import java.io.IOException;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class SeInterpreterApplication extends Application {
 
-    private Suite suite;
-
-    private TestCase currentDisplay;
-
-    private ViewType currentMainView;
-
     private SeInterpreterRunner runner;
+
+    private ObjectProperty<Suite> suite = new SimpleObjectProperty<>();
+
+    private ObjectProperty<TestCase> displayTestCase = new SimpleObjectProperty<>();
+
+    private ObjectProperty<ViewType> scriptViewType = new SimpleObjectProperty<>();
+
+    private ObjectProperty<Pair<Integer, Result>> replayStatus = new SimpleObjectProperty<>();
 
     private Scene scene;
 
@@ -52,24 +51,20 @@ public class SeInterpreterApplication extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
+        Injector.setModelOrService(SeInterpreterApplication.class, this);
         System.setProperty("log4j.configurationFile", "log4j2-gui.xml");
-        stage.setTitle("SeInterpreter");
-
-        final URL resource = this.getClass().getResource("/fxml/seleniumbuilder.fxml");
-        Parent root = FXMLLoader.load(Objects.requireNonNull(resource));
-        this.scene = new Scene(root);
-        stage.setScene(this.scene);
-        stage.setResizable(true);
-        stage.show();
-        EventBus.registSubscriber(this);
-        EventBus.publish(new ScriptResetEvent());
-        this.currentMainView = ViewType.TABLE;
         final Parameters parameters = getParameters();
         this.runner = new SeInterpreterRunner(parameters.getRaw());
         final List<String> unnamed = parameters.getUnnamed();
         if (unnamed.size() > 0) {
             this.resetSuite(getScriptParser().load(new File(unnamed.get(0))).toSuite());
         }
+        final MainView mainView = new MainView();
+        this.scene = new Scene(mainView.getView());
+        stage.setTitle("SeInterpreter");
+        stage.setScene(this.scene);
+        stage.setResizable(true);
+        stage.show();
     }
 
     @Override
@@ -78,244 +73,102 @@ public class SeInterpreterApplication extends Application {
         super.stop();
     }
 
-    @Subscribe
-    public void reset(ScriptResetEvent event) {
-        ReportErrorEvent.publishIfExecuteThrowsException(() -> {
-            this.resetSuite(this.templateScript().toSuite());
-        });
+    public ObjectProperty<Suite> suiteProperty() {
+        return suite;
     }
 
-    @Subscribe
-    public void scriptReLoad(FileLoadEvent event) {
-        ReportErrorEvent.publishIfExecuteThrowsException(() -> {
-            this.resetSuite(getScriptParser().load(event.getFile()).toSuite());
-        });
-
+    public ObjectProperty<TestCase> displayTestCaseProperty() {
+        return displayTestCase;
     }
 
-    @Subscribe
-    public void addScript(ScriptAddEvent event) {
-        TestCase newTestCase = event.getTestCase();
-        if (newTestCase == null) {
-            newTestCase = this.templateScript();
+    public Suite getSuite() {
+        return this.suite.getValue();
+    }
+
+    public TestCase getDisplayTestCase() {
+        return this.displayTestCase.getValue();
+    }
+
+    public String getCurrentDisplayAsJson() {
+        return Context.getScriptParser().toString(this.getDisplayTestCase());
+    }
+
+    public ObjectProperty<ViewType> scriptViewTypeProperty() {
+        return this.scriptViewType;
+    }
+
+    public ObjectProperty<Pair<Integer, Result>> replayStatusProperty() {
+        return replayStatus;
+    }
+
+    public void executeAndLoggingCaseWhenThrowException(ThrowableAction action) {
+        try {
+            action.execute();
+        } catch (Throwable th) {
+            this.runner.getLog().error(Throwables.getStackTraceAsString(th));
         }
-        addScript(newTestCase);
     }
 
-    @Subscribe
-    public void insertScript(ScriptInsertEvent event) {
+    public void changeScriptViewType(ViewType viewType) {
+        this.scriptViewType.setValue(viewType);
+    }
+
+    public void reset() {
+        this.resetSuite(this.templateScript().toSuite());
+    }
+
+    public void selectScript(String newValue) {
+        this.displayTestCase.setValue(this.getSuite().get(newValue));
+    }
+
+    public void replaceScriptJson(String text) throws IOException {
+        TestCase replaced = Context.getScriptParser().load(text, new File(this.getDisplayTestCase().getScriptFile().path()))
+                .map(it -> it.setName(this.getDisplayTestCase().name()));
+        replaceDisplayCase(replaced);
+    }
+
+    public void insertScript() {
         TestCase newTestCase = this.templateScript();
-        this.resetScript(this.suite.map(it -> it.insertTest(this.currentDisplay, newTestCase)), newTestCase);
+        this.resetScript(this.getSuite().map(it -> it.insertTest(this.getDisplayTestCase(), newTestCase)), newTestCase);
     }
 
-    @Subscribe
-    public void exportTemplate(TemplateLoadEvent event) {
-        this.addScript(this.runner.exportTemplate(event.getParentLocator(), event.getTargetTag(), event.isWithDataSource()));
+    public void addScript() {
+        this.addScript(this.templateScript());
     }
 
-    @Subscribe
-    public void scriptImport(ScriptImportEvent event) {
-        ReportErrorEvent.publishIfExecuteThrowsException(() -> {
-            addScript(getScriptParser().load(event.getFile()));
-        });
-
+    public void addScript(TestCase newTestCase) {
+        this.resetScript(this.getSuite().map(it -> it.addChain(this.getDisplayTestCase(), newTestCase)), newTestCase);
     }
 
-    @Subscribe
-    public void deleteScript(ScriptDeleteEvent event) {
-        this.resetSuite(this.suite.map(it -> it.remove(this.currentDisplay)));
+    public void removeScript() {
+        this.resetSuite(this.getSuite().map(it -> it.remove(this.getDisplayTestCase())));
     }
 
-    @Subscribe
-    public void changeCurrentScript(ScriptSelectEvent event) {
-        this.currentDisplay = this.suite.get(event.getScriptName());
-        this.refreshMainView();
+    public void resetSuite(Suite newSuite) {
+        this.resetScript(newSuite, newSuite.head());
     }
 
-    @Subscribe
-    public void replaceScript(ScriptReplaceEvent event) {
-        ReportErrorEvent.publishIfExecuteThrowsException(() -> {
-            TestCase newTestCase = getScriptParser().load(event.getJsonString(), new File(this.currentDisplay.path()))
-                    .map(builder -> builder.setName(this.currentDisplay.name()));
-            this.resetScript(this.suite.replace(this.currentDisplay, newTestCase), newTestCase);
+    public void scriptReLoad(File file) {
+        this.executeAndLoggingCaseWhenThrowException(() -> {
+            this.resetSuite(getScriptParser().load(file).toSuite());
         });
     }
 
-    @Subscribe
-    public void handleViewTypeChange(ScriptViewChangeEvent event) {
-        this.currentMainView = event.getViewType();
-        this.refreshMainView();
+    public void importScript(File file) {
+        this.executeAndLoggingCaseWhenThrowException(() -> {
+            addScript(getScriptParser().load(file));
+        });
     }
 
-    @Subscribe
-    public void deleteStep(StepDeleteEvent event) {
-        TestCase newCase = this.currentDisplay.removeStep(event.getStepIndex());
-        this.resetScript(this.suite.replace(this.currentDisplay, newCase), newCase);
-    }
-
-    @Subscribe
-    public void moveStep(StepMoveEvent event) {
-        Step step = this.currentDisplay.steps().get(event.getFrom());
-        int indexTo = event.getTo();
-        TestCase newCase;
-        if (event.getTo() > event.getFrom()) {
-            newCase = this.currentDisplay.addStep(indexTo, step)
-                    .removeStep(event.getFrom());
-        } else {
-            newCase = this.currentDisplay.insertStep(indexTo, step)
-                    .removeStep(event.getFrom() + 1);
-        }
-        this.resetScript(this.suite.replace(this.currentDisplay, newCase), newCase);
-    }
-
-    @Subscribe
-    public void editStep(StepEditEvent event) {
-        Step newStep = event.getStepSource();
-        TestCase newCase;
-        if (event.getEditAction().equals("change")) {
-            newCase = this.currentDisplay.setSteps(event.getStepIndex(), newStep);
-        } else if (event.getEditAction().equals("insert")) {
-            newCase = this.currentDisplay.insertStep(event.getStepIndex(), newStep);
-        } else {
-            newCase = this.currentDisplay.addStep(event.getStepIndex(), newStep);
-        }
-        this.resetScript(this.suite.replace(this.currentDisplay, newCase), newCase);
-    }
-
-    @Subscribe
-    public void createStep(StepAddEvent event) {
-        TestCase templateTestCase = Context
-                .getStepTypeFactory()
-                .getStepTypeOfName(event.getStepType())
-                .toStep()
-                .build()
-                .toTestCase();
-        EventBus.publish(RefreshStepEditViewEvent.add(templateTestCase.steps().get(0)));
-    }
-
-    @Subscribe
-    public void loadStep(StepLoadEvent event) {
-        EventBus.publish(RefreshStepEditViewEvent.change(this.currentDisplay.steps().get(event.getStepIndex())));
-    }
-
-    @Subscribe
-    public void saveScript(FileSaveEvent event) {
-        if (Strings.isNullOrEmpty(this.currentDisplay.path())) {
-            EventBus.publish(new OpenScriptSaveChooserEvent());
-        } else {
-            this.saveContents(new File(this.currentDisplay.path()), this.getScriptParser().toString(this.currentDisplay));
-        }
-    }
-
-    @Subscribe
-    public void saveScript(FileSaveAsEvent event) {
-        File target = event.getFile();
-        TestCase save = this.saveContents(target
-                , this.currentDisplay.builder()
-                        .associateWith(target)
-                        .build()
-                , this.currentDisplay.path());
-        this.resetScript(this.suite.replace(this.currentDisplay, save), save);
-    }
-
-    @Subscribe
-    public void saveSuite(FileSaveSuiteAsEvent event) {
-        if (Strings.isNullOrEmpty(this.suite.path())) {
-            EventBus.publish(new OpenSuiteSaveChooserEvent());
-        } else {
-            this.saveSuite();
-        }
-    }
-
-
-    @Subscribe
-    public void saveSuite(FileSaveSuiteEvent event) {
-        this.suite = this.suite.builder()
-                .associateWith(event.getFile())
-                .build()
-                .toSuite();
+    public void saveSuite(File file) {
+        this.suite.setValue(this.getSuite().map(builder -> builder.associateWith(file)));
         this.saveSuite();
     }
 
-    @Subscribe
-    public void browserSetting(BrowserSettingEvent event) {
-        this.runner.reloadSetting(event.getSelectedBrowser(), event.getDriverPath());
-        this.open(new BrowserOpenEvent());
-    }
-
-    @Subscribe
-    public void open(BrowserOpenEvent event) {
-        this.executeTask(this.runner.createRunScriptTask(this.templateScript(), logger -> {
-            return new TestRunListenerImpl(logger);
-        }));
-    }
-
-    @Subscribe
-    public void highLightElement(ElementHighLightEvent event) {
-        this.runner.highLightElement(event.getLocator(), event.getValue());
-    }
-
-    @Subscribe
-    public void runStep(RunStepEvent event) {
-        this.executeTask(this.runner.createRunScriptTask(this.currentDisplay.removeStep(event.getFilter())
-                , log -> new GUITestRunListener(log) {
-                    @Override
-                    public int getStepNo() {
-                        return event.getStepNoFunction().apply(super.getStepNo());
-                    }
-                }));
-    }
-
-    @Subscribe
-    public void runScript(RunEvent event) {
-        this.executeTask(this.runner.createRunScriptTask(this.currentDisplay));
-    }
-
-    @Subscribe
-    public void runSuite(RunSuiteEvent event) {
-        this.executeTask(this.runner.createRunScriptTask(this.suite.head()));
-    }
-
-    @Subscribe
-    public void runStop(StopEvent event) {
-        this.runner.stopRunning();
-    }
-
-    @Subscribe
-    public void close(BrowserCloseEvent event) {
-        this.runner.close();
-    }
-
-    protected ScriptParser getScriptParser() {
-        return Context.getScriptParser();
-    }
-
-    private TestCase templateScript() {
-        return new Get().toStep().put("url", "https://www.google.com").build().toTestCase();
-    }
-
-    private void addScript(TestCase newTestCase) {
-        this.resetScript(this.suite.map(it -> it.addChain(this.currentDisplay, newTestCase)), newTestCase);
-    }
-
-    private void resetSuite(Suite newSuite) {
-        resetScript(newSuite, newSuite.head());
-    }
-
-    private void resetScript(Suite aSuite, TestCase toSelect) {
-        this.suite = aSuite;
-        if (this.currentDisplay != null && Objects.equals(this.currentDisplay.path(), toSelect.path())) {
-            this.currentDisplay = this.suite.get(this.currentDisplay.name());
-        } else {
-            this.currentDisplay = this.suite.get(toSelect.name());
-        }
-        EventBus.publish(new RefreshScriptViewEvent(this.suite, toSelect.name()));
-    }
-
-    private void saveSuite() {
-        File target = new File(this.suite.path());
+    public void saveSuite() {
+        File target = new File(this.getSuite().path());
         List<TestCase> notAssociateFile = Lists.newArrayList();
-        this.suite.getChains().forEach(it -> {
+        this.getSuite().getChains().forEach(it -> {
             if (Strings.isNullOrEmpty(it.path())) {
                 notAssociateFile.add(it);
             }
@@ -332,14 +185,103 @@ public class SeInterpreterApplication extends Application {
             }
             File saveTo = new File(scriptSaveTo, newName);
             TestCase save = this.saveContents(saveTo, it.builder().associateWith(saveTo).build(), "");
-            Suite newSuite = this.suite.replace(it, save);
-            if (it == this.currentDisplay) {
+            Suite newSuite = this.getSuite().replace(it, save);
+            if (it == this.getDisplayTestCase()) {
                 this.resetScript(newSuite, save);
             } else {
-                this.resetScript(newSuite, this.currentDisplay);
+                this.resetScript(newSuite, this.getDisplayTestCase());
             }
         });
-        this.saveContents(target, this.getScriptParser().toString(this.suite));
+        this.saveContents(target, this.getScriptParser().toString(this.getSuite()));
+    }
+
+    public StepType getStepTypeOfName(String stepType) {
+        return Context
+                .getStepTypeFactory()
+                .getStepTypeOfName(stepType);
+    }
+
+    public Step createStep(String stepType) {
+        return this.getStepTypeOfName(stepType)
+                .toStep()
+                .build()
+                .toTestCase()
+                .steps().get(0);
+    }
+
+    public void replaceDisplayCase(TestCase newCase) {
+        this.resetScript(this.getSuite().replace(this.getDisplayTestCase(), newCase), newCase);
+    }
+
+    public void saveTestCase(File target) {
+        TestCase save = this.saveContents(target
+                , this.getDisplayTestCase().map(builder -> builder.associateWith(target))
+                , this.getDisplayTestCase().path());
+        this.replaceDisplayCase(save);
+    }
+
+    public void saveTestCase() {
+        this.saveContents(new File(this.getDisplayTestCase().path()), this.getScriptParser().toString(this.getDisplayTestCase()));
+    }
+
+    public void browserSetting(String selectedBrowser, String driverPath) {
+        this.runner.reloadSetting(selectedBrowser, driverPath);
+        this.browserOpen();
+    }
+
+    public void browserOpen() {
+        this.executeTask(this.runner.createRunScriptTask(this.templateScript(), logger -> new TestRunListenerImpl(logger)));
+    }
+
+    public void browserClose() {
+        this.runner.close();
+    }
+
+    public void highLightElement(String locatorType, String value) {
+        Step highLightElement = new HighLightElement()
+                .toStep()
+                .locator(new Locator(locatorType, value))
+                .build();
+        this.runner.run(highLightElement.toTestCase());
+    }
+
+    public TestCase exportTemplate(Locator locator, List<String> targetTags, boolean withDataSource) {
+        return this.runner.exportTemplate(locator, targetTags, withDataSource);
+    }
+
+    public void runSuite() {
+        this.executeTask(this.runner.createRunScriptTask(this.getSuite().head(), log -> new GUITestRunListener(log, this)));
+    }
+
+    public void runScript() {
+        this.executeTask(this.runner.createRunScriptTask(this.getDisplayTestCase(), log -> new GUITestRunListener(log, this)));
+    }
+
+    public void runStep(Predicate<Number> filter, Function<Integer, Integer> function) {
+        this.executeTask(this.runner.createRunScriptTask(this.getDisplayTestCase().removeStep(filter)
+                , log -> new GUITestRunListener(log, this) {
+                    @Override
+                    public int getStepNo() {
+                        return function.apply(super.getStepNo());
+                    }
+                }));
+    }
+
+    public void updateReplayStatus(int stepNo, Result result) {
+        this.replayStatus.setValue(new Pair<>(stepNo, result));
+    }
+
+    protected ScriptParser getScriptParser() {
+        return Context.getScriptParser();
+    }
+
+    private void resetScript(Suite aSuite, TestCase toSelect) {
+        this.suite.setValue(aSuite);
+        this.selectScript(toSelect.name());
+    }
+
+    private TestCase templateScript() {
+        return new Get().toStep().put("url", "https://www.google.com").build().toTestCase();
     }
 
     private TestCase saveContents(File target, TestCase exportTo, String oldPath) {
@@ -352,7 +294,7 @@ public class SeInterpreterApplication extends Application {
     }
 
     private void saveContents(File target, String content) {
-        ReportErrorEvent.publishIfExecuteThrowsException(() -> {
+        this.executeAndLoggingCaseWhenThrowException(() -> {
             if (!target.exists()) {
                 target.createNewFile();
             }
@@ -363,32 +305,47 @@ public class SeInterpreterApplication extends Application {
     private TestCase copyDataSourceTemplate(TestCase it) {
         if (it.getTestDataSet().getDataSourceConfig().containsKey("path")) {
             File src = new File(this.runner.getTemplateOutputDirectory(), it.getTestDataSet().getDataSourceConfig().get("path"));
-            final String newDataSourceName = it.name().replace(".json", ".csv");
-            File dest = new File(this.runner.getDataSourceDirectory(), newDataSourceName);
-            if (src.exists() && !dest.exists()) {
-                ReportErrorEvent.publishIfExecuteThrowsException(() -> Files.copy(src, dest));
-                return it.map(builder -> builder.addDataSourceConfig("path", newDataSourceName));
+            if (src.exists()) {
+                final String newDataSourceName = it.name().replace(".json", "");
+                File newDataSource = new File(this.runner.getDataSourceDirectory(), newDataSourceName + ".csv");
+                int suffix = 1;
+                while (newDataSource.exists()) {
+                    newDataSource = new File(this.runner.getDataSourceDirectory(), newDataSourceName + suffix + ".csv");
+                    suffix++;
+                }
+                final File dest = newDataSource;
+                this.executeAndLoggingCaseWhenThrowException(() -> Files.copy(src, dest));
+                return it.map(builder -> builder.addDataSourceConfig("path", dest.getName()));
             }
         }
         return it;
     }
 
-    private void refreshMainView() {
-        if (this.currentMainView == ViewType.TABLE) {
-            EventBus.publish(new RefreshStepTableViewEvent(this.currentDisplay));
-        } else if (this.currentMainView == ViewType.TEXT) {
-            EventBus.publish(new RefreshStepTextViewEvent(this.currentDisplay));
-        }
-    }
-
     private void executeTask(Task task) {
-        ReportErrorEvent.publishIfExecuteThrowsException(() -> {
+        this.executeAndLoggingCaseWhenThrowException(() -> {
             ExecutorService executor = Executors.newSingleThreadExecutor();
-            RunningProgressController.init(this.scene.getWindow(), task);
+            this.showProgressbar(this.scene.getWindow(), task);
             task.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED, wse -> {
                 executor.shutdown();
             });
             executor.submit(task);
         });
+    }
+
+    private void showProgressbar(Window window, Task task) {
+        ReplayView replayView = new ReplayView();
+        Scene scene = new Scene(replayView.getView());
+        Stage runProgressDialog = new Stage();
+        runProgressDialog.setScene(scene);
+        runProgressDialog.initOwner(window);
+        runProgressDialog.initModality(Modality.WINDOW_MODAL);
+        runProgressDialog.setTitle("run progress");
+        ReplayPresenter.class.cast(replayView.getPresenter()).bind(task);
+        runProgressDialog.setResizable(false);
+        runProgressDialog.show();
+    }
+
+    public interface ThrowableAction {
+        void execute() throws Exception;
     }
 }

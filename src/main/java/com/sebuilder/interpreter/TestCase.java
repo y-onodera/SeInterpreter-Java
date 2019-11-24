@@ -78,7 +78,10 @@ public class TestCase {
     }
 
     public Suite toSuite() {
-        return new Suite(this);
+        if (this.getScriptFile().type() == ScriptFile.Type.SUITE) {
+            return new Suite(this);
+        }
+        return new Suite(TestCaseBuilder.suite(null).addChain(this).build());
     }
 
     public ScriptFile getScriptFile() {
