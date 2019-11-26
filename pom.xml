@@ -121,6 +121,13 @@
                     <include>**/*.css</include>
                 </includes>
             </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>**/*.xml</include>
+                    <include>**/*.xsl</include>
+                </includes>
+            </resource>
         </resources>
         <plugins>
             <plugin>
