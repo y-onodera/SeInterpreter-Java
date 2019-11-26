@@ -63,6 +63,9 @@ public class ScriptFile {
     }
 
     public File toFile() {
+        if(Strings.isNullOrEmpty(this.path)){
+            return null;
+        }
         return new File(this.path);
     }
 

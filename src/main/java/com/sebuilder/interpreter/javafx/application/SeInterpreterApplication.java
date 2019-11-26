@@ -122,7 +122,7 @@ public class SeInterpreterApplication extends Application {
     }
 
     public void replaceScriptJson(String text) throws IOException {
-        TestCase replaced = Context.getScriptParser().load(text, new File(this.getDisplayTestCase().getScriptFile().path()))
+        TestCase replaced = Context.getScriptParser().load(text, this.getDisplayTestCase().getScriptFile().toFile())
                 .map(it -> it.setName(this.getDisplayTestCase().name()));
         replaceDisplayCase(replaced);
     }
