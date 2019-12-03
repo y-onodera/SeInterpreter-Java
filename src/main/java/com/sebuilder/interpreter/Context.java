@@ -66,6 +66,10 @@ public enum Context {
         return getInstance().browser;
     }
 
+    public String getWebDriverPath() {
+        return this.wdf.getDriverPath();
+    }
+
     public static Map<String, String> getDriverConfig() {
         return getInstance().getDriverConfig;
     }

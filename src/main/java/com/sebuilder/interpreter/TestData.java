@@ -5,16 +5,18 @@ import com.google.common.collect.Maps;
 import org.apache.commons.jexl3.*;
 import org.openqa.selenium.Keys;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class TestData {
 
     public static final String ROW_NUMBER = "_rowNumber";
-    private static final HashMap<String, String> EMPTY = Maps.newHashMap();
+    private static final LinkedHashMap<String, String> EMPTY = Maps.newLinkedHashMap();
 
-    private final Map<String, String> row;
+    private final LinkedHashMap<String, String> row;
 
     private final boolean lastRow;
 
@@ -22,13 +24,20 @@ public class TestData {
         this(EMPTY, true);
     }
 
-    public TestData(Map<String, String> row) {
+    public TestData(LinkedHashMap<String, String> row) {
         this(row, false);
     }
 
-    public TestData(Map<String, String> row, boolean lastRow) {
-        this.row = Maps.newHashMap(row);
+    public TestData(LinkedHashMap<String, String> row, boolean lastRow) {
+        this.row = Maps.newLinkedHashMap(row);
         this.lastRow = lastRow;
+    }
+
+    public Set<Map.Entry<String, String>> input() {
+        return this.entrySet()
+                .stream()
+                .filter(it -> !it.getKey().startsWith("_"))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     public String rowNumber() {
@@ -76,7 +85,7 @@ public class TestData {
         try {
             JexlEngine jexl = new JexlBuilder().create();
             JexlExpression expression = jexl.createExpression(exp);
-            JexlContext jc = new MapContext(new HashMap(this.row));
+            JexlContext jc = new MapContext(Maps.newHashMap(this.row));
             return Boolean.valueOf(expression.evaluate(jc).toString());
         } catch (JexlException ex) {
             return false;
@@ -99,7 +108,7 @@ public class TestData {
     }
 
     public Builder builder() {
-        return new Builder(Maps.newHashMap(this.row), this.lastRow);
+        return new Builder(Maps.newLinkedHashMap(this.row), this.lastRow);
     }
 
     public Set<Map.Entry<String, String>> entrySet() {
@@ -155,11 +164,11 @@ public class TestData {
     }
 
     public static class Builder {
-        private final Map<String, String> row;
+        private final LinkedHashMap<String, String> row;
 
         private final boolean lastRow;
 
-        public Builder(Map<String, String> row, boolean lastRow) {
+        public Builder(LinkedHashMap<String, String> row, boolean lastRow) {
             this.row = row;
             this.lastRow = lastRow;
         }
@@ -182,6 +191,5 @@ public class TestData {
             this.row.put(key, value);
             return this;
         }
-
     }
 }

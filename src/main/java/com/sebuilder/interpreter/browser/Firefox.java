@@ -67,4 +67,8 @@ public class Firefox implements WebDriverFactory {
         System.setProperty("webdriver.gecko.driver", driverPath);
     }
 
+    @Override
+    public String getDriverPath() {
+        return System.getProperty("webdriver.gecko.driver");
+    }
 }

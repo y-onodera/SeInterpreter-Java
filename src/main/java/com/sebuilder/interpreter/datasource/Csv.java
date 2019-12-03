@@ -16,29 +16,32 @@
 
 package com.sebuilder.interpreter.datasource;
 
+import com.google.common.io.Files;
 import com.opencsv.CSVReader;
+import com.opencsv.CSVWriter;
 import com.sebuilder.interpreter.Context;
-import com.sebuilder.interpreter.DataSource;
+import com.sebuilder.interpreter.DataSourceWriter;
 import com.sebuilder.interpreter.TestData;
 
 import java.io.*;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import static com.sebuilder.interpreter.Utils.findFile;
+import java.util.stream.Collectors;
 
 /**
  * CSV-based data source.
  *
  * @author zarkonnen
  */
-public class Csv implements DataSource {
+public class Csv implements FileDataSource {
+
     @Override
     public List<TestData> getData(Map<String, String> config, File relativeTo, TestData vars) {
         ArrayList<TestData> data = new ArrayList<>();
-        File f = findFile(relativeTo, vars.bind(config.get("path")));
+        File f = this.sourceFile(config, relativeTo, vars);
         String charsetName = Context.getDataSourceEncoding();
         BufferedReader r = null;
         try {
@@ -50,7 +53,7 @@ public class Csv implements DataSource {
                 int rowNumber = 1;
                 while ((line = csvR.readNext()) != null) {
                     rowNumber++;
-                    HashMap<String, String> row = new HashMap<String, String>();
+                    LinkedHashMap<String, String> row = new LinkedHashMap<String, String>();
                     if (line.length < keys.length) {
                         throw new IOException("Not enough cells in row " + rowNumber + ".");
                     }
@@ -76,6 +79,22 @@ public class Csv implements DataSource {
             }
         }
         return data;
+    }
+
+    @Override
+    public DataSourceWriter writer(Map<String, String> dataSourceConfig, File relativePath, TestData shareInput) {
+        return data -> {
+            File target = sourceFile(dataSourceConfig, relativePath, shareInput);
+            try (BufferedWriter writer = Files.newWriter(target, Charset.forName(Context.getDataSourceEncoding()))) {
+                CSVWriter csvwriter = new CSVWriter(writer);
+                String[] header = data.get(0).entrySet().stream().map(Map.Entry::getKey).toArray(size -> new String[size]);
+                List<String[]> rows = data.stream()
+                        .map(it -> it.entrySet().stream().map(Map.Entry::getValue).toArray(size -> new String[size]))
+                        .collect(Collectors.toCollection(ArrayList::new));
+                rows.add(0, header);
+                csvwriter.writeAll(rows);
+            }
+        };
     }
 
     @Override

@@ -9,6 +9,7 @@ import com.sebuilder.interpreter.TestCaseChains;
 import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.stage.FileChooser;
@@ -30,6 +31,9 @@ public class SuitePresenter {
     private TreeView<String> treeViewScriptName;
 
     @FXML
+    public MenuItem openDataSource;
+
+    @FXML
     void initialize() {
         assert this.treeViewScriptName != null : "fx:id=\"treeViewScriptName\" was not injected: check your FXML file 'scriptview.fxml'.";
         this.application.suiteProperty().addListener((observed, oldValue, newValue) -> {
@@ -41,8 +45,18 @@ public class SuitePresenter {
             } else {
                 this.findItem(newValue).ifPresent(it -> this.treeViewScriptName.getSelectionModel().select(it));
             }
+            if (observed.getValue().hasLoadableDataSet() && observed.getValue().loadData().size() > 0) {
+                openDataSource.setDisable(false);
+            } else {
+                openDataSource.setDisable(true);
+            }
         });
         this.showScriptView();
+    }
+
+    @FXML
+    public void handleOpenDataSource(ActionEvent actionEvent) {
+        new DataSetView().showDataSet(this.application.getDisplayTestCase(), this.treeViewScriptName.getScene().getWindow());
     }
 
     @FXML

@@ -30,7 +30,19 @@ public interface DataSource {
 
     List<TestData> getData(Map<String, String> config, File relativeTo, TestData vars);
 
+    default String name(Map<String, String> dataSourceConfig, TestData shareInput) {
+        return this.name();
+    }
+
     default String name() {
         return this.getClass().getSimpleName().toLowerCase();
+    }
+
+    default boolean isLoadable(Map<String, String> dataSourceConfig, File relativePath, TestData shareInput) {
+        return false;
+    }
+
+    default DataSourceWriter writer(Map<String,String> dataSourceConfig, File relativePath, TestData shareInput){
+        throw new UnsupportedOperationException();
     }
 }

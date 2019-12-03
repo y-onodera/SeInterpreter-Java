@@ -11,7 +11,7 @@ import com.sebuilder.interpreter.DataSource;
 import com.sebuilder.interpreter.TestData;
 
 import java.io.File;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,7 +23,7 @@ import java.util.Map;
 public class Manual implements DataSource {
     @Override
     public List<TestData> getData(Map<String, String> config, File relativeTo, TestData vars) {
-        Map<String, String> row = new HashMap<>(config);
+        LinkedHashMap<String, String> row = new LinkedHashMap<>(config);
         row.put(TestData.ROW_NUMBER, String.valueOf(1));
         config.keySet()
                 .stream()

@@ -17,7 +17,6 @@
 package com.sebuilder.interpreter.datasource;
 
 import com.sebuilder.interpreter.Context;
-import com.sebuilder.interpreter.DataSource;
 import com.sebuilder.interpreter.TestData;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -29,25 +28,24 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.*;
 
-import static com.sebuilder.interpreter.Utils.findFile;
-
 /**
  * JSON-based data source.
  *
  * @author zarkonnen
  */
-public class Json implements DataSource {
+public class Json implements FileDataSource {
+
     @Override
     public List<TestData> getData(Map<String, String> config, File relativeTo, TestData vars) {
         ArrayList<TestData> data = new ArrayList<>();
-        File f = findFile(relativeTo, vars.bind(config.get("path")));
+        File f = this.sourceFile(config, relativeTo, vars);
         String charsetName = Context.getDataSourceEncoding();
         try (BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(f), charsetName))) {
             JSONTokener tok = new JSONTokener(r);
             JSONArray a = new JSONArray(tok);
             for (int i = 0; i < a.length(); i++) {
                 JSONObject rowO = a.getJSONObject(i);
-                Map<String, String> row = new HashMap<>();
+                LinkedHashMap<String, String> row = new LinkedHashMap<>();
                 row.put(TestData.ROW_NUMBER, String.valueOf(i + 1));
                 for (Iterator<String> it = rowO.keys(); it.hasNext(); ) {
                     String key = it.next();

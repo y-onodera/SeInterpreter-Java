@@ -32,4 +32,6 @@ public interface WebDriverFactory {
     default String targetBrowser() {
         return this.getClass().getSimpleName();
     }
+
+    String getDriverPath();
 }

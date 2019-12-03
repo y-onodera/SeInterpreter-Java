@@ -42,4 +42,9 @@ public class Chrome implements WebDriverFactory {
     public void setDriverPath(String driverPath) {
         System.setProperty("webdriver.chrome.driver", driverPath);
     }
+
+    @Override
+    public String getDriverPath() {
+        return System.getProperty("webdriver.chrome.driver");
+    }
 }

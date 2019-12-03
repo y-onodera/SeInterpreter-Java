@@ -17,7 +17,6 @@
 package com.sebuilder.interpreter.datasource;
 
 import com.google.common.collect.Lists;
-import com.sebuilder.interpreter.DataSource;
 import com.sebuilder.interpreter.TestData;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -27,29 +26,28 @@ import org.w3c.dom.NodeList;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import static com.sebuilder.interpreter.Utils.findFile;
 
 /**
  * XML data source compatible with the standard IDE approach.
  *
  * @author zarkonnen
  */
-public class Xml implements DataSource {
+public class Xml implements FileDataSource {
+
     @Override
     public List<TestData> getData(Map<String, String> config, File relativeTo, TestData vars) {
         ArrayList<TestData> data = Lists.newArrayList();
-        File f = findFile(relativeTo, vars.bind(config.get("path")));
+        File f = this.sourceFile(config, relativeTo, vars);
         try {
             Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(f);
             NodeList rows = doc.getElementsByTagName("test");
             for (int i = 0; i < rows.getLength(); i++) {
                 Node rowN = rows.item(i);
                 NamedNodeMap attributes = rowN.getAttributes();
-                Map<String, String> row = new HashMap<String, String>();
+                LinkedHashMap<String, String> row = new LinkedHashMap<String, String>();
                 row.put(TestData.ROW_NUMBER, String.valueOf(i + 1));
                 for (int j = 0; j < attributes.getLength(); j++) {
                     row.put(attributes.item(j).getNodeName(), attributes.item(j).getNodeValue());

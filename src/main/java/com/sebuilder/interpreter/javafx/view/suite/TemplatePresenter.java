@@ -80,14 +80,14 @@ public class TemplatePresenter {
     @FXML
     void selectLocator(ActionEvent actionEvent) {
         String locator = this.selectParentLocator.getSelectionModel().getSelectedItem();
-        if (DEFAULT_PARENT.equals(locator)) {
-            if (this.exportSettingsGrid.getRowCount() == 3) {
+        if (this.exportSettingsGrid.getChildren().contains(this.textLocatorValue)) {
+            if (DEFAULT_PARENT.equals(locator)) {
                 this.removeLocatorValue();
             }
-            return;
+        } else {
+            this.exportSettingsGrid.add(this.textLocatorValue, 1, 1);
+            this.exportSettingsGrid.add(this.parentSearchButton, 2, 1);
         }
-        this.exportSettingsGrid.add(this.textLocatorValue, 1, 1);
-        this.exportSettingsGrid.add(this.parentSearchButton, 2, 1);
     }
 
     @FXML

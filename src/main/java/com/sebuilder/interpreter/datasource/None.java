@@ -22,7 +22,7 @@ import com.sebuilder.interpreter.TestData;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,7 +30,7 @@ public class None implements DataSource {
     @Override
     public List<TestData> getData(Map<String, String> config, File relativeTo, TestData vars) {
         ArrayList<TestData> l = Lists.newArrayList();
-        final HashMap<String, String> row = new HashMap<>();
+        final LinkedHashMap<String, String> row = new LinkedHashMap<>();
         row.put(TestData.ROW_NUMBER, String.valueOf(1));
         l.add(new TestData(row).lastRow(true));
         return l;

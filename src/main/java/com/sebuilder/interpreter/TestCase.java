@@ -77,6 +77,29 @@ public class TestCase {
         return true;
     }
 
+    public List<TestData> loadData() {
+        return this.runtimeDataSet().loadData(this.getShareInput());
+    }
+
+    public String loadDataFrom() {
+        return this.runtimeDataSet().name(this.getShareInput());
+    }
+
+    public boolean hasLoadableDataSet() {
+        return this.runtimeDataSet().isLoadable(this.getShareInput());
+    }
+
+    public DataSourceWriter runtimeDataSetWriter() {
+        return this.runtimeDataSet().writer(this.shareInput);
+    }
+
+    public TestDataSet runtimeDataSet(){
+        if (this.getOverrideTestDataSet().getDataSource() != null) {
+            return this.getOverrideTestDataSet();
+        }
+        return this.getTestDataSet();
+    }
+
     public Suite toSuite() {
         if (this.getScriptFile().type() == ScriptFile.Type.SUITE) {
             return new Suite(this);
@@ -252,13 +275,6 @@ public class TestCase {
 
     protected TestCase lazyLoad() {
         return this.getLazyLoad().apply(this);
-    }
-
-    protected List<TestData> loadData() {
-        if (this.getOverrideTestDataSet().getDataSource() != null) {
-            return this.getOverrideTestDataSet().loadData(this.getShareInput());
-        }
-        return this.getTestDataSet().loadData(this.getShareInput());
     }
 
     @Override

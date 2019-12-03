@@ -5,10 +5,8 @@ import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import javax.inject.Inject;
@@ -23,10 +21,6 @@ public class MenuPresenter {
 
     @FXML
     private Pane paneSeInterpreterMenu;
-
-    private Stage browserSettingDialog;
-
-    private Stage scriptSettingDialog;
 
     @FXML
     void initialize() {
@@ -78,32 +72,12 @@ public class MenuPresenter {
 
     @FXML
     void handleBrowserSetting(ActionEvent event) throws IOException {
-        if (browserSettingDialog == null) {
-            BrowserView browserView = new BrowserView();
-            Scene scene = new Scene(browserView.getView());
-            browserSettingDialog = new Stage();
-            browserSettingDialog.setScene(scene);
-            browserSettingDialog.initOwner(paneSeInterpreterMenu.getScene().getWindow());
-            browserSettingDialog.initModality(Modality.WINDOW_MODAL);
-            browserSettingDialog.setResizable(false);
-            browserSettingDialog.setTitle("edit browser setting");
-        }
-        browserSettingDialog.show();
+        new BrowserView().open(this.paneSeInterpreterMenu.getScene().getWindow());
     }
 
     @FXML
     void handleReplaySetting(ActionEvent event) throws IOException {
-        if (scriptSettingDialog == null) {
-            DatasourceView datasourceView = new DatasourceView();
-            Scene scene = new Scene(datasourceView.getView());
-            scriptSettingDialog = new Stage();
-            scriptSettingDialog.setScene(scene);
-            scriptSettingDialog.initOwner(paneSeInterpreterMenu.getScene().getWindow());
-            scriptSettingDialog.initModality(Modality.WINDOW_MODAL);
-            scriptSettingDialog.setResizable(false);
-            scriptSettingDialog.setTitle("edit script setting");
-        }
-        scriptSettingDialog.show();
+        new DatasourceView().open(paneSeInterpreterMenu.getScene().getWindow());
     }
 
     @FXML

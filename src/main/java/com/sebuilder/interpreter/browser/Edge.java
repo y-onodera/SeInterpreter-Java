@@ -32,4 +32,9 @@ public class Edge implements WebDriverFactory {
     public void setDriverPath(String driverPath) {
         System.setProperty("webdriver.edge.driver", driverPath);
     }
+
+    @Override
+    public String getDriverPath() {
+        return System.getProperty("webdriver.edge.driver");
+    }
 }

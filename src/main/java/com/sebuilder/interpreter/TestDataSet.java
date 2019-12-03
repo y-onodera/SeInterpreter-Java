@@ -45,6 +45,27 @@ public class TestDataSet {
         return this.dataSource.getData(this.dataSourceConfig, this.relativePath, vars);
     }
 
+    public String name(TestData shareInput) {
+        if (this.dataSource == null) {
+            return "none";
+        }
+        return this.dataSource.name(this.dataSourceConfig, shareInput);
+    }
+
+    public boolean isLoadable(TestData shareInput) {
+        if (this.dataSource == null) {
+            return false;
+        }
+        return this.dataSource.isLoadable(this.dataSourceConfig, this.relativePath, shareInput);
+    }
+
+    public DataSourceWriter writer(TestData shareInput) {
+        if (this.dataSource == null) {
+            throw new IllegalStateException("no datasource exists");
+        }
+        return this.dataSource.writer(this.dataSourceConfig, this.relativePath, shareInput);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -68,4 +89,5 @@ public class TestDataSet {
                 ", relativize=" + relativePath +
                 '}';
     }
+
 }

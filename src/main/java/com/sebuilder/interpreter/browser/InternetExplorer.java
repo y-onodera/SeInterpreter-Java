@@ -33,4 +33,9 @@ public class InternetExplorer implements WebDriverFactory {
     public void setDriverPath(String driverPath) {
         System.setProperty("webdriver.ie.driver", driverPath);
     }
+
+    @Override
+    public String getDriverPath() {
+        return System.getProperty("webdriver.ie.driver");
+    }
 }

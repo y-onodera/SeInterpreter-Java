@@ -6,8 +6,8 @@
             fx:controller="com.sebuilder.interpreter.javafx.view.script.ScriptPresenter">
     <children>
         <TableView id="tableViewScriptBody" fx:id="tableViewScriptBody" stylesheets="@script.css"
-                   prefWidth="480.0" minWidth="0" maxWidth="Infinity"
-                   minHeight="0" maxHeight="Infinity" prefHeight="425.0"
+                   prefWidth="480.0" prefHeight="425.0" minWidth="0" maxWidth="Infinity"
+                   minHeight="0" maxHeight="Infinity"
                    AnchorPane.bottomAnchor="0.0"
                    AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
                    AnchorPane.topAnchor="0.0">
