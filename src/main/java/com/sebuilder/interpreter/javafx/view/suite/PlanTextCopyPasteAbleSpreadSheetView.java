@@ -5,9 +5,9 @@ import com.google.common.collect.Maps;
 import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
-import javafx.scene.input.Clipboard;
-import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.DataFormat;
+import javafx.event.EventHandler;
+import javafx.scene.control.TextArea;
+import javafx.scene.input.*;
 import org.controlsfx.control.spreadsheet.*;
 
 import java.io.StringReader;
@@ -21,7 +21,7 @@ public class PlanTextCopyPasteAbleSpreadSheetView extends org.controlsfx.control
     public static final SpreadsheetCellType.StringType TEXT_AREA = new SpreadsheetCellType.StringType() {
         @Override
         public SpreadsheetCellEditor createEditor(SpreadsheetView view) {
-            return new SpreadsheetCellEditor.TextAreaEditor(view);
+            return new EnterAndTabIgnoreTextAreaCellEditor(view);
         }
     };
 
@@ -91,5 +91,69 @@ public class PlanTextCopyPasteAbleSpreadSheetView extends org.controlsfx.control
             this.spreadSheetViewFmt = new DataFormat(new String[]{"SpreadsheetView"});
         }
         return this.spreadSheetViewFmt;
+    }
+
+    static class EnterAndTabIgnoreTextAreaCellEditor extends SpreadsheetCellEditor {
+        private final TextArea textArea = new TextArea();
+
+        public EnterAndTabIgnoreTextAreaCellEditor(SpreadsheetView view) {
+            super(view);
+            this.textArea.setWrapText(true);
+            this.textArea.minHeightProperty().bind(this.textArea.maxHeightProperty());
+        }
+
+        public void startEdit(Object value, String format, Object... options) {
+            if (value instanceof String || value == null) {
+                this.textArea.setText((String) value);
+            }
+
+            this.attachEnterEscapeEventHandler();
+            this.textArea.requestFocus();
+            this.textArea.selectAll();
+        }
+
+        public String getControlValue() {
+            return this.textArea.getText();
+        }
+
+        public void end() {
+            this.textArea.setOnKeyPressed((EventHandler) null);
+        }
+
+        public TextArea getEditor() {
+            return this.textArea;
+        }
+
+        public double getMaxHeight() {
+            return 1.7976931348623157E308D;
+        }
+
+        private void attachEnterEscapeEventHandler() {
+            this.textArea.addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
+                public void handle(KeyEvent keyEvent) {
+                    if (keyEvent.getCode() == KeyCode.ENTER) {
+                        if (keyEvent.isAltDown()) {
+                            textArea.replaceSelection("\n");
+                        } else {
+                            endEdit(true);
+                            textArea.removeEventFilter(KeyEvent.KEY_PRESSED, this);
+                        }
+                        keyEvent.consume();
+                    } else if (keyEvent.getCode() == KeyCode.ESCAPE) {
+                        endEdit(false);
+                        textArea.removeEventFilter(KeyEvent.KEY_PRESSED, this);
+                        keyEvent.consume();
+                    } else if (keyEvent.getCode() == KeyCode.TAB) {
+                        if (keyEvent.isShiftDown()) {
+                            textArea.replaceSelection("\t");
+                        } else {
+                            endEdit(true);
+                            textArea.removeEventFilter(KeyEvent.KEY_PRESSED, this);
+                        }
+                        keyEvent.consume();
+                    }
+                }
+            });
+        }
     }
 }
