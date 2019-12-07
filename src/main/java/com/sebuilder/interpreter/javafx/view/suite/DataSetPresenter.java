@@ -5,6 +5,7 @@ import com.google.common.base.Strings;
 import com.sebuilder.interpreter.TestCase;
 import com.sebuilder.interpreter.TestData;
 import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
+import com.sebuilder.interpreter.javafx.control.ExcelLikeSpreadSheetView;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -21,10 +22,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.sebuilder.interpreter.javafx.view.suite.PlanTextCopyPasteAbleSpreadSheetView.TEXT_AREA;
+import static com.sebuilder.interpreter.javafx.control.ExcelLikeSpreadSheetView.TEXT_AREA;
 
 public class DataSetPresenter {
 
+    private static final int DEFAULT_ROWS = 50;
+    private static final int DEFAULT_COLUMNS = 50;
     @Inject
     private SeInterpreterApplication application;
     @FXML
@@ -34,8 +37,8 @@ public class DataSetPresenter {
 
     public void showDataSet(TestCase currentCase) {
         List<TestData> testData = currentCase.loadData();
-        int row = testData.size() < 50 ? 50 : testData.size();
-        int column = testData.size() < 1 || testData.get(0).input().size() < 50 ? 50 : testData.get(0).input().size();
+        int row = testData.size() < DEFAULT_ROWS ? DEFAULT_ROWS : testData.size();
+        int column = testData.size() < 1 || testData.get(0).input().size() < DEFAULT_COLUMNS ? DEFAULT_COLUMNS : testData.get(0).input().size();
         GridBase grid = new GridBase(row, column);
         ObservableList<ObservableList<SpreadsheetCell>> rows = FXCollections.observableArrayList();
         testData.forEach(it -> {
@@ -47,13 +50,13 @@ public class DataSetPresenter {
             }
             addRow(rows, Integer.parseInt(it.rowNumber()), it, Map.Entry::getValue);
         });
-        if (rows.size() < 50) {
-            for (int current = rows.size(); current < 50; current++) {
+        if (rows.size() < DEFAULT_ROWS) {
+            for (int current = rows.size(); current < DEFAULT_ROWS; current++) {
                 addRow(rows, current, new TestData(), Map.Entry::getValue);
             }
         }
         grid.setRows(rows);
-        sheet = new PlanTextCopyPasteAbleSpreadSheetView(grid);
+        sheet = new ExcelLikeSpreadSheetView(grid);
         sheet.getFixedRows().add(Integer.valueOf(0));
         AnchorPane.setTopAnchor(sheet, Double.valueOf(0));
         AnchorPane.setBottomAnchor(sheet, Double.valueOf(0));
@@ -90,7 +93,7 @@ public class DataSetPresenter {
         return header.stream()
                 .map(it -> {
                     String value = "";
-                    if (row.size() > it.getKey() && row.get(it.getKey()) != null) {
+                    if (isExistsCell(row, it)) {
                         value = row.get(it.getKey()).getText();
                     }
                     return new TestData().add(it.getValue(), value);
@@ -99,11 +102,11 @@ public class DataSetPresenter {
     }
 
     protected boolean hasValue(ObservableList<SpreadsheetCell> row, List<Pair<Integer, String>> header) {
-        return header.stream().anyMatch(it -> row.size() > it.getKey() && row.get(it.getKey()) != null && !Strings.isNullOrEmpty(row.get(it.getKey()).getText()));
+        return header.stream().anyMatch(it -> isExistsCell(row, it) && !Strings.isNullOrEmpty(row.get(it.getKey()).getText()));
     }
 
     protected void addRow(ObservableList<ObservableList<SpreadsheetCell>> rows, int row, TestData it, Function<Map.Entry<String, String>, String> map) {
-        this.addRow(rows, row, it, map, (SpreadsheetCell cell) -> cell);
+        this.addRow(rows, row, it, map, cell -> cell);
     }
 
     protected void addRow(ObservableList<ObservableList<SpreadsheetCell>> rows, int row, TestData it, Function<Map.Entry<String, String>, String> map, Function<SpreadsheetCell, SpreadsheetCell> setStyle) {
@@ -114,11 +117,14 @@ public class DataSetPresenter {
             dataRow.add(setStyle.apply(cell));
             col++;
         }
-        for (; col < 50; col++) {
+        for (; col < DEFAULT_COLUMNS; col++) {
             SpreadsheetCell cell = TEXT_AREA.createCell(row, col, 1, 1, null);
             dataRow.add(setStyle.apply(cell));
         }
         rows.add(dataRow);
     }
 
+    private boolean isExistsCell(ObservableList<SpreadsheetCell> row, Pair<Integer, String> it) {
+        return row.size() > it.getKey() && row.get(it.getKey()) != null;
+    }
 }
