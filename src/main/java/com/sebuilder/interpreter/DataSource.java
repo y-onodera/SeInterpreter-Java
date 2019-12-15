@@ -16,6 +16,8 @@
 
 package com.sebuilder.interpreter;
 
+import com.google.common.collect.Lists;
+
 import java.io.File;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +29,18 @@ import java.util.Map;
  * @author zarkonnen
  */
 public interface DataSource {
+
+    DataSource NONE = new DataSource() {
+        @Override
+        public List<InputData> getData(Map<String, String> config, File relativeTo, InputData vars) {
+            return Lists.newArrayList(new InputData());
+        }
+
+        @Override
+        public String name() {
+            return "none";
+        }
+    };
 
     List<InputData> getData(Map<String, String> config, File relativeTo, InputData vars);
 
@@ -42,7 +56,7 @@ public interface DataSource {
         return false;
     }
 
-    default DataSourceWriter writer(Map<String,String> dataSourceConfig, File relativePath, InputData shareInput){
+    default DataSourceWriter writer(Map<String, String> dataSourceConfig, File relativePath, InputData shareInput) {
         throw new UnsupportedOperationException();
     }
 }

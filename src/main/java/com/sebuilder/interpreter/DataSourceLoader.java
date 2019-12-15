@@ -16,7 +16,14 @@ public class DataSourceLoader {
 
     private final File relativePath;
 
+    private final InputData shareInput;
+
     public DataSourceLoader(DataSource dataSource, Map<String, String> dataSourceConfig, File relativePath) {
+        this(dataSource, dataSourceConfig, relativePath, new InputData());
+    }
+
+    public DataSourceLoader(DataSource dataSource, Map<String, String> dataSourceConfig, File relativePath, InputData shareInput) {
+        this.shareInput = shareInput;
         this.dataSource = dataSource;
         if (dataSourceConfig != null) {
             this.dataSourceConfig = Maps.newHashMap(dataSourceConfig);
@@ -24,6 +31,10 @@ public class DataSourceLoader {
             this.dataSourceConfig = Maps.newHashMap();
         }
         this.relativePath = relativePath;
+    }
+
+    public DataSourceLoader shareInput(InputData aShareInput) {
+        return new DataSourceLoader(this.dataSource, this.dataSourceConfig, this.relativePath, aShareInput);
     }
 
     public DataSource getDataSource() {
@@ -38,55 +49,45 @@ public class DataSourceLoader {
         return this.relativePath;
     }
 
-    public List<InputData> loadData(InputData vars) {
-        if (this.dataSource == null) {
-            return Lists.newArrayList(new InputData());
-        }
-        return this.dataSource.getData(this.dataSourceConfig, this.relativePath, vars);
+    public List<InputData> loadData() {
+        return this.dataSource.getData(this.dataSourceConfig, this.relativePath, this.shareInput);
     }
 
-    public String name(InputData shareInput) {
-        if (this.dataSource == null) {
-            return "none";
-        }
-        return this.dataSource.name(this.dataSourceConfig, shareInput);
+    public String name() {
+        return this.dataSource.name(this.dataSourceConfig, this.shareInput);
     }
 
-    public boolean isLoadable(InputData shareInput) {
-        if (this.dataSource == null) {
-            return false;
-        }
-        return this.dataSource.isLoadable(this.dataSourceConfig, this.relativePath, shareInput);
+    public boolean isLoadable() {
+        return this.dataSource.isLoadable(this.dataSourceConfig, this.relativePath, this.shareInput);
     }
 
-    public DataSourceWriter writer(InputData shareInput) {
-        if (this.dataSource == null) {
-            throw new IllegalStateException("no datasource exists");
-        }
-        return this.dataSource.writer(this.dataSourceConfig, this.relativePath, shareInput);
+    public DataSourceWriter writer() {
+        return this.dataSource.writer(this.dataSourceConfig, this.relativePath, this.shareInput);
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        DataSourceLoader dataSourceLoader = (DataSourceLoader) o;
-        return Objects.equal(getDataSource(), dataSourceLoader.getDataSource()) &&
-                Objects.equal(getDataSourceConfig(), dataSourceLoader.getDataSourceConfig()) &&
-                Objects.equal(getRelativePath(), dataSourceLoader.getRelativePath());
+        DataSourceLoader that = (DataSourceLoader) o;
+        return Objects.equal(dataSource, that.dataSource) &&
+                Objects.equal(dataSourceConfig, that.dataSourceConfig) &&
+                Objects.equal(relativePath, that.relativePath) &&
+                Objects.equal(shareInput, that.shareInput);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getDataSource(), getDataSourceConfig(), getRelativePath());
+        return Objects.hashCode(dataSource, dataSourceConfig, relativePath, shareInput);
     }
 
     @Override
     public String toString() {
-        return "TestDataSet{" +
+        return "DataSourceLoader{" +
                 "dataSource=" + dataSource +
                 ", dataSourceConfig=" + dataSourceConfig +
-                ", relativize=" + relativePath +
+                ", relativePath=" + relativePath +
+                ", shareInput=" + shareInput +
                 '}';
     }
 

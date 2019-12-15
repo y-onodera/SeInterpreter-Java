@@ -78,26 +78,26 @@ public class TestCase {
     }
 
     public List<InputData> loadData() {
-        return this.runtimeDataSet().loadData(this.getShareInput());
+        return this.runtimeDataSet().loadData();
     }
 
     public String loadDataFrom() {
-        return this.runtimeDataSet().name(this.getShareInput());
+        return this.runtimeDataSet().name();
     }
 
     public boolean hasLoadableDataSet() {
-        return this.runtimeDataSet().isLoadable(this.getShareInput());
+        return this.runtimeDataSet().isLoadable();
     }
 
     public DataSourceWriter runtimeDataSetWriter() {
-        return this.runtimeDataSet().writer(this.shareInput);
+        return this.runtimeDataSet().writer();
     }
 
-    public DataSourceLoader runtimeDataSet(){
-        if (this.getOverrideDataSourceLoader().getDataSource() != null) {
-            return this.getOverrideDataSourceLoader();
+    public DataSourceLoader runtimeDataSet() {
+        if (this.getOverrideDataSourceLoader().getDataSource() != DataSource.NONE) {
+            return this.getOverrideDataSourceLoader().shareInput(this.getShareInput());
         }
-        return this.getDataSourceLoader();
+        return this.getDataSourceLoader().shareInput(this.getShareInput());
     }
 
     public Suite toSuite() {

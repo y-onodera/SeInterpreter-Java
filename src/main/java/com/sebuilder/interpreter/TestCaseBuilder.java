@@ -39,6 +39,8 @@ public class TestCaseBuilder {
         this.scriptFile = scriptFile;
         this.steps = new ArrayList<>();
         this.chains = new TestCaseChains();
+        this.dataSource = DataSource.NONE;
+        this.overrideDataSource = DataSource.NONE;
         this.aspect = new Aspect();
         this.skip = "false";
     }

@@ -62,7 +62,7 @@ public class TestCaseAssert {
     }
 
     public static void assertEqualsNoDataSource(TestCase actual) {
-        assertNull(actual.getDataSourceLoader().getDataSource());
+        assertSame(DataSource.NONE, actual.getDataSourceLoader().getDataSource());
         assertEquals(0, actual.getDataSourceLoader().getDataSourceConfig().size());
     }
 
@@ -87,7 +87,7 @@ public class TestCaseAssert {
     }
 
     public static void assertEqualsNoOverrideDataSource(TestCase actual) {
-        assertNull(actual.getOverrideDataSourceLoader().getDataSource());
+        assertSame(DataSource.NONE, actual.getOverrideDataSourceLoader().getDataSource());
         assertEquals(0, actual.getOverrideDataSourceLoader().getDataSourceConfig().size());
     }
 

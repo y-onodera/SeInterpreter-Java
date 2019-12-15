@@ -84,7 +84,7 @@ public class SebuilderToStringConverter {
     private JSONObject toJson(DataSourceLoader target) throws JSONException {
         final DataSource dataSource = target.getDataSource();
         final Map<String, String> dataSourceConfig = target.getDataSourceConfig();
-        if (dataSource != null) {
+        if (dataSource != DataSource.NONE) {
             JSONObject data = new JSONObject();
             final String sourceName = dataSource.name();
             data.put("source", sourceName);

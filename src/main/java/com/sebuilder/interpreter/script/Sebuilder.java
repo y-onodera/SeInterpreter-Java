@@ -274,7 +274,7 @@ public class Sebuilder implements ScriptParser {
 
     protected DataSource getDataSource(JSONObject o) throws JSONException {
         if (!o.has("data")) {
-            return null;
+            return DataSource.NONE;
         }
         JSONObject data = o.getJSONObject("data");
         return Context.getDataSourceFactory().getDataSource(data.getString("source"));
