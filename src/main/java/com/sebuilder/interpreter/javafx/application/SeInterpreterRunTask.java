@@ -1,7 +1,7 @@
 package com.sebuilder.interpreter.javafx.application;
 
 import com.sebuilder.interpreter.TestCase;
-import com.sebuilder.interpreter.TestData;
+import com.sebuilder.interpreter.InputData;
 import com.sebuilder.interpreter.TestRunListener;
 import com.sebuilder.interpreter.TestRunListenerWrapper;
 import com.sebuilder.interpreter.application.SeInterpreterREPL;
@@ -32,7 +32,7 @@ public class SeInterpreterRunTask extends Task<String> {
                 private int currentScriptSteps;
 
                 @Override
-                public boolean openTestSuite(TestCase testCase, String testRunName, TestData aProperty) {
+                public boolean openTestSuite(TestCase testCase, String testRunName, InputData aProperty) {
                     this.currentScriptSteps = testCase.steps().size();
                     updateMessage(testRunName);
                     updateProgress(0, this.currentScriptSteps);

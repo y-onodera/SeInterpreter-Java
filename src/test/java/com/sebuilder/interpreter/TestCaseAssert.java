@@ -62,12 +62,12 @@ public class TestCaseAssert {
     }
 
     public static void assertEqualsNoDataSource(TestCase actual) {
-        assertNull(actual.getTestDataSet().getDataSource());
-        assertEquals(0, actual.getTestDataSet().getDataSourceConfig().size());
+        assertNull(actual.getDataSourceLoader().getDataSource());
+        assertEquals(0, actual.getDataSourceLoader().getDataSourceConfig().size());
     }
 
-    public static Consumer<TestCase> assertEqualsDataSet(TestDataSet dataSource) {
-        return (TestCase actual) -> assertEquals(dataSource, actual.getTestDataSet());
+    public static Consumer<TestCase> assertEqualsDataSet(DataSourceLoader dataSource) {
+        return (TestCase actual) -> assertEquals(dataSource, actual.getDataSourceLoader());
     }
 
     public static void assertEqualsNoChainCase(TestCase actual) {
@@ -87,12 +87,12 @@ public class TestCaseAssert {
     }
 
     public static void assertEqualsNoOverrideDataSource(TestCase actual) {
-        assertNull(actual.getOverrideTestDataSet().getDataSource());
-        assertEquals(0, actual.getOverrideTestDataSet().getDataSourceConfig().size());
+        assertNull(actual.getOverrideDataSourceLoader().getDataSource());
+        assertEquals(0, actual.getOverrideDataSourceLoader().getDataSourceConfig().size());
     }
 
-    public static Consumer<TestCase> assertEqualsOverrideDataSst(TestDataSet testDataSet) {
-        return (TestCase actual) -> assertEquals(testDataSet, actual.getOverrideTestDataSet());
+    public static Consumer<TestCase> assertEqualsOverrideDataSst(DataSourceLoader dataSourceLoader) {
+        return (TestCase actual) -> assertEquals(dataSourceLoader, actual.getOverrideDataSourceLoader());
     }
 
     public static Consumer<TestCase> assertEqualsNoSkip() {

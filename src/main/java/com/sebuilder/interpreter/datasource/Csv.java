@@ -21,7 +21,7 @@ import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.DataSourceWriter;
-import com.sebuilder.interpreter.TestData;
+import com.sebuilder.interpreter.InputData;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -39,8 +39,8 @@ import java.util.stream.Collectors;
 public class Csv implements FileDataSource {
 
     @Override
-    public List<TestData> getData(Map<String, String> config, File relativeTo, TestData vars) {
-        ArrayList<TestData> data = new ArrayList<>();
+    public List<InputData> getData(Map<String, String> config, File relativeTo, InputData vars) {
+        ArrayList<InputData> data = new ArrayList<>();
         File f = this.sourceFile(config, relativeTo, vars);
         String charsetName = Context.getDataSourceEncoding();
         BufferedReader r = null;
@@ -57,15 +57,15 @@ public class Csv implements FileDataSource {
                     if (line.length < keys.length) {
                         throw new IOException("Not enough cells in row " + rowNumber + ".");
                     }
-                    row.put(TestData.ROW_NUMBER, String.valueOf(rowNumber - 1));
+                    row.put(InputData.ROW_NUMBER, String.valueOf(rowNumber - 1));
                     for (int c = 0; c < keys.length; c++) {
                         row.put(keys[c], line[c]);
                     }
-                    data.add(new TestData(row));
+                    data.add(new InputData(row));
                 }
                 if (rowNumber > 1) {
                     final int lastRowNumber = rowNumber - 2;
-                    TestData lastRow = data.get(lastRowNumber).lastRow(true);
+                    InputData lastRow = data.get(lastRowNumber).lastRow(true);
                     data.remove(lastRowNumber);
                     data.add(lastRow);
                 }
@@ -82,7 +82,7 @@ public class Csv implements FileDataSource {
     }
 
     @Override
-    public DataSourceWriter writer(Map<String, String> dataSourceConfig, File relativePath, TestData shareInput) {
+    public DataSourceWriter writer(Map<String, String> dataSourceConfig, File relativePath, InputData shareInput) {
         return data -> {
             File target = sourceFile(dataSourceConfig, relativePath, shareInput);
             try (BufferedWriter writer = Files.newWriter(target, Charset.forName(Context.getDataSourceEncoding()))) {

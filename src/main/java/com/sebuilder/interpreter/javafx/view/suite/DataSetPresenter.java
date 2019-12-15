@@ -3,7 +3,7 @@ package com.sebuilder.interpreter.javafx.view.suite;
 import com.google.common.base.Function;
 import com.google.common.base.Strings;
 import com.sebuilder.interpreter.TestCase;
-import com.sebuilder.interpreter.TestData;
+import com.sebuilder.interpreter.InputData;
 import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
 import com.sebuilder.interpreter.javafx.control.ExcelLikeSpreadSheetView;
 import javafx.collections.FXCollections;
@@ -36,12 +36,12 @@ public class DataSetPresenter {
     private SpreadsheetView sheet;
 
     public void showDataSet(TestCase currentCase) {
-        List<TestData> testData = currentCase.loadData();
-        int row = testData.size() < DEFAULT_ROWS ? DEFAULT_ROWS : testData.size();
-        int column = testData.size() < 1 || testData.get(0).input().size() < DEFAULT_COLUMNS ? DEFAULT_COLUMNS : testData.get(0).input().size();
+        List<InputData> inputData = currentCase.loadData();
+        int row = inputData.size() < DEFAULT_ROWS ? DEFAULT_ROWS : inputData.size();
+        int column = inputData.size() < 1 || inputData.get(0).input().size() < DEFAULT_COLUMNS ? DEFAULT_COLUMNS : inputData.get(0).input().size();
         GridBase grid = new GridBase(row, column);
         ObservableList<ObservableList<SpreadsheetCell>> rows = FXCollections.observableArrayList();
-        testData.forEach(it -> {
+        inputData.forEach(it -> {
             if (Integer.parseInt(it.rowNumber()) == 1) {
                 addRow(rows, 0, it, Map.Entry::getKey, cell -> {
                     cell.getStyleClass().add("header");
@@ -52,7 +52,7 @@ public class DataSetPresenter {
         });
         if (rows.size() < DEFAULT_ROWS) {
             for (int current = rows.size(); current < DEFAULT_ROWS; current++) {
-                addRow(rows, current, new TestData(), Map.Entry::getValue);
+                addRow(rows, current, new InputData(), Map.Entry::getValue);
             }
         }
         grid.setRows(rows);
@@ -79,7 +79,7 @@ public class DataSetPresenter {
                 .filter(it -> !Strings.isNullOrEmpty(it.getText()))
                 .map(it -> new Pair<>(Integer.valueOf(it.getColumn()), it.getText()))
                 .collect(Collectors.toList());
-        ArrayList<TestData> saveContents = rows.subList(1, rows.size() - 1).stream()
+        ArrayList<InputData> saveContents = rows.subList(1, rows.size() - 1).stream()
                 .filter(it -> hasValue(it, header))
                 .map(it -> toTestData(it, header))
                 .collect(Collectors.toCollection(ArrayList::new));
@@ -89,27 +89,27 @@ public class DataSetPresenter {
         this.reloadDataSet(actionEvent);
     }
 
-    protected TestData toTestData(ObservableList<SpreadsheetCell> row, List<Pair<Integer, String>> header) {
+    protected InputData toTestData(ObservableList<SpreadsheetCell> row, List<Pair<Integer, String>> header) {
         return header.stream()
                 .map(it -> {
                     String value = "";
                     if (isExistsCell(row, it)) {
                         value = row.get(it.getKey()).getText();
                     }
-                    return new TestData().add(it.getValue(), value);
+                    return new InputData().add(it.getValue(), value);
                 })
-                .reduce(new TestData(), TestData::add);
+                .reduce(new InputData(), InputData::add);
     }
 
     protected boolean hasValue(ObservableList<SpreadsheetCell> row, List<Pair<Integer, String>> header) {
         return header.stream().anyMatch(it -> isExistsCell(row, it) && !Strings.isNullOrEmpty(row.get(it.getKey()).getText()));
     }
 
-    protected void addRow(ObservableList<ObservableList<SpreadsheetCell>> rows, int row, TestData it, Function<Map.Entry<String, String>, String> map) {
+    protected void addRow(ObservableList<ObservableList<SpreadsheetCell>> rows, int row, InputData it, Function<Map.Entry<String, String>, String> map) {
         this.addRow(rows, row, it, map, cell -> cell);
     }
 
-    protected void addRow(ObservableList<ObservableList<SpreadsheetCell>> rows, int row, TestData it, Function<Map.Entry<String, String>, String> map, Function<SpreadsheetCell, SpreadsheetCell> setStyle) {
+    protected void addRow(ObservableList<ObservableList<SpreadsheetCell>> rows, int row, InputData it, Function<Map.Entry<String, String>, String> map, Function<SpreadsheetCell, SpreadsheetCell> setStyle) {
         final ObservableList<SpreadsheetCell> dataRow = FXCollections.observableArrayList();
         int col = 0;
         for (Map.Entry<String, String> entry : it.input()) {

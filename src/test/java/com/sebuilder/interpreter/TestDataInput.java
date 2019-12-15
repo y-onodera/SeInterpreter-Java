@@ -5,9 +5,9 @@ import org.junit.Test;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class TestDataTest {
+public class TestDataInput {
 
-    private TestData target = new TestData()
+    private InputData target = new InputData()
             .add("aTrue", "true")
             .add("aFalse", "false")
             .add("number", "1")

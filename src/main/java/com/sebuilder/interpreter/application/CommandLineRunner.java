@@ -7,7 +7,6 @@ import com.sebuilder.interpreter.script.Sebuilder;
 import com.sebuilder.interpreter.step.StepTypeFactoryImpl;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.util.Strings;
-import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.io.IOException;
 
@@ -118,7 +117,7 @@ public abstract class CommandLineRunner {
         this.log.info("setUp finish");
     }
 
-    protected TestRun getTestRun(TestRunBuilder script, TestData data, TestRunListener testRunListener) {
+    protected TestRun getTestRun(TestRunBuilder script, InputData data, TestRunListener testRunListener) {
         return script.createTestRun(testRunListener.getLog()
                 , Context.getWebDriverFactory()
                 , Context.getDriverConfig()

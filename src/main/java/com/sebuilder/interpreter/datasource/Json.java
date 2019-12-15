@@ -17,7 +17,7 @@
 package com.sebuilder.interpreter.datasource;
 
 import com.sebuilder.interpreter.Context;
-import com.sebuilder.interpreter.TestData;
+import com.sebuilder.interpreter.InputData;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -36,8 +36,8 @@ import java.util.*;
 public class Json implements FileDataSource {
 
     @Override
-    public List<TestData> getData(Map<String, String> config, File relativeTo, TestData vars) {
-        ArrayList<TestData> data = new ArrayList<>();
+    public List<InputData> getData(Map<String, String> config, File relativeTo, InputData vars) {
+        ArrayList<InputData> data = new ArrayList<>();
         File f = this.sourceFile(config, relativeTo, vars);
         String charsetName = Context.getDataSourceEncoding();
         try (BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(f), charsetName))) {
@@ -46,16 +46,16 @@ public class Json implements FileDataSource {
             for (int i = 0; i < a.length(); i++) {
                 JSONObject rowO = a.getJSONObject(i);
                 LinkedHashMap<String, String> row = new LinkedHashMap<>();
-                row.put(TestData.ROW_NUMBER, String.valueOf(i + 1));
+                row.put(InputData.ROW_NUMBER, String.valueOf(i + 1));
                 for (Iterator<String> it = rowO.keys(); it.hasNext(); ) {
                     String key = it.next();
                     row.put(key, rowO.getString(key));
                 }
-                data.add(new TestData(row));
+                data.add(new InputData(row));
             }
             if (a.length() > 0) {
                 final int lastRowNumber = a.length() - 1;
-                TestData lastRow = data.get(lastRowNumber).lastRow(true);
+                InputData lastRow = data.get(lastRowNumber).lastRow(true);
                 data.remove(lastRowNumber);
                 data.add(lastRow);
             }

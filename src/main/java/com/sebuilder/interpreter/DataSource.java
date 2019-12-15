@@ -28,9 +28,9 @@ import java.util.Map;
  */
 public interface DataSource {
 
-    List<TestData> getData(Map<String, String> config, File relativeTo, TestData vars);
+    List<InputData> getData(Map<String, String> config, File relativeTo, InputData vars);
 
-    default String name(Map<String, String> dataSourceConfig, TestData shareInput) {
+    default String name(Map<String, String> dataSourceConfig, InputData shareInput) {
         return this.name();
     }
 
@@ -38,11 +38,11 @@ public interface DataSource {
         return this.getClass().getSimpleName().toLowerCase();
     }
 
-    default boolean isLoadable(Map<String, String> dataSourceConfig, File relativePath, TestData shareInput) {
+    default boolean isLoadable(Map<String, String> dataSourceConfig, File relativePath, InputData shareInput) {
         return false;
     }
 
-    default DataSourceWriter writer(Map<String,String> dataSourceConfig, File relativePath, TestData shareInput){
+    default DataSourceWriter writer(Map<String,String> dataSourceConfig, File relativePath, InputData shareInput){
         throw new UnsupportedOperationException();
     }
 }

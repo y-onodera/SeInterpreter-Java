@@ -72,7 +72,7 @@ public class TestRunListenerWrapper implements TestRunListener {
     }
 
     @Override
-    public boolean openTestSuite(TestCase testCase, String testRunName, TestData aProperty) {
+    public boolean openTestSuite(TestCase testCase, String testRunName, InputData aProperty) {
         return delegate.openTestSuite(testCase, testRunName, aProperty);
     }
 

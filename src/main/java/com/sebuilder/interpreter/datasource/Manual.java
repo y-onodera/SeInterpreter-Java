@@ -8,7 +8,7 @@ package com.sebuilder.interpreter.datasource;
 
 import com.google.common.collect.Lists;
 import com.sebuilder.interpreter.DataSource;
-import com.sebuilder.interpreter.TestData;
+import com.sebuilder.interpreter.InputData;
 
 import java.io.File;
 import java.util.LinkedHashMap;
@@ -22,13 +22,13 @@ import java.util.Map;
  */
 public class Manual implements DataSource {
     @Override
-    public List<TestData> getData(Map<String, String> config, File relativeTo, TestData vars) {
+    public List<InputData> getData(Map<String, String> config, File relativeTo, InputData vars) {
         LinkedHashMap<String, String> row = new LinkedHashMap<>(config);
-        row.put(TestData.ROW_NUMBER, String.valueOf(1));
+        row.put(InputData.ROW_NUMBER, String.valueOf(1));
         config.keySet()
                 .stream()
                 .forEach(key -> row.put(key, vars.bind(config.get(key))));
-        return Lists.newArrayList(new TestData(row).lastRow(true));
+        return Lists.newArrayList(new InputData(row).lastRow(true));
     }
 
     @Override

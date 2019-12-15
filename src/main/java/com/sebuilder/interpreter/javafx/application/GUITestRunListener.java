@@ -1,7 +1,7 @@
 package com.sebuilder.interpreter.javafx.application;
 
 import com.sebuilder.interpreter.TestCase;
-import com.sebuilder.interpreter.TestData;
+import com.sebuilder.interpreter.InputData;
 import com.sebuilder.interpreter.application.TestRunListenerImpl;
 import org.apache.logging.log4j.Logger;
 
@@ -14,7 +14,7 @@ public class GUITestRunListener extends TestRunListenerImpl {
     }
 
     @Override
-    public boolean openTestSuite(TestCase testCase, String testRunName, TestData aProperty) {
+    public boolean openTestSuite(TestCase testCase, String testRunName, InputData aProperty) {
         if (this.application.getSuite().get(testCase.name()) != null) {
             this.application.selectScript(testCase.name());
         }

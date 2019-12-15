@@ -30,7 +30,7 @@ public interface TestRunListener {
 
     void setUpDir(File dest);
 
-    boolean openTestSuite(TestCase testCase, String testRunName, TestData aProperty);
+    boolean openTestSuite(TestCase testCase, String testRunName, InputData aProperty);
 
     void startTest(String testName);
 

@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class TestData {
+public class InputData {
 
     public static final String ROW_NUMBER = "_rowNumber";
     private static final LinkedHashMap<String, String> EMPTY = Maps.newLinkedHashMap();
@@ -20,15 +20,15 @@ public class TestData {
 
     private final boolean lastRow;
 
-    public TestData() {
+    public InputData() {
         this(EMPTY, true);
     }
 
-    public TestData(LinkedHashMap<String, String> row) {
+    public InputData(LinkedHashMap<String, String> row) {
         this(row, false);
     }
 
-    public TestData(LinkedHashMap<String, String> row, boolean lastRow) {
+    public InputData(LinkedHashMap<String, String> row, boolean lastRow) {
         this.row = Maps.newLinkedHashMap(row);
         this.lastRow = lastRow;
     }
@@ -48,32 +48,32 @@ public class TestData {
         return this.row.get(key);
     }
 
-    public TestData clearRowNumber() {
-        TestData result = copy();
+    public InputData clearRowNumber() {
+        InputData result = copy();
         result.row.remove(ROW_NUMBER);
         return result;
     }
 
-    public TestData add(TestData shareInput) {
-        TestData result = this.copy();
+    public InputData add(InputData shareInput) {
+        InputData result = this.copy();
         result.row.putAll(shareInput.row);
         return result;
     }
 
-    public TestData add(Map<String, String> initialVars) {
-        TestData result = this.copy();
+    public InputData add(Map<String, String> initialVars) {
+        InputData result = this.copy();
         result.row.putAll(initialVars);
         return result;
     }
 
-    public TestData add(String key, String value) {
-        TestData result = this.copy();
+    public InputData add(String key, String value) {
+        InputData result = this.copy();
         result.row.put(key, value);
         return result;
     }
 
-    public TestData lastRow(boolean isLastRow) {
-        return new TestData(this.row, isLastRow);
+    public InputData lastRow(boolean isLastRow) {
+        return new InputData(this.row, isLastRow);
     }
 
     public boolean evaluate(String target) {
@@ -119,8 +119,8 @@ public class TestData {
         return this.lastRow;
     }
 
-    protected TestData copy() {
-        return new TestData(this.row, this.lastRow);
+    protected InputData copy() {
+        return new InputData(this.row, this.lastRow);
     }
 
     private String replaceKeys(String s) {
@@ -145,9 +145,9 @@ public class TestData {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        TestData testData = (TestData) o;
-        return isLastRow() == testData.isLastRow() &&
-                Objects.equal(row, testData.row);
+        InputData inputData = (InputData) o;
+        return isLastRow() == inputData.isLastRow() &&
+                Objects.equal(row, inputData.row);
     }
 
     @Override
@@ -173,11 +173,11 @@ public class TestData {
             this.lastRow = lastRow;
         }
 
-        public TestData build() {
-            return new TestData(this.row, this.lastRow);
+        public InputData build() {
+            return new InputData(this.row, this.lastRow);
         }
 
-        public Builder add(TestData shareInput) {
+        public Builder add(InputData shareInput) {
             this.row.putAll(shareInput.row);
             return this;
         }

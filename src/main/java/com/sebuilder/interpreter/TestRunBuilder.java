@@ -12,7 +12,7 @@ public class TestRunBuilder {
 
     private static final Pattern DUPLICATE_PATTERN = Pattern.compile(".+\\.[^\\.]+(\\(\\d+\\)$)");
     private final TestCase testCase;
-    private TestData shareInput;
+    private InputData shareInput;
     private boolean preventContextAspect;
     private String testRunNamePrefix;
     private String testRunNameSuffix;
@@ -39,7 +39,7 @@ public class TestRunBuilder {
         return this.preventContextAspect;
     }
 
-    public TestRunBuilder setShareInput(TestData shareInput) {
+    public TestRunBuilder setShareInput(InputData shareInput) {
         this.shareInput = this.shareInput.add(shareInput);
         return this;
     }
@@ -69,7 +69,7 @@ public class TestRunBuilder {
         return this;
     }
 
-    public TestRun createTestRun(Logger log, WebDriverFactory webDriverFactory, Map<String, String> webDriverConfig, Long implicitWaitTime, Long pageLoadWaitTime, TestData initialVars, TestRun previousRun, TestRunListener seInterpreterTestListener) {
+    public TestRun createTestRun(Logger log, WebDriverFactory webDriverFactory, Map<String, String> webDriverConfig, Long implicitWaitTime, Long pageLoadWaitTime, InputData initialVars, TestRun previousRun, TestRunListener seInterpreterTestListener) {
         final RemoteWebDriver driver;
         if (this.testCase.isShareState() && previousRun != null && previousRun.driver() != null) {
             driver = previousRun.driver();
@@ -85,7 +85,7 @@ public class TestRunBuilder {
         return this.createTestRun(log, driver, initialVars, seInterpreterTestListener);
     }
 
-    public TestRun createTestRun(TestData initialVars, TestRun previousRun) {
+    public TestRun createTestRun(InputData initialVars, TestRun previousRun) {
         return this.createTestRun(
                 previousRun.getTestRunName() + "_" + this.testCase.name()
                 , previousRun.log()
@@ -94,16 +94,16 @@ public class TestRunBuilder {
                 , previousRun.getListener());
     }
 
-    public TestRun createTestRun(Logger log, RemoteWebDriver driver, TestData initialVars, TestRunListener seInterpreterTestListener) {
+    public TestRun createTestRun(Logger log, RemoteWebDriver driver, InputData initialVars, TestRunListener seInterpreterTestListener) {
         return this.createTestRun(this.testCase.name(), log, driver, initialVars, seInterpreterTestListener);
     }
 
-    protected TestRun createTestRun(String testRunName, Logger log, RemoteWebDriver driver, TestData initialVars, TestRunListener seInterpreterTestListener) {
-        TestData data = this.shareInput.clearRowNumber().add(initialVars).lastRow(initialVars.isLastRow());
+    protected TestRun createTestRun(String testRunName, Logger log, RemoteWebDriver driver, InputData initialVars, TestRunListener seInterpreterTestListener) {
+        InputData data = this.shareInput.clearRowNumber().add(initialVars).lastRow(initialVars.isLastRow());
         return new TestRun(this.getTestRunName(testRunName, data), this, log, driver, data, seInterpreterTestListener);
     }
 
-    protected String getTestRunName(String testRunName, TestData initialVars) {
+    protected String getTestRunName(String testRunName, InputData initialVars) {
         String result = testRunName;
         if (testCase.path() != null && result.contains(".")) {
             String suffix = "";

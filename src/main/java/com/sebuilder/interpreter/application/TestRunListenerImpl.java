@@ -2,7 +2,7 @@ package com.sebuilder.interpreter.application;
 
 import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.TestCase;
-import com.sebuilder.interpreter.TestData;
+import com.sebuilder.interpreter.InputData;
 import com.sebuilder.interpreter.TestRunListener;
 import org.apache.logging.log4j.Logger;
 import org.apache.tools.ant.Project;
@@ -164,7 +164,7 @@ public class TestRunListenerImpl implements TestRunListener {
     }
 
     @Override
-    public boolean openTestSuite(TestCase testCase, String testRunName, TestData aProperty) {
+    public boolean openTestSuite(TestCase testCase, String testRunName, InputData aProperty) {
         String baseName = testRunName;
         String testName = this.startTime + "." + baseName.replace("_", ".");
         this.log.info("open suite:" + testName);

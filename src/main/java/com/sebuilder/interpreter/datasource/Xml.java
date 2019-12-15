@@ -17,7 +17,7 @@
 package com.sebuilder.interpreter.datasource;
 
 import com.google.common.collect.Lists;
-import com.sebuilder.interpreter.TestData;
+import com.sebuilder.interpreter.InputData;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -38,8 +38,8 @@ import java.util.Map;
 public class Xml implements FileDataSource {
 
     @Override
-    public List<TestData> getData(Map<String, String> config, File relativeTo, TestData vars) {
-        ArrayList<TestData> data = Lists.newArrayList();
+    public List<InputData> getData(Map<String, String> config, File relativeTo, InputData vars) {
+        ArrayList<InputData> data = Lists.newArrayList();
         File f = this.sourceFile(config, relativeTo, vars);
         try {
             Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(f);
@@ -48,15 +48,15 @@ public class Xml implements FileDataSource {
                 Node rowN = rows.item(i);
                 NamedNodeMap attributes = rowN.getAttributes();
                 LinkedHashMap<String, String> row = new LinkedHashMap<String, String>();
-                row.put(TestData.ROW_NUMBER, String.valueOf(i + 1));
+                row.put(InputData.ROW_NUMBER, String.valueOf(i + 1));
                 for (int j = 0; j < attributes.getLength(); j++) {
                     row.put(attributes.item(j).getNodeName(), attributes.item(j).getNodeValue());
                 }
-                data.add(new TestData(row));
+                data.add(new InputData(row));
             }
             if (rows.getLength() > 0) {
                 final int lastRowNumber = rows.getLength() - 1;
-                TestData lastRow = data.get(lastRowNumber).lastRow(true);
+                InputData lastRow = data.get(lastRowNumber).lastRow(true);
                 data.remove(lastRowNumber);
                 data.add(lastRow);
             }

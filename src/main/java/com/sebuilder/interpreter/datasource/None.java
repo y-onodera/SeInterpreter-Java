@@ -18,7 +18,7 @@ package com.sebuilder.interpreter.datasource;
 
 import com.google.common.collect.Lists;
 import com.sebuilder.interpreter.DataSource;
-import com.sebuilder.interpreter.TestData;
+import com.sebuilder.interpreter.InputData;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -28,11 +28,11 @@ import java.util.Map;
 
 public class None implements DataSource {
     @Override
-    public List<TestData> getData(Map<String, String> config, File relativeTo, TestData vars) {
-        ArrayList<TestData> l = Lists.newArrayList();
+    public List<InputData> getData(Map<String, String> config, File relativeTo, InputData vars) {
+        ArrayList<InputData> l = Lists.newArrayList();
         final LinkedHashMap<String, String> row = new LinkedHashMap<>();
-        row.put(TestData.ROW_NUMBER, String.valueOf(1));
-        l.add(new TestData(row).lastRow(true));
+        row.put(InputData.ROW_NUMBER, String.valueOf(1));
+        l.add(new InputData(row).lastRow(true));
         return l;
     }
 

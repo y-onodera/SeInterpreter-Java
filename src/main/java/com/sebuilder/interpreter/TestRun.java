@@ -35,7 +35,7 @@ public class TestRun {
     private final TestRunListener listener;
     private final Aspect aspect;
     private final boolean preventContextAspect;
-    private TestData vars;
+    private InputData vars;
     private TestRunStatus testRunStatus;
     private ChainRunner chainRunner;
     private boolean closeDriver;
@@ -45,7 +45,7 @@ public class TestRun {
             TestRunBuilder testRunBuilder,
             Logger log,
             RemoteWebDriver driver,
-            TestData initialVars,
+            InputData initialVars,
             TestRunListener seInterpreterTestListener
     ) {
         this.testRunName = testRunName;
@@ -94,7 +94,7 @@ public class TestRun {
         return this.listener;
     }
 
-    public TestData vars() {
+    public InputData vars() {
         return this.vars;
     }
 
@@ -314,7 +314,7 @@ public class TestRun {
         private final TestRun parent;
         private final TestCaseChains chains;
         private TestRun lastRun;
-        private TestData lastRunVar;
+        private InputData lastRunVar;
 
         public ChainRunner(TestRun parent) {
             this.parent = parent;
@@ -322,9 +322,9 @@ public class TestRun {
         }
 
         public boolean finish() {
-            TestData chainInitialVar = this.parent.vars();
+            InputData chainInitialVar = this.parent.vars();
             for (TestCase nextChain : this.chains) {
-                final TestData chainVar = chainInitialVar;
+                final InputData chainVar = chainInitialVar;
                 if (!nextChain.map(it -> it.addAspect(this.parent.getAspect()).setShareInput(chainVar))
                         .run(this, this.parent.getListener())) {
                     return false;
@@ -337,11 +337,11 @@ public class TestRun {
         }
 
         @Override
-        public STATUS execute(TestRunBuilder testRunBuilder, TestData data, TestRunListener testRunListener) {
+        public STATUS execute(TestRunBuilder testRunBuilder, InputData data, TestRunListener testRunListener) {
             if (this.isStopped()) {
                 return STATUS.STOPPED;
             }
-            TestData chainData = data;
+            InputData chainData = data;
             this.lastRun = testRunBuilder.createTestRun(chainData, this.parent);
             boolean result = this.lastRun.finish();
             if (this.lastRun.isStopped()) {

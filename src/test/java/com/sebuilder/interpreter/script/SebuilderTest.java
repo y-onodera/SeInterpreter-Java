@@ -40,10 +40,10 @@ public class SebuilderTest {
     private static String baseDir = SebuilderTest.class.getResource(".").getPath();
     private static Sebuilder target = new Sebuilder();
 
-    private static final TestDataSet DATA_SET_NONE = new TestDataSet(new None(), Map.of(), new File(baseDir));
-    private static final TestDataSet DATA_SET_CSV = new TestDataSet(new Csv(), Map.of("path", "test.csv"), new File(baseDir));
-    private static final TestDataSet DATA_SET_OVERRIDE_CSV = new TestDataSet(new Csv(), Map.of("path", "override.csv"), new File(baseDir));
-    private static final TestDataSet DATA_SET_OVERRIDE_LAZY = new TestDataSet(new Csv(), Map.of("path", "${dataSource1}.csv"), null);
+    private static final DataSourceLoader DATA_SET_NONE = new DataSourceLoader(new None(), Map.of(), new File(baseDir));
+    private static final DataSourceLoader DATA_SET_CSV = new DataSourceLoader(new Csv(), Map.of("path", "test.csv"), new File(baseDir));
+    private static final DataSourceLoader DATA_SET_OVERRIDE_CSV = new DataSourceLoader(new Csv(), Map.of("path", "override.csv"), new File(baseDir));
+    private static final DataSourceLoader DATA_SET_OVERRIDE_LAZY = new DataSourceLoader(new Csv(), Map.of("path", "${dataSource1}.csv"), null);
 
     private static final File testFileNoType = new File(baseDir, "noType.json");
     private static final File testFileScriptWithNoContents = new File(baseDir, "scriptWithNoContents.json");
@@ -73,7 +73,7 @@ public class SebuilderTest {
             assertEquals(results.get(i).getType(), stepType);
             assertSame(results.get(i).getLocator("locator").type, locatorName);
             assertEquals(results.get(i).getLocator("locator").value, locatorValue);
-            assertEquals(results.get(i).isSkip(new TestData()), isSkip);
+            assertEquals(results.get(i).isSkip(new InputData()), isSkip);
             assertEquals(results.get(i).isNegated(), isNageted);
         }
     }
@@ -361,7 +361,7 @@ public class SebuilderTest {
                     .assertChainCaseCounts(TestCaseAssert.assertEqualsChainCaseCount(3))
                     .assertChainCase(0, new ParseScriptNoContents().getTestCaseAssert()
                             .builder()
-                            .assertOverrideDataSource(TestCaseAssert.assertEqualsOverrideDataSst(new TestDataSet(new Csv(), Map.of("path", "${path}/override.csv"), new File(baseDir))))
+                            .assertOverrideDataSource(TestCaseAssert.assertEqualsOverrideDataSst(new DataSourceLoader(new Csv(), Map.of("path", "${path}/override.csv"), new File(baseDir))))
                             .create())
                     .assertChainCase(1, new ParseScriptTypeWithSteps().getTestCaseAssert()
                             .builder()
@@ -404,7 +404,7 @@ public class SebuilderTest {
                             .builder()
                             .assertOverrideDataSource(TestCaseAssert.assertEqualsOverrideDataSst(DATA_SET_NONE))
                             .create())
-                    .assertDataSource(TestCaseAssert.assertEqualsDataSet(new TestDataSet(new Manual()
+                    .assertDataSource(TestCaseAssert.assertEqualsDataSet(new DataSourceLoader(new Manual()
                             , Map.of("script1", "scriptWithNoContents", "skip1", "false", "dataSource1", "override")
                             , new File(baseDir))))
                     .create();
@@ -437,11 +437,11 @@ public class SebuilderTest {
                             .assertChainCase(1, TestCaseAssert.of()
                                     .assertFileAttribute(TestCaseAssert.assertEqualsFileAttribute("${script3}.json"))
                                     .assertSkip(TestCaseAssert.assertEqualsSkip("false"))
-                                    .assertOverrideDataSource(TestCaseAssert.assertEqualsOverrideDataSst(new TestDataSet(new Csv(), Map.of("path", "${dataSource3}.csv"), null)))
+                                    .assertOverrideDataSource(TestCaseAssert.assertEqualsOverrideDataSst(new DataSourceLoader(new Csv(), Map.of("path", "${dataSource3}.csv"), null)))
                                     .assertLazy(TestCaseAssert::assertLazyLoad)
                                     .create())
                             .create())
-                    .assertDataSource(TestCaseAssert.assertEqualsDataSet(new TestDataSet(new Manual()
+                    .assertDataSource(TestCaseAssert.assertEqualsDataSet(new DataSourceLoader(new Manual()
                             , Map.of("script1", "scriptWithDataSource", "script3", "scriptWithNoContents", "dataSource3", "csv/override")
                             , new File(baseDir))))
                     .create();

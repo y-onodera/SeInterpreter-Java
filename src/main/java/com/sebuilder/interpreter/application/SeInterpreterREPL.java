@@ -96,7 +96,7 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
     }
 
     @Override
-    public STATUS execute(TestRunBuilder testRunBuilder, TestData data, TestRunListener seInterpreterTestListener) {
+    public STATUS execute(TestRunBuilder testRunBuilder, InputData data, TestRunListener seInterpreterTestListener) {
         this.lastRun = this.getTestRun(testRunBuilder, data, seInterpreterTestListener);
         this.log.info("start execute test");
         boolean result = this.lastRun.finish();

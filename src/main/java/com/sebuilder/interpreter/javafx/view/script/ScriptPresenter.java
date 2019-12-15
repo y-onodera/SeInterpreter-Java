@@ -26,10 +26,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ScriptPresenter {
-    @Inject
-    private SeInterpreterApplication application;
 
     private static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat("application/x-java-serialized-object");
+
+    @Inject
+    private SeInterpreterApplication application;
 
     @FXML
     private TableColumn<ScriptBody, String> tableColumnScriptBodyStep;

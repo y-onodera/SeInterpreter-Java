@@ -201,7 +201,7 @@ public class Sebuilder implements ScriptParser {
                             .associateWith(lazyLoad.getScriptFile().toFile())
                             .setName(lazyLoad.name())
                             .addSteps(lazyLoad.steps())
-                            .setTestDataSet(lazyLoad.getTestDataSet())
+                            .setTestDataSet(lazyLoad.getDataSourceLoader())
                             .addAspect(lazyLoad.getAspect())
                     );
                 } catch (JSONException | IOException e) {

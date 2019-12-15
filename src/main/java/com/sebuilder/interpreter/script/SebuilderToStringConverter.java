@@ -29,7 +29,7 @@ public class SebuilderToStringConverter {
                 stepsA.put(this.toJSON(s));
             }
             o.put("steps", stepsA);
-            JSONObject data = this.toJson(target.getTestDataSet());
+            JSONObject data = this.toJson(target.getDataSourceLoader());
             if (data != null) {
                 o.put("data", data);
             }
@@ -42,7 +42,7 @@ public class SebuilderToStringConverter {
     private String toStringSuite(TestCase target) {
         try {
             JSONObject o = new JSONObject();
-            JSONObject data = toJson(target.getTestDataSet());
+            JSONObject data = toJson(target.getDataSourceLoader());
             if (data != null) {
                 o.put("data", data);
             }
@@ -81,7 +81,7 @@ public class SebuilderToStringConverter {
         return o;
     }
 
-    private JSONObject toJson(TestDataSet target) throws JSONException {
+    private JSONObject toJson(DataSourceLoader target) throws JSONException {
         final DataSource dataSource = target.getDataSource();
         final Map<String, String> dataSourceConfig = target.getDataSourceConfig();
         if (dataSource != null) {
@@ -143,7 +143,7 @@ public class SebuilderToStringConverter {
         if (testCase.isBreakNestedChain()) {
             scriptPath.put("breakNestedChain", testCase.isBreakNestedChain());
         }
-        JSONObject data = this.toJson(testCase.getOverrideTestDataSet());
+        JSONObject data = this.toJson(testCase.getOverrideDataSourceLoader());
         if (data != null) {
             scriptPath.put("data", data);
         }

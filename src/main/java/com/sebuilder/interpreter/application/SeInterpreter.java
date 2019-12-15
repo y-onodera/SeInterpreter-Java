@@ -70,7 +70,7 @@ public class SeInterpreter extends CommandLineRunner implements TestRunner {
     }
 
     @Override
-    public STATUS execute(TestRunBuilder testRunBuilder, TestData data, TestRunListener aTestRunListener) {
+    public STATUS execute(TestRunBuilder testRunBuilder, InputData data, TestRunListener aTestRunListener) {
         boolean success = false;
         try {
             this.lastRun = getTestRun(testRunBuilder, data, aTestRunListener);

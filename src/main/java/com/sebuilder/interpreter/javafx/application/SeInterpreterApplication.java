@@ -309,8 +309,8 @@ public class SeInterpreterApplication extends Application {
     }
 
     private TestCase copyDataSourceTemplate(TestCase it) {
-        if (it.getTestDataSet().getDataSourceConfig().containsKey("path")) {
-            File src = new File(this.runner.getTemplateOutputDirectory(), it.getTestDataSet().getDataSourceConfig().get("path"));
+        if (it.getDataSourceLoader().getDataSourceConfig().containsKey("path")) {
+            File src = new File(this.runner.getTemplateOutputDirectory(), it.getDataSourceLoader().getDataSourceConfig().get("path"));
             if (src.exists()) {
                 final String newDataSourceName = it.name().replace(".json", "");
                 File newDataSource = new File(this.runner.getDataSourceDirectory(), newDataSourceName + ".csv");

@@ -8,7 +8,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 
-public class TestDataSet {
+public class DataSourceLoader {
 
     private final DataSource dataSource;
 
@@ -16,7 +16,7 @@ public class TestDataSet {
 
     private final File relativePath;
 
-    public TestDataSet(DataSource dataSource, Map<String, String> dataSourceConfig, File relativePath) {
+    public DataSourceLoader(DataSource dataSource, Map<String, String> dataSourceConfig, File relativePath) {
         this.dataSource = dataSource;
         if (dataSourceConfig != null) {
             this.dataSourceConfig = Maps.newHashMap(dataSourceConfig);
@@ -38,28 +38,28 @@ public class TestDataSet {
         return this.relativePath;
     }
 
-    public List<TestData> loadData(TestData vars) {
+    public List<InputData> loadData(InputData vars) {
         if (this.dataSource == null) {
-            return Lists.newArrayList(new TestData());
+            return Lists.newArrayList(new InputData());
         }
         return this.dataSource.getData(this.dataSourceConfig, this.relativePath, vars);
     }
 
-    public String name(TestData shareInput) {
+    public String name(InputData shareInput) {
         if (this.dataSource == null) {
             return "none";
         }
         return this.dataSource.name(this.dataSourceConfig, shareInput);
     }
 
-    public boolean isLoadable(TestData shareInput) {
+    public boolean isLoadable(InputData shareInput) {
         if (this.dataSource == null) {
             return false;
         }
         return this.dataSource.isLoadable(this.dataSourceConfig, this.relativePath, shareInput);
     }
 
-    public DataSourceWriter writer(TestData shareInput) {
+    public DataSourceWriter writer(InputData shareInput) {
         if (this.dataSource == null) {
             throw new IllegalStateException("no datasource exists");
         }
@@ -70,10 +70,10 @@ public class TestDataSet {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        TestDataSet testDataSet = (TestDataSet) o;
-        return Objects.equal(getDataSource(), testDataSet.getDataSource()) &&
-                Objects.equal(getDataSourceConfig(), testDataSet.getDataSourceConfig()) &&
-                Objects.equal(getRelativePath(), testDataSet.getRelativePath());
+        DataSourceLoader dataSourceLoader = (DataSourceLoader) o;
+        return Objects.equal(getDataSource(), dataSourceLoader.getDataSource()) &&
+                Objects.equal(getDataSourceConfig(), dataSourceLoader.getDataSourceConfig()) &&
+                Objects.equal(getRelativePath(), dataSourceLoader.getRelativePath());
     }
 
     @Override
