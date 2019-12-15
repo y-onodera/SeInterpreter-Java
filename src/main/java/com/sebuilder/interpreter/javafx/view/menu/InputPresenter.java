@@ -8,8 +8,6 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -51,23 +49,23 @@ public class InputPresenter {
         this.row.setCellValueFactory(body -> body.getValue().rowProperty().asObject());
         this.slash.setCellValueFactory(body -> new SimpleStringProperty("/"));
         this.rows.setCellValueFactory(body -> body.getValue().rowsProperty().asObject());
-        this.button.setCellFactory(inputResourceStringTableColumn -> {
-            return new TableCell<InputResource, Void>() {
-                @Override
-                public void updateItem(Void item, boolean empty) {
-                    super.updateItem(item, empty);
-                    if (empty) {
-                        setGraphic(null);
-                    } else {
-                        Button btn = new Button("open");
-                        btn.setOnAction((ActionEvent event) -> {
-                            InputResource data = getTableView().getItems().get(getIndex());
-                            new DataSetView().showDataSet(data.getLoader(), inputResourceTableView.getScene().getWindow());
-                        });
-                        setGraphic(btn);
-                    }
+        this.button.setCellFactory(inputResourceStringTableColumn -> new TableCell<InputResource, Void>() {
+            @Override
+            public void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    Button btn = new Button("open");
+                    btn.setOnAction((ActionEvent event) -> {
+                        InputResource data = getTableView().getItems().get(getIndex());
+                        DataSetView dataSetView = new DataSetView();
+                        dataSetView.onClick(e -> refreshTable());
+                        dataSetView.showDataSet(data.getLoader(), inputResourceTableView.getScene().getWindow());
+                    });
+                    setGraphic(btn);
                 }
-            };
+            }
         });
         this.refreshTable();
     }

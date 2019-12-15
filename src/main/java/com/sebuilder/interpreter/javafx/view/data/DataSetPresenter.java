@@ -9,6 +9,7 @@ import com.sebuilder.interpreter.javafx.control.ExcelLikeSpreadSheetView;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.layout.AnchorPane;
 import javafx.util.Pair;
@@ -34,6 +35,8 @@ public class DataSetPresenter {
     private AnchorPane gridParentPane;
 
     private SpreadsheetView sheet;
+
+    private EventHandler<ActionEvent> onclick;
 
     public void showDataSet(DataSourceLoader resource) {
         List<InputData> inputData = resource.loadData();
@@ -65,6 +68,10 @@ public class DataSetPresenter {
         this.gridParentPane.getChildren().add(sheet);
     }
 
+    public void setOnclick(EventHandler<ActionEvent> onclick) {
+        this.onclick = onclick;
+    }
+
     @FXML
     void reloadDataSet(ActionEvent actionEvent) {
         this.gridParentPane.getChildren().clear();
@@ -90,6 +97,9 @@ public class DataSetPresenter {
                     .write(saveContents));
         }
         this.reloadDataSet(actionEvent);
+        if (onclick != null) {
+            this.onclick.handle(actionEvent);
+        }
     }
 
     protected InputData toTestData(ObservableList<SpreadsheetCell> row, List<Pair<Integer, String>> header) {

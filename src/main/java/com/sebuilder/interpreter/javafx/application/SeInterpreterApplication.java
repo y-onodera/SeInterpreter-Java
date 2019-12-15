@@ -8,6 +8,7 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import com.sebuilder.interpreter.*;
 import com.sebuilder.interpreter.application.TestRunListenerImpl;
+import com.sebuilder.interpreter.datasource.Manual;
 import com.sebuilder.interpreter.javafx.view.replay.ReplayPresenter;
 import com.sebuilder.interpreter.javafx.view.replay.ReplayView;
 import com.sebuilder.interpreter.step.type.Get;
@@ -31,6 +32,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class SeInterpreterApplication extends Application {
 
@@ -269,8 +271,22 @@ public class SeInterpreterApplication extends Application {
     }
 
     public void runScript(Map<String, Integer> shareInputs) {
-        this.executeTask(this.runner.createRunScriptTask(this.getDisplayTestCase(), log -> new GUITestRunListener(log, this)));
+        InputData shareInput = getShareInput(shareInputs);
+        final TestCase target = this.getDisplayTestCase().map(builder -> builder.setShareInput(shareInput));
+        if (shareInputs.get(target.runtimeDataSet().name()) != null) {
+            this.executeTask(this.runner.createRunScriptTask(
+                    target.map(builder -> builder.setOverrideTestDataSet(new Manual()
+                            , target.loadData()
+                                    .get(shareInputs.get(target.runtimeDataSet().name()) - 1)
+                                    .input()
+                                    .stream()
+                                    .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()))))
+                    , log -> new GUITestRunListener(log, this)));
+        } else {
+            this.executeTask(this.runner.createRunScriptTask(target, log -> new GUITestRunListener(log, this)));
+        }
     }
+
 
     public void runStep(Predicate<Number> filter, Function<Integer, Integer> function) {
         this.executeTask(this.runner.createRunScriptTask(this.getDisplayTestCase().removeStep(filter)
@@ -292,6 +308,19 @@ public class SeInterpreterApplication extends Application {
 
     protected ScriptParser getScriptParser() {
         return Context.getScriptParser();
+    }
+
+    private InputData getShareInput(Map<String, Integer> shareInputs) {
+        InputData shareInput = this.replayShareInput();
+        for (DataSourceLoader loader : this.getDisplayTestCaseDataSources()) {
+            DataSourceLoader withShareInput = loader.shareInput(shareInput);
+            if (withShareInput.isLoadable()) {
+                shareInput = shareInput.add(withShareInput
+                        .loadData()
+                        .get(shareInputs.getOrDefault(withShareInput.name(), 1) - 1));
+            }
+        }
+        return shareInput;
     }
 
     private void resetScript(Suite aSuite, TestCase toSelect) {
