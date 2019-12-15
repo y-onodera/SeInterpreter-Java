@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 /**
  * A Selenium 2 script. To create and finish a test, instantiate a TestCase object,
@@ -77,20 +78,12 @@ public class TestCase {
         return true;
     }
 
+    public Stream<TestCase> flattenTestCases() {
+        return Stream.concat(Stream.of(this), this.chains.flattenTestCases());
+    }
+
     public List<InputData> loadData() {
         return this.runtimeDataSet().loadData();
-    }
-
-    public String loadDataFrom() {
-        return this.runtimeDataSet().name();
-    }
-
-    public boolean hasLoadableDataSet() {
-        return this.runtimeDataSet().isLoadable();
-    }
-
-    public DataSourceWriter runtimeDataSetWriter() {
-        return this.runtimeDataSet().writer();
     }
 
     public DataSourceLoader runtimeDataSet() {

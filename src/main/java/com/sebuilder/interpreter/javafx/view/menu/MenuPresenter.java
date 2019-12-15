@@ -87,7 +87,7 @@ public class MenuPresenter {
 
     @FXML
     void handleReplayScript(ActionEvent event) {
-        this.application.runScript();
+        new InputView().open(paneSeInterpreterMenu.getScene().getWindow());
     }
 
     private void saveSuiteToNewFile() {

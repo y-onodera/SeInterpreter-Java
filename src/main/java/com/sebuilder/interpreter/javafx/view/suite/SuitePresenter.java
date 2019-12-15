@@ -7,6 +7,7 @@ import com.sebuilder.interpreter.Suite;
 import com.sebuilder.interpreter.TestCase;
 import com.sebuilder.interpreter.TestCaseChains;
 import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
+import com.sebuilder.interpreter.javafx.view.data.DataSetView;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.MenuItem;
@@ -45,7 +46,7 @@ public class SuitePresenter {
             } else {
                 this.findItem(newValue).ifPresent(it -> this.treeViewScriptName.getSelectionModel().select(it));
             }
-            if (observed.getValue().hasLoadableDataSet() && observed.getValue().loadData().size() > 0) {
+            if (observed.getValue().runtimeDataSet().isLoadable() && observed.getValue().loadData().size() > 0) {
                 openDataSource.setDisable(false);
             } else {
                 openDataSource.setDisable(true);
@@ -56,7 +57,7 @@ public class SuitePresenter {
 
     @FXML
     public void handleOpenDataSource(ActionEvent actionEvent) {
-        new DataSetView().showDataSet(this.application.getDisplayTestCase(), this.treeViewScriptName.getScene().getWindow());
+        new DataSetView().showDataSet(this.application.getDisplayTestCaseDataSource(), this.treeViewScriptName.getScene().getWindow());
     }
 
     @FXML

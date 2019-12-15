@@ -58,7 +58,7 @@ public class SeInterpreterApplication extends Application {
         final List<String> unnamed = parameters.getUnnamed();
         if (unnamed.size() > 0) {
             this.resetSuite(getScriptParser().load(new File(unnamed.get(0))).toSuite());
-        }else {
+        } else {
             this.reset();
         }
         final MainView mainView = new MainView();
@@ -101,6 +101,14 @@ public class SeInterpreterApplication extends Application {
 
     public ObjectProperty<Pair<Integer, Result>> replayStatusProperty() {
         return replayStatus;
+    }
+
+    public DataSourceLoader getDisplayTestCaseDataSource() {
+        return this.getDisplayTestCase().runtimeDataSet();
+    }
+
+    public DataSourceLoader[] getDisplayTestCaseDataSources() {
+        return this.getSuite().dataSources(this.getDisplayTestCase());
     }
 
     public void executeAndLoggingCaseWhenThrowException(ThrowableAction action) {

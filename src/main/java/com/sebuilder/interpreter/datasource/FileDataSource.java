@@ -22,4 +22,8 @@ public interface FileDataSource extends DataSource {
     default boolean isLoadable(Map<String, String> dataSourceConfig, File relativePath, InputData shareInput) {
         return this.sourceFile(dataSourceConfig, relativePath, shareInput).exists();
     }
+
+    default boolean enableMultiLine() {
+        return true;
+    }
 }

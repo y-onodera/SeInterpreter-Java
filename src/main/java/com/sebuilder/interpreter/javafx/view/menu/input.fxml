@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<AnchorPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.sebuilder.interpreter.javafx.view.menu.InputPresenter">
+    <children>
+    <SplitPane dividerPositions="0.75" orientation="VERTICAL" prefHeight="120.0" prefWidth="400.0">
+    <items>
+        <TableView id="inputResourceTableView" fx:id="inputResourceTableView" editable="true" stylesheets="@input.css"
+                   prefWidth="400.0" minWidth="400.0" maxWidth="400.0"
+                   AnchorPane.bottomAnchor="0.0"
+                   AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                   AnchorPane.topAnchor="0.0">
+            <columns>
+                <TableColumn id="resourceName" fx:id="resourceName"
+                             prefWidth="210.0" maxWidth="210.0"
+                             style="-fx-alignment: CENTER_LEFT;" text="resourceName"/>
+                <TableColumn id="row" fx:id="row" editable="true"
+                             prefWidth="50.0" maxWidth="50.0"
+                             style="-fx-alignment: CENTER_RIGHT;" text="row"/>
+                <TableColumn id="slash" fx:id="slash"
+                             prefWidth="20.0" maxWidth="20.0"
+                             style="-fx-alignment: CENTER;" />
+                <TableColumn id="rows" fx:id="rows"
+                             prefWidth="50.0" maxWidth="50.0"
+                             style="-fx-alignment: CENTER_RIGHT;" text="rows"/>
+                <TableColumn id="button" fx:id="button"
+                             prefWidth="70.0" maxWidth="70.0"
+                             style="-fx-alignment: CENTER;"/>
+            </columns>
+        </TableView>
+        <HBox alignment="TOP_RIGHT" prefHeight="100.0" prefWidth="400.0" spacing="10.0">
+            <children>
+                <Button fx:id="replayStart" alignment="CENTER" mnemonicParsing="false" onAction="#handleReplayStart"
+                        text="replay start"/>
+            </children>
+        </HBox>
+    </items>
+    </SplitPane>
+    </children>
+</AnchorPane>

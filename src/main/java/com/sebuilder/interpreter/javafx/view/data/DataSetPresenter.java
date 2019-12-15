@@ -1,8 +1,8 @@
-package com.sebuilder.interpreter.javafx.view.suite;
+package com.sebuilder.interpreter.javafx.view.data;
 
 import com.google.common.base.Function;
 import com.google.common.base.Strings;
-import com.sebuilder.interpreter.TestCase;
+import com.sebuilder.interpreter.DataSourceLoader;
 import com.sebuilder.interpreter.InputData;
 import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
 import com.sebuilder.interpreter.javafx.control.ExcelLikeSpreadSheetView;
@@ -35,8 +35,8 @@ public class DataSetPresenter {
 
     private SpreadsheetView sheet;
 
-    public void showDataSet(TestCase currentCase) {
-        List<InputData> inputData = currentCase.loadData();
+    public void showDataSet(DataSourceLoader resource) {
+        List<InputData> inputData = resource.loadData();
         int row = inputData.size() < DEFAULT_ROWS ? DEFAULT_ROWS : inputData.size();
         int column = inputData.size() < 1 || inputData.get(0).input().size() < DEFAULT_COLUMNS ? DEFAULT_COLUMNS : inputData.get(0).input().size();
         GridBase grid = new GridBase(row, column);
@@ -68,7 +68,7 @@ public class DataSetPresenter {
     @FXML
     void reloadDataSet(ActionEvent actionEvent) {
         this.gridParentPane.getChildren().clear();
-        this.showDataSet(this.application.getDisplayTestCase());
+        this.showDataSet(this.application.getDisplayTestCase().runtimeDataSet());
     }
 
     @FXML
@@ -84,7 +84,10 @@ public class DataSetPresenter {
                 .map(it -> toTestData(it, header))
                 .collect(Collectors.toCollection(ArrayList::new));
         if (saveContents.size() > 0) {
-            this.application.executeAndLoggingCaseWhenThrowException(() -> this.application.getDisplayTestCase().runtimeDataSetWriter().writer(saveContents));
+            this.application.executeAndLoggingCaseWhenThrowException(() -> this.application.getDisplayTestCase()
+                    .runtimeDataSet()
+                    .writer()
+                    .write(saveContents));
         }
         this.reloadDataSet(actionEvent);
     }

@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class TestCaseChains implements Iterable<TestCase> {
 
@@ -31,6 +32,11 @@ public class TestCaseChains implements Iterable<TestCase> {
     @Override
     public Iterator<TestCase> iterator() {
         return this.testCases.iterator();
+    }
+
+    public Stream<TestCase> flattenTestCases() {
+        return this.testCases.stream()
+                .flatMap(testCase -> testCase.flattenTestCases());
     }
 
     public boolean isTakeOverLastRun() {

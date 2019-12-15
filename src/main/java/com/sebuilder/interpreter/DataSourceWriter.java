@@ -4,5 +4,5 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public interface DataSourceWriter {
-    void writer(ArrayList<InputData> saveContents) throws IOException;
+    void write(ArrayList<InputData> saveContents) throws IOException;
 }

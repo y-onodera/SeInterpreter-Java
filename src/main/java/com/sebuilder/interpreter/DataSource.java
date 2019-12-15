@@ -56,7 +56,12 @@ public interface DataSource {
         return false;
     }
 
+    default boolean enableMultiLine() {
+        return false;
+    }
+
     default DataSourceWriter writer(Map<String, String> dataSourceConfig, File relativePath, InputData shareInput) {
         throw new UnsupportedOperationException();
     }
+
 }
