@@ -15,15 +15,14 @@ public abstract class CommandLineRunner {
     protected static WebDriverFactory DEFAULT_DRIVER_FACTORY = new Chrome();
     protected TestRun lastRun;
     protected TestRunListener testRunListener;
-    protected RemoteWebDriver driver;
     protected Logger log;
 
     protected CommandLineRunner(String[] args, Logger log) {
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
-                if (driver != null) {
-                    driver.quit();
+                if (lastRun != null) {
+                    lastRun.driver().quit();
                 }
             }
         });

@@ -62,8 +62,8 @@ public class SeInterpreter extends CommandLineRunner implements TestRunner {
                 Context.getScriptParser().load(new File(path)).run(this, this.testRunListener);
             }
         } finally {
-            if (this.driver != null && this.closeDriver) {
-                this.driver.quit();
+            if (this.lastRun != null && this.closeDriver) {
+                this.lastRun.driver().quit();
             }
             this.testRunListener.aggregateResult();
         }
@@ -82,16 +82,15 @@ public class SeInterpreter extends CommandLineRunner implements TestRunner {
             }
         } catch (AssertionError e) {
             this.log.info(testRunBuilder.getScriptName() + " failed", e);
-        }
-        if (this.lastRun != null && !this.lastRun.isCloseDriver()) {
-            this.driver = this.lastRun.driver();
+        } finally {
             this.closeDriver = true;
-        } else {
+        }
+        boolean stopped = this.lastRun.isStopped();
+        if (this.lastRun.isCloseDriver()) {
             this.lastRun = null;
-            this.driver = null;
             this.closeDriver = false;
         }
-        if (this.lastRun.isStopped()) {
+        if (stopped) {
             return STATUS.STOPPED;
         } else if (!success) {
             return STATUS.FAILED;

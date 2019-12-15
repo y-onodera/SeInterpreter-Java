@@ -54,7 +54,7 @@ public class ReplayPresenter {
 
     @FXML
     void handleReplayStop(ActionEvent event) throws Exception {
-        this.application.stop();
+        this.application.stopReplay();
     }
 
     @FXML

@@ -269,6 +269,10 @@ public class SeInterpreterApplication extends Application {
                 }));
     }
 
+    public void stopReplay() {
+        this.runner.stopRunning();
+    }
+
     public void updateReplayStatus(int stepNo, Result result) {
         this.replayStatus.setValue(new Pair<>(stepNo, result));
     }

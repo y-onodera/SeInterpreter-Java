@@ -68,9 +68,8 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
     }
 
     public void tearDownREPL() {
-        if (this.driver != null) {
-            this.driver.quit();
-            this.driver = null;
+        if (this.lastRun != null) {
+            this.lastRun.driver().quit();
             this.lastRun = null;
         }
     }
@@ -102,9 +101,6 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
         this.log.info("start execute test");
         boolean result = this.lastRun.finish();
         this.log.info("finish execute test");
-        if (this.driver == null && lastRun != null) {
-            this.driver = this.lastRun.driver();
-        }
         if (this.lastRun.isStopped()) {
             return STATUS.STOPPED;
         } else if (!result) {
