@@ -53,10 +53,7 @@ public class TestRun {
         this.log = log;
         this.driver = driver;
         this.listener = seInterpreterTestListener;
-        this.vars = initialVars.builder()
-                .add("_browser", Context.getBrowser())
-                .add("_baseDir", Context.getBaseDirectory().getAbsolutePath())
-                .add("_dataSourceDir", Context.getDataSourceDirectory().getAbsolutePath())
+        this.vars = initialVars.builder().add(Context.settings())
                 .add("_resultDir", seInterpreterTestListener.getResultDir().getAbsolutePath())
                 .add("_screenShotDir", seInterpreterTestListener.getScreenShotOutputDirectory().getAbsolutePath())
                 .add("_downloadDir", seInterpreterTestListener.getDownloadDirectory().getAbsolutePath())

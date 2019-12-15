@@ -26,6 +26,7 @@ import javafx.util.Pair;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
@@ -101,6 +102,10 @@ public class SeInterpreterApplication extends Application {
 
     public ObjectProperty<Pair<Integer, Result>> replayStatusProperty() {
         return replayStatus;
+    }
+
+    public InputData replayShareInput() {
+        return Context.settings();
     }
 
     public DataSourceLoader getDisplayTestCaseDataSource() {
@@ -263,7 +268,7 @@ public class SeInterpreterApplication extends Application {
         this.executeTask(this.runner.createRunScriptTask(this.getSuite().head(), log -> new GUITestRunListener(log, this)));
     }
 
-    public void runScript() {
+    public void runScript(Map<String, Integer> shareInputs) {
         this.executeTask(this.runner.createRunScriptTask(this.getDisplayTestCase(), log -> new GUITestRunListener(log, this)));
     }
 

@@ -54,6 +54,14 @@ public enum Context {
         return INSTANCE;
     }
 
+    public static InputData settings() {
+        return new InputData().builder()
+                .add("_browser", Context.getBrowser())
+                .add("_baseDir", Context.getBaseDirectory().getAbsolutePath())
+                .add("_dataSourceDir", Context.getDataSourceDirectory().getAbsolutePath())
+                .build();
+    }
+
     public static Long getImplicitlyWaitTime() {
         return getInstance().implicitlyWaitTime;
     }

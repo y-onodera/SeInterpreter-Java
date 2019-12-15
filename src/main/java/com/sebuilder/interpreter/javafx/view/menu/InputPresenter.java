@@ -8,6 +8,8 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -19,7 +21,9 @@ import javafx.util.converter.IntegerStringConverter;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class InputPresenter {
 
@@ -37,6 +41,8 @@ public class InputPresenter {
     private TableColumn<InputResource, Integer> rows;
     @FXML
     private TableColumn<InputResource, Void> button;
+
+    private Map<String, Integer> shareInputs = new HashMap<>();
 
     @FXML
     void initialize() {
@@ -68,23 +74,26 @@ public class InputPresenter {
 
     @FXML
     public void handleReplayStart(ActionEvent actionEvent) {
-        this.application.runScript();
+        this.application.runScript(this.shareInputs);
     }
 
     private void refreshTable() {
         this.application.executeAndLoggingCaseWhenThrowException(() -> {
             this.inputResourceTableView.getItems().setAll(new ArrayList<>());
+            InputData shareInput = this.application.replayShareInput();
             for (DataSourceLoader loader : this.application.getDisplayTestCaseDataSources()) {
-                if (loader.isLoadable()) {
-                    InputResource row = new InputResource(loader);
+                DataSourceLoader withShareInput = loader.shareInput(shareInput);
+                if (withShareInput.isLoadable()) {
+                    InputResource row = new InputResource(withShareInput);
                     this.inputResourceTableView.getItems().add(row);
+                    shareInput = shareInput.add(withShareInput.loadData().get(row.getRow() - 1));
                 }
             }
             this.inputResourceTableView.refresh();
         });
     }
 
-    static class InputResource {
+    class InputResource {
         private final DataSourceLoader loader;
         private StringProperty resourceName;
         private IntegerProperty row;
@@ -94,7 +103,12 @@ public class InputPresenter {
             this.loader = loader;
             List<InputData> data = this.loader.loadData();
             this.resourceName = new SimpleStringProperty(this.loader.name());
-            this.row = new SimpleIntegerProperty(1);
+            this.row = new SimpleIntegerProperty(shareInputs.getOrDefault(this.resourceName.get(), 1));
+            final String key = this.resourceName.get();
+            this.row.addListener((observableValue, oldVal, newVal) -> {
+                shareInputs.put(key, observableValue.getValue().intValue());
+                refreshTable();
+            });
             this.rows = new SimpleIntegerProperty(data.size());
         }
 
@@ -108,10 +122,6 @@ public class InputPresenter {
 
         public StringProperty resourceNameProperty() {
             return resourceName;
-        }
-
-        public void setResourceName(String resourceName) {
-            this.resourceName.set(resourceName);
         }
 
         public int getRow() {
@@ -132,10 +142,6 @@ public class InputPresenter {
 
         public IntegerProperty rowsProperty() {
             return rows;
-        }
-
-        public void setRows(int rows) {
-            this.rows.set(rows);
         }
     }
 }
