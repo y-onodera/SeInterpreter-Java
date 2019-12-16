@@ -10,6 +10,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import javax.inject.Inject;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
@@ -76,11 +77,6 @@ public class MenuPresenter {
     }
 
     @FXML
-    void handleReplaySetting(ActionEvent event) throws IOException {
-        new DatasourceView().open(paneSeInterpreterMenu.getScene().getWindow());
-    }
-
-    @FXML
     void handleReplaySuite(ActionEvent event) {
         this.application.runSuite();
     }
@@ -88,6 +84,17 @@ public class MenuPresenter {
     @FXML
     void handleReplayScript(ActionEvent event) {
         new InputView().open(paneSeInterpreterMenu.getScene().getWindow());
+    }
+
+    @FXML
+    void handleReplaySetting(ActionEvent event) throws IOException {
+        new DatasourceView().open(paneSeInterpreterMenu.getScene().getWindow());
+    }
+
+    @FXML
+    void handleOpenResult(ActionEvent actionEvent) {
+        this.application.executeAndLoggingCaseWhenThrowException(() -> Desktop.getDesktop()
+                .open(Context.getResultOutputDirectory()));
     }
 
     private void saveSuiteToNewFile() {

@@ -31,6 +31,8 @@
                                   onAction="#handleReplayScript" text="Run Script"/>
                         <MenuItem fx:id="menuReplaySetting" mnemonicParsing="false" onAction="#handleReplaySetting"
                                   text="Setting"/>
+                        <MenuItem fx:id="menuOpenResult" mnemonicParsing="false" onAction="#handleOpenResult"
+                                  text="Open Result"/>
                     </items>
                 </Menu>
                 <Menu id="menuBrowser" fx:id="menuBrowser" mnemonicParsing="false" text="Browser">
