@@ -34,12 +34,15 @@ public class DataSetPresenter {
     @FXML
     private AnchorPane gridParentPane;
 
+    private DataSourceLoader resource;
+
     private SpreadsheetView sheet;
 
     private EventHandler<ActionEvent> onclick;
 
     public void showDataSet(DataSourceLoader resource) {
-        List<InputData> inputData = resource.loadData();
+        this.resource = resource;
+        List<InputData> inputData = this.resource.loadData();
         int row = Math.max(inputData.size(), DEFAULT_ROWS);
         int column = inputData.size() < 1 || inputData.get(0).input().size() < DEFAULT_COLUMNS ? DEFAULT_COLUMNS : inputData.get(0).input().size();
         GridBase grid = new GridBase(row, column);
@@ -75,7 +78,7 @@ public class DataSetPresenter {
     @FXML
     void reloadDataSet(ActionEvent actionEvent) {
         this.gridParentPane.getChildren().clear();
-        this.showDataSet(this.application.getDisplayTestCase().runtimeDataSet());
+        this.showDataSet(this.resource);
     }
 
     @FXML
@@ -91,10 +94,7 @@ public class DataSetPresenter {
                 .map(it -> toTestData(it, header))
                 .collect(Collectors.toCollection(ArrayList::new));
         if (saveContents.size() > 0) {
-            this.application.executeAndLoggingCaseWhenThrowException(() -> this.application.getDisplayTestCase()
-                    .runtimeDataSet()
-                    .writer()
-                    .write(saveContents));
+            this.application.executeAndLoggingCaseWhenThrowException(() -> this.resource.writer().write(saveContents));
         }
         this.reloadDataSet(actionEvent);
         if (onclick != null) {
