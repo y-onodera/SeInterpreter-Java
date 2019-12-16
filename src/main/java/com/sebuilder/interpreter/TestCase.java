@@ -266,8 +266,7 @@ public class TestCase {
     }
 
     protected TestCase materialized() {
-        return this.changeWhenConditionMatch(TestCase::isLazyLoad
-                , matches -> matches.lazyLoad());
+        return this.changeWhenConditionMatch(TestCase::isLazyLoad, TestCase::lazyLoad);
     }
 
     protected TestCase lazyLoad() {
