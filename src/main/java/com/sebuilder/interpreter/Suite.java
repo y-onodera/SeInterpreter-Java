@@ -3,7 +3,6 @@ package com.sebuilder.interpreter;
 import com.google.common.base.Objects;
 
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 public class Suite {
 
@@ -41,14 +40,11 @@ public class Suite {
     }
 
     public DataSourceLoader[] dataSources(TestCase target) {
-        Stream<DataSourceLoader> shareInputs = this.head.flattenTestCases()
-                .takeWhile(it -> !it.equals(target))
+        return this.head.flattenTestCases()
+                .filter(it -> it.include(target))
                 .filter(it -> it.runtimeDataSet().getDataSource().enableMultiLine())
-                .map(TestCase::runtimeDataSet);
-        if (target.runtimeDataSet().getDataSource().enableMultiLine()) {
-            return Stream.concat(shareInputs, Stream.of(target.runtimeDataSet())).toArray(DataSourceLoader[]::new);
-        }
-        return shareInputs.toArray(DataSourceLoader[]::new);
+                .map(TestCase::runtimeDataSet)
+                .toArray(DataSourceLoader[]::new);
     }
 
     public TestCaseBuilder builder() {

@@ -82,6 +82,10 @@ public class TestCase {
         return Stream.concat(Stream.of(this), this.chains.flattenTestCases());
     }
 
+    public boolean include(TestCase target) {
+        return this.flattenTestCases().anyMatch(it -> it.equals(target));
+    }
+
     public List<InputData> loadData() {
         return this.runtimeDataSet().loadData();
     }
