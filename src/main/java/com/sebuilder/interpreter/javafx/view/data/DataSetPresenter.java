@@ -1,6 +1,5 @@
 package com.sebuilder.interpreter.javafx.view.data;
 
-import com.google.common.base.Function;
 import com.google.common.base.Strings;
 import com.sebuilder.interpreter.DataSourceLoader;
 import com.sebuilder.interpreter.InputData;
@@ -21,6 +20,7 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.sebuilder.interpreter.javafx.control.ExcelLikeSpreadSheetView.TEXT_AREA;
@@ -40,31 +40,31 @@ public class DataSetPresenter {
 
     public void showDataSet(DataSourceLoader resource) {
         List<InputData> inputData = resource.loadData();
-        int row = inputData.size() < DEFAULT_ROWS ? DEFAULT_ROWS : inputData.size();
+        int row = Math.max(inputData.size(), DEFAULT_ROWS);
         int column = inputData.size() < 1 || inputData.get(0).input().size() < DEFAULT_COLUMNS ? DEFAULT_COLUMNS : inputData.get(0).input().size();
         GridBase grid = new GridBase(row, column);
         ObservableList<ObservableList<SpreadsheetCell>> rows = FXCollections.observableArrayList();
         inputData.forEach(it -> {
             if (Integer.parseInt(it.rowNumber()) == 1) {
-                addRow(rows, 0, it, Map.Entry::getKey, cell -> {
+                addRow(rows, 0, column, it, Map.Entry::getKey, cell -> {
                     cell.getStyleClass().add("header");
                     return cell;
                 });
             }
-            addRow(rows, Integer.parseInt(it.rowNumber()), it, Map.Entry::getValue);
+            addRow(rows, Integer.parseInt(it.rowNumber()), column, it, Map.Entry::getValue);
         });
         if (rows.size() < DEFAULT_ROWS) {
             for (int current = rows.size(); current < DEFAULT_ROWS; current++) {
-                addRow(rows, current, new InputData(), Map.Entry::getValue);
+                addRow(rows, current, column, new InputData(), Map.Entry::getValue);
             }
         }
         grid.setRows(rows);
         sheet = new ExcelLikeSpreadSheetView(grid);
-        sheet.getFixedRows().add(Integer.valueOf(0));
-        AnchorPane.setTopAnchor(sheet, Double.valueOf(0));
-        AnchorPane.setBottomAnchor(sheet, Double.valueOf(0));
-        AnchorPane.setRightAnchor(sheet, Double.valueOf(0));
-        AnchorPane.setLeftAnchor(sheet, Double.valueOf(0));
+        sheet.getFixedRows().add(0);
+        AnchorPane.setTopAnchor(sheet, 0.0);
+        AnchorPane.setBottomAnchor(sheet, 0.0);
+        AnchorPane.setRightAnchor(sheet, 0.0);
+        AnchorPane.setLeftAnchor(sheet, 0.0);
         this.gridParentPane.getChildren().add(sheet);
     }
 
@@ -84,7 +84,7 @@ public class DataSetPresenter {
         List<Pair<Integer, String>> header = rows.get(0)
                 .stream()
                 .filter(it -> !Strings.isNullOrEmpty(it.getText()))
-                .map(it -> new Pair<>(Integer.valueOf(it.getColumn()), it.getText()))
+                .map(it -> new Pair<>(it.getColumn(), it.getText()))
                 .collect(Collectors.toList());
         ArrayList<InputData> saveContents = rows.subList(1, rows.size() - 1).stream()
                 .filter(it -> hasValue(it, header))
@@ -118,11 +118,11 @@ public class DataSetPresenter {
         return header.stream().anyMatch(it -> isExistsCell(row, it) && !Strings.isNullOrEmpty(row.get(it.getKey()).getText()));
     }
 
-    protected void addRow(ObservableList<ObservableList<SpreadsheetCell>> rows, int row, InputData it, Function<Map.Entry<String, String>, String> map) {
-        this.addRow(rows, row, it, map, cell -> cell);
+    protected void addRow(ObservableList<ObservableList<SpreadsheetCell>> rows, int row, int column, InputData it, Function<Map.Entry<String, String>, String> map) {
+        this.addRow(rows, row, column, it, map, cell -> cell);
     }
 
-    protected void addRow(ObservableList<ObservableList<SpreadsheetCell>> rows, int row, InputData it, Function<Map.Entry<String, String>, String> map, Function<SpreadsheetCell, SpreadsheetCell> setStyle) {
+    protected void addRow(ObservableList<ObservableList<SpreadsheetCell>> rows, int row, int column, InputData it, Function<Map.Entry<String, String>, String> map, Function<SpreadsheetCell, SpreadsheetCell> setStyle) {
         final ObservableList<SpreadsheetCell> dataRow = FXCollections.observableArrayList();
         int col = 0;
         for (Map.Entry<String, String> entry : it.input()) {
@@ -130,7 +130,7 @@ public class DataSetPresenter {
             dataRow.add(setStyle.apply(cell));
             col++;
         }
-        for (; col < DEFAULT_COLUMNS; col++) {
+        for (; col < column; col++) {
             SpreadsheetCell cell = TEXT_AREA.createCell(row, col, 1, 1, null);
             dataRow.add(setStyle.apply(cell));
         }
