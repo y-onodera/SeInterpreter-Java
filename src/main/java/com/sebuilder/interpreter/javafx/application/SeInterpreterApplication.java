@@ -9,7 +9,6 @@ import com.google.common.io.Files;
 import com.sebuilder.interpreter.*;
 import com.sebuilder.interpreter.application.TestRunListenerImpl;
 import com.sebuilder.interpreter.datasource.Manual;
-import com.sebuilder.interpreter.javafx.view.replay.ReplayPresenter;
 import com.sebuilder.interpreter.javafx.view.replay.ReplayView;
 import com.sebuilder.interpreter.step.type.Get;
 import com.sebuilder.interpreter.step.type.HighLightElement;
@@ -19,7 +18,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.scene.Scene;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.util.Pair;
@@ -166,15 +164,11 @@ public class SeInterpreterApplication extends Application {
     }
 
     public void scriptReLoad(File file) {
-        this.executeAndLoggingCaseWhenThrowException(() -> {
-            this.resetSuite(getScriptParser().load(file).toSuite());
-        });
+        this.executeAndLoggingCaseWhenThrowException(() -> this.resetSuite(getScriptParser().load(file).toSuite()));
     }
 
     public void importScript(File file) {
-        this.executeAndLoggingCaseWhenThrowException(() -> {
-            addScript(getScriptParser().load(file));
-        });
+        this.executeAndLoggingCaseWhenThrowException(() -> addScript(getScriptParser().load(file)));
     }
 
     public void saveSuite(File file) {
@@ -381,16 +375,7 @@ public class SeInterpreterApplication extends Application {
     }
 
     private void showProgressbar(Window window, Task task) {
-        ReplayView replayView = new ReplayView();
-        Scene scene = new Scene(replayView.getView());
-        Stage runProgressDialog = new Stage();
-        runProgressDialog.setScene(scene);
-        runProgressDialog.initOwner(window);
-        runProgressDialog.initModality(Modality.WINDOW_MODAL);
-        runProgressDialog.setTitle("run progress");
-        ReplayPresenter.class.cast(replayView.getPresenter()).bind(task);
-        runProgressDialog.setResizable(false);
-        runProgressDialog.show();
+        new ReplayView().open(window, task);
     }
 
     public interface ThrowableAction {
