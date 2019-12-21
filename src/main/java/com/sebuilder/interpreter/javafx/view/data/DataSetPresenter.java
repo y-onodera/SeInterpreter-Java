@@ -125,7 +125,7 @@ public class DataSetPresenter {
     protected void addRow(ObservableList<ObservableList<SpreadsheetCell>> rows, int row, int column, InputData it, Function<Map.Entry<String, String>, String> map, Function<SpreadsheetCell, SpreadsheetCell> setStyle) {
         final ObservableList<SpreadsheetCell> dataRow = FXCollections.observableArrayList();
         int col = 0;
-        for (Map.Entry<String, String> entry : it.input()) {
+        for (Map.Entry<String, String> entry : it.input().entrySet()) {
             SpreadsheetCell cell = TEXT_AREA.createCell(row, col, 1, 1, map.apply(entry));
             dataRow.add(setStyle.apply(cell));
             col++;

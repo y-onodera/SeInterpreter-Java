@@ -11,7 +11,7 @@ import javafx.stage.Window;
 public class DataSetView extends FXMLView {
 
     public void showDataSet(DataSourceLoader resource, Window parentWindow) {
-        presenter().showDataSet(resource);
+        this.presenter().showDataSet(resource);
         Stage stage = new Stage();
         stage.initOwner(parentWindow);
         Scene scene = new Scene(this.getView());
@@ -25,7 +25,7 @@ public class DataSetView extends FXMLView {
     }
 
     private DataSetPresenter presenter() {
-        return DataSetPresenter.class.cast(this.getPresenter());
+        return (DataSetPresenter) this.getPresenter();
     }
 
 }

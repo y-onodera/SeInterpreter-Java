@@ -6,7 +6,6 @@ import com.sebuilder.interpreter.application.CommandLineArgument;
 import com.sebuilder.interpreter.application.SeInterpreterREPL;
 import com.sebuilder.interpreter.application.TestRunListenerImpl;
 import com.sebuilder.interpreter.step.type.ExportTemplate;
-import javafx.concurrent.Task;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -26,7 +25,7 @@ public class SeInterpreterRunner {
     private TestRunListener globalListener;
 
     public SeInterpreterRunner(List<String> raw) {
-        this.repl = new SeInterpreterREPL(raw.toArray(new String[raw.size()]), log);
+        this.repl = new SeInterpreterREPL(raw.toArray(new String[0]), log);
         this.repl.setUpREPL();
         this.globalListener = new TestRunListenerImpl(this.log);
         this.globalListener.setUpDir(Context.getResultOutputDirectory());
@@ -104,7 +103,7 @@ public class SeInterpreterRunner {
         this.repl.execute(testCase, listener);
     }
 
-    public Task createRunScriptTask(TestCase currentDisplay, Function<Logger, TestRunListener> listenerFactory) {
+    public SeInterpreterRunTask createRunScriptTask(TestCase currentDisplay, Function<Logger, TestRunListener> listenerFactory) {
         return this.createBackgroundTask(currentDisplay, listenerFactory.apply(this.log));
     }
 
@@ -128,7 +127,7 @@ public class SeInterpreterRunner {
         }
     }
 
-    private Task createBackgroundTask(TestCase testCase, TestRunListener listener) {
+    private SeInterpreterRunTask createBackgroundTask(TestCase testCase, TestRunListener listener) {
         if (!this.isOpen()) {
             this.setUp();
         }

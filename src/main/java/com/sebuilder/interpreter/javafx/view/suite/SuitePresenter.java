@@ -37,9 +37,7 @@ public class SuitePresenter {
     @FXML
     void initialize() {
         assert this.treeViewScriptName != null : "fx:id=\"treeViewScriptName\" was not injected: check your FXML file 'scriptview.fxml'.";
-        this.application.suiteProperty().addListener((observed, oldValue, newValue) -> {
-            this.showScriptView();
-        });
+        this.application.suiteProperty().addListener((observed, oldValue, newValue) -> this.showScriptView());
         this.application.displayTestCaseProperty().addListener((observed, oldValue, newValue) -> {
             if (this.application.getSuite().name().equals(newValue.name())) {
                 this.treeViewScriptName.getSelectionModel().selectFirst();

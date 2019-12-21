@@ -15,8 +15,8 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
 import java.util.Map;
+import java.util.Objects;
 
 public class StepPresenter {
 
@@ -317,11 +317,7 @@ public class StepPresenter {
         this.backupBeforeLocator();
         this.inputs.clear();
         this.locatorInputs.clear();
-        for (Node node : new ArrayList<>(this.stepEditGrid.getChildren())) {
-            if (!this.stepTypeSelect.equals(node) && !this.labelSelectType.equals(node)) {
-                this.stepEditGrid.getChildren().remove(node);
-            }
-        }
+        this.stepEditGrid.getChildren().removeIf(node -> !this.stepTypeSelect.equals(node) && !this.labelSelectType.equals(node));
     }
 
     private void backupBeforeLocator() {
@@ -353,9 +349,7 @@ public class StepPresenter {
             this.stepEditGrid.add(select, 1, row++);
             TextField text = resetLocatorText(step, locator);
             Button button = new Button("find");
-            button.setOnAction(ae -> {
-                this.apprication.highLightElement(select.getSelectionModel().getSelectedItem(), text.getText());
-            });
+            button.setOnAction(ae -> this.apprication.highLightElement(select.getSelectionModel().getSelectedItem(), text.getText()));
             this.stepEditGrid.add(text, 1, row);
             this.stepEditGrid.add(button, 2, row++);
             Map<String, Node> input = Maps.newHashMap();
@@ -385,11 +379,7 @@ public class StepPresenter {
             if (!type.equals("")) {
                 this.beforeLocatorType = type;
             }
-            if (this.beforeLocatorType != null) {
-                locatorTypeSelect.getSelectionModel().select(this.beforeLocatorType);
-            } else {
-                locatorTypeSelect.getSelectionModel().select("");
-            }
+            locatorTypeSelect.getSelectionModel().select(Objects.requireNonNullElse(this.beforeLocatorType, ""));
         } else {
             select.getSelectionModel().select(type);
         }
@@ -419,7 +409,7 @@ public class StepPresenter {
         Label label = new Label();
         label.setText(key);
         CheckBox checkbox = new CheckBox();
-        checkbox.setSelected(Boolean.valueOf(step.getParam(key)));
+        checkbox.setSelected(Boolean.parseBoolean(step.getParam(key)));
         this.stepEditGrid.add(label, 0, row);
         this.stepEditGrid.add(checkbox, 1, row++);
         this.inputs.put(key, checkbox);
@@ -444,21 +434,21 @@ public class StepPresenter {
                 StepBuilder step = new StepBuilder(this.apprication.getStepTypeOfName(this.selectedStepType));
                 for (Map.Entry<String, Node> input : this.inputs.entrySet()) {
                     if (input.getValue() instanceof TextField) {
-                        TextField text = TextField.class.cast(input.getValue());
+                        TextField text = (TextField) input.getValue();
                         if (!Strings.isNullOrEmpty(text.getText())) {
                             step.put(input.getKey(), text.getText());
                         }
                     } else if (input.getValue() instanceof CheckBox) {
-                        CheckBox check = CheckBox.class.cast(input.getValue());
+                        CheckBox check = (CheckBox) input.getValue();
                         if (check.isSelected()) {
                             step.put(input.getKey(), "true");
                         }
                     }
                 }
                 for (Map.Entry<String, Map<String, Node>> input : this.locatorInputs.entrySet()) {
-                    String type = ComboBox.class.cast(input.getValue().get("type")).getSelectionModel().getSelectedItem().toString();
+                    String type = ((ComboBox<String>) input.getValue().get("type")).getSelectionModel().getSelectedItem();
                     if (!Strings.isNullOrEmpty(type)) {
-                        String value = TextField.class.cast(input.getValue().get("value")).getText();
+                        String value = ((TextField) input.getValue().get("value")).getText();
                         step.put(input.getKey(), new Locator(type, value));
                     }
                 }

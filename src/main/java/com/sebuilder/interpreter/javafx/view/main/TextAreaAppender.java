@@ -1,4 +1,4 @@
-package com.sebuilder.interpreter.javafx.application;
+package com.sebuilder.interpreter.javafx.view.main;
 
 import javafx.application.Platform;
 import javafx.scene.control.TextArea;

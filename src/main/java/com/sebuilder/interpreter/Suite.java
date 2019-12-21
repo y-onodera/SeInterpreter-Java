@@ -3,6 +3,7 @@ package com.sebuilder.interpreter;
 import com.google.common.base.Objects;
 
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class Suite {
 
@@ -39,9 +40,9 @@ public class Suite {
         return this.head().getChains().get(index);
     }
 
-    public DataSourceLoader[] dataSources(TestCase target) {
+    public DataSourceLoader[] dataSources(Predicate<TestCase> predicate) {
         return this.head.flattenTestCases()
-                .filter(it -> it.include(target))
+                .filter(predicate)
                 .filter(it -> it.runtimeDataSet().getDataSource().enableMultiLine())
                 .map(TestCase::runtimeDataSet)
                 .toArray(DataSourceLoader[]::new);

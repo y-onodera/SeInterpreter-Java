@@ -6,7 +6,6 @@ import org.apache.commons.jexl3.*;
 import org.openqa.selenium.Keys;
 
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -33,11 +32,14 @@ public class InputData {
         this.lastRow = lastRow;
     }
 
-    public Set<Map.Entry<String, String>> input() {
+    public Map<String, String> input() {
         return this.entrySet()
                 .stream()
                 .filter(it -> !it.getKey().startsWith("_"))
-                .collect(Collectors.toCollection(LinkedHashSet::new));
+                .collect(Collectors.toMap(Map.Entry::getKey
+                        , Map.Entry::getValue
+                        , (e1, e2) -> e1
+                        , LinkedHashMap::new));
     }
 
     public String rowNumber() {
@@ -80,13 +82,13 @@ public class InputData {
         String result = this.bind(target);
         String exp = this.extractExpression(result);
         if (Objects.equal(result, exp)) {
-            return Boolean.valueOf(result);
+            return Boolean.parseBoolean(result);
         }
         try {
             JexlEngine jexl = new JexlBuilder().create();
             JexlExpression expression = jexl.createExpression(exp);
             JexlContext jc = new MapContext(Maps.newHashMap(this.row));
-            return Boolean.valueOf(expression.evaluate(jc).toString());
+            return Boolean.parseBoolean(expression.evaluate(jc).toString());
         } catch (JexlException ex) {
             return false;
         }
@@ -138,7 +140,7 @@ public class InputData {
     }
 
     private String extractExpression(String result) {
-        return result.replaceAll("\\$\\{(.+)\\}", "$1");
+        return result.replaceAll("\\$\\{(.+)}", "$1");
     }
 
     @Override

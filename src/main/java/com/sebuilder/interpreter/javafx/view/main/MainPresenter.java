@@ -1,5 +1,7 @@
-package com.sebuilder.interpreter.javafx.application;
+package com.sebuilder.interpreter.javafx.view.main;
 
+import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
+import com.sebuilder.interpreter.javafx.application.ViewType;
 import javafx.fxml.FXML;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TextArea;

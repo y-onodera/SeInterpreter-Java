@@ -9,17 +9,15 @@ import com.google.common.io.Files;
 import com.sebuilder.interpreter.*;
 import com.sebuilder.interpreter.application.TestRunListenerImpl;
 import com.sebuilder.interpreter.datasource.Manual;
+import com.sebuilder.interpreter.javafx.view.main.MainView;
 import com.sebuilder.interpreter.javafx.view.replay.ReplayView;
 import com.sebuilder.interpreter.step.type.Get;
 import com.sebuilder.interpreter.step.type.HighLightElement;
 import javafx.application.Application;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
-import javafx.scene.Scene;
 import javafx.stage.Stage;
-import javafx.stage.Window;
 import javafx.util.Pair;
 
 import java.io.File;
@@ -30,7 +28,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public class SeInterpreterApplication extends Application {
 
@@ -44,7 +41,7 @@ public class SeInterpreterApplication extends Application {
 
     private ObjectProperty<Pair<Integer, Result>> replayStatus = new SimpleObjectProperty<>();
 
-    private Scene scene;
+    private MainView mainView;
 
     public static void main(String[] args) {
         launch(args);
@@ -62,12 +59,8 @@ public class SeInterpreterApplication extends Application {
         } else {
             this.reset();
         }
-        final MainView mainView = new MainView();
-        this.scene = new Scene(mainView.getView());
-        stage.setTitle("SeInterpreter");
-        stage.setScene(this.scene);
-        stage.setResizable(true);
-        stage.show();
+        this.mainView = new MainView();
+        this.mainView.open(stage);
     }
 
     @Override
@@ -113,7 +106,11 @@ public class SeInterpreterApplication extends Application {
     }
 
     public DataSourceLoader[] getDisplayTestCaseDataSources() {
-        return this.getSuite().dataSources(this.getDisplayTestCase());
+        return this.getDisplayScriptDataSources(it -> it.include(this.getDisplayTestCase()));
+    }
+
+    public DataSourceLoader[] getDisplayScriptDataSources(Predicate<TestCase> predicate) {
+        return this.getSuite().dataSources(predicate);
     }
 
     public void executeAndLoggingCaseWhenThrowException(ThrowableAction action) {
@@ -241,7 +238,7 @@ public class SeInterpreterApplication extends Application {
     }
 
     public void browserOpen() {
-        this.executeTask(this.runner.createRunScriptTask(this.templateScript(), logger -> new TestRunListenerImpl(logger)));
+        this.executeTask(this.runner.createRunScriptTask(this.templateScript(), TestRunListenerImpl::new));
     }
 
     public void browserClose() {
@@ -265,20 +262,17 @@ public class SeInterpreterApplication extends Application {
     }
 
     public void runScript(Map<String, Integer> shareInputs) {
-        InputData shareInput = getShareInput(shareInputs);
-        final TestCase target = this.getDisplayTestCase().map(builder -> builder.setShareInput(shareInput));
-        if (shareInputs.get(target.runtimeDataSet().name()) != null) {
-            this.executeTask(this.runner.createRunScriptTask(
-                    target.map(builder -> builder.setOverrideTestDataSet(new Manual()
-                            , target.loadData()
-                                    .get(shareInputs.get(target.runtimeDataSet().name()) - 1)
-                                    .input()
-                                    .stream()
-                                    .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()))))
-                    , log -> new GUITestRunListener(log, this)));
-        } else {
-            this.executeTask(this.runner.createRunScriptTask(target, log -> new GUITestRunListener(log, this)));
-        }
+        final InputData shareInput = getShareInput(shareInputs);
+        final TestCase target = this.getDisplayTestCase().map(builder -> builder.setShareInput(shareInput)
+                .changeWhenConditionMatch(it -> shareInputs.get(it.build().runtimeDataSet().name()) != null
+                        , it -> {
+                            TestCase withShareInput = it.build();
+                            return it.setOverrideTestDataSet(new Manual()
+                                    , withShareInput.loadData()
+                                            .get(shareInputs.get(withShareInput.runtimeDataSet().name()) - 1)
+                                            .input());
+                        }));
+        this.executeTask(this.runner.createRunScriptTask(target, log -> new GUITestRunListener(log, this)));
     }
 
 
@@ -306,7 +300,8 @@ public class SeInterpreterApplication extends Application {
 
     private InputData getShareInput(Map<String, Integer> shareInputs) {
         InputData shareInput = this.replayShareInput();
-        for (DataSourceLoader loader : this.getDisplayTestCaseDataSources()) {
+        for (DataSourceLoader loader : this.getDisplayScriptDataSources(
+                it -> it.include(getDisplayTestCase()) && !it.equals(getDisplayTestCase()))) {
             DataSourceLoader withShareInput = loader.shareInput(shareInput);
             if (withShareInput.isLoadable()) {
                 shareInput = shareInput.add(withShareInput
@@ -363,10 +358,10 @@ public class SeInterpreterApplication extends Application {
         return it;
     }
 
-    private void executeTask(Task task) {
+    private void executeTask(SeInterpreterRunTask task) {
         this.executeAndLoggingCaseWhenThrowException(() -> {
             ExecutorService executor = Executors.newSingleThreadExecutor();
-            this.showProgressbar(this.scene.getWindow(), task);
+            this.showProgressbar(task);
             task.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED, wse -> {
                 executor.shutdown();
             });
@@ -374,8 +369,8 @@ public class SeInterpreterApplication extends Application {
         });
     }
 
-    private void showProgressbar(Window window, Task task) {
-        new ReplayView().open(window, task);
+    private void showProgressbar(SeInterpreterRunTask task) {
+        new ReplayView().open(this.mainView.getMainWindow(), task);
     }
 
     public interface ThrowableAction {
