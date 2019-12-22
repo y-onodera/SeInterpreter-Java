@@ -6,7 +6,6 @@ import com.sebuilder.interpreter.InputData;
 import com.sebuilder.interpreter.TestCase;
 import com.sebuilder.interpreter.TestCaseBuilder;
 import com.sebuilder.interpreter.datasource.Manual;
-import com.sebuilder.interpreter.javafx.view.replay.InputPresenter;
 import javafx.util.Pair;
 
 import java.util.List;
@@ -25,11 +24,7 @@ public class ReplayOption {
         for (DataSourceLoader loader : shareDataSources) {
             DataSourceLoader withShareInput = loader.shareInput(result);
             if (withShareInput.isLoadable()) {
-                Pair<Integer, InputData> input = getSetting(withShareInput.name());
-                result = result.add(withShareInput
-                        .loadData()
-                        .get(input.getKey() - 1))
-                        .add(input.getValue());
+                result = this.merge(result, withShareInput);
             }
         }
         return result;
@@ -42,10 +37,7 @@ public class ReplayOption {
             DataSourceLoader withShareInput = loader.shareInput(shareInput);
             if (withShareInput.isLoadable()) {
                 result.add(withShareInput);
-                Pair<Integer, InputData> setting = this.getSetting(withShareInput.name());
-                shareInput = shareInput
-                        .add(withShareInput.loadData().get(setting.getKey() - 1))
-                        .add(setting.getValue());
+                shareInput = this.merge(shareInput, withShareInput);
             }
         }
         return result;
@@ -59,6 +51,13 @@ public class ReplayOption {
                         .get(runtimeInfo.getKey() - 1)
                         .add(runtimeInfo.getValue())
                         .input()));
+    }
+
+    private InputData merge(InputData shareInput, DataSourceLoader withShareInput) {
+        Pair<Integer, InputData> setting = this.getSetting(withShareInput.name());
+        return shareInput
+                .add(withShareInput.loadData().get(setting.getKey() - 1))
+                .add(setting.getValue());
     }
 
     private Pair<Integer, InputData> getSetting(String dataSetName) {
