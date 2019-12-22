@@ -3,6 +3,7 @@ package com.sebuilder.interpreter.javafx.view.menu;
 import com.google.common.base.Strings;
 import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
+import com.sebuilder.interpreter.javafx.view.replay.InputView;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.layout.Pane;

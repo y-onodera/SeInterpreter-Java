@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
@@ -261,15 +262,19 @@ public class SeInterpreterApplication extends Application {
         this.executeTask(this.runner.createRunScriptTask(this.getSuite().head(), log -> new GUITestRunListener(log, this)));
     }
 
-    public void runScript(Map<String, Integer> shareInputs) {
+    public void runScript(Map<String, Pair<Integer, InputData>> shareInputs) {
         final InputData shareInput = getShareInput(shareInputs);
-        final TestCase target = this.getDisplayTestCase().map(builder -> builder.setShareInput(shareInput)
+        final TestCase target = this.getDisplayTestCase().map(builder -> builder
+                .setShareInput(shareInput)
                 .changeWhenConditionMatch(it -> shareInputs.get(it.build().runtimeDataSet().name()) != null
                         , it -> {
                             TestCase withShareInput = it.build();
+                            Pair<Integer, InputData> runtimeInfo = Optional.ofNullable(shareInputs.get(withShareInput.runtimeDataSet().name()))
+                                    .orElse(new Pair<>(1, new InputData()));
                             return it.setOverrideTestDataSet(new Manual()
                                     , withShareInput.loadData()
-                                            .get(shareInputs.get(withShareInput.runtimeDataSet().name()) - 1)
+                                            .get(runtimeInfo.getKey() - 1)
+                                            .add(runtimeInfo.getValue())
                                             .input());
                         }));
         this.executeTask(this.runner.createRunScriptTask(target, log -> new GUITestRunListener(log, this)));
@@ -298,15 +303,18 @@ public class SeInterpreterApplication extends Application {
         return Context.getScriptParser();
     }
 
-    private InputData getShareInput(Map<String, Integer> shareInputs) {
+    private InputData getShareInput(Map<String, Pair<Integer, InputData>> shareInputs) {
         InputData shareInput = this.replayShareInput();
         for (DataSourceLoader loader : this.getDisplayScriptDataSources(
                 it -> it.include(getDisplayTestCase()) && !it.equals(getDisplayTestCase()))) {
             DataSourceLoader withShareInput = loader.shareInput(shareInput);
             if (withShareInput.isLoadable()) {
+                Pair<Integer, InputData> input = Optional.ofNullable(shareInputs.get(withShareInput.name()))
+                        .orElse(new Pair<>(1, new InputData()));
                 shareInput = shareInput.add(withShareInput
                         .loadData()
-                        .get(shareInputs.getOrDefault(withShareInput.name(), 1) - 1));
+                        .get(input.getKey() - 1))
+                        .add(input.getValue());
             }
         }
         return shareInput;

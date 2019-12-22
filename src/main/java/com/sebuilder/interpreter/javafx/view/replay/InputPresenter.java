@@ -1,9 +1,10 @@
-package com.sebuilder.interpreter.javafx.view.menu;
+package com.sebuilder.interpreter.javafx.view.replay;
 
 import com.sebuilder.interpreter.DataSourceLoader;
 import com.sebuilder.interpreter.InputData;
 import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
 import com.sebuilder.interpreter.javafx.view.data.DataSetView;
+import com.sebuilder.interpreter.javafx.view.replay.VariableView;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -15,6 +16,7 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.util.Pair;
 import javafx.util.converter.IntegerStringConverter;
 
 import javax.inject.Inject;
@@ -25,6 +27,7 @@ import java.util.Map;
 
 public class InputPresenter {
 
+    static private final Pair<Integer, InputData> DEFAULT = new Pair<>(1, new InputData());
     @Inject
     private SeInterpreterApplication application;
     @FXML
@@ -38,9 +41,11 @@ public class InputPresenter {
     @FXML
     private TableColumn<InputResource, Integer> rows;
     @FXML
-    private TableColumn<InputResource, Void> button;
+    private TableColumn<InputResource, Void> buttonOpen;
+    @FXML
+    private TableColumn<InputResource, Void> buttonEdit;
 
-    private Map<String, Integer> shareInputs = new HashMap<>();
+    private Map<String, Pair<Integer, InputData>> shareInputs = new HashMap<>();
 
     @FXML
     void initialize() {
@@ -49,7 +54,7 @@ public class InputPresenter {
         this.row.setCellValueFactory(body -> body.getValue().rowProperty().asObject());
         this.slash.setCellValueFactory(body -> new SimpleStringProperty("/"));
         this.rows.setCellValueFactory(body -> body.getValue().rowsProperty().asObject());
-        this.button.setCellFactory(inputResourceStringTableColumn -> new TableCell<InputResource, Void>() {
+        this.buttonOpen.setCellFactory(inputResourceStringTableColumn -> new TableCell<>() {
             @Override
             public void updateItem(Void item, boolean empty) {
                 super.updateItem(item, empty);
@@ -67,11 +72,33 @@ public class InputPresenter {
                 }
             }
         });
+        this.buttonEdit.setCellFactory(inputResourceStringTableColumn -> new TableCell<>() {
+            @Override
+            public void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    Button btn = new Button("edit");
+                    btn.setOnAction((ActionEvent event) -> {
+                        InputResource data = getTableView().getItems().get(getIndex());
+                        VariableView variableView = new VariableView();
+                        variableView.onClick(result -> {
+                            data.setRuntimeVariable(result);
+                            shareInputs.put(data.getResourceName(), new Pair<>(data.getRow(), data.getRuntimeVariable()));
+                            refreshTable();
+                        });
+                        variableView.open(data.getRuntimeVariable(), inputResourceTableView.getScene().getWindow());
+                    });
+                    setGraphic(btn);
+                }
+            }
+        });
         this.refreshTable();
     }
 
     @FXML
-    public void handleReplayStart(ActionEvent actionEvent) {
+    public void handleReplayStart() {
         this.application.runScript(this.shareInputs);
     }
 
@@ -84,7 +111,8 @@ public class InputPresenter {
                 if (withShareInput.isLoadable()) {
                     InputResource row = new InputResource(withShareInput);
                     this.inputResourceTableView.getItems().add(row);
-                    shareInput = shareInput.add(withShareInput.loadData().get(row.getRow() - 1));
+                    shareInput = shareInput.add(withShareInput.loadData().get(row.getRow() - 1))
+                            .add(row.getRuntimeVariable());
                 }
             }
             this.inputResourceTableView.refresh();
@@ -93,6 +121,7 @@ public class InputPresenter {
 
     class InputResource {
         private final DataSourceLoader loader;
+        private InputData runtimeVariable;
         private StringProperty resourceName;
         private IntegerProperty row;
         private IntegerProperty rows;
@@ -101,10 +130,12 @@ public class InputPresenter {
             this.loader = loader;
             List<InputData> data = this.loader.loadData();
             this.resourceName = new SimpleStringProperty(this.loader.name());
-            this.row = new SimpleIntegerProperty(shareInputs.getOrDefault(this.resourceName.get(), 1));
+            this.runtimeVariable = shareInputs.getOrDefault(this.resourceName.get(), DEFAULT).getValue();
+            this.row = new SimpleIntegerProperty(shareInputs.getOrDefault(this.resourceName.get(), DEFAULT).getKey());
             final String key = this.resourceName.get();
             this.row.addListener((observableValue, oldVal, newVal) -> {
-                shareInputs.put(key, observableValue.getValue().intValue());
+                setRuntimeVariable(new InputData());
+                shareInputs.put(key, new Pair<>(observableValue.getValue().intValue(), getRuntimeVariable()));
                 refreshTable();
             });
             this.rows = new SimpleIntegerProperty(data.size());
@@ -128,6 +159,14 @@ public class InputPresenter {
 
         public IntegerProperty rowProperty() {
             return row;
+        }
+
+        public InputData getRuntimeVariable() {
+            return runtimeVariable;
+        }
+
+        public void setRuntimeVariable(InputData runtimeVariable) {
+            this.runtimeVariable = runtimeVariable;
         }
 
         public void setRow(int row) {

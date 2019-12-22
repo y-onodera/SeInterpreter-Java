@@ -3,12 +3,11 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <AnchorPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.sebuilder.interpreter.javafx.view.menu.InputPresenter">
-    <children>
-    <SplitPane orientation="VERTICAL" prefHeight="260.0" maxHeight="Infinity" prefWidth="480.0">
-    <items>
-        <TableView id="inputResourceTableView" fx:id="inputResourceTableView" editable="true" stylesheets="@input.css"
-                   prefWidth="480.0" minWidth="480.0" maxWidth="480.0"
+            fx:controller="com.sebuilder.interpreter.javafx.view.replay.InputPresenter">
+    <SplitPane orientation="VERTICAL" prefHeight="260.0" maxHeight="Infinity" prefWidth="540.0">
+        <TableView id="inputResourceTableView" fx:id="inputResourceTableView" editable="true"
+                   stylesheets="@input.css"
+                   prefWidth="570.0" minWidth="570.0" maxWidth="570.0"
                    prefHeight="230.0" maxHeight="Infinity"
                    AnchorPane.bottomAnchor="0.0"
                    AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
@@ -17,27 +16,26 @@
                 <TableColumn id="resourceName" fx:id="resourceName"
                              prefWidth="300.0" maxWidth="300.0"
                              style="-fx-alignment: CENTER_LEFT;" text="resourceName"/>
-                <TableColumn id="row" fx:id="row" editable="true"
+                <TableColumn id="row" fx:id="row"
                              prefWidth="50.0" maxWidth="50.0"
                              style="-fx-alignment: CENTER_RIGHT;" text="row"/>
                 <TableColumn id="slash" fx:id="slash"
                              prefWidth="20.0" maxWidth="20.0"
-                             style="-fx-alignment: CENTER;" />
+                             style="-fx-alignment: CENTER;"/>
                 <TableColumn id="rows" fx:id="rows"
                              prefWidth="50.0" maxWidth="50.0"
                              style="-fx-alignment: CENTER_RIGHT;" text="rows"/>
-                <TableColumn id="button" fx:id="button"
+                <TableColumn id="button" fx:id="buttonOpen" text="file"
                              prefWidth="60.0" maxWidth="60.0"
+                             style="-fx-alignment: CENTER;"/>
+                <TableColumn id="button" fx:id="buttonEdit" text="runtimeVar"
+                             prefWidth="90.0" maxWidth="90.0"
                              style="-fx-alignment: CENTER;"/>
             </columns>
         </TableView>
-        <HBox alignment="CENTER_RIGHT" prefHeight="30.0" maxHeight="30.0" minHeight="30.0" prefWidth="480.0" spacing="10.0">
-            <children>
-                <Button fx:id="replayStart" alignment="CENTER" mnemonicParsing="false" onAction="#handleReplayStart"
-                        text="replay start"/>
-            </children>
+        <HBox alignment="CENTER_RIGHT" prefHeight="30.0" maxHeight="30.0" minHeight="30.0" prefWidth="480.0"
+              spacing="10.0">
+            <Button alignment="CENTER" mnemonicParsing="false" onAction="#handleReplayStart" text="replay start"/>
         </HBox>
-    </items>
     </SplitPane>
-    </children>
 </AnchorPane>
