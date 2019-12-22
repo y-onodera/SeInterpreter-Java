@@ -85,6 +85,10 @@ public class TestCaseBuilder {
         return this;
     }
 
+    public TestCaseBuilder map(Function<TestCaseBuilder, TestCaseBuilder> function) {
+        return function.apply(this);
+    }
+
     public TestCaseBuilder associateWith(File target) {
         this.scriptFile = ScriptFile.of(target, this.getScriptFile().type());
         return this;

@@ -4,7 +4,6 @@ import com.google.common.base.Strings;
 import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
 import com.sebuilder.interpreter.javafx.view.replay.InputView;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
@@ -13,7 +12,6 @@ import javafx.stage.Stage;
 import javax.inject.Inject;
 import java.awt.*;
 import java.io.File;
-import java.io.IOException;
 import java.util.Optional;
 
 public class MenuPresenter {
@@ -30,7 +28,7 @@ public class MenuPresenter {
     }
 
     @FXML
-    void handleScriptOpenFile(ActionEvent event) {
+    void handleScriptOpenFile() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open Resource File");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("json format (*.json)", "*.json"));
@@ -44,7 +42,7 @@ public class MenuPresenter {
     }
 
     @FXML
-    void handleSaveSuite(ActionEvent event) {
+    void handleSaveSuite() {
         if (Strings.isNullOrEmpty(this.application.getSuite().path())) {
             this.saveSuiteToNewFile();
         } else {
@@ -53,47 +51,47 @@ public class MenuPresenter {
     }
 
     @FXML
-    void handleSaveSuiteAs(ActionEvent event) {
+    void handleSaveSuiteAs() {
         this.saveSuiteToNewFile();
     }
 
     @FXML
-    void handleCreateNewSuite(ActionEvent event) {
+    void handleCreateNewSuite() {
         this.application.reset();
     }
 
     @FXML
-    void handleBrowserOpen(ActionEvent event) {
+    void handleBrowserOpen() {
         this.application.browserOpen();
     }
 
     @FXML
-    void handleBrowserClose(ActionEvent event) {
+    void handleBrowserClose() {
         this.application.browserClose();
     }
 
     @FXML
-    void handleBrowserSetting(ActionEvent event) throws IOException {
+    void handleBrowserSetting()  {
         new BrowserView().open(this.paneSeInterpreterMenu.getScene().getWindow());
     }
 
     @FXML
-    void handleReplaySuite(ActionEvent event) {
+    void handleReplaySuite() {
         this.application.runSuite();
     }
 
     @FXML
-    void handleReplayScript(ActionEvent event) {
+    void handleReplayScript() {
         new InputView().open(paneSeInterpreterMenu.getScene().getWindow());
     }
 
     @FXML
-    void handleReplaySetting(ActionEvent event) throws IOException {
+    void handleReplaySetting() {
         new DatasourceView().open(paneSeInterpreterMenu.getScene().getWindow());
     }
 
     @FXML
-    void handleOpenResult(ActionEvent actionEvent) {
+    void handleOpenResult() {
         this.application.executeAndLoggingCaseWhenThrowException(() -> Desktop.getDesktop()
                 .open(Context.getResultOutputDirectory()));
     }

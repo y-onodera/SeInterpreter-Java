@@ -2,9 +2,9 @@ package com.sebuilder.interpreter.javafx.view.replay;
 
 import com.sebuilder.interpreter.DataSourceLoader;
 import com.sebuilder.interpreter.InputData;
+import com.sebuilder.interpreter.javafx.application.ReplayOption;
 import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
 import com.sebuilder.interpreter.javafx.view.data.DataSetView;
-import com.sebuilder.interpreter.javafx.view.replay.VariableView;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class InputPresenter {
 
@@ -47,8 +48,11 @@ public class InputPresenter {
 
     private Map<String, Pair<Integer, InputData>> shareInputs = new HashMap<>();
 
+    private Consumer<ReplayOption> onclickReplayStart;
+
     @FXML
     void initialize() {
+        this.onclickReplayStart = (it) -> application.runScript(it);
         this.resourceName.setCellValueFactory(body -> body.getValue().resourceNameProperty());
         this.row.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
         this.row.setCellValueFactory(body -> body.getValue().rowProperty().asObject());
@@ -99,24 +103,23 @@ public class InputPresenter {
 
     @FXML
     public void handleReplayStart() {
-        this.application.runScript(this.shareInputs);
+        this.onclickReplayStart.accept(this.createReplayOption());
+    }
+
+    public void setOnclickReplayStart(Consumer<ReplayOption> onclickReplayStart) {
+        this.onclickReplayStart = onclickReplayStart;
     }
 
     private void refreshTable() {
-        this.application.executeAndLoggingCaseWhenThrowException(() -> {
-            this.inputResourceTableView.getItems().setAll(new ArrayList<>());
-            InputData shareInput = this.application.replayShareInput();
-            for (DataSourceLoader loader : this.application.getDisplayTestCaseDataSources()) {
-                DataSourceLoader withShareInput = loader.shareInput(shareInput);
-                if (withShareInput.isLoadable()) {
-                    InputResource row = new InputResource(withShareInput);
-                    this.inputResourceTableView.getItems().add(row);
-                    shareInput = shareInput.add(withShareInput.loadData().get(row.getRow() - 1))
-                            .add(row.getRuntimeVariable());
-                }
-            }
-            this.inputResourceTableView.refresh();
-        });
+        this.inputResourceTableView.getItems().setAll(new ArrayList<>());
+        for (DataSourceLoader loadable : this.createReplayOption().filterLoadableSource(this.application.replayShareInput(), this.application.getDisplayTestCaseDataSources())) {
+            this.inputResourceTableView.getItems().add(new InputResource(loadable));
+        }
+        this.inputResourceTableView.refresh();
+    }
+
+    private ReplayOption createReplayOption() {
+        return new ReplayOption(this.shareInputs);
     }
 
     class InputResource {
@@ -130,12 +133,14 @@ public class InputPresenter {
             this.loader = loader;
             List<InputData> data = this.loader.loadData();
             this.resourceName = new SimpleStringProperty(this.loader.name());
-            this.runtimeVariable = shareInputs.getOrDefault(this.resourceName.get(), DEFAULT).getValue();
-            this.row = new SimpleIntegerProperty(shareInputs.getOrDefault(this.resourceName.get(), DEFAULT).getKey());
-            final String key = this.resourceName.get();
+            if (!shareInputs.containsKey(this.getResourceName())) {
+                shareInputs.put(this.getResourceName(), DEFAULT);
+            }
+            this.runtimeVariable = shareInputs.get(this.resourceName.get()).getValue();
+            this.row = new SimpleIntegerProperty(shareInputs.get(this.resourceName.get()).getKey());
             this.row.addListener((observableValue, oldVal, newVal) -> {
                 setRuntimeVariable(new InputData());
-                shareInputs.put(key, new Pair<>(observableValue.getValue().intValue(), getRuntimeVariable()));
+                shareInputs.put(resourceName.get(), new Pair<>(observableValue.getValue().intValue(), getRuntimeVariable()));
                 refreshTable();
             });
             this.rows = new SimpleIntegerProperty(data.size());

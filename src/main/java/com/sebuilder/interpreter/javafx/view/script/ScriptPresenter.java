@@ -6,12 +6,12 @@ import com.sebuilder.interpreter.TestCase;
 import com.sebuilder.interpreter.javafx.application.Result;
 import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
 import com.sebuilder.interpreter.javafx.application.ViewType;
+import com.sebuilder.interpreter.javafx.view.replay.InputView;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
@@ -49,7 +49,7 @@ public class ScriptPresenter {
         this.tableColumnScriptBodyNo.setCellValueFactory(body -> body.getValue().noProperty().asObject());
         this.tableColumnScriptBodyStep.setCellValueFactory(body -> body.getValue().stepProperty());
         this.tableViewScriptBody.setRowFactory(scriptBodyTableView -> {
-            TableRow<ScriptBody> row = new TableRow<ScriptBody>() {
+            TableRow<ScriptBody> row = new TableRow<>() {
                 @Override
                 protected void updateItem(ScriptBody scriptBody, boolean b) {
                     super.updateItem(scriptBody, b);
@@ -82,7 +82,7 @@ public class ScriptPresenter {
             row.setOnDragOver(event -> {
                 Dragboard db = event.getDragboard();
                 if (db.hasContent(SERIALIZED_MIME_TYPE)) {
-                    if (row.getIndex() != ((Integer) db.getContent(SERIALIZED_MIME_TYPE)).intValue()) {
+                    if (row.getIndex() != (Integer) db.getContent(SERIALIZED_MIME_TYPE)) {
                         event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
                         event.consume();
                     }
@@ -124,58 +124,69 @@ public class ScriptPresenter {
     }
 
     @FXML
-    void handleStepDelete(ActionEvent event) {
+    void handleStepDelete() {
         int stepNo = this.tableViewScriptBody.getSelectionModel().getSelectedItem().noProperty().intValue();
         this.application.replaceDisplayCase(this.application.getDisplayTestCase().removeStep(stepNo - 1));
     }
 
     @FXML
-    void handleStepInsert(ActionEvent actionEvent) {
+    void handleStepInsert() {
         this.initStepEditDialog(StepView.Action.INSERT);
     }
 
     @FXML
-    void handleStepAdd(ActionEvent event) {
+    void handleStepAdd() {
         this.initStepEditDialog(StepView.Action.ADD);
     }
 
     @FXML
-    void handleStepEdit(ActionEvent event) {
+    void handleStepEdit() {
         StepView stepView = this.initStepEditDialog(StepView.Action.EDIT);
         ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
         stepView.refresh(this.application.getDisplayTestCase()
-                        .steps()
-                        .get(item.no.intValue() - 1)
-                );
+                .steps()
+                .get(item.no.intValue() - 1)
+        );
     }
 
     @FXML
-    void handleRunStep(ActionEvent actionEvent) {
-        ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
-        this.application.runStep(i -> item.no.intValue() - 1 == i.intValue(), i -> i + item.no.intValue() - 1);
+    void handleRunStep() {
+        InputView inputView = new InputView();
+        inputView.setOnclickReplayStart((it) -> {
+            ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
+            this.application.runStep(it, i -> item.no.intValue() - 1 == i.intValue(), i -> i + item.no.intValue() - 1);
+        });
+        inputView.open(this.tableViewScriptBody.getScene().getWindow());
     }
 
     @FXML
-    void handleRunFromHere(ActionEvent actionEvent) {
-        ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
-        this.application.runStep(i -> item.no.intValue() - 1 <= i.intValue(), i -> i + item.no.intValue() - 1);
+    void handleRunFromHere() {
+        InputView inputView = new InputView();
+        inputView.setOnclickReplayStart((it) -> {
+            ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
+            this.application.runStep(it, i -> item.no.intValue() - 1 <= i.intValue(), i -> i + item.no.intValue() - 1);
+        });
+        inputView.open(this.tableViewScriptBody.getScene().getWindow());
     }
 
     @FXML
-    void handleRunToHere(ActionEvent actionEvent) {
-        ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
-        this.application.runStep(i -> item.no.intValue() - 1 >= i.intValue(), i -> i);
+    void handleRunToHere() {
+        InputView inputView = new InputView();
+        inputView.setOnclickReplayStart((it) -> {
+            ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
+            this.application.runStep(it, i -> item.no.intValue() - 1 >= i.intValue(), i -> i);
+        });
+        inputView.open(this.tableViewScriptBody.getScene().getWindow());
     }
 
     private void moveStep(int from, int to) {
         Step step = this.application.getDisplayTestCase().steps().get(from);
-        int indexTo = to;
         TestCase newCase;
         if (to > from) {
-            newCase = this.application.getDisplayTestCase().addStep(indexTo, step)
+            newCase = this.application.getDisplayTestCase().addStep(to, step)
                     .removeStep(from);
         } else {
-            newCase = this.application.getDisplayTestCase().insertStep(indexTo, step)
+            newCase = this.application.getDisplayTestCase().insertStep(to, step)
                     .removeStep(from + 1);
         }
         this.application.replaceDisplayCase(newCase);

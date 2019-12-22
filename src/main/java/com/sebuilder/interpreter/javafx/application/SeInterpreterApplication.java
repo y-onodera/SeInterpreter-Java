@@ -8,7 +8,6 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import com.sebuilder.interpreter.*;
 import com.sebuilder.interpreter.application.TestRunListenerImpl;
-import com.sebuilder.interpreter.datasource.Manual;
 import com.sebuilder.interpreter.javafx.view.main.MainView;
 import com.sebuilder.interpreter.javafx.view.replay.ReplayView;
 import com.sebuilder.interpreter.step.type.Get;
@@ -19,12 +18,11 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.stage.Stage;
 import javafx.util.Pair;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
@@ -50,8 +48,8 @@ public class SeInterpreterApplication extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        Injector.setModelOrService(SeInterpreterApplication.class, this);
         System.setProperty("log4j.configurationFile", "log4j2-gui.xml");
+        Injector.setModelOrService(SeInterpreterApplication.class, this);
         final Parameters parameters = getParameters();
         this.runner = new SeInterpreterRunner(parameters.getRaw());
         final List<String> unnamed = parameters.getUnnamed();
@@ -193,7 +191,8 @@ public class SeInterpreterApplication extends Application {
                 newName = newName + ".json";
             }
             File saveTo = new File(scriptSaveTo, newName);
-            TestCase save = this.saveContents(saveTo, it.builder().associateWith(saveTo).build(), "");
+            TestCase save = this.changeAssociateFile(it.builder().associateWith(saveTo).build(), "");
+            this.saveContents(saveTo, this.getScriptParser().toString(save));
             Suite newSuite = this.getSuite().replace(it, save);
             if (it == this.getDisplayTestCase()) {
                 this.resetScript(newSuite, save);
@@ -223,9 +222,10 @@ public class SeInterpreterApplication extends Application {
     }
 
     public void saveTestCase(File target) {
-        TestCase save = this.saveContents(target
-                , this.getDisplayTestCase().map(builder -> builder.associateWith(target))
+        TestCase save = this.changeAssociateFile(
+                this.getDisplayTestCase().map(builder -> builder.associateWith(target))
                 , this.getDisplayTestCase().path());
+        this.saveContents(target, this.getScriptParser().toString(save));
         this.replaceDisplayCase(save);
     }
 
@@ -239,7 +239,7 @@ public class SeInterpreterApplication extends Application {
     }
 
     public void browserOpen() {
-        this.executeTask(this.runner.createRunScriptTask(this.templateScript(), TestRunListenerImpl::new));
+        this.executeTask(this.templateScript(), TestRunListenerImpl::new);
     }
 
     public void browserClose() {
@@ -259,36 +259,25 @@ public class SeInterpreterApplication extends Application {
     }
 
     public void runSuite() {
-        this.executeTask(this.runner.createRunScriptTask(this.getSuite().head(), log -> new GUITestRunListener(log, this)));
+        this.executeTask(this.getSuite().head(), this.listener());
     }
 
-    public void runScript(Map<String, Pair<Integer, InputData>> shareInputs) {
-        final InputData shareInput = getShareInput(shareInputs);
-        final TestCase target = this.getDisplayTestCase().map(builder -> builder
-                .setShareInput(shareInput)
-                .changeWhenConditionMatch(it -> shareInputs.get(it.build().runtimeDataSet().name()) != null
-                        , it -> {
-                            TestCase withShareInput = it.build();
-                            Pair<Integer, InputData> runtimeInfo = Optional.ofNullable(shareInputs.get(withShareInput.runtimeDataSet().name()))
-                                    .orElse(new Pair<>(1, new InputData()));
-                            return it.setOverrideTestDataSet(new Manual()
-                                    , withShareInput.loadData()
-                                            .get(runtimeInfo.getKey() - 1)
-                                            .add(runtimeInfo.getValue())
-                                            .input());
-                        }));
-        this.executeTask(this.runner.createRunScriptTask(target, log -> new GUITestRunListener(log, this)));
+    public void runScript(ReplayOption replayOption) {
+        this.executeTask(this.getDisplayTestCase()
+                        .map(builder -> builder.setShareInput(this.currentDisplayShareInput(replayOption)).map(replayOption::apply))
+                , this.listener());
     }
 
-
-    public void runStep(Predicate<Number> filter, Function<Integer, Integer> function) {
-        this.executeTask(this.runner.createRunScriptTask(this.getDisplayTestCase().removeStep(filter)
+    public void runStep(ReplayOption replayOption, Predicate<Number> filter, Function<Integer, Integer> function) {
+        this.executeTask(this.getDisplayTestCase()
+                        .removeStep(filter)
+                        .map(builder -> builder.setShareInput(this.currentDisplayShareInput(replayOption)).map(replayOption::apply))
                 , log -> new GUITestRunListener(log, this) {
                     @Override
                     public int getStepNo() {
                         return function.apply(super.getStepNo());
                     }
-                }));
+                });
     }
 
     public void stopReplay() {
@@ -303,42 +292,23 @@ public class SeInterpreterApplication extends Application {
         return Context.getScriptParser();
     }
 
-    private InputData getShareInput(Map<String, Pair<Integer, InputData>> shareInputs) {
-        InputData shareInput = this.replayShareInput();
-        for (DataSourceLoader loader : this.getDisplayScriptDataSources(
-                it -> it.include(getDisplayTestCase()) && !it.equals(getDisplayTestCase()))) {
-            DataSourceLoader withShareInput = loader.shareInput(shareInput);
-            if (withShareInput.isLoadable()) {
-                Pair<Integer, InputData> input = Optional.ofNullable(shareInputs.get(withShareInput.name()))
-                        .orElse(new Pair<>(1, new InputData()));
-                shareInput = shareInput.add(withShareInput
-                        .loadData()
-                        .get(input.getKey() - 1))
-                        .add(input.getValue());
-            }
-        }
-        return shareInput;
-    }
-
-    private void resetScript(Suite aSuite, TestCase toSelect) {
+    protected void resetScript(Suite aSuite, TestCase toSelect) {
         this.suite.setValue(aSuite);
         this.selectScript(toSelect.name());
     }
 
-    private TestCase templateScript() {
+    protected TestCase templateScript() {
         return new Get().toStep().put("url", "https://www.google.com").build().toTestCase();
     }
 
-    private TestCase saveContents(File target, TestCase exportTo, String oldPath) {
-        TestCase save = exportTo;
+    protected TestCase changeAssociateFile(TestCase exportTo, String oldPath) {
         if (Strings.isNullOrEmpty(oldPath)) {
-            save = this.copyDataSourceTemplate(exportTo);
+            return this.copyDataSourceTemplate(exportTo);
         }
-        this.saveContents(target, this.getScriptParser().toString(save));
-        return save;
+        return exportTo;
     }
 
-    private void saveContents(File target, String content) {
+    protected void saveContents(File target, String content) {
         this.executeAndLoggingCaseWhenThrowException(() -> {
             if (!target.exists()) {
                 target.createNewFile();
@@ -347,7 +317,7 @@ public class SeInterpreterApplication extends Application {
         });
     }
 
-    private TestCase copyDataSourceTemplate(TestCase it) {
+    protected TestCase copyDataSourceTemplate(TestCase it) {
         if (it.getDataSourceLoader().getDataSourceConfig().containsKey("path")) {
             File src = new File(this.runner.getTemplateOutputDirectory(), it.getDataSourceLoader().getDataSourceConfig().get("path"));
             if (src.exists()) {
@@ -366,7 +336,17 @@ public class SeInterpreterApplication extends Application {
         return it;
     }
 
-    private void executeTask(SeInterpreterRunTask task) {
+    protected InputData currentDisplayShareInput(ReplayOption replayOption) {
+        return replayOption.reduceShareInput(this.replayShareInput()
+                , this.getDisplayScriptDataSources(it -> it.include(getDisplayTestCase()) && !it.equals(getDisplayTestCase())));
+    }
+
+    protected Function<Logger, TestRunListener> listener() {
+        return log -> new GUITestRunListener(log, this);
+    }
+
+    protected void executeTask(TestCase replayCase, Function<Logger, TestRunListener> listenerFactory) {
+        SeInterpreterRunTask task = this.runner.createRunScriptTask(replayCase, listenerFactory);
         this.executeAndLoggingCaseWhenThrowException(() -> {
             ExecutorService executor = Executors.newSingleThreadExecutor();
             this.showProgressbar(task);
@@ -377,7 +357,7 @@ public class SeInterpreterApplication extends Application {
         });
     }
 
-    private void showProgressbar(SeInterpreterRunTask task) {
+    protected void showProgressbar(SeInterpreterRunTask task) {
         new ReplayView().open(this.mainView.getMainWindow(), task);
     }
 
