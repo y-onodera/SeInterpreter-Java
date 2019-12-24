@@ -21,8 +21,8 @@ public class Page extends AbstractPrintable {
         BufferedImage image = getScreenshot();
         this.imageHeight = image.getHeight();
         this.imageWidth = image.getWidth();
-        this.windowHeight = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return window.innerHeight || document.documentElement.clientHeight || document.getElementsByTagName('body')[0].clientHeight;", new Object[0])).intValue();
-        this.windowWidth = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return window.innerWidth || document.documentElement.clientWidth || document.getElementsByTagName('body')[0].clientWidth;", new Object[0])).intValue();
+        this.windowHeight = ((Number) ((JavascriptExecutor) getWebDriver()).executeScript("return window.innerHeight || document.documentElement.clientHeight || document.getElementsByTagName('body')[0].clientHeight;", new Object[0])).intValue();
+        this.windowWidth = ((Number) ((JavascriptExecutor) getWebDriver()).executeScript("return window.innerWidth || document.documentElement.clientWidth || document.getElementsByTagName('body')[0].clientWidth;", new Object[0])).intValue();
         this.viewportHeight = this.getWindowHeight();
         this.viewportWidth = this.getWindowWidth();
         this.scrollableHeight = this.getFullHeight();

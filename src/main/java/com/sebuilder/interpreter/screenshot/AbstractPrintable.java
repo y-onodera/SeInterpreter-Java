@@ -69,13 +69,13 @@ public abstract class AbstractPrintable implements Printable {
                 .stream()
                 .reduce(0
                         , (sum, element) -> sum + element.getScrollHeight() + element.getInnerScrollHeight()
-                        , (sum1, sum2) -> sum1 + sum2);
+                        , Integer::sum);
         this.innerScrollWidth = this.getInnerHorizontalScrollableElement()
                 .values()
                 .stream()
                 .reduce(0
                         , (sum, element) -> sum + element.getScrollWidth() + element.getInnerScrollWidth()
-                        , (sum1, sum2) -> sum1 + sum2);
+                        , Integer::sum);
     }
 
 }

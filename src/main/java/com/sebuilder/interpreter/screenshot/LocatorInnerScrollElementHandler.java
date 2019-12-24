@@ -39,10 +39,10 @@ public class LocatorInnerScrollElementHandler implements InnerScrollElementHandl
         RemoteWebDriver wd = getWebDriver();
         List<WebElement> frames = wd.findElementsByTagName("iframe");
         for (WebElement targetFrame : frames) {
-            int border = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('border-top-width'));", targetFrame)).intValue();
+            int border = ((Number) ((JavascriptExecutor) getWebDriver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('border-top-width'));", targetFrame)).intValue();
             int pointY = getPointY(targetFrame, border, wd);
             int viewportHeight = getClientHeight(targetFrame, border, wd);
-            int borderWidth = ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('border-left-width'));", targetFrame)).intValue();
+            int borderWidth = ((Number) ((JavascriptExecutor) getWebDriver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('border-left-width'));", targetFrame)).intValue();
             int pointX = targetFrame.getLocation().getX() + borderWidth;
             int viewportWidth = Integer.parseInt(targetFrame.getAttribute("clientWidth"));
             wd.switchTo().frame(targetFrame);
@@ -71,10 +71,10 @@ public class LocatorInnerScrollElementHandler implements InnerScrollElementHandl
         List<WebElement> divs = testRun.locator().findElements(testRun)
                 .stream()
                 .filter(element -> {
-                    int scrollHeight = Integer.valueOf(element.getAttribute("scrollHeight"));
-                    int clientHeight = Integer.valueOf(element.getAttribute("clientHeight"));
-                    int scrollWidth = Integer.valueOf(element.getAttribute("scrollWidth"));
-                    int clientWidth = Integer.valueOf(element.getAttribute("clientWidth"));
+                    int scrollHeight = Integer.parseInt(element.getAttribute("scrollHeight"));
+                    int clientHeight = Integer.parseInt(element.getAttribute("clientHeight"));
+                    int scrollWidth = Integer.parseInt(element.getAttribute("scrollWidth"));
+                    int clientWidth = Integer.parseInt(element.getAttribute("clientWidth"));
                     return (scrollHeight > clientHeight) || (scrollWidth > clientWidth);
                 })
                 .filter(element -> {
@@ -102,30 +102,30 @@ public class LocatorInnerScrollElementHandler implements InnerScrollElementHandl
         Point framePoint = targetDiv.getLocation();
 
         int height = new BigDecimal(targetDiv.getCssValue("height").replaceAll("[^0-9\\.]", "")).intValue();
-        int clientHeight = Integer.valueOf(targetDiv.getAttribute("clientHeight"));
-        int scrollableDivHeight = Integer.valueOf(targetDiv.getAttribute("scrollHeight"));
+        int clientHeight = Integer.parseInt(targetDiv.getAttribute("clientHeight"));
+        int scrollableDivHeight = Integer.parseInt(targetDiv.getAttribute("scrollHeight"));
 
         int width = new BigDecimal(targetDiv.getCssValue("width").replaceAll("[^0-9\\.]", "")).intValue();
-        int clientWidth = Integer.valueOf(targetDiv.getAttribute("clientWidth"));
-        int scrollableDivWidth = Integer.valueOf(targetDiv.getAttribute("scrollWidth"));
+        int clientWidth = Integer.parseInt(targetDiv.getAttribute("clientWidth"));
+        int scrollableDivWidth = Integer.parseInt(targetDiv.getAttribute("scrollWidth"));
 
-        int borderHeight = ((Number) JavascriptExecutor.class.cast(testRun.driver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('border-top-width'));", targetDiv)).intValue();
+        int borderHeight = ((Number) ((JavascriptExecutor) testRun.driver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('border-top-width'));", targetDiv)).intValue();
         int pointY = framePoint.getY() + borderHeight;
-        int borderWidth = ((Number) JavascriptExecutor.class.cast(testRun.driver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('border-left-width'));", targetDiv)).intValue();
+        int borderWidth = ((Number) ((JavascriptExecutor) testRun.driver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('border-left-width'));", targetDiv)).intValue();
         int pointX = framePoint.getX() + borderWidth;
         if (Objects.equal(targetDiv.getCssValue("box-sizing"), "border-box")) {
             height = height - borderHeight * 2;
             width = width - borderWidth * 2;
         } else {
-            int paddingTop = ((Number) JavascriptExecutor.class.cast(testRun.driver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-top') || document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding'));", targetDiv)).intValue();
+            int paddingTop = ((Number) ((JavascriptExecutor) testRun.driver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-top') || document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding'));", targetDiv)).intValue();
             pointY = pointY + paddingTop;
-            int paddingLeft = ((Number) JavascriptExecutor.class.cast(testRun.driver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-left') || document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding'));", targetDiv)).intValue();
+            int paddingLeft = ((Number) ((JavascriptExecutor) testRun.driver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-left') || document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding'));", targetDiv)).intValue();
             pointX = pointX + paddingLeft;
         }
         if (testRun.driver() instanceof FirefoxDriver) {
-            int paddingBottom = ((Number) JavascriptExecutor.class.cast(testRun.driver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-bottom') || document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding'));", targetDiv)).intValue();
+            int paddingBottom = ((Number) ((JavascriptExecutor) testRun.driver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-bottom') || document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding'));", targetDiv)).intValue();
             height = height - paddingBottom;
-            int paddingRight = ((Number) JavascriptExecutor.class.cast(testRun.driver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-right') || document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding'));", targetDiv)).intValue();
+            int paddingRight = ((Number) ((JavascriptExecutor) testRun.driver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-right') || document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding'));", targetDiv)).intValue();
             width = width - paddingRight;
         }
         scrollableDivHeight = scrollableDivHeight - (clientHeight - height);

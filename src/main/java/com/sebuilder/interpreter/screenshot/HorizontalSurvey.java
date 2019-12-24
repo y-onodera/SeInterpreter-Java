@@ -35,7 +35,7 @@ public interface HorizontalSurvey extends DocumentSurvey, Scrollable {
 
     default void scrollHorizontally(int scrollX) {
         if (this.hasHorizontalScroll()) {
-            JavascriptExecutor.class.cast(getWebDriver()).executeScript("scrollTo(arguments[0] ,0); return [];", scrollX);
+            ((JavascriptExecutor) getWebDriver()).executeScript("scrollTo(arguments[0] ,0); return [];", scrollX);
             waitForScrolling();
         }
     }

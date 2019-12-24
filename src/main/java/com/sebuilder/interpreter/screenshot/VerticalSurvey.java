@@ -35,7 +35,7 @@ public interface VerticalSurvey extends DocumentSurvey, Scrollable {
 
     default void scrollVertically(int scrollY) {
         if (this.hasVerticalScroll()) {
-            JavascriptExecutor.class.cast(getWebDriver()).executeScript("scrollTo(0, arguments[0]); return [];", scrollY);
+            ((JavascriptExecutor) getWebDriver()).executeScript("scrollTo(0, arguments[0]); return [];", scrollY);
             waitForScrolling();
         }
     }

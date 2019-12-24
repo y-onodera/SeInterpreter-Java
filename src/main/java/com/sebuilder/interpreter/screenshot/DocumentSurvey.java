@@ -28,7 +28,7 @@ public interface DocumentSurvey {
         if (Objects.equals(body.getCssValue("overflow"), "hidden") || Objects.equals(body.getCssValue("overflow-y"), "hidden")) {
             return getWindowHeight();
         }
-        return ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return Math.max(document.body.scrollHeight, document.body.offsetHeight,document.documentElement.clientHeight, document.documentElement.scrollHeight, document.documentElement.offsetHeight);", new Object[0])).intValue();
+        return ((Number) ((JavascriptExecutor) getWebDriver()).executeScript("return Math.max(document.body.scrollHeight, document.body.offsetHeight,document.documentElement.clientHeight, document.documentElement.scrollHeight, document.documentElement.offsetHeight);", new Object[0])).intValue();
     }
 
     default int getFullWidth() {
@@ -36,7 +36,7 @@ public interface DocumentSurvey {
         if (Objects.equals(body.getCssValue("overflow"), "hidden") || Objects.equals(body.getCssValue("overflow-x"), "hidden")) {
             return getWindowWidth();
         }
-        return ((Number) JavascriptExecutor.class.cast(getWebDriver()).executeScript("return Math.max(document.body.scrollWidth, document.body.offsetWidth,document.documentElement.clientWidth, document.documentElement.scrollWidth, document.documentElement.offsetWidth);", new Object[0])).intValue();
+        return ((Number) ((JavascriptExecutor) getWebDriver()).executeScript("return Math.max(document.body.scrollWidth, document.body.offsetWidth,document.documentElement.clientWidth, document.documentElement.scrollWidth, document.documentElement.offsetWidth);", new Object[0])).intValue();
     }
 
     default BufferedImage getScreenshot() {
