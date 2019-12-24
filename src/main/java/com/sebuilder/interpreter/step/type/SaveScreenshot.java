@@ -80,14 +80,6 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
         return o.apply(LocatorHolder.super::addDefaultParam);
     }
 
-    protected void waitForRepaint() {
-        try {
-            Thread.sleep(600);
-        } catch (InterruptedException var2) {
-            throw new IllegalStateException("Exception while waiting for repaint", var2);
-        }
-    }
-
     protected boolean compare(File file, BufferedImage actual, BufferedImage expect) throws IOException {
         if (this.isSizeMissMatch(actual, expect)) {
             BufferedImage resizeActual = this.toSameSize(actual, expect.getWidth(), expect.getHeight());
