@@ -17,9 +17,8 @@
 package com.sebuilder.interpreter.step.type;
 
 import com.github.romankh3.image.comparison.ImageComparison;
-import com.github.romankh3.image.comparison.ImageComparisonUtil;
-import com.github.romankh3.image.comparison.model.ComparisonResult;
-import com.github.romankh3.image.comparison.model.ComparisonState;
+import com.github.romankh3.image.comparison.model.ImageComparisonResult;
+import com.github.romankh3.image.comparison.model.ImageComparisonState;
 import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
@@ -53,7 +52,7 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
             File file = ctx.getListener().addScreenshot(fileName);
             BufferedImage actual = target.printImage(new VerticalPrinter(), 0);
             if (ctx.getBoolean("verify")) {
-                BufferedImage expect = ImageComparisonUtil.readImageFromFile(new File(Context.getExpectScreenShotDirectory(), fileName));
+                BufferedImage expect = ImageIO.read(new File(Context.getExpectScreenShotDirectory(), fileName));
                 boolean compareResult = this.compare(file, actual, expect);
                 if (!compareResult) {
                     File expectFile = ctx.getListener().saveExpectScreenshot();
@@ -86,9 +85,9 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
             ImageIO.write(this.getComparisonResult(file, resizeActual, expect).getResult(), "PNG", file);
             return false;
         }
-        ComparisonResult result = this.getComparisonResult(file, actual, expect);
+        ImageComparisonResult result = this.getComparisonResult(file, actual, expect);
         ImageIO.write(result.getResult(), "PNG", file);
-        return result.getComparisonState() == ComparisonState.MATCH;
+        return result.getImageComparisonState() == ImageComparisonState.MATCH;
     }
 
     protected BufferedImage toSameSize(BufferedImage actual, int expectWidth, int expectHeight) {
@@ -99,7 +98,7 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
         return finalImage;
     }
 
-    protected ComparisonResult getComparisonResult(File file, BufferedImage actual, BufferedImage expect) throws IOException {
+    protected ImageComparisonResult getComparisonResult(File file, BufferedImage actual, BufferedImage expect) {
         return new ImageComparison(expect, actual, file)
                 .setDrawExcludedRectangles(true)
                 .compareImages();
