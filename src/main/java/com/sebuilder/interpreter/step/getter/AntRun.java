@@ -1,6 +1,7 @@
 package com.sebuilder.interpreter.step.getter;
 
 import com.google.common.base.Strings;
+import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.Utils;
@@ -21,7 +22,12 @@ public class AntRun extends AbstractGetter {
         ProjectHelper helper = ProjectHelper.getProjectHelper();
         p.addReference("ant.projectHelper", helper);
         helper.parse(p, buildFile);
-        ctx.vars().entrySet().forEach(entry -> p.setProperty(entry.getKey(), entry.getValue()));
+        ctx.vars()
+                .entrySet()
+                .forEach(entry -> p.setProperty(entry.getKey(), ctx.bindRuntimeVariables(entry.getValue())));
+        Context.getEnvironmentProperties()
+                .entrySet()
+                .forEach(entry -> p.setProperty("env." + entry.getKey(), ctx.bindRuntimeVariables(entry.getValue().toString())));
         String target = p.getDefaultTarget();
         if (ctx.containsKey("target") && !Strings.isNullOrEmpty(ctx.string("target"))) {
             target = ctx.string("target");

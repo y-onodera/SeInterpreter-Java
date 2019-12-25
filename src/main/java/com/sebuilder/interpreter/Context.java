@@ -138,6 +138,10 @@ public enum Context {
         return getInstance().aspect;
     }
 
+    public static Properties getEnvironmentProperties() {
+        return getInstance().environmentProperties;
+    }
+
     public static File getExpectScreenShotDirectory() {
         return new File(getDataSourceDirectory(), "screenshot");
     }
