@@ -62,7 +62,7 @@ public class Sebuilder implements ScriptParser {
         try {
             return this.parseScript(new JSONObject(new JSONTokener(jsonString)), null);
         } catch (IOException | JSONException e) {
-            throw new AssertionError(e);
+            throw new AssertionError("error parse:" + jsonString, e);
         }
     }
 
@@ -78,7 +78,7 @@ public class Sebuilder implements ScriptParser {
             try {
                 return this.load(new JSONObject(new JSONTokener(r)), f);
             } catch (JSONException e) {
-                throw new IOException(e);
+                throw new IOException("error load:" + f.getAbsolutePath(), e);
             }
         }
     }
@@ -94,7 +94,7 @@ public class Sebuilder implements ScriptParser {
         try {
             return this.load(new JSONObject(new JSONTokener(json)), file);
         } catch (JSONException e) {
-            throw new IOException(e);
+            throw new IOException("error parse:" + json, e);
         }
     }
 
@@ -104,7 +104,7 @@ public class Sebuilder implements ScriptParser {
             try {
                 return this.getAspect(new JSONObject(new JSONTokener(r)));
             } catch (JSONException e) {
-                throw new IOException(e);
+                throw new IOException("error load:" + f.getAbsolutePath(), e);
             }
         }
     }
