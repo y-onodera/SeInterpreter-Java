@@ -6,7 +6,9 @@ import com.sebuilder.interpreter.step.type.SaveScreenshot;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,10 +20,10 @@ public enum Context {
 
     private final File baseDirectory = Paths.get(".").toAbsolutePath().normalize().toFile();
     private String browser = "Chrome";
-    public final HashMap<String, String> getDriverConfig = new HashMap();
+    public final HashMap<String, String> getDriverConfig = new HashMap<>();
     private WebDriverFactory wdf;
-    private Long implicitlyWaitTime = Long.valueOf(-1);
-    private Long pageLoadWaitTime = Long.valueOf(-1);
+    private Long implicitlyWaitTime = (long) -1;
+    private Long pageLoadWaitTime = (long) -1;
     private DataSourceFactory dataSourceFactory;
     private String dataSourceDirectory = "input";
     private String dataSourceEncoding = "UTF-8";
@@ -42,9 +44,8 @@ public enum Context {
     Context() {
         try {
             File envPropertyFile = new File("env.properties");
-            if (envPropertyFile.exists()) {
-                environmentProperties.load(new FileInputStream(envPropertyFile));
-            }
+            if (envPropertyFile.exists())
+                environmentProperties.load(new InputStreamReader(new FileInputStream(envPropertyFile), StandardCharsets.UTF_8));
         } catch (IOException e) {
             throw new AssertionError(e);
         }
@@ -74,10 +75,6 @@ public enum Context {
         return getInstance().browser;
     }
 
-    public String getWebDriverPath() {
-        return this.wdf.getDriverPath();
-    }
-
     public static Map<String, String> getDriverConfig() {
         return getInstance().getDriverConfig;
     }
@@ -87,7 +84,7 @@ public enum Context {
     }
 
     public static ScriptParser getScriptParser() {
-        return getInstance().getScriptParser(getDefaultScript());
+        return getScriptParser(getDefaultScript());
     }
 
     public static ScriptParser getScriptParser(String scriptType) {
@@ -242,7 +239,7 @@ public enum Context {
     }
 
     public Context setAspect(String aspectFileName) throws IOException {
-        this.aspect = this.getScriptParser().loadAspect(new File(this.getBaseDirectory(), aspectFileName));
+        this.aspect = getScriptParser().loadAspect(new File(getBaseDirectory(), aspectFileName));
         return this;
     }
 
