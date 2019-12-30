@@ -307,7 +307,7 @@ public class TestRun {
         }
     }
 
-    protected class ChainRunner implements TestRunner {
+    protected static class ChainRunner implements TestRunner {
         private final TestRun parent;
         private final TestCaseChains chains;
         private TestRun lastRun;
@@ -338,8 +338,7 @@ public class TestRun {
             if (this.isStopped()) {
                 return STATUS.STOPPED;
             }
-            InputData chainData = data;
-            this.lastRun = testRunBuilder.createTestRun(chainData, this.parent);
+            this.lastRun = testRunBuilder.createTestRun(data, this.parent);
             boolean result = this.lastRun.finish();
             if (this.lastRun.isStopped()) {
                 return STATUS.STOPPED;
