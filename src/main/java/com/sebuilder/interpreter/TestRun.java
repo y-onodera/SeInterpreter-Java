@@ -120,7 +120,7 @@ public class TestRun {
     }
 
     public boolean getBoolean(@Nonnull String key) {
-        return this.containsKey(key) && Boolean.valueOf(this.string(key));
+        return this.containsKey(key) && Boolean.parseBoolean(this.string(key));
     }
 
     public String string(@Nonnull String key) {

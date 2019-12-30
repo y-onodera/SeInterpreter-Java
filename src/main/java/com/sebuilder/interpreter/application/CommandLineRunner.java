@@ -8,7 +8,9 @@ import com.sebuilder.interpreter.step.StepTypeFactoryImpl;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.util.Strings;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.Locale;
 
 public abstract class CommandLineRunner {
     protected static WebDriverFactory DEFAULT_DRIVER_FACTORY = new Chrome();
@@ -59,13 +61,13 @@ public abstract class CommandLineRunner {
                     this.log.fatal("Driver configuration option \"" + s + "\" is not of the form \"--driver=<name>\" or \"--driver.<key>=<value\".");
                     System.exit(1);
                 }
-                if (s.startsWith(CommandLineArgument.IMPLICITLY_WAIT.key())) {
+                if (kv[0].equals(CommandLineArgument.IMPLICITLY_WAIT.key())) {
                     Context.getInstance().setImplicitlyWaitTime(Long.valueOf(kv[1]));
-                } else if (s.startsWith(CommandLineArgument.PAGE_LOAD_TIMEOUT.key())) {
+                } else if (kv[0].equals(CommandLineArgument.PAGE_LOAD_TIMEOUT.key())) {
                     Context.getInstance().setPageLoadWaitTime(Long.valueOf(kv[1]));
-                } else if (s.startsWith(CommandLineArgument.STEP_TYPE_PACKAGE.key())) {
+                } else if (kv[0].equals(CommandLineArgument.STEP_TYPE_PACKAGE.key())) {
                     Context.getStepTypeFactory().setPrimaryPackage(kv[1]);
-                } else if (s.startsWith(CommandLineArgument.STEP_TYPE_PACKAGE2.key())) {
+                } else if (kv[0].equals(CommandLineArgument.STEP_TYPE_PACKAGE2.key())) {
                     Context.getStepTypeFactory().setSecondaryPackage(kv[1]);
                 } else if (s.startsWith(CommandLineArgument.DRIVER_CONFIG_PREFIX.key())) {
                     Context.getDriverConfig().put(kv[0].substring(CommandLineArgument.DRIVER_CONFIG_PREFIX.key().length()), kv[1]);
@@ -73,21 +75,21 @@ public abstract class CommandLineRunner {
                     Context.getInstance().setBrowser(kv[1]);
                 } else if (kv[0].equals(CommandLineArgument.DRIVER_PATH.key())) {
                     Context.getInstance().setWebDriverPath(kv[1]);
-                } else if (s.startsWith(CommandLineArgument.DATASOURCE_PACKAGE.key())) {
+                } else if (kv[0].equals(CommandLineArgument.DATASOURCE_PACKAGE.key())) {
                     Context.getDataSourceFactory().setCustomDataSourcePackage(kv[1]);
-                } else if (s.startsWith(CommandLineArgument.DATASOURCE_ENCODING.key())) {
+                } else if (kv[0].equals(CommandLineArgument.DATASOURCE_ENCODING.key())) {
                     Context.getInstance().setDataSourceEncoding(kv[1]);
-                } else if (s.startsWith(CommandLineArgument.DATASOURCE_DIRECTORY.key())) {
+                } else if (kv[0].equals(CommandLineArgument.DATASOURCE_DIRECTORY.key())) {
                     Context.getInstance().setDataSourceDirectory(kv[1]);
-                } else if (s.startsWith(CommandLineArgument.SCREENSHOT_OUTPUT.key())) {
+                } else if (kv[0].equals(CommandLineArgument.SCREENSHOT_OUTPUT.key())) {
                     Context.getInstance().setScreenShotOutputDirectory(kv[1]);
-                } else if (s.startsWith(CommandLineArgument.TEMPLATE_OUTPUT.key())) {
+                } else if (kv[0].equals(CommandLineArgument.TEMPLATE_OUTPUT.key())) {
                     Context.getInstance().setTemplateOutputDirectory(kv[1]);
-                } else if (s.startsWith(CommandLineArgument.RESULT_OUTPUT.key())) {
+                } else if (kv[0].equals(CommandLineArgument.RESULT_OUTPUT.key())) {
                     Context.getInstance().setResultOutputDirectory(kv[1]);
-                } else if (s.startsWith(CommandLineArgument.DOWNLOAD_OUTPUT.key())) {
+                } else if (kv[0].equals(CommandLineArgument.DOWNLOAD_OUTPUT.key())) {
                     Context.getInstance().setDownloadDirectory(kv[1]);
-                } else if (s.startsWith(CommandLineArgument.ASPECT.key())) {
+                } else if (kv[0].equals(CommandLineArgument.ASPECT.key())) {
                     aspectFileName = kv[1];
                 } else if (kv[0].equals(CommandLineArgument.ENVIRONMENT_PROPERTIES.key())) {
                     try {
@@ -98,6 +100,10 @@ public abstract class CommandLineRunner {
                     }
                 } else if (s.startsWith(CommandLineArgument.ENVIRONMENT_PROPERTIES_PREFIX.key())) {
                     Context.getInstance().setEnvironmentProperty(kv[0].substring(CommandLineArgument.ENVIRONMENT_PROPERTIES_PREFIX.key().length()), kv[1]);
+                } else if (kv[0].equals(CommandLineArgument.LOCALE_CONF.key())) {
+                    Context.getInstance().setLocaleConfDir(new File(kv[1]));
+                } else if (kv[0].equals(CommandLineArgument.LOCALE.key())) {
+                    Context.getInstance().setLocale(new Locale(kv[1]));
                 } else {
                     configureOption(s, kv);
                 }

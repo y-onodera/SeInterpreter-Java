@@ -19,7 +19,8 @@ public enum CommandLineArgument {
     ASPECT("--aspectFile"),
     ENVIRONMENT_PROPERTIES("--env"),
     ENVIRONMENT_PROPERTIES_PREFIX("--env."),
-    ;
+    LOCALE("--locale"),
+    LOCALE_CONF("--locale.conf");
 
     private String key;
 

@@ -1,6 +1,7 @@
 package com.sebuilder.interpreter;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.sebuilder.interpreter.step.type.SaveScreenshot;
 
 import java.io.File;
@@ -8,11 +9,12 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public enum Context {
 
@@ -40,12 +42,15 @@ public enum Context {
             .build()
             .build();
     private Properties environmentProperties = new Properties();
+    private Locale locale = Locale.getDefault();
+    private File localeConfDir = new File(".");
 
     Context() {
         try {
             File envPropertyFile = new File("env.properties");
-            if (envPropertyFile.exists())
+            if (envPropertyFile.exists()) {
                 environmentProperties.load(new InputStreamReader(new FileInputStream(envPropertyFile), StandardCharsets.UTF_8));
+            }
         } catch (IOException e) {
             throw new AssertionError(e);
         }
@@ -60,6 +65,8 @@ public enum Context {
                 .add("_browser", Context.getBrowser())
                 .add("_baseDir", Context.getBaseDirectory().getAbsolutePath())
                 .add("_dataSourceDir", Context.getDataSourceDirectory().getAbsolutePath())
+                .add(localizeTexts())
+                .add(environmentVariables())
                 .build();
     }
 
@@ -144,7 +151,7 @@ public enum Context {
     }
 
     public static String bindEnvironmentProperties(String variable) {
-        for (Map.Entry<Object, Object> v : INSTANCE.environmentProperties.entrySet()) {
+        for (Map.Entry<Object, Object> v : getInstance().environmentProperties.entrySet()) {
             variable = variable.replace("${env." + v.getKey().toString() + "}", v.getValue().toString());
         }
         return variable;
@@ -256,5 +263,41 @@ public enum Context {
     public Context setEnvironmentProperty(String key, String value) {
         this.environmentProperties.put(key, value);
         return this;
+    }
+
+    public Context setLocale(Locale locale) {
+        this.locale = locale;
+        return this;
+    }
+
+    public Context setLocaleConfDir(File path) {
+        this.localeConfDir = path;
+        return this;
+    }
+
+    private static Map<String, String> environmentVariables() {
+        return getInstance().environmentProperties
+                .entrySet()
+                .stream()
+                .collect(Collectors.toMap(
+                        it -> "env." + it.getKey()
+                        , it -> it.getValue().toString()
+                        , (e1, e2) -> e1
+                        , HashMap::new));
+    }
+
+    private static Map<String, String> localizeTexts() {
+        try (URLClassLoader url = new URLClassLoader(new URL[]{getInstance().localeConfDir.toURI().toURL()})) {
+            ResourceBundle resourceBundle = ResourceBundle.getBundle("locale", getInstance().locale, url);
+            return resourceBundle.keySet()
+                    .stream()
+                    .collect(Collectors.toMap(
+                            it -> "locale." + it
+                            , resourceBundle::getString
+                            , (e1, e2) -> e1
+                            , HashMap::new));
+        } catch (IOException e) {
+            return Maps.newHashMap();
+        }
     }
 }
