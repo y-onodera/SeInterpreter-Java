@@ -85,9 +85,9 @@ public class TestRunBuilder {
         return this.createTestRun(log, driver, initialVars, seInterpreterTestListener);
     }
 
-    public TestRun createTestRun(InputData initialVars, TestRun previousRun) {
+    public TestRun createTestRun(InputData initialVars, TestRun previousRun, int index) {
         return this.createTestRun(
-                previousRun.getTestRunName() + "_" + this.testCase.name()
+                previousRun.getTestRunName() + "_" + index + "_" + this.testCase.name()
                 , previousRun.log()
                 , previousRun.driver()
                 , initialVars

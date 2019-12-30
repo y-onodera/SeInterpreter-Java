@@ -656,7 +656,7 @@ public class TestRunTest {
             Mockito.doNothing().when(this.listener).closeTestSuite();
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_chainCase"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_0_chainCase"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("chain: ClickElement");
             Mockito.doReturn(true).when(this.chainStep).run(Mockito.any());
 
@@ -669,7 +669,7 @@ public class TestRunTest {
             Mockito.verify(this.listener, Mockito.times(2)).endTest();
             Mockito.verify(this.listener, Mockito.times(2)).closeTestSuite();
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_chainCase"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_0_chainCase"), Mockito.any(InputData.class));
             Mockito.verify(this.listener).startTest("chain: ClickElement");
             Mockito.verify(this.chainStep).run(Mockito.any());
         }
@@ -716,7 +716,7 @@ public class TestRunTest {
             Mockito.doNothing().when(this.listener).closeTestSuite();
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_chainCase"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_0_chainCase"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("chain: ClickElement");
             Mockito.doReturn(false).when(this.chainStep).run(Mockito.any());
             Mockito.doNothing().when(this.listener).addFailure("chain: ClickElement failed.");
@@ -730,7 +730,7 @@ public class TestRunTest {
                 Mockito.verify(this.listener).endTest();
                 Mockito.verify(this.listener, Mockito.times(2)).closeTestSuite();
                 Mockito.verify(this.listener)
-                        .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_chainCase"), Mockito.any(InputData.class));
+                        .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_0_chainCase"), Mockito.any(InputData.class));
                 Mockito.verify(this.listener).startTest("chain: ClickElement");
                 Mockito.verify(this.chainStep).run(Mockito.any());
                 Mockito.verify(this.listener, Mockito.times(1)).addFailure("chain: ClickElement failed.");
@@ -825,7 +825,7 @@ public class TestRunTest {
             Mockito.doReturn(true).when(this.aspectAfterStep).run(Mockito.any());
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_chainCase"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_0_chainCase"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("chain: ClickElement");
             Mockito.doReturn(true).when(this.chainStep).run(Mockito.any());
 
@@ -838,7 +838,7 @@ public class TestRunTest {
             Mockito.verify(this.listener, Mockito.times(2)).endTest();
             Mockito.verify(this.listener, Mockito.times(2)).closeTestSuite();
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_chainCase"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_0_chainCase"), Mockito.any(InputData.class));
             Mockito.verify(this.listener).startTest("chain: ClickElement");
             Mockito.verify(this.chainStep).run(Mockito.any());
             Mockito.verify(this.interceptor, Mockito.times(2)).createAdviseListener(Mockito.any(TestRun.class));
@@ -914,13 +914,13 @@ public class TestRunTest {
             Mockito.doNothing().when(this.listener).closeTestSuite();
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_chainCase"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_0_chainCase"), Mockito.any(InputData.class));
             Mockito.doReturn(this.adviseListener)
                     .when(this.interceptor)
                     .createAdviseListener(Mockito.any(TestRun.class));
             Mockito.doReturn(true)
                     .when(this.adviseListener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_chainCase_ClickElement_aspect_before"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_0_chainCase_ClickElement_aspect_before"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.adviseListener).startTest("SetElementText");
             Mockito.doReturn(true).when(this.aspectBeforeStep).run(Mockito.any());
             Mockito.doNothing().when(this.adviseListener).endTest();
@@ -929,7 +929,7 @@ public class TestRunTest {
             Mockito.doReturn(true).when(this.chainStep).run(Mockito.any());
             Mockito.doReturn(true)
                     .when(this.adviseListener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_chainCase_ClickElement_aspect_after"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_0_chainCase_ClickElement_aspect_after"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.adviseListener).startTest("DoubleClickElement");
             Mockito.doReturn(true).when(this.aspectAfterStep).run(Mockito.any());
 
@@ -942,16 +942,16 @@ public class TestRunTest {
             Mockito.verify(this.listener, Mockito.times(2)).endTest();
             Mockito.verify(this.listener, Mockito.times(2)).closeTestSuite();
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_chainCase"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_0_chainCase"), Mockito.any(InputData.class));
             Mockito.verify(this.listener).startTest("chain: ClickElement");
             Mockito.verify(this.chainStep).run(Mockito.any());
             Mockito.verify(this.interceptor, Mockito.times(2)).createAdviseListener(Mockito.any(TestRun.class));
-            Mockito.verify(this.adviseListener).openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_chainCase_ClickElement_aspect_before"), Mockito.any(InputData.class));
+            Mockito.verify(this.adviseListener).openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_0_chainCase_ClickElement_aspect_before"), Mockito.any(InputData.class));
             Mockito.verify(this.adviseListener).startTest("SetElementText");
             Mockito.verify(this.aspectBeforeStep).run(Mockito.any());
             Mockito.verify(this.adviseListener, Mockito.times(2)).endTest();
             Mockito.verify(this.adviseListener, Mockito.times(2)).closeTestSuite();
-            Mockito.verify(this.adviseListener).openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_chainCase_ClickElement_aspect_after"), Mockito.any(InputData.class));
+            Mockito.verify(this.adviseListener).openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_0_chainCase_ClickElement_aspect_after"), Mockito.any(InputData.class));
             Mockito.verify(this.adviseListener).startTest("DoubleClickElement");
             Mockito.verify(this.aspectAfterStep).run(Mockito.any());
         }
@@ -1055,13 +1055,13 @@ public class TestRunTest {
             Mockito.doReturn(true).when(this.aspectAfterStep).run(Mockito.any());
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_chainCase"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_0_chainCase"), Mockito.any(InputData.class));
             Mockito.doReturn(this.contextAdviseListener)
                     .when(this.contextInterceptor)
                     .createAdviseListener(Mockito.any(TestRun.class));
             Mockito.doReturn(true)
                     .when(this.contextAdviseListener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_chainCase_ClickElement_aspect_before"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_0_chainCase_ClickElement_aspect_before"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.contextAdviseListener).startTest("SetElementText");
             Mockito.doReturn(true).when(this.contextAspectBeforeStep).run(Mockito.any());
             Mockito.doNothing().when(this.contextAdviseListener).endTest();
@@ -1070,7 +1070,7 @@ public class TestRunTest {
             Mockito.doReturn(true).when(this.chainStep).run(Mockito.any());
             Mockito.doReturn(true)
                     .when(this.contextAdviseListener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_chainCase_ClickElement_aspect_after"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_0_chainCase_ClickElement_aspect_after"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.contextAdviseListener).startTest("DoubleClickElement");
             Mockito.doReturn(true).when(this.contextAspectAfterStep).run(Mockito.any());
 
@@ -1083,7 +1083,7 @@ public class TestRunTest {
             Mockito.verify(this.listener, Mockito.times(2)).endTest();
             Mockito.verify(this.listener, Mockito.times(2)).closeTestSuite();
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_chainCase"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_0_chainCase"), Mockito.any(InputData.class));
             Mockito.verify(this.listener).startTest("chain: ClickElement");
             Mockito.verify(this.chainStep).run(Mockito.any());
             Mockito.verify(this.interceptor, Mockito.times(2)).createAdviseListener(Mockito.any(TestRun.class));
@@ -1096,12 +1096,12 @@ public class TestRunTest {
             Mockito.verify(this.adviseListener).startTest("DoubleClickElement");
             Mockito.verify(this.aspectAfterStep).run(Mockito.any());
             Mockito.verify(this.contextInterceptor, Mockito.times(2)).createAdviseListener(Mockito.any(TestRun.class));
-            Mockito.verify(this.contextAdviseListener).openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_chainCase_ClickElement_aspect_before"), Mockito.any(InputData.class));
+            Mockito.verify(this.contextAdviseListener).openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_0_chainCase_ClickElement_aspect_before"), Mockito.any(InputData.class));
             Mockito.verify(this.contextAdviseListener).startTest("SetElementText");
             Mockito.verify(this.contextAspectBeforeStep).run(Mockito.any());
             Mockito.verify(this.contextAdviseListener, Mockito.times(2)).endTest();
             Mockito.verify(this.contextAdviseListener, Mockito.times(2)).closeTestSuite();
-            Mockito.verify(this.contextAdviseListener).openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_chainCase_ClickElement_aspect_after"), Mockito.any(InputData.class));
+            Mockito.verify(this.contextAdviseListener).openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_0_chainCase_ClickElement_aspect_after"), Mockito.any(InputData.class));
             Mockito.verify(this.contextAdviseListener).startTest("DoubleClickElement");
             Mockito.verify(this.contextAspectAfterStep).run(Mockito.any());
         }
@@ -1148,13 +1148,13 @@ public class TestRunTest {
             Mockito.doNothing().when(this.listener).closeTestSuite();
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("name: ClickElement");
             Mockito.doReturn(true).when(this.step).run(Mockito.any());
             Mockito.doNothing().when(this.listener).endTest();
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("chain: ClickElement");
             Mockito.doReturn(true).when(this.chainStep).run(Mockito.any());
 
@@ -1163,13 +1163,13 @@ public class TestRunTest {
             Mockito.verify(this.listener)
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart"), Mockito.any(InputData.class));
             Mockito.verify(this.listener).startTest("name: ClickElement");
             Mockito.verify(this.step).run(Mockito.any());
             Mockito.verify(this.listener, Mockito.times(2)).endTest();
             Mockito.verify(this.listener, Mockito.times(3)).closeTestSuite();
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase"), Mockito.any(InputData.class));
             Mockito.verify(this.listener).startTest("chain: ClickElement");
             Mockito.verify(this.chainStep).run(Mockito.any());
         }
@@ -1183,7 +1183,7 @@ public class TestRunTest {
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite"), Mockito.any(InputData.class));
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("name: ClickElement");
             Mockito.doReturn(true).when(this.step).run(Mockito.any());
             Mockito.doNothing().when(this.listener).endTest();
@@ -1194,13 +1194,13 @@ public class TestRunTest {
             Mockito.verify(this.listener)
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart"), Mockito.any(InputData.class));
             Mockito.verify(this.listener).startTest("name: ClickElement");
             Mockito.verify(this.step).run(Mockito.any());
             Mockito.verify(this.listener).endTest();
             Mockito.verify(this.listener, Mockito.times(2)).closeTestSuite();
             Mockito.verify(this.listener, Mockito.never())
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase"), Mockito.any(InputData.class));
             Mockito.verify(this.listener, Mockito.never()).startTest("chain: ClickElement");
             Mockito.verify(this.chainStep, Mockito.never()).run(Mockito.any());
         }
@@ -1241,21 +1241,21 @@ public class TestRunTest {
             Mockito.doNothing().when(this.listener).closeTestSuite();
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_chainCase_row_1"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_0_chainCase_row_1"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("chain: ClickElement");
             Mockito.doReturn(true).when(this.chainStep).run(Mockito.any());
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_chainCase_row_2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_0_chainCase_row_2"), Mockito.any(InputData.class));
 
             assertTrue(target.finish());
 
             Mockito.verify(this.listener)
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName()), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_chainCase_row_1"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_0_chainCase_row_1"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_chainCase_row_2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_0_chainCase_row_2"), Mockito.any(InputData.class));
             Mockito.verify(this.listener, Mockito.times(3)).closeTestSuite();
             Mockito.verify(this.listener).startTest("name: ClickElement");
             Mockito.verify(this.listener, Mockito.times(2)).startTest("chain: ClickElement");
@@ -1320,22 +1320,22 @@ public class TestRunTest {
             Mockito.doNothing().when(this.listener).closeTestSuite();
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("name: ClickElement");
             Mockito.doReturn(true).when(this.step).run(Mockito.any());
             Mockito.doNothing().when(this.listener).endTest();
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_1"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_1"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("chain: ClickElement key=1");
             Mockito.doReturn(true).when(this.chainStep).run(Mockito.any());
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_2"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("chain: ClickElement key=2");
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_1_chainCase2"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("chain2: ClickElement key=2");
             Mockito.doReturn(true).when(this.chainStep2).run(Mockito.any());
 
@@ -1344,13 +1344,13 @@ public class TestRunTest {
             Mockito.verify(this.listener)
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_1"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_1"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_2"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_1_chainCase2"), Mockito.any(InputData.class));
             Mockito.verify(this.listener).startTest("name: ClickElement");
             Mockito.verify(this.step).run(Mockito.any());
             Mockito.verify(this.listener).startTest("chain: ClickElement key=1");
@@ -1372,13 +1372,13 @@ public class TestRunTest {
             Mockito.doNothing().when(this.listener).closeTestSuite();
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("name: ClickElement");
             Mockito.doReturn(true).when(this.step).run(Mockito.any());
             Mockito.doNothing().when(this.listener).endTest();
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase2"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("chain2: ClickElement key=default");
             Mockito.doReturn(true).when(this.chainStep2).run(Mockito.any());
 
@@ -1387,13 +1387,13 @@ public class TestRunTest {
             Mockito.verify(this.listener)
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart"), Mockito.any(InputData.class));
             Mockito.verify(this.listener, Mockito.never())
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_1"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_1"), Mockito.any(InputData.class));
             Mockito.verify(this.listener, Mockito.never())
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_2"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_1_chainCase2"), Mockito.any(InputData.class));
             Mockito.verify(this.listener).startTest("name: ClickElement");
             Mockito.verify(this.step).run(Mockito.any());
             Mockito.verify(this.listener, Mockito.never()).startTest("chain: ClickElement key1");
@@ -1414,19 +1414,19 @@ public class TestRunTest {
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite"), Mockito.any(InputData.class));
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("name: ClickElement");
             Mockito.doReturn(true).when(this.step).run(Mockito.any());
             Mockito.doNothing().when(this.listener).endTest();
             Mockito.doNothing().when(this.listener).closeTestSuite();
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_1"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_1"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("chain: ClickElement key=1");
             Mockito.doReturn(true).when(this.chainStep).run(Mockito.any());
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_2"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("chain: ClickElement key=2");
 
             assertTrue(target.finish());
@@ -1434,13 +1434,13 @@ public class TestRunTest {
             Mockito.verify(this.listener)
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_1"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_1"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_2"), Mockito.any(InputData.class));
             Mockito.verify(this.listener, Mockito.never())
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_1_chainCase2"), Mockito.any(InputData.class));
             Mockito.verify(this.listener).startTest("name: ClickElement");
             Mockito.verify(this.step).run(Mockito.any());
             Mockito.verify(this.listener).startTest("chain: ClickElement key=1");
@@ -1462,7 +1462,7 @@ public class TestRunTest {
             Mockito.doNothing().when(this.listener).closeTestSuite();
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("name: ClickElement");
             Mockito.doReturn(true).when(this.step).run(Mockito.any());
             Mockito.doNothing().when(this.listener).endTest();
@@ -1472,13 +1472,13 @@ public class TestRunTest {
             Mockito.verify(this.listener)
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart"), Mockito.any(InputData.class));
             Mockito.verify(this.listener, Mockito.never())
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_1"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_1"), Mockito.any(InputData.class));
             Mockito.verify(this.listener, Mockito.never())
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_2"), Mockito.any(InputData.class));
             Mockito.verify(this.listener, Mockito.never())
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_1_chainCase2"), Mockito.any(InputData.class));
             Mockito.verify(this.listener).startTest("name: ClickElement");
             Mockito.verify(this.step).run(Mockito.any());
             Mockito.verify(this.listener, Mockito.never()).startTest("chain: ClickElement key=1");
@@ -1500,22 +1500,22 @@ public class TestRunTest {
             Mockito.doNothing().when(this.listener).closeTestSuite();
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("name: ClickElement");
             Mockito.doReturn(true).when(this.step).run(Mockito.any());
             Mockito.doNothing().when(this.listener).endTest();
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_1"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_1"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("chain: ClickElement key=1");
             Mockito.doReturn(true).when(this.chainStep).run(Mockito.any());
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_2"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("chain: ClickElement key=2");
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_1_chainCase2"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("chain2: ClickElement key=2");
             Mockito.doReturn(true).when(this.chainStep2).run(Mockito.any());
 
@@ -1525,13 +1525,13 @@ public class TestRunTest {
             Mockito.verify(this.listener)
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_1"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_1"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_2"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_1_chainCase2"), Mockito.any(InputData.class));
             Mockito.verify(this.listener).startTest("name: ClickElement");
             Mockito.verify(this.step).run(Mockito.any());
             Mockito.verify(this.listener).startTest("chain: ClickElement key=1");
@@ -1602,27 +1602,27 @@ public class TestRunTest {
             Mockito.doNothing().when(this.listener).closeTestSuite();
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("name: ClickElement");
             Mockito.doReturn(true).when(this.step).run(Mockito.any());
             Mockito.doNothing().when(this.listener).endTest();
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_1"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_1"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("chain: ClickElement key=1");
             Mockito.doReturn(true).when(this.chainStep).run(Mockito.any());
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_1_chainCase2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_1_0_chainCase2"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("chain2: ClickElement key=1");
             Mockito.doReturn(true).when(this.chainStep2).run(Mockito.any());
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_2"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("chain: ClickElement key=2");
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_2_chainCase2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_2_0_chainCase2"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("chain2: ClickElement key=2");
 
             assertTrue(target.finish());
@@ -1630,15 +1630,15 @@ public class TestRunTest {
             Mockito.verify(this.listener)
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_1"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_1"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_1_chainCase2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_1_0_chainCase2"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_2"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_2_chainCase2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_2_0_chainCase2"), Mockito.any(InputData.class));
             Mockito.verify(this.listener).startTest("name: ClickElement");
             Mockito.verify(this.step).run(Mockito.any());
             Mockito.verify(this.listener).startTest("chain: ClickElement key=1");
@@ -1660,7 +1660,7 @@ public class TestRunTest {
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite"), Mockito.any(InputData.class));
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).closeTestSuite();
             Mockito.doNothing().when(this.listener).startTest("name: ClickElement");
             Mockito.doReturn(true).when(this.step).run(Mockito.any());
@@ -1671,13 +1671,13 @@ public class TestRunTest {
             Mockito.verify(this.listener)
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart"), Mockito.any(InputData.class));
             Mockito.verify(this.listener, Mockito.never())
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_1"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_1"), Mockito.any(InputData.class));
             Mockito.verify(this.listener, Mockito.never())
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_2"), Mockito.any(InputData.class));
             Mockito.verify(this.listener, Mockito.never())
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_1_chainCase2"), Mockito.any(InputData.class));
             Mockito.verify(this.listener).startTest("name: ClickElement");
             Mockito.verify(this.step).run(Mockito.any());
             Mockito.verify(this.listener, Mockito.never()).startTest("chain: ClickElement key1");
@@ -1698,19 +1698,19 @@ public class TestRunTest {
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite"), Mockito.any(InputData.class));
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("name: ClickElement");
             Mockito.doReturn(true).when(this.step).run(Mockito.any());
             Mockito.doNothing().when(this.listener).endTest();
             Mockito.doNothing().when(this.listener).closeTestSuite();
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_1"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_1"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("chain: ClickElement key=1");
             Mockito.doReturn(true).when(this.chainStep).run(Mockito.any());
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_2"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("chain: ClickElement key=2");
 
             assertTrue(target.finish());
@@ -1718,15 +1718,15 @@ public class TestRunTest {
             Mockito.verify(this.listener)
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_1"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_1"), Mockito.any(InputData.class));
             Mockito.verify(this.listener, Mockito.never())
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_1_chainCase2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_1_0_chainCase2"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_2"), Mockito.any(InputData.class));
             Mockito.verify(this.listener, Mockito.never())
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_2_chainCase2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_2_0_chainCase2"), Mockito.any(InputData.class));
             Mockito.verify(this.listener).startTest("name: ClickElement");
             Mockito.verify(this.step).run(Mockito.any());
             Mockito.verify(this.listener).startTest("chain: ClickElement key=1");
@@ -1747,7 +1747,7 @@ public class TestRunTest {
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite"), Mockito.any(InputData.class));
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("name: ClickElement");
             Mockito.doReturn(true).when(this.step).run(Mockito.any());
             Mockito.doNothing().when(this.listener).endTest();
@@ -1758,13 +1758,13 @@ public class TestRunTest {
             Mockito.verify(this.listener)
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart"), Mockito.any(InputData.class));
             Mockito.verify(this.listener, Mockito.never())
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_1"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_1"), Mockito.any(InputData.class));
             Mockito.verify(this.listener, Mockito.never())
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_2"), Mockito.any(InputData.class));
             Mockito.verify(this.listener, Mockito.never())
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_1_chainCase2"), Mockito.any(InputData.class));
             Mockito.verify(this.listener).startTest("name: ClickElement");
             Mockito.verify(this.step).run(Mockito.any());
             Mockito.verify(this.listener, Mockito.never()).startTest("chain: ClickElement key=1");
@@ -1785,28 +1785,28 @@ public class TestRunTest {
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite"), Mockito.any(InputData.class));
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("name: ClickElement");
             Mockito.doReturn(true).when(this.step).run(Mockito.any());
             Mockito.doNothing().when(this.listener).endTest();
             Mockito.doNothing().when(this.listener).closeTestSuite();
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_1"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_1"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("chain: ClickElement key=1");
             Mockito.doReturn(true).when(this.chainStep).run(Mockito.any());
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_1_chainCase2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_1_0_chainCase2"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("chain2: ClickElement key=1");
             Mockito.doReturn(true).when(this.chainStep2).run(Mockito.any());
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_2"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("chain: ClickElement key=2");
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_2_chainCase2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_2_0_chainCase2"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("chain2: ClickElement key=2");
 
             this.target.putVars("key", "change");
@@ -1815,15 +1815,15 @@ public class TestRunTest {
             Mockito.verify(this.listener)
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_1"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_1"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_1_chainCase2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_1_0_chainCase2"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_2"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_2_chainCase2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_2_0_chainCase2"), Mockito.any(InputData.class));
             Mockito.verify(this.listener).startTest("name: ClickElement");
             Mockito.verify(this.step).run(Mockito.any());
             Mockito.verify(this.listener).startTest("chain: ClickElement key=1");
@@ -1907,31 +1907,31 @@ public class TestRunTest {
             Mockito.doNothing().when(this.listener).closeTestSuite();
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("name: ClickElement");
             Mockito.doReturn(true).when(this.step).run(Mockito.any());
             Mockito.doNothing().when(this.listener).endTest();
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_1"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_1"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("chain: ClickElement key=1");
             Mockito.doReturn(true).when(this.chainStep).run(Mockito.any());
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_1_chainCase2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_1_0_chainCase2"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("chain2: ClickElement key=1");
             Mockito.doReturn(true).when(this.chainStep2).run(Mockito.any());
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_2"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("chain: ClickElement key=2");
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_2_chainCase2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_2_0_chainCase2"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("chain2: ClickElement key=2");
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase3"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_1_chainCase3"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("chain3: ClickElement key=2");
             Mockito.doReturn(true).when(this.chainStep3).run(Mockito.any());
 
@@ -1940,17 +1940,17 @@ public class TestRunTest {
             Mockito.verify(this.listener)
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_1"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_1"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_1_chainCase2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_1_0_chainCase2"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_2"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase_row_2_chainCase2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_2_0_chainCase2"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase3"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_1_chainCase3"), Mockito.any(InputData.class));
             Mockito.verify(this.listener).startTest("name: ClickElement");
             Mockito.verify(this.step).run(Mockito.any());
             Mockito.verify(this.listener).startTest("chain: ClickElement key=1");
@@ -2038,30 +2038,30 @@ public class TestRunTest {
             Mockito.doNothing().when(this.listener).closeTestSuite();
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("name: ClickElement");
             Mockito.doReturn(true).when(this.step).run(Mockito.any());
             Mockito.doNothing().when(this.listener).endTest();
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_suite2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_suite2"), Mockito.any(InputData.class));
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_suite2_chainCase_row_1"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_suite2_0_chainCase_row_1"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("chain: ClickElement key=1");
             Mockito.doReturn(true).when(this.chainStep).run(Mockito.any());
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_suite2_chainCase_row_2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_suite2_0_chainCase_row_2"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("chain: ClickElement key=2");
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_suite2_chainCase2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_suite2_1_chainCase2"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("chain2: ClickElement key=default");
             Mockito.doReturn(true).when(this.chainStep2).run(Mockito.any());
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase3"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_1_chainCase3"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("chain3: ClickElement key=default");
             Mockito.doReturn(true).when(this.chainStep3).run(Mockito.any());
 
@@ -2070,17 +2070,17 @@ public class TestRunTest {
             Mockito.verify(this.listener)
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_suite2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_suite2"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_suite2_chainCase_row_1"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_suite2_0_chainCase_row_1"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_suite2_chainCase_row_2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_suite2_0_chainCase_row_2"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_suite2_chainCase2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_suite2_1_chainCase2"), Mockito.any(InputData.class));
             Mockito.verify(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_chainStart_chainCase3"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_1_chainCase3"), Mockito.any(InputData.class));
             Mockito.verify(this.listener).startTest("name: ClickElement");
             Mockito.verify(this.step).run(Mockito.any());
             Mockito.verify(this.listener).startTest("chain: ClickElement key=1");

@@ -312,6 +312,7 @@ public class TestRun {
         private final TestCaseChains chains;
         private TestRun lastRun;
         private InputData lastRunVar;
+        private int chainIndex;
 
         public ChainRunner(TestRun parent) {
             this.parent = parent;
@@ -320,6 +321,7 @@ public class TestRun {
 
         public boolean finish() {
             InputData chainInitialVar = this.parent.vars();
+            this.chainIndex = 0;
             for (TestCase nextChain : this.chains) {
                 final InputData chainVar = chainInitialVar;
                 if (!nextChain.map(it -> it.addAspect(this.parent.getAspect()).setShareInput(chainVar))
@@ -329,6 +331,7 @@ public class TestRun {
                 if (this.chains.isTakeOverLastRun() && this.lastRunVar != null) {
                     chainInitialVar = this.lastRunVar;
                 }
+                this.chainIndex++;
             }
             return true;
         }
@@ -338,7 +341,7 @@ public class TestRun {
             if (this.isStopped()) {
                 return STATUS.STOPPED;
             }
-            this.lastRun = testRunBuilder.createTestRun(data, this.parent);
+            this.lastRun = testRunBuilder.createTestRun(data, this.parent, this.chainIndex);
             boolean result = this.lastRun.finish();
             if (this.lastRun.isStopped()) {
                 return STATUS.STOPPED;
