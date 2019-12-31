@@ -3,6 +3,7 @@ package com.sebuilder.interpreter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sebuilder.interpreter.step.type.SaveScreenshot;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -14,6 +15,7 @@ import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public enum Context {
@@ -21,29 +23,29 @@ public enum Context {
     INSTANCE;
 
     private final File baseDirectory = Paths.get(".").toAbsolutePath().normalize().toFile();
-    private String browser = "Chrome";
-    public final HashMap<String, String> getDriverConfig = new HashMap<>();
+    private String browser;
+    private final HashMap<String, String> driverConfig = new HashMap<>();
     private WebDriverFactory wdf;
-    private Long implicitlyWaitTime = (long) -1;
-    private Long pageLoadWaitTime = (long) -1;
+    private Long implicitlyWaitTime;
+    private Long pageLoadWaitTime;
     private DataSourceFactory dataSourceFactory;
-    private String dataSourceDirectory = "input";
-    private String dataSourceEncoding = "UTF-8";
-    private String resultOutputDirectory = "result";
-    private String downloadDirectory = "download";
-    private String screenShotOutputDirectory = "screenshot";
-    private String templateOutputDirectory = "template";
+    private String dataSourceDirectory;
+    private String dataSourceEncoding;
+    private String resultOutputDirectory;
+    private String downloadDirectory;
+    private String screenShotOutputDirectory;
+    private String templateOutputDirectory;
     private String defaultScript = "sebuilder";
-    private Map<String, ScriptParser> scriptParsers = new HashMap<>();
+    private final Map<String, ScriptParser> scriptParsers = new HashMap<>();
     private StepTypeFactory stepTypeFactory;
     private Aspect aspect = new Aspect().builder()
             .interceptor()
             .addFailure(Lists.newArrayList(new SaveScreenshot().toStep().put("file", "failure.png").build()))
             .build()
             .build();
-    private Properties environmentProperties = new Properties();
-    private Locale locale = Locale.getDefault();
-    private File localeConfDir = new File(".");
+    private final Properties environmentProperties = new Properties();
+    private Locale locale;
+    private File localeConfDir;
 
     Context() {
         try {
@@ -83,7 +85,7 @@ public enum Context {
     }
 
     public static Map<String, String> getDriverConfig() {
-        return getInstance().getDriverConfig;
+        return getInstance().driverConfig;
     }
 
     public static WebDriverFactory getWebDriverFactory() {
@@ -157,6 +159,17 @@ public enum Context {
         return variable;
     }
 
+    public Context ifMatch(boolean condition, Function<Context, Context> modifier) throws Exception {
+        if (condition) {
+            try {
+                return modifier.apply(this);
+            } catch (Exception e) {
+                throw e;
+            }
+        }
+        return this;
+    }
+
     public Context setImplicitlyWaitTime(Long aLong) {
         this.implicitlyWaitTime = aLong;
         return this;
@@ -194,6 +207,12 @@ public enum Context {
         this.browser = webDriverFactory.targetBrowser();
         return this;
     }
+
+    public Context setDriverConfig(Map<String, String> config) {
+        this.driverConfig.putAll(config);
+        return this;
+    }
+
 
     public Context addScriptParser(ScriptParser parser) {
         this.scriptParsers.put(parser.type(), parser);
@@ -245,8 +264,12 @@ public enum Context {
         return this;
     }
 
-    public Context setAspect(String aspectFileName) throws IOException {
-        this.aspect = getScriptParser().loadAspect(new File(getBaseDirectory(), aspectFileName));
+    public Context setAspect(String aspectFileName) {
+        try {
+            this.aspect = getScriptParser().loadAspect(new File(getBaseDirectory(), aspectFileName));
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
         return this;
     }
 
@@ -255,13 +278,18 @@ public enum Context {
         return this;
     }
 
-    public Context setEnvironmentProperties(String propertyFile) throws IOException {
-        this.environmentProperties.load(new FileInputStream(propertyFile));
+    public Context setEnvironmentProperties(String propertyFile) {
+        this.environmentProperties.clear();
+        try (FileInputStream is = new FileInputStream(propertyFile)) {
+            this.environmentProperties.load(is);
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
         return this;
     }
 
-    public Context setEnvironmentProperty(String key, String value) {
-        this.environmentProperties.put(key, value);
+    public Context setEnvironmentProperty(Map<String, String> property) {
+        this.environmentProperties.putAll(property);
         return this;
     }
 
@@ -287,8 +315,10 @@ public enum Context {
     }
 
     private static Map<String, String> localizeTexts() {
-        try (URLClassLoader url = new URLClassLoader(new URL[]{getInstance().localeConfDir.toURI().toURL()})) {
-            ResourceBundle resourceBundle = ResourceBundle.getBundle("locale", getInstance().locale, url);
+        File loadFrom = Optional.ofNullable(getInstance().localeConfDir).orElse(getInstance().baseDirectory);
+        Locale currentLocale = Optional.ofNullable(getInstance().locale).orElse(Locale.getDefault());
+        try (URLClassLoader url = new URLClassLoader(new URL[]{loadFrom.toURI().toURL()})) {
+            ResourceBundle resourceBundle = ResourceBundle.getBundle("locale", currentLocale, url);
             return resourceBundle.keySet()
                     .stream()
                     .collect(Collectors.toMap(

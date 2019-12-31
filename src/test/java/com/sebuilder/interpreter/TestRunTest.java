@@ -51,6 +51,7 @@ public class TestRunTest {
         public void setUpStub() {
             Context.getInstance().setBrowser("Chrome");
             Context.getInstance().setDataSourceDirectory("datasource");
+            Context.getInstance().setDataSourceEncoding("UTF-8");
             Context.getInstance().setAspect(new Aspect());
             Mockito.doReturn(new File(".", "result")).when(this.listener).getResultDir();
             Mockito.doReturn(new File(".", "screenshot")).when(this.listener).getScreenShotOutputDirectory();

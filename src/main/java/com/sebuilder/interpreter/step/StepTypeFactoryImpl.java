@@ -31,16 +31,6 @@ public class StepTypeFactoryImpl implements com.sebuilder.interpreter.StepTypeFa
     public static final String DEFAULT_PACKAGE = "com.sebuilder.interpreter.step";
 
     /**
-     * Primary package used to load stepType instances
-     */
-    private String primaryPackage = DEFAULT_PACKAGE;
-    /**
-     * Secondary package used to load stepType instances when first package is
-     * not found
-     */
-    private String secondaryPackage = DEFAULT_PACKAGE;
-
-    /**
      * Mapping of the names of step types to their implementing classes, lazily
      * loaded through reflection. StepType classes must be either in the first
      * package either in the second one and their name must be the capitalized
@@ -53,16 +43,6 @@ public class StepTypeFactoryImpl implements com.sebuilder.interpreter.StepTypeFa
      * package.
      */
     private final HashMap<String, StepType> typesMap = new HashMap<String, StepType>();
-
-    @Override
-    public void setPrimaryPackage(String primaryPackage) {
-        this.primaryPackage = primaryPackage;
-    }
-
-    @Override
-    public void setSecondaryPackage(String secondaryPackage) {
-        this.secondaryPackage = secondaryPackage;
-    }
 
     /**
      * @param name
@@ -157,15 +137,9 @@ public class StepTypeFactoryImpl implements com.sebuilder.interpreter.StepTypeFa
     private Class<?> newInstance(String className, String errorMessage, String subPackage) {
         Class<?> c = null;
         try {
-            c = Class.forName(this.primaryPackage + subPackage + className);
+            c = Class.forName(DEFAULT_PACKAGE + subPackage + className);
         } catch (ClassNotFoundException cnfe) {
-            try {
-                if (this.secondaryPackage != null) {
-                    c = Class.forName(this.secondaryPackage + subPackage + className);
-                }
-            } catch (ClassNotFoundException cnfe2) {
-                throw new RuntimeException(errorMessage, cnfe);
-            }
+            throw new RuntimeException(errorMessage, cnfe);
         }
         return c;
     }

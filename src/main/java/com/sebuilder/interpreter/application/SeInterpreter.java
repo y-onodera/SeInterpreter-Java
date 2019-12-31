@@ -23,6 +23,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * An interpreter for Builder JSON tests. Given one or more JSON script files, it plays them back
@@ -104,9 +105,7 @@ public class SeInterpreter extends CommandLineRunner implements TestRunner {
     }
 
     @Override
-    protected void configureOption(String s) {
-        this.paths.add(s);
+    protected void setScripts(Set<String> scripts) {
+        this.paths.addAll(scripts);
     }
-
-
 }

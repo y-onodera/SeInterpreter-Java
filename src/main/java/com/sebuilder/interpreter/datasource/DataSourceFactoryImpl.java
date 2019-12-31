@@ -34,21 +34,6 @@ public class DataSourceFactoryImpl implements com.sebuilder.interpreter.DataSour
      */
     private final HashMap<String, DataSource> sourcesMap = new HashMap<String, DataSource>();
 
-    private String customDataSourcePackage = null;
-
-    @Override
-    public String getCustomDataSourcePackage() {
-        return customDataSourcePackage;
-    }
-
-    /**
-     * Package from which the factory preferentially loads in data sources.
-     */
-    @Override
-    public void setCustomDataSourcePackage(String customDataSourcePackage) {
-        this.customDataSourcePackage = customDataSourcePackage;
-    }
-
     @Override
     public DataSource getDataSource(String sourceName) {
         this.loadDataSource(sourceName);
@@ -59,19 +44,10 @@ public class DataSourceFactoryImpl implements com.sebuilder.interpreter.DataSour
         if (!sourcesMap.containsKey(sourceName)) {
             String className = sourceName.substring(0, 1).toUpperCase() + sourceName.substring(1).toLowerCase();
             Class c = null;
-            if (customDataSourcePackage != null) {
-                try {
-                    c = Class.forName(customDataSourcePackage + "." + className);
-                } catch (ClassNotFoundException cnfe) {
-                    // Ignore this exception.
-                }
-            }
-            if (c == null) {
-                try {
-                    c = Class.forName(DEFAULT_DATA_SOURCE_PACKAGE + "." + className);
-                } catch (ClassNotFoundException cnfe) {
-                    throw new RuntimeException("No implementation class for data source \"" + sourceName + "\" could be found.", cnfe);
-                }
+            try {
+                c = Class.forName(DEFAULT_DATA_SOURCE_PACKAGE + "." + className);
+            } catch (ClassNotFoundException cnfe) {
+                throw new RuntimeException("No implementation class for data source \"" + sourceName + "\" could be found.", cnfe);
             }
             if (c != null) {
                 try {
