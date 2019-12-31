@@ -5,7 +5,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class TestDataInput {
+public class InputDataTest {
 
     private InputData target = new InputData()
             .add("aTrue", "true")
