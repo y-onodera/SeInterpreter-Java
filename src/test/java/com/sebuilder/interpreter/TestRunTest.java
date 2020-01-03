@@ -1379,7 +1379,7 @@ public class TestRunTest {
             Mockito.doNothing().when(this.listener).endTest();
             Mockito.doReturn(true)
                     .when(this.listener)
-                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase2"), Mockito.any(InputData.class));
+                    .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_1_chainCase2"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("chain2: ClickElement key=default");
             Mockito.doReturn(true).when(this.chainStep2).run(Mockito.any());
 
