@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -42,7 +43,7 @@ public class TestCase {
     private final DataSourceLoader dataSourceLoader;
     private final String skip;
     private final DataSourceLoader overrideDataSourceLoader;
-    private final Function<TestCase, TestCase> lazyLoad;
+    private final BiFunction<TestCase, TestRunListener, TestCase> lazyLoad;
     private final boolean nestedChain;
     private final boolean breakNestedChain;
     private final TestCaseChains chains;
@@ -69,7 +70,7 @@ public class TestCase {
         if (this.skipRunning(this.getShareInput())) {
             return true;
         }
-        final TestCase materialized = this.materialized();
+        final TestCase materialized = this.materialized(testRunListener);
         try {
             for (InputData data : materialized.loadData()) {
                 TestRunner.STATUS result = runner.execute(new TestRunBuilder(materialized), data, testRunListener);
@@ -150,7 +151,7 @@ public class TestCase {
         return this.getLazyLoad() != null;
     }
 
-    public Function<TestCase, TestCase> getLazyLoad() {
+    public BiFunction<TestCase, TestRunListener, TestCase> getLazyLoad() {
         return lazyLoad;
     }
 
@@ -271,12 +272,12 @@ public class TestCase {
         return this.map(it -> it.clearStep().addSteps(converter.apply(this.steps)));
     }
 
-    protected TestCase materialized() {
-        return this.changeWhenConditionMatch(TestCase::isLazyLoad, TestCase::lazyLoad);
+    protected TestCase materialized(TestRunListener testRunListener) {
+        return this.changeWhenConditionMatch(TestCase::isLazyLoad, it -> it.lazyLoad(testRunListener));
     }
 
-    protected TestCase lazyLoad() {
-        return this.getLazyLoad().apply(this);
+    protected TestCase lazyLoad(TestRunListener testRunListener) {
+        return this.getLazyLoad().apply(this, testRunListener);
     }
 
     @Override

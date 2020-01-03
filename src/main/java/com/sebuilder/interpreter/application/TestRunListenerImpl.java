@@ -1,9 +1,6 @@
 package com.sebuilder.interpreter.application;
 
-import com.sebuilder.interpreter.Context;
-import com.sebuilder.interpreter.TestCase;
-import com.sebuilder.interpreter.InputData;
-import com.sebuilder.interpreter.TestRunListener;
+import com.sebuilder.interpreter.*;
 import org.apache.logging.log4j.Logger;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.Delete;
@@ -315,7 +312,7 @@ public class TestRunListenerImpl implements TestRunListener {
 
     @Override
     public void reportError(String testCaseName, Throwable toBeReport) {
-        this.openTestSuite(null, testCaseName, Context.settings());
+        this.openTestSuite(new TestCaseBuilder().build(), testCaseName, Context.settings());
         this.startTest(testCaseName);
         this.addError(toBeReport);
         this.closeTestSuite();

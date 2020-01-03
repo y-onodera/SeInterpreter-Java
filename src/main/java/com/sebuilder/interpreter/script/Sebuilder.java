@@ -185,11 +185,11 @@ public class Sebuilder implements ScriptParser {
     protected TestCase loadScript(JSONObject script, File suiteFile, TestRunListener testRunListener) throws JSONException, IOException {
         if (script.has("lazyLoad")) {
             String beforeReplace = script.getString("lazyLoad");
-            return this.overrideSetting(script, TestCaseBuilder.lazyLoad(beforeReplace, (TestCase runtimeBefore) -> {
+            return this.overrideSetting(script, TestCaseBuilder.lazyLoad(beforeReplace, (runtimeBefore, listener) -> {
                 String fileName = runtimeBefore.getShareInput().bind(beforeReplace);
                 JSONObject source = new JSONObject();
                 try {
-                    TestCase lazyLoad = loadScript(source.put("path", fileName), suiteFile, testRunListener);
+                    TestCase lazyLoad = loadScript(source.put("path", fileName), suiteFile, listener);
                     return runtimeBefore.map(it -> it
                             .associateWith(lazyLoad.getScriptFile().toFile())
                             .setName(lazyLoad.name())

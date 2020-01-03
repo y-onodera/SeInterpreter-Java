@@ -5,6 +5,7 @@ import com.google.common.base.Predicates;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -17,7 +18,7 @@ public class TestCaseBuilder {
     private String skip;
     private DataSource overrideDataSource;
     private Map<String, String> overrideDataSourceConfig;
-    private Function<TestCase, TestCase> lazyLoad;
+    private BiFunction<TestCase, TestRunListener, TestCase> lazyLoad;
     private boolean nestedChain;
     private boolean breakNestedChain;
     private TestCaseChains chains;
@@ -67,7 +68,7 @@ public class TestCaseBuilder {
                 .isShareState(true);
     }
 
-    public static TestCase lazyLoad(String beforeReplace, Function<TestCase, TestCase> lazyLoad) {
+    public static TestCase lazyLoad(String beforeReplace, BiFunction<TestCase, TestRunListener, TestCase> lazyLoad) {
         return new TestCaseBuilder()
                 .setName(beforeReplace)
                 .setLazyLoad(lazyLoad)
@@ -142,7 +143,7 @@ public class TestCaseBuilder {
         return this;
     }
 
-    public TestCaseBuilder setLazyLoad(Function<TestCase, TestCase> lazyLoad) {
+    public TestCaseBuilder setLazyLoad(BiFunction<TestCase, TestRunListener, TestCase> lazyLoad) {
         this.lazyLoad = lazyLoad;
         return this;
     }
@@ -239,7 +240,7 @@ public class TestCaseBuilder {
         return new DataSourceLoader(this.overrideDataSource, this.overrideDataSourceConfig, this.scriptFile.relativePath());
     }
 
-    public Function<TestCase, TestCase> getLazyLoad() {
+    public BiFunction<TestCase, TestRunListener, TestCase> getLazyLoad() {
         return this.lazyLoad;
     }
 
