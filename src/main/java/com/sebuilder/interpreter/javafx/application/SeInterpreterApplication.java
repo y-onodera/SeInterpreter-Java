@@ -32,6 +32,8 @@ public class SeInterpreterApplication extends Application {
 
     private SeInterpreterRunner runner;
 
+    private TestRunListener errorReportListener;
+
     private ObjectProperty<Suite> suite = new SimpleObjectProperty<>();
 
     private ObjectProperty<TestCase> displayTestCase = new SimpleObjectProperty<>();
@@ -52,9 +54,12 @@ public class SeInterpreterApplication extends Application {
         Injector.setModelOrService(SeInterpreterApplication.class, this);
         final Parameters parameters = getParameters();
         this.runner = new SeInterpreterRunner(parameters.getRaw());
+        this.errorReportListener = new TestRunListenerImpl(this.runner.getLog());
         final List<String> unnamed = parameters.getUnnamed();
         if (unnamed.size() > 0) {
-            this.resetSuite(getScriptParser().load(new File(unnamed.get(0))).toSuite());
+            this.resetSuite(getScriptParser()
+                    .load(new File(unnamed.get(0)), this.errorReportListener)
+                    .toSuite());
         } else {
             this.reset();
         }
@@ -132,10 +137,13 @@ public class SeInterpreterApplication extends Application {
         this.displayTestCase.setValue(this.getSuite().get(newValue));
     }
 
-    public void replaceScriptJson(String text) throws IOException {
-        TestCase replaced = Context.getScriptParser().load(text, this.getDisplayTestCase().getScriptFile().toFile())
-                .map(it -> it.setName(this.getDisplayTestCase().name()));
-        replaceDisplayCase(replaced);
+    public void replaceScriptJson(String text) {
+        this.executeAndLoggingCaseWhenThrowException(() -> {
+            TestCase replaced = Context.getScriptParser()
+                    .load(text, this.getDisplayTestCase().getScriptFile().toFile(), this.errorReportListener)
+                    .map(it -> it.setName(this.getDisplayTestCase().name()));
+            replaceDisplayCase(replaced);
+        });
     }
 
     public void insertScript() {
@@ -160,11 +168,15 @@ public class SeInterpreterApplication extends Application {
     }
 
     public void scriptReLoad(File file) {
-        this.executeAndLoggingCaseWhenThrowException(() -> this.resetSuite(getScriptParser().load(file).toSuite()));
+        this.executeAndLoggingCaseWhenThrowException(() -> {
+            this.resetSuite(getScriptParser().load(file, this.errorReportListener).toSuite());
+        });
     }
 
     public void importScript(File file) {
-        this.executeAndLoggingCaseWhenThrowException(() -> addScript(getScriptParser().load(file)));
+        this.executeAndLoggingCaseWhenThrowException(() -> {
+            addScript(getScriptParser().load(file, this.errorReportListener));
+        });
     }
 
     public void saveSuite(File file) {
@@ -263,21 +275,27 @@ public class SeInterpreterApplication extends Application {
     }
 
     public void runScript(ReplayOption replayOption) {
-        this.executeTask(this.getDisplayTestCase()
-                        .map(builder -> builder.setShareInput(this.currentDisplayShareInput(replayOption)).map(replayOption::apply))
-                , this.listener());
+        this.executeAndLoggingCaseWhenThrowException(() -> {
+            InputData inputData = this.currentDisplayShareInput(replayOption);
+            this.executeTask(this.getDisplayTestCase()
+                            .map(builder -> builder.setShareInput(inputData).map(replayOption::apply))
+                    , this.listener());
+        });
     }
 
     public void runStep(ReplayOption replayOption, Predicate<Number> filter, Function<Integer, Integer> function) {
-        this.executeTask(this.getDisplayTestCase()
-                        .removeStep(filter)
-                        .map(builder -> builder.setShareInput(this.currentDisplayShareInput(replayOption)).map(replayOption::apply))
-                , log -> new GUITestRunListener(log, this) {
-                    @Override
-                    public int getStepNo() {
-                        return function.apply(super.getStepNo());
-                    }
-                });
+        this.executeAndLoggingCaseWhenThrowException(() -> {
+            InputData inputData = this.currentDisplayShareInput(replayOption);
+            this.executeTask(this.getDisplayTestCase()
+                            .removeStep(filter)
+                            .map(builder -> builder.setShareInput(inputData).map(replayOption::apply))
+                    , log -> new GUITestRunListener(log, this) {
+                        @Override
+                        public int getStepNo() {
+                            return function.apply(super.getStepNo());
+                        }
+                    });
+        });
     }
 
     public void stopReplay() {
@@ -336,7 +354,7 @@ public class SeInterpreterApplication extends Application {
         return it;
     }
 
-    protected InputData currentDisplayShareInput(ReplayOption replayOption) {
+    protected InputData currentDisplayShareInput(ReplayOption replayOption) throws IOException {
         return replayOption.reduceShareInput(this.replayShareInput()
                 , this.getDisplayScriptDataSources(it -> it.include(getDisplayTestCase()) && !it.equals(getDisplayTestCase())));
     }

@@ -8,6 +8,7 @@ import com.sebuilder.interpreter.TestCaseBuilder;
 import com.sebuilder.interpreter.datasource.Manual;
 import javafx.util.Pair;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -19,7 +20,7 @@ public class ReplayOption {
         this.dataLoadSettings = dataLoadSettings;
     }
 
-    public InputData reduceShareInput(InputData defaultValue, DataSourceLoader[] shareDataSources) {
+    public InputData reduceShareInput(InputData defaultValue, DataSourceLoader[] shareDataSources) throws IOException {
         InputData result = defaultValue;
         for (DataSourceLoader loader : shareDataSources) {
             DataSourceLoader withShareInput = loader.shareInput(result);
@@ -30,7 +31,7 @@ public class ReplayOption {
         return result;
     }
 
-    public Iterable<DataSourceLoader> filterLoadableSource(InputData replayShareInput, DataSourceLoader[] displayTestCaseDataSources) {
+    public Iterable<DataSourceLoader> filterLoadableSource(InputData replayShareInput, DataSourceLoader[] displayTestCaseDataSources) throws IOException {
         List<DataSourceLoader> result = Lists.newArrayList();
         InputData shareInput = replayShareInput;
         for (DataSourceLoader loader : displayTestCaseDataSources) {
@@ -47,13 +48,19 @@ public class ReplayOption {
         final TestCase targetBuild = target.build();
         final Pair<Integer, InputData> runtimeInfo = this.dataLoadSettings.get(targetBuild.runtimeDataSet().name());
         return target.changeWhenConditionMatch(it -> runtimeInfo != null
-                , it -> it.setOverrideTestDataSet(new Manual(), targetBuild.loadData()
-                        .get(runtimeInfo.getKey() - 1)
-                        .add(runtimeInfo.getValue())
-                        .input()));
+                , it -> {
+                    try {
+                        return it.setOverrideTestDataSet(new Manual(), targetBuild.loadData()
+                                .get(runtimeInfo.getKey() - 1)
+                                .add(runtimeInfo.getValue())
+                                .input());
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
     }
 
-    private InputData merge(InputData shareInput, DataSourceLoader withShareInput) {
+    private InputData merge(InputData shareInput, DataSourceLoader withShareInput) throws IOException {
         Pair<Integer, InputData> setting = this.getSetting(withShareInput.name());
         return shareInput
                 .add(withShareInput.loadData().get(setting.getKey() - 1))

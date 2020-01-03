@@ -19,13 +19,11 @@ package com.sebuilder.interpreter.datasource;
 import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.InputData;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.*;
 
 /**
@@ -36,7 +34,7 @@ import java.util.*;
 public class Json implements FileDataSource {
 
     @Override
-    public List<InputData> getData(Map<String, String> config, File relativeTo, InputData vars) {
+    public List<InputData> getData(Map<String, String> config, File relativeTo, InputData vars) throws IOException {
         ArrayList<InputData> data = new ArrayList<>();
         File f = this.sourceFile(config, relativeTo, vars);
         String charsetName = Context.getDataSourceEncoding();
@@ -59,8 +57,8 @@ public class Json implements FileDataSource {
                 data.remove(lastRowNumber);
                 data.add(lastRow);
             }
-        } catch (Exception e) {
-            throw new RuntimeException("Unable to get data.", e);
+        } catch (JSONException e) {
+            throw new IOException("Unable to get data.", e);
         }
         return data;
     }

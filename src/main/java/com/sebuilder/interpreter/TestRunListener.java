@@ -53,4 +53,6 @@ public interface TestRunListener {
     void closeTestSuite();
 
     void aggregateResult();
+
+    void reportError(String name, Throwable e);
 }

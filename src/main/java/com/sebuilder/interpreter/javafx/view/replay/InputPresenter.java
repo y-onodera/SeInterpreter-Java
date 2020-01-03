@@ -20,6 +20,7 @@ import javafx.util.Pair;
 import javafx.util.converter.IntegerStringConverter;
 
 import javax.inject.Inject;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -112,9 +113,11 @@ public class InputPresenter {
 
     private void refreshTable() {
         this.inputResourceTableView.getItems().setAll(new ArrayList<>());
-        for (DataSourceLoader loadable : this.createReplayOption().filterLoadableSource(this.application.replayShareInput(), this.application.getDisplayTestCaseDataSources())) {
-            this.inputResourceTableView.getItems().add(new InputResource(loadable));
-        }
+        this.application.executeAndLoggingCaseWhenThrowException(() -> {
+            for (DataSourceLoader loadable : this.createReplayOption().filterLoadableSource(this.application.replayShareInput(), this.application.getDisplayTestCaseDataSources())) {
+                this.inputResourceTableView.getItems().add(new InputResource(loadable));
+            }
+        });
         this.inputResourceTableView.refresh();
     }
 
@@ -129,7 +132,7 @@ public class InputPresenter {
         private IntegerProperty row;
         private IntegerProperty rows;
 
-        public InputResource(DataSourceLoader loader) {
+        public InputResource(DataSourceLoader loader) throws IOException {
             this.loader = loader;
             List<InputData> data = this.loader.loadData();
             this.resourceName = new SimpleStringProperty(this.loader.name());

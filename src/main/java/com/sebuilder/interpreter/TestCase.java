@@ -20,6 +20,7 @@ import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -69,11 +70,16 @@ public class TestCase {
             return true;
         }
         final TestCase materialized = this.materialized();
-        for (InputData data : materialized.loadData()) {
-            TestRunner.STATUS result = runner.execute(new TestRunBuilder(materialized), data, testRunListener);
-            if (result == TestRunner.STATUS.STOPPED) {
-                return false;
+        try {
+            for (InputData data : materialized.loadData()) {
+                TestRunner.STATUS result = runner.execute(new TestRunBuilder(materialized), data, testRunListener);
+                if (result == TestRunner.STATUS.STOPPED) {
+                    return false;
+                }
             }
+        } catch (IOException e) {
+            testRunListener.reportError(materialized.name(), e);
+            throw new AssertionError(e);
         }
         return true;
     }
@@ -86,7 +92,7 @@ public class TestCase {
         return this.flattenTestCases().anyMatch(it -> it.equals(target));
     }
 
-    public List<InputData> loadData() {
+    public List<InputData> loadData() throws IOException {
         return this.runtimeDataSet().loadData();
     }
 

@@ -2,10 +2,7 @@ package com.sebuilder.interpreter.javafx.view.suite;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.sebuilder.interpreter.Context;
-import com.sebuilder.interpreter.Suite;
-import com.sebuilder.interpreter.TestCase;
-import com.sebuilder.interpreter.TestCaseChains;
+import com.sebuilder.interpreter.*;
 import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
 import com.sebuilder.interpreter.javafx.view.data.DataSetView;
 import javafx.event.ActionEvent;
@@ -18,6 +15,7 @@ import javafx.stage.Stage;
 
 import javax.inject.Inject;
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -44,9 +42,13 @@ public class SuitePresenter {
             } else {
                 this.findItem(newValue).ifPresent(it -> this.treeViewScriptName.getSelectionModel().select(it));
             }
-            if (observed.getValue().runtimeDataSet().isLoadable() && observed.getValue().loadData().size() > 0) {
-                openDataSource.setDisable(false);
-            } else {
+            try {
+                if (observed.getValue().runtimeDataSet().isLoadable() && observed.getValue().loadData().size() > 0) {
+                    openDataSource.setDisable(false);
+                } else {
+                    openDataSource.setDisable(true);
+                }
+            } catch (IOException e) {
                 openDataSource.setDisable(true);
             }
         });

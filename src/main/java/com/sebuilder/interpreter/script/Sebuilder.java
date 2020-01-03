@@ -28,6 +28,7 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -61,46 +62,44 @@ public class Sebuilder implements ScriptParser {
     public TestCase load(String jsonString) {
         try {
             return this.parseScript(new JSONObject(new JSONTokener(jsonString)), null);
-        } catch (IOException | JSONException e) {
+        } catch (JSONException e) {
             throw new AssertionError("error parse:" + jsonString, e);
         }
     }
 
     /**
-     * @param f A File pointing to a JSON file describing a script or suite.
+     * @param f               A File pointing to a JSON file describing a script or suite.
+     * @param testRunListener listener to report error
      * @return A list of script, ready to finish.
-     * @throws IOException If anything goes wrong with interpreting the JSON, or
-     *                     with the Reader.
      */
     @Override
-    public TestCase load(File f) throws IOException {
-        try (BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(f), "UTF-8"))) {
-            try {
-                return this.load(new JSONObject(new JSONTokener(r)), f);
-            } catch (JSONException e) {
-                throw new IOException("error load:" + f.getAbsolutePath(), e);
-            }
+    public TestCase load(File f, TestRunListener testRunListener) throws IOException {
+        try (BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(f), StandardCharsets.UTF_8))) {
+            return this.load(new JSONObject(new JSONTokener(r)), f, testRunListener);
+        } catch (JSONException | IOException e) {
+            testRunListener.reportError("loadScript." + f.getName(), e);
+            throw new IOException("error load:" + f.getAbsolutePath(), e);
         }
     }
 
     /**
-     * @param json A JSON string describing a script or suite.
+     * @param json            A JSON string describing a script or suite.
+     * @param testRunListener listener to report error
      * @return A list of script, ready to finish.
-     * @throws IOException If anything goes wrong with interpreting the JSON, or
-     *                     with the Reader.
      */
     @Override
-    public TestCase load(String json, File file) throws IOException {
+    public TestCase load(String json, File file, TestRunListener testRunListener) throws IOException {
         try {
-            return this.load(new JSONObject(new JSONTokener(json)), file);
+            return this.load(new JSONObject(new JSONTokener(json)), file, testRunListener);
         } catch (JSONException e) {
+            testRunListener.reportError("loadScript.jsonText", e);
             throw new IOException("error parse:" + json, e);
         }
     }
 
     @Override
     public Aspect loadAspect(File f) throws IOException {
-        try (BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(f), "UTF-8"))) {
+        try (BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(f), StandardCharsets.UTF_8))) {
             try {
                 return this.getAspect(new JSONObject(new JSONTokener(r)));
             } catch (JSONException e) {
@@ -110,49 +109,43 @@ public class Sebuilder implements ScriptParser {
     }
 
     /**
-     * @param o          A JSONObject describing a script or a suite.
-     * @param sourceFile Optionally. the file the JSON was loaded from.
+     * @param o               A JSONObject describing a script or a suite.
+     * @param sourceFile      Optionally. the file the JSON was loaded from.
+     * @param testRunListener listener to report error
      * @return A script, ready to finish.
-     * @throws IOException If anything goes wrong with interpreting the JSON.
+     * @throws JSONException If anything goes wrong with interpreting the JSON.
      */
-    protected TestCase load(JSONObject o, File sourceFile) throws IOException {
+    protected TestCase load(JSONObject o, File sourceFile, TestRunListener testRunListener) throws JSONException, IOException {
         if (o.optString("type", "script").equals("suite")) {
-            return this.parseSuite(o, sourceFile);
+            return this.parseSuite(o, sourceFile, testRunListener);
         }
         return this.parseScript(o, sourceFile);
     }
 
     /**
-     * @param o         A JSONObject describing a script or a suite.
-     * @param suiteFile Optionally. the file the JSON was loaded from.
+     * @param o               A JSONObject describing a script or a suite.
+     * @param suiteFile       Optionally. the file the JSON was loaded from.
+     * @param testRunListener listener to report error
      * @return A script, ready to finish.
-     * @throws IOException If anything goes wrong with interpreting the JSON.
+     * @throws JSONException If anything goes wrong with interpreting the JSON.
      */
-    protected TestCase parseSuite(JSONObject o, File suiteFile) throws IOException {
-        try {
-            TestCaseBuilder builder = TestCaseBuilder.suite(suiteFile)
-                    .isShareState(o.optBoolean("shareState", true))
-                    .setDataSource(this.getDataSource(o), this.getDataSourceConfig(o));
-            this.loadScripts(o, builder);
-            return builder.setAspect(this.getAspect(o))
-                    .build();
-        } catch (JSONException e) {
-            throw new IOException("Could not load suite.", e);
-        }
+    protected TestCase parseSuite(JSONObject o, File suiteFile, TestRunListener testRunListener) throws JSONException, IOException {
+        TestCaseBuilder builder = TestCaseBuilder.suite(suiteFile)
+                .isShareState(o.optBoolean("shareState", true))
+                .setDataSource(this.getDataSource(o), this.getDataSourceConfig(o));
+        this.loadScripts(o, builder, testRunListener);
+        return builder.setAspect(this.getAspect(o))
+                .build();
     }
 
     /**
      * @param o A JSONObject describing a script or a suite.
      * @param f Optionally. the file the JSON was loaded from.
      * @return A script, ready to finish.
-     * @throws IOException If anything goes wrong with interpreting the JSON.
+     * @throws JSONException If anything goes wrong with interpreting the JSON.
      */
-    protected TestCase parseScript(JSONObject o, File f) throws IOException {
-        try {
-            return this.create(o, f);
-        } catch (JSONException e) {
-            throw new IOException("Could not load script.", e);
-        }
+    protected TestCase parseScript(JSONObject o, File f) throws JSONException {
+        return this.create(o, f);
     }
 
     /**
@@ -167,36 +160,36 @@ public class Sebuilder implements ScriptParser {
                 .build();
     }
 
-    protected void loadScripts(JSONObject o, TestCaseBuilder builder) throws IOException, JSONException {
+    protected void loadScripts(JSONObject o, TestCaseBuilder builder, TestRunListener testRunListener) throws JSONException, IOException {
         JSONArray scriptLocations = o.getJSONArray("scripts");
         for (int i = 0; i < scriptLocations.length(); i++) {
             JSONObject script = scriptLocations.getJSONObject(i);
             if (script.has("paths")) {
                 JSONArray scriptArrays = script.getJSONArray("paths");
-                this.loadScriptChain(scriptArrays, builder);
+                this.loadScriptChain(scriptArrays, builder, testRunListener);
             } else if (script.has("chain")) {
                 JSONArray scriptArrays = script.getJSONArray("chain");
-                this.loadScriptChain(scriptArrays, builder);
+                this.loadScriptChain(scriptArrays, builder, testRunListener);
             } else {
-                builder.addChain(this.loadScript(script, new File(builder.getScriptFile().path())));
+                builder.addChain(this.loadScript(script, new File(builder.getScriptFile().path()), testRunListener));
             }
         }
     }
 
     /**
-     * @param script A JSONObject describing a script or a suite where load from.
+     * @param script          A JSONObject describing a script or a suite where load from.
+     * @param testRunListener listener to report error
      * @return loaded from file
      * @throws JSONException If anything goes wrong with interpreting the JSON.
-     * @throws IOException   If script file not found.
      */
-    protected TestCase loadScript(JSONObject script, File suiteFile) throws JSONException, IOException {
+    protected TestCase loadScript(JSONObject script, File suiteFile, TestRunListener testRunListener) throws JSONException, IOException {
         if (script.has("lazyLoad")) {
             String beforeReplace = script.getString("lazyLoad");
             return this.overrideSetting(script, TestCaseBuilder.lazyLoad(beforeReplace, (TestCase runtimeBefore) -> {
                 String fileName = runtimeBefore.getShareInput().bind(beforeReplace);
                 JSONObject source = new JSONObject();
                 try {
-                    TestCase lazyLoad = loadScript(source.put("path", fileName), suiteFile);
+                    TestCase lazyLoad = loadScript(source.put("path", fileName), suiteFile, testRunListener);
                     return runtimeBefore.map(it -> it
                             .associateWith(lazyLoad.getScriptFile().toFile())
                             .setName(lazyLoad.name())
@@ -212,25 +205,22 @@ public class Sebuilder implements ScriptParser {
         String path = Context.bindEnvironmentProperties(script.getString("path"));
         if (script.has("where") && Strings.isNullOrEmpty(script.getString("where"))) {
             File wherePath = new File(Context.bindEnvironmentProperties(script.getString("where")), path);
-            return this.loadScriptIfExists(wherePath, script);
+            return this.loadScriptIfExists(wherePath, script, testRunListener);
         }
         File f = new File(path);
         if (!f.exists()) {
             f = new File(suiteFile.getAbsoluteFile().getParentFile(), path);
         }
-        return this.loadScriptIfExists(f, script);
+        return this.loadScriptIfExists(f, script, testRunListener);
     }
 
-    protected void loadScriptChain(JSONArray scriptArrays, TestCaseBuilder builder) throws JSONException, IOException {
-        ChainLoader chainLoader = new ChainLoader(this, builder.getScriptFile(), scriptArrays);
+    protected void loadScriptChain(JSONArray scriptArrays, TestCaseBuilder builder, TestRunListener testRunListener) throws JSONException, IOException {
+        ChainLoader chainLoader = new ChainLoader(this, builder.getScriptFile(), scriptArrays, testRunListener);
         builder.addChain(chainLoader.load());
     }
 
-    protected TestCase loadScriptIfExists(File wherePath, JSONObject script) throws IOException, JSONException {
-        if (wherePath.exists()) {
-            return this.overrideSetting(script, this.load(wherePath));
-        }
-        throw new IOException("TestCase file " + wherePath.toString() + " not found.");
+    protected TestCase loadScriptIfExists(File wherePath, JSONObject script, TestRunListener testRunListener) throws JSONException, IOException {
+        return this.overrideSetting(script, this.load(wherePath, testRunListener));
     }
 
     protected TestCase overrideSetting(JSONObject script, TestCase resultTestCase) throws JSONException {
@@ -289,8 +279,8 @@ public class Sebuilder implements ScriptParser {
         HashMap<String, String> config = new HashMap<>();
         if (data.has("configs") && data.getJSONObject("configs").has(sourceName)) {
             JSONObject cfg = data.getJSONObject("configs").getJSONObject(sourceName);
-            for (Iterator<String> it = cfg.keys(); it.hasNext(); ) {
-                String key = it.next();
+            for (Iterator<String> itr = cfg.keys(); itr.hasNext(); ) {
+                String key = itr.next();
                 config.put(key, cfg.getString(key));
             }
         }

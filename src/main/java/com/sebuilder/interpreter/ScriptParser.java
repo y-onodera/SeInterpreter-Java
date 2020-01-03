@@ -13,11 +13,11 @@ public interface ScriptParser {
 
     String toString(TestCase target);
 
-    TestCase load(File f) throws IOException;
+    TestCase load(File f, TestRunListener testRunListener) throws IOException;
 
     TestCase load(String jsonString);
 
-    TestCase load(String jsonString, File file) throws IOException;
+    TestCase load(String jsonString, File file, TestRunListener testRunListener) throws IOException;
 
     Aspect loadAspect(File f) throws IOException;
 }

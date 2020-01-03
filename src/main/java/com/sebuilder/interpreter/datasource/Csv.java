@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.google.common.io.Files.*;
+
 /**
  * CSV-based data source.
  *
@@ -39,13 +41,11 @@ import java.util.stream.Collectors;
 public class Csv implements FileDataSource {
 
     @Override
-    public List<InputData> getData(Map<String, String> config, File relativeTo, InputData vars) {
+    public List<InputData> getData(Map<String, String> config, File relativeTo, InputData vars) throws IOException {
         ArrayList<InputData> data = new ArrayList<>();
         File f = this.sourceFile(config, relativeTo, vars);
         String charsetName = Context.getDataSourceEncoding();
-        BufferedReader r = null;
-        try {
-            r = new BufferedReader(new InputStreamReader(new FileInputStream(f), charsetName));
+        try (BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(f), charsetName))) {
             CSVReader csvR = new CSVReader(r);
             String[] keys = csvR.readNext();
             if (keys != null) {
@@ -53,7 +53,7 @@ public class Csv implements FileDataSource {
                 int rowNumber = 1;
                 while ((line = csvR.readNext()) != null) {
                     rowNumber++;
-                    LinkedHashMap<String, String> row = new LinkedHashMap<String, String>();
+                    LinkedHashMap<String, String> row = new LinkedHashMap<>();
                     if (line.length < keys.length) {
                         throw new IOException("Not enough cells in row " + rowNumber + ".");
                     }
@@ -70,13 +70,6 @@ public class Csv implements FileDataSource {
                     data.add(lastRow);
                 }
             }
-        } catch (Exception e) {
-            throw new RuntimeException("Unable to get data.", e);
-        } finally {
-            try {
-                r.close();
-            } catch (Exception e) {
-            }
         }
         return data;
     }
@@ -85,11 +78,11 @@ public class Csv implements FileDataSource {
     public DataSourceWriter writer(Map<String, String> dataSourceConfig, File relativePath, InputData shareInput) {
         return data -> {
             File target = sourceFile(dataSourceConfig, relativePath, shareInput);
-            try (BufferedWriter writer = Files.newWriter(target, Charset.forName(Context.getDataSourceEncoding()))) {
+            try (BufferedWriter writer = newWriter(target, Charset.forName(Context.getDataSourceEncoding()))) {
                 CSVWriter csvwriter = new CSVWriter(writer);
-                String[] header = data.get(0).entrySet().stream().map(Map.Entry::getKey).toArray(size -> new String[size]);
+                String[] header = data.get(0).entrySet().stream().map(Map.Entry::getKey).toArray(String[]::new);
                 List<String[]> rows = data.stream()
-                        .map(it -> it.entrySet().stream().map(Map.Entry::getValue).toArray(size -> new String[size]))
+                        .map(it -> it.entrySet().stream().map(Map.Entry::getValue).toArray(String[]::new))
                         .collect(Collectors.toCollection(ArrayList::new));
                 rows.add(0, header);
                 csvwriter.writeAll(rows);

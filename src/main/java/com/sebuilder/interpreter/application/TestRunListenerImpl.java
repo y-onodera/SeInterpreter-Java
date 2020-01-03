@@ -25,6 +25,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class TestRunListenerImpl implements TestRunListener {
@@ -165,8 +166,7 @@ public class TestRunListenerImpl implements TestRunListener {
 
     @Override
     public boolean openTestSuite(TestCase testCase, String testRunName, InputData aProperty) {
-        String baseName = testRunName;
-        String testName = this.startTime + "." + baseName.replace("_", ".");
+        String testName = this.startTime + "." + testRunName.replace("_", ".");
         this.log.info("open suite:" + testName);
         this.suite = new JUnitTest();
         this.suite.setName(testName);
@@ -176,7 +176,7 @@ public class TestRunListenerImpl implements TestRunListener {
                         .stream()
                         .collect(Collectors.toMap(
                                 entry -> entry.getKey().replace("'", "\\'")
-                                , entry -> entry.getValue())
+                                , Map.Entry::getValue)
                         )));
         this.test = null;
         this.runTest = 0;
@@ -311,6 +311,14 @@ public class TestRunListenerImpl implements TestRunListener {
         delete.setProject(this.project);
         delete.setFile(new File(this.resultDir, "TEST-SeBuilder-result.xml"));
         delete.execute();
+    }
+
+    @Override
+    public void reportError(String testCaseName, Throwable toBeReport) {
+        this.openTestSuite(null, testCaseName, Context.settings());
+        this.startTest(testCaseName);
+        this.addError(toBeReport);
+        this.closeTestSuite();
     }
 
     static class ResultReportableTestCase extends junit.framework.TestCase {

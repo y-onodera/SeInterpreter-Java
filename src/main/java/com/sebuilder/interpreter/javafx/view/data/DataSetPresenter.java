@@ -42,33 +42,35 @@ public class DataSetPresenter {
 
     public void showDataSet(DataSourceLoader resource) {
         this.resource = resource;
-        List<InputData> inputData = this.resource.loadData();
-        int row = Math.max(inputData.size(), DEFAULT_ROWS);
-        int column = inputData.size() < 1 || inputData.get(0).input().size() < DEFAULT_COLUMNS ? DEFAULT_COLUMNS : inputData.get(0).input().size();
-        GridBase grid = new GridBase(row, column);
-        ObservableList<ObservableList<SpreadsheetCell>> rows = FXCollections.observableArrayList();
-        inputData.forEach(it -> {
-            if (Integer.parseInt(it.rowNumber()) == 1) {
-                addRow(rows, 0, column, it, Map.Entry::getKey, cell -> {
-                    cell.getStyleClass().add("header");
-                    return cell;
-                });
+        this.application.executeAndLoggingCaseWhenThrowException(() -> {
+            List<InputData> inputData = this.resource.loadData();
+            int row = Math.max(inputData.size(), DEFAULT_ROWS);
+            int column = inputData.size() < 1 || inputData.get(0).input().size() < DEFAULT_COLUMNS ? DEFAULT_COLUMNS : inputData.get(0).input().size();
+            GridBase grid = new GridBase(row, column);
+            ObservableList<ObservableList<SpreadsheetCell>> rows = FXCollections.observableArrayList();
+            inputData.forEach(it -> {
+                if (Integer.parseInt(it.rowNumber()) == 1) {
+                    addRow(rows, 0, column, it, Map.Entry::getKey, cell -> {
+                        cell.getStyleClass().add("header");
+                        return cell;
+                    });
+                }
+                addRow(rows, Integer.parseInt(it.rowNumber()), column, it, Map.Entry::getValue);
+            });
+            if (rows.size() < DEFAULT_ROWS) {
+                for (int current = rows.size(); current < DEFAULT_ROWS; current++) {
+                    addRow(rows, current, column, new InputData(), Map.Entry::getValue);
+                }
             }
-            addRow(rows, Integer.parseInt(it.rowNumber()), column, it, Map.Entry::getValue);
+            grid.setRows(rows);
+            sheet = new ExcelLikeSpreadSheetView(grid);
+            sheet.getFixedRows().add(0);
+            AnchorPane.setTopAnchor(sheet, 0.0);
+            AnchorPane.setBottomAnchor(sheet, 0.0);
+            AnchorPane.setRightAnchor(sheet, 0.0);
+            AnchorPane.setLeftAnchor(sheet, 0.0);
+            this.gridParentPane.getChildren().add(sheet);
         });
-        if (rows.size() < DEFAULT_ROWS) {
-            for (int current = rows.size(); current < DEFAULT_ROWS; current++) {
-                addRow(rows, current, column, new InputData(), Map.Entry::getValue);
-            }
-        }
-        grid.setRows(rows);
-        sheet = new ExcelLikeSpreadSheetView(grid);
-        sheet.getFixedRows().add(0);
-        AnchorPane.setTopAnchor(sheet, 0.0);
-        AnchorPane.setBottomAnchor(sheet, 0.0);
-        AnchorPane.setRightAnchor(sheet, 0.0);
-        AnchorPane.setLeftAnchor(sheet, 0.0);
-        this.gridParentPane.getChildren().add(sheet);
     }
 
     public void setOnclick(EventHandler<ActionEvent> onclick) {

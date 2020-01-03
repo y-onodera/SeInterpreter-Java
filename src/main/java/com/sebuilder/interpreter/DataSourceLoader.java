@@ -4,6 +4,7 @@ import com.google.common.base.Objects;
 import com.google.common.collect.Maps;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -48,7 +49,7 @@ public class DataSourceLoader {
         return this.relativePath;
     }
 
-    public List<InputData> loadData() {
+    public List<InputData> loadData() throws IOException {
         return this.dataSource.getData(this.dataSourceConfig, this.relativePath, this.shareInput);
     }
 

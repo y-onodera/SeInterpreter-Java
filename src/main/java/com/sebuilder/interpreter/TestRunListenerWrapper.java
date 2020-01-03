@@ -130,4 +130,9 @@ public class TestRunListenerWrapper implements TestRunListener {
     public void aggregateResult() {
         delegate.aggregateResult();
     }
+
+    @Override
+    public void reportError(String name, Throwable e) {
+        delegate.reportError(name, e);
+    }
 }

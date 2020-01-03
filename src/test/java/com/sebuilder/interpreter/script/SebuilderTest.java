@@ -2,6 +2,7 @@ package com.sebuilder.interpreter.script;
 
 import com.google.common.base.Strings;
 import com.sebuilder.interpreter.*;
+import com.sebuilder.interpreter.application.TestRunListenerImpl;
 import com.sebuilder.interpreter.datasource.Csv;
 import com.sebuilder.interpreter.datasource.DataSourceFactoryImpl;
 import com.sebuilder.interpreter.datasource.Manual;
@@ -10,6 +11,9 @@ import com.sebuilder.interpreter.step.Loop;
 import com.sebuilder.interpreter.step.StepTypeFactoryImpl;
 import com.sebuilder.interpreter.step.getter.ElementAttribute;
 import com.sebuilder.interpreter.step.type.ClickElement;
+import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -37,6 +41,7 @@ public class SebuilderTest {
                 .setDataSourceFactory(new DataSourceFactoryImpl());
     }
 
+    static Logger log = LogManager.getLogger(SebuilderTest.class);
     private static String baseDir = SebuilderTest.class.getResource(".").getPath();
     private static Sebuilder target = new Sebuilder();
 
@@ -80,6 +85,7 @@ public class SebuilderTest {
 
     public static abstract class ParseResultTest {
         protected TestCase result;
+        protected TestRunListener testRunListener = new TestRunListenerImpl(log);
 
         @Test
         public void parseResultContents() {
@@ -88,7 +94,7 @@ public class SebuilderTest {
 
         @Test
         public void parseResultReversible() throws IOException {
-            TestCase reverse = target.load(target.toString(this.result), Strings.isNullOrEmpty(this.result.path()) ? null : new File(this.result.path()));
+            TestCase reverse = target.load(target.toString(this.result), Strings.isNullOrEmpty(this.result.path()) ? null : new File(this.result.path()), testRunListener);
             this.getTestCaseAssert().run(reverse);
         }
 
@@ -100,7 +106,7 @@ public class SebuilderTest {
 
         @Before
         public void setUp() throws IOException {
-            this.result = target.load(testFileNoType);
+            this.result = target.load(testFileNoType, testRunListener);
         }
 
         @Override
@@ -121,7 +127,7 @@ public class SebuilderTest {
 
         @Before
         public void setUp() throws IOException {
-            this.result = target.load(testFileScriptWithNoContents);
+            this.result = target.load(testFileScriptWithNoContents, testRunListener);
         }
 
         @Override
@@ -137,7 +143,7 @@ public class SebuilderTest {
 
         @Before
         public void setUp() throws IOException {
-            this.result = target.load(testFileScriptWithDataSource);
+            this.result = target.load(testFileScriptWithDataSource, testRunListener);
         }
 
         @Override
@@ -153,7 +159,7 @@ public class SebuilderTest {
 
         @Before
         public void setUp() throws IOException {
-            this.result = target.load(testFileScriptWithSteps);
+            this.result = target.load(testFileScriptWithSteps, testRunListener);
         }
 
         @Override
@@ -169,7 +175,7 @@ public class SebuilderTest {
 
         @Before
         public void setUp() throws IOException {
-            this.result = target.load(testFileScriptWithFullContents);
+            this.result = target.load(testFileScriptWithFullContents, testRunListener);
         }
 
         @Override
@@ -188,7 +194,7 @@ public class SebuilderTest {
 
         @Before
         public void setUp() throws IOException {
-            this.result = target.load(this.testFile);
+            this.result = target.load(this.testFile, testRunListener);
         }
 
         @Override
@@ -206,7 +212,7 @@ public class SebuilderTest {
 
         @Before
         public void setUp() throws IOException {
-            this.result = target.load(this.testFile);
+            this.result = target.load(this.testFile, testRunListener);
         }
 
         @Override
@@ -224,7 +230,7 @@ public class SebuilderTest {
 
         @Before
         public void setUp() throws IOException {
-            this.result = target.load(this.testFile);
+            this.result = target.load(this.testFile, testRunListener);
         }
 
         @Override
@@ -255,7 +261,7 @@ public class SebuilderTest {
 
         @Before
         public void setUp() throws IOException {
-            this.result = target.load(this.testFile);
+            this.result = target.load(this.testFile, testRunListener);
         }
 
         @Override
@@ -287,7 +293,7 @@ public class SebuilderTest {
 
         @Before
         public void setUp() throws IOException {
-            this.result = target.load(this.testFile);
+            this.result = target.load(this.testFile, testRunListener);
         }
 
         @Override
@@ -318,7 +324,7 @@ public class SebuilderTest {
 
         @Before
         public void setUp() throws IOException {
-            this.result = target.load(this.testFile);
+            this.result = target.load(this.testFile, testRunListener);
         }
 
         @Override
@@ -351,7 +357,7 @@ public class SebuilderTest {
 
         @Before
         public void setUp() throws IOException {
-            this.result = target.load(this.testFile);
+            this.result = target.load(this.testFile, testRunListener);
         }
 
         @Override
@@ -382,7 +388,7 @@ public class SebuilderTest {
 
         @Before
         public void setUp() throws IOException {
-            this.result = target.load(this.testFile);
+            this.result = target.load(this.testFile, testRunListener);
         }
 
         @Override
@@ -417,7 +423,7 @@ public class SebuilderTest {
 
         @Before
         public void setUp() throws IOException {
-            this.result = target.load(this.testFile);
+            this.result = target.load(this.testFile, testRunListener);
         }
 
         @Override
@@ -454,7 +460,7 @@ public class SebuilderTest {
 
         @Before
         public void setUp() throws IOException {
-            this.result = target.load(this.testFile);
+            this.result = target.load(this.testFile, testRunListener);
         }
 
         @Override

@@ -56,11 +56,11 @@ public class SeInterpreter extends CommandLineRunner implements TestRunner {
         }
     }
 
-    public void runScripts() throws IOException {
+    public void runScripts() {
         this.testRunListener.cleanResult();
         try {
             for (String path : this.paths) {
-                Context.getScriptParser().load(new File(path)).run(this, this.testRunListener);
+                this.loadTestCase(path).run(this, this.testRunListener);
             }
         } finally {
             if (this.lastRun != null && this.closeDriver) {
@@ -99,6 +99,14 @@ public class SeInterpreter extends CommandLineRunner implements TestRunner {
         return STATUS.SUCCESS;
     }
 
+    protected TestCase loadTestCase(String path) {
+        try {
+            return Context.getScriptParser().load(new File(path), this.testRunListener);
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
+    }
+
     @Override
     protected void preSetUp() {
         paths = new ArrayList<>();
@@ -108,4 +116,5 @@ public class SeInterpreter extends CommandLineRunner implements TestRunner {
     protected void setScripts(Set<String> scripts) {
         this.paths.addAll(scripts);
     }
+
 }

@@ -19,6 +19,8 @@ package com.sebuilder.interpreter;
 import com.google.common.collect.Lists;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -42,7 +44,7 @@ public interface DataSource {
         }
     };
 
-    List<InputData> getData(Map<String, String> config, File relativeTo, InputData vars);
+    List<InputData> getData(Map<String, String> config, File relativeTo, InputData vars) throws IOException;
 
     default String name(Map<String, String> dataSourceConfig, InputData shareInput) {
         return this.name();

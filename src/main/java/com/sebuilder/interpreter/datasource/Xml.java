@@ -25,6 +25,7 @@ import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -38,7 +39,7 @@ import java.util.Map;
 public class Xml implements FileDataSource {
 
     @Override
-    public List<InputData> getData(Map<String, String> config, File relativeTo, InputData vars) {
+    public List<InputData> getData(Map<String, String> config, File relativeTo, InputData vars) throws IOException {
         ArrayList<InputData> data = Lists.newArrayList();
         File f = this.sourceFile(config, relativeTo, vars);
         try {
@@ -61,7 +62,7 @@ public class Xml implements FileDataSource {
                 data.add(lastRow);
             }
         } catch (Exception e) {
-            throw new RuntimeException("Unable to get data.", e);
+            throw new IOException("Unable to get data.", e);
         }
         return data;
     }
