@@ -35,6 +35,10 @@ public class SeInterpreterRunner {
         return log;
     }
 
+    public TestRunListener getGlobalListener() {
+        return globalListener;
+    }
+
     public File getDataSourceDirectory() {
         return Context.getDataSourceDirectory();
     }

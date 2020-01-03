@@ -32,8 +32,6 @@ public class SeInterpreterApplication extends Application {
 
     private SeInterpreterRunner runner;
 
-    private TestRunListener errorReportListener;
-
     private ObjectProperty<Suite> suite = new SimpleObjectProperty<>();
 
     private ObjectProperty<TestCase> displayTestCase = new SimpleObjectProperty<>();
@@ -54,11 +52,10 @@ public class SeInterpreterApplication extends Application {
         Injector.setModelOrService(SeInterpreterApplication.class, this);
         final Parameters parameters = getParameters();
         this.runner = new SeInterpreterRunner(parameters.getRaw());
-        this.errorReportListener = new TestRunListenerImpl(this.runner.getLog());
         final List<String> unnamed = parameters.getUnnamed();
         if (unnamed.size() > 0) {
             this.resetSuite(getScriptParser()
-                    .load(new File(unnamed.get(0)), this.errorReportListener)
+                    .load(new File(unnamed.get(0)), this.runner.getGlobalListener())
                     .toSuite());
         } else {
             this.reset();
@@ -140,7 +137,7 @@ public class SeInterpreterApplication extends Application {
     public void replaceScriptJson(String text) {
         this.executeAndLoggingCaseWhenThrowException(() -> {
             TestCase replaced = Context.getScriptParser()
-                    .load(text, this.getDisplayTestCase().getScriptFile().toFile(), this.errorReportListener)
+                    .load(text, this.getDisplayTestCase().getScriptFile().toFile(), this.runner.getGlobalListener())
                     .map(it -> it.setName(this.getDisplayTestCase().name()));
             replaceDisplayCase(replaced);
         });
@@ -169,13 +166,13 @@ public class SeInterpreterApplication extends Application {
 
     public void scriptReLoad(File file) {
         this.executeAndLoggingCaseWhenThrowException(() -> {
-            this.resetSuite(getScriptParser().load(file, this.errorReportListener).toSuite());
+            this.resetSuite(getScriptParser().load(file, this.runner.getGlobalListener()).toSuite());
         });
     }
 
     public void importScript(File file) {
         this.executeAndLoggingCaseWhenThrowException(() -> {
-            addScript(getScriptParser().load(file, this.errorReportListener));
+            addScript(getScriptParser().load(file, this.runner.getGlobalListener()));
         });
     }
 
