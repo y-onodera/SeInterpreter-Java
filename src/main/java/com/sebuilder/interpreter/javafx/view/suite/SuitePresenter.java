@@ -57,7 +57,9 @@ public class SuitePresenter {
 
     @FXML
     public void handleOpenDataSource(ActionEvent actionEvent) {
-        new DataSetView().showDataSet(this.application.getDisplayTestCaseDataSource(), this.treeViewScriptName.getScene().getWindow());
+        this.application.executeAndLoggingCaseWhenThrowException(() -> {
+            new DataSetView().showDataSet(this.application.getDisplayTestCaseDataSource(), this.treeViewScriptName.getScene().getWindow());
+        });
     }
 
     @FXML

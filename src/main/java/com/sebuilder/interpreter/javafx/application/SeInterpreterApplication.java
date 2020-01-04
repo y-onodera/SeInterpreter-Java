@@ -3,11 +3,11 @@ package com.sebuilder.interpreter.javafx.application;
 import com.airhacks.afterburner.injection.Injector;
 import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
-import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import com.sebuilder.interpreter.*;
 import com.sebuilder.interpreter.application.TestRunListenerImpl;
+import com.sebuilder.interpreter.javafx.view.main.ErrorDialog;
 import com.sebuilder.interpreter.javafx.view.main.MainView;
 import com.sebuilder.interpreter.javafx.view.replay.ReplayView;
 import com.sebuilder.interpreter.step.type.Get;
@@ -32,6 +32,8 @@ public class SeInterpreterApplication extends Application {
 
     private SeInterpreterRunner runner;
 
+    private ErrorDialog errorDialog;
+
     private ObjectProperty<Suite> suite = new SimpleObjectProperty<>();
 
     private ObjectProperty<TestCase> displayTestCase = new SimpleObjectProperty<>();
@@ -52,6 +54,7 @@ public class SeInterpreterApplication extends Application {
         Injector.setModelOrService(SeInterpreterApplication.class, this);
         final Parameters parameters = getParameters();
         this.runner = new SeInterpreterRunner(parameters.getRaw());
+        this.errorDialog = new ErrorDialog(this.runner.getLog());
         final List<String> unnamed = parameters.getUnnamed();
         if (unnamed.size() > 0) {
             this.resetSuite(getScriptParser()
@@ -118,7 +121,7 @@ public class SeInterpreterApplication extends Application {
         try {
             action.execute();
         } catch (Throwable th) {
-            this.runner.getLog().error(Throwables.getStackTraceAsString(th));
+            this.errorDialog.show(th.getMessage(), th);
         }
     }
 

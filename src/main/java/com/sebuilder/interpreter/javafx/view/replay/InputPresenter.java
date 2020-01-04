@@ -69,9 +69,11 @@ public class InputPresenter {
                     Button btn = new Button("open");
                     btn.setOnAction((ActionEvent event) -> {
                         InputResource data = getTableView().getItems().get(getIndex());
-                        DataSetView dataSetView = new DataSetView();
-                        dataSetView.onClick(e -> refreshTable());
-                        dataSetView.showDataSet(data.getLoader(), inputResourceTableView.getScene().getWindow());
+                        application.executeAndLoggingCaseWhenThrowException(() -> {
+                            DataSetView dataSetView = new DataSetView();
+                            dataSetView.onClick(e -> refreshTable());
+                            dataSetView.showDataSet(data.getLoader(), inputResourceTableView.getScene().getWindow());
+                        });
                     });
                     setGraphic(btn);
                 }
@@ -117,8 +119,8 @@ public class InputPresenter {
             for (DataSourceLoader loadable : this.createReplayOption().filterLoadableSource(this.application.replayShareInput(), this.application.getDisplayTestCaseDataSources())) {
                 this.inputResourceTableView.getItems().add(new InputResource(loadable));
             }
+            this.inputResourceTableView.refresh();
         });
-        this.inputResourceTableView.refresh();
     }
 
     private ReplayOption createReplayOption() {
