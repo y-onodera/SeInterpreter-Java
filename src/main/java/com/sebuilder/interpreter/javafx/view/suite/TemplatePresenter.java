@@ -3,7 +3,6 @@ package com.sebuilder.interpreter.javafx.view.suite;
 import com.sebuilder.interpreter.Locator;
 import com.sebuilder.interpreter.TestCase;
 import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
@@ -73,12 +72,12 @@ public class TemplatePresenter {
     }
 
     @FXML
-    void parentFind(ActionEvent event) {
+    void parentFind() {
         this.application.highLightElement(this.selectParentLocator.getSelectionModel().getSelectedItem(), this.textLocatorValue.getText());
     }
 
     @FXML
-    void selectLocator(ActionEvent actionEvent) {
+    void selectLocator() {
         String locator = this.selectParentLocator.getSelectionModel().getSelectedItem();
         if (this.exportSettingsGrid.getChildren().contains(this.textLocatorValue)) {
             if (DEFAULT_PARENT.equals(locator)) {
@@ -91,7 +90,7 @@ public class TemplatePresenter {
     }
 
     @FXML
-    void execExport(ActionEvent event) {
+    void execExport() {
         String locator = this.selectParentLocator.getSelectionModel().getSelectedItem();
         String locatorValue = this.textLocatorValue.getText();
         List<String> targetTag = listTargetTag.getSelectionModel().getSelectedItems();

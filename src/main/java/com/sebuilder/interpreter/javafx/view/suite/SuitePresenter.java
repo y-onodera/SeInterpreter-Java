@@ -56,31 +56,31 @@ public class SuitePresenter {
     }
 
     @FXML
-    public void handleOpenDataSource(ActionEvent actionEvent) {
+    public void handleOpenDataSource() {
         this.application.executeAndLoggingCaseWhenThrowException(() -> {
             new DataSetView().showDataSet(this.application.getDisplayTestCaseDataSource(), this.treeViewScriptName.getScene().getWindow());
         });
     }
 
     @FXML
-    void handleScriptInsert(ActionEvent event) {
+    void handleScriptInsert() {
         this.application.insertScript();
         this.showScriptView();
     }
 
     @FXML
-    void handleScriptAdd(ActionEvent event) {
+    void handleScriptAdd() {
         this.application.addScript();
         this.showScriptView();
     }
 
     @FXML
-    void handleScriptCreateTemplate(ActionEvent event) {
+    void handleScriptCreateTemplate() {
         new TemplateView(treeViewScriptName.getScene().getWindow());
     }
 
     @FXML
-    void handleScriptImport(ActionEvent event) {
+    void handleScriptImport() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open Resource File");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("json format (*.json)", "*.json"));
@@ -94,13 +94,13 @@ public class SuitePresenter {
     }
 
     @FXML
-    void handleScriptDelete(ActionEvent event) {
+    void handleScriptDelete() {
         this.application.removeScript();
         this.showScriptView();
     }
 
     @FXML
-    void handleScriptSave(ActionEvent event) {
+    void handleScriptSave() {
         if (Strings.isNullOrEmpty(this.application.getDisplayTestCase().path())) {
             this.saveTestCaseToNewFile();
         } else {
@@ -109,7 +109,7 @@ public class SuitePresenter {
     }
 
     @FXML
-    void handleScriptSaveAs(ActionEvent event) {
+    void handleScriptSaveAs() {
         this.saveTestCaseToNewFile();
     }
 

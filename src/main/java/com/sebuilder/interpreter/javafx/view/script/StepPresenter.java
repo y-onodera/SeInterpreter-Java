@@ -245,7 +245,7 @@ public class StepPresenter {
     }
 
     @FXML
-    void selectType(ActionEvent event) {
+    void selectType() {
         String stepType = stepTypeSelect.getSelectionModel().getSelectedItem();
         if (this.selectedStepType.equals(stepType)) {
             return;
