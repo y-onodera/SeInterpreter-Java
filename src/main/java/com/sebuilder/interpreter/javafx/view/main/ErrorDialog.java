@@ -21,7 +21,7 @@ public class ErrorDialog {
     public void show(String message, Throwable th) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Exception Dialog");
-        alert.setHeaderText("Look, an Exception Dialog");
+        alert.setHeaderText(null);
         alert.setContentText(message);
 
         StringWriter sw = new StringWriter();

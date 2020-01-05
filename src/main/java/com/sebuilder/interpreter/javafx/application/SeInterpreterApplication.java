@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import com.sebuilder.interpreter.*;
 import com.sebuilder.interpreter.application.TestRunListenerImpl;
+import com.sebuilder.interpreter.javafx.view.SuccessDialog;
 import com.sebuilder.interpreter.javafx.view.main.ErrorDialog;
 import com.sebuilder.interpreter.javafx.view.main.MainView;
 import com.sebuilder.interpreter.javafx.view.replay.ReplayView;
@@ -137,12 +138,13 @@ public class SeInterpreterApplication extends Application {
         this.displayTestCase.setValue(this.getSuite().get(newValue));
     }
 
-    public void replaceScriptJson(String text) {
+    public void replaceScript(String text) {
         this.executeAndLoggingCaseWhenThrowException(() -> {
             TestCase replaced = Context.getScriptParser()
                     .load(text, this.getDisplayTestCase().getScriptFile().toFile(), this.runner.getGlobalListener())
                     .map(it -> it.setName(this.getDisplayTestCase().name()));
             replaceDisplayCase(replaced);
+            SuccessDialog.show("commit succeed");
         });
     }
 
@@ -331,7 +333,8 @@ public class SeInterpreterApplication extends Application {
             if (!target.exists()) {
                 target.createNewFile();
             }
-            Files.asCharSink(target, Charsets.UTF_8).write(content.toString());
+            Files.asCharSink(target, Charsets.UTF_8).write(content);
+            SuccessDialog.show("save succeed:" + target.getAbsolutePath());
         });
     }
 

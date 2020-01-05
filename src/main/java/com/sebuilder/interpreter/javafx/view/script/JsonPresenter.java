@@ -38,7 +38,7 @@ public class JsonPresenter {
 
     @FXML
     void jsonCommit() {
-        this.application.replaceScriptJson(this.textAreaStep.getText());
+        this.application.replaceScript(this.textAreaStep.getText());
     }
 
     void showScriptAsText() {

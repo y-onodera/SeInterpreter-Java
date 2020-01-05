@@ -5,6 +5,7 @@ import com.sebuilder.interpreter.DataSourceLoader;
 import com.sebuilder.interpreter.InputData;
 import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
 import com.sebuilder.interpreter.javafx.control.ExcelLikeSpreadSheetView;
+import com.sebuilder.interpreter.javafx.view.SuccessDialog;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -99,6 +100,7 @@ public class DataSetPresenter {
         if (saveContents.size() > 0) {
             this.application.executeAndLoggingCaseWhenThrowException(() -> {
                 this.resource.writer().write(saveContents);
+                SuccessDialog.show("save succeed");
                 this.reloadDataSet();
                 if (onclick != null) {
                     this.onclick.handle(actionEvent);
