@@ -143,7 +143,7 @@ public class TestRunListenerImpl implements TestRunListener {
 
     @Override
     public void setUpDir(File dest) {
-        this.startTime = "start" + DateTimeFormatter.ofPattern("yyyyMMddhhmmss").format(LocalDateTime.now());
+        this.startTime = "start" + DateTimeFormatter.ofPattern("yyyyMMddHHmmss").format(LocalDateTime.now());
         // create directory result save in
         this.resultDir = dest;
         Mkdir mkdir = new Mkdir();
