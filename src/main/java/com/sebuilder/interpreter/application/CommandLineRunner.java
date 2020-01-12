@@ -15,14 +15,11 @@ public abstract class CommandLineRunner {
     protected Logger log;
 
     protected CommandLineRunner(String[] args, Logger log) {
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                if (lastRun != null) {
-                    lastRun.driver().quit();
-                }
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            if (lastRun != null) {
+                lastRun.driver().quit();
             }
-        });
+        }));
         this.log = log;
         Context.getInstance()
                 .setDefaultScriptParser(new Sebuilder())

@@ -149,7 +149,7 @@ public enum Context {
     }
 
     public static File getExpectScreenShotDirectory() {
-        return new File(getDataSourceDirectory(), getInstance().getScreenShotOutputDirectory());
+        return new File(getDataSourceDirectory(), getScreenShotOutputDirectory());
     }
 
     public static String bindEnvironmentProperties(String variable) {
@@ -159,13 +159,9 @@ public enum Context {
         return variable;
     }
 
-    public Context ifMatch(boolean condition, Function<Context, Context> modifier) throws Exception {
+    public Context ifMatch(boolean condition, Function<Context, Context> modifier)  {
         if (condition) {
-            try {
-                return modifier.apply(this);
-            } catch (Exception e) {
-                throw e;
-            }
+            return modifier.apply(this);
         }
         return this;
     }
