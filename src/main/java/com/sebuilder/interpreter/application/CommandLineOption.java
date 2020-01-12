@@ -12,8 +12,8 @@ import java.util.*;
 
 public class CommandLineOption {
 
-    private Long implicitlyWait= (long) -1;
-    private Long pageLoadTimeout= (long) -1;
+    private Long implicitlyWait = (long) -1;
+    private Long pageLoadTimeout = (long) -1;
     private String driver = "Chrome";
     private String driverPath;
     private Map<String, String> driverConfig = Maps.newHashMap();
@@ -21,8 +21,8 @@ public class CommandLineOption {
     private String datasourceDirectory = "input";
     private String resultoutput = "result";
     private String downloadoutput = "download";
-    private String screenshotoutput= "screenshot";
-    private String templateoutput= "template";
+    private String screenshotoutput = "screenshot";
+    private String templateoutput = "template";
     private String aspectFile;
     private String environmentProperties;
     private Map<String, String> envVar = Maps.newHashMap();

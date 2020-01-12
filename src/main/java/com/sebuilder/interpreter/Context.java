@@ -133,7 +133,7 @@ public enum Context {
     }
 
     public static String getScreenShotOutputDirectory() {
-        return getInstance().screenShotOutputDirectory;
+        return getInstance().browser + "_" + getInstance().screenShotOutputDirectory;
     }
 
     public static String getTemplateOutputDirectory() {
@@ -149,7 +149,7 @@ public enum Context {
     }
 
     public static File getExpectScreenShotDirectory() {
-        return new File(getDataSourceDirectory(), "screenshot");
+        return new File(getDataSourceDirectory(), getInstance().getScreenShotOutputDirectory());
     }
 
     public static String bindEnvironmentProperties(String variable) {
