@@ -52,6 +52,10 @@ public class Locator {
         } else if ("a".equals(element.getTagName())) {
             return new Locator("link text", element.getText());
         }
+        String name = element.getAttribute("name");
+        if (!Strings.isNullOrEmpty(name)) {
+            return new Locator("name", name);
+        }
         return new Locator("xpath", WebElements.toXpath(driver, element));
     }
 
