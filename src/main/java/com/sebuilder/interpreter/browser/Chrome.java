@@ -18,6 +18,20 @@ public class Chrome implements WebDriverFactory {
      */
     @Override
     public RemoteWebDriver make(Map<String, String> config) {
+        return new ChromeDriver(this.getOptions(config));
+    }
+
+    @Override
+    public void setDriverPath(String driverPath) {
+        System.setProperty("webdriver.chrome.driver", driverPath);
+    }
+
+    @Override
+    public String getDriverPath() {
+        return System.getProperty("webdriver.chrome.driver");
+    }
+
+    protected ChromeOptions getOptions(Map<String, String> config) {
         HashMap<String, String> caps = new HashMap<String, String>();
         HashMap<String, String> prefs = new HashMap<String, String>();
         ChromeOptions option = new ChromeOptions();
@@ -34,17 +48,7 @@ public class Chrome implements WebDriverFactory {
             }
         });
         option.setExperimentalOption("prefs", prefs);
-        DesiredCapabilities capabilities = new DesiredCapabilities(caps);
-        return new ChromeDriver(option.merge(capabilities));
+        return option.merge( new DesiredCapabilities(caps));
     }
 
-    @Override
-    public void setDriverPath(String driverPath) {
-        System.setProperty("webdriver.chrome.driver", driverPath);
-    }
-
-    @Override
-    public String getDriverPath() {
-        return System.getProperty("webdriver.chrome.driver");
-    }
 }
