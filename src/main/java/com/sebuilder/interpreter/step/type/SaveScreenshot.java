@@ -27,11 +27,13 @@ import com.sebuilder.interpreter.screenshot.Page;
 import com.sebuilder.interpreter.screenshot.VerticalPrinter;
 import com.sebuilder.interpreter.step.AbstractStepType;
 import com.sebuilder.interpreter.step.LocatorHolder;
+import org.openqa.selenium.OutputType;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 
@@ -46,11 +48,20 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
     public boolean run(TestRun ctx) {
         RemoteWebDriver wd = ctx.driver();
         wd.switchTo().defaultContent();
-        Page target = new Page(ctx, 100, new LocatorInnerScrollElementHandler(wd));
         try {
             final String fileName = ctx.getTestRunName() + "_" + ctx.string("file");
             File file = ctx.getListener().addScreenshot(fileName);
-            BufferedImage actual = target.printImage(new VerticalPrinter(), 0);
+            BufferedImage actual;
+            if (ctx.getBoolean("default")) {
+                try (ByteArrayInputStream imageArrayStream = new ByteArrayInputStream(wd.getScreenshotAs(OutputType.BYTES))) {
+                    actual = ImageIO.read(imageArrayStream);
+                } catch (IOException var9) {
+                    throw new RuntimeException("Can not load screenshot data", var9);
+                }
+            } else {
+                Page target = new Page(ctx, 100, new LocatorInnerScrollElementHandler(wd));
+                actual = target.printImage(new VerticalPrinter(), 0);
+            }
             if (ctx.getBoolean("verify")) {
                 BufferedImage expect = ImageIO.read(new File(Context.getExpectScreenShotDirectory(), fileName));
                 boolean compareResult = this.compare(file, actual, expect);
