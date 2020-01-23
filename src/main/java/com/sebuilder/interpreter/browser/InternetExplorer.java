@@ -16,17 +16,39 @@ public class InternetExplorer implements WebDriverFactory {
      */
     @Override
     public RemoteWebDriver make(Map<String, String> config) {
-        DesiredCapabilities ieCapabilities = DesiredCapabilities.internetExplorer();
-        ieCapabilities.setCapability("nativeEvents", false);
-        ieCapabilities.setCapability("unexpectedAlertBehaviour", "accept");
-        ieCapabilities.setCapability("ignoreProtectedModeSettings", true);
-        ieCapabilities.setCapability("disable-popup-blocking", true);
-        ieCapabilities.setCapability("enablePersistentHover", true);
-        ieCapabilities.setCapability("ignoreZoomSetting", true);
-        HashMap<String, String> caps = new HashMap<String, String>(config);
+        HashMap<String, String> caps = new HashMap<>();
+        HashMap<String, Object> ieOptions = new HashMap<>();
+        config.forEach((key, value) -> {
+            if (key.startsWith("ieoption.")) {
+                if (value.toLowerCase().equals(Boolean.TRUE.toString())) {
+                    ieOptions.put(key.substring("ieoption.".length()), true);
+                } else if (value.toLowerCase().equals(Boolean.FALSE.toString())) {
+                    ieOptions.put(key.substring("ieoption.".length()), false);
+                } else {
+                    ieOptions.put(key.substring("ieoption.".length()), value);
+                }
+            } else {
+                caps.put(key, value);
+            }
+        });
         DesiredCapabilities capabilities = new DesiredCapabilities(caps);
-        ieCapabilities.merge(capabilities);
-        return new InternetExplorerDriver(new InternetExplorerOptions(ieCapabilities));
+        if (ieOptions.size() > 0) {
+            ieOptions.put("nativeEvents", false);
+            ieOptions.put("unexpectedAlertBehaviour", "accept");
+            ieOptions.put("ignoreProtectedModeSettings", true);
+            ieOptions.put("disable-popup-blocking", true);
+            ieOptions.put("enablePersistentHover", true);
+            ieOptions.put("ignoreZoomSetting", true);
+            capabilities.setCapability("se:ieOptions", ieOptions);
+        } else {
+            capabilities.setCapability("nativeEvents", false);
+            capabilities.setCapability("unexpectedAlertBehaviour", "accept");
+            capabilities.setCapability("ignoreProtectedModeSettings", true);
+            capabilities.setCapability("disable-popup-blocking", true);
+            capabilities.setCapability("enablePersistentHover", true);
+            capabilities.setCapability("ignoreZoomSetting", true);
+        }
+        return new InternetExplorerDriver(new InternetExplorerOptions(capabilities));
     }
 
     @Override
