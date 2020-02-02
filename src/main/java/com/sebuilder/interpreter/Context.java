@@ -37,6 +37,7 @@ public enum Context {
     private String templateOutputDirectory;
     private String defaultScript = "sebuilder";
     private final Map<String, ScriptParser> scriptParsers = new HashMap<>();
+    private TestCaseConverter testCaseConverter;
     private StepTypeFactory stepTypeFactory;
     private Aspect aspect = new Aspect().builder()
             .interceptor()
@@ -98,6 +99,9 @@ public enum Context {
 
     public static ScriptParser getScriptParser(String scriptType) {
         return getInstance().scriptParsers.get(scriptType);
+    }
+    public static TestCaseConverter getTestCaseConverter() {
+        return getInstance().testCaseConverter;
     }
 
     public static StepTypeFactory getStepTypeFactory() {
@@ -218,6 +222,11 @@ public enum Context {
     public Context setDefaultScriptParser(ScriptParser parser) {
         this.defaultScript = parser.type();
         return this.addScriptParser(parser);
+    }
+
+    public Context setTestCaseConverter(TestCaseConverter converter) {
+        this.testCaseConverter = converter;
+        return this;
     }
 
     public Context setStepTypeFactory(StepTypeFactory stepTypeFactory) {

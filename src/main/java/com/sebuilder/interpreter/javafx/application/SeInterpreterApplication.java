@@ -75,11 +75,11 @@ public class SeInterpreterApplication extends Application {
     }
 
     public ObjectProperty<Suite> suiteProperty() {
-        return suite;
+        return this.suite;
     }
 
     public ObjectProperty<TestCase> displayTestCaseProperty() {
-        return displayTestCase;
+        return this.displayTestCase;
     }
 
     public Suite getSuite() {
@@ -91,7 +91,7 @@ public class SeInterpreterApplication extends Application {
     }
 
     public String getCurrentDisplayAsJson() {
-        return Context.getScriptParser().toString(this.getDisplayTestCase());
+        return Context.getTestCaseConverter().toString(this.getDisplayTestCase());
     }
 
     public ObjectProperty<ViewType> scriptViewTypeProperty() {
@@ -99,7 +99,7 @@ public class SeInterpreterApplication extends Application {
     }
 
     public ObjectProperty<Pair<Integer, Result>> replayStatusProperty() {
-        return replayStatus;
+        return this.replayStatus;
     }
 
     public InputData replayShareInput() {
@@ -206,7 +206,7 @@ public class SeInterpreterApplication extends Application {
             }
             File saveTo = new File(scriptSaveTo, newName);
             TestCase save = this.changeAssociateFile(it.builder().associateWith(saveTo).build(), "");
-            this.saveContents(saveTo, this.getScriptParser().toString(save));
+            this.saveContents(saveTo, this.getTestCaseConverter().toString(save));
             Suite newSuite = this.getSuite().replace(it, save);
             if (it == this.getDisplayTestCase()) {
                 this.resetScript(newSuite, save);
@@ -214,7 +214,7 @@ public class SeInterpreterApplication extends Application {
                 this.resetScript(newSuite, this.getDisplayTestCase());
             }
         });
-        this.saveContents(target, this.getScriptParser().toString(this.getSuite()));
+        this.saveContents(target, this.getTestCaseConverter().toString(this.getSuite()));
     }
 
     public StepType getStepTypeOfName(String stepType) {
@@ -239,12 +239,12 @@ public class SeInterpreterApplication extends Application {
         TestCase save = this.changeAssociateFile(
                 this.getDisplayTestCase().map(builder -> builder.associateWith(target))
                 , this.getDisplayTestCase().path());
-        this.saveContents(target, this.getScriptParser().toString(save));
+        this.saveContents(target, this.getTestCaseConverter().toString(save));
         this.replaceDisplayCase(save);
     }
 
     public void saveTestCase() {
-        this.saveContents(new File(this.getDisplayTestCase().path()), this.getScriptParser().toString(this.getDisplayTestCase()));
+        this.saveContents(new File(this.getDisplayTestCase().path()), this.getTestCaseConverter().toString(this.getDisplayTestCase()));
     }
 
     public void browserSetting(String selectedBrowser, String driverPath) {
@@ -310,6 +310,10 @@ public class SeInterpreterApplication extends Application {
 
     protected ScriptParser getScriptParser() {
         return Context.getScriptParser();
+    }
+
+    protected TestCaseConverter getTestCaseConverter() {
+        return Context.getTestCaseConverter();
     }
 
     protected void resetScript(Suite aSuite, TestCase toSelect) {

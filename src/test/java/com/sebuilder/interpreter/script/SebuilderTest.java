@@ -44,6 +44,7 @@ public class SebuilderTest {
     static Logger log = LogManager.getLogger(SebuilderTest.class);
     private static String baseDir = SebuilderTest.class.getResource(".").getPath();
     private static Sebuilder target = new Sebuilder();
+    private static SebuilderToStringConverter toStringConverter = new SebuilderToStringConverter();
 
     private static final DataSourceLoader DATA_SET_NONE = new DataSourceLoader(new None(), Map.of(), new File(baseDir));
     private static final DataSourceLoader DATA_SET_CSV = new DataSourceLoader(new Csv(), Map.of("path", "test.csv"), new File(baseDir));
@@ -94,7 +95,7 @@ public class SebuilderTest {
 
         @Test
         public void parseResultReversible() throws IOException {
-            TestCase reverse = target.load(target.toString(this.result), Strings.isNullOrEmpty(this.result.path()) ? null : new File(this.result.path()), testRunListener);
+            TestCase reverse = target.load(toStringConverter.toString(this.result), Strings.isNullOrEmpty(this.result.path()) ? null : new File(this.result.path()), testRunListener);
             this.getTestCaseAssert().run(reverse);
         }
 

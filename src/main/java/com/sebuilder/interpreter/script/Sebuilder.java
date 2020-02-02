@@ -40,19 +40,7 @@ import java.util.function.Predicate;
  *
  * @author jkowalczyk
  */
-public class Sebuilder implements ScriptParser {
-
-    private SebuilderToStringConverter sebuilderToStringConverter = new SebuilderToStringConverter();
-
-    @Override
-    public String toString(Suite target) {
-        return this.sebuilderToStringConverter.toString(target);
-    }
-
-    @Override
-    public String toString(TestCase target) {
-        return this.sebuilderToStringConverter.toString(target);
-    }
+public class Sebuilder extends AbstractJsonScriptParser {
 
     /**
      * @param jsonString A JSON string describing a script or suite.
@@ -67,36 +55,6 @@ public class Sebuilder implements ScriptParser {
         }
     }
 
-    /**
-     * @param f               A File pointing to a JSON file describing a script or suite.
-     * @param testRunListener listener to report error
-     * @return A list of script, ready to finish.
-     */
-    @Override
-    public TestCase load(File f, TestRunListener testRunListener) throws IOException {
-        try (BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(f), StandardCharsets.UTF_8))) {
-            return this.load(new JSONObject(new JSONTokener(r)), f, testRunListener);
-        } catch (JSONException | IOException e) {
-            testRunListener.reportError("loadScript." + f.getName(), e);
-            throw new IOException("error load:" + f.getAbsolutePath(), e);
-        }
-    }
-
-    /**
-     * @param json            A JSON string describing a script or suite.
-     * @param testRunListener listener to report error
-     * @return A list of script, ready to finish.
-     */
-    @Override
-    public TestCase load(String json, File file, TestRunListener testRunListener) throws IOException {
-        try {
-            return this.load(new JSONObject(new JSONTokener(json)), file, testRunListener);
-        } catch (JSONException e) {
-            testRunListener.reportError("loadScript.jsonText", e);
-            throw new IOException("error parse:" + json, e);
-        }
-    }
-
     @Override
     public Aspect loadAspect(File f) throws IOException {
         try (BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(f), StandardCharsets.UTF_8))) {
@@ -108,13 +66,7 @@ public class Sebuilder implements ScriptParser {
         }
     }
 
-    /**
-     * @param o               A JSONObject describing a script or a suite.
-     * @param sourceFile      Optionally. the file the JSON was loaded from.
-     * @param testRunListener listener to report error
-     * @return A script, ready to finish.
-     * @throws JSONException If anything goes wrong with interpreting the JSON.
-     */
+    @Override
     protected TestCase load(JSONObject o, File sourceFile, TestRunListener testRunListener) throws JSONException, IOException {
         if (o.optString("type", "script").equals("suite")) {
             return this.parseSuite(o, sourceFile, testRunListener);
@@ -131,7 +83,6 @@ public class Sebuilder implements ScriptParser {
      */
     protected TestCase parseSuite(JSONObject o, File suiteFile, TestRunListener testRunListener) throws JSONException, IOException {
         TestCaseBuilder builder = TestCaseBuilder.suite(suiteFile)
-                .isShareState(o.optBoolean("shareState", true))
                 .setDataSource(this.getDataSource(o), this.getDataSourceConfig(o));
         this.loadScripts(o, builder, testRunListener);
         return builder.setAspect(this.getAspect(o))

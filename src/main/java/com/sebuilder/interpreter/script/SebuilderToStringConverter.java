@@ -8,20 +8,22 @@ import org.json.JSONObject;
 import java.util.Map;
 import java.util.Objects;
 
-public class SebuilderToStringConverter {
+public class SebuilderToStringConverter implements TestCaseConverter{
 
-    protected String toString(Suite target) {
+    @Override
+    public String toString(Suite target) {
         return toStringSuite(target.head());
     }
 
-    protected String toString(TestCase target) {
+    @Override
+    public String toString(TestCase target) {
         if (target.getScriptFile().type() == ScriptFile.Type.SUITE) {
             return toStringSuite(target);
         }
         return toStringTest(target);
     }
 
-    private String toStringTest(TestCase target) {
+    protected String toStringTest(TestCase target) {
         try {
             JSONObject o = new JSONObject();
             JSONArray stepsA = new JSONArray();
@@ -39,7 +41,7 @@ public class SebuilderToStringConverter {
         }
     }
 
-    private String toStringSuite(TestCase target) {
+    protected String toStringSuite(TestCase target) {
         try {
             JSONObject o = new JSONObject();
             JSONObject data = toJson(target.getDataSourceLoader());
@@ -55,7 +57,7 @@ public class SebuilderToStringConverter {
         }
     }
 
-    private JSONObject toJSON(Step s) throws JSONException {
+    protected JSONObject toJSON(Step s) throws JSONException {
         JSONObject o = new JSONObject();
         if (s.getName() != null) {
             o.put("step_name", s.getName());
@@ -74,14 +76,14 @@ public class SebuilderToStringConverter {
         return o;
     }
 
-    private JSONObject toJSON(Locator locator) throws JSONException {
+    protected JSONObject toJSON(Locator locator) throws JSONException {
         JSONObject o = new JSONObject();
         o.put("type", locator.type.toString());
         o.put("value", locator.value);
         return o;
     }
 
-    private JSONObject toJson(DataSourceLoader target) throws JSONException {
+    protected JSONObject toJson(DataSourceLoader target) throws JSONException {
         final DataSource dataSource = target.getDataSource();
         final Map<String, String> dataSourceConfig = target.getDataSourceConfig();
         if (dataSource != DataSource.NONE) {
@@ -96,7 +98,7 @@ public class SebuilderToStringConverter {
         return null;
     }
 
-    private JSONArray toJsonArray(TestCase target) throws JSONException {
+    protected JSONArray toJsonArray(TestCase target) throws JSONException {
         JSONArray scriptsA = new JSONArray();
         for (TestCase s : target.getChains()) {
             if (s.getChains().size() > 0 && s.getScriptFile().type() == ScriptFile.Type.TEST) {
@@ -109,7 +111,7 @@ public class SebuilderToStringConverter {
         return scriptsA;
     }
 
-    private JSONObject chainToJson(ScriptFile suiteFile, TestCase chainHeader) throws JSONException {
+    protected JSONObject chainToJson(ScriptFile suiteFile, TestCase chainHeader) throws JSONException {
         JSONArray chain = new JSONArray();
         chain.put(this.getJSON(chainHeader, suiteFile));
         this.addChain(suiteFile, chainHeader, chain);
@@ -118,7 +120,7 @@ public class SebuilderToStringConverter {
         return scriptPaths;
     }
 
-    private void addChain(ScriptFile suiteFile, TestCase chainHeader, JSONArray addChainTo) throws JSONException {
+    protected void addChain(ScriptFile suiteFile, TestCase chainHeader, JSONArray addChainTo) throws JSONException {
         for (TestCase chainCase : chainHeader.getChains()) {
             addChainTo.put(this.getJSON(chainCase, suiteFile));
             if (chainCase.getChains().size() > 0 && chainCase.getScriptFile().type() == ScriptFile.Type.TEST) {
@@ -127,7 +129,7 @@ public class SebuilderToStringConverter {
         }
     }
 
-    private JSONObject getJSON(TestCase testCase, ScriptFile scriptFile) throws JSONException {
+    protected JSONObject getJSON(TestCase testCase, ScriptFile scriptFile) throws JSONException {
         JSONObject scriptPath = new JSONObject();
         if (testCase.isLazyLoad()) {
             scriptPath.put("lazyLoad", testCase.name());

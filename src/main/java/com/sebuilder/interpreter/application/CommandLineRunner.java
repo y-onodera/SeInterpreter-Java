@@ -4,6 +4,7 @@ import com.google.common.base.Strings;
 import com.sebuilder.interpreter.*;
 import com.sebuilder.interpreter.datasource.DataSourceFactoryImpl;
 import com.sebuilder.interpreter.script.Sebuilder;
+import com.sebuilder.interpreter.script.SebuilderToStringConverter;
 import com.sebuilder.interpreter.step.StepTypeFactoryImpl;
 import org.apache.logging.log4j.Logger;
 
@@ -25,6 +26,7 @@ public abstract class CommandLineRunner {
                 .setDefaultScriptParser(new Sebuilder())
                 .setDataSourceFactory(new DataSourceFactoryImpl())
                 .setStepTypeFactory(new StepTypeFactoryImpl())
+                .setTestCaseConverter(new SebuilderToStringConverter())
         ;
         setUp(args);
     }
@@ -74,7 +76,7 @@ public abstract class CommandLineRunner {
             ;
             this.setScripts(option.getScripts());
         } catch (Exception e) {
-            this.log.error("error argument parse:",e);
+            this.log.error("error argument parse:", e);
             System.exit(1);
         }
         this.setTestRunListener(new TestRunListenerImpl(this.log));

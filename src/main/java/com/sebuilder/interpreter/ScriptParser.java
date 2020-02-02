@@ -9,10 +9,6 @@ public interface ScriptParser {
         return this.getClass().getSimpleName();
     }
 
-    String toString(Suite target);
-
-    String toString(TestCase target);
-
     TestCase load(File f, TestRunListener testRunListener) throws IOException;
 
     TestCase load(String jsonString);
