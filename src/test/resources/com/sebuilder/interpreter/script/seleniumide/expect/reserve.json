@@ -1,0 +1,125 @@
+{"steps": [
+  {
+    "negated": false,
+    "skip": "false",
+    "type": "Get",
+    "url": "http://example.selenium.jp/reserveApp_Renewal/"
+  },
+  {
+    "height": "660",
+    "negated": false,
+    "skip": "false",
+    "type": "SetWindowSize",
+    "width": "1050"
+  },
+  {
+    "locator": {
+      "type": "id",
+      "value": "datePick"
+    },
+    "negated": false,
+    "skip": "false",
+    "type": "ClickElement"
+  },
+  {
+    "locator": {
+      "type": "id",
+      "value": "datePick"
+    },
+    "negated": false,
+    "skip": "false",
+    "text": "2020/02/02",
+    "type": "SetElementText"
+  },
+  {
+    "locator": {
+      "type": "id",
+      "value": "reserve_term"
+    },
+    "negated": false,
+    "skip": "false",
+    "type": "ClickElement"
+  },
+  {
+    "locator": {
+      "type": "xpath",
+      "value": "//*[@id='reserve_term']/option[. = '3']"
+    },
+    "negated": false,
+    "skip": "false",
+    "type": "SetElementSelected"
+  },
+  {
+    "locator": {
+      "type": "id",
+      "value": "headcount"
+    },
+    "negated": false,
+    "skip": "false",
+    "type": "ClickElement"
+  },
+  {
+    "locator": {
+      "type": "xpath",
+      "value": "//*[@id='headcount']/option[. = '2']"
+    },
+    "negated": false,
+    "skip": "false",
+    "type": "SetElementSelected"
+  },
+  {
+    "locator": {
+      "type": "id",
+      "value": "breakfast_off"
+    },
+    "negated": false,
+    "skip": "false",
+    "type": "ClickElement"
+  },
+  {
+    "locator": {
+      "type": "id",
+      "value": "plan_a"
+    },
+    "negated": false,
+    "skip": "false",
+    "type": "ClickElement"
+  },
+  {
+    "locator": {
+      "type": "id",
+      "value": "plan_b"
+    },
+    "negated": false,
+    "skip": "false",
+    "type": "ClickElement"
+  },
+  {
+    "locator": {
+      "type": "id",
+      "value": "guestname"
+    },
+    "negated": false,
+    "skip": "false",
+    "type": "ClickElement"
+  },
+  {
+    "locator": {
+      "type": "id",
+      "value": "guestname"
+    },
+    "negated": false,
+    "skip": "false",
+    "text": "鈴木一郎",
+    "type": "SetElementText"
+  },
+  {
+    "locator": {
+      "type": "id",
+      "value": "agree_and_goto_next"
+    },
+    "negated": false,
+    "skip": "false",
+    "type": "ClickElement"
+  }
+]}

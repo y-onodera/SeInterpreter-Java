@@ -5,6 +5,7 @@ import com.sebuilder.interpreter.*;
 import com.sebuilder.interpreter.datasource.DataSourceFactoryImpl;
 import com.sebuilder.interpreter.script.Sebuilder;
 import com.sebuilder.interpreter.script.SebuilderToStringConverter;
+import com.sebuilder.interpreter.script.SeleniumIDE;
 import com.sebuilder.interpreter.step.StepTypeFactoryImpl;
 import org.apache.logging.log4j.Logger;
 
@@ -24,6 +25,7 @@ public abstract class CommandLineRunner {
         this.log = log;
         Context.getInstance()
                 .setDefaultScriptParser(new Sebuilder())
+                .addScriptParser(new SeleniumIDE())
                 .setDataSourceFactory(new DataSourceFactoryImpl())
                 .setStepTypeFactory(new StepTypeFactoryImpl())
                 .setTestCaseConverter(new SebuilderToStringConverter())

@@ -4,6 +4,7 @@ import com.google.common.base.Strings;
 import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
 import com.sebuilder.interpreter.javafx.view.replay.InputView;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
@@ -29,15 +30,17 @@ public class MenuPresenter {
 
     @FXML
     void handleScriptOpenFile() {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Open Resource File");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("json format (*.json)", "*.json"));
-        fileChooser.setInitialDirectory(this.getBaseDirectory());
-        Stage stage = new Stage();
-        stage.initOwner(paneSeInterpreterMenu.getScene().getWindow());
-        File file = fileChooser.showOpenDialog(stage);
+        File file = openFileChooser("Open Resource File", "json format (*.json)", "*.json");
         if (file != null) {
             this.application.scriptReLoad(file);
+        }
+    }
+
+    @FXML
+    public void handleImportSeleniumIDEScript(ActionEvent actionEvent) {
+        File file = openFileChooser("Import SeleniumIDE Script", "side format (*.side)", "*.side");
+        if (file != null) {
+            this.application.scriptReLoad(file, "SeleniumIDE");
         }
     }
 
@@ -71,7 +74,7 @@ public class MenuPresenter {
     }
 
     @FXML
-    void handleBrowserSetting()  {
+    void handleBrowserSetting() {
         new BrowserView().open(this.paneSeInterpreterMenu.getScene().getWindow());
     }
 
@@ -96,7 +99,17 @@ public class MenuPresenter {
                 .open(Context.getResultOutputDirectory()));
     }
 
-    private void saveSuiteToNewFile() {
+    protected File openFileChooser(String aTitle, String aFilterMessage, String aFilterExtensions) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle(aTitle);
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(aFilterMessage, aFilterExtensions));
+        fileChooser.setInitialDirectory(this.getBaseDirectory());
+        Stage stage = new Stage();
+        stage.initOwner(paneSeInterpreterMenu.getScene().getWindow());
+        return fileChooser.showOpenDialog(stage);
+    }
+
+    protected void saveSuiteToNewFile() {
         FileChooser fileSave = new FileChooser();
         fileSave.setTitle("Save Suite File");
         fileSave.getExtensionFilters().add(new FileChooser.ExtensionFilter("json format (*.json)", "*.json"));
@@ -109,7 +122,7 @@ public class MenuPresenter {
         }
     }
 
-    private File getBaseDirectory() {
+    protected File getBaseDirectory() {
         return Optional.ofNullable(this.application.getSuite().head().relativePath())
                 .orElse(Context.getBaseDirectory());
     }

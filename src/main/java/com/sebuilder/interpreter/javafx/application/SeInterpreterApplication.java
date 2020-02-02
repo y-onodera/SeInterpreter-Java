@@ -170,8 +170,12 @@ public class SeInterpreterApplication extends Application {
     }
 
     public void scriptReLoad(File file) {
+        this.scriptReLoad(file, Context.getDefaultScript());
+    }
+
+    public void scriptReLoad(File file, String scriptType) {
         this.executeAndLoggingCaseWhenThrowException(() -> {
-            this.resetSuite(getScriptParser().load(file, this.runner.getGlobalListener()).toSuite());
+            this.resetSuite(getScriptParser(scriptType).load(file, this.runner.getGlobalListener()).toSuite());
         });
     }
 
@@ -309,7 +313,11 @@ public class SeInterpreterApplication extends Application {
     }
 
     protected ScriptParser getScriptParser() {
-        return Context.getScriptParser();
+        return this.getScriptParser(Context.getDefaultScript());
+    }
+
+    protected ScriptParser getScriptParser(String scriptType) {
+        return Context.getScriptParser(scriptType);
     }
 
     protected TestCaseConverter getTestCaseConverter() {

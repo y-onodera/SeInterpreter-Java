@@ -15,6 +15,8 @@
                     <items>
                         <MenuItem id="menuTestOpenFile" fx:id="menuScriptOpenFile" mnemonicParsing="false"
                                   onAction="#handleScriptOpenFile" text="Open File"/>
+                        <MenuItem id="menuTestImportSeleniumIDEScript" fx:id="menuImportSeleniumIDEScript" mnemonicParsing="false"
+                                  onAction="#handleImportSeleniumIDEScript" text="Import SeleniumIDE Script"/>
                         <MenuItem id="menuTestSuiteSave" fx:id="menuSaveSuite" mnemonicParsing="false"
                                   onAction="#handleSaveSuite" text="Save Suite"/>
                         <MenuItem id="menuTestSuiteSaveAs" fx:id="menuSaveSuiteAs" mnemonicParsing="false"
