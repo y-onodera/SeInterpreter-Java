@@ -14,6 +14,8 @@ import javafx.stage.Stage;
 import javax.inject.Inject;
 import java.io.File;
 
+;
+
 public class BrowserPresenter {
 
     @Inject
@@ -110,7 +112,7 @@ public class BrowserPresenter {
         if ("Firefox".equals(selectedBrowser)) {
             driverName = "geckodriver.exe";
         } else if ("Edge".equals(selectedBrowser)) {
-            driverName = "MicrosoftWebDriver.exe";
+            driverName = "msedgedriver.exe";
         } else if ("InternetExplorer".equals(selectedBrowser)) {
             driverName = "IEDriverServer.exe";
         }
