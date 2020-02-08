@@ -7,8 +7,7 @@ import com.sebuilder.interpreter.TestRun;
 public interface FlowStep extends StepType {
 
     default int getSubSteps(TestRun ctx) {
-        int subStepCount = Integer.valueOf(ctx.string("subStep"));
-        return subStepCount;
+        return Integer.parseInt(ctx.string("subStep"));
     }
 
     default boolean runSubStep(TestRun ctx, int actions) {
