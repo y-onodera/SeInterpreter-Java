@@ -21,10 +21,10 @@ import com.sebuilder.interpreter.step.AbstractStepType;
 import com.sebuilder.interpreter.step.LocatorHolder;
 import org.openqa.selenium.interactions.Actions;
 
-public class ReleaseElement extends AbstractStepType implements LocatorHolder {
+public class ReleaseElement extends AbstractStepType implements ConditionalStep, LocatorHolder {
 
     @Override
-    public boolean run(TestRun ctx) {
+    public boolean doRun(TestRun ctx) {
         new Actions(ctx.driver()).release(ctx.locator().find(ctx)).build().perform();
         return true;
     }

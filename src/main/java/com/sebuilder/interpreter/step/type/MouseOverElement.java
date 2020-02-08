@@ -19,20 +19,13 @@ package com.sebuilder.interpreter.step.type;
 import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.step.AbstractStepType;
 import com.sebuilder.interpreter.step.LocatorHolder;
-import com.sebuilder.interpreter.step.WaitFor;
-import com.sebuilder.interpreter.step.getter.ElementVisible;
 import org.openqa.selenium.interactions.Actions;
 
 public class MouseOverElement extends AbstractStepType implements ConditionalStep, LocatorHolder {
+
     @Override
     public boolean doRun(TestRun ctx) {
         new Actions(ctx.driver()).moveToElement(ctx.locator().find(ctx)).build().perform();
         return true;
     }
-
-    @Override
-    public WaitFor waitForReady() {
-        return new WaitFor(new ElementVisible());
-    }
-
 }
