@@ -37,8 +37,15 @@ public class SeleniumIDETest {
         TestCase expect = new Sebuilder().load(new File(baseDir, "expect/sampleScript.json"), testRunListener);
         TestCase loaded = target.load(new File(baseDir, "sampleScript.side"), testRunListener);
         assertEquals(toStringConverter.toString(expect), toStringConverter.toString(loaded));
-        assertEquals(toStringConverter.toString(expect.getChains().get(0)), toStringConverter.toString(loaded.getChains().get(0)));
-        assertEquals(toStringConverter.toString(expect.getChains().get(1)), toStringConverter.toString(loaded.getChains().get(1)));
+        assertChainCaseEquals(expect, loaded);
+    }
+
+    private void assertChainCaseEquals(TestCase expect, TestCase loaded) {
+        assertEquals(expect.getChains().size(), loaded.getChains().size());
+        for (int i = 0, j = expect.getChains().size(); i < j; i++) {
+            assertEquals(toStringConverter.toString(expect.getChains().get(i)), toStringConverter.toString(loaded.getChains().get(i)));
+            assertChainCaseEquals(expect.getChains().get(i), loaded.getChains().get(i));
+        }
     }
 
 }

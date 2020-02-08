@@ -10,7 +10,7 @@
       "id": "e34dcfc1-d7f5-408d-ba40-5a6d9f0507d9",
       "comment": "",
       "command": "open",
-      "target": "http://example.selenium.jp/reserveApp_Renewal/",
+      "target": "reserveApp_Renewal/",
       "targets": [],
       "value": ""
     }, {
@@ -338,7 +338,14 @@
   }],
   "suites": [{
     "id": "3381b5a9-8130-4e1e-ae66-824df8619f0f",
-    "name": "Default Suite",
+    "name": "sampleSuite",
+    "persistSession": false,
+    "parallel": false,
+    "timeout": 300,
+    "tests": ["b03c6741-2f38-4611-9d19-af84f495a5d5", "69919f05-7832-4190-b390-7cd3bda15d4c"]
+  }, {
+    "id": "fbd74edc-b0f7-498c-9ff5-f21d083245c3",
+    "name": "sampleSuite2",
     "persistSession": false,
     "parallel": false,
     "timeout": 300,
