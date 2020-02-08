@@ -9,8 +9,8 @@ public class ClickElementAt extends AbstractStepType {
 
     @Override
     public boolean run(TestRun ctx) {
-        int pointY = Integer.valueOf(ctx.string("pointY")).intValue();
-        int pointX = Integer.valueOf(ctx.string("pointX")).intValue();
+        int pointY = Integer.parseInt(ctx.string("pointY"));
+        int pointX = Integer.parseInt(ctx.string("pointX"));
         new Actions(ctx.driver())
                 .moveByOffset(pointX, pointY)
                 .click()
