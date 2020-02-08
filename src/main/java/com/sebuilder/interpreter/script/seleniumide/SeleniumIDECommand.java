@@ -1,4 +1,4 @@
-package com.sebuilder.interpreter.script;
+package com.sebuilder.interpreter.script.seleniumide;
 
 import com.google.common.collect.Maps;
 import org.json.JSONArray;

@@ -5,16 +5,13 @@ import com.sebuilder.interpreter.TestCase;
 import com.sebuilder.interpreter.TestRunListener;
 import com.sebuilder.interpreter.application.TestRunListenerImpl;
 import com.sebuilder.interpreter.datasource.DataSourceFactoryImpl;
+import com.sebuilder.interpreter.script.seleniumide.SeleniumIDE;
 import com.sebuilder.interpreter.step.StepTypeFactoryImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.json.JSONObject;
-import org.json.JSONTokener;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 
 import static org.junit.Assert.*;
