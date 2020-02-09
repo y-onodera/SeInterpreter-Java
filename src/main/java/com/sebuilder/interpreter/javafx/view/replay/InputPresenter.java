@@ -1,5 +1,7 @@
 package com.sebuilder.interpreter.javafx.view.replay;
 
+import com.google.common.collect.Maps;
+import com.sebuilder.interpreter.DataSource;
 import com.sebuilder.interpreter.DataSourceLoader;
 import com.sebuilder.interpreter.InputData;
 import com.sebuilder.interpreter.javafx.application.ReplayOption;
@@ -9,6 +11,7 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -30,6 +33,7 @@ import java.util.function.Consumer;
 public class InputPresenter {
 
     static private final Pair<Integer, InputData> DEFAULT = new Pair<>(1, new InputData());
+    public static final DataSourceLoader NO_DATASOURCE = new DataSourceLoader(DataSource.NONE, Maps.newHashMap(), null);
     @Inject
     private SeInterpreterApplication application;
     @FXML
@@ -56,9 +60,9 @@ public class InputPresenter {
         this.onclickReplayStart = (it) -> application.runScript(it);
         this.resourceName.setCellValueFactory(body -> body.getValue().resourceNameProperty());
         this.row.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
-        this.row.setCellValueFactory(body -> body.getValue().rowProperty().asObject());
+        this.row.setCellValueFactory(body -> body.getValue().rowValue());
         this.slash.setCellValueFactory(body -> new SimpleStringProperty("/"));
-        this.rows.setCellValueFactory(body -> body.getValue().rowsProperty().asObject());
+        this.rows.setCellValueFactory(body -> body.getValue().rowsValue());
         this.buttonOpen.setCellFactory(inputResourceStringTableColumn -> new TableCell<>() {
             @Override
             public void updateItem(Void item, boolean empty) {
@@ -66,16 +70,7 @@ public class InputPresenter {
                 if (empty) {
                     setGraphic(null);
                 } else {
-                    Button btn = new Button("open");
-                    btn.setOnAction((ActionEvent event) -> {
-                        InputResource data = getTableView().getItems().get(getIndex());
-                        application.executeAndLoggingCaseWhenThrowException(() -> {
-                            DataSetView dataSetView = new DataSetView();
-                            dataSetView.onClick(e -> refreshTable());
-                            dataSetView.showDataSet(data.getLoader(), inputResourceTableView.getScene().getWindow());
-                        });
-                    });
-                    setGraphic(btn);
+                    setGraphic(getTableView().getItems().get(getIndex()).createOpenButton());
                 }
             }
         });
@@ -119,6 +114,9 @@ public class InputPresenter {
             for (DataSourceLoader loadable : this.createReplayOption().filterLoadableSource(this.application.replayShareInput(), this.application.getDisplayTestCaseDataSources())) {
                 this.inputResourceTableView.getItems().add(new InputResource(loadable));
             }
+            if (this.inputResourceTableView.getItems().size() == 0) {
+                this.inputResourceTableView.getItems().add(new InputResource());
+            }
             this.inputResourceTableView.refresh();
         });
     }
@@ -134,6 +132,10 @@ public class InputPresenter {
         private IntegerProperty row;
         private IntegerProperty rows;
 
+        public InputResource() throws IOException {
+            this(NO_DATASOURCE);
+        }
+
         public InputResource(DataSourceLoader loader) throws IOException {
             this.loader = loader;
             List<InputData> data = this.loader.loadData();
@@ -142,14 +144,17 @@ public class InputPresenter {
                 shareInputs.put(this.getResourceName(), DEFAULT);
             }
             this.runtimeVariable = shareInputs.get(this.resourceName.get()).getValue();
-            this.row = new SimpleIntegerProperty(shareInputs.get(this.resourceName.get()).getKey());
-            this.row.addListener((observableValue, oldVal, newVal) -> {
-                setRuntimeVariable(new InputData());
-                shareInputs.put(resourceName.get(), new Pair<>(observableValue.getValue().intValue(), getRuntimeVariable()));
-                refreshTable();
-            });
-            this.rows = new SimpleIntegerProperty(data.size());
+            if (this.loader != NO_DATASOURCE) {
+                this.row = new SimpleIntegerProperty(shareInputs.get(this.resourceName.get()).getKey());
+                this.row.addListener((observableValue, oldVal, newVal) -> {
+                    setRuntimeVariable(new InputData());
+                    shareInputs.put(resourceName.get(), new Pair<>(observableValue.getValue().intValue(), getRuntimeVariable()));
+                    refreshTable();
+                });
+                this.rows = new SimpleIntegerProperty(data.size());
+            }
         }
+
 
         public DataSourceLoader getLoader() {
             return loader;
@@ -164,7 +169,17 @@ public class InputPresenter {
         }
 
         public int getRow() {
+            if (this.loader == NO_DATASOURCE) {
+                return 1;
+            }
             return row.get();
+        }
+
+        public ObservableValue<Integer> rowValue() {
+            if (this.loader == NO_DATASOURCE) {
+                return null;
+            }
+            return this.rowProperty().asObject();
         }
 
         public IntegerProperty rowProperty() {
@@ -183,12 +198,31 @@ public class InputPresenter {
             this.row.set(row);
         }
 
-        public int getRows() {
-            return rows.get();
-        }
-
         public IntegerProperty rowsProperty() {
             return rows;
+        }
+
+        public ObservableValue<Integer> rowsValue() {
+            if (this.loader == NO_DATASOURCE) {
+                return null;
+            }
+            return this.rowsProperty().asObject();
+        }
+
+        public Button createOpenButton() {
+            if (this.loader == NO_DATASOURCE) {
+                return null;
+            }
+            Button btn = new Button("open");
+            btn.setOnAction((ActionEvent event) -> {
+                InputResource data = this;
+                application.executeAndLoggingCaseWhenThrowException(() -> {
+                    DataSetView dataSetView = new DataSetView();
+                    dataSetView.onClick(e -> refreshTable());
+                    dataSetView.showDataSet(data.getLoader(), inputResourceTableView.getScene().getWindow());
+                });
+            });
+            return btn;
         }
     }
 }
