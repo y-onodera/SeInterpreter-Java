@@ -5,7 +5,7 @@ import com.sebuilder.interpreter.*;
 import com.sebuilder.interpreter.datasource.DataSourceFactoryImpl;
 import com.sebuilder.interpreter.script.Sebuilder;
 import com.sebuilder.interpreter.script.SebuilderToStringConverter;
-import com.sebuilder.interpreter.script.SeleniumIDE;
+import com.sebuilder.interpreter.script.seleniumide.SeleniumIDE;
 import com.sebuilder.interpreter.step.StepTypeFactoryImpl;
 import org.apache.logging.log4j.Logger;
 
