@@ -1,5 +1,6 @@
 package com.sebuilder.interpreter.application;
 
+import com.sebuilder.interpreter.Context;
 import org.junit.Test;
 
 import java.io.File;
@@ -27,6 +28,7 @@ public class CommandLineOptionTest {
                 CommandLineArgument.SCREENSHOT_OUTPUT.getArgument("saveImage"),
                 CommandLineArgument.TEMPLATE_OUTPUT.getArgument("reverse"),
                 CommandLineArgument.RESULT_OUTPUT.getArgument("report"),
+                CommandLineArgument.JUNIT_REPORT_PREFIX.getArgument("timestamp"),
                 CommandLineArgument.DOWNLOAD_OUTPUT.getArgument("file"),
                 CommandLineArgument.ASPECT.getArgument("test.json"),
                 CommandLineArgument.ENVIRONMENT_PROPERTIES.getArgument("some_environment.properties"),
@@ -46,6 +48,7 @@ public class CommandLineOptionTest {
         assertEquals("saveImage", target.getScreenshotoutput());
         assertEquals("reverse", target.getTemplateoutput());
         assertEquals("report", target.getResultoutput());
+        assertEquals(Context.TestNamePrefix.TIMESTAMP, target.getJunitReportPrefix());
         assertEquals("file", target.getDownloadoutput());
         assertEquals("test.json", target.getAspectFile());
         assertEquals("some_environment.properties", target.getEnvironmentProperties());
@@ -72,6 +75,7 @@ public class CommandLineOptionTest {
         assertEquals("saveImage", target.getScreenshotoutput());
         assertEquals("reverse", target.getTemplateoutput());
         assertEquals("report", target.getResultoutput());
+        assertEquals(Context.TestNamePrefix.NONE, target.getJunitReportPrefix());
         assertEquals("file", target.getDownloadoutput());
         assertEquals("test.json", target.getAspectFile());
         assertEquals("some_environment.properties", target.getEnvironmentProperties());
@@ -97,6 +101,7 @@ public class CommandLineOptionTest {
                 CommandLineArgument.SCREENSHOT_OUTPUT.getArgument("saveImage2"),
                 CommandLineArgument.TEMPLATE_OUTPUT.getArgument("reverse2"),
                 CommandLineArgument.RESULT_OUTPUT.getArgument("report2"),
+                CommandLineArgument.JUNIT_REPORT_PREFIX.getArgument("resultDir"),
                 CommandLineArgument.DOWNLOAD_OUTPUT.getArgument("file2"),
                 CommandLineArgument.ASPECT.getArgument("test2.json"),
                 CommandLineArgument.ENVIRONMENT_PROPERTIES.getArgument("some_environment2.properties"),
@@ -116,6 +121,7 @@ public class CommandLineOptionTest {
         assertEquals("saveImage2", target.getScreenshotoutput());
         assertEquals("reverse2", target.getTemplateoutput());
         assertEquals("report2", target.getResultoutput());
+        assertEquals(Context.TestNamePrefix.RESULT_DIR, target.getJunitReportPrefix());
         assertEquals("file2", target.getDownloadoutput());
         assertEquals("test2.json", target.getAspectFile());
         assertEquals("some_environment2.properties", target.getEnvironmentProperties());
@@ -131,7 +137,7 @@ public class CommandLineOptionTest {
         assertEquals(Long.valueOf(-1), target.getImplicitlyWait());
         assertEquals(Long.valueOf(-1), target.getPageLoadTimeout());
         assertEquals("Chrome", target.getDriver());
-        assertNull( target.getDriverPath());
+        assertNull(target.getDriverPath());
         assertEquals(0, target.getDriverConfig().size());
         assertEquals("UTF-8", target.getDatasourceEncoding());
         assertEquals("input", target.getDatasourceDirectory());
@@ -139,11 +145,11 @@ public class CommandLineOptionTest {
         assertEquals("template", target.getTemplateoutput());
         assertEquals("result", target.getResultoutput());
         assertEquals("download", target.getDownloadoutput());
-        assertNull( target.getAspectFile());
-        assertNull( target.getEnvironmentProperties());
+        assertNull(target.getAspectFile());
+        assertNull(target.getEnvironmentProperties());
         assertEquals(0, target.getEnvVar().size());
         assertNull(target.getLocale());
-        assertNull( target.getLocaleConf());
+        assertNull(target.getLocaleConf());
         assertEquals(0, target.getScripts().size());
     }
 

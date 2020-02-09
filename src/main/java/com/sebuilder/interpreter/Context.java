@@ -3,7 +3,6 @@ package com.sebuilder.interpreter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sebuilder.interpreter.step.type.SaveScreenshot;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -14,9 +13,12 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public enum Context {
 
@@ -32,6 +34,7 @@ public enum Context {
     private String dataSourceDirectory;
     private String dataSourceEncoding;
     private String resultOutputDirectory;
+    private TestNamePrefix junitReportPrefix;
     private String downloadDirectory;
     private String screenShotOutputDirectory;
     private String templateOutputDirectory;
@@ -100,6 +103,7 @@ public enum Context {
     public static ScriptParser getScriptParser(String scriptType) {
         return getInstance().scriptParsers.get(scriptType);
     }
+
     public static TestCaseConverter getTestCaseConverter() {
         return getInstance().testCaseConverter;
     }
@@ -130,6 +134,20 @@ public enum Context {
 
     public static File getResultOutputDirectory() {
         return new File(getInstance().resultOutputDirectory);
+    }
+
+    public static String getJunitReportPrefix() {
+        switch (getInstance().junitReportPrefix) {
+            case TIMESTAMP:
+                return "start" + DateTimeFormatter
+                        .ofPattern("yyyyMMddHHmmss")
+                        .format(LocalDateTime.now()) + ".";
+            case RESULT_DIR:
+                return getInstance().resultOutputDirectory
+                        .replace("/", "_")
+                        .replace("\\", "_") + ".";
+        }
+        return "";
     }
 
     public static String getDownloadDirectory() {
@@ -163,7 +181,7 @@ public enum Context {
         return variable;
     }
 
-    public Context ifMatch(boolean condition, Function<Context, Context> modifier)  {
+    public Context ifMatch(boolean condition, Function<Context, Context> modifier) {
         if (condition) {
             return modifier.apply(this);
         }
@@ -180,21 +198,19 @@ public enum Context {
         return this;
     }
 
-    public Context setBrowser(String browserName, String driverPath) {
+    public void setBrowser(String browserName, String driverPath) {
         this.setBrowser(browserName);
         this.setWebDriverPath(driverPath);
-        return this;
     }
 
     public Context setBrowser(String browser) {
         try {
-            setWebDriverFactory((WebDriverFactory) Class.forName("com.sebuilder.interpreter.browser." + browser).getDeclaredConstructor().newInstance());
+            return setWebDriverFactory((WebDriverFactory) Class.forName("com.sebuilder.interpreter.browser." + browser).getDeclaredConstructor().newInstance());
         } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
             throw new AssertionError("Unknown WebDriverFactory: " + "com.sebuilder.interpreter.browser." + browser, e);
         } catch (InstantiationException | IllegalAccessException e) {
             throw new AssertionError("Could not instantiate WebDriverFactory " + "com.sebuilder.interpreter.browser." + browser, e);
         }
-        return this;
     }
 
     public Context setWebDriverPath(String driverPath) {
@@ -251,6 +267,11 @@ public enum Context {
 
     public Context setResultOutputDirectory(String aResultOutputDirectory) {
         this.resultOutputDirectory = aResultOutputDirectory;
+        return this;
+    }
+
+    public Context setJunitReportPrefix(TestNamePrefix junitReportPrefix) {
+        this.junitReportPrefix = junitReportPrefix;
         return this;
     }
 
@@ -333,6 +354,22 @@ public enum Context {
                             , HashMap::new));
         } catch (IOException e) {
             return Maps.newHashMap();
+        }
+    }
+
+    public enum TestNamePrefix {
+        TIMESTAMP("timestamp"), RESULT_DIR("resultDir"), NONE("none");
+        private String name;
+
+        TestNamePrefix(String name) {
+            this.name = name;
+        }
+
+        public static TestNamePrefix fromName(String name) {
+            return Stream.of(TestNamePrefix.values())
+                    .filter(it -> it.name.equals(name))
+                    .findFirst()
+                    .get();
         }
     }
 }

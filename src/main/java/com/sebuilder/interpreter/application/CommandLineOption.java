@@ -3,11 +3,11 @@ package com.sebuilder.interpreter.application;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.sebuilder.interpreter.Context;
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineParser;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
 
 public class CommandLineOption {
@@ -20,6 +20,7 @@ public class CommandLineOption {
     private String datasourceEncoding = "UTF-8";
     private String datasourceDirectory = "input";
     private String resultoutput = "result";
+    private Context.TestNamePrefix junitReportPrefix = Context.TestNamePrefix.TIMESTAMP;
     private String downloadoutput = "download";
     private String screenshotoutput = "screenshot";
     private String templateoutput = "template";
@@ -39,7 +40,7 @@ public class CommandLineOption {
         this.parseArguments();
     }
 
-    private void parseArguments() throws IOException {
+    private void parseArguments() {
         for (String args : this.arguments) {
             if (args.startsWith("--")) {
                 String[] kv = args.split("=", 2);
@@ -63,6 +64,8 @@ public class CommandLineOption {
                     this.templateoutput = kv[1];
                 } else if (kv[0].equals(CommandLineArgument.RESULT_OUTPUT.key())) {
                     this.resultoutput = kv[1];
+                } else if (kv[0].equals(CommandLineArgument.JUNIT_REPORT_PREFIX.key())) {
+                    this.junitReportPrefix = Context.TestNamePrefix.fromName(kv[1]);
                 } else if (kv[0].equals(CommandLineArgument.DOWNLOAD_OUTPUT.key())) {
                     this.downloadoutput = kv[1];
                 } else if (kv[0].equals(CommandLineArgument.ASPECT.key())) {
@@ -120,6 +123,10 @@ public class CommandLineOption {
 
     public String getResultoutput() {
         return resultoutput;
+    }
+
+    public Context.TestNamePrefix getJunitReportPrefix() {
+        return this.junitReportPrefix;
     }
 
     public String getDownloadoutput() {

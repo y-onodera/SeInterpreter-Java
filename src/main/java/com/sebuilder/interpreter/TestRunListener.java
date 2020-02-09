@@ -6,7 +6,7 @@ import java.io.File;
 
 public interface TestRunListener {
 
-    String getStartTime();
+    String getReportPrefix();
 
     TestRunListener copy();
 

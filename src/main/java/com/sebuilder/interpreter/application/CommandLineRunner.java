@@ -65,6 +65,7 @@ public abstract class CommandLineRunner {
                     .setScreenShotOutputDirectory(option.getScreenshotoutput())
                     .setTemplateOutputDirectory(option.getTemplateoutput())
                     .setResultOutputDirectory(option.getResultoutput())
+                    .setJunitReportPrefix(option.getJunitReportPrefix())
                     .setDownloadDirectory(option.getDownloadoutput())
                     .ifMatch(!Strings.isNullOrEmpty(option.getAspectFile())
                             , it -> it.setAspect(option.getAspectFile())

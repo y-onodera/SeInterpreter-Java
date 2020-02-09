@@ -10,6 +10,7 @@ public enum CommandLineArgument {
     DATASOURCE_ENCODING("--datasource.encoding"),
     DATASOURCE_DIRECTORY("--datasource.directory"),
     RESULT_OUTPUT("--resultoutput"),
+    JUNIT_REPORT_PREFIX("--junitReportPrefix"),
     DOWNLOAD_OUTPUT("--downloadoutput"),
     SCREENSHOT_OUTPUT("--screenshotoutput"),
     TEMPLATE_OUTPUT("--templateoutput"),

@@ -1,5 +1,6 @@
 package com.sebuilder.interpreter.application;
 
+import com.google.common.base.Strings;
 import com.sebuilder.interpreter.*;
 import org.apache.logging.log4j.Logger;
 import org.apache.tools.ant.Project;
@@ -27,7 +28,7 @@ import java.util.stream.Collectors;
 
 public class TestRunListenerImpl implements TestRunListener {
     private final TestResultFormatter formatter;
-    private String startTime;
+    private String reportPrefix;
     private Project project;
     private File resultDir;
     private File downloadDirectory;
@@ -73,7 +74,7 @@ public class TestRunListenerImpl implements TestRunListener {
         this.error = 0;
         this.failed = 0;
         this.stepNo = 0;
-        this.startTime = extendFrom.getStartTime();
+        this.reportPrefix = extendFrom.getReportPrefix();
         this.resultDir = extendFrom.getResultDir();
         this.downloadDirectory = extendFrom.getDownloadDirectory();
         this.screenShotOutputDirectory = extendFrom.getScreenShotOutputDirectory();
@@ -87,32 +88,32 @@ public class TestRunListenerImpl implements TestRunListener {
 
     @Override
     public Logger getLog() {
-        return log;
+        return this.log;
     }
 
     @Override
-    public String getStartTime() {
-        return startTime;
+    public String getReportPrefix() {
+        return this.reportPrefix;
     }
 
     @Override
     public File getResultDir() {
-        return resultDir;
+        return this.resultDir;
     }
 
     @Override
     public File getDownloadDirectory() {
-        return downloadDirectory;
+        return this.downloadDirectory;
     }
 
     @Override
     public File getScreenShotOutputDirectory() {
-        return screenShotOutputDirectory;
+        return this.screenShotOutputDirectory;
     }
 
     @Override
     public File getTemplateOutputDirectory() {
-        return templateOutputDirectory;
+        return this.templateOutputDirectory;
     }
 
     @Override
@@ -143,7 +144,7 @@ public class TestRunListenerImpl implements TestRunListener {
 
     @Override
     public void setUpDir(File dest) {
-        this.startTime = "start" + DateTimeFormatter.ofPattern("yyyyMMddHHmmss").format(LocalDateTime.now());
+        this.reportPrefix = Context.getJunitReportPrefix();
         // create directory result save in
         this.resultDir = dest;
         Mkdir mkdir = new Mkdir();
@@ -163,7 +164,7 @@ public class TestRunListenerImpl implements TestRunListener {
 
     @Override
     public boolean openTestSuite(TestCase testCase, String testRunName, InputData aProperty) {
-        String testName = this.startTime + "." + testRunName.replace("_", ".");
+        String testName = this.reportPrefix + testRunName.replace("_", ".");
         this.log.info("open suite:" + testName);
         this.suite = new JUnitTest();
         this.suite.setName(testName);
