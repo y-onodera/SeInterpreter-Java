@@ -21,4 +21,9 @@ public class Edge extends Chrome {
     public String getDriverPath() {
         return System.getProperty("webdriver.edge.driver");
     }
+
+    @Override
+    public String getDriverName() {
+        return "msedgedriver.exe";
+    }
 }

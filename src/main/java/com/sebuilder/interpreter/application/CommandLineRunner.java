@@ -37,8 +37,8 @@ public abstract class CommandLineRunner {
         this.testRunListener = testRunListener;
     }
 
-    public void reloadBrowserSetting(String browserName, String driverPath) {
-        Context.getInstance().setBrowser(browserName, driverPath);
+    public void reloadBrowserSetting(String browserName, String driverPath, String binaryPath) {
+        Context.getInstance().setBrowser(browserName, driverPath, binaryPath);
     }
 
     public void setUp(String[] args) {

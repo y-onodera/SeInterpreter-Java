@@ -16,6 +16,7 @@
 
 package com.sebuilder.interpreter;
 
+import com.google.common.base.Strings;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.util.Map;
@@ -27,11 +28,32 @@ public interface WebDriverFactory {
      */
     RemoteWebDriver make(Map<String, String> config) throws Exception;
 
-    void setDriverPath(String driverPath);
-
     default String targetBrowser() {
         return this.getClass().getSimpleName();
     }
 
+    String getDriverName();
+
     String getDriverPath();
+
+    boolean isBinarySelectable();
+
+    default String getBinaryPath() {
+        if (this.isBinarySelectable()) {
+            return Context.getDriverConfig().getOrDefault("binary", null);
+        }
+        return null;
+    }
+
+    void setDriverPath(String driverPath);
+
+    default void setBinaryPath(String binaryPath) {
+        if (this.isBinarySelectable()) {
+            if (Strings.isNullOrEmpty(binaryPath)) {
+                Context.getDriverConfig().remove("binary");
+            } else {
+                Context.getDriverConfig().put("binary", binaryPath);
+            }
+        }
+    }
 }

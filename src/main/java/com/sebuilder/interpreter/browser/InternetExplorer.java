@@ -60,4 +60,14 @@ public class InternetExplorer implements WebDriverFactory {
     public String getDriverPath() {
         return System.getProperty("webdriver.ie.driver");
     }
+
+    @Override
+    public String getDriverName() {
+        return "IEDriverServer.exe";
+    }
+
+    @Override
+    public boolean isBinarySelectable() {
+        return false;
+    }
 }

@@ -71,4 +71,15 @@ public class Firefox implements WebDriverFactory {
     public String getDriverPath() {
         return System.getProperty("webdriver.gecko.driver");
     }
+
+    @Override
+    public String getDriverName() {
+        return "geckodriver.exe";
+    }
+
+    @Override
+    public boolean isBinarySelectable() {
+        return true;
+    }
+
 }

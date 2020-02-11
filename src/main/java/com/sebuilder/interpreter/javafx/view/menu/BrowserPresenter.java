@@ -2,8 +2,8 @@ package com.sebuilder.interpreter.javafx.view.menu;
 
 import com.google.common.base.Strings;
 import com.sebuilder.interpreter.Context;
+import com.sebuilder.interpreter.WebDriverFactory;
 import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -13,8 +13,7 @@ import javafx.stage.Stage;
 
 import javax.inject.Inject;
 import java.io.File;
-
-;
+import java.util.Objects;
 
 public class BrowserPresenter {
 
@@ -25,13 +24,13 @@ public class BrowserPresenter {
     private ComboBox<String> browserSelect;
 
     @FXML
-    private Button driverSearchButton;
-
-    @FXML
     private TextField driverText;
 
     @FXML
-    private Button editButton;
+    private TextField binaryText;
+
+    @FXML
+    private Button binarySearchButton;
 
     private String selectedBrowser;
 
@@ -41,17 +40,13 @@ public class BrowserPresenter {
 
     @FXML
     void initialize() {
-        assert browserSelect != null : "fx:id=\"browserSelect\" was not injected: check your FXML file 'browsersetting.fxml'.";
-        assert driverSearchButton != null : "fx:id=\"driverSearchButton\" was not injected: check your FXML file 'browsersetting.fxml'.";
-        assert driverText != null : "fx:id=\"driverText\" was not injected: check your FXML file 'browsersetting.fxml'.";
-        assert editButton != null : "fx:id=\"editButton\" was not injected: check your FXML file 'browsersetting.fxml'.";
         this.init(Context.getBrowser(), Context.getWebDriverFactory().getDriverPath());
     }
 
     @FXML
-    void selectBrowser(ActionEvent event) {
+    void selectBrowser() {
         String browser = browserSelect.getSelectionModel().getSelectedItem();
-        if (this.selectedBrowser.equals(browser)) {
+        if (Objects.equals(this.selectedBrowser, browser)) {
             return;
         }
         this.selectedBrowser = this.browserSelect.getSelectionModel().getSelectedItem();
@@ -59,7 +54,7 @@ public class BrowserPresenter {
     }
 
     @FXML
-    void setDriverPath(ActionEvent actionEvent) {
+    void setDriverPath() {
         this.currentDriverPath = this.driverText.getText();
         if (!Strings.isNullOrEmpty(this.currentDriverPath)) {
             this.parentDir = new File(this.currentDriverPath).getParentFile().getAbsoluteFile();
@@ -67,11 +62,11 @@ public class BrowserPresenter {
     }
 
     @FXML
-    void driverSearch(ActionEvent event) {
+    void driverSearch() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open Resource File");
         fileChooser.setInitialDirectory(this.parentDir);
-        fileChooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("select driver.exe", ".exe"));
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("select driver.exe", "*.exe"));
         Stage stage = new Stage();
         stage.initOwner(this.driverText.getScene().getWindow());
         File file = fileChooser.showOpenDialog(stage);
@@ -82,40 +77,48 @@ public class BrowserPresenter {
     }
 
     @FXML
-    void settingEdit(ActionEvent event) {
-        this.application.browserSetting(this.selectedBrowser, this.driverText.getText());
+    void binarySearch() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Open Resource File");
+        fileChooser.setInitialDirectory(this.parentDir);
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("select browser.exe", "*.exe"));
+        Stage stage = new Stage();
+        stage.initOwner(this.binaryText.getScene().getWindow());
+        File file = fileChooser.showOpenDialog(stage);
+        if (file != null && file.exists()) {
+            this.binaryText.setText(file.getAbsolutePath());
+        }
+    }
+
+    @FXML
+    void settingEdit() {
+        this.application.browserSetting(this.selectedBrowser
+                , this.driverText.getText()
+                , this.binaryText.getText());
         this.driverText.getScene().getWindow().hide();
     }
 
-    private void init(String selectedBrowser, String currentDriverPath) {
-        this.selectedBrowser = selectedBrowser;
-        this.currentDriverPath = currentDriverPath;
+    private void init(String aSelectedBrowser, String aCurrentDriverPath) {
         this.browserSelect.getItems().add("Chrome");
         this.browserSelect.getItems().add("Firefox");
         this.browserSelect.getItems().add("InternetExplorer");
         this.browserSelect.getItems().add("Edge");
-        if (this.selectedBrowser != null) {
-            this.browserSelect.getSelectionModel().select(this.selectedBrowser);
+        if (!Strings.isNullOrEmpty(aSelectedBrowser)) {
+            this.browserSelect.getSelectionModel().select(aSelectedBrowser);
         } else {
             this.browserSelect.getSelectionModel().select(0);
         }
-        if (this.currentDriverPath != null) {
+        this.selectBrowser();
+        if (!Strings.isNullOrEmpty(aCurrentDriverPath)) {
+            this.currentDriverPath = aCurrentDriverPath;
             this.driverText.setText(this.currentDriverPath);
             this.parentDir = new File(this.currentDriverPath).getParentFile().getAbsoluteFile();
-        } else {
-            this.populate();
         }
     }
 
     private void populate() {
-        String driverName = "chromedriver.exe";
-        if ("Firefox".equals(selectedBrowser)) {
-            driverName = "geckodriver.exe";
-        } else if ("Edge".equals(selectedBrowser)) {
-            driverName = "msedgedriver.exe";
-        } else if ("InternetExplorer".equals(selectedBrowser)) {
-            driverName = "IEDriverServer.exe";
-        }
+        WebDriverFactory webdriverFactory = Context.getWebDriverFactory(this.selectedBrowser);
+        String driverName = webdriverFactory.getDriverName();
         if (parentDir == null || !parentDir.exists()) {
             File driverParent = new File(Context.getBaseDirectory(), "exe/");
             if (!driverParent.exists()) {
@@ -124,5 +127,13 @@ public class BrowserPresenter {
             this.parentDir = driverParent.getAbsoluteFile();
         }
         this.driverText.setText(new File(parentDir, driverName).getAbsolutePath());
+        if (Objects.equals(this.selectedBrowser, Context.getWebDriverFactory().targetBrowser())) {
+            this.binaryText.setText(Context.getWebDriverFactory().getBinaryPath());
+        } else {
+            this.binaryText.setText(null);
+        }
+        this.binaryText.setDisable(!webdriverFactory.isBinarySelectable());
+        this.binarySearchButton.setDisable(binaryText.isDisable());
     }
+
 }

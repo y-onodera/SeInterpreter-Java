@@ -251,8 +251,8 @@ public class SeInterpreterApplication extends Application {
         this.saveContents(new File(this.getDisplayTestCase().path()), this.getTestCaseConverter().toString(this.getDisplayTestCase()));
     }
 
-    public void browserSetting(String selectedBrowser, String driverPath) {
-        this.runner.reloadSetting(selectedBrowser, driverPath);
+    public void browserSetting(String selectedBrowser, String driverPath, String binaryPath) {
+        this.runner.reloadSetting(selectedBrowser, driverPath, binaryPath);
         this.browserOpen();
     }
 

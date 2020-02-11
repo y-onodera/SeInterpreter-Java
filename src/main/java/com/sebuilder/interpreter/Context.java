@@ -96,6 +96,16 @@ public enum Context {
         return getInstance().wdf;
     }
 
+    public static WebDriverFactory getWebDriverFactory(String browser) {
+        try {
+            return (WebDriverFactory) Class.forName("com.sebuilder.interpreter.browser." + browser).getDeclaredConstructor().newInstance();
+        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
+            throw new AssertionError("Unknown WebDriverFactory: " + "com.sebuilder.interpreter.browser." + browser, e);
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new AssertionError("Could not instantiate WebDriverFactory " + "com.sebuilder.interpreter.browser." + browser, e);
+        }
+    }
+
     public static ScriptParser getScriptParser() {
         return getScriptParser(getDefaultScript());
     }
@@ -198,19 +208,17 @@ public enum Context {
         return this;
     }
 
-    public void setBrowser(String browserName, String driverPath) {
-        this.setBrowser(browserName);
-        this.setWebDriverPath(driverPath);
+    public void setBrowser(String browserName, String driverPath, String binaryPath) {
+        this.setBrowser(browserName, driverPath).wdf.setBinaryPath(binaryPath);
+    }
+
+    public Context setBrowser(String browserName, String driverPath) {
+        return this.setBrowser(browserName)
+                .setWebDriverPath(driverPath);
     }
 
     public Context setBrowser(String browser) {
-        try {
-            return setWebDriverFactory((WebDriverFactory) Class.forName("com.sebuilder.interpreter.browser." + browser).getDeclaredConstructor().newInstance());
-        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
-            throw new AssertionError("Unknown WebDriverFactory: " + "com.sebuilder.interpreter.browser." + browser, e);
-        } catch (InstantiationException | IllegalAccessException e) {
-            throw new AssertionError("Could not instantiate WebDriverFactory " + "com.sebuilder.interpreter.browser." + browser, e);
-        }
+        return setWebDriverFactory(getWebDriverFactory(browser));
     }
 
     public Context setWebDriverPath(String driverPath) {

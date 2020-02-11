@@ -47,13 +47,13 @@ public class SeInterpreterRunner {
         return this.globalListener.getTemplateOutputDirectory();
     }
 
-    public void reloadSetting(String browserName, String driverPath) {
+    public void reloadSetting(String browserName, String driverPath, String binaryPath) {
         if (this.isOpen()) {
             this.close();
         } else {
             this.setUp();
         }
-        this.repl.reloadBrowserSetting(browserName, driverPath);
+        this.repl.reloadBrowserSetting(browserName, driverPath, binaryPath);
     }
 
     public boolean isOpen() {

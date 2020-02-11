@@ -1,5 +1,6 @@
 package com.sebuilder.interpreter.browser;
 
+import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.WebDriverFactory;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -31,6 +32,16 @@ public class Chrome implements WebDriverFactory {
         return System.getProperty("webdriver.chrome.driver");
     }
 
+    @Override
+    public String getDriverName() {
+        return "chromedriver.exe";
+    }
+
+    @Override
+    public boolean isBinarySelectable() {
+        return true;
+    }
+
     protected ChromeOptions getOptions(Map<String, String> config) {
         HashMap<String, String> caps = new HashMap<String, String>();
         HashMap<String, String> prefs = new HashMap<String, String>();
@@ -48,7 +59,7 @@ public class Chrome implements WebDriverFactory {
             }
         });
         option.setExperimentalOption("prefs", prefs);
-        return option.merge( new DesiredCapabilities(caps));
+        return option.merge(new DesiredCapabilities(caps));
     }
 
 }
