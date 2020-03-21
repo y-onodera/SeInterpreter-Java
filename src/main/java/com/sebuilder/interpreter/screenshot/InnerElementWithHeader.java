@@ -11,17 +11,27 @@ import java.util.Map;
 public class InnerElementWithHeader implements InnerElement {
     private final InnerElement element;
     private final InnerElement headerElement;
+    private final ScrollableWidth width;
+    private final ScrollableHeight height;
 
     public InnerElementWithHeader(InnerElement element, InnerElement headerElement) {
         this.element = element;
         this.headerElement = new ScrollableTag(headerElement.getParent()
                 , element.getElement()
-                , headerElement.getPointY()
-                , headerElement.getScrollableHeight()
-                , headerElement.getViewportHeight()
-                , element.getPointX()
-                , element.getScrollableWidth()
-                , element.getViewportWidth());
+                , headerElement.getHeight()
+                , element.getWidth());
+        this.width = element.getWidth();
+        this.height = new Height(element, headerElement);
+    }
+
+    @Override
+    public ScrollableWidth getWidth() {
+        return this.width;
+    }
+
+    @Override
+    public ScrollableHeight getHeight() {
+        return this.height;
     }
 
     @Override
@@ -46,10 +56,7 @@ public class InnerElementWithHeader implements InnerElement {
                 , headerImage.getWidth()
                 , element.convertImageHeight(this.element.getPointY() - this.headerElement.getPointY()));
         graphics.drawImage(headerImage, 0, 0, null);
-        int mainImageStartFrom = element.convertDocumentHeight(headerImage.getHeight());
-        if (!this.element.getParent().hasVerticalScroll()) {
-            mainImageStartFrom = mainImageStartFrom + fromPointY;
-        }
+        int mainImageStartFrom = element.convertDocumentHeight(headerImage.getHeight()) + fromPointY;
         graphics.drawImage(this.element.printImage(aPrinter
                 , mainImageStartFrom)
                 , 0
@@ -75,197 +82,136 @@ public class InnerElementWithHeader implements InnerElement {
     }
 
     @Override
-    public int getPointY() {
-        return this.headerElement.getPointY();
-    }
-
-    @Override
     public Printable getParent() {
         return element.getParent();
     }
 
     @Override
-    public int getViewportHeight() {
-        return element.getViewportHeight() + this.element.getPointY() - this.headerElement.getPointY();
-    }
-
-    @Override
-    public int getScrollableHeight() {
-        return element.getScrollableHeight() + this.element.getPointY() - this.headerElement.getPointY();
-    }
-
-    @Override
     public int getInnerScrollHeight() {
-        return element.getInnerScrollHeight();
-    }
-
-    @Override
-    public int getScrollHeight() {
-        return element.getScrollHeight();
+        return this.element.getInnerScrollHeight();
     }
 
     @Override
     public int getFullImageHeight() {
-        return element.getFullImageHeight() + this.convertImageHeight(this.element.getPointY() - this.headerElement.getPointY());
-    }
-
-    @Override
-    public boolean hasVerticalScroll() {
-        return element.hasVerticalScroll();
-    }
-
-    @Override
-    public boolean isMoveScrollTopTo(int aPointY) {
-        return element.isMoveScrollTopTo(aPointY);
+        return this.element.getFullImageHeight() + this.convertImageHeight(this.element.getPointY() - this.headerElement.getPointY());
     }
 
     @Override
     public Map<Integer, InnerElement> getInnerVerticalScrollableElement() {
-        return element.getInnerVerticalScrollableElement();
-    }
-
-    @Override
-    public void scrollVertically(int scrollY) {
-        element.scrollVertically(scrollY);
-    }
-
-    @Override
-    public void scrollVertically(int scrollY, WebElement element) {
-        this.element.scrollVertically(scrollY, element);
-    }
-
-    @Override
-    public int scrollOutVertically(int printedHeight, int scrolledHeight) {
-        return element.scrollOutVertically(printedHeight, scrolledHeight);
+        return this.element.getInnerVerticalScrollableElement();
     }
 
     @Override
     public int nextPrintableHeight(int remainViewPortHeight, int printedHeight) {
-        return element.nextPrintableHeight(remainViewPortHeight, printedHeight);
+        return this.element.nextPrintableHeight(remainViewPortHeight, printedHeight);
     }
 
     @Override
     public int convertImageHeight(int documentHeight) {
-        return element.convertImageHeight(documentHeight);
+        return this.element.convertImageHeight(documentHeight);
     }
 
     @Override
     public int convertDocumentHeight(int imageHeight) {
-        return element.convertDocumentHeight(imageHeight);
+        return this.element.convertDocumentHeight(imageHeight);
     }
 
     @Override
     public int getImageHeight() {
-        return element.getImageHeight();
+        return this.element.getImageHeight();
     }
 
     @Override
     public int getImageWidth() {
-        return element.getImageWidth();
+        return this.element.getImageWidth();
     }
 
     @Override
     public int getWindowHeight() {
-        return element.getWindowHeight();
+        return this.element.getWindowHeight();
     }
 
     @Override
     public int getWindowWidth() {
-        return element.getWindowWidth();
+        return this.element.getWindowWidth();
     }
 
     @Override
     public int getFullHeight() {
-        return element.getFullHeight();
+        return this.element.getFullHeight();
     }
 
     @Override
     public int getFullWidth() {
-        return element.getFullWidth();
+        return this.element.getFullWidth();
     }
 
     @Override
     public BufferedImage getScreenshot() {
-        return element.getScreenshot();
-    }
-
-    @Override
-    public long scrollTimeout() {
-        return element.scrollTimeout();
-    }
-
-    @Override
-    public void waitForScrolling() {
-        element.waitForScrolling();
-    }
-
-    @Override
-    public int getPointX() {
-        return element.getPointX();
-    }
-
-    @Override
-    public int getViewportWidth() {
-        return element.getViewportWidth();
-    }
-
-    @Override
-    public int getScrollableWidth() {
-        return element.getScrollableWidth();
+        return this.element.getScreenshot();
     }
 
     @Override
     public int getInnerScrollWidth() {
-        return element.getInnerScrollWidth();
-    }
-
-    @Override
-    public int getScrollWidth() {
-        return element.getScrollWidth();
+        return this.element.getInnerScrollWidth();
     }
 
     @Override
     public int getFullImageWidth() {
-        return element.getFullImageWidth();
-    }
-
-    @Override
-    public boolean hasHorizontalScroll() {
-        return element.hasHorizontalScroll();
-    }
-
-    @Override
-    public boolean isMoveScrollLeftTo(int aPointX) {
-        return element.isMoveScrollLeftTo(aPointX);
+        return this.element.getFullImageWidth();
     }
 
     @Override
     public Map<Integer, InnerElement> getInnerHorizontalScrollableElement() {
-        return element.getInnerHorizontalScrollableElement();
-    }
-
-    @Override
-    public void scrollHorizontally(int scrollX) {
-        element.scrollHorizontally(scrollX);
-    }
-
-    @Override
-    public void scrollHorizontally(int scrollX, WebElement element) {
-        this.element.scrollHorizontally(scrollX, element);
-    }
-
-    @Override
-    public int scrollOutHorizontally(int printedWidth) {
-        return element.scrollOutHorizontally(printedWidth);
+        return this.element.getInnerHorizontalScrollableElement();
     }
 
     @Override
     public int convertImageWidth(int documentWidth) {
-        return element.convertImageWidth(documentWidth);
+        return this.element.convertImageWidth(documentWidth);
     }
 
     @Override
     public int convertDocumentWidth(int imageWidth) {
-        return element.convertDocumentWidth(imageWidth);
+        return this.element.convertDocumentWidth(imageWidth);
+    }
+
+    private static class Height extends ScrollableHeight {
+        private final InnerElement element;
+
+        public Height(InnerElement element, InnerElement headerElement) {
+            super(new ScrollableHeight.Builder()
+                    .setWebDriver(element.getWebDriver())
+                    .setPointY(headerElement.getPointY())
+                    .setViewportHeight(element.getViewportHeight() + element.getPointY() - headerElement.getPointY())
+                    .setScrollableHeight(element.getScrollableHeight() + element.getPointY() - headerElement.getPointY())
+            );
+            this.element = element;
+        }
+
+        @Override
+        public int getScrollHeight() {
+            return this.element.getScrollHeight();
+        }
+
+        @Override
+        public boolean hasVerticalScroll() {
+            return this.element.hasVerticalScroll();
+        }
+
+        @Override
+        public boolean isEnableMoveScrollTopTo(int aPointY) {
+            return this.element.isEnableMoveScrollTopTo(aPointY);
+        }
+
+        @Override
+        public void scrollVertically(int scrollY) {
+            this.element.scrollVertically(scrollY);
+        }
+
+        @Override
+        public int scrollOutVertically(int printedHeight, int scrolledHeight) {
+            return this.element.scrollOutVertically(printedHeight, scrolledHeight);
+        }
     }
 }

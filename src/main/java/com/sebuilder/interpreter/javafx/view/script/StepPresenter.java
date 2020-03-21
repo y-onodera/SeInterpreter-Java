@@ -86,6 +86,14 @@ public class StepPresenter {
             , "storeCurrentUrl"
             , "storeTitle"
             , "storeText"
+            , "storePointX"
+            , "storePointY"
+            , "storeClientHeight"
+            , "storeClientWidth"
+            , "storeScrollableHeight"
+            , "storeScrollableWidth"
+            , "storeWindowHeight"
+            , "storeWindowWidth"
             , "storeVariable"
             , "storeCookieByName"
             , "storeCmd"
@@ -104,6 +112,14 @@ public class StepPresenter {
             , "printBodyText"
             , "printPageSource"
             , "printText"
+            , "printPointX"
+            , "printPointY"
+            , "printClientHeight"
+            , "printClientWidth"
+            , "printScrollableHeight"
+            , "printScrollableWidth"
+            , "printWindowHeight"
+            , "printWindowWidth"
             , "printVariable"
             , "printCookieByName"
             , "printCmd"
@@ -188,6 +204,12 @@ public class StepPresenter {
             , "SwitchToWindowByIndex"
             , "SwitchToWindowByTitle"
             , "SaveScreenshot"
+            , "ScrollUp"
+            , "ScrollDown"
+            , "ScrollLeft"
+            , "ScrollRight"
+            , "ScrollHorizontally"
+            , "ScrollVertically"
             , "ExportTemplate"
             , "SetWindowSize"
             , "WindowMaximize"
@@ -373,7 +395,11 @@ public class StepPresenter {
         select.getItems().add("css selector");
         select.getItems().add("xpath");
         select.getItems().add("link text");
-        String type = step.getLocator(locator).type.toString();
+        Locator current = step.getLocator(locator);
+        String type = "";
+        if (!Strings.isNullOrEmpty(current.value)) {
+            type = current.type.toString();
+        }
         if (this.isDefaultLocator(locator)) {
             locatorTypeSelect = select;
             if (!type.equals("")) {

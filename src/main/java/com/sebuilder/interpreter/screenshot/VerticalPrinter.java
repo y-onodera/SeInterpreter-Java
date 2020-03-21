@@ -89,11 +89,11 @@ public class VerticalPrinter {
                     this.appendImage(scrollElement.printImage(new VerticalPrinter(), printFrom + notScrolled));
                 }
 
-                if (printTarget.isMoveScrollTopTo(printTarget.convertDocumentHeight(this.getPrintedHeight()) + scrollElement.getViewportHeight())) {
-                    this.verticallyScrollOutPrintedPart(printTarget, scrollElement.getViewportHeight());
+                if (printTarget.isEnableMoveScrollTopTo(printTarget.convertDocumentHeight(this.getPrintedHeight()) + scrollElement.getViewportHeight())) {
+                    this.verticallyScrollOutPrintedPart(printTarget, printTarget.convertImageHeight(scrollElement.getViewportHeight()));
                     viewportPrint = 0;
                 } else {
-                    this.appendPrintedHeight(scrollElement.getViewportHeight());
+                    this.appendPrintedHeight(printTarget.convertImageHeight(scrollElement.getViewportHeight()));
                     if (viewportPrint + scrollElement.getViewportHeight() > printTarget.getViewportHeight()) {
                         printTarget.scrollVertically(printTarget.getScrollableHeight() - printTarget.getViewportHeight());
                         viewportPrint = printTarget.getViewportHeight() - (printTarget.getScrollableHeight() - pointY - scrollElement.getViewportHeight());
@@ -173,12 +173,12 @@ public class VerticalPrinter {
         return this.verticallyScrollOutPrintedPart(printTarget, printedHeight, 0);
     }
 
-    protected int verticallyScrollOut(Printable printTarget, int printedHeight) {
-        int notScrolled = printTarget.scrollOutVertically(printedHeight, this.scrolledHeight);
+    protected int verticallyScrollOut(Printable printTarget, int toBeScroll) {
+        int notScrolled = printTarget.scrollOutVertically(toBeScroll, this.scrolledHeight);
         if (notScrolled == 0) {
-            this.scrolledHeight = this.scrolledHeight + printedHeight;
+            this.scrolledHeight = this.scrolledHeight + toBeScroll;
         } else {
-            this.scrolledHeight = this.scrolledHeight + printedHeight - notScrolled;
+            this.scrolledHeight = this.scrolledHeight + toBeScroll - notScrolled;
         }
         return notScrolled;
     }

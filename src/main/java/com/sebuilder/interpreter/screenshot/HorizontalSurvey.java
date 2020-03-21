@@ -1,62 +1,46 @@
 package com.sebuilder.interpreter.screenshot;
 
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebElement;
-
 import java.util.Map;
 
-public interface HorizontalSurvey extends DocumentSurvey, Scrollable {
+public interface HorizontalSurvey extends DocumentSurvey {
 
-    int getPointX();
+    ScrollableWidth getWidth();
 
-    int getViewportWidth();
+    default int getPointX() {
+        return this.getWidth().getPointX();
+    }
 
-    int getScrollableWidth();
+    default int getViewportWidth() {
+        return this.getWidth().getViewportWidth();
+    }
 
-    int getInnerScrollWidth();
+    default int getScrollableWidth() {
+        return this.getWidth().getScrollableWidth();
+    }
 
     default int getScrollWidth() {
-        return getScrollableWidth() - getViewportWidth();
+        return this.getWidth().getScrollWidth();
     }
+
+    default boolean hasHorizontalScroll() {
+        return this.getWidth().hasHorizontalScroll();
+    }
+
+    default void scrollHorizontally(int scrollX) {
+        this.getWidth().scrollHorizontally(scrollX);
+    }
+
+    default int scrollOutHorizontally(int printedWidth) {
+        return this.getWidth().scrollOutHorizontally(printedWidth);
+    }
+
+    int getInnerScrollWidth();
 
     default int getFullImageWidth() {
         return this.convertImageWidth(this.getWindowWidth() + this.getScrollWidth() + this.getInnerScrollWidth());
     }
 
-    default boolean hasHorizontalScroll() {
-        return this.getScrollableWidth() > this.getViewportWidth();
-    }
-
-    default boolean isMoveScrollLeftTo(int aPointX) {
-        return aPointX + this.getViewportWidth() < this.getScrollableWidth();
-    }
-
     Map<Integer, InnerElement> getInnerHorizontalScrollableElement();
-
-    default void scrollHorizontally(int scrollX) {
-        if (this.hasHorizontalScroll()) {
-            ((JavascriptExecutor) getWebDriver()).executeScript("scrollTo(arguments[0] ,0); return [];", scrollX);
-            waitForScrolling();
-        }
-    }
-
-    default void scrollHorizontally(int scrollX, WebElement element) {
-        this.getWebDriver().executeScript("arguments[0].scrollLeft = arguments[1]; return [];", element, scrollX);
-        waitForScrolling();
-    }
-
-    default int scrollOutHorizontally(int printedWidth) {
-        if (this.isMoveScrollLeftTo(printedWidth)) {
-            this.scrollHorizontally(printedWidth);
-            return 0;
-        }
-        if (this.getViewportWidth() >= this.getScrollableWidth()) {
-            return printedWidth;
-        }
-        final int scrollX = this.getScrollableWidth() - this.getViewportWidth();
-        this.scrollHorizontally(scrollX);
-        return printedWidth - scrollX;
-    }
 
     default int convertImageWidth(int documentWidth) {
         return documentWidth * this.getImageWidth() / this.getWindowWidth();

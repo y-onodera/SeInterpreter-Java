@@ -1,6 +1,10 @@
 package com.sebuilder.interpreter.screenshot;
 
 import com.sebuilder.interpreter.TestRun;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.awt.image.BufferedImage;
@@ -25,4 +29,5 @@ public interface Printable extends VerticalSurvey, HorizontalSurvey {
     }
 
     Map<Integer, InnerElement> getInnerScrollableElement();
+
 }

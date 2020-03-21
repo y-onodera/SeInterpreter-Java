@@ -1,67 +1,54 @@
 package com.sebuilder.interpreter.screenshot;
 
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebElement;
-
 import java.util.Map;
 
-public interface VerticalSurvey extends DocumentSurvey, Scrollable {
+public interface VerticalSurvey extends DocumentSurvey {
 
-    int getPointY();
+    ScrollableHeight getHeight();
 
-    int getViewportHeight();
-
-    int getScrollableHeight();
-
-    int getInnerScrollHeight();
-
-    default int getScrollHeight() {
-        return getScrollableHeight() - getViewportHeight();
+    default int getPointY() {
+        return this.getHeight().getPointY();
     }
 
-    default int getFullImageHeight() {
-        return this.convertImageHeight(this.getScrollableHeight() + this.getInnerScrollHeight());
+    default int getViewportHeight() {
+        return this.getHeight().getViewportHeight();
+    }
+
+    default int getScrollableHeight() {
+        return this.getHeight().getScrollableHeight();
+    }
+
+    default int getScrollHeight() {
+        return this.getHeight().getScrollHeight();
     }
 
     default boolean hasVerticalScroll() {
-        return this.getScrollableHeight() > this.getViewportHeight();
+        return this.getHeight().hasVerticalScroll();
     }
 
-    default boolean isMoveScrollTopTo(int aPointY) {
-        return aPointY + this.getViewportHeight() < this.getScrollableHeight();
+    default boolean isEnableMoveScrollTopTo(int aPointY) {
+        return this.getHeight().isEnableMoveScrollTopTo(aPointY);
     }
-
-    Map<Integer, InnerElement> getInnerVerticalScrollableElement();
 
     default void scrollVertically(int scrollY) {
-        if (this.hasVerticalScroll()) {
-            ((JavascriptExecutor) getWebDriver()).executeScript("scrollTo(0, arguments[0]); return [];", scrollY);
-            waitForScrolling();
-        }
+        this.getHeight().scrollVertically(scrollY);
     }
 
-    default void scrollVertically(int scrollY, WebElement element) {
-        this.getWebDriver().executeScript("arguments[0].scrollTop = arguments[1]; return [];", element, scrollY);
-        waitForScrolling();
-    }
-
-    default int scrollOutVertically(int printedHeight, int scrolledHeight) {
-        int nextScrollTop = printedHeight + scrolledHeight;
-        if (this.isMoveScrollTopTo(nextScrollTop)) {
-            this.scrollVertically(nextScrollTop);
-            return 0;
-        }
-        if (this.getViewportHeight() >= this.getScrollableHeight()) {
-            return nextScrollTop;
-        }
-        final int scrollY = this.getScrollableHeight() - this.getViewportHeight();
-        this.scrollVertically(scrollY);
-        return nextScrollTop - scrollY;
+    default int scrollOutVertically(int toBeScrollOut, int scrolledHeight) {
+        return this.getHeight().scrollOutVertically(toBeScrollOut, scrolledHeight);
     }
 
     default int nextPrintableHeight(int remainViewPortHeight, int printedHeight) {
         return Math.min(remainViewPortHeight, this.getScrollableHeight() - printedHeight);
     }
+
+    int getInnerScrollHeight();
+
+    default int getFullImageHeight() {
+        return this.convertImageHeight(this.getScrollableHeight() + this.getInnerScrollHeight());
+    }
+
+    Map<Integer, InnerElement> getInnerVerticalScrollableElement();
 
     default int convertImageHeight(int documentHeight) {
         return documentHeight * this.getImageHeight() / this.getWindowHeight();

@@ -17,10 +17,12 @@
 package com.sebuilder.interpreter;
 
 import org.apache.logging.log4j.Logger;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import javax.annotation.Nonnull;
 import java.io.File;
+import java.util.Objects;
 
 /**
  * A single finish of a test head.
@@ -144,6 +146,38 @@ public class TestRun {
         // This kind of variable substitution makes for short code, but it's inefficient.
         l.value = this.bindRuntimeVariables(l.value);
         return l;
+    }
+
+    public int getWindowHeight() {
+        return ((Number) this.driver().executeScript("return window.innerHeight;", new Object[0])).intValue();
+    }
+
+    public int getWindowWidth() {
+        return ((Number)driver().executeScript("return window.innerWidth;", new Object[0])).intValue();
+    }
+
+    public int getClientHeight() {
+        return ((Number) this.driver().executeScript("return document.documentElement.clientHeight;", new Object[0])).intValue();
+    }
+
+    public int getClientWidth() {
+        return ((Number)driver().executeScript("return document.documentElement.clientWidth;", new Object[0])).intValue();
+    }
+
+    public int getContentHeight() {
+        WebElement body = driver().findElementByTagName("body");
+        if (Objects.equals(body.getCssValue("overflow"), "hidden") || Objects.equals(body.getCssValue("overflow-y"), "hidden")) {
+            return getClientHeight();
+        }
+        return ((Number) driver().executeScript("return Math.max(document.body.scrollHeight, document.body.offsetHeight,document.documentElement.clientHeight, document.documentElement.scrollHeight, document.documentElement.offsetHeight);", new Object[0])).intValue();
+    }
+
+    public int getContentWidth() {
+        WebElement body = driver().findElementByTagName("body");
+        if (Objects.equals(body.getCssValue("overflow"), "hidden") || Objects.equals(body.getCssValue("overflow-x"), "hidden")) {
+            return getClientWidth();
+        }
+        return ((Number) driver().executeScript("return Math.max(document.body.scrollWidth, document.body.offsetWidth,document.documentElement.clientWidth, document.documentElement.scrollWidth, document.documentElement.offsetWidth);", new Object[0])).intValue();
     }
 
     public boolean isStopped() {

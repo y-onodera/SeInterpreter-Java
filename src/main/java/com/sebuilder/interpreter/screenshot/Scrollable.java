@@ -2,7 +2,9 @@ package com.sebuilder.interpreter.screenshot;
 
 public interface Scrollable {
 
-    long scrollTimeout();
+    default long scrollTimeout() {
+        return 100;
+    }
 
     default void waitForScrolling() {
         try {

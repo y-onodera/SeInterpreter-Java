@@ -27,8 +27,7 @@ public class HorizontalPrinter {
     }
 
     protected void printImage(HorizontalSurvey target) {
-        this.setUpPrint(target);
-        int fromPointX = target.getPointX();
+        int fromPointX = this.setUpPrint(target);
         int viewportPrintFrom = fromPointX;
         int viewportWidth = target.getViewportWidth();
         int remainViewPortWidth = viewportWidth;
@@ -45,14 +44,25 @@ public class HorizontalPrinter {
                 }
             }
         }
-        final int printed = target.getPointX() + target.getViewportWidth();
+        final int printed = fromPointX + target.getViewportWidth();
         this.appendImage(this.getScreenshot(target, printed, target.getWindowWidth() - printed));
     }
 
-    protected void setUpPrint(HorizontalSurvey printTarget) {
+    protected int setUpPrint(HorizontalSurvey printTarget) {
         printTarget.scrollHorizontally(0);
         this.resetPrintedWidth();
-        this.appendImage(this.getScreenshot(printTarget, 0, printTarget.getPointX()));
+        if (printTarget.getPointX() > 0) {
+            boolean isParentScrollable = printTarget instanceof InnerElement && printTarget.hasHorizontalScroll();
+            if (isParentScrollable) {
+                ((InnerElement) printTarget).getParent().scrollHorizontally(0);
+            }
+            this.appendImage(this.getScreenshot(printTarget, 0, printTarget.getPointX()));
+            if (isParentScrollable) {
+                int notScrolled = ((InnerElement) printTarget).getParent().scrollOutHorizontally(printTarget.getPointX());
+                return notScrolled;
+            }
+        }
+        return printTarget.getPointX();
     }
 
     protected void resetPrintedWidth() {
@@ -87,11 +97,11 @@ public class HorizontalPrinter {
         int height = part.getHeight();
         int width = Math.min(part.getWidth(), viewportWidth);
         if (remainWidth < width) {
-            if (printFrom + viewportWidth < part.getWidth()) {
+            if (printFrom + remainWidth < part.getWidth()) {
                 part = getBufferedImage(printFrom, remainWidth, part, height);
             } else {
                 if (printFrom + remainWidth < part.getWidth()) {
-                    part = getBufferedImage(printFrom, remainWidth, part, height);
+                    part = getBufferedImage(part.getWidth() - remainWidth, remainWidth, part, height);
                 } else if (printFrom < part.getWidth()) {
                     part = getBufferedImage(printFrom, part, height);
                 }

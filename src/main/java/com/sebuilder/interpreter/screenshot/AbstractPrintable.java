@@ -9,34 +9,27 @@ import java.util.stream.Collectors;
 public abstract class AbstractPrintable implements Printable {
 
     private final TestRun ctx;
-    private final long scrollTimeout;
     private SortedMap<Integer, InnerElement> innerScrollableElement;
     private int innerScrollHeight;
     private int innerScrollWidth;
 
-    protected AbstractPrintable(TestRun ctx, long scrollTimeout) {
+    protected AbstractPrintable(TestRun ctx) {
         this.ctx = ctx;
-        this.scrollTimeout = scrollTimeout;
-    }
-
-    @Override
-    public long scrollTimeout() {
-        return this.scrollTimeout;
     }
 
     @Override
     public TestRun getCtx() {
-        return ctx;
+        return this.ctx;
     }
 
     @Override
     public int getInnerScrollHeight() {
-        return innerScrollHeight;
+        return this.innerScrollHeight;
     }
 
     @Override
     public int getInnerScrollWidth() {
-        return innerScrollWidth;
+        return this.innerScrollWidth;
     }
 
     @Override

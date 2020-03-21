@@ -59,7 +59,7 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
                     throw new RuntimeException("Can not load screenshot data", var9);
                 }
             } else {
-                Page target = new Page(ctx, 100, new LocatorInnerScrollElementHandler(wd));
+                Page target = new Page(ctx, new LocatorInnerScrollElementHandler());
                 actual = target.printImage(new VerticalPrinter(), 0);
             }
             if (ctx.getBoolean("verify")) {
@@ -86,6 +86,12 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
         }
         if (!o.containsStringParam("verify")) {
             o.put("verify", "false");
+        }
+        if (!o.containsStringParam("default")) {
+            o.put("default", "false");
+        }
+        if (!o.containsStringParam("locatorHeader")) {
+            LocatorHolder.super.addDefaultParam("locatorHeader", o);
         }
         return o.apply(LocatorHolder.super::addDefaultParam);
     }

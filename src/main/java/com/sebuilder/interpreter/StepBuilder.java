@@ -23,23 +23,23 @@ public class StepBuilder {
     }
 
     public boolean isNegated() {
-        return negated;
+        return this.negated;
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public StepType getStepType() {
-        return stepType;
+        return this.stepType;
     }
 
     public Map<String, String> getStringParams() {
-        return stringParams;
+        return this.stringParams;
     }
 
     public Map<String, Locator> getLocatorParams() {
-        return locatorParams;
+        return this.locatorParams;
     }
 
     public boolean containsStringParam(String paramKey) {
