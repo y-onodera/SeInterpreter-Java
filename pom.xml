@@ -17,6 +17,21 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+    <profiles>
+        <profile>
+            <id>build</id>
+            <properties>
+                <javafx.scope>provided</javafx.scope>
+            </properties>
+        </profile>
+        <profile>
+            <id>testrun</id>
+            <activation><activeByDefault>true</activeByDefault></activation>
+            <properties>
+                <javafx.scope>compile</javafx.scope>
+            </properties>
+        </profile>
+    </profiles>
     <dependencies>
         <dependency>
             <groupId>args4j</groupId>
@@ -88,6 +103,12 @@
             <groupId>com.dlsc.afterburner</groupId>
             <artifactId>afterburner.fx</artifactId>
             <version>2.0.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.openjfx</groupId>
+                    <artifactId>javafx-swing</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.controlsfx</groupId>
@@ -102,31 +123,35 @@
                     <groupId>org.openjfx</groupId>
                     <artifactId>javafx-media</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.openjfx</groupId>
+                    <artifactId>javafx-swing</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-base</artifactId>
             <version>15.0.1</version>
-            <scope>provided</scope>
+            <scope>${javafx.scope}</scope>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
             <version>15.0.1</version>
-            <scope>provided</scope>
+            <scope>${javafx.scope}</scope>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
             <version>15.0.1</version>
-            <scope>provided</scope>
+            <scope>${javafx.scope}</scope>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-graphics</artifactId>
             <version>15.0.1</version>
-            <scope>provided</scope>
+            <scope>${javafx.scope}</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
@@ -239,6 +264,22 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>0.0.5</version>
+                <configuration>
+                    <mainClass>com.sebuilder.interpreter.javafx.application.SeInterpreterApplication</mainClass>
+                    <options>
+                        <option>--add-modules</option>
+                        <option>javafx.controls,javafx.fxml</option>
+                        <option>--add-opens</option>
+                        <option>javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED</option>
+                        <option> --add-opens</option>
+                        <option>javafx.base/com.sun.javafx.event=ALL-UNNAMED</option>
+                    </options>
+                </configuration>
             </plugin>
         </plugins>
     </build>
