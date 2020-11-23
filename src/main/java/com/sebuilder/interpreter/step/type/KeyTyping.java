@@ -3,12 +3,15 @@ package com.sebuilder.interpreter.step.type;
 import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.step.AbstractStepType;
+import org.openqa.selenium.interactions.Actions;
 
-public class KeyTyping extends AbstractStepType  {
+public class KeyTyping extends AbstractStepType {
 
     @Override
     public boolean run(TestRun ctx) {
-        ctx.driver().getKeyboard().sendKeys(ctx.text());
+        new Actions(ctx.driver()).sendKeys(ctx.text())
+                .build()
+                .perform();
         return true;
     }
 
