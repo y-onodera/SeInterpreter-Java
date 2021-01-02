@@ -89,6 +89,10 @@ public class StepBuilder {
         return this;
     }
 
+    public StepBuilder skip(String aParam) {
+        return this.put(Step.KEY_NAME_SKIP,aParam);
+    }
+
     public Step build() {
         return new Step(this);
     }

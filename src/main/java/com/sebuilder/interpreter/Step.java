@@ -27,6 +27,7 @@ import java.util.Map;
  * @author jkowalczyk
  */
 public class Step {
+    public static final String KEY_NAME_SKIP = "skip";
     private boolean negated;
     private String name;
     private StepType type;
@@ -72,7 +73,7 @@ public class Step {
 
     public boolean isSkip(InputData vars) {
         if (this.isSkippable()) {
-            return vars.evaluate(this.getParam("skip"));
+            return vars.evaluate(this.getParam(KEY_NAME_SKIP));
         }
         return false;
     }
@@ -149,7 +150,7 @@ public class Step {
     }
 
     private boolean isSkippable() {
-        return this.stringParams.containsKey("skip");
+        return this.stringParams.containsKey(KEY_NAME_SKIP);
     }
 
 }

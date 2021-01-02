@@ -184,6 +184,7 @@ public class ExportResourceBuilder {
             String id = "id:" + result.value.replaceAll(".+(?=@id='([^']+)').*", "$1");
             String value = result.value.replaceAll(".+(?=@value='([^']*)').*", "@value='$1'");
             this.addVariable(id, value.replaceAll("@value='(.*)'", "$1"));
+            this.currentStep.skip("${!has('" + id + "')}");
             result = new Locator(result.type.toString(), result.value.replace(value, "@value='${" + id + "}'"));
         }
         return this.addLocator(result);
@@ -200,8 +201,10 @@ public class ExportResourceBuilder {
             if (locator.value.contains("//select[@id=")) {
                 this.currentStep.put(opt, value);
             } else {
-                String valuable = addVariable(locator.toPrettyString(), value);
-                this.currentStep.put(opt, valuable);
+                String valuable = this.addVariable(locator.toPrettyString(), value);
+                this.currentStep.put(opt, valuable)
+                        .skip("${!has('" + valuable.replace("${", "")
+                                .replace("}", "") + "')}");
             }
         } else {
             this.currentStep.put(opt, value);
