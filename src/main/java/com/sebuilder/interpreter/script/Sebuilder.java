@@ -174,45 +174,6 @@ public class Sebuilder extends AbstractJsonScriptParser {
         return this.overrideSetting(script, this.load(wherePath, testRunListener));
     }
 
-    protected TestCase overrideSetting(JSONObject script, TestCase resultTestCase) throws JSONException {
-        final DataSource dataSource = this.getDataSource(script);
-        final HashMap<String, String> config = this.getDataSourceConfig(script);
-        final String skip = Sebuilder.this.getSkip(script);
-        final boolean nestedChain = this.isNestedChain(script);
-        final boolean breakNestedChain = this.isBreakNestedChain(script);
-        return resultTestCase.map(it -> it.setSkip(skip)
-                .isNestedChain(nestedChain)
-                .isBreakNestedChain(breakNestedChain)
-                .changeWhenConditionMatch(target -> dataSource != null
-                        , matches -> matches.setOverrideTestDataSet(dataSource, config)
-                )
-        );
-    }
-
-    protected boolean isNestedChain(JSONObject script) throws JSONException {
-        boolean result = false;
-        if (script.has("nestedChain")) {
-            result = script.getBoolean("nestedChain");
-        }
-        return result;
-    }
-
-    protected boolean isBreakNestedChain(JSONObject script) throws JSONException {
-        boolean result = false;
-        if (script.has("breakNestedChain")) {
-            result = script.getBoolean("breakNestedChain");
-        }
-        return result;
-    }
-
-    protected String getSkip(JSONObject o) throws JSONException {
-        String result = "false";
-        if (o.has("skip")) {
-            result = o.getString("skip");
-        }
-        return result;
-    }
-
     protected DataSource getDataSource(JSONObject o) throws JSONException {
         if (!o.has("data")) {
             return DataSource.NONE;
@@ -363,5 +324,54 @@ public class Sebuilder extends AbstractJsonScriptParser {
             pointcut = pointcut.and(new StringParamFilter(stringParam));
         }
         return pointcut;
+    }
+
+    protected TestCase overrideSetting(JSONObject script, TestCase resultTestCase) throws JSONException {
+        final DataSource dataSource = this.getDataSource(script);
+        final HashMap<String, String> config = this.getDataSourceConfig(script);
+        final String skip = Sebuilder.this.getSkip(script);
+        final boolean nestedChain = this.isNestedChain(script);
+        final boolean breakNestedChain = this.isBreakNestedChain(script);
+        final boolean preventContextAspect = this.isPreventContextAspect(script);
+        return resultTestCase.map(it -> it.setSkip(skip)
+                .changeWhenConditionMatch(target -> dataSource != null
+                        , matches -> matches.setOverrideTestDataSet(dataSource, config)
+                )
+                .isNestedChain(nestedChain)
+                .isBreakNestedChain(breakNestedChain)
+                .isPreventContextAspect(preventContextAspect)
+        );
+    }
+
+    protected String getSkip(JSONObject o) throws JSONException {
+        String result = "false";
+        if (o.has("skip")) {
+            result = o.getString("skip");
+        }
+        return result;
+    }
+
+    protected boolean isNestedChain(JSONObject script) throws JSONException {
+        boolean result = false;
+        if (script.has("nestedChain")) {
+            result = script.getBoolean("nestedChain");
+        }
+        return result;
+    }
+
+    protected boolean isBreakNestedChain(JSONObject script) throws JSONException {
+        boolean result = false;
+        if (script.has("breakNestedChain")) {
+            result = script.getBoolean("breakNestedChain");
+        }
+        return result;
+    }
+
+    protected boolean isPreventContextAspect(JSONObject script)throws JSONException {
+        boolean result = false;
+        if (script.has("preventContextAspect")) {
+            result = script.getBoolean("preventContextAspect");
+        }
+        return result;
     }
 }

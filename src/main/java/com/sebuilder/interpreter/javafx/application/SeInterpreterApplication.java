@@ -257,7 +257,8 @@ public class SeInterpreterApplication extends Application {
     }
 
     public void browserOpen() {
-        this.executeTask(this.templateScript(), TestRunListenerImpl::new);
+        this.executeTask(this.templateScript().map(it->it.isPreventContextAspect(true))
+                , TestRunListenerImpl::new);
     }
 
     public void browserClose() {
@@ -269,7 +270,8 @@ public class SeInterpreterApplication extends Application {
                 .toStep()
                 .locator(new Locator(locatorType, value))
                 .build();
-        this.runner.run(highLightElement.toTestCase());
+        this.runner.run(highLightElement.toTestCase()
+                .map(it -> it.isPreventContextAspect(true)));
     }
 
     public TestCase exportTemplate(Locator locator, List<String> targetTags, boolean withDataSource) {

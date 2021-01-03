@@ -13,14 +13,12 @@ public class TestRunBuilder {
     private static final Pattern DUPLICATE_PATTERN = Pattern.compile(".+\\.[^\\.]+(\\(\\d+\\)$)");
     private final TestCase testCase;
     private InputData shareInput;
-    private boolean preventContextAspect;
     private String testRunNamePrefix;
     private String testRunNameSuffix;
 
     public TestRunBuilder(TestCase testCase) {
         this.testCase = testCase;
         this.shareInput = testCase.getShareInput();
-        this.preventContextAspect = false;
     }
 
     public String getScriptName() {
@@ -36,7 +34,7 @@ public class TestRunBuilder {
     }
 
     public boolean isPreventContextAspect() {
-        return this.preventContextAspect;
+        return this.testCase.isPreventContextAspect();
     }
 
     public TestRunBuilder setShareInput(InputData shareInput) {
@@ -61,11 +59,6 @@ public class TestRunBuilder {
         if (aTestRunNamePrefix != null) {
             this.testRunNamePrefix = this.testRunNamePrefix + aTestRunNamePrefix;
         }
-        return this;
-    }
-
-    public TestRunBuilder preventContextAspect(boolean aPreventAspect) {
-        this.preventContextAspect = aPreventAspect;
         return this;
     }
 
@@ -129,8 +122,7 @@ public class TestRunBuilder {
         return new TestRunBuilder(this.testCase)
                 .setShareInput(this.shareInput)
                 .addTestRunNamePrefix(this.testRunNamePrefix)
-                .addTestRunNameSuffix(this.testRunNameSuffix)
-                .preventContextAspect(this.preventContextAspect);
+                .addTestRunNameSuffix(this.testRunNameSuffix);
     }
 
     private RemoteWebDriver createDriver(Logger log, WebDriverFactory webDriverFactory, Map<String, String> webDriverConfig) {
@@ -141,5 +133,4 @@ public class TestRunBuilder {
             throw new RuntimeException("Test finish failed: unable to create driver.", e);
         }
     }
-
 }

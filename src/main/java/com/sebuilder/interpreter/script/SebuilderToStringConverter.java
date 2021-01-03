@@ -105,7 +105,7 @@ public class SebuilderToStringConverter implements TestCaseConverter{
                 JSONObject scriptPaths = this.chainToJson(target.getScriptFile(), s);
                 scriptsA.put(scriptPaths);
             } else {
-                scriptsA.put(this.getJSON(s, target.getScriptFile()));
+                scriptsA.put(this.toJson(s, target.getScriptFile()));
             }
         }
         return scriptsA;
@@ -113,7 +113,7 @@ public class SebuilderToStringConverter implements TestCaseConverter{
 
     protected JSONObject chainToJson(ScriptFile suiteFile, TestCase chainHeader) throws JSONException {
         JSONArray chain = new JSONArray();
-        chain.put(this.getJSON(chainHeader, suiteFile));
+        chain.put(this.toJson(chainHeader, suiteFile));
         this.addChain(suiteFile, chainHeader, chain);
         JSONObject scriptPaths = new JSONObject();
         scriptPaths.put("chain", chain);
@@ -122,14 +122,14 @@ public class SebuilderToStringConverter implements TestCaseConverter{
 
     protected void addChain(ScriptFile suiteFile, TestCase chainHeader, JSONArray addChainTo) throws JSONException {
         for (TestCase chainCase : chainHeader.getChains()) {
-            addChainTo.put(this.getJSON(chainCase, suiteFile));
+            addChainTo.put(this.toJson(chainCase, suiteFile));
             if (chainCase.getChains().size() > 0 && chainCase.getScriptFile().type() == ScriptFile.Type.TEST) {
                 this.addChain(suiteFile, chainCase, addChainTo);
             }
         }
     }
 
-    protected JSONObject getJSON(TestCase testCase, ScriptFile scriptFile) throws JSONException {
+    protected JSONObject toJson(TestCase testCase, ScriptFile scriptFile) throws JSONException {
         JSONObject scriptPath = new JSONObject();
         if (testCase.isLazyLoad()) {
             scriptPath.put("lazyLoad", testCase.name());
@@ -144,6 +144,9 @@ public class SebuilderToStringConverter implements TestCaseConverter{
         }
         if (testCase.isBreakNestedChain()) {
             scriptPath.put("breakNestedChain", testCase.isBreakNestedChain());
+        }
+        if (testCase.isPreventContextAspect()) {
+            scriptPath.put("preventContextAspect", testCase.isPreventContextAspect());
         }
         JSONObject data = this.toJson(testCase.getOverrideDataSourceLoader());
         if (data != null) {

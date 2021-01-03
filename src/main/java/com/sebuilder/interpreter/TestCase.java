@@ -41,33 +41,35 @@ public class TestCase {
     private final ScriptFile scriptFile;
     private final ArrayList<Step> steps;
     private final DataSourceLoader dataSourceLoader;
-    private final String skip;
-    private final DataSourceLoader overrideDataSourceLoader;
-    private final BiFunction<TestCase, TestRunListener, TestCase> lazyLoad;
-    private final boolean nestedChain;
-    private final boolean breakNestedChain;
-    private final TestCaseChains chains;
     private final Aspect aspect;
     private final boolean shareState;
     private final InputData shareInput;
+    private final DataSourceLoader overrideDataSourceLoader;
+    private final String skip;
+    private final TestCaseChains chains;
+    private final boolean nestedChain;
+    private final boolean breakNestedChain;
+    private boolean preventContextAspect;
+    private final BiFunction<TestCase, TestRunListener, TestCase> lazyLoad;
 
     public TestCase(TestCaseBuilder builder) {
         this.scriptFile = builder.getScriptFile();
         this.steps = builder.getSteps();
         this.dataSourceLoader = builder.getTestDataSet();
-        this.skip = builder.getSkip();
-        this.overrideDataSourceLoader = builder.getOverrideTestDataSet();
-        this.lazyLoad = builder.getLazyLoad();
-        this.nestedChain = builder.isNestedChain();
-        this.breakNestedChain = builder.isBreakNestedChain();
-        this.chains = builder.getChains();
         this.aspect = builder.getAspect();
         this.shareState = builder.isShareState();
         this.shareInput = builder.getShareInput();
+        this.overrideDataSourceLoader = builder.getOverrideTestDataSet();
+        this.skip = builder.getSkip();
+        this.chains = builder.getChains();
+        this.nestedChain = builder.isNestedChain();
+        this.breakNestedChain = builder.isBreakNestedChain();
+        this.lazyLoad = builder.getLazyLoad();
+        this.preventContextAspect = builder.isPreventContextAspect();
     }
 
     public boolean run(TestRunner runner, TestRunListener testRunListener) {
-        if (this.skipRunning(this.getShareInput())) {
+        if (this.skipRunning()) {
             return true;
         }
         final TestCase materialized = this.materialized(testRunListener);
@@ -83,32 +85,6 @@ public class TestCase {
             throw new AssertionError(e);
         }
         return true;
-    }
-
-    public Stream<TestCase> flattenTestCases() {
-        return Stream.concat(Stream.of(this), this.chains.flattenTestCases());
-    }
-
-    public boolean include(TestCase target) {
-        return this.flattenTestCases().anyMatch(it -> it.equals(target));
-    }
-
-    public List<InputData> loadData() throws IOException {
-        return this.runtimeDataSet().loadData();
-    }
-
-    public DataSourceLoader runtimeDataSet() {
-        if (this.getOverrideDataSourceLoader().getDataSource() != DataSource.NONE) {
-            return this.getOverrideDataSourceLoader().shareInput(this.getShareInput());
-        }
-        return this.getDataSourceLoader().shareInput(this.getShareInput());
-    }
-
-    public Suite toSuite() {
-        if (this.getScriptFile().type() == ScriptFile.Type.SUITE) {
-            return new Suite(this);
-        }
-        return new Suite(TestCaseBuilder.suite(null).addChain(this).build());
     }
 
     public ScriptFile getScriptFile() {
@@ -139,38 +115,6 @@ public class TestCase {
         return dataSourceLoader;
     }
 
-    public String getSkip() {
-        return skip;
-    }
-
-    public DataSourceLoader getOverrideDataSourceLoader() {
-        return overrideDataSourceLoader;
-    }
-
-    public boolean isLazyLoad() {
-        return this.getLazyLoad() != null;
-    }
-
-    public BiFunction<TestCase, TestRunListener, TestCase> getLazyLoad() {
-        return lazyLoad;
-    }
-
-    public boolean isNestedChain() {
-        return this.nestedChain;
-    }
-
-    public boolean isBreakNestedChain() {
-        return this.breakNestedChain;
-    }
-
-    public boolean hasChain() {
-        return this.getChains().size() > 0;
-    }
-
-    public TestCaseChains getChains() {
-        return this.chains;
-    }
-
     public Aspect getAspect() {
         return this.aspect;
     }
@@ -183,8 +127,66 @@ public class TestCase {
         return this.shareInput;
     }
 
-    public boolean skipRunning(InputData param) {
-        return param.evaluate(this.skip);
+    public DataSourceLoader getOverrideDataSourceLoader() {
+        return overrideDataSourceLoader;
+    }
+
+    public String getSkip() {
+        return skip;
+    }
+
+    public boolean hasChain() {
+        return this.getChains().size() > 0;
+    }
+
+    public TestCaseChains getChains() {
+        return this.chains;
+    }
+
+    public boolean isNestedChain() {
+        return this.nestedChain;
+    }
+
+    public boolean isBreakNestedChain() {
+        return this.breakNestedChain;
+    }
+
+    public boolean isPreventContextAspect() {
+        return this.preventContextAspect;
+    }
+
+    public boolean isLazyLoad() {
+        return this.getLazyLoad() != null;
+    }
+
+    public BiFunction<TestCase, TestRunListener, TestCase> getLazyLoad() {
+        return lazyLoad;
+    }
+
+    public List<InputData> loadData() throws IOException {
+        return this.runtimeDataSet().loadData();
+    }
+
+    public DataSourceLoader runtimeDataSet() {
+        if (this.getOverrideDataSourceLoader().getDataSource() != DataSource.NONE) {
+            return this.getOverrideDataSourceLoader().shareInput(this.getShareInput());
+        }
+        return this.getDataSourceLoader().shareInput(this.getShareInput());
+    }
+
+    public boolean include(TestCase target) {
+        return this.flattenTestCases().anyMatch(it -> it.equals(target));
+    }
+
+    public Stream<TestCase> flattenTestCases() {
+        return Stream.concat(Stream.of(this), this.chains.flattenTestCases());
+    }
+
+    public Suite toSuite() {
+        if (this.getScriptFile().type() == ScriptFile.Type.SUITE) {
+            return new Suite(this);
+        }
+        return new Suite(TestCaseBuilder.suite(null).addChain(this).build());
     }
 
     public TestCaseBuilder builder() {
@@ -272,6 +274,10 @@ public class TestCase {
         return this.map(it -> it.clearStep().addSteps(converter.apply(this.steps)));
     }
 
+    protected boolean skipRunning() {
+        return this.getShareInput().evaluate(this.skip);
+    }
+
     protected TestCase materialized(TestRunListener testRunListener) {
         return this.changeWhenConditionMatch(TestCase::isLazyLoad, it -> it.lazyLoad(testRunListener));
     }
@@ -286,36 +292,55 @@ public class TestCase {
                 "scriptFile=" + scriptFile +
                 ", steps=" + steps +
                 ", dataSourceLoader=" + dataSourceLoader +
-                ", skip='" + skip + '\'' +
+                ", aspect=" + aspect +
+                ", shareState=" + shareState +
+                ", shareInput=" + shareInput +
                 ", overrideDataSourceLoader=" + overrideDataSourceLoader +
-                ", lazyLoad=" + lazyLoad +
+                ", skip='" + skip + '\'' +
+                ", chains=" + chains +
                 ", nestedChain=" + nestedChain +
                 ", breakNestedChain=" + breakNestedChain +
-                ", chains=" + chains +
-                ", aspect=" + aspect +
+                ", preventContextAspect=" + preventContextAspect +
+                ", lazyLoad=" + lazyLoad +
                 '}';
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof TestCase)) return false;
         TestCase testCase = (TestCase) o;
-        return isNestedChain() == testCase.isNestedChain() &&
-                isBreakNestedChain() == testCase.isBreakNestedChain() &&
-                Objects.equal(getScriptFile(), testCase.getScriptFile()) &&
-                Objects.equal(getDataSourceLoader(), testCase.getDataSourceLoader()) &&
-                Objects.equal(getSkip(), testCase.getSkip()) &&
-                Objects.equal(getOverrideDataSourceLoader(), testCase.getOverrideDataSourceLoader()) &&
-                Objects.equal(isLazyLoad(), testCase.isLazyLoad()) &&
-                Objects.equal(getChains(), testCase.getChains()) &&
-                Objects.equal(getAspect(), testCase.getAspect()) &&
-                Objects.equal(steps, testCase.steps);
+        return shareState == testCase.shareState
+                && nestedChain == testCase.nestedChain
+                && breakNestedChain == testCase.breakNestedChain
+                && preventContextAspect == testCase.preventContextAspect
+                && Objects.equal(scriptFile, testCase.scriptFile)
+                && Objects.equal(steps, testCase.steps)
+                && Objects.equal(dataSourceLoader, testCase.dataSourceLoader)
+                && Objects.equal(aspect, testCase.aspect)
+                && Objects.equal(shareInput, testCase.shareInput)
+                && Objects.equal(overrideDataSourceLoader, testCase.overrideDataSourceLoader)
+                && Objects.equal(skip, testCase.skip)
+                && Objects.equal(chains, testCase.chains)
+                && Objects.equal(lazyLoad, testCase.lazyLoad)
+                ;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getScriptFile(), getDataSourceLoader(), getSkip(), getOverrideDataSourceLoader(), isLazyLoad(), isNestedChain(), isBreakNestedChain(), getChains(), getAspect(), this.steps);
+        return Objects.hashCode(this.scriptFile
+                , this.steps
+                , this.dataSourceLoader
+                , this.aspect
+                , this.shareState
+                , this.shareInput
+                , this.overrideDataSourceLoader
+                , this.skip
+                , this.chains
+                , this.nestedChain
+                , this.breakNestedChain
+                , this.preventContextAspect
+                , this.lazyLoad
+        );
     }
-
 }

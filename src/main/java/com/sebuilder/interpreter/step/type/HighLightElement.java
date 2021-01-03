@@ -15,11 +15,13 @@ public class HighLightElement extends AbstractStepType implements LocatorHolder 
     @Override
     public boolean run(TestRun ctx) {
         Cache.reflesh(ctx);
+        boolean result = false;
         for (WebElement element : ctx.locator().findElements(ctx)) {
             Cache.originalStyle(ctx, element);
             toggleHighlight(ctx, element, "2px solid red");
+            result = true;
         }
-        return true;
+        return result;
     }
 
     static void toggleHighlight(TestRun ctx, WebElement element, String aStyle) {
