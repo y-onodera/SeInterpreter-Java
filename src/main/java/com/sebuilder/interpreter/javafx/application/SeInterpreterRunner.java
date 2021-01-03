@@ -77,7 +77,9 @@ public class SeInterpreterRunner {
         if (withDataSource) {
             export.put("datasource", dataSourceName);
         }
-        TestCase get = export.build().toTestCase();
+        TestCase get = export.build()
+                .toTestCase()
+                .map(it -> it.isPreventContextAspect(true));
         TestRunListener listener = new TestRunListenerImpl(this.log);
         this.repl.execute(get, listener);
         File exported = new File(listener.getTemplateOutputDirectory(), fileName);
@@ -137,5 +139,4 @@ public class SeInterpreterRunner {
         }
         return new SeInterpreterRunTask(this.log, listener, this.repl, testCase);
     }
-
 }
