@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.sebuilder.interpreter.*;
 import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
 import com.sebuilder.interpreter.javafx.view.data.DataSetView;
+import com.sebuilder.interpreter.javafx.view.replay.InputView;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.MenuItem;
@@ -63,6 +64,11 @@ public class SuitePresenter {
     }
 
     @FXML
+    void handleScriptReplay() {
+        new InputView().open(this.treeViewScriptName.getScene().getWindow());
+    }
+
+    @FXML
     void handleScriptInsert() {
         this.application.insertScript();
         this.showScriptView();
@@ -113,7 +119,7 @@ public class SuitePresenter {
         this.saveTestCaseToNewFile();
     }
 
-    public void showScriptView() {
+    private void showScriptView() {
         Suite suite = this.application.getSuite();
         TreeItem<String> root = new TreeItem<>(suite.name());
         root.setExpanded(true);
