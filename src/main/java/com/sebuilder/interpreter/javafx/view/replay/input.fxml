@@ -35,7 +35,8 @@
         </TableView>
         <HBox alignment="CENTER_RIGHT" prefHeight="30.0" maxHeight="30.0" minHeight="30.0" prefWidth="480.0"
               spacing="10.0">
+            <CheckBox alignment="CENTER_LEFT" text="take screenshot if replay is failed" fx:id="aspectTakeOver"/>
             <Button alignment="CENTER" mnemonicParsing="false" onAction="#handleReplayStart" text="replay start"/>
         </HBox>
-    </SplitPane>
+        </SplitPane>
 </AnchorPane>

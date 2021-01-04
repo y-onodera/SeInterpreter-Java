@@ -14,10 +14,7 @@ import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.Pair;
 import javafx.util.converter.IntegerStringConverter;
@@ -50,6 +47,8 @@ public class InputPresenter {
     private TableColumn<InputResource, Void> buttonOpen;
     @FXML
     private TableColumn<InputResource, Void> buttonEdit;
+    @FXML
+    private CheckBox aspectTakeOver;
 
     private Map<String, Pair<Integer, InputData>> shareInputs = new HashMap<>();
 
@@ -122,7 +121,7 @@ public class InputPresenter {
     }
 
     private ReplayOption createReplayOption() {
-        return new ReplayOption(this.shareInputs);
+        return new ReplayOption(this.shareInputs, this.aspectTakeOver.isSelected());
     }
 
     class InputResource {

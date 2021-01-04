@@ -15,9 +15,11 @@ import java.util.Optional;
 
 public class ReplayOption {
     private final Map<String, Pair<Integer, InputData>> dataLoadSettings;
+    private final boolean isAspectTakeOver;
 
-    public ReplayOption(Map<String, Pair<Integer, InputData>> dataLoadSettings) {
+    public ReplayOption(Map<String, Pair<Integer, InputData>> dataLoadSettings, boolean isAspectTakeOver) {
         this.dataLoadSettings = dataLoadSettings;
+        this.isAspectTakeOver = isAspectTakeOver;
     }
 
     public InputData reduceShareInput(InputData defaultValue, DataSourceLoader[] shareDataSources) throws IOException {
@@ -45,7 +47,7 @@ public class ReplayOption {
     }
 
     public TestCaseBuilder apply(TestCaseBuilder target) {
-        final TestCase targetBuild = target.build();
+        final TestCase targetBuild = target.isPreventContextAspect(!this.isAspectTakeOver).build();
         final Pair<Integer, InputData> runtimeInfo = this.dataLoadSettings.get(targetBuild.runtimeDataSet().name());
         return target.changeWhenConditionMatch(it -> runtimeInfo != null
                 , it -> {
