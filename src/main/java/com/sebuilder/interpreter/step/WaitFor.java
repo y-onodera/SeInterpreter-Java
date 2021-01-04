@@ -48,7 +48,6 @@ public class WaitFor extends AbstractStepType implements GetterUseStep {
             intervalMs = Integer.parseInt(ctx.string("interval"));
         }
         long stopBy = System.currentTimeMillis() + maxWaitMs;
-        boolean result;
         // NB: If the step is negated, a result of "true"  means that we haven't succeeded yet.
         //     If the step is normal,  a result of "false" means that we haven't succeeded yet.
         while (!this.test(ctx) && System.currentTimeMillis() < stopBy) {

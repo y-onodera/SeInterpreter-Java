@@ -22,7 +22,7 @@ public class ComplexCondition extends AbstractGetter {
     @Override
     public String get(TestRun ctx) {
         for (WaitFor condition : this.conditions) {
-            if (!condition.run(ctx)) {
+            if (!condition.test(ctx)) {
                 return "false";
             }
         }
@@ -33,12 +33,12 @@ public class ComplexCondition extends AbstractGetter {
         List<WaitFor> conditions = Lists.newArrayList();
 
         public Builder addCondition(Getter condition) {
-            conditions.add(condition.toWaitFor());
+            this.conditions.add(condition.toWaitFor());
             return this;
         }
 
         public ComplexCondition build() {
-            return new ComplexCondition(conditions);
+            return new ComplexCondition(this.conditions);
         }
     }
 
