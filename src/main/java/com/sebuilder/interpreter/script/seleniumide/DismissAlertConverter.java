@@ -2,8 +2,6 @@ package com.sebuilder.interpreter.script.seleniumide;
 
 import com.sebuilder.interpreter.Step;
 import com.sebuilder.interpreter.StepBuilder;
-import com.sebuilder.interpreter.StepType;
-import com.sebuilder.interpreter.step.type.AcceptAlert;
 import com.sebuilder.interpreter.step.type.DismissAlert;
 import org.json.JSONException;
 

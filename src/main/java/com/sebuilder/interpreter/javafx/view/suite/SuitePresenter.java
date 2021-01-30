@@ -2,11 +2,13 @@ package com.sebuilder.interpreter.javafx.view.suite;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.sebuilder.interpreter.*;
+import com.sebuilder.interpreter.Context;
+import com.sebuilder.interpreter.Suite;
+import com.sebuilder.interpreter.TestCase;
+import com.sebuilder.interpreter.TestCaseChains;
 import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
 import com.sebuilder.interpreter.javafx.view.data.DataSetView;
 import com.sebuilder.interpreter.javafx.view.replay.InputView;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TreeItem;

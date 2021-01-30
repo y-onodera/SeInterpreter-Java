@@ -1,7 +1,7 @@
 package com.sebuilder.interpreter.javafx.application;
 
-import com.sebuilder.interpreter.TestCase;
 import com.sebuilder.interpreter.InputData;
+import com.sebuilder.interpreter.TestCase;
 import com.sebuilder.interpreter.application.TestRunListenerImpl;
 import org.apache.logging.log4j.Logger;
 

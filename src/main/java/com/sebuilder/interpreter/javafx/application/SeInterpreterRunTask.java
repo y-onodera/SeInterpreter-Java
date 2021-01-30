@@ -1,7 +1,7 @@
 package com.sebuilder.interpreter.javafx.application;
 
-import com.sebuilder.interpreter.TestCase;
 import com.sebuilder.interpreter.InputData;
+import com.sebuilder.interpreter.TestCase;
 import com.sebuilder.interpreter.TestRunListener;
 import com.sebuilder.interpreter.TestRunListenerWrapper;
 import com.sebuilder.interpreter.application.SeInterpreterREPL;

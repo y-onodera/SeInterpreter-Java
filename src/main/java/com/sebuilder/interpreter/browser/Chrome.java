@@ -1,6 +1,5 @@
 package com.sebuilder.interpreter.browser;
 
-import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.WebDriverFactory;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;

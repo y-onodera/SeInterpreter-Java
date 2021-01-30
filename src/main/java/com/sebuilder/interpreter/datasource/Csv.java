@@ -16,7 +16,6 @@
 
 package com.sebuilder.interpreter.datasource;
 
-import com.google.common.io.Files;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 import com.sebuilder.interpreter.Context;
@@ -31,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.google.common.io.Files.*;
+import static com.google.common.io.Files.newWriter;
 
 /**
  * CSV-based data source.

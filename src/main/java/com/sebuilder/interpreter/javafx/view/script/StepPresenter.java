@@ -7,7 +7,6 @@ import com.sebuilder.interpreter.Step;
 import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestCase;
 import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;

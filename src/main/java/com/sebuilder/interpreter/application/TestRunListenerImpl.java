@@ -1,6 +1,5 @@
 package com.sebuilder.interpreter.application;
 
-import com.google.common.base.Strings;
 import com.sebuilder.interpreter.*;
 import org.apache.logging.log4j.Logger;
 import org.apache.tools.ant.Project;
@@ -19,8 +18,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Map;
