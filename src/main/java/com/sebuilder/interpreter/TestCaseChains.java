@@ -1,6 +1,7 @@
 package com.sebuilder.interpreter;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.tuple.Pair;
@@ -69,7 +70,9 @@ public class TestCaseChains implements Iterable<TestCase> {
 
     public TestCaseChains append(int aIndex, TestCase testCase) {
         ArrayList<TestCase> newList = Lists.newArrayList(this.testCases);
-        long countDuplicate = newList.stream().filter(it -> it.equals(testCase)).count();
+        long countDuplicate = newList.stream().filter(it -> !Strings.isNullOrEmpty(it.getScriptFile().path())
+                && !Strings.isNullOrEmpty(testCase.getScriptFile().path())
+                && it.getScriptFile().path().equals(testCase.getScriptFile().path())).count();
         if (countDuplicate == 0) {
             newList.add(aIndex, testCase);
         } else {
@@ -105,7 +108,7 @@ public class TestCaseChains implements Iterable<TestCase> {
                     .changeWhenConditionMatch(isChainConvert, matches -> matches.map(it -> it.setChains(testCase.getChains().map(converter, isChainConvert))));
             final String scriptName = copy.name();
             Pair<String, String> key = Pair.of(copy.name(), copy.path());
-            if (duplicate.containsKey(key)) {
+            if (duplicate.containsKey(key) && !Strings.isNullOrEmpty(key.getValue())) {
                 Optional<String> entries = newTestCases
                         .stream()
                         .map(it -> it.name())

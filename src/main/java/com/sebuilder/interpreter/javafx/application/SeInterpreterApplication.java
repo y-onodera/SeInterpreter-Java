@@ -257,7 +257,7 @@ public class SeInterpreterApplication extends Application {
     }
 
     public void browserOpen() {
-        this.executeTask(this.templateScript().map(it->it.isPreventContextAspect(true))
+        this.executeTask(this.templateScript().map(it -> it.isPreventContextAspect(true))
                 , TestRunListenerImpl::new);
     }
 
@@ -332,7 +332,19 @@ public class SeInterpreterApplication extends Application {
     }
 
     protected TestCase templateScript() {
-        return new Get().toStep().put("url", "https://www.google.com").build().toTestCase();
+        TestCase result = new Get().toStep().put("url", "https://www.google.com").build().toTestCase();
+        if (this.suite.get() == null) {
+            return result;
+        }
+        long no = this.suite.get()
+                .getChains()
+                .flattenTestCases()
+                .filter(it -> Strings.isNullOrEmpty(it.getScriptFile().path()))
+                .count();
+        if (no > 0) {
+            return result.map(it -> it.setName(result.name() + "(" + no + ")"));
+        }
+        return result;
     }
 
     protected TestCase changeAssociateFile(TestCase exportTo, String oldPath) {
