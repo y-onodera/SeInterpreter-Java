@@ -38,7 +38,7 @@ public class ExcelLikeSpreadSheetView extends SpreadsheetView {
                 }
 
                 public void end() {
-                    textArea.setOnKeyPressed((EventHandler) null);
+                    textArea.setOnKeyPressed(null);
                 }
 
                 public TextArea getEditor() {
@@ -80,11 +80,9 @@ public class ExcelLikeSpreadSheetView extends SpreadsheetView {
         }
     };
 
-    private DataFormat spreadSheetViewFmt;
+    private final Stack<GridChange> undoStack = new Stack<>();
 
-    private Stack<GridChange> undoStack = new Stack<>();
-
-    private Stack<GridChange> redoStack = new Stack<>();
+    private final Stack<GridChange> redoStack = new Stack<>();
 
     private final KeyCombination undoKeypad;
 
@@ -157,7 +155,7 @@ public class ExcelLikeSpreadSheetView extends SpreadsheetView {
                     , (summary, newVal) -> summary.append("\t").append(newVal));
         }
         StringJoiner result = new StringJoiner("\r\n");
-        copy.values().forEach(it -> result.add(it));
+        copy.values().forEach(result::add);
         return result.toString();
     }
 
@@ -178,9 +176,10 @@ public class ExcelLikeSpreadSheetView extends SpreadsheetView {
     }
 
     private DataFormat getSpreadSheetDataFormat() {
-        if ((this.spreadSheetViewFmt = DataFormat.lookupMimeType("SpreadsheetView")) == null) {
-            this.spreadSheetViewFmt = new DataFormat(new String[]{"SpreadsheetView"});
+        DataFormat spreadSheetViewFmt;
+        if ((spreadSheetViewFmt = DataFormat.lookupMimeType("SpreadsheetView")) == null) {
+            spreadSheetViewFmt = new DataFormat("SpreadsheetView");
         }
-        return this.spreadSheetViewFmt;
+        return spreadSheetViewFmt;
     }
 }

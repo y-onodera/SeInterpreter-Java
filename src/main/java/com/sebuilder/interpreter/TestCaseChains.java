@@ -30,6 +30,7 @@ public class TestCaseChains implements Iterable<TestCase> {
         this.takeOverLastRun = takeOverLastRun;
     }
 
+    @SuppressWarnings("NullableProblems")
     @Override
     public Iterator<TestCase> iterator() {
         return this.testCases.iterator();
@@ -37,7 +38,7 @@ public class TestCaseChains implements Iterable<TestCase> {
 
     public Stream<TestCase> flattenTestCases() {
         return this.testCases.stream()
-                .flatMap(testCase -> testCase.flattenTestCases());
+                .flatMap(TestCase::flattenTestCases);
     }
 
     public boolean isTakeOverLastRun() {
@@ -105,14 +106,14 @@ public class TestCaseChains implements Iterable<TestCase> {
         for (TestCase testCase : this.testCases) {
             TestCase copy = converter
                     .apply(testCase)
-                    .changeWhenConditionMatch(isChainConvert, matches -> matches.map(it -> it.setChains(testCase.getChains().map(converter, isChainConvert))));
+                    .changeWhenConditionMatch(isChainConvert, matches -> matches.map(it -> it.setChains(matches.getChains().map(converter, isChainConvert))));
             final String scriptName = copy.name();
             Pair<String, String> key = Pair.of(copy.name(), copy.path());
             if (duplicate.containsKey(key) && !Strings.isNullOrEmpty(key.getValue())) {
                 Optional<String> entries = newTestCases
                         .stream()
-                        .map(it -> it.name())
-                        .filter(it -> scriptName.startsWith(it))
+                        .map(TestCase::name)
+                        .filter(scriptName::startsWith)
                         .findFirst();
                 if (entries.isPresent()) {
                     int nextCount = duplicate.get(key) + 1;

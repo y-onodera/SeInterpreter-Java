@@ -17,6 +17,7 @@ import javafx.application.Application;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.WorkerStateEvent;
+import javafx.scene.control.TreeItem;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 import org.apache.logging.log4j.Logger;
@@ -161,8 +162,33 @@ public class SeInterpreterApplication extends Application {
         this.resetScript(this.getSuite().map(it -> it.addChain(this.getDisplayTestCase(), newTestCase)), newTestCase);
     }
 
+    public void addScript(String chainHeadName, int i, TestCase dragged) {
+        TestCase before = this.findChainHead(chainHeadName);
+        TestCase after = before.map(it -> it.addChain(dragged, i));
+        this.resetSuite(this.getSuite().replace(before, after));
+    }
+
     public void removeScript() {
         this.resetSuite(this.getSuite().map(it -> it.remove(this.getDisplayTestCase())));
+    }
+
+    public void removeScriptFromChain(String chainHeadName, String targetName) {
+        TestCase target = this.findTestCase(chainHeadName, targetName);
+        this.resetSuite(this.getSuite().map(it -> it.remove(target)));
+    }
+
+    public TestCase findTestCase(String chainHeadName, String targetName) {
+        return this.findChainHead(chainHeadName)
+                .getChains()
+                .get(targetName);
+    }
+
+    public TestCase findChainHead(String chainHeadName) {
+        return this.getSuite().head()
+                .flattenTestCases()
+                .filter(it -> it.getChains().size() > 0 && it.name().equals(chainHeadName))
+                .findFirst()
+                .get();
     }
 
     public void resetSuite(Suite newSuite) {

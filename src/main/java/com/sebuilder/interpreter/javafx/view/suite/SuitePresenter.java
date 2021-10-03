@@ -7,10 +7,12 @@ import com.sebuilder.interpreter.Suite;
 import com.sebuilder.interpreter.TestCase;
 import com.sebuilder.interpreter.TestCaseChains;
 import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
+import com.sebuilder.interpreter.javafx.control.DragAndDropSortTreeViewCellFactory;
 import com.sebuilder.interpreter.javafx.view.data.DataSetView;
 import com.sebuilder.interpreter.javafx.view.replay.InputView;
 import javafx.fxml.FXML;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.stage.FileChooser;
@@ -37,7 +39,34 @@ public class SuitePresenter {
 
     @FXML
     void initialize() {
-        assert this.treeViewScriptName != null : "fx:id=\"treeViewScriptName\" was not injected: check your FXML file 'scriptview.fxml'.";
+        assert this.treeViewScriptName != null : "fx:id=\"treeViewScriptName\" was not injected: check your FXML file 'suite.fxml'.";
+        this.treeViewScriptName.setCellFactory(new DragAndDropSortTreeViewCellFactory<>() {
+            private TestCase dragged;
+
+            @Override
+            protected void updateItemCallback(TreeCell<String> treeCell, String s, boolean b) {
+                if (Strings.isNullOrEmpty(s) || b) {
+                    treeCell.setText(null);
+                } else {
+                    treeCell.setText(s);
+                }
+            }
+
+            @Override
+            protected void removeDragItemFromPreviousParent(TreeItem<String> droppedItemParent) {
+                super.removeDragItemFromPreviousParent(droppedItemParent);
+                this.dragged = application.findTestCase(droppedItemParent.getValue(), getDraggedItem().getValue());
+                application.removeScriptFromChain(droppedItemParent.getValue(), getDraggedItem().getValue());
+            }
+
+            @Override
+            protected void addDropItemToNewParent(TreeItem<String> droppedItemParent, int i) {
+                super.addDropItemToNewParent(droppedItemParent, i);
+                application.addScript(droppedItemParent.getValue(), i, this.dragged);
+                this.dragged = null;
+            }
+
+        });
         this.application.suiteProperty().addListener((observed, oldValue, newValue) -> this.showScriptView());
         this.application.displayTestCaseProperty().addListener((observed, oldValue, newValue) -> {
             if (this.application.getSuite().name().equals(newValue.name())) {
@@ -46,11 +75,7 @@ public class SuitePresenter {
                 this.findItem(newValue).ifPresent(it -> this.treeViewScriptName.getSelectionModel().select(it));
             }
             try {
-                if (observed.getValue().runtimeDataSet().isLoadable() && observed.getValue().loadData().size() > 0) {
-                    openDataSource.setDisable(false);
-                } else {
-                    openDataSource.setDisable(true);
-                }
+                openDataSource.setDisable(!observed.getValue().runtimeDataSet().isLoadable() || observed.getValue().loadData().size() <= 0);
             } catch (IOException e) {
                 openDataSource.setDisable(true);
             }
@@ -60,9 +85,7 @@ public class SuitePresenter {
 
     @FXML
     public void handleOpenDataSource() {
-        this.application.executeAndLoggingCaseWhenThrowException(() -> {
-            new DataSetView().showDataSet(this.application.getDisplayTestCaseDataSource(), this.treeViewScriptName.getScene().getWindow());
-        });
+        this.application.executeAndLoggingCaseWhenThrowException(() -> new DataSetView().showDataSet(this.application.getDisplayTestCaseDataSource(), this.treeViewScriptName.getScene().getWindow()));
     }
 
     @FXML

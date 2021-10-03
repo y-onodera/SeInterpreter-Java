@@ -3,6 +3,7 @@ package com.sebuilder.interpreter.javafx.view.script;
 import com.google.common.base.Strings;
 import com.sebuilder.interpreter.Step;
 import com.sebuilder.interpreter.TestCase;
+import com.sebuilder.interpreter.javafx.Constant;
 import com.sebuilder.interpreter.javafx.application.Result;
 import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
 import com.sebuilder.interpreter.javafx.application.ViewType;
@@ -17,7 +18,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.DataFormat;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 
@@ -26,8 +26,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ScriptPresenter {
-
-    private static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat("application/x-java-serialized-object");
 
     @Inject
     private SeInterpreterApplication application;
@@ -74,15 +72,15 @@ public class ScriptPresenter {
                     Dragboard db = row.startDragAndDrop(TransferMode.MOVE);
                     db.setDragView(row.snapshot(null, null));
                     ClipboardContent cc = new ClipboardContent();
-                    cc.put(SERIALIZED_MIME_TYPE, index);
+                    cc.put(Constant.SERIALIZED_MIME_TYPE, index);
                     db.setContent(cc);
                     event.consume();
                 }
             });
             row.setOnDragOver(event -> {
                 Dragboard db = event.getDragboard();
-                if (db.hasContent(SERIALIZED_MIME_TYPE)) {
-                    if (row.getIndex() != (Integer) db.getContent(SERIALIZED_MIME_TYPE)) {
+                if (db.hasContent(Constant.SERIALIZED_MIME_TYPE)) {
+                    if (row.getIndex() != (Integer) db.getContent(Constant.SERIALIZED_MIME_TYPE)) {
                         event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
                         event.consume();
                     }
@@ -90,8 +88,8 @@ public class ScriptPresenter {
             });
             row.setOnDragDropped(event -> {
                 Dragboard db = event.getDragboard();
-                if (db.hasContent(SERIALIZED_MIME_TYPE)) {
-                    int draggedIndex = (Integer) db.getContent(SERIALIZED_MIME_TYPE);
+                if (db.hasContent(Constant.SERIALIZED_MIME_TYPE)) {
+                    int draggedIndex = (Integer) db.getContent(Constant.SERIALIZED_MIME_TYPE);
                     int dropIndex;
                     if (row.isEmpty()) {
                         dropIndex = tableViewScriptBody.getItems().size() - 1;
