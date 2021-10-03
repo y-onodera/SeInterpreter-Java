@@ -162,7 +162,7 @@ public class Sebuilder extends AbstractJsonScriptParser {
         if (!f.exists()) {
             f = new File(suiteFile.getAbsoluteFile().getParentFile(), path);
         }
-        return this.loadScriptIfExists(f, script, testRunListener);
+        return this.loadScriptIfExists(f.getAbsoluteFile(), script, testRunListener);
     }
 
     protected void loadScriptChain(JSONArray scriptArrays, TestCaseBuilder builder, TestRunListener testRunListener) throws JSONException, IOException {
