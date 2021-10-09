@@ -3,10 +3,10 @@ package com.sebuilder.interpreter.javafx.view.script;
 import com.google.common.base.Strings;
 import com.sebuilder.interpreter.Step;
 import com.sebuilder.interpreter.TestCase;
-import com.sebuilder.interpreter.javafx.Constant;
 import com.sebuilder.interpreter.javafx.application.Result;
 import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
 import com.sebuilder.interpreter.javafx.application.ViewType;
+import com.sebuilder.interpreter.javafx.control.DragAndDropTableViewRowFactory;
 import com.sebuilder.interpreter.javafx.view.replay.InputView;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -17,9 +17,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
-import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.Dragboard;
-import javafx.scene.input.TransferMode;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -46,62 +43,27 @@ public class ScriptPresenter {
         assert tableViewScriptBody != null : "fx:id=\"tableViewScriptBody\" was not injected: check your FXML file 'seleniumbuilderscriptbody.fxml'.";
         this.tableColumnScriptBodyNo.setCellValueFactory(body -> body.getValue().noProperty().asObject());
         this.tableColumnScriptBodyStep.setCellValueFactory(body -> body.getValue().stepProperty());
-        this.tableViewScriptBody.setRowFactory(scriptBodyTableView -> {
-            TableRow<ScriptBody> row = new TableRow<>() {
-                @Override
-                protected void updateItem(ScriptBody scriptBody, boolean b) {
-                    super.updateItem(scriptBody, b);
-                    for (Result result : Result.values()) {
-                        getStyleClass().remove(result.toString().toLowerCase());
-                    }
-                    if (!b && !isEmpty()) {
-                        getItem().runningResultProperty().addListener((ObservableValue<? extends String> observed, String oldValue, String newValue) -> {
-                            for (Result result : Result.values()) {
-                                getStyleClass().remove(result.toString().toLowerCase());
-                            }
-                            if (!Strings.isNullOrEmpty(newValue)) {
-                                getStyleClass().add(newValue.toLowerCase());
-                            }
-                        });
-                    }
+        this.tableViewScriptBody.setRowFactory(new DragAndDropTableViewRowFactory<>() {
+            @Override
+            protected void updateItemCallback(TableRow<ScriptBody> tableRow, ScriptBody scriptBody, boolean b) {
+                for (Result result : Result.values()) {
+                    tableRow.getStyleClass().remove(result.toString().toLowerCase());
                 }
-            };
-            row.setOnDragDetected(event -> {
-                if (!row.isEmpty()) {
-                    Integer index = row.getIndex();
-                    Dragboard db = row.startDragAndDrop(TransferMode.MOVE);
-                    db.setDragView(row.snapshot(null, null));
-                    ClipboardContent cc = new ClipboardContent();
-                    cc.put(Constant.SERIALIZED_MIME_TYPE, index);
-                    db.setContent(cc);
-                    event.consume();
+                if (!b && !tableRow.isEmpty()) {
+                    tableRow.getItem().runningResultProperty().addListener((ObservableValue<? extends String> observed, String oldValue, String newValue) -> {
+                        for (Result result : Result.values()) {
+                            tableRow.getStyleClass().remove(result.toString().toLowerCase());
+                        }
+                        if (!Strings.isNullOrEmpty(newValue)) {
+                            tableRow.getStyleClass().add(newValue.toLowerCase());
+                        }
+                    });
                 }
-            });
-            row.setOnDragOver(event -> {
-                Dragboard db = event.getDragboard();
-                if (db.hasContent(Constant.SERIALIZED_MIME_TYPE)) {
-                    if (row.getIndex() != (Integer) db.getContent(Constant.SERIALIZED_MIME_TYPE)) {
-                        event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
-                        event.consume();
-                    }
-                }
-            });
-            row.setOnDragDropped(event -> {
-                Dragboard db = event.getDragboard();
-                if (db.hasContent(Constant.SERIALIZED_MIME_TYPE)) {
-                    int draggedIndex = (Integer) db.getContent(Constant.SERIALIZED_MIME_TYPE);
-                    int dropIndex;
-                    if (row.isEmpty()) {
-                        dropIndex = tableViewScriptBody.getItems().size() - 1;
-                    } else {
-                        dropIndex = row.getIndex();
-                    }
-                    event.setDropCompleted(true);
-                    event.consume();
-                    moveStep(draggedIndex, dropIndex);
-                }
-            });
-            return row;
+            }
+            @Override
+            protected void move(int draggedIndex, int dropIndex) {
+                ScriptPresenter.this.moveStep(draggedIndex, dropIndex);
+            }
         });
         this.application.displayTestCaseProperty().addListener((observed, oldValue, newValue) -> {
             if (application.scriptViewTypeProperty().get() == ViewType.TABLE) {
@@ -224,7 +186,7 @@ public class ScriptPresenter {
 
         private final StringProperty step;
 
-        private StringProperty runningResult;
+        private final StringProperty runningResult;
 
         public ScriptBody(int no, String step, String runningResult) {
             this.no = new SimpleIntegerProperty(no);
@@ -246,10 +208,6 @@ public class ScriptPresenter {
 
         public StringProperty runningResultProperty() {
             return this.runningResult;
-        }
-
-        public String getRunningResult() {
-            return this.runningResult.get();
         }
 
         public void setRunningResult(String runningResult) {

@@ -4,7 +4,6 @@ import com.airhacks.afterburner.injection.Injector;
 import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.google.common.io.Files;
 import com.sebuilder.interpreter.*;
 import com.sebuilder.interpreter.application.TestRunListenerImpl;
 import com.sebuilder.interpreter.javafx.view.SuccessDialog;
@@ -17,13 +16,14 @@ import javafx.application.Application;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.WorkerStateEvent;
-import javafx.scene.control.TreeItem;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -36,13 +36,13 @@ public class SeInterpreterApplication extends Application {
 
     private ErrorDialog errorDialog;
 
-    private ObjectProperty<Suite> suite = new SimpleObjectProperty<>();
+    private final ObjectProperty<Suite> suite = new SimpleObjectProperty<>();
 
-    private ObjectProperty<TestCase> displayTestCase = new SimpleObjectProperty<>();
+    private final ObjectProperty<TestCase> displayTestCase = new SimpleObjectProperty<>();
 
-    private ObjectProperty<ViewType> scriptViewType = new SimpleObjectProperty<>();
+    private final ObjectProperty<ViewType> scriptViewType = new SimpleObjectProperty<>();
 
-    private ObjectProperty<Pair<Integer, Result>> replayStatus = new SimpleObjectProperty<>();
+    private final ObjectProperty<Pair<Integer, Result>> replayStatus = new SimpleObjectProperty<>();
 
     private MainView mainView;
 
@@ -188,7 +188,7 @@ public class SeInterpreterApplication extends Application {
                 .flattenTestCases()
                 .filter(it -> it.getChains().size() > 0 && it.name().equals(chainHeadName))
                 .findFirst()
-                .get();
+                .orElse(null);
     }
 
     public void resetSuite(Suite newSuite) {
@@ -200,15 +200,11 @@ public class SeInterpreterApplication extends Application {
     }
 
     public void scriptReLoad(File file, String scriptType) {
-        this.executeAndLoggingCaseWhenThrowException(() -> {
-            this.resetSuite(getScriptParser(scriptType).load(file, this.runner.getGlobalListener()).toSuite());
-        });
+        this.executeAndLoggingCaseWhenThrowException(() -> this.resetSuite(getScriptParser(scriptType).load(file, this.runner.getGlobalListener()).toSuite()));
     }
 
     public void importScript(File file) {
-        this.executeAndLoggingCaseWhenThrowException(() -> {
-            addScript(getScriptParser().load(file, this.runner.getGlobalListener()));
-        });
+        this.executeAndLoggingCaseWhenThrowException(() -> addScript(getScriptParser().load(file, this.runner.getGlobalListener())));
     }
 
     public void saveSuite(File file) {
@@ -217,34 +213,36 @@ public class SeInterpreterApplication extends Application {
     }
 
     public void saveSuite() {
-        File target = new File(this.getSuite().path());
-        List<TestCase> notAssociateFile = Lists.newArrayList();
-        this.getSuite().getChains().forEach(it -> {
-            if (Strings.isNullOrEmpty(it.path())) {
-                notAssociateFile.add(it);
+        this.executeAndLoggingCaseWhenThrowException(() -> {
+            File target = new File(this.getSuite().path());
+            List<TestCase> notAssociateFile = Lists.newArrayList();
+            this.getSuite().getChains().forEach(it -> {
+                if (Strings.isNullOrEmpty(it.path())) {
+                    notAssociateFile.add(it);
+                }
+            });
+            final File scriptSaveTo = new File(target.getParentFile(), "script");
+            if (notAssociateFile.size() > 0 && !scriptSaveTo.exists()) {
+                Files.createDirectories(scriptSaveTo.toPath());
             }
+            notAssociateFile.forEach(it -> {
+                String oldName = it.name();
+                String newName = oldName;
+                if (!oldName.endsWith(".json")) {
+                    newName = newName + ".json";
+                }
+                File saveTo = new File(scriptSaveTo, newName);
+                TestCase save = this.changeAssociateFile(it.builder().associateWith(saveTo).build(), "");
+                this.saveContents(saveTo, this.getTestCaseConverter().toString(save));
+                Suite newSuite = this.getSuite().replace(it, save);
+                if (it == this.getDisplayTestCase()) {
+                    this.resetScript(newSuite, save);
+                } else {
+                    this.resetScript(newSuite, this.getDisplayTestCase());
+                }
+            });
+            this.saveContents(target, this.getTestCaseConverter().toString(this.getSuite()));
         });
-        final File scriptSaveTo = new File(target.getParentFile(), "script");
-        if (notAssociateFile.size() > 0 && !scriptSaveTo.exists()) {
-            scriptSaveTo.mkdirs();
-        }
-        notAssociateFile.forEach(it -> {
-            String oldName = it.name();
-            String newName = oldName;
-            if (!oldName.endsWith(".json")) {
-                newName = newName + ".json";
-            }
-            File saveTo = new File(scriptSaveTo, newName);
-            TestCase save = this.changeAssociateFile(it.builder().associateWith(saveTo).build(), "");
-            this.saveContents(saveTo, this.getTestCaseConverter().toString(save));
-            Suite newSuite = this.getSuite().replace(it, save);
-            if (it == this.getDisplayTestCase()) {
-                this.resetScript(newSuite, save);
-            } else {
-                this.resetScript(newSuite, this.getDisplayTestCase());
-            }
-        });
-        this.saveContents(target, this.getTestCaseConverter().toString(this.getSuite()));
     }
 
     public StepType getStepTypeOfName(String stepType) {
@@ -383,9 +381,9 @@ public class SeInterpreterApplication extends Application {
     protected void saveContents(File target, String content) {
         this.executeAndLoggingCaseWhenThrowException(() -> {
             if (!target.exists()) {
-                target.createNewFile();
+                Files.createFile(target.toPath());
             }
-            Files.asCharSink(target, Charsets.UTF_8).write(content);
+            Files.writeString(target.toPath(), content, Charsets.UTF_8);
             SuccessDialog.show("save succeed:" + target.getAbsolutePath());
         });
     }
@@ -402,7 +400,7 @@ public class SeInterpreterApplication extends Application {
                     suffix++;
                 }
                 final File dest = newDataSource;
-                this.executeAndLoggingCaseWhenThrowException(() -> Files.copy(src, dest));
+                this.executeAndLoggingCaseWhenThrowException(() -> Files.copy(src.toPath(), dest.toPath(), StandardCopyOption.REPLACE_EXISTING));
                 return it.map(builder -> builder.addDataSourceConfig("path", dest.getName()));
             }
         }
@@ -423,9 +421,7 @@ public class SeInterpreterApplication extends Application {
         this.executeAndLoggingCaseWhenThrowException(() -> {
             ExecutorService executor = Executors.newSingleThreadExecutor();
             this.showProgressbar(task);
-            task.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED, wse -> {
-                executor.shutdown();
-            });
+            task.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED, wse -> executor.shutdown());
             executor.submit(task);
         });
     }
