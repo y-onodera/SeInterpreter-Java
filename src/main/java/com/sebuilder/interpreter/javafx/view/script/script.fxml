@@ -4,34 +4,32 @@
 <?import javafx.scene.layout.*?>
 <AnchorPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.sebuilder.interpreter.javafx.view.script.ScriptPresenter">
-    <children>
-        <TableView id="tableViewScriptBody" fx:id="tableViewScriptBody" stylesheets="@script.css"
-                   prefWidth="480.0" prefHeight="425.0" minWidth="0" maxWidth="Infinity"
-                   minHeight="0" maxHeight="Infinity"
-                   AnchorPane.bottomAnchor="0.0"
-                   AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                   AnchorPane.topAnchor="0.0">
-            <columns>
-                <TableColumn id="tableColumnScriptBodyNo" fx:id="tableColumnScriptBodyNo"
-                             prefWidth="30.0"
-                             style="-fx-alignment: CENTER_RIGHT;" text="No"/>
-                <TableColumn id="tableColumnScriptBodyStep" fx:id="tableColumnScriptBodyStep"
-                             prefWidth="Infinity"
-                             style="-fx-alignment: CENTER_LEFT;" text="Step"/>
-            </columns>
-            <contextMenu>
-                <ContextMenu>
-                    <items>
-                        <MenuItem mnemonicParsing="false" onAction="#handleStepInsert" text="insert"/>
-                        <MenuItem mnemonicParsing="false" onAction="#handleStepAdd" text="add"/>
-                        <MenuItem mnemonicParsing="false" onAction="#handleStepDelete" text="delete"/>
-                        <MenuItem mnemonicParsing="false" onAction="#handleStepEdit" text="edit"/>
-                        <MenuItem mnemonicParsing="false" onAction="#handleRunStep" text="run step"/>
-                        <MenuItem mnemonicParsing="false" onAction="#handleRunFromHere" text="run from Here"/>
-                        <MenuItem mnemonicParsing="false" onAction="#handleRunToHere" text="run to Here"/>
-                    </items>
-                </ContextMenu>
-            </contextMenu>
-        </TableView>
-    </children>
+    <TableView id="tableViewScriptBody" fx:id="tableViewScriptBody" stylesheets="@script.css"
+               prefWidth="480.0" prefHeight="425.0" minWidth="0" maxWidth="Infinity"
+               minHeight="0" maxHeight="Infinity"
+               AnchorPane.bottomAnchor="0.0"
+               AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+               AnchorPane.topAnchor="0.0">
+        <columns>
+            <TableColumn id="tableColumnScriptBodyNo" fx:id="tableColumnScriptBodyNo"
+                         prefWidth="30.0"
+                         style="-fx-alignment: CENTER_RIGHT;" text="No"/>
+            <TableColumn id="tableColumnScriptBodyStep" fx:id="tableColumnScriptBodyStep"
+                         prefWidth="Infinity"
+                         style="-fx-alignment: CENTER_LEFT;" text="Step"/>
+        </columns>
+        <contextMenu>
+            <ContextMenu>
+                <items>
+                    <MenuItem mnemonicParsing="false" onAction="#handleStepInsert" text="insert"/>
+                    <MenuItem mnemonicParsing="false" onAction="#handleStepAdd" text="add"/>
+                    <MenuItem mnemonicParsing="false" onAction="#handleStepDelete" text="delete"/>
+                    <MenuItem mnemonicParsing="false" onAction="#handleStepEdit" text="edit"/>
+                    <MenuItem mnemonicParsing="false" onAction="#handleRunStep" text="run step"/>
+                    <MenuItem mnemonicParsing="false" onAction="#handleRunFromHere" text="run from Here"/>
+                    <MenuItem mnemonicParsing="false" onAction="#handleRunToHere" text="run to Here"/>
+                </items>
+            </ContextMenu>
+        </contextMenu>
+    </TableView>
 </AnchorPane>

@@ -5,8 +5,8 @@ import com.sebuilder.interpreter.TestCase;
 import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
+import org.tbee.javafx.scene.layout.MigPane;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -19,7 +19,7 @@ public class TemplatePresenter {
     private SeInterpreterApplication application;
 
     @FXML
-    private GridPane exportSettingsGrid;
+    private MigPane exportSettingsGrid;
 
     @FXML
     private TextField textLocatorValue;
@@ -84,8 +84,8 @@ public class TemplatePresenter {
                 this.removeLocatorValue();
             }
         } else {
-            this.exportSettingsGrid.add(this.textLocatorValue, 1, 1);
-            this.exportSettingsGrid.add(this.parentSearchButton, 2, 1);
+            this.exportSettingsGrid.add(this.textLocatorValue, "cell 1 1,grow");
+            this.exportSettingsGrid.add(this.parentSearchButton, "cell 2 1");
         }
     }
 

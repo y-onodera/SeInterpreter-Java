@@ -20,7 +20,7 @@ import java.util.Objects;
 public class StepPresenter {
 
     @Inject
-    private SeInterpreterApplication apprication;
+    private SeInterpreterApplication application;
 
     private static final String[] STEP_TYPES = {
             "ClickElement"
@@ -239,9 +239,9 @@ public class StepPresenter {
 
     private String beforeLocatorValue;
 
-    private Map<String, Node> inputs = Maps.newHashMap();
+    private final Map<String, Node> inputs = Maps.newHashMap();
 
-    private Map<String, Map<String, Node>> locatorInputs = Maps.newHashMap();
+    private final Map<String, Map<String, Node>> locatorInputs = Maps.newHashMap();
 
     private Stage dialog;
 
@@ -276,12 +276,12 @@ public class StepPresenter {
         }
         this.selectedStepType = this.stepTypeSelect.getSelectionModel().getSelectedItem();
         this.clearInputFields();
-        this.refreshView(this.apprication.createStep(stepType));
+        this.refreshView(this.application.createStep(stepType));
     }
 
     void refreshView(Step step) {
         Step stepWithAllParam = step.withAllParam();
-        this.apprication.executeAndLoggingCaseWhenThrowException(() -> {
+        this.application.executeAndLoggingCaseWhenThrowException(() -> {
             int row = 1;
             String typeName = this.resetStepType(stepWithAllParam);
             row = this.addTextBox(stepWithAllParam, row, "skip");
@@ -373,7 +373,7 @@ public class StepPresenter {
             this.stepEditGrid.add(select, 1, row++);
             TextField text = resetLocatorText(step, locator);
             Button button = new Button("find");
-            button.setOnAction(ae -> this.apprication.highLightElement(select.getSelectionModel().getSelectedItem(), text.getText()));
+            button.setOnAction(ae -> this.application.highLightElement(select.getSelectionModel().getSelectedItem(), text.getText()));
             this.stepEditGrid.add(text, 1, row);
             this.stepEditGrid.add(button, 2, row++);
             Map<String, Node> input = Maps.newHashMap();
@@ -458,8 +458,8 @@ public class StepPresenter {
     private Button createApplyButton() {
         Button result = new Button("apply");
         result.setOnAction(ae -> {
-            this.apprication.executeAndLoggingCaseWhenThrowException(() -> {
-                StepBuilder step = new StepBuilder(this.apprication.getStepTypeOfName(this.selectedStepType));
+            this.application.executeAndLoggingCaseWhenThrowException(() -> {
+                StepBuilder step = new StepBuilder(this.application.getStepTypeOfName(this.selectedStepType));
                 for (Map.Entry<String, Node> input : this.inputs.entrySet()) {
                     if (input.getValue() instanceof TextField) {
                         TextField text = (TextField) input.getValue();
@@ -490,12 +490,12 @@ public class StepPresenter {
     private void editStep(StepView.Action editAction, int stepIndex, Step newStep) {
         TestCase newCase;
         if (editAction == StepView.Action.EDIT) {
-            newCase = this.apprication.getDisplayTestCase().setSteps(stepIndex, newStep);
+            newCase = this.application.getDisplayTestCase().setSteps(stepIndex, newStep);
         } else if (editAction == StepView.Action.INSERT) {
-            newCase = this.apprication.getDisplayTestCase().insertStep(stepIndex, newStep);
+            newCase = this.application.getDisplayTestCase().insertStep(stepIndex, newStep);
         } else {
-            newCase = this.apprication.getDisplayTestCase().addStep(stepIndex, newStep);
+            newCase = this.application.getDisplayTestCase().addStep(stepIndex, newStep);
         }
-        this.apprication.replaceDisplayCase(newCase);
+        this.application.replaceDisplayCase(newCase);
     }
 }
