@@ -165,7 +165,12 @@ public class SeInterpreterApplication extends Application {
     public void addScript(String chainHeadName, int i, TestCase dragged) {
         TestCase before = this.findChainHead(chainHeadName);
         TestCase after = before.map(it -> it.addChain(dragged, i));
-        this.resetSuite(this.getSuite().replace(before, after));
+        this.resetScript(this.getSuite().replace(before, after)
+                , TestCaseSelector.builder()
+                        .setHeadName(after.name())
+                        .setTestCaseName(dragged.name())
+                        .build()
+                        .findTestCase(after));
     }
 
     public void removeScript() {
@@ -184,11 +189,10 @@ public class SeInterpreterApplication extends Application {
     }
 
     public TestCase findChainHead(String chainHeadName) {
-        return this.getSuite().head()
-                .flattenTestCases()
-                .filter(it -> it.getChains().size() > 0 && it.name().equals(chainHeadName))
-                .findFirst()
-                .orElse(null);
+        return TestCaseSelector.builder()
+                .setHeadName(chainHeadName)
+                .build()
+                .findChainHead(this.getSuite());
     }
 
     public void resetSuite(Suite newSuite) {

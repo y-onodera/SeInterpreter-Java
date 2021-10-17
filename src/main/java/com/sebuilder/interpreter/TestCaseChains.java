@@ -30,7 +30,6 @@ public class TestCaseChains implements Iterable<TestCase> {
         this.takeOverLastRun = takeOverLastRun;
     }
 
-    @SuppressWarnings("NullableProblems")
     @Override
     public Iterator<TestCase> iterator() {
         return this.testCases.iterator();
