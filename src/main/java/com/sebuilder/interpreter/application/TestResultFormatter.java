@@ -40,9 +40,9 @@ public class TestResultFormatter extends XMLJUnitResultFormatter {
         String screenshotPath = "";
         String expectScreenshotPath = "";
         if (test instanceof TestRunListenerImpl.ResultReportableTestCase) {
-            screenshotPath = TestRunListenerImpl.ResultReportableTestCase.class.cast(test).getScreenshotPath();
-            expectScreenshotPath = TestRunListenerImpl.ResultReportableTestCase.class.cast(test).getExpectScreenshotPath();
-            downloadPath = TestRunListenerImpl.ResultReportableTestCase.class.cast(test).getDownloadPath();
+            screenshotPath = ((TestRunListenerImpl.ResultReportableTestCase) test).getScreenshotPath();
+            expectScreenshotPath = ((TestRunListenerImpl.ResultReportableTestCase) test).getExpectScreenshotPath();
+            downloadPath = ((TestRunListenerImpl.ResultReportableTestCase) test).getDownloadPath();
         }
         currentTest.setAttribute("screenshot", screenshotPath);
         currentTest.setAttribute("screenshotExpect", expectScreenshotPath);

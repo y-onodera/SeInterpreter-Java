@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 public class TestRunListenerImpl implements TestRunListener {
     private final TestResultFormatter formatter;
     private String reportPrefix;
-    private Project project;
+    private final Project project;
     private File resultDir;
     private File downloadDirectory;
     private File screenShotOutputDirectory;
@@ -37,7 +37,7 @@ public class TestRunListenerImpl implements TestRunListener {
     private int runTest;
     private int error;
     private int failed;
-    private Logger log;
+    private final Logger log;
 
     public TestRunListenerImpl(Logger aLog) {
         this.log = aLog;

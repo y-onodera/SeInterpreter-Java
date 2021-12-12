@@ -16,7 +16,7 @@ public class CommandLineOption {
     private Long pageLoadTimeout = (long) -1;
     private String driver = "Chrome";
     private String driverPath;
-    private Map<String, String> driverConfig = Maps.newHashMap();
+    private final Map<String, String> driverConfig = Maps.newHashMap();
     private String datasourceEncoding = "UTF-8";
     private String datasourceDirectory = "input";
     private String resultoutput = "result";
@@ -26,12 +26,12 @@ public class CommandLineOption {
     private String templateoutput = "template";
     private String aspectFile;
     private String environmentProperties;
-    private Map<String, String> envVar = Maps.newHashMap();
+    private final Map<String, String> envVar = Maps.newHashMap();
     private Locale locale;
     private File localeConf;
-    private LinkedHashSet<String> scripts = Sets.newLinkedHashSet();
+    private final LinkedHashSet<String> scripts = Sets.newLinkedHashSet();
     @Argument
-    private List<String> arguments = Lists.newArrayList();
+    private final List<String> arguments = Lists.newArrayList();
 
     public void parse(String[] args) throws Exception {
         CmdLineParser parser = new CmdLineParser(this);

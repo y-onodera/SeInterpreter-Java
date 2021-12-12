@@ -20,7 +20,7 @@ public enum CommandLineArgument {
     LOCALE("--locale"),
     LOCALE_CONF("--locale.conf");
 
-    private String key;
+    private final String key;
 
     CommandLineArgument(String aKey) {
         this.key = aKey;
