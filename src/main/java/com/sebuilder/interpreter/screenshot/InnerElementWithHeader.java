@@ -35,8 +35,8 @@ public class InnerElementWithHeader implements InnerElement {
     }
 
     @Override
-    public RemoteWebDriver getWebDriver() {
-        return this.element.getWebDriver();
+    public RemoteWebDriver driver() {
+        return this.element.driver();
     }
 
     @Override
@@ -181,7 +181,7 @@ public class InnerElementWithHeader implements InnerElement {
 
         public Height(InnerElement element, InnerElement headerElement) {
             super(new ScrollableHeight.Builder()
-                    .setWebDriver(element.getWebDriver())
+                    .setWebDriver(element.driver())
                     .setPointY(headerElement.getPointY())
                     .setViewportHeight(element.getViewportHeight() + element.getPointY() - headerElement.getPointY())
                     .setScrollableHeight(element.getScrollableHeight() + element.getPointY() - headerElement.getPointY())

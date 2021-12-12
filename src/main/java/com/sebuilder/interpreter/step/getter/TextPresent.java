@@ -18,11 +18,12 @@ package com.sebuilder.interpreter.step.getter;
 
 import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
+import org.openqa.selenium.By;
 
 public class TextPresent extends AbstractGetter {
     @Override
     public String get(TestRun ctx) {
-        return "" + ctx.driver().findElementByTagName("html").getText().contains(ctx.text());
+        return Boolean.toString(ctx.getHtml().contains(ctx.text()));
     }
 
     @Override

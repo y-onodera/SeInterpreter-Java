@@ -37,11 +37,11 @@ public class HighLightElement extends AbstractStepType implements LocatorHolder 
     }
 
     private static void toggleOutline(TestRun ctx, WebElement element, String aStyle) {
-        ctx.driver().executeScript("arguments[0].style.outline = '" + aStyle + "'; return [];", element);
+        ctx.executeScript("arguments[0].style.outline = '" + aStyle + "'; return [];", element);
     }
 
     private static void toggleBorder(TestRun ctx, WebElement element, String aStyle) {
-        ctx.driver().executeScript("arguments[0].style.border = '" + aStyle + "'; return [];", element);
+        ctx.executeScript("arguments[0].style.border = '" + aStyle + "'; return [];", element);
     }
 
     public static class Cache {
@@ -71,20 +71,20 @@ public class HighLightElement extends AbstractStepType implements LocatorHolder 
         }
 
         public static void originalStyle(TestRun ctx, WebElement element) {
-            String originalBorder = (String) ctx.driver().executeScript("return arguments[0].style.border;", element);
+            String originalBorder = (String) ctx.executeScript("return arguments[0].style.border;", element);
             String originalOutline = null;
             if (isChangeOutline(element)) {
-                originalOutline = (String) ctx.driver().executeScript("return arguments[0].style.outline;", element);
+                originalOutline = (String) ctx.executeScript("return arguments[0].style.outline;", element);
             }
-            Locator locator = Locator.of(ctx.driver(), element);
+            Locator locator = ctx.detectLocator(element);
             cache.put(locator, new BackupStyle(originalBorder, originalOutline));
         }
 
     }
 
     private static class BackupStyle {
-        private String border;
-        private String outline;
+        private final String border;
+        private final String outline;
 
         public BackupStyle(String border, String outline) {
             this.border = border;

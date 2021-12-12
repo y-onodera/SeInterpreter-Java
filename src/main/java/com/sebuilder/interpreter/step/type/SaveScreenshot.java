@@ -27,13 +27,11 @@ import com.sebuilder.interpreter.screenshot.Page;
 import com.sebuilder.interpreter.screenshot.VerticalPrinter;
 import com.sebuilder.interpreter.step.AbstractStepType;
 import com.sebuilder.interpreter.step.LocatorHolder;
-import org.openqa.selenium.OutputType;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 
@@ -53,11 +51,7 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
             File file = ctx.getListener().addScreenshot(fileName);
             BufferedImage actual;
             if (ctx.getBoolean("default")) {
-                try (ByteArrayInputStream imageArrayStream = new ByteArrayInputStream(wd.getScreenshotAs(OutputType.BYTES))) {
-                    actual = ImageIO.read(imageArrayStream);
-                } catch (IOException var9) {
-                    throw new RuntimeException("Can not load screenshot data", var9);
-                }
+                actual = ctx.getScreenshot();
             } else {
                 Page target = new Page(ctx, new LocatorInnerScrollElementHandler());
                 actual = target.printImage(new VerticalPrinter(), 0);

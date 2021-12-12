@@ -21,7 +21,7 @@ import com.sebuilder.interpreter.TestRun;
 public class BodyText extends AbstractGetter {
     @Override
     public String get(TestRun ctx) {
-        return ctx.driver().findElementByTagName("html").getText();
+        return ctx.getHtml();
     }
 
     @Override

@@ -55,9 +55,9 @@ public class Firefox implements WebDriverFactory {
             }
         });
         DesiredCapabilities capabilities = new DesiredCapabilities(caps);
-        capabilities.setCapability(FirefoxDriver.BINARY, fb);
-        capabilities.setCapability(FirefoxDriver.PROFILE, fp);
         FirefoxOptions option = new FirefoxOptions(capabilities);
+        option.setBinary(fb);
+        option.setProfile(fp);
         FirefoxDriver result = new FirefoxDriver(option);
         return result;
     }

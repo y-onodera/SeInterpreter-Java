@@ -10,7 +10,7 @@ import java.util.Map;
 public interface Printable extends VerticalSurvey, HorizontalSurvey {
 
     @Override
-    default RemoteWebDriver getWebDriver() {
+    default RemoteWebDriver driver() {
         return getCtx().driver();
     }
 

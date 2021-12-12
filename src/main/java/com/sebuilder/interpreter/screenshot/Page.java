@@ -6,12 +6,12 @@ import java.awt.image.BufferedImage;
 
 
 public class Page extends AbstractPrintable {
-    private int imageHeight;
-    private int imageWidth;
-    private int windowHeight;
-    private int windowWidth;
-    private ScrollableHeight height;
-    private ScrollableWidth width;
+    private final int imageHeight;
+    private final int imageWidth;
+    private final int windowHeight;
+    private final int windowWidth;
+    private final ScrollableHeight height;
+    private final ScrollableWidth width;
 
     public Page(TestRun ctx, InnerScrollElementHandler innerScrollElementHandler) {
         super(ctx);

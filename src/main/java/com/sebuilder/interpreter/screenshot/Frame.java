@@ -1,6 +1,5 @@
 package com.sebuilder.interpreter.screenshot;
 
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
@@ -21,7 +20,7 @@ public class Frame extends AbstractInnerElement {
 
     @Override
     public BufferedImage printImage(VerticalPrinter aPrinter, int fromPointY) {
-        WebDriver wd = getWebDriver();
+        WebDriver wd = this.driver();
         wd.switchTo().frame(this.getElement());
         BufferedImage result = super.printImage(aPrinter, fromPointY);
         wd.switchTo().parentFrame();
@@ -30,7 +29,7 @@ public class Frame extends AbstractInnerElement {
 
     @Override
     public BufferedImage getScreenshot() {
-        WebDriver wd = getWebDriver();
+        WebDriver wd = this.driver();
         wd.switchTo().parentFrame();
         BufferedImage result = this.getParent().getScreenshot();
         wd.switchTo().frame(this.getElement());
@@ -38,7 +37,7 @@ public class Frame extends AbstractInnerElement {
     }
 
     public static ScrollableHeight getHeight(Printable parent, RemoteWebDriver wd, WebElement targetFrame) {
-        int border = ((Number) ((JavascriptExecutor) wd).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('border-top-width'));", targetFrame)).intValue();
+        int border = ((Number) parent.executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('border-top-width'));", targetFrame)).intValue();
         int pointY = getPointY(targetFrame, border, wd);
         int viewportHeight = getClientHeight(targetFrame, border, wd);
         wd.switchTo().frame(targetFrame);
@@ -52,7 +51,7 @@ public class Frame extends AbstractInnerElement {
     }
 
     public static ScrollableWidth getWidth(Printable parent, RemoteWebDriver wd, WebElement targetFrame) {
-        int borderWidth = ((Number) ((JavascriptExecutor) wd).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('border-left-width'));", targetFrame)).intValue();
+        int borderWidth = ((Number) parent.executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('border-left-width'));", targetFrame)).intValue();
         int pointX = targetFrame.getLocation().getX() + borderWidth;
         int viewportWidth = Integer.parseInt(targetFrame.getAttribute("clientWidth"));
         wd.switchTo().frame(targetFrame);

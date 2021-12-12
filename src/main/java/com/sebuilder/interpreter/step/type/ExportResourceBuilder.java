@@ -7,7 +7,6 @@ import com.sebuilder.interpreter.datasource.DataSourceFactoryImpl;
 import com.sebuilder.interpreter.step.StepTypeFactoryImpl;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -17,8 +16,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ExportResourceBuilder {
-    private StepTypeFactory stepTypeFactory = new StepTypeFactoryImpl();
-    private DataSourceFactory dataSourceFactory = new DataSourceFactoryImpl();
+    private final StepTypeFactory stepTypeFactory = new StepTypeFactoryImpl();
+    private final DataSourceFactory dataSourceFactory = new DataSourceFactoryImpl();
     private final TestRun ctx;
     private final Map<String, String> variables;
     private final Map<String, Integer> duplicate;
@@ -70,23 +69,23 @@ public class ExportResourceBuilder {
                     String type = element.getAttribute("type");
                     switch (type) {
                         case "text":
-                            this.addStep(new SetElementText(), this.ctx.driver(), element);
+                            this.addStep(new SetElementText(), element);
                             break;
                         case "checkbox":
                         case "radio":
-                            this.addStep(new SetElementSelected(), this.ctx.driver(), element);
+                            this.addStep(new SetElementSelected(), element);
                             break;
                         case "hidden":
                             break;
                         default:
-                            this.addStep(new SetElementText(), this.ctx.driver(), element);
+                            this.addStep(new SetElementText(),  element);
                     }
                 });
         this.extractFrom
                 .findElements(By.tagName("textarea"))
                 .stream()
                 .forEach(element -> {
-                    this.addStep(new SetElementText(), this.ctx.driver(), element);
+                    this.addStep(new SetElementText(), element);
                 });
         return this;
     }
@@ -103,7 +102,7 @@ public class ExportResourceBuilder {
                             .stream()
                             .filter(option -> option.isSelected())
                             .forEach(option -> {
-                                this.addStep(new SetElementSelected(), this.ctx.driver(), option);
+                                this.addStep(new SetElementSelected(), option);
                             });
                 });
         return this;
@@ -118,7 +117,7 @@ public class ExportResourceBuilder {
                 .stream()
                 .filter(element -> !Strings.isNullOrEmpty(element.getText()))
                 .forEach(element -> {
-                    this.addStep(new ClickElement(), this.ctx.driver(), element);
+                    this.addStep(new ClickElement(), element);
                 });
         return this;
     }
@@ -131,7 +130,7 @@ public class ExportResourceBuilder {
                 .findElements(By.tagName("button"))
                 .stream()
                 .forEach(element -> {
-                    this.addStep(new ClickElement(), this.ctx.driver(), element);
+                    this.addStep(new ClickElement(), element);
                 });
         return this;
     }
@@ -144,7 +143,7 @@ public class ExportResourceBuilder {
                 .findElements(By.tagName("div"))
                 .stream()
                 .forEach(element -> {
-                    this.addStep(new ClickElement(), this.ctx.driver(), element);
+                    this.addStep(new ClickElement(),  element);
                 });
         return this;
     }
@@ -157,15 +156,15 @@ public class ExportResourceBuilder {
                 .findElements(By.tagName("span"))
                 .stream()
                 .forEach(element -> {
-                    this.addStep(new ClickElement(), this.ctx.driver(), element);
+                    this.addStep(new ClickElement(), element);
                 });
         return this;
     }
 
-    public ExportResourceBuilder addStep(Exportable source, RemoteWebDriver driver, WebElement element) {
+    public ExportResourceBuilder addStep(Exportable source, WebElement element) {
         this.addStep(source.getTypeName())
-                .addLocator(source.hasLocator(), driver, element);
-        source.addElement(this, driver, element);
+                .addLocator(source.hasLocator(), element);
+        source.addElement(this, this.ctx.driver(), element);
         return this;
     }
 
@@ -175,11 +174,11 @@ public class ExportResourceBuilder {
         return this;
     }
 
-    public ExportResourceBuilder addLocator(boolean hasLocator, RemoteWebDriver driver, WebElement element) {
+    public ExportResourceBuilder addLocator(boolean hasLocator, WebElement element) {
         if (!hasLocator) {
             return this;
         }
-        Locator result = Locator.of(driver, element);
+        Locator result = this.ctx.detectLocator(element);
         if (result.value.contains("//select[@id=")) {
             String id = "id:" + result.value.replaceAll(".+(?=@id='([^']+)').*", "$1");
             String value = result.value.replaceAll(".+(?=@value='([^']*)').*", "@value='$1'");

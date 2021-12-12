@@ -22,7 +22,7 @@ import com.sebuilder.interpreter.TestRun;
 public class Eval extends AbstractGetter {
     @Override
     public String get(TestRun ctx) {
-        Object result = ctx.driver().executeScript(ctx.string("script"));
+        Object result = ctx.executeScript(ctx.string("script"));
         return result == null ? null : result.toString();
     }
 

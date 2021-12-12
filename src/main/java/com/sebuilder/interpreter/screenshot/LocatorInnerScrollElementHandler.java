@@ -60,7 +60,7 @@ public class LocatorInnerScrollElementHandler implements InnerScrollElementHandl
     }
 
     public Frame toFrame(Printable parent, WebElement targetFrame) {
-        RemoteWebDriver wd = parent.getWebDriver();
+        RemoteWebDriver wd = parent.driver();
         ScrollableHeight height = Frame.getHeight(parent, wd, targetFrame);
         ScrollableWidth width = Frame.getWidth(parent, wd, targetFrame);
         wd.switchTo().frame(targetFrame);

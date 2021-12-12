@@ -33,7 +33,7 @@ public class SetElementText extends AbstractStepType implements ConditionalStep,
         el.clear();
         String input = ctx.text();
         if (isIncludeHalfWidthText(input)) {
-            ctx.driver().executeScript("arguments[0].value = arguments[1]", el, input);
+            ctx.executeScript("arguments[0].value = arguments[1]", el, input);
             el.sendKeys(Keys.TAB);
         } else {
             el.sendKeys(input);

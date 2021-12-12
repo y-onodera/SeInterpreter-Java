@@ -1,7 +1,6 @@
 package com.sebuilder.interpreter.screenshot;
 
 import com.sebuilder.interpreter.TestRun;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
 
@@ -32,8 +31,8 @@ public class ScrollableTag extends AbstractInnerElement {
         int viewportHeight = Integer.parseInt(targetDiv.getAttribute("clientHeight"));
         int scrollableHeight = Integer.parseInt(targetDiv.getAttribute("scrollHeight"));
 
-        int paddingTop = ((Number) ((JavascriptExecutor) testRun.driver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-top') || document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding'));", targetDiv)).intValue();
-        int paddingBottom = ((Number) ((JavascriptExecutor) testRun.driver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-bottom') || document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding'));", targetDiv)).intValue();
+        int paddingTop = ((Number) testRun.executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-top') || document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding'));", targetDiv)).intValue();
+        int paddingBottom = ((Number) testRun.executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-bottom') || document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding'));", targetDiv)).intValue();
         pointY = pointY + paddingTop;
         viewportHeight = viewportHeight - paddingBottom - paddingTop;
         scrollableHeight = scrollableHeight  - paddingBottom - paddingTop;
@@ -52,8 +51,8 @@ public class ScrollableTag extends AbstractInnerElement {
         int viewportWidth = Integer.parseInt(targetDiv.getAttribute("clientWidth"));
         int scrollableWidth = Integer.parseInt(targetDiv.getAttribute("scrollWidth"));
 
-        int paddingLeft = ((Number) ((JavascriptExecutor) testRun.driver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-left') || document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding'));", targetDiv)).intValue();
-        int paddingRight = ((Number) ((JavascriptExecutor) testRun.driver()).executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-right') || document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding'));", targetDiv)).intValue();
+        int paddingLeft = ((Number) testRun.executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-left') || document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding'));", targetDiv)).intValue();
+        int paddingRight = ((Number)testRun.executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-right') || document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding'));", targetDiv)).intValue();
         pointX = pointX + paddingLeft;
         viewportWidth = viewportWidth - paddingRight - paddingLeft;
         scrollableWidth = scrollableWidth - paddingRight - paddingLeft;

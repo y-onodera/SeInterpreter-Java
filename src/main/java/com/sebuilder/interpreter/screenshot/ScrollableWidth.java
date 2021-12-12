@@ -20,7 +20,8 @@ public class ScrollableWidth implements Scrollable {
         this.ignoreScroll = builder.isIgnoreScroll();
     }
 
-    public RemoteWebDriver getWebDriver() {
+    @Override
+    public RemoteWebDriver driver() {
         return this.wd;
     }
 
@@ -55,9 +56,9 @@ public class ScrollableWidth implements Scrollable {
     public void scrollHorizontally(int nextLeft) {
         if (this.hasHorizontalScroll()) {
             if (this.getTargetElement() != null) {
-                this.getWebDriver().executeScript("arguments[0].scrollLeft = arguments[1]; return [];", this.getTargetElement(), nextLeft);
+                this.executeScript("arguments[0].scrollLeft = arguments[1]; return [];", this.getTargetElement(), nextLeft);
             } else {
-                this.getWebDriver().executeScript("scrollTo(arguments[0],document.documentElement.scrollTop); return [];", nextLeft);
+                this.executeScript("scrollTo(arguments[0],document.documentElement.scrollTop); return [];", nextLeft);
             }
             waitForScrolling();
         }

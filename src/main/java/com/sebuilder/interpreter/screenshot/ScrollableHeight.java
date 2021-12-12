@@ -21,7 +21,8 @@ public class ScrollableHeight implements Scrollable {
         this.ignoreScroll = builder.isIgnoreScroll();
     }
 
-    public RemoteWebDriver getWebDriver() {
+    @Override
+    public RemoteWebDriver driver() {
         return this.wd;
     }
 
@@ -56,9 +57,9 @@ public class ScrollableHeight implements Scrollable {
     public void scrollVertically(int nextTop) {
         if (this.hasVerticalScroll()) {
             if (this.getTargetElement() != null) {
-                this.getWebDriver().executeScript("arguments[0].scrollTop = arguments[1]; return [];", this.getTargetElement(), nextTop);
+                this.executeScript("arguments[0].scrollTop = arguments[1]; return [];", this.getTargetElement(), nextTop);
             } else {
-                this.getWebDriver().executeScript("scrollTo(document.documentElement.scrollLeft,arguments[0]); return [];", nextTop);
+                this.executeScript("scrollTo(document.documentElement.scrollLeft,arguments[0]); return [];", nextTop);
             }
             waitForScrolling();
         }

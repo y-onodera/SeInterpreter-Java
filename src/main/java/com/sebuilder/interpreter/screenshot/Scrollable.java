@@ -1,6 +1,8 @@
 package com.sebuilder.interpreter.screenshot;
 
-public interface Scrollable {
+import com.sebuilder.interpreter.WebDriverWrapper;
+
+public interface Scrollable extends WebDriverWrapper {
 
     default long scrollTimeout() {
         return 100;

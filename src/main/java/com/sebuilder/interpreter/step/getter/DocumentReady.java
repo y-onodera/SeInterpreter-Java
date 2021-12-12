@@ -6,7 +6,7 @@ public class DocumentReady extends AbstractGetter {
 
     @Override
     public String get(TestRun ctx) {
-        return String.valueOf(ctx.driver().executeScript("return document.readyState").equals("complete"));
+        return String.valueOf(ctx.executeScript("return document.readyState").equals("complete"));
     }
 
 }

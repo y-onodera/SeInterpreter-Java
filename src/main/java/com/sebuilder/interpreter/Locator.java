@@ -20,7 +20,6 @@ import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.util.List;
 
@@ -33,7 +32,7 @@ public class Locator {
     public Type type;
     public String value;
 
-    public static Locator of(RemoteWebDriver driver, WebElement element) {
+    static Locator of(WebDriverWrapper driver, WebElement element) {
         String id = element.getAttribute("id");
         if ("option".equals(element.getTagName())) {
             WebElement parent = element.findElement(By.xpath(".."));
@@ -108,56 +107,56 @@ public class Locator {
         ID {
             @Override
             public WebElement find(String value, TestRun ctx) {
-                return ctx.driver().findElementById(value);
+                return ctx.driver().findElement(By.id(value));
             }
 
             @Override
             public List<WebElement> findElements(String value, TestRun ctx) {
-                return ctx.driver().findElementsById(value);
+                return ctx.driver().findElements(By.id(value));
             }
         },
         NAME {
             @Override
             public WebElement find(String value, TestRun ctx) {
-                return ctx.driver().findElementByName(value);
+                return ctx.driver().findElement(By.name(value));
             }
 
             @Override
             public List<WebElement> findElements(String value, TestRun ctx) {
-                return ctx.driver().findElementsByName(value);
+                return ctx.driver().findElements(By.name(value));
             }
         },
         LINK_TEXT {
             @Override
             public WebElement find(String value, TestRun ctx) {
-                return ctx.driver().findElementByLinkText(value);
+                return ctx.driver().findElement(By.linkText(value));
             }
 
             @Override
             public List<WebElement> findElements(String value, TestRun ctx) {
-                return ctx.driver().findElementsByLinkText(value);
+                return ctx.driver().findElements(By.linkText(value));
             }
         },
         CSS_SELECTOR {
             @Override
             public WebElement find(String value, TestRun ctx) {
-                return ctx.driver().findElementByCssSelector(value);
+                return ctx.driver().findElement(By.cssSelector(value));
             }
 
             @Override
             public List<WebElement> findElements(String value, TestRun ctx) {
-                return ctx.driver().findElementsByCssSelector(value);
+                return ctx.driver().findElements(By.cssSelector(value));
             }
         },
         XPATH {
             @Override
             public WebElement find(String value, TestRun ctx) {
-                return ctx.driver().findElementByXPath(value);
+                return ctx.driver().findElement(By.xpath(value));
             }
 
             @Override
             public List<WebElement> findElements(String value, TestRun ctx) {
-                return ctx.driver().findElementsByXPath(value);
+                return ctx.driver().findElements(By.xpath(value));
             }
         };
 

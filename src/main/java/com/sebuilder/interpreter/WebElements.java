@@ -31,7 +31,7 @@ public enum WebElements {
             .append("return getElementXPath(arguments[0]).toLowerCase();")
             .toString();
 
-    public static String toXpath(RemoteWebDriver driver, WebElement element) {
+    public static String toXpath(WebDriverWrapper driver, WebElement element) {
         return (String) driver.executeScript(JAVA_SCRIPT_ELEMENT_TO_XPATH, element);
     }
 }

@@ -42,8 +42,8 @@ public class Chrome implements WebDriverFactory {
     }
 
     protected ChromeOptions getOptions(Map<String, String> config) {
-        HashMap<String, String> caps = new HashMap<String, String>();
-        HashMap<String, String> prefs = new HashMap<String, String>();
+        HashMap<String, String> caps = new HashMap<>();
+        HashMap<String, String> prefs = new HashMap<>();
         ChromeOptions option = new ChromeOptions();
         if (config.containsKey("binary")) {
             option.setBinary(new File(config.get("binary")));
