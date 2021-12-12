@@ -11,7 +11,7 @@ import java.util.Objects;
 
 public class ExecCmd extends AbstractStepType implements GetterUseStep {
 
-    private Cmd cmd = new Cmd();
+    private final Cmd cmd = new Cmd();
 
     @Override
     public Getter getGetter() {

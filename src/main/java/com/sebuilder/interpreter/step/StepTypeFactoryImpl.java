@@ -93,19 +93,19 @@ public class StepTypeFactoryImpl implements com.sebuilder.interpreter.StepTypeFa
                 try {
                     Object o = c.getDeclaredConstructor().newInstance();
                     if (name.startsWith("assert")) {
-                        this.typesMap.put(name, Getter.class.cast(o).toAssert());
+                        this.typesMap.put(name, ((Getter) o).toAssert());
                     } else if (name.startsWith("verify")) {
-                        this.typesMap.put(name, Getter.class.cast(o).toVerify());
+                        this.typesMap.put(name, ((Getter) o).toVerify());
                     } else if (name.startsWith("waitFor")) {
-                        this.typesMap.put(name, Getter.class.cast(o).toWaitFor());
+                        this.typesMap.put(name, ((Getter) o).toWaitFor());
                     } else if (name.startsWith("store") && !name.equals("store")) {
-                        this.typesMap.put(name, Getter.class.cast(o).toStore());
+                        this.typesMap.put(name, ((Getter) o).toStore());
                     } else if (name.startsWith("print") && !name.equals("print")) {
-                        this.typesMap.put(name, Getter.class.cast(o).toPrint());
+                        this.typesMap.put(name, ((Getter) o).toPrint());
                     } else if (name.startsWith("if") && !name.equals("if")) {
-                        this.typesMap.put(name, Getter.class.cast(o).toIf());
+                        this.typesMap.put(name, ((Getter) o).toIf());
                     } else if (name.startsWith("retry") && !name.equals("retry")) {
-                        this.typesMap.put(name, Getter.class.cast(o).toRetry());
+                        this.typesMap.put(name, ((Getter) o).toRetry());
                     } else {
                         this.typesMap.put(name, (StepType) o);
                     }
