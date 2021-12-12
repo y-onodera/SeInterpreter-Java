@@ -20,9 +20,9 @@ public class SeInterpreterRunner {
 
     private SeInterpreterREPL repl;
 
-    private Logger log = LogManager.getLogger(SeInterpreterRunner.class);
+    private final Logger log = LogManager.getLogger(SeInterpreterRunner.class);
 
-    private TestRunListener globalListener;
+    private final TestRunListener globalListener;
 
     public SeInterpreterRunner(List<String> raw) {
         this.repl = new SeInterpreterREPL(raw.toArray(new String[0]), log);

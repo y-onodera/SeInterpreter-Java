@@ -27,7 +27,7 @@ public class StepView extends FXMLView {
     }
 
     protected StepPresenter presenter() {
-        return StepPresenter.class.cast(this.getPresenter());
+        return (StepPresenter) this.getPresenter();
     }
 
     public enum Action {

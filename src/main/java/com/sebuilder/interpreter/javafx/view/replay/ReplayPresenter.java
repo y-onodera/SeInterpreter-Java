@@ -40,7 +40,7 @@ public class ReplayPresenter {
     @FXML
     private Label runStatus;
 
-    private StringProperty lastRunResultDir = new SimpleStringProperty();
+    private final StringProperty lastRunResultDir = new SimpleStringProperty();
 
     @FXML
     void initialize() {

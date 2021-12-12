@@ -50,7 +50,7 @@ public class InputPresenter {
     @FXML
     private CheckBox aspectTakeOver;
 
-    private Map<String, Pair<Integer, InputData>> shareInputs = new HashMap<>();
+    private final Map<String, Pair<Integer, InputData>> shareInputs = new HashMap<>();
 
     private Consumer<ReplayOption> onclickReplayStart;
 
@@ -127,7 +127,7 @@ public class InputPresenter {
     class InputResource {
         private final DataSourceLoader loader;
         private InputData runtimeVariable;
-        private StringProperty resourceName;
+        private final StringProperty resourceName;
         private IntegerProperty row;
         private IntegerProperty rows;
 
