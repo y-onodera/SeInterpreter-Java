@@ -92,11 +92,11 @@ public class Interceptor {
         private final Aspect.Builder aspectBuilder;
         private Predicate<Step> pointcut = Aspect.NONE;
 
-        private ArrayList<Step> beforeStep = Lists.newArrayList();
+        private final ArrayList<Step> beforeStep = Lists.newArrayList();
 
-        private ArrayList<Step> afterStep = Lists.newArrayList();
+        private final ArrayList<Step> afterStep = Lists.newArrayList();
 
-        private ArrayList<Step> failureStep = Lists.newArrayList();
+        private final ArrayList<Step> failureStep = Lists.newArrayList();
 
         public Builder(Aspect.Builder builder) {
             aspectBuilder = builder;

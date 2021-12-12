@@ -30,9 +30,9 @@ public class Step {
     public static final String KEY_NAME_SKIP = "skip";
     private boolean negated;
     private String name;
-    private StepType type;
-    private HashMap<String, String> stringParams = new HashMap<>();
-    private HashMap<String, Locator> locatorParams = new HashMap<>();
+    private final StepType type;
+    private final HashMap<String, String> stringParams = new HashMap<>();
+    private final HashMap<String, Locator> locatorParams = new HashMap<>();
 
     public Step(StepType type) {
         this.type = type;

@@ -367,7 +367,7 @@ public enum Context {
 
     public enum TestNamePrefix {
         TIMESTAMP("timestamp"), RESULT_DIR("resultDir"), NONE("none");
-        private String name;
+        private final String name;
 
         TestNamePrefix(String name) {
             this.name = name;

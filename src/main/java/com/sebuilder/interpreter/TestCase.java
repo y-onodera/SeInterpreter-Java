@@ -49,7 +49,7 @@ public class TestCase {
     private final TestCaseChains chains;
     private final boolean nestedChain;
     private final boolean breakNestedChain;
-    private boolean preventContextAspect;
+    private final boolean preventContextAspect;
     private final BiFunction<TestCase, TestRunListener, TestCase> lazyLoad;
 
     public TestCase(TestCaseBuilder builder) {

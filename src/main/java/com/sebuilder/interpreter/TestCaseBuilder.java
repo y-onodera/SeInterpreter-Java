@@ -12,7 +12,7 @@ import java.util.function.Predicate;
 public class TestCaseBuilder {
 
     private ScriptFile scriptFile;
-    private ArrayList<Step> steps;
+    private final ArrayList<Step> steps;
     private DataSource dataSource;
     private Map<String, String> dataSourceConfig;
     private Aspect aspect;

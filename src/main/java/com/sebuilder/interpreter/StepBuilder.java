@@ -8,9 +8,9 @@ import java.util.function.Function;
 public class StepBuilder {
     private boolean negated;
     private String name;
-    private StepType stepType;
-    private Map<String, String> stringParams = Maps.newHashMap();
-    private Map<String, Locator> locatorParams = Maps.newHashMap();
+    private final StepType stepType;
+    private final Map<String, String> stringParams = Maps.newHashMap();
+    private final Map<String, Locator> locatorParams = Maps.newHashMap();
 
     public StepBuilder(StepType stepType) {
         this(null, stepType, false);

@@ -87,7 +87,7 @@ public class Aspect {
 
     public static class Builder {
 
-        private LinkedHashSet<Interceptor> interceptors;
+        private final LinkedHashSet<Interceptor> interceptors;
 
         public Builder(Collection<Interceptor> interceptors) {
             this.interceptors = Sets.newLinkedHashSet(interceptors);
