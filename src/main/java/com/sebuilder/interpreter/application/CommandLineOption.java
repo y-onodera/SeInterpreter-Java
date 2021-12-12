@@ -31,7 +31,7 @@ public class CommandLineOption {
     private File localeConf;
     private final LinkedHashSet<String> scripts = Sets.newLinkedHashSet();
     @Argument
-    private final List<String> arguments = Lists.newArrayList();
+    private List<String> arguments = Lists.newArrayList();
 
     public void parse(String[] args) throws Exception {
         CmdLineParser parser = new CmdLineParser(this);
