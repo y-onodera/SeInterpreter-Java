@@ -7,7 +7,7 @@ import java.util.function.Predicate;
 
 public class StringParamFilter implements Predicate<Step> {
 
-    private Map<String, String> targetParam;
+    private final Map<String, String> targetParam;
 
     public StringParamFilter(Map<String, String> targetParam) {
         this.targetParam = targetParam;

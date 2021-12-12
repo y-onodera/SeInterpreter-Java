@@ -6,7 +6,7 @@ import java.util.function.Predicate;
 
 public class StepTypeFilter implements Predicate<Step> {
 
-    private String targetType;
+    private final String targetType;
 
     public StepTypeFilter(String targetType) {
         this.targetType = targetType;

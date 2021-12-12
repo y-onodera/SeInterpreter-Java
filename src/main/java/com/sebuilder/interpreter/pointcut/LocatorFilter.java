@@ -8,7 +8,7 @@ import java.util.function.Predicate;
 
 public class LocatorFilter implements Predicate<Step> {
 
-    private Map<String, Locator> targetParam;
+    private final Map<String, Locator> targetParam;
 
     public LocatorFilter(Map<String, Locator> targetParam) {
         this.targetParam = targetParam;

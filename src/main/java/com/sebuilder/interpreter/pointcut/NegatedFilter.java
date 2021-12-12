@@ -6,7 +6,7 @@ import java.util.function.Predicate;
 
 public class NegatedFilter implements Predicate<Step> {
 
-    private boolean target;
+    private final boolean target;
 
     public NegatedFilter(boolean target) {
         this.target = target;
