@@ -16,8 +16,8 @@ public class ChainLoader {
     private final ScriptFile suiteFile;
     private final JSONArray scriptArrays;
     private int index;
-    private List<Integer> alreadyBreak;
-    private TestRunListener testRunListener;
+    private final List<Integer> alreadyBreak;
+    private final TestRunListener testRunListener;
 
     public ChainLoader(Sebuilder sebuilder, ScriptFile suiteFile, JSONArray scriptArrays, TestRunListener testRunListener) {
         this.sebuilder = sebuilder;

@@ -41,7 +41,7 @@ public class SetElementSelectedConverter extends AbstractStepConverter {
         return target.replace("xpath=", "");
     }
 
-    public static enum Input {
+    public enum Input {
         SELECT, CHECK
     }
 }

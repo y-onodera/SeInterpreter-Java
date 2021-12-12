@@ -15,7 +15,7 @@ import java.util.List;
 
 public class SeleniumIDEConverter {
 
-    private static Logger logger = LogManager.getLogger(SeleniumIDEConverter.class);
+    private static final Logger logger = LogManager.getLogger(SeleniumIDEConverter.class);
     private static final ImmutableMap<String, StepConverter> CONVERT_MAP = new ImmutableMap.Builder<String, StepConverter>()
             .put("open", new GetConverter())
             .put("close", new CloseWindowConverter())
@@ -42,7 +42,7 @@ public class SeleniumIDEConverter {
             .build();
 
     private String url;
-    private JSONObject source;
+    private final JSONObject source;
 
     public SeleniumIDEConverter(JSONObject source) {
         this.source = source;
