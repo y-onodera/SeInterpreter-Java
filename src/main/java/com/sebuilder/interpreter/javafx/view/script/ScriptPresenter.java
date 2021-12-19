@@ -17,6 +17,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
+import javafx.scene.input.MouseButton;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -58,8 +59,14 @@ public class ScriptPresenter {
                             tableRow.getStyleClass().add(newValue.toLowerCase());
                         }
                     });
+                    tableRow.setOnMouseClicked(ev ->{
+                        if (ev.getButton().equals(MouseButton.PRIMARY) && ev.getClickCount() == 2){
+                            handleStepEdit();
+                        }
+                    });
                 }
             }
+
             @Override
             protected void move(int draggedIndex, int dropIndex) {
                 ScriptPresenter.this.moveStep(draggedIndex, dropIndex);
