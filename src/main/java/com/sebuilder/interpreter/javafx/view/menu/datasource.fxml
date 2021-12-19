@@ -6,13 +6,12 @@
            xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="com.sebuilder.interpreter.javafx.view.menu.DatasourcePresenter"
            dividerPositions="0.5" orientation="VERTICAL">
-    <MigPane cols="[70][grow][45]" rows="[30]" maxHeight="45.0" prefWidth="400.0">
-        <Label text="datasource directory" />
+    <MigPane cols="[45][150][45]" rows="[30]" maxHeight="40" prefWidth="400.0">
+        <Label text="directory" />
         <TextField fx:id="datasourceText" MigPane.cc="grow"/>
-        <Button fx:id="datasourceSearchButton" onAction="#dataSourceSearch" mnemonicParsing="false" text="search"/>
+        <Button fx:id="datasourceSearchButton" onAction="#dataSourceSearch" mnemonicParsing="false" text="search" MigPane.cc="right"/>
     </MigPane>
-    <MigPane  cols="[grow]" rows="[30]" maxHeight="35.0" prefWidth="400.0">
-        <Button fx:id="editButton" onAction="#settingEdit" mnemonicParsing="false" text="Edit"
-                MigPane.cc="align right"/>
+    <MigPane  cols="[grow]" rows="[30]" prefHeight="40" prefWidth="400.0">
+        <Button fx:id="editButton" onAction="#settingEdit" mnemonicParsing="false" text="Edit" MigPane.cc="align right"/>
     </MigPane>
 </SplitPane>
