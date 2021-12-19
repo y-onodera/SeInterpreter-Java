@@ -18,6 +18,7 @@ package com.sebuilder.interpreter.datasource;
 
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
+import com.opencsv.exceptions.CsvValidationException;
 import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.DataSourceWriter;
 import com.sebuilder.interpreter.InputData;
@@ -69,6 +70,8 @@ public class Csv implements FileDataSource {
                     data.add(lastRow);
                 }
             }
+        } catch (CsvValidationException e) {
+            throw new IOException(e);
         }
         return data;
     }

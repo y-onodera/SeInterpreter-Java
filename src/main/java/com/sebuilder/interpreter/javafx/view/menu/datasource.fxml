@@ -7,7 +7,7 @@
            fx:controller="com.sebuilder.interpreter.javafx.view.menu.DatasourcePresenter"
            dividerPositions="0.5" orientation="VERTICAL">
     <MigPane cols="[70][grow][45]" rows="[30]" maxHeight="45.0" prefWidth="400.0">
-        <Label text="datasource dir" />
+        <Label text="datasource directory" />
         <TextField fx:id="datasourceText" MigPane.cc="grow"/>
         <Button fx:id="datasourceSearchButton" onAction="#dataSourceSearch" mnemonicParsing="false" text="search"/>
     </MigPane>
