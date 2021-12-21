@@ -12,6 +12,7 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
+import org.controlsfx.control.SearchableComboBox;
 import org.tbee.javafx.scene.layout.MigPane;
 
 import javax.inject.Inject;
@@ -225,7 +226,7 @@ public class StepPresenter {
     private MigPane stepEditGrid;
 
     @FXML
-    private ComboBox<String> stepTypeSelect;
+    private SearchableComboBox<String> stepTypeSelect;
 
     @FXML
     private Label labelSelectType;
@@ -275,7 +276,7 @@ public class StepPresenter {
     @FXML
     void selectType() {
         String stepType = stepTypeSelect.getSelectionModel().getSelectedItem();
-        if (this.selectedStepType.equals(stepType)) {
+        if (Objects.equals(this.selectedStepType, stepType) || Strings.isNullOrEmpty(stepType)) {
             return;
         }
         this.selectedStepType = this.stepTypeSelect.getSelectionModel().getSelectedItem();
