@@ -74,12 +74,6 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
             <version>2.0.0-alpha5</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>log4j</groupId>
-                    <artifactId>log4j</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -288,6 +282,7 @@
                                         implementation="org.apache.maven.plugins.shade.resource.DontIncludeResourceTransformer">
                                     <resource>Log4j2Plugins.dat</resource>
                                 </transformer>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>com.sebuilder.interpreter.javafx.application.SeInterpreterApplication</mainClass>
