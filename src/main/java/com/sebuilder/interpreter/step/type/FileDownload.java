@@ -86,12 +86,6 @@ public class FileDownload extends AbstractStepType implements ConditionalStep, L
 
     @Override
     public StepBuilder addDefaultParam(StepBuilder o) {
-        if (!o.containsStringParam("name")) {
-            o.put("name", "");
-        }
-        if (!o.containsStringParam("value")) {
-            o.put("value", "");
-        }
         if (!o.containsStringParam("filepath")) {
             o.put("filepath", "");
         }
