@@ -17,8 +17,6 @@
 package com.sebuilder.interpreter.application;
 
 import com.sebuilder.interpreter.*;
-import io.netty.util.internal.logging.InternalLoggerFactory;
-import io.netty.util.internal.logging.Log4J2LoggerFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -44,7 +42,6 @@ public class SeInterpreter extends CommandLineRunner implements TestRunner {
     }
 
     public static void main(String[] args) {
-        InternalLoggerFactory.setDefaultFactory(Log4J2LoggerFactory.INSTANCE);
         Logger log = LogManager.getLogger(SeInterpreter.class);
         SeInterpreter interpreter = new SeInterpreter(args, log);
         if (interpreter.paths.isEmpty()) {

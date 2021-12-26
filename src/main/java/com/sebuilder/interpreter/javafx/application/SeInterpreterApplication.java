@@ -12,8 +12,6 @@ import com.sebuilder.interpreter.javafx.view.main.MainView;
 import com.sebuilder.interpreter.javafx.view.replay.ReplayView;
 import com.sebuilder.interpreter.step.type.Get;
 import com.sebuilder.interpreter.step.type.HighLightElement;
-import io.netty.util.internal.logging.InternalLoggerFactory;
-import io.netty.util.internal.logging.Log4J2LoggerFactory;
 import javafx.application.Application;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -55,7 +53,6 @@ public class SeInterpreterApplication extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         System.setProperty("log4j.configurationFile", "log4j2-gui.xml");
-        InternalLoggerFactory.setDefaultFactory(Log4J2LoggerFactory.INSTANCE);
         Injector.setModelOrService(SeInterpreterApplication.class, this);
         final Parameters parameters = getParameters();
         this.runner = new SeInterpreterRunner(parameters.getRaw());
