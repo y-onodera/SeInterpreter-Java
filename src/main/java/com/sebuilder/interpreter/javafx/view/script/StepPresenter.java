@@ -350,7 +350,7 @@ public class StepPresenter {
                     || (key.equals("negated") && !hasGetterType(typeName))) {
                 continue;
             }
-            if (key.equals("negated") || key.equals("post")) {
+            if (key.equals("negated")) {
                 row = addCheckBox(step, row, key);
             } else {
                 row = addTextBox(step, row, key);
