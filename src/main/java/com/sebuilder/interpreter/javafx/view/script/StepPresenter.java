@@ -34,6 +34,7 @@ public class StepPresenter {
             , "SendKeysToPathElement"
             , "SubmitElement"
             , "FileDownload"
+            , "FileDownloadCDP"
             , "ExecCmd"
             , "Pause"
             , "Loop"
