@@ -344,6 +344,10 @@ public class SeInterpreterApplication extends Application {
         this.replayStatus.setValue(new Pair<>(stepNo, result));
     }
 
+    public String getReportFileName() {
+        return this.runner.getGlobalListener().getReportFileName();
+    }
+
     protected ScriptParser getScriptParser() {
         return this.getScriptParser(Context.getDefaultScript());
     }

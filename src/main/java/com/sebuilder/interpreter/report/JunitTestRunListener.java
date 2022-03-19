@@ -52,6 +52,11 @@ public class JunitTestRunListener extends TestRunListenerImpl {
     }
 
     @Override
+    public String getReportFileName() {
+        return "junit-noframes.html";
+    }
+
+    @Override
     public JunitTestRunListener copy() {
         return new JunitTestRunListener(this);
     }

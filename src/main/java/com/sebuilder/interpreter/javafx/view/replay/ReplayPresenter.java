@@ -59,7 +59,7 @@ public class ReplayPresenter {
 
     @FXML
     void handleOpenReplayLog(ActionEvent event) throws IOException {
-        Desktop.getDesktop().open(new File(this.lastRunResultDir.get(), "junit-noframes.html"));
+        Desktop.getDesktop().open(new File(this.lastRunResultDir.get(), this.application.getReportFileName()));
     }
 
     @FXML

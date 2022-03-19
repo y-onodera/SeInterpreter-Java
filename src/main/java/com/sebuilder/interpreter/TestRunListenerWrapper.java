@@ -12,6 +12,11 @@ public class TestRunListenerWrapper implements TestRunListener {
     }
 
     @Override
+    public String getReportFileName() {
+        return delegate.getReportFileName();
+    }
+
+    @Override
     public TestRunListener copy() {
         return new TestRunListenerWrapper(delegate.copy());
     }

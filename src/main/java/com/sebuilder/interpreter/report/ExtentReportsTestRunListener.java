@@ -32,6 +32,11 @@ public class ExtentReportsTestRunListener extends TestRunListenerImpl {
         return new ExtentReportsTestRunListener(this);
     }
 
+    @Override
+    public String getReportFileName() {
+        return "ExtentReport.html";
+    }
+
     public ExtentReports getExtentReports() {
         return this.reports;
     }
@@ -40,7 +45,7 @@ public class ExtentReportsTestRunListener extends TestRunListenerImpl {
     public void setUpDir(File dest) {
         super.setUpDir(dest);
         this.reports = new ExtentReports();
-        ExtentSparkReporter spark = new ExtentSparkReporter(new File(this.resultDir, "ExtentReport.html")) {
+        ExtentSparkReporter spark = new ExtentSparkReporter(new File(this.resultDir, this.getReportFileName())) {
             @Override
             protected Configuration createFreemarkerConfig(String templatePath, String encoding) {
                 return super.createFreemarkerConfig("custom/" + templatePath, encoding);
