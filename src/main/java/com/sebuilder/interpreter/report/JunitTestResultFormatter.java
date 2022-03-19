@@ -1,4 +1,4 @@
-package com.sebuilder.interpreter.application;
+package com.sebuilder.interpreter.report;
 
 import junit.framework.Test;
 import org.apache.tools.ant.BuildException;
@@ -11,7 +11,7 @@ import java.lang.reflect.Field;
 import java.util.Hashtable;
 import java.util.Map;
 
-public class TestResultFormatter extends XMLJUnitResultFormatter {
+public class JunitTestResultFormatter extends XMLJUnitResultFormatter {
 
     private String classname;
 
@@ -39,10 +39,10 @@ public class TestResultFormatter extends XMLJUnitResultFormatter {
         String downloadPath = "";
         String screenshotPath = "";
         String expectScreenshotPath = "";
-        if (test instanceof TestRunListenerImpl.ResultReportableTestCase) {
-            screenshotPath = ((TestRunListenerImpl.ResultReportableTestCase) test).getScreenshotPath();
-            expectScreenshotPath = ((TestRunListenerImpl.ResultReportableTestCase) test).getExpectScreenshotPath();
-            downloadPath = ((TestRunListenerImpl.ResultReportableTestCase) test).getDownloadPath();
+        if (test instanceof JunitTestRunListener.ResultReportableTestCase) {
+            screenshotPath = ((JunitTestRunListener.ResultReportableTestCase) test).getScreenshotPath();
+            expectScreenshotPath = ((JunitTestRunListener.ResultReportableTestCase) test).getExpectScreenshotPath();
+            downloadPath = ((JunitTestRunListener.ResultReportableTestCase) test).getDownloadPath();
         }
         currentTest.setAttribute("screenshot", screenshotPath);
         currentTest.setAttribute("screenshotExpect", expectScreenshotPath);

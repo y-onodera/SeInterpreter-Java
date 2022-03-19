@@ -5,7 +5,6 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.sebuilder.interpreter.*;
-import com.sebuilder.interpreter.application.TestRunListenerImpl;
 import com.sebuilder.interpreter.javafx.view.SuccessDialog;
 import com.sebuilder.interpreter.javafx.view.main.ErrorDialog;
 import com.sebuilder.interpreter.javafx.view.main.MainView;
@@ -289,7 +288,7 @@ public class SeInterpreterApplication extends Application {
 
     public void browserOpen() {
         this.executeTask(this.templateScript().map(it -> it.isPreventContextAspect(true))
-                , TestRunListenerImpl::new);
+                , Context::getTestListener);
     }
 
     public void browserClose() {
@@ -328,7 +327,7 @@ public class SeInterpreterApplication extends Application {
             this.executeTask(this.getDisplayTestCase()
                             .removeStep(filter)
                             .map(builder -> builder.setShareInput(inputData).map(replayOption::apply))
-                    , log -> new GUITestRunListener(log, this) {
+                    , log -> new GUITestRunListener(Context.getTestListener(log), this) {
                         @Override
                         public int getStepNo() {
                             return function.apply(super.getStepNo());
@@ -420,7 +419,7 @@ public class SeInterpreterApplication extends Application {
     }
 
     protected Function<Logger, TestRunListener> listener() {
-        return log -> new GUITestRunListener(log, this);
+        return log -> new GUITestRunListener(Context.getTestListener(log), this);
     }
 
     protected void executeTask(TestCase replayCase, Function<Logger, TestRunListener> listenerFactory) {

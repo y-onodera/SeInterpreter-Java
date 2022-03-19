@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.sebuilder.interpreter.Context;
+import com.sebuilder.interpreter.report.ReportFormat;
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineParser;
 
@@ -24,6 +25,7 @@ public class CommandLineOption {
     private String downloadoutput = "download";
     private String screenshotoutput = "screenshot";
     private String templateoutput = "template";
+    private ReportFormat reportFormat = ReportFormat.JUNIT;
     private String aspectFile;
     private String environmentProperties;
     private final Map<String, String> envVar = Maps.newHashMap();
@@ -66,6 +68,8 @@ public class CommandLineOption {
                     this.resultoutput = kv[1];
                 } else if (kv[0].equals(CommandLineArgument.JUNIT_REPORT_PREFIX.key())) {
                     this.junitReportPrefix = Context.TestNamePrefix.fromName(kv[1]);
+                } else if (kv[0].equals(CommandLineArgument.REPORT_FORMAT.key())) {
+                    this.reportFormat = ReportFormat.fromName(kv[1]);
                 } else if (kv[0].equals(CommandLineArgument.DOWNLOAD_OUTPUT.key())) {
                     this.downloadoutput = kv[1];
                 } else if (kv[0].equals(CommandLineArgument.ASPECT.key())) {
@@ -86,71 +90,75 @@ public class CommandLineOption {
     }
 
     public Long getImplicitlyWait() {
-        return implicitlyWait;
+        return this.implicitlyWait;
     }
 
     public Long getPageLoadTimeout() {
-        return pageLoadTimeout;
+        return this.pageLoadTimeout;
     }
 
     public String getDriver() {
-        return driver;
+        return this.driver;
     }
 
     public String getDriverPath() {
-        return driverPath;
+        return this.driverPath;
     }
 
     public Map<String, String> getDriverConfig() {
-        return driverConfig;
+        return this.driverConfig;
     }
 
     public String getDatasourceEncoding() {
-        return datasourceEncoding;
+        return this.datasourceEncoding;
     }
 
     public String getDatasourceDirectory() {
-        return datasourceDirectory;
+        return this.datasourceDirectory;
     }
 
     public String getScreenshotoutput() {
-        return screenshotoutput;
+        return this.screenshotoutput;
     }
 
     public String getTemplateoutput() {
-        return templateoutput;
+        return this.templateoutput;
     }
 
     public String getResultoutput() {
-        return resultoutput;
+        return this.resultoutput;
     }
 
     public Context.TestNamePrefix getJunitReportPrefix() {
         return this.junitReportPrefix;
     }
 
+    public ReportFormat getReportFormat() {
+        return this.reportFormat;
+    }
+
     public String getDownloadoutput() {
-        return downloadoutput;
+        return this.downloadoutput;
     }
 
     public String getAspectFile() {
-        return aspectFile;
+        return this.aspectFile;
     }
 
     public String getEnvironmentProperties() {
-        return environmentProperties;
+        return this.environmentProperties;
     }
 
     public Map<String, String> getEnvVar() {
-        return envVar;
+        return this.envVar;
     }
 
     public Locale getLocale() {
-        return locale;
+        return this.locale;
     }
 
     public File getLocaleConf() {
-        return localeConf;
+        return this.localeConf;
     }
 
     public String getDriverConfig(String key) {

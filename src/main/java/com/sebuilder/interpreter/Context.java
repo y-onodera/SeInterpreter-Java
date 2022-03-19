@@ -3,6 +3,7 @@ package com.sebuilder.interpreter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sebuilder.interpreter.step.type.SaveScreenshot;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -35,6 +36,7 @@ public enum Context {
     private String dataSourceEncoding;
     private String resultOutputDirectory;
     private TestNamePrefix junitReportPrefix;
+    private TestRunListener.Factory testRunListenerFactory;
     private String downloadDirectory;
     private String screenShotOutputDirectory;
     private String templateOutputDirectory;
@@ -191,6 +193,11 @@ public enum Context {
         return variable;
     }
 
+    public static TestRunListener getTestListener(Logger log) {
+        return getInstance().testRunListenerFactory.create(log);
+    }
+
+
     public Context ifMatch(boolean condition, Function<Context, Context> modifier) {
         if (condition) {
             return modifier.apply(this);
@@ -280,6 +287,11 @@ public enum Context {
 
     public Context setJunitReportPrefix(TestNamePrefix junitReportPrefix) {
         this.junitReportPrefix = junitReportPrefix;
+        return this;
+    }
+
+    public Context setTestRunListenerFactory(TestRunListener.Factory testRunListenerFactory) {
+        this.testRunListenerFactory = testRunListenerFactory;
         return this;
     }
 
@@ -380,4 +392,5 @@ public enum Context {
                     .get();
         }
     }
+
 }

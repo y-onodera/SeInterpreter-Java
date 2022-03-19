@@ -97,8 +97,8 @@ public class TestRunListenerWrapper implements TestRunListener {
     }
 
     @Override
-    public File saveExpectScreenshot() {
-        return delegate.saveExpectScreenshot();
+    public File saveExpectScreenshot(File file) {
+        return delegate.saveExpectScreenshot(file);
     }
 
     @Override

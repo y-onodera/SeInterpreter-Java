@@ -60,7 +60,7 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
                 BufferedImage expect = ImageIO.read(new File(Context.getExpectScreenShotDirectory(), fileName));
                 boolean compareResult = this.compare(file, actual, expect);
                 if (!compareResult) {
-                    File expectFile = ctx.getListener().saveExpectScreenshot();
+                    File expectFile = ctx.getListener().saveExpectScreenshot(file);
                     ImageIO.write(expect, "PNG", expectFile);
                 }
                 return compareResult;

@@ -4,7 +4,6 @@ import com.google.common.io.Files;
 import com.sebuilder.interpreter.*;
 import com.sebuilder.interpreter.application.CommandLineArgument;
 import com.sebuilder.interpreter.application.SeInterpreterREPL;
-import com.sebuilder.interpreter.application.TestRunListenerImpl;
 import com.sebuilder.interpreter.step.type.ExportTemplate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,7 +26,7 @@ public class SeInterpreterRunner {
     public SeInterpreterRunner(List<String> raw) {
         this.repl = new SeInterpreterREPL(raw.toArray(new String[0]), log);
         this.repl.setUpREPL();
-        this.globalListener = new TestRunListenerImpl(this.log);
+        this.globalListener = Context.getTestListener(this.log);
         this.globalListener.setUpDir(Context.getResultOutputDirectory());
     }
 
@@ -80,7 +79,7 @@ public class SeInterpreterRunner {
         TestCase get = export.build()
                 .toTestCase()
                 .map(it -> it.isPreventContextAspect(true));
-        TestRunListener listener = new TestRunListenerImpl(this.log);
+        TestRunListener listener = Context.getTestListener(this.log);
         this.repl.execute(get, listener);
         File exported = new File(listener.getTemplateOutputDirectory(), fileName);
         if (!exported.exists()) {
@@ -105,7 +104,7 @@ public class SeInterpreterRunner {
     }
 
     public void run(TestCase testCase) {
-        TestRunListener listener = new TestRunListenerImpl(this.log);
+        TestRunListener listener = Context.getTestListener(this.log);
         this.repl.execute(testCase, listener);
     }
 

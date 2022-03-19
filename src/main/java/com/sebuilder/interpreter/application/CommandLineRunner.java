@@ -66,6 +66,7 @@ public abstract class CommandLineRunner {
                     .setTemplateOutputDirectory(option.getTemplateoutput())
                     .setResultOutputDirectory(option.getResultoutput())
                     .setJunitReportPrefix(option.getJunitReportPrefix())
+                    .setTestRunListenerFactory(option.getReportFormat())
                     .setDownloadDirectory(option.getDownloadoutput())
                     .ifMatch(!Strings.isNullOrEmpty(option.getAspectFile())
                             , it -> it.setAspect(option.getAspectFile())
@@ -82,7 +83,7 @@ public abstract class CommandLineRunner {
             this.log.error("error argument parse:", e);
             System.exit(1);
         }
-        this.setTestRunListener(new TestRunListenerImpl(this.log));
+        this.setTestRunListener(Context.getTestListener(this.log));
         this.log.info("setUp finish");
     }
 

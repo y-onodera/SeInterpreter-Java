@@ -2,7 +2,7 @@ package com.sebuilder.interpreter.script;
 
 import com.google.common.base.Strings;
 import com.sebuilder.interpreter.*;
-import com.sebuilder.interpreter.application.TestRunListenerImpl;
+import com.sebuilder.interpreter.report.JunitTestRunListener;
 import com.sebuilder.interpreter.datasource.Csv;
 import com.sebuilder.interpreter.datasource.DataSourceFactoryImpl;
 import com.sebuilder.interpreter.datasource.Manual;
@@ -11,7 +11,6 @@ import com.sebuilder.interpreter.step.Loop;
 import com.sebuilder.interpreter.step.StepTypeFactoryImpl;
 import com.sebuilder.interpreter.step.getter.ElementAttribute;
 import com.sebuilder.interpreter.step.type.ClickElement;
-import org.apache.commons.logging.LogFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONException;
@@ -86,7 +85,7 @@ public class SebuilderTest {
 
     public static abstract class ParseResultTest {
         protected TestCase result;
-        protected TestRunListener testRunListener = new TestRunListenerImpl(log);
+        protected TestRunListener testRunListener = new JunitTestRunListener(log);
 
         @Test
         public void parseResultContents() {

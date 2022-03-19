@@ -1,7 +1,7 @@
 package com.sebuilder.interpreter;
 
 import com.google.common.collect.Lists;
-import com.sebuilder.interpreter.application.TestRunListenerImpl;
+import com.sebuilder.interpreter.report.TestRunListenerImpl;
 import com.sebuilder.interpreter.datasource.Csv;
 import com.sebuilder.interpreter.step.getter.ElementAttribute;
 import com.sebuilder.interpreter.step.type.ClickElement;

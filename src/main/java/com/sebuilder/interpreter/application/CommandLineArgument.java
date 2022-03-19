@@ -11,6 +11,7 @@ public enum CommandLineArgument {
     DATASOURCE_DIRECTORY("--datasource.directory"),
     RESULT_OUTPUT("--resultoutput"),
     JUNIT_REPORT_PREFIX("--junitReportPrefix"),
+    REPORT_FORMAT("--reportFormat"),
     DOWNLOAD_OUTPUT("--downloadoutput"),
     SCREENSHOT_OUTPUT("--screenshotoutput"),
     TEMPLATE_OUTPUT("--templateoutput"),

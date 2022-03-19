@@ -3,7 +3,7 @@ package com.sebuilder.interpreter.script;
 import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.TestCase;
 import com.sebuilder.interpreter.TestRunListener;
-import com.sebuilder.interpreter.application.TestRunListenerImpl;
+import com.sebuilder.interpreter.report.JunitTestRunListener;
 import com.sebuilder.interpreter.datasource.DataSourceFactoryImpl;
 import com.sebuilder.interpreter.script.seleniumide.SeleniumIDE;
 import com.sebuilder.interpreter.step.StepTypeFactoryImpl;
@@ -27,7 +27,7 @@ public class SeleniumIDETest {
     private String baseDir = SeleniumIDETest.class.getResource("./seleniumide").getPath();
     private SeleniumIDE target = new SeleniumIDE();
     private SebuilderToStringConverter toStringConverter = new SebuilderToStringConverter();
-    protected TestRunListener testRunListener = new TestRunListenerImpl(log);
+    protected TestRunListener testRunListener = new JunitTestRunListener(log);
 
     @Test
     public void load() throws IOException {
