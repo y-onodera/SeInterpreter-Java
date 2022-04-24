@@ -11,6 +11,7 @@ public class StepBuilder {
     private final StepType stepType;
     private final Map<String, String> stringParams = Maps.newHashMap();
     private final Map<String, Locator> locatorParams = Maps.newHashMap();
+    private final Map<String, ImageArea> imageAreaParams = Maps.newHashMap();
 
     public StepBuilder(StepType stepType) {
         this(null, stepType, false);
@@ -42,12 +43,20 @@ public class StepBuilder {
         return this.locatorParams;
     }
 
+    public Map<String, ImageArea> getImageAreaParams() {
+        return this.imageAreaParams;
+    }
+
     public boolean containsStringParam(String paramKey) {
         return this.stringParams.containsKey(paramKey);
     }
 
     public boolean containsLocatorParam(String paramKey) {
         return this.locatorParams.containsKey(paramKey);
+    }
+
+    public boolean containsImageAreaParam(String paramKey) {
+        return this.imageAreaParams.containsKey(paramKey);
     }
 
     public StepBuilder apply(Function<StepBuilder, StepBuilder> function) {
@@ -66,6 +75,11 @@ public class StepBuilder {
 
     public StepBuilder negated(boolean negated) {
         this.negated = negated;
+        return this;
+    }
+
+    public StepBuilder put(String key, ImageArea value) {
+        this.imageAreaParams.put(key, value);
         return this;
     }
 
@@ -89,8 +103,13 @@ public class StepBuilder {
         return this;
     }
 
+    public StepBuilder imageAreaParams(Map<String, ImageArea> imageAreaParams) {
+        this.imageAreaParams.putAll(imageAreaParams);
+        return this;
+    }
+
     public StepBuilder skip(String aParam) {
-        return this.put(Step.KEY_NAME_SKIP,aParam);
+        return this.put(Step.KEY_NAME_SKIP, aParam);
     }
 
     public Step build() {

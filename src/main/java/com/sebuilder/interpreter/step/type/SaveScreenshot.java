@@ -19,9 +19,8 @@ package com.sebuilder.interpreter.step.type;
 import com.github.romankh3.image.comparison.ImageComparison;
 import com.github.romankh3.image.comparison.model.ImageComparisonResult;
 import com.github.romankh3.image.comparison.model.ImageComparisonState;
-import com.sebuilder.interpreter.Context;
-import com.sebuilder.interpreter.StepBuilder;
-import com.sebuilder.interpreter.TestRun;
+import com.github.romankh3.image.comparison.model.Rectangle;
+import com.sebuilder.interpreter.*;
 import com.sebuilder.interpreter.screenshot.LocatorInnerScrollElementHandler;
 import com.sebuilder.interpreter.screenshot.Page;
 import com.sebuilder.interpreter.screenshot.VerticalPrinter;
@@ -30,7 +29,7 @@ import com.sebuilder.interpreter.step.LocatorHolder;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -58,7 +57,7 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
             }
             if (ctx.getBoolean("verify")) {
                 BufferedImage expect = ImageIO.read(new File(Context.getExpectScreenShotDirectory(), fileName));
-                boolean compareResult = this.compare(file, actual, expect);
+                boolean compareResult = this.compare(file, actual, expect, ctx);
                 if (!compareResult) {
                     File expectFile = ctx.getListener().saveExpectScreenshot(file);
                     ImageIO.write(expect, "PNG", expectFile);
@@ -84,33 +83,42 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
         if (!o.containsStringParam("default")) {
             o.put("default", "false");
         }
-        if (!o.containsStringParam("locatorHeader")) {
+        if (!o.containsLocatorParam("locatorHeader")) {
             LocatorHolder.super.addDefaultParam("locatorHeader", o);
+        }
+        if (!o.containsImageAreaParam("imageAreaExclude")) {
+            o.put("imageAreaExclude", new ImageArea(""));
         }
         return o.apply(LocatorHolder.super::addDefaultParam);
     }
 
-    protected boolean compare(File file, BufferedImage actual, BufferedImage expect) throws IOException {
+    protected boolean compare(File file, BufferedImage actual, BufferedImage expect, TestRun ctx) throws IOException {
+        BufferedImage actualResize = actual;
         if (this.isSizeMissMatch(actual, expect)) {
-            BufferedImage resizeActual = this.toSameSize(actual, expect.getWidth(), expect.getHeight());
-            ImageIO.write(this.getComparisonResult(file, resizeActual, expect).getResult(), "PNG", file);
-            return false;
+            actualResize = this.toSameSize(actual, expect);
         }
-        ImageComparisonResult result = this.getComparisonResult(file, actual, expect);
+        ImageArea exclude = ctx.getImageArea("imageAreaExclude");
+        ImageComparisonResult result = this.getComparisonResult(file, actualResize, expect, exclude.getRectangles());
+        result.getRectangles()
+                .stream()
+                .forEach(it -> ctx.log().info("diff rectangle: {},{},{},{}"
+                        , it.getMinPoint().getX(), it.getMinPoint().getY()
+                        , it.getMaxPoint().getX(), it.getMaxPoint().getY()));
         ImageIO.write(result.getResult(), "PNG", file);
         return result.getImageComparisonState() == ImageComparisonState.MATCH;
     }
 
-    protected BufferedImage toSameSize(BufferedImage actual, int expectWidth, int expectHeight) {
-        BufferedImage finalImage = new BufferedImage(expectWidth, expectHeight, BufferedImage.TYPE_3BYTE_BGR);
+    protected BufferedImage toSameSize(BufferedImage actual, BufferedImage expect) {
+        BufferedImage finalImage = new BufferedImage(expect.getWidth(), expect.getHeight(), BufferedImage.TYPE_3BYTE_BGR);
         Graphics2D graphics = finalImage.createGraphics();
         graphics.drawImage(actual, 0, 0, null);
         graphics.dispose();
         return finalImage;
     }
 
-    protected ImageComparisonResult getComparisonResult(File file, BufferedImage actual, BufferedImage expect) {
+    protected ImageComparisonResult getComparisonResult(File file, BufferedImage actual, BufferedImage expect, java.util.List<Rectangle> rectangles) {
         return new ImageComparison(expect, actual, file)
+                .setExcludedAreas(rectangles)
                 .setDrawExcludedRectangles(true)
                 .compareImages();
     }

@@ -258,7 +258,9 @@ public class Sebuilder extends AbstractJsonScriptParser {
         }
         if (stepO.optJSONObject(key) != null && key.startsWith("locator")) {
             step.put(key, new Locator(stepO.getJSONObject(key).getString("type"), stepO.getJSONObject(key).getString("value")));
-        } else {
+        } else if (stepO.optString(key) != null && key.startsWith("imageArea")) {
+            step.put(key, new ImageArea(stepO.getString(key)));
+        }else{
             step.put(key, stepO.getString(key));
         }
     }

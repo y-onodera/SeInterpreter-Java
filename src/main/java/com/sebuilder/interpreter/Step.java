@@ -33,6 +33,7 @@ public class Step {
     private final StepType type;
     private final HashMap<String, String> stringParams = new HashMap<>();
     private final HashMap<String, Locator> locatorParams = new HashMap<>();
+    private final HashMap<String, ImageArea> imageAreaParams = new HashMap<>();
 
     public Step(StepType type) {
         this.type = type;
@@ -50,6 +51,7 @@ public class Step {
         this.negated = stepBuilder.isNegated();
         this.stringParams.putAll(stepBuilder.getStringParams());
         this.locatorParams.putAll(stepBuilder.getLocatorParams());
+        this.imageAreaParams.putAll(stepBuilder.getImageAreaParams());
     }
 
     public String getName() {
@@ -94,12 +96,24 @@ public class Step {
         return this.locatorParams.keySet();
     }
 
-    public Locator getLocator(String locatorName) {
-        return this.locatorParams.get(locatorName);
+    public Locator getLocator(String key) {
+        return this.locatorParams.get(key);
     }
 
-    public boolean locatorContains(String locatorName) {
-        return this.locatorParams.containsKey(locatorName);
+    public boolean locatorContains(String key) {
+        return this.locatorParams.containsKey(key);
+    }
+
+    public Collection<String> imageAreaKeys() {
+        return this.imageAreaParams.keySet();
+    }
+
+    public ImageArea getImageArea(String key) {
+        return this.imageAreaParams.get(key);
+    }
+
+    public boolean imageAreaContains(String key) {
+        return this.imageAreaParams.containsKey(key);
     }
 
     public Step copy() {
@@ -115,7 +129,9 @@ public class Step {
                 .name(this.name)
                 .negated(this.negated)
                 .stringParams(this.stringParams)
-                .locatorParams(this.locatorParams);
+                .locatorParams(this.locatorParams)
+                .imageAreaParams(this.imageAreaParams)
+                ;
     }
 
     public Step withAllParam() {

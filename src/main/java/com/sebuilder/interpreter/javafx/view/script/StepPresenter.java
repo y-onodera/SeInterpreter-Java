@@ -10,7 +10,6 @@ import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import org.controlsfx.control.SearchableComboBox;
 import org.tbee.javafx.scene.layout.MigPane;
@@ -322,7 +321,8 @@ public class StepPresenter {
             row = this.addTextBox(stepWithAllParam, row, "skip");
             row = this.addLocator(stepWithAllParam, row, "locator");
             row = this.constructStringParamView(stepWithAllParam, row, typeName);
-            this.constructLocatorParamView(stepWithAllParam, row);
+            row = this.constructLocatorParamView(stepWithAllParam, row);
+            this.constructImageAreaParamView(stepWithAllParam, row);
             stepEditGrid.getScene().getWindow().sizeToScene();
         });
     }
@@ -356,6 +356,13 @@ public class StepPresenter {
             } else {
                 row = addTextBox(step, row, key);
             }
+        }
+        return row;
+    }
+
+    private int constructImageAreaParamView(Step step, int row) {
+        for (String key : step.imageAreaKeys()) {
+            row = addTextBox(key, row, step.getImageArea(key).getValue());
         }
         return row;
     }
@@ -478,10 +485,14 @@ public class StepPresenter {
     }
 
     private int addTextBox(Step step, int row, String key) {
+        return addTextBox(key, row, step.getParam(key));
+    }
+
+    private int addTextBox(String key, int row, String value) {
         Label label = new Label();
         label.setText(key);
         TextField text = new TextField();
-        text.setText(step.getParam(key));
+        text.setText(value);
         this.stepEditGrid.add(label, "cell 0 " + row);
         this.stepEditGrid.add(text, "width 150,cell 1 " + row++);
         this.inputs.put(key, text);

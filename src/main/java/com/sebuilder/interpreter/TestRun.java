@@ -17,13 +17,10 @@
 package com.sebuilder.interpreter;
 
 import org.apache.logging.log4j.Logger;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import javax.annotation.Nonnull;
 import java.io.File;
-import java.util.Objects;
 
 /**
  * A single finish of a test head.
@@ -148,6 +145,16 @@ public class TestRun implements WebDriverWrapper {
         // This kind of variable substitution makes for short code, but it's inefficient.
         l.value = this.bindRuntimeVariables(l.value);
         return l;
+    }
+
+    public boolean hasImageArea(String key) {
+        return this.currentStep().imageAreaContains(key);
+    }
+
+    public ImageArea getImageArea(String key) {
+        ImageArea i = new ImageArea(this.currentStep().getImageArea(key));
+        i.value = this.bindRuntimeVariables(i.value);
+        return i;
     }
 
     public boolean isStopped() {
