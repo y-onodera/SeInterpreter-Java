@@ -64,6 +64,14 @@ public interface WebDriverWrapper {
         }
     }
 
+    default BufferedImage getScreenshot(Locator locator) {
+        try (ByteArrayInputStream imageArrayStream = new ByteArrayInputStream(locator.find(this.driver()).getScreenshotAs(OutputType.BYTES))) {
+            return ImageIO.read(imageArrayStream);
+        } catch (IOException var9) {
+            throw new RuntimeException("Can not load screenshot data", var9);
+        }
+    }
+
     default Object executeScript(String s) {
         return this.executeScript(s, new Object[0]);
     }

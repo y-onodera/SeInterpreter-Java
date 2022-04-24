@@ -19,6 +19,7 @@ package com.sebuilder.interpreter;
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import java.util.List;
@@ -73,11 +74,19 @@ public class Locator {
     }
 
     public WebElement find(TestRun ctx) {
-        return this.type.find(this.value, ctx);
+        return this.find(ctx.driver());
+    }
+
+    public WebElement find(WebDriver driver) {
+        return this.type.find(this.value, driver);
     }
 
     public List<WebElement> findElements(TestRun ctx) {
-        return this.type.findElements(this.value, ctx);
+        return this.findElements(ctx.driver());
+    }
+
+    public List<WebElement> findElements(WebDriver driver) {
+        return this.type.findElements(this.value, driver);
     }
 
     @Override
@@ -106,63 +115,63 @@ public class Locator {
     public enum Type {
         ID {
             @Override
-            public WebElement find(String value, TestRun ctx) {
-                return ctx.driver().findElement(By.id(value));
+            public WebElement find(String value, WebDriver driver) {
+                return driver.findElement(By.id(value));
             }
 
             @Override
-            public List<WebElement> findElements(String value, TestRun ctx) {
-                return ctx.driver().findElements(By.id(value));
+            public List<WebElement> findElements(String value, WebDriver driver) {
+                return driver.findElements(By.id(value));
             }
         },
         NAME {
             @Override
-            public WebElement find(String value, TestRun ctx) {
-                return ctx.driver().findElement(By.name(value));
+            public WebElement find(String value, WebDriver driver) {
+                return driver.findElement(By.name(value));
             }
 
             @Override
-            public List<WebElement> findElements(String value, TestRun ctx) {
-                return ctx.driver().findElements(By.name(value));
+            public List<WebElement> findElements(String value, WebDriver driver) {
+                return driver.findElements(By.name(value));
             }
         },
         LINK_TEXT {
             @Override
-            public WebElement find(String value, TestRun ctx) {
-                return ctx.driver().findElement(By.linkText(value));
+            public WebElement find(String value, WebDriver driver) {
+                return driver.findElement(By.linkText(value));
             }
 
             @Override
-            public List<WebElement> findElements(String value, TestRun ctx) {
-                return ctx.driver().findElements(By.linkText(value));
+            public List<WebElement> findElements(String value, WebDriver driver) {
+                return driver.findElements(By.linkText(value));
             }
         },
         CSS_SELECTOR {
             @Override
-            public WebElement find(String value, TestRun ctx) {
-                return ctx.driver().findElement(By.cssSelector(value));
+            public WebElement find(String value, WebDriver driver) {
+                return driver.findElement(By.cssSelector(value));
             }
 
             @Override
-            public List<WebElement> findElements(String value, TestRun ctx) {
-                return ctx.driver().findElements(By.cssSelector(value));
+            public List<WebElement> findElements(String value, WebDriver driver) {
+                return driver.findElements(By.cssSelector(value));
             }
         },
         XPATH {
             @Override
-            public WebElement find(String value, TestRun ctx) {
-                return ctx.driver().findElement(By.xpath(value));
+            public WebElement find(String value, WebDriver driver) {
+                return driver.findElement(By.xpath(value));
             }
 
             @Override
-            public List<WebElement> findElements(String value, TestRun ctx) {
-                return ctx.driver().findElements(By.xpath(value));
+            public List<WebElement> findElements(String value, WebDriver driver) {
+                return driver.findElements(By.xpath(value));
             }
         };
 
-        public abstract WebElement find(String value, TestRun ctx);
+        public abstract WebElement find(String value, WebDriver driver);
 
-        public abstract List<WebElement> findElements(String value, TestRun ctx);
+        public abstract List<WebElement> findElements(String value, WebDriver driver);
 
         @Override
         public String toString() {

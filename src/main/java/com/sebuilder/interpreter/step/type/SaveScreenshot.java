@@ -49,8 +49,12 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
             final String fileName = ctx.getTestRunName() + "_" + ctx.string("file");
             File file = ctx.getListener().addScreenshot(fileName);
             BufferedImage actual;
-            if (ctx.getBoolean("default")) {
-                actual = ctx.getScreenshot();
+            if (!ctx.getBoolean("scroll")) {
+                if (ctx.hasLocator()) {
+                    actual = ctx.getScreenshot(ctx.locator());
+                } else {
+                    actual = ctx.getScreenshot();
+                }
             } else {
                 Page target = new Page(ctx, new LocatorInnerScrollElementHandler());
                 actual = target.printImage(new VerticalPrinter(), 0);
@@ -80,8 +84,8 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
         if (!o.containsStringParam("verify")) {
             o.put("verify", "false");
         }
-        if (!o.containsStringParam("default")) {
-            o.put("default", "false");
+        if (!o.containsStringParam("scroll")) {
+            o.put("scroll", "true");
         }
         if (!o.containsLocatorParam("locatorHeader")) {
             LocatorHolder.super.addDefaultParam("locatorHeader", o);
