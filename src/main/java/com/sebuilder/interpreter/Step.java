@@ -151,16 +151,17 @@ public class Step {
             sb.append(name).append(": ");
         }
         sb.append(type.getStepTypeName());
-
         if (type instanceof GetterUseStep) {
             sb.append(" negated=" + this.negated);
         }
-
-        for (Map.Entry<String, String> pe : stringParams.entrySet()) {
+        for (Map.Entry<String, String> pe : this.stringParams.entrySet()) {
             sb.append(" ").append(pe.getKey()).append("=").append(pe.getValue());
         }
-        for (Map.Entry<String, Locator> le : locatorParams.entrySet()) {
+        for (Map.Entry<String, Locator> le : this.locatorParams.entrySet()) {
             sb.append(" ").append(le.getKey()).append("=").append(le.getValue().toPrettyString());
+        }
+        for (Map.Entry<String, ImageArea> pe : this.imageAreaParams.entrySet()) {
+            sb.append(" ").append(pe.getKey()).append("=").append(pe.getValue().getValue());
         }
         return sb.toString();
     }

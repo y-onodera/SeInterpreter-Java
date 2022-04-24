@@ -70,6 +70,9 @@ public class SebuilderToStringConverter implements TestCaseConverter{
         for (String key : s.locatorKeys()) {
             o.put(key, this.toJSON(s.getLocator(key)));
         }
+        for (String key : s.imageAreaKeys()) {
+            o.put(key, s.getImageArea(key).getValue());
+        }
         if (!s.containsParam("skip")) {
             o.put("skip", "false");
         }

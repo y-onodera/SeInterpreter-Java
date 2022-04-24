@@ -2,10 +2,7 @@ package com.sebuilder.interpreter.javafx.view.script;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
-import com.sebuilder.interpreter.Locator;
-import com.sebuilder.interpreter.Step;
-import com.sebuilder.interpreter.StepBuilder;
-import com.sebuilder.interpreter.TestCase;
+import com.sebuilder.interpreter.*;
 import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -248,6 +245,8 @@ public class StepPresenter {
 
     private final Map<String, Map<String, Node>> locatorInputs = Maps.newHashMap();
 
+    private final Map<String, Node> imageAreaInputs = Maps.newHashMap();
+
     private Stage dialog;
 
     private int stepIndex;
@@ -308,6 +307,12 @@ public class StepPresenter {
                     step.put(input.getKey(), new Locator(type, value));
                 }
             }
+            for (Map.Entry<String, Node> input : this.imageAreaInputs.entrySet()) {
+                TextField text = (TextField) input.getValue();
+                if (!Strings.isNullOrEmpty(text.getText())) {
+                    step.put(input.getKey(), new ImageArea(text.getText()));
+                }
+            }
             this.editStep(this.action, this.stepIndex, step.build());
             this.dialog.close();
         });
@@ -362,7 +367,7 @@ public class StepPresenter {
 
     private int constructImageAreaParamView(Step step, int row) {
         for (String key : step.imageAreaKeys()) {
-            row = addTextBox(key, row, step.getImageArea(key).getValue());
+            row = addTextBox(key, row, step.getImageArea(key).getValue(), this.imageAreaInputs);
         }
         return row;
     }
@@ -443,11 +448,11 @@ public class StepPresenter {
             type = current.type.toString();
         }
         if (this.isDefaultLocator(locator)) {
-            locatorTypeSelect = select;
+            this.locatorTypeSelect = select;
             if (!type.equals("")) {
                 this.beforeLocatorType = type;
             }
-            locatorTypeSelect.getSelectionModel().select(Objects.requireNonNullElse(this.beforeLocatorType, ""));
+            this.locatorTypeSelect.getSelectionModel().select(Objects.requireNonNullElse(this.beforeLocatorType, ""));
         } else {
             select.getSelectionModel().select(type);
         }
@@ -485,17 +490,17 @@ public class StepPresenter {
     }
 
     private int addTextBox(Step step, int row, String key) {
-        return addTextBox(key, row, step.getParam(key));
+        return addTextBox(key, row, step.getParam(key), this.inputs);
     }
 
-    private int addTextBox(String key, int row, String value) {
+    private int addTextBox(String key, int row, String value, Map<String, Node> inputMap) {
         Label label = new Label();
         label.setText(key);
         TextField text = new TextField();
         text.setText(value);
         this.stepEditGrid.add(label, "cell 0 " + row);
         this.stepEditGrid.add(text, "width 150,cell 1 " + row++);
-        this.inputs.put(key, text);
+        inputMap.put(key, text);
         return row;
     }
 
