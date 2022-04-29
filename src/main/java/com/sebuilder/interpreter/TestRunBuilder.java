@@ -3,14 +3,15 @@ package com.sebuilder.interpreter;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class TestRunBuilder {
 
-    private static final Pattern DUPLICATE_PATTERN = Pattern.compile(".+\\.[^\\.]+(\\(\\d+\\)$)");
+    private static final Pattern DUPLICATE_PATTERN = Pattern.compile(".+\\.[^.]+(\\(\\d+\\)$)");
     private final TestCase testCase;
     private InputData shareInput;
     private String testRunNamePrefix;
@@ -69,11 +70,11 @@ public class TestRunBuilder {
         } else {
             driver = createDriver(log, webDriverFactory, webDriverConfig);
         }
-        if (implicitWaitTime != null && implicitWaitTime.longValue() > 0) {
-            driver.manage().timeouts().implicitlyWait(implicitWaitTime, TimeUnit.SECONDS);
+        if (implicitWaitTime != null && implicitWaitTime > 0) {
+            driver.manage().timeouts().implicitlyWait(Duration.of(implicitWaitTime, ChronoUnit.SECONDS));
         }
-        if (pageLoadWaitTime != null && pageLoadWaitTime.longValue() > 0) {
-            driver.manage().timeouts().pageLoadTimeout(pageLoadWaitTime, TimeUnit.SECONDS);
+        if (pageLoadWaitTime != null && pageLoadWaitTime > 0) {
+            driver.manage().timeouts().pageLoadTimeout(Duration.of(pageLoadWaitTime, ChronoUnit.SECONDS));
         }
         return this.createTestRun(log, driver, initialVars, seInterpreterTestListener);
     }
