@@ -281,8 +281,11 @@ public class SeInterpreterApplication extends Application {
         this.saveContents(new File(this.getDisplayTestCase().path()), this.getTestCaseConverter().toString(this.getDisplayTestCase()));
     }
 
-    public void browserSetting(String selectedBrowser, String driverPath, String binaryPath) {
+    public void browserSetting(String selectedBrowser, String remoteUrl, String driverPath, String binaryPath) {
         this.runner.reloadSetting(selectedBrowser, driverPath, binaryPath);
+        if (!Strings.isNullOrEmpty(remoteUrl)) {
+            Context.getInstance().setRemoteUrl(remoteUrl);
+        }
         this.browserOpen();
     }
 

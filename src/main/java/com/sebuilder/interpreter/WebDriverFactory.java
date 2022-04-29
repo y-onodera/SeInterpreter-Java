@@ -17,8 +17,11 @@
 package com.sebuilder.interpreter;
 
 import com.google.common.base.Strings;
+import org.openqa.selenium.Capabilities;
+import org.openqa.selenium.remote.LocalFileDetector;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
+import java.net.URL;
 import java.util.Map;
 
 public interface WebDriverFactory {
@@ -26,7 +29,18 @@ public interface WebDriverFactory {
      * @param config A key/value mapping of configuration options specific to this factory.
      * @return A RemoteWebDriver of the type produced by this factory.
      */
-    RemoteWebDriver make(Map<String, String> config) throws Exception;
+    default RemoteWebDriver make(Map<String, String> config) throws Exception {
+        if (config.containsKey(Context.REMOTE_URL_KEY)) {
+            RemoteWebDriver result= new RemoteWebDriver(new URL(config.get(Context.REMOTE_URL_KEY)), this.getOptions(config));
+            result.setFileDetector(new LocalFileDetector());
+            return result;
+        }
+        return this.createLocaleDriver(config);
+    }
+
+    RemoteWebDriver createLocaleDriver(Map<String, String> config);
+
+    Capabilities getOptions(Map<String, String> config);
 
     default String targetBrowser() {
         return this.getClass().getSimpleName();

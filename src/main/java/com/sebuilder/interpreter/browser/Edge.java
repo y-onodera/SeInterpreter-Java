@@ -1,20 +1,40 @@
 package com.sebuilder.interpreter.browser;
 
-import org.openqa.selenium.chrome.ChromeOptions;
+import com.sebuilder.interpreter.WebDriverFactory;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.edge.EdgeOptions;
+import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
+import java.io.File;
+import java.util.HashMap;
 import java.util.Map;
 
-public class Edge extends Chrome {
+public class Edge implements WebDriverFactory {
     @Override
-    public RemoteWebDriver make(Map<String, String> config) {
-        ChromeOptions options = this.getOptions(config);
-        options.setCapability("browserName", "MicrosoftEdge");
-        EdgeOptions edgeOptions = new EdgeOptions();
-        edgeOptions.setCapability("ms:edgeOptions", options.asMap().get("goog:chromeOptions"));
-        return new EdgeDriver(edgeOptions);
+    public RemoteWebDriver createLocaleDriver(Map<String, String> config) {
+        return new EdgeDriver(this.getOptions(config));
+    }
+
+    @Override
+    public EdgeOptions getOptions(Map<String, String> config) {
+        HashMap<String, String> caps = new HashMap<>();
+        HashMap<String, String> prefs = new HashMap<>();
+        EdgeOptions option = new EdgeOptions();
+        if (config.containsKey("binary")) {
+            option.setBinary(new File(config.get("binary")));
+        }
+        config.forEach((key, value) -> {
+            if (key.startsWith("experimental.")) {
+                prefs.put(key.substring("experimental.".length()), value);
+            } else if (key.startsWith("edge.arguments.")) {
+                option.addArguments("--" + key.substring("edge.arguments.".length()));
+            } else {
+                caps.put(key, value);
+            }
+        });
+        option.setExperimentalOption("prefs", prefs);
+        return option.merge(new DesiredCapabilities(caps));
     }
 
     @Override
@@ -30,5 +50,10 @@ public class Edge extends Chrome {
     @Override
     public String getDriverName() {
         return "msedgedriver.exe";
+    }
+
+    @Override
+    public boolean isBinarySelectable() {
+        return true;
     }
 }

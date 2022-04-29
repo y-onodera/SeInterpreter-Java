@@ -4,6 +4,7 @@ import com.google.common.base.Strings;
 import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.WebDriverFactory;
 import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -24,6 +25,9 @@ public class BrowserPresenter {
     private ComboBox<String> browserSelect;
 
     @FXML
+    private TextField remoteUrl;
+
+    @FXML
     private TextField driverText;
 
     @FXML
@@ -40,7 +44,7 @@ public class BrowserPresenter {
 
     @FXML
     void initialize() {
-        this.init(Context.getBrowser(), Context.getWebDriverFactory().getDriverPath());
+        this.init(Context.getRemoteUrl(), Context.getBrowser(), Context.getWebDriverFactory().getDriverPath());
     }
 
     @FXML
@@ -93,12 +97,13 @@ public class BrowserPresenter {
     @FXML
     void settingEdit() {
         this.application.browserSetting(this.selectedBrowser
+                , this.remoteUrl.getText()
                 , this.driverText.getText()
                 , this.binaryText.getText());
         this.driverText.getScene().getWindow().hide();
     }
 
-    private void init(String aSelectedBrowser, String aCurrentDriverPath) {
+    private void init(String remoteUrl, String aSelectedBrowser, String aCurrentDriverPath) {
         this.browserSelect.getItems().add("Chrome");
         this.browserSelect.getItems().add("Firefox");
         this.browserSelect.getItems().add("InternetExplorer");
@@ -109,7 +114,8 @@ public class BrowserPresenter {
             this.browserSelect.getSelectionModel().select(0);
         }
         this.selectBrowser();
-        if (!Strings.isNullOrEmpty(aCurrentDriverPath)) {
+        this.remoteUrl.setText(remoteUrl);
+        if (Strings.isNullOrEmpty(remoteUrl) && !Strings.isNullOrEmpty(aCurrentDriverPath)) {
             this.currentDriverPath = aCurrentDriverPath;
             this.driverText.setText(this.currentDriverPath);
             this.parentDir = new File(this.currentDriverPath).getParentFile().getAbsoluteFile();
@@ -126,11 +132,14 @@ public class BrowserPresenter {
             }
             this.parentDir = driverParent.getAbsoluteFile();
         }
-        this.driverText.setText(new File(parentDir, driverName).getAbsolutePath());
-        if (Objects.equals(this.selectedBrowser, Context.getWebDriverFactory().targetBrowser())) {
-            this.binaryText.setText(Context.getWebDriverFactory().getBinaryPath());
-        } else {
-            this.binaryText.setText(null);
+        this.remoteUrl.setText(Context.getRemoteUrl());
+        if (Strings.isNullOrEmpty(remoteUrl.getText())) {
+            this.driverText.setText(new File(parentDir, driverName).getAbsolutePath());
+            if (Objects.equals(this.selectedBrowser, Context.getWebDriverFactory().targetBrowser())) {
+                this.binaryText.setText(Context.getWebDriverFactory().getBinaryPath());
+            } else {
+                this.binaryText.setText(null);
+            }
         }
         this.binaryText.setDisable(!webdriverFactory.isBinarySelectable());
         this.binarySearchButton.setDisable(binaryText.isDisable());

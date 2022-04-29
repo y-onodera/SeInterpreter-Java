@@ -5,9 +5,11 @@
 <SplitPane orientation="VERTICAL"  maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
            xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="com.sebuilder.interpreter.javafx.view.menu.BrowserPresenter">
-    <MigPane cols="[45][150][45]" rows="[30][30][30]" prefHeight="120" prefWidth="400.0">
+    <MigPane cols="[45][150][45]" rows="[30][30][30][30]" prefHeight="150" prefWidth="400.0">
         <Label text="browser"/>
         <ComboBox fx:id="browserSelect" onAction="#selectBrowser" MigPane.cc="wrap"/>
+        <Label text="webdriver server url" />
+        <TextField fx:id="remoteUrl" MigPane.cc="wrap,grow"/>
         <Label text="driver" />
         <TextField fx:id="driverText" onAction="#setDriverPath" MigPane.cc="grow"/>
         <Button fx:id="driverSearchButton" mnemonicParsing="false" onAction="#driverSearch" text="search" MigPane.cc="wrap,align right"/>

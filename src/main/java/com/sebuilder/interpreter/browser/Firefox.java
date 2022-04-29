@@ -38,28 +38,27 @@ public class Firefox implements WebDriverFactory {
      * @return A FirefoxDriver.
      */
     @Override
-    public RemoteWebDriver make(Map<String, String> config) {
-        FirefoxBinary fb = config.containsKey("binary")
-                ? new FirefoxBinary(new File(config.get("binary")))
-                : new FirefoxBinary();
-        FirefoxProfile fp = config.containsKey("profile")
-                ? new FirefoxProfile(new File(config.get("profile")))
-                : new FirefoxProfile();
-        fp.setPreference("marionette", "true");
-        Map<String, String> caps = new HashMap<String, String>();
+    public RemoteWebDriver createLocaleDriver(Map<String, String> config) {
+        return new FirefoxDriver(this.getOptions(config));
+    }
+
+    @Override
+    public FirefoxOptions getOptions(Map<String, String> config) {
+        FirefoxOptions option = new FirefoxOptions();
+        if (config.containsKey("binary")) {
+            option.setBinary(new FirefoxBinary(new File(config.get("binary"))));
+        }
+        if (config.containsKey("profile")) {
+            option.setProfile(new FirefoxProfile(new File(config.get("profile"))));
+        }
         config.forEach((key, value) -> {
             if (key.startsWith("firefox.options.")) {
-                fb.addCommandLineOptions("--" + key.substring("firefox.options.".length()));
+                option.addArguments("--" + key.substring("firefox.options.".length()));
             } else {
-                caps.put(key, value);
+                option.addPreference(key, value);
             }
         });
-        DesiredCapabilities capabilities = new DesiredCapabilities(caps);
-        FirefoxOptions option = new FirefoxOptions(capabilities);
-        option.setBinary(fb);
-        option.setProfile(fp);
-        FirefoxDriver result = new FirefoxDriver(option);
-        return result;
+        return option;
     }
 
     @Override

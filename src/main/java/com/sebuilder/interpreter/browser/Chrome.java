@@ -17,8 +17,29 @@ public class Chrome implements WebDriverFactory {
      * @return A RemoteWebDriver of the type produced by this factory.
      */
     @Override
-    public RemoteWebDriver make(Map<String, String> config) {
+    public RemoteWebDriver createLocaleDriver(Map<String, String> config) {
         return new ChromeDriver(this.getOptions(config));
+    }
+
+    @Override
+    public ChromeOptions getOptions(Map<String, String> config) {
+        HashMap<String, String> caps = new HashMap<>();
+        HashMap<String, String> prefs = new HashMap<>();
+        ChromeOptions option = new ChromeOptions();
+        if (config.containsKey("binary")) {
+            option.setBinary(new File(config.get("binary")));
+        }
+        config.forEach((key, value) -> {
+            if (key.startsWith("experimental.")) {
+                prefs.put(key.substring("experimental.".length()), value);
+            } else if (key.startsWith("chrome.arguments.")) {
+                option.addArguments("--" + key.substring("chrome.arguments.".length()));
+            } else {
+                caps.put(key, value);
+            }
+        });
+        option.setExperimentalOption("prefs", prefs);
+        return option.merge(new DesiredCapabilities(caps));
     }
 
     @Override
@@ -39,26 +60,6 @@ public class Chrome implements WebDriverFactory {
     @Override
     public boolean isBinarySelectable() {
         return true;
-    }
-
-    protected ChromeOptions getOptions(Map<String, String> config) {
-        HashMap<String, String> caps = new HashMap<>();
-        HashMap<String, String> prefs = new HashMap<>();
-        ChromeOptions option = new ChromeOptions();
-        if (config.containsKey("binary")) {
-            option.setBinary(new File(config.get("binary")));
-        }
-        config.forEach((key, value) -> {
-            if (key.startsWith("experimental.")) {
-                prefs.put(key.substring("experimental.".length()), value);
-            } else if (key.startsWith("chrome.arguments.")) {
-                option.addArguments("--" + key.substring("chrome.arguments.".length()));
-            } else {
-                caps.put(key, value);
-            }
-        });
-        option.setExperimentalOption("prefs", prefs);
-        return option.merge(new DesiredCapabilities(caps));
     }
 
 }

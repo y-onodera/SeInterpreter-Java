@@ -25,6 +25,7 @@ public enum Context {
 
     INSTANCE;
 
+    public static final String REMOTE_URL_KEY = "remote-url";
     private final File baseDirectory = Paths.get(".").toAbsolutePath().normalize().toFile();
     private String browser;
     private final HashMap<String, String> driverConfig = new HashMap<>();
@@ -88,6 +89,17 @@ public enum Context {
 
     public static String getBrowser() {
         return getInstance().browser;
+    }
+
+    public static boolean isRemote() {
+        return getInstance().driverConfig.containsKey(REMOTE_URL_KEY);
+    }
+
+    public static String getRemoteUrl() {
+        if (isRemote()) {
+            return getInstance().driverConfig.get(REMOTE_URL_KEY);
+        }
+        return "";
     }
 
     public static Map<String, String> getDriverConfig() {
@@ -197,7 +209,6 @@ public enum Context {
         return getInstance().testRunListenerFactory.create(log);
     }
 
-
     public Context ifMatch(boolean condition, Function<Context, Context> modifier) {
         if (condition) {
             return modifier.apply(this);
@@ -226,6 +237,11 @@ public enum Context {
 
     public Context setBrowser(String browser) {
         return setWebDriverFactory(getWebDriverFactory(browser));
+    }
+
+    public Context setRemoteUrl(String remoteUrl) {
+        this.driverConfig.put(REMOTE_URL_KEY, remoteUrl);
+        return this;
     }
 
     public Context setWebDriverPath(String driverPath) {

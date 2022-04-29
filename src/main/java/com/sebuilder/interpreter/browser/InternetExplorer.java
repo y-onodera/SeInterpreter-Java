@@ -15,7 +15,12 @@ public class InternetExplorer implements WebDriverFactory {
      * @return A RemoteWebDriver of the type produced by this factory.
      */
     @Override
-    public RemoteWebDriver make(Map<String, String> config) {
+    public RemoteWebDriver createLocaleDriver(Map<String, String> config) {
+        return new InternetExplorerDriver(this.getOptions(config));
+    }
+
+    @Override
+    public InternetExplorerOptions getOptions(Map<String, String> config) {
         HashMap<String, String> caps = new HashMap<>();
         DesiredCapabilities capabilities = new DesiredCapabilities();
         capabilities.setJavascriptEnabled(true);
@@ -33,12 +38,12 @@ public class InternetExplorer implements WebDriverFactory {
                 caps.put(key, value);
             }
         });
-        caps.forEach((key,value)->ieOptions.setCapability(key,value));
+        caps.forEach(ieOptions::setCapability);
         ieOptions.attachToEdgeChrome()
                 .withEdgeExecutablePath(this.getBinaryPath())
                 .setCapability(InternetExplorerDriver.UNEXPECTED_ALERT_BEHAVIOR, "accept");
         ieOptions.setCapability("disable-popup-blocking", true);
-        return new InternetExplorerDriver(ieOptions);
+        return ieOptions;
     }
 
     @Override
