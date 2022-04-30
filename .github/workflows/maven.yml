@@ -35,7 +35,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: executableJar
-        path: ./java/target/**.jar
+        path: ./java/target/**jar-with-dependencies.jar
     - name: jlink
       run: jlink --module-path "%JAVA_HOME%\jmods" --add-modules java.base,java.compiler,java.datatransfer,java.xml,java.prefs,java.desktop,java.logging,java.management,java.security.sasl,java.naming,java.rmi,java.scripting,java.security.jgss,java.transaction.xa,java.sql,jdk.unsupported,jdk.charsets,javafx.base,javafx.graphics,javafx.controls,javafx.fxml --compress=2 --output jre
       shell: cmd
@@ -44,17 +44,6 @@ jobs:
       with:
         name: jre
         path: jre
-    - name: webdriver-server startup
-      run: docker-compose -f test/docker-compose.yml up -d
-      shell: cmd
-    - name: chrome-test
-      run: call jre/bin/java -jar java\target\sebuilder-interpreter-2.0.0-SNAPSHOT-jar-with-dependencies.jar com.sebuilder.interpreter.application.SeInterpreter --resultoutput=chrome --datasource.directory=test/suite/input --driver.remote-url=http://localhost:4444 --reportFormat=ExtentReports test/suite/testsuite.json
-      shell: cmd
-    - name: Upload chrome result
-      uses: actions/upload-artifact@v3
-      with:
-        name: chrome-result
-        path: chrome
 
   deploy:
     needs: [build]
@@ -62,7 +51,7 @@ jobs:
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v3
-      - name: Download Artifacts
+      - name: Download unitTestReport
         uses: actions/download-artifact@v3
         with:
           name: unitTestReport
@@ -71,3 +60,22 @@ jobs:
         with:
           branch: gh-pages
           folder: 'allure-maven-plugin'
+      - name: Download jre
+        uses: actions/download-artifact@v3
+        with:
+          name: jre
+      - name: Download executableJar
+        uses: actions/download-artifact@v3
+        with:
+          name: executableJar
+      - name: webdriver-server startup
+        run: docker-compose -f test/docker-compose.yml up -d
+        shell: cmd
+      - name: chrome-test
+        run: call jre/bin/java -jar sebuilder-interpreter-2.0.0-SNAPSHOT-jar-with-dependencies.jar com.sebuilder.interpreter.application.SeInterpreter --resultoutput=chrome --datasource.directory=test/suite/input --driver.remote-url=http://localhost:4444 --reportFormat=ExtentReports test/suite/testsuite.json
+        shell: cmd
+      - name: Upload chrome result
+        uses: actions/upload-artifact@v3
+        with:
+          name: chrome-result
+          path: chrome
