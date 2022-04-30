@@ -1,7 +1,6 @@
 package com.sebuilder.interpreter;
 
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.remote.RemoteWebDriver;
 
 public enum WebElements {
     SINGLETON;

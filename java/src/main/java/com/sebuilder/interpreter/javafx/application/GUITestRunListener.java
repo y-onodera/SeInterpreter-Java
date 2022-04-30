@@ -4,8 +4,6 @@ import com.sebuilder.interpreter.InputData;
 import com.sebuilder.interpreter.TestCase;
 import com.sebuilder.interpreter.TestRunListener;
 import com.sebuilder.interpreter.TestRunListenerWrapper;
-import com.sebuilder.interpreter.report.TestRunListenerImpl;
-import org.apache.logging.log4j.Logger;
 
 public class GUITestRunListener extends TestRunListenerWrapper {
     private final SeInterpreterApplication application;

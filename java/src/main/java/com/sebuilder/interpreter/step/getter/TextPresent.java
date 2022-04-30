@@ -18,7 +18,6 @@ package com.sebuilder.interpreter.step.getter;
 
 import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
-import org.openqa.selenium.By;
 
 public class TextPresent extends AbstractGetter {
     @Override

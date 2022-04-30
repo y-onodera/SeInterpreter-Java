@@ -5,14 +5,14 @@ name: Java CI with Maven
 
 on:
   push:
-    branches: [ master ]
+    branches: [ java/** ]
   pull_request:
-    branches: [ master ]
+    branches: [ java/** ]
 
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: windows-2019
 
     steps:
     - uses: actions/checkout@v2
@@ -23,9 +23,9 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Build with Maven
-      run: mvn clean test allure:report -Pbuild
+      run: mvn clean test allure:report -Pbuild -fjava/pom.xml
     - name: Deploy TestReport
       uses: JamesIves/github-pages-deploy-action@v4.2.5
       with:
         branch: gh-pages
-        folder: ./target/site/allure-maven-plugin
+        folder: ./java/target/site/allure-maven-plugin

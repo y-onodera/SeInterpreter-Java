@@ -4,7 +4,6 @@ import com.google.common.base.Strings;
 import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.WebDriverFactory;
 import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
