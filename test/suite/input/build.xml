@@ -1,7 +1,7 @@
 <project name="test">
     <target name="nextDate">
         <tstamp>
-            <format property="resultDate" pattern="yyyy/MM/dd" offset="1" unit="day"/>
+            <format property="resultDate" pattern="yyyy/MM/dd" offset="${add_days}" unit="day"/>
         </tstamp>
     </target>
 </project>
