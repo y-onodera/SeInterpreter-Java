@@ -18,6 +18,8 @@ package com.sebuilder.interpreter;
 
 import com.google.common.base.Strings;
 import org.openqa.selenium.Capabilities;
+import org.openqa.selenium.Platform;
+import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.LocalFileDetector;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
@@ -31,7 +33,9 @@ public interface WebDriverFactory {
      */
     default RemoteWebDriver make(Map<String, String> config) throws Exception {
         if (config.containsKey(Context.REMOTE_URL_KEY)) {
-            RemoteWebDriver result= new RemoteWebDriver(new URL(config.get(Context.REMOTE_URL_KEY)), this.getOptions(config));
+            DesiredCapabilities cap = new DesiredCapabilities(this.getOptions(config));
+            cap.setPlatform(Platform.LINUX);
+            RemoteWebDriver result = new RemoteWebDriver(new URL(config.get(Context.REMOTE_URL_KEY)), cap);
             result.setFileDetector(new LocalFileDetector());
             return result;
         }
