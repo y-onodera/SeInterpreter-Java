@@ -61,6 +61,22 @@ jobs:
 
   integration-test:
     runs-on: ubuntu-latest
+    services:
+      selenium-hub:
+        image: selenium/hub
+        ports:
+          - 4442:4442
+          - 4443:4443
+          - 4444:4444
+      chrome:
+        image: selenium/node-chrome
+        env:
+          SE_EVENT_BUS_HOST: selenium-hub
+          SE_EVENT_BUS_PUBLISH_PORT: 4442
+          SE_EVENT_BUS_SUBSCRIBE_PORT: 4443
+        options :
+          --shm_size 2gb
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -73,8 +89,6 @@ jobs:
           cache: maven
       - name: Build with Maven
         run: mvn package test allure:report -Pbuild -fjava/pom.xml
-      - name: webdriver-server startup
-        run: docker-compose -f test/docker-compose.yml up -d
       - name: chrome-test
         run: java -cp ./java/target/sebuilder-interpreter-2.0.0-SNAPSHOT-jar-with-dependencies.jar com.sebuilder.interpreter.application.SeInterpreter --resultoutput=chrome --datasource.directory=test/suite/input --driver.remote-url=http://localhost:4444/ --reportFormat=ExtentReports test/suite/testsuite.json
       - name: Upload chrome result
