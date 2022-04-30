@@ -32,7 +32,7 @@ jobs:
         name: site
         path: ./java/target/site
     - name: jlink
-      run: jlink --module-path "C:\hostedtoolcache\windows\Java_Zulu_jdk+fx\17.0.3-7\x64\jmods" --add-modules java.base,java.compiler,java.datatransfer,java.xml,java.prefs,java.desktop,java.logging,java.management,java.security.sasl,java.naming,java.rmi,java.scripting,java.security.jgss,java.transaction.xa,java.sql,jdk.unsupported,jdk.charsets,javafx.base,javafx.graphics,javafx.controls,javafx.fxml --compress=2 --output jre
+      run: jlink --module-path "%JAVA_HOME%\jmods" --add-modules java.base,java.compiler,java.datatransfer,java.xml,java.prefs,java.desktop,java.logging,java.management,java.security.sasl,java.naming,java.rmi,java.scripting,java.security.jgss,java.transaction.xa,java.sql,jdk.unsupported,jdk.charsets,javafx.base,javafx.graphics,javafx.controls,javafx.fxml --compress=2 --output jre
       shell: cmd
 
   deploy:
