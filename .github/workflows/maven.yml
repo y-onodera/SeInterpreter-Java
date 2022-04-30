@@ -26,12 +26,14 @@ jobs:
     - name: Build with Maven
       run: mvn package test allure:report -Pbuild -fjava/pom.xml
       shell: cmd
-
     - name: Upload TestReport
       uses: actions/upload-artifact@v1
       with:
         name: site
         path: ./java/target/site
+    - name: jlink
+      run: jlink --module-path "C:\hostedtoolcache\windows\Java_Zulu_jdk+fx\17.0.3-7\x64\jmods" --add-modules java.base,java.compiler,java.datatransfer,java.xml,java.prefs,java.desktop,java.logging,java.management,java.security.sasl,java.naming,java.rmi,java.scripting,java.security.jgss,java.transaction.xa,java.sql,jdk.unsupported,jdk.charsets,javafx.base,javafx.graphics,javafx.controls,javafx.fxml --compress=2 --output jre
+      shell: cmd
 
   deploy:
     needs: [build]
@@ -39,12 +41,10 @@ jobs:
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v3
-
       - name: Download Artifacts
         uses: actions/download-artifact@v1
         with:
           name: site
-
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4.3.3
         with:
