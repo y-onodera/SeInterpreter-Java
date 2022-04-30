@@ -285,6 +285,8 @@ public class SeInterpreterApplication extends Application {
         this.runner.reloadSetting(selectedBrowser, driverPath, binaryPath);
         if (!Strings.isNullOrEmpty(remoteUrl)) {
             Context.getInstance().setRemoteUrl(remoteUrl);
+        } else {
+            Context.getInstance().setRemoteUrl(null);
         }
         this.browserOpen();
     }

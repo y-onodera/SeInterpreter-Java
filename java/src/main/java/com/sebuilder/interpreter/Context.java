@@ -1,5 +1,6 @@
 package com.sebuilder.interpreter;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sebuilder.interpreter.step.type.SaveScreenshot;
@@ -240,7 +241,11 @@ public enum Context {
     }
 
     public Context setRemoteUrl(String remoteUrl) {
-        this.driverConfig.put(REMOTE_URL_KEY, remoteUrl);
+        if (Strings.isNullOrEmpty(remoteUrl)) {
+            this.driverConfig.remove(REMOTE_URL_KEY);
+        } else {
+            this.driverConfig.put(REMOTE_URL_KEY, remoteUrl);
+        }
         return this;
     }
 

@@ -49,7 +49,7 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
             final String fileName = ctx.getTestRunName() + "_" + ctx.string("file");
             File file = ctx.getListener().addScreenshot(fileName);
             BufferedImage actual;
-            if (!ctx.getBoolean("scroll")) {
+            if (ctx.containsKey("scroll") && !ctx.getBoolean("scroll")) {
                 if (ctx.hasLocator()) {
                     actual = ctx.getScreenshot(ctx.locator());
                 } else {
