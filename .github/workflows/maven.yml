@@ -76,7 +76,7 @@ jobs:
       - name: webdriver-server startup
         run: docker-compose -f test/docker-compose.yml up -d
       - name: chrome-test
-        run: java -cp ./java/target/sebuilder-interpreter-2.0.0-SNAPSHOT-jar-with-dependencies.jar com.sebuilder.interpreter.application.SeInterpreter --resultoutput=chrome --datasource.directory=test/suite/input --driver.remote-url=http://localhost:4444 --reportFormat=ExtentReports test/suite/testsuite.json
+        run: java -cp ./java/target/sebuilder-interpreter-2.0.0-SNAPSHOT-jar-with-dependencies.jar com.sebuilder.interpreter.application.SeInterpreter --driver=Firefox --resultoutput=chrome --datasource.directory=test/suite/input --driver.remote-url=http://localhost:4444 --reportFormat=ExtentReports test/suite/testsuite.json
       - name: Upload chrome result
         uses: actions/upload-artifact@v3
         with:
