@@ -48,7 +48,7 @@ jobs:
       run: docker-compose -f test/docker-compose.yml up -d
       shell: cmd
     - name: chrome-test
-      run: jre/bin/java -jar java\target\sebuilder-interpreter-2.0.0-SNAPSHOT-jar-with-dependencies.jar com.sebuilder.interpreter.application.SeInterpreter --resultoutput=chrome --datasource.directory=test/suite/input --driver.remote-url=http://localhost:4444 --reportFormat=ExtentReports test/suite/testsuite.json
+      run: call jre/bin/java -jar java\target\sebuilder-interpreter-2.0.0-SNAPSHOT-jar-with-dependencies.jar com.sebuilder.interpreter.application.SeInterpreter --resultoutput=chrome --datasource.directory=test/suite/input --driver.remote-url=http://localhost:4444 --reportFormat=ExtentReports test/suite/testsuite.json
       shell: cmd
     - name: Upload chrome result
       uses: actions/upload-artifact@v3
