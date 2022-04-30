@@ -1,0 +1,26 @@
+{
+    "data": {
+        "configs": {"csv": {"path": "suiteInput.csv"}},
+        "source": "csv"
+    },
+    "scripts": [{"chain": [
+        {
+            "data": {
+                "configs": {"csv": {"path": "${inputDir}/formInput.csv"}},
+                "source": "csv"
+            },
+            "path": "script/getPage.json"
+        },
+        {
+            "data": {
+                "configs": {"none": {}},
+                "source": "none"
+            },
+            "path": "script/formInput.json"
+        },
+        {"path": "script/agree.json"},
+        {"lazyLoad": "script/${decide}.json"}
+    ]}],
+    "shareState": true,
+    "type": "suite"
+}

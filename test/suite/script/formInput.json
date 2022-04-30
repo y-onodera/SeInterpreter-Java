@@ -1,0 +1,132 @@
+{
+    "data": {
+        "configs": {"csv": {"path": "formInput.csv"}},
+        "source": "csv"
+    },
+    "steps": [
+        {
+            "locator": {
+                "type": "id",
+                "value": "reserve_year"
+            },
+            "negated": false,
+            "skip": "false",
+            "type": "storeElementValue",
+            "variable": "reserve_year"
+        },
+        {
+            "locator": {
+                "type": "id",
+                "value": "reserve_month"
+            },
+            "negated": false,
+            "skip": "false",
+            "type": "storeElementValue",
+            "variable": "reserve_month"
+        },
+        {
+            "locator": {
+                "type": "id",
+                "value": "reserve_day"
+            },
+            "negated": false,
+            "skip": "false",
+            "type": "storeElementValue",
+            "variable": "reserve_day"
+        },
+        {
+            "negated": false,
+            "build.xml": "${_dataSourceDir}/build.xml",
+            "target": "nextDate",
+            "type": "storeAntRun",
+            "variable": "date",
+            "resultProperty": "resultDate"
+        },
+        {
+            "locator": {
+                "type": "id",
+                "value": "datePick"
+            },
+            "negated": false,
+            "skip": "false",
+            "text": "${date}",
+            "type": "SetElementText"
+        },
+        {
+            "check": "${id:breakfast_on}",
+            "locator": {
+                "type": "id",
+                "value": "breakfast_on"
+            },
+            "negated": false,
+            "skip": "false",
+            "type": "SetElementSelected"
+        },
+        {
+            "check": "${id:breakfast_off}",
+            "locator": {
+                "type": "id",
+                "value": "breakfast_off"
+            },
+            "negated": false,
+            "skip": "false",
+            "type": "SetElementSelected"
+        },
+        {
+            "check": "${id:plan_a}",
+            "locator": {
+                "type": "id",
+                "value": "plan_a"
+            },
+            "negated": false,
+            "skip": "false",
+            "type": "SetElementSelected"
+        },
+        {
+            "check": "${id:plan_b}",
+            "locator": {
+                "type": "id",
+                "value": "plan_b"
+            },
+            "negated": false,
+            "skip": "false",
+            "type": "SetElementSelected"
+        },
+        {
+            "locator": {
+                "type": "id",
+                "value": "guestname"
+            },
+            "negated": false,
+            "skip": "${!has('id:guestname')}",
+            "text": "${id:guestname}",
+            "type": "SetElementText"
+        },
+        {
+            "check": "true",
+            "locator": {
+                "type": "xpath",
+                "value": "//select[@id='reserve_term']/option[@value='${id:reserve_term}']"
+            },
+            "negated": false,
+            "skip": "false",
+            "type": "SetElementSelected"
+        },
+        {
+            "check": "true",
+            "locator": {
+                "type": "xpath",
+                "value": "//select[@id='headcount']/option[@value='${id:headcount}']"
+            },
+            "negated": false,
+            "skip": "false",
+            "type": "SetElementSelected"
+        },
+        {
+            "file": "inputResult.png",
+            "scroll": "true",
+            "type": "SaveScreenshot",
+            "verify": "false"
+        }
+    ]
+}

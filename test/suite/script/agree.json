@@ -1,0 +1,17 @@
+{"steps": [
+    {
+        "negated": false,
+        "skip": "false",
+        "type": "ClickElement",
+        "locator": {
+            "type": "id",
+            "value": "agree_and_goto_next"
+        }
+    },
+    {
+        "file": "afterPageMove.png",
+        "scroll": "true",
+        "verify": "${env.verifyImage}",
+        "type": "SaveScreenshot"
+    }
+]}
