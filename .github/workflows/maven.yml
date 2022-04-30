@@ -10,8 +10,57 @@ on:
     branches: [ master ]
 
 jobs:
-  integration-test:
+  build:
+    runs-on: windows-2019
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        java-package: 'jdk+fx'
+        distribution: 'zulu'
+        cache: maven
+    - name: Build with Maven
+      run: mvn package test allure:report -Pbuild -fjava/pom.xml
+      shell: cmd
+    - name: Upload TestReport
+      uses: actions/upload-artifact@v3
+      with:
+        name: unitTestReport
+        path: ./java/target/site
+    - name: Upload jar
+      uses: actions/upload-artifact@v3
+      with:
+        name: executableJar
+        path: ./java/target/**jar-with-dependencies.jar
+    - name: jlink
+      run: jlink --module-path "%JAVA_HOME%\jmods" --add-modules java.base,java.compiler,java.datatransfer,java.xml,java.prefs,java.desktop,java.logging,java.management,java.security.sasl,java.naming,java.rmi,java.scripting,java.security.jgss,java.transaction.xa,java.sql,jdk.unsupported,jdk.charsets,javafx.base,javafx.graphics,javafx.controls,javafx.fxml --compress=2 --output jre
+      shell: cmd
+    - name: Upload jre
+      uses: actions/upload-artifact@v3
+      with:
+        name: jre
+        path: jre
+
+  report-deploy:
+    needs: [build]
     runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3
+      - name: Download unitTestReport
+        uses: actions/download-artifact@v3
+        with:
+          name: unitTestReport
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@v4.3.3
+        with:
+          branch: gh-pages
+          folder: 'allure-maven-plugin'
+
+  integration-test:
+    runs-on: ubuntu-18.04
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v3
