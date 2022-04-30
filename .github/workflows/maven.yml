@@ -45,7 +45,7 @@ jobs:
         name: jre
         path: jre
     - name: webdriver-server startup
-      run: docker-compose up -d
+      run: docker-compose up -f test/docker-compose.yml -d
     - name: chrome-test
       run: jre/bin/java -jar java\target\sebuilder-interpreter-2.0.0-SNAPSHOT-jar-with-dependencies.jar com.sebuilder.interpreter.application.SeInterpreter --resultoutput=chrome --datasource.directory=test/suite/input --driver.remote-url=http://localhost:4444 --reportFormat=ExtentReports test/suite/testsuite.json
       shell: cmd
