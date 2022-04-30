@@ -77,6 +77,22 @@ jobs:
           SE_EVENT_BUS_SUBSCRIBE_PORT: 4443
         options :
           --shm-size=2gb
+      edge:
+        image: selenium/node-edge
+        env:
+          SE_EVENT_BUS_HOST: selenium-hub
+          SE_EVENT_BUS_PUBLISH_PORT: 4442
+          SE_EVENT_BUS_SUBSCRIBE_PORT: 4443
+        options :
+          --shm-size=2gb
+      firefox:
+        image: selenium/node-firefox
+        env:
+          SE_EVENT_BUS_HOST: selenium-hub
+          SE_EVENT_BUS_PUBLISH_PORT: 4442
+          SE_EVENT_BUS_SUBSCRIBE_PORT: 4443
+        options :
+          --shm-size=2gb
 
     steps:
       - name: Checkout
@@ -99,3 +115,17 @@ jobs:
         with:
           name: chrome-result
           path: chrome
+      - name: edge-test
+        run: java -cp sebuilder-interpreter-2.0.0-SNAPSHOT-jar-with-dependencies.jar com.sebuilder.interpreter.application.SeInterpreter --driver=Edge --resultoutput=edge --datasource.directory=test/suite/input --driver.remote-url=http://localhost:4444/ --reportFormat=ExtentReports test/suite/testsuite.json
+      - name: Upload chrome result
+        uses: actions/upload-artifact@v3
+        with:
+          name: edge-result
+          path: edge
+      - name: firefox-test
+        run: java -cp sebuilder-interpreter-2.0.0-SNAPSHOT-jar-with-dependencies.jar com.sebuilder.interpreter.application.SeInterpreter --driver=Firefox --resultoutput=firefox --datasource.directory=test/suite/input --driver.remote-url=http://localhost:4444/ --reportFormat=ExtentReports test/suite/testsuite.json
+      - name: Upload firefox result
+        uses: actions/upload-artifact@v3
+        with:
+          name: firefox-result
+          path: firefox
