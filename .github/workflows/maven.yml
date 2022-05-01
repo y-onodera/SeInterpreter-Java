@@ -103,6 +103,8 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: jre-ubuntu-latest
+      - name: permmit access
+        run:  chmod +x ./bin/java
       - name: Download executableJar
         uses: actions/download-artifact@v3
         with:
