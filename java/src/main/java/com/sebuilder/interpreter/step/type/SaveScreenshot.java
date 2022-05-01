@@ -20,6 +20,7 @@ import com.github.romankh3.image.comparison.ImageComparison;
 import com.github.romankh3.image.comparison.model.ImageComparisonResult;
 import com.github.romankh3.image.comparison.model.ImageComparisonState;
 import com.github.romankh3.image.comparison.model.Rectangle;
+import com.google.common.collect.Lists;
 import com.sebuilder.interpreter.*;
 import com.sebuilder.interpreter.screenshot.LocatorInnerScrollElementHandler;
 import com.sebuilder.interpreter.screenshot.Page;
@@ -33,6 +34,7 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
 
@@ -101,13 +103,18 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
         if (this.isSizeMissMatch(actual, expect)) {
             actualResize = this.toSameSize(actual, expect);
         }
-        ImageArea exclude = ctx.getImageArea("imageAreaExclude");
-        ImageComparisonResult result = this.getComparisonResult(file, actualResize, expect, exclude.getRectangles());
-        result.getRectangles()
-                .stream()
-                .forEach(it -> ctx.log().info("diff rectangle: {},{},{},{}"
-                        , it.getMinPoint().getX(), it.getMinPoint().getY()
-                        , it.getMaxPoint().getX(), it.getMaxPoint().getY()));
+        List<Rectangle> exclude = Lists.newArrayList();
+        if (ctx.hasImageArea("imageAreaExclude")) {
+            exclude = ctx.getImageArea("imageAreaExclude").getRectangles();
+        }
+        ImageComparisonResult result = this.getComparisonResult(file, actualResize, expect, exclude);
+        if (result.getRectangles() != null) {
+            result.getRectangles()
+                    .stream()
+                    .forEach(it -> ctx.log().info("diff rectangle: {},{},{},{}"
+                            , it.getMinPoint().getX(), it.getMinPoint().getY()
+                            , it.getMaxPoint().getX(), it.getMaxPoint().getY()));
+        }
         ImageIO.write(result.getResult(), "PNG", file);
         return result.getImageComparisonState() == ImageComparisonState.MATCH;
     }
