@@ -24,7 +24,9 @@ import org.openqa.selenium.remote.LocalFileDetector;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public interface WebDriverFactory {
     /**
@@ -33,9 +35,11 @@ public interface WebDriverFactory {
      */
     default RemoteWebDriver make(Map<String, String> config) throws Exception {
         if (config.containsKey(Context.REMOTE_URL_KEY)) {
-            DesiredCapabilities cap = new DesiredCapabilities(this.getOptions(config));
-            cap.setPlatform(Platform.LINUX);
-            RemoteWebDriver result = new RemoteWebDriver(new URL(config.get(Context.REMOTE_URL_KEY)), cap);
+            RemoteWebDriver result = new RemoteWebDriver(new URL(config.get(Context.REMOTE_URL_KEY))
+                    , this.getOptions(config.entrySet()
+                    .stream()
+                    .filter(it -> !it.getKey().equals(Context.REMOTE_URL_KEY))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))));
             result.setFileDetector(new LocalFileDetector());
             return result;
         }
