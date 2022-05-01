@@ -34,14 +34,30 @@ jobs:
       with:
         name: executableJar
         path: ./java/target/**jar-with-dependencies.jar
-    - name: jlink
-      run: jlink --module-path "%JAVA_HOME%\jmods" --add-modules java.base,java.compiler,java.datatransfer,java.xml,java.prefs,java.desktop,java.logging,java.management,java.security.sasl,java.naming,java.rmi,java.scripting,java.security.jgss,java.transaction.xa,java.sql,jdk.unsupported,jdk.charsets,javafx.base,javafx.graphics,javafx.controls,javafx.fxml --compress=2 --output jre
-      shell: cmd
-    - name: Upload jre
-      uses: actions/upload-artifact@v3
-      with:
-        name: jre
-        path: jre
+
+
+  jlink:
+    strategy:
+      matrix:
+        os: [windows-latest ,ubuntu-latest]
+    runs-on: ${{matrix.os}}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          java-package: 'jdk+fx'
+          distribution: 'zulu'
+          cache: maven
+      - name: jlink
+        run: jlink --module-path "%JAVA_HOME%\jmods" --add-modules java`.base,java`.compiler,java`.datatransfer,java`.xml,java`.prefs,java`.desktop,java`.logging,java`.management,java`.security`.sasl,java`.naming,java`.rmi,java`.scripting,java`.security`.jgss,java`.transaction`.xa,java`.sql,jdk`.unsupported,jdk`.charsets,javafx`.base,javafx`.graphics,javafx`.controls,javafx`.fxml --compress=2 --output jre
+        shell: pwsh
+      - name: Upload jre
+        uses: actions/upload-artifact@v3
+        with:
+          name: jre-${{matrix.os}}
+          path: jre
 
   report-deploy:
     needs: [build]
@@ -60,11 +76,11 @@ jobs:
           folder: 'allure-maven-plugin'
 
   browser-test:
-    needs: [build]
+    needs: [build ,jlink]
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        browser: [chrome ,edge ,firefox]
+        browser: [Chrome ,Edge ,Firefox]
     services:
       selenium-hub:
         image: selenium/hub
@@ -83,20 +99,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
+      - name: Download jre
+        uses: actions/download-artifact@v3
         with:
-          java-version: '17'
-          java-package: 'jdk+fx'
-          distribution: 'zulu'
-          cache: maven
-      - name: jlink
-        run: jlink --module-path "%JAVA_HOME%\jmods" --add-modules java.base,java.compiler,java.datatransfer,java.xml,java.prefs,java.desktop,java.logging,java.management,java.security.sasl,java.naming,java.rmi,java.scripting,java.security.jgss,java.transaction.xa,java.sql,jdk.unsupported,jdk.charsets,javafx.base,javafx.graphics,javafx.controls,javafx.fxml --compress=2 --output jre
+          name: jre-ubuntu-latest
       - name: Download executableJar
         uses: actions/download-artifact@v3
         with:
           name: executableJar
-      - name: chrome-test
+      - name: browser-test
         run: ./jre/bin/java -cp sebuilder-interpreter-2.0.0-SNAPSHOT-jar-with-dependencies.jar com.sebuilder.interpreter.application.SeInterpreter --driver=${{matrix.browser}} --resultoutput=${{matrix.browser}} --datasource.directory=test/suite/input --driver.remote-url=http://localhost:4444/ --reportFormat=ExtentReports test/suite/testsuite.json
       - name: Upload result
         uses: actions/upload-artifact@v3
