@@ -59,9 +59,12 @@ jobs:
           branch: gh-pages
           folder: 'allure-maven-plugin'
 
-  chrome-test:
+  browser-test:
     needs: [build]
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        browser: [chrome ,edge ,firefox]
     services:
       selenium-hub:
         image: selenium/hub
@@ -69,8 +72,8 @@ jobs:
           - 4442:4442
           - 4443:4443
           - 4444:4444
-      chrome:
-        image: selenium/node-chrome
+      selenium-node:
+        image: selenium/node-${{matrix.browser}}
         env:
           SE_EVENT_BUS_HOST: selenium-hub
           SE_EVENT_BUS_PUBLISH_PORT: 4442
@@ -94,103 +97,9 @@ jobs:
         with:
           name: executableJar
       - name: chrome-test
-        run: ./jre/bin/java -cp sebuilder-interpreter-2.0.0-SNAPSHOT-jar-with-dependencies.jar com.sebuilder.interpreter.application.SeInterpreter --resultoutput=chrome --datasource.directory=test/suite/input --driver.remote-url=http://localhost:4444/ --reportFormat=ExtentReports test/suite/testsuite.json
-      - name: Upload chrome result
+        run: ./jre/bin/java -cp sebuilder-interpreter-2.0.0-SNAPSHOT-jar-with-dependencies.jar com.sebuilder.interpreter.application.SeInterpreter --driver=${{matrix.browser}} --resultoutput=${{matrix.browser}} --datasource.directory=test/suite/input --driver.remote-url=http://localhost:4444/ --reportFormat=ExtentReports test/suite/testsuite.json
+      - name: Upload result
         uses: actions/upload-artifact@v3
         with:
-          name: chrome-result
-          path: chrome
-
-  edge-test:
-    needs: [build]
-    runs-on: ubuntu-latest
-    services:
-      selenium-hub:
-        image: selenium/hub
-        ports:
-          - 4442:4442
-          - 4443:4443
-          - 4444:4444
-      edge:
-        image: selenium/node-edge
-        env:
-          SE_EVENT_BUS_HOST: selenium-hub
-          SE_EVENT_BUS_PUBLISH_PORT: 4442
-          SE_EVENT_BUS_SUBSCRIBE_PORT: 4443
-        options :
-          --shm-size=2gb
-      firefox:
-        image: selenium/node-firefox
-        env:
-          SE_EVENT_BUS_HOST: selenium-hub
-          SE_EVENT_BUS_PUBLISH_PORT: 4442
-          SE_EVENT_BUS_SUBSCRIBE_PORT: 4443
-        options :
-          --shm-size=2gb
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          java-package: 'jdk+fx'
-          distribution: 'zulu'
-          cache: maven
-      - name: jlink
-        run: jlink --module-path "%JAVA_HOME%\jmods" --add-modules java.base,java.compiler,java.datatransfer,java.xml,java.prefs,java.desktop,java.logging,java.management,java.security.sasl,java.naming,java.rmi,java.scripting,java.security.jgss,java.transaction.xa,java.sql,jdk.unsupported,jdk.charsets,javafx.base,javafx.graphics,javafx.controls,javafx.fxml --compress=2 --output jre
-      - name: Download executableJar
-        uses: actions/download-artifact@v3
-        with:
-          name: executableJar
-      - name: edge-test
-        run: ./jre/bin/java -cp sebuilder-interpreter-2.0.0-SNAPSHOT-jar-with-dependencies.jar com.sebuilder.interpreter.application.SeInterpreter --driver=Edge --resultoutput=edge --datasource.directory=test/suite/input --driver.remote-url=http://localhost:4444/ --reportFormat=ExtentReports test/suite/testsuite.json
-      - name: Upload edge result
-        uses: actions/upload-artifact@v3
-        with:
-          name: edge-result
-          path: edge
-
-  firefox-test:
-    needs: [build]
-    runs-on: ubuntu-latest
-    services:
-      selenium-hub:
-        image: selenium/hub
-        ports:
-          - 4442:4442
-          - 4443:4443
-          - 4444:4444
-      firefox:
-        image: selenium/node-firefox
-        env:
-          SE_EVENT_BUS_HOST: selenium-hub
-          SE_EVENT_BUS_PUBLISH_PORT: 4442
-          SE_EVENT_BUS_SUBSCRIBE_PORT: 4443
-        options :
-          --shm-size=2gb
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          java-package: 'jdk+fx'
-          distribution: 'zulu'
-          cache: maven
-      - name: jlink
-        run: jlink --module-path "%JAVA_HOME%\jmods" --add-modules java.base,java.compiler,java.datatransfer,java.xml,java.prefs,java.desktop,java.logging,java.management,java.security.sasl,java.naming,java.rmi,java.scripting,java.security.jgss,java.transaction.xa,java.sql,jdk.unsupported,jdk.charsets,javafx.base,javafx.graphics,javafx.controls,javafx.fxml --compress=2 --output jre
-      - name: Download executableJar
-        uses: actions/download-artifact@v3
-        with:
-          name: executableJar
-      - name: firefox-test
-        run: ./jre/bin/java -cp sebuilder-interpreter-2.0.0-SNAPSHOT-jar-with-dependencies.jar com.sebuilder.interpreter.application.SeInterpreter --driver=Firefox --resultoutput=firefox --datasource.directory=test/suite/input --driver.remote-url=http://localhost:4444/ --reportFormat=ExtentReports test/suite/testsuite.json
-      - name: Upload firefox result
-        uses: actions/upload-artifact@v3
-        with:
-          name: firefox-result
-          path: firefox
+          name: ${{matrix.browser}}-result
+          path: ${{matrix.browser}}
