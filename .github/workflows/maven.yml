@@ -80,7 +80,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        browser: [Chrome ,Edge ,Firefox]
+        browser: [chrome ,edge ,firefox]
     services:
       selenium-hub:
         image: selenium/hub

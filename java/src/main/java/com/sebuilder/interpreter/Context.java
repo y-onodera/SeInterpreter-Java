@@ -113,7 +113,8 @@ public enum Context {
 
     public static WebDriverFactory getWebDriverFactory(String browser) {
         try {
-            return (WebDriverFactory) Class.forName("com.sebuilder.interpreter.browser." + browser).getDeclaredConstructor().newInstance();
+            String classname = browser.substring(0, 1).toUpperCase() + browser.substring(1);
+            return (WebDriverFactory) Class.forName("com.sebuilder.interpreter.browser." + classname).getDeclaredConstructor().newInstance();
         } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
             throw new AssertionError("Unknown WebDriverFactory: " + "com.sebuilder.interpreter.browser." + browser, e);
         } catch (InstantiationException | IllegalAccessException e) {
