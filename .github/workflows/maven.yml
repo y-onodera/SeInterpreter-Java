@@ -108,7 +108,7 @@ jobs:
         with:
           name: executableJar
       - name: browser-test
-        run: ./jre/bin/java -cp sebuilder-interpreter-2.0.0-SNAPSHOT-jar-with-dependencies.jar com.sebuilder.interpreter.application.SeInterpreter --driver=${{matrix.browser}} --resultoutput=${{matrix.browser}} --datasource.directory=test/suite/input --driver.remote-url=http://localhost:4444/ --reportFormat=ExtentReports test/suite/testsuite.json
+        run: ./bin/java -cp sebuilder-interpreter-2.0.0-SNAPSHOT-jar-with-dependencies.jar com.sebuilder.interpreter.application.SeInterpreter --driver=${{matrix.browser}} --resultoutput=${{matrix.browser}} --datasource.directory=test/suite/input --driver.remote-url=http://localhost:4444/ --reportFormat=ExtentReports test/suite/testsuite.json
       - name: Upload result
         uses: actions/upload-artifact@v3
         with:
