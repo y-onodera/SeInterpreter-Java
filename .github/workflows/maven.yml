@@ -21,6 +21,18 @@ jobs:
         java-package: 'jdk+fx'
         distribution: 'zulu'
         cache: maven
+    - name: download webdriver-manager
+      uses: dsaltares/fetch-gh-release-asset@master
+      with:
+        repo: "bonigarcia/webdrivermanager"
+        version: "tag/webdrivermanager-5.1.1"
+        file: "webdrivermanager-5.1.1-fat.jar"
+        token: ${{ secrets.GITHUB_TOKEN }}
+    - name: chrome webdriver setup
+      run: java -jar webdrivermanager-5.1.1-fat`.jar resolveDriverFor chrome
+      shell: pwsh
+    - name: chrome setup
+      uses: browser-actions/setup-chrome@latest
     - name: Build with Maven
       run: mvn package test allure:report -Pbuild -fjava/pom.xml
       shell: cmd
@@ -34,7 +46,6 @@ jobs:
       with:
         name: executableJar
         path: ./java/target/**jar-with-dependencies.jar
-
 
   jlink:
     strategy:
