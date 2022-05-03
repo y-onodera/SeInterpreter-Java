@@ -25,7 +25,6 @@ jobs:
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: "bonigarcia/webdrivermanager"
-        version: "tag/webdrivermanager-5.1.1"
         file: "webdrivermanager-5.1.1-fat.jar"
         token: ${{ secrets.GITHUB_TOKEN }}
     - name: chrome webdriver setup
