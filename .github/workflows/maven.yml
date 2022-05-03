@@ -21,17 +21,6 @@ jobs:
         java-package: 'jdk+fx'
         distribution: 'zulu'
         cache: maven
-    - name: download webdriver-manager
-      uses: dsaltares/fetch-gh-release-asset@master
-      with:
-        repo: "bonigarcia/webdrivermanager"
-        file: "webdrivermanager-5.1.1-fat.jar"
-        token: ${{ secrets.GITHUB_TOKEN }}
-    - name: chrome webdriver setup
-      run: java -jar webdrivermanager-5.1.1-fat`.jar resolveDriverFor chrome
-      shell: pwsh
-    - name: chrome setup
-      uses: browser-actions/setup-chrome@latest
     - name: Build with Maven
       run: mvn package test allure:report -Pbuild -fjava/pom.xml
       shell: cmd
@@ -85,7 +74,7 @@ jobs:
           branch: gh-pages
           folder: 'allure-maven-plugin'
 
-  browser-test:
+  remote-browser-test:
     needs: [build ,jlink]
     runs-on: ubuntu-latest
     strategy:
@@ -124,5 +113,45 @@ jobs:
       - name: Upload result
         uses: actions/upload-artifact@v3
         with:
-          name: ${{matrix.browser}}-result
+          name: remote-${{matrix.browser}}-result
+          path: ${{matrix.browser}}
+
+  locale-browser-test:
+    needs: [build ,jlink]
+    runs-on: windows-2019
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          java-package: 'jdk+fx'
+          distribution: 'zulu'
+          cache: maven
+      - name: chrome setup
+        uses: browser-actions/setup-chrome@latest
+      - name: download webdriver-manager
+        uses: dsaltares/fetch-gh-release-asset@master
+        with:
+          repo: "bonigarcia/webdrivermanager"
+          file: "webdrivermanager-5.1.1-fat.jar"
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: chrome webdriver setup
+        run: java -jar webdrivermanager-5.1.1-fat`.jar resolveDriverFor chrome
+        shell: pwsh
+      - name: Download jre
+        uses: actions/download-artifact@v3
+        with:
+          name: jre-windows-latest
+      - name: Download executableJar
+        uses: actions/download-artifact@v3
+        with:
+          name: executableJar
+      - name: browser-test
+        run: ./bin/java -cp sebuilder-interpreter-2.0.0-SNAPSHOT-jar-with-dependencies.jar com.sebuilder.interpreter.application.SeInterpreter --driver=chrome --resultoutput=chrome --datasource.directory=test/suite/input --driverPath=chromedriver.exe --reportFormat=ExtentReports test/suite/testsuite.json
+        shell: cmd
+      - name: Upload result
+        uses: actions/upload-artifact@v3
+        with:
+          name: remote-${{matrix.browser}}-result
           path: ${{matrix.browser}}
