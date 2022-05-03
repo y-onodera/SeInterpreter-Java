@@ -138,8 +138,12 @@ jobs:
           java-package: 'jdk+fx'
           distribution: 'zulu'
           cache: maven
-      - name: ${{matrix.browser}} setup
-        uses: browser-actions/setup-${{matrix.browser}}@latest
+      - uses: browser-actions/setup-firefox@latest
+        if: matrix.browser == 'firefox'
+      - uses: browser-actions/setup-chrome@latest
+        if: matrix.browser == 'chrome'
+      - uses: browser-actions/setup-edge@latest
+        if: matrix.browser == 'edge'
       - name: download webdriver-manager
         uses: dsaltares/fetch-gh-release-asset@master
         with:
