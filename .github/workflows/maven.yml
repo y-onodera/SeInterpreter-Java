@@ -109,7 +109,7 @@ jobs:
         with:
           name: executableJar
       - name: browser-test
-        run: ./bin/java -cp sebuilder-interpreter-2.0.0-SNAPSHOT-jar-with-dependencies.jar com.sebuilder.interpreter.application.SeInterpreter --driver=${{matrix.browser}} --resultoutput=${{matrix.browser}} --datasource.directory=test/suite/input --driver.remote-url=http://localhost:4444/ --reportFormat=ExtentReports test/suite/testsuite.json
+        run: ./bin/java -cp sebuilder-interpreter-2.0.0-SNAPSHOT-jar-with-dependencies.jar com.sebuilder.interpreter.application.SeInterpreter --driver=${{matrix.browser}} --resultoutput=${{matrix.browser}} --driver.remote-url=http://localhost:4444/ --datasource.directory=test/suite/input --reportFormat=ExtentReports test/suite/testsuite.json
       - name: Upload result
         uses: actions/upload-artifact@v3
         with:
@@ -119,6 +119,16 @@ jobs:
   locale-browser-test:
     needs: [build ,jlink]
     runs-on: windows-2019
+    strategy:
+      matrix:
+        browser: [chrome ,edge ,firefox]
+        include:
+          - driver: chromedriver
+            browser: chrome
+          - driver: msedgedriver
+            browser: edge
+          - driver: geckodriver
+            browser: firefox
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK 17
@@ -128,16 +138,16 @@ jobs:
           java-package: 'jdk+fx'
           distribution: 'zulu'
           cache: maven
-      - name: chrome setup
-        uses: browser-actions/setup-chrome@latest
+      - name: ${{matrix.browser}} setup
+        uses: browser-actions/setup-${{matrix.browser}}@latest
       - name: download webdriver-manager
         uses: dsaltares/fetch-gh-release-asset@master
         with:
           repo: "bonigarcia/webdrivermanager"
           file: "webdrivermanager-5.1.1-fat.jar"
           token: ${{ secrets.GITHUB_TOKEN }}
-      - name: chrome webdriver setup
-        run: java -jar webdrivermanager-5.1.1-fat`.jar resolveDriverFor chrome
+      - name: ${{matrix.browser}} webdriver setup
+        run: java -jar webdrivermanager-5.1.1-fat`.jar resolveDriverFor ${{matrix.browser}}
         shell: pwsh
       - name: Download jre
         uses: actions/download-artifact@v3
@@ -148,10 +158,10 @@ jobs:
         with:
           name: executableJar
       - name: browser-test
-        run: bin\java -cp sebuilder-interpreter-2.0.0-SNAPSHOT-jar-with-dependencies.jar com.sebuilder.interpreter.application.SeInterpreter --driver=chrome --resultoutput=chrome --datasource.directory=test/suite/input --driverPath=chromedriver.exe --reportFormat=ExtentReports test/suite/testsuite.json
+        run: bin\java -cp sebuilder-interpreter-2.0.0-SNAPSHOT-jar-with-dependencies.jar com.sebuilder.interpreter.application.SeInterpreter --driver=${{matrix.browser}} --resultoutput=${{matrix.browser}} --driverPath=${{matrix.driver}}.exe --datasource.directory=test/suite/input --reportFormat=ExtentReports test/suite/testsuite.json
         shell: cmd
       - name: Upload result
         uses: actions/upload-artifact@v3
         with:
-          name: remote-${{matrix.browser}}-result
+          name: locale-${{matrix.browser}}-result
           path: ${{matrix.browser}}
