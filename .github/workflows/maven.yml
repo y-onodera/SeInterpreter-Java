@@ -121,14 +121,12 @@ jobs:
     runs-on: windows-2019
     strategy:
       matrix:
-        browser: [chrome ,edge ,firefox]
+        browser: [chrome ,edge]
         include:
           - driver: chromedriver
             browser: chrome
           - driver: msedgedriver
             browser: edge
-          - driver: geckodriver
-            browser: firefox
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK 17
@@ -138,8 +136,6 @@ jobs:
           java-package: 'jdk+fx'
           distribution: 'zulu'
           cache: maven
-      - uses: browser-actions/setup-firefox@latest
-        if: matrix.browser == 'firefox'
       - uses: browser-actions/setup-chrome@latest
         if: matrix.browser == 'chrome'
       - uses: browser-actions/setup-edge@latest
