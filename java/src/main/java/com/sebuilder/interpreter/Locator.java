@@ -30,7 +30,7 @@ import java.util.List;
  * @author zarkonnen
  */
 public class Locator {
-    public Type type;
+    public String type;
     public String value;
 
     static Locator of(WebDriverWrapper driver, WebElement element) {
@@ -60,7 +60,7 @@ public class Locator {
     }
 
     public Locator(String type, String value) {
-        this.type = Type.ofName(type);
+        this.type = type;
         this.value = value;
     }
 
@@ -78,7 +78,7 @@ public class Locator {
     }
 
     public WebElement find(WebDriver driver) {
-        return this.type.find(this.value, driver);
+        return Type.ofName(this.type).find(this.value, driver);
     }
 
     public List<WebElement> findElements(TestRun ctx) {
@@ -86,7 +86,7 @@ public class Locator {
     }
 
     public List<WebElement> findElements(WebDriver driver) {
-        return this.type.findElements(this.value, driver);
+        return Type.ofName(this.type).findElements(this.value, driver);
     }
 
     @Override
@@ -95,7 +95,7 @@ public class Locator {
     }
 
     public String toPrettyString() {
-        return this.type.name().toLowerCase() + ":" + this.value;
+        return this.type + ":" + this.value;
     }
 
     @Override

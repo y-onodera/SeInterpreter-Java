@@ -787,7 +787,7 @@ public class TestRunTest {
             this.aspectBeforeStep = Mockito.spy(new StepBuilder(new SetElementText()).build());
             this.aspectAfterStep = Mockito.spy(new StepBuilder(new DoubleClickElement()).build());
             this.interceptor = Mockito.spy(new Interceptor(
-                    it -> "name".equals(it.getName())
+                    (step, input) -> "name".equals(step.getName())
                     , Lists.newArrayList(this.aspectBeforeStep)
                     , Lists.newArrayList(this.aspectAfterStep)
                     , Lists.newArrayList()));
@@ -887,7 +887,7 @@ public class TestRunTest {
             this.aspectBeforeStep = Mockito.spy(new StepBuilder(new SetElementText()).build());
             this.aspectAfterStep = Mockito.spy(new StepBuilder(new DoubleClickElement()).build());
             this.interceptor = Mockito.spy(new Interceptor(
-                    it -> "chain".equals(it.getName())
+                    (step, input) -> "chain".equals(step.getName())
                     , Lists.newArrayList(this.aspectBeforeStep)
                     , Lists.newArrayList(this.aspectAfterStep)
                     , Lists.newArrayList()));
@@ -999,7 +999,7 @@ public class TestRunTest {
             this.aspectBeforeStep = Mockito.spy(new StepBuilder(new SetElementText()).build());
             this.aspectAfterStep = Mockito.spy(new StepBuilder(new DoubleClickElement()).build());
             this.interceptor = Mockito.spy(new Interceptor(
-                    it -> "name".equals(it.getName())
+                    (step, input) -> "name".equals(step.getName())
                     , Lists.newArrayList(this.aspectBeforeStep)
                     , Lists.newArrayList(this.aspectAfterStep)
                     , Lists.newArrayList()));
@@ -1013,7 +1013,7 @@ public class TestRunTest {
             this.contextAspectBeforeStep = Mockito.spy(new StepBuilder(new SetElementText()).build());
             this.contextAspectAfterStep = Mockito.spy(new StepBuilder(new DoubleClickElement()).build());
             this.contextInterceptor = Mockito.spy(new Interceptor(
-                    it -> "chain".equals(it.getName())
+                    (step, input) -> "chain".equals(step.getName())
                     , Lists.newArrayList(this.contextAspectBeforeStep)
                     , Lists.newArrayList(this.contextAspectAfterStep)
                     , Lists.newArrayList()));

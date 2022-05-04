@@ -142,7 +142,7 @@ public class TestRun implements WebDriverWrapper {
 
     public Locator locator(@Nonnull String key) {
         Locator l = new Locator(this.currentStep().getLocator(key));
-        // This kind of variable substitution makes for short code, but it's inefficient.
+        l.type = this.bindRuntimeVariables(l.type);
         l.value = this.bindRuntimeVariables(l.value);
         return l;
     }
@@ -219,6 +219,7 @@ public class TestRun implements WebDriverWrapper {
 
     public void toNextStepIndex() {
         this.forwardStepIndex(1);
+        this.putVars("_stepIndex", String.valueOf(this.currentStepIndex()));
     }
 
     public void backStepIndex(int count) {
@@ -293,7 +294,7 @@ public class TestRun implements WebDriverWrapper {
                     .add(Context.getAspect())
                     .build();
         }
-        return weaver.advice(this.currentStep());
+        return weaver.advice(this.currentStep(), this.vars());
     }
 
     protected boolean chainRun() {

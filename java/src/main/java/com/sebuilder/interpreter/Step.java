@@ -15,6 +15,7 @@
  */
 package com.sebuilder.interpreter;
 
+import com.google.common.collect.Maps;
 import com.sebuilder.interpreter.step.GetterUseStep;
 
 import java.util.Collection;
@@ -164,6 +165,19 @@ public class Step {
             sb.append(" ").append(pe.getKey()).append("=").append(pe.getValue().getValue());
         }
         return sb.toString();
+    }
+
+    public Map<String, String> toMap() {
+        Map<String, String> result = Maps.newHashMap();
+        result.putAll(this.stringParams);
+        for (Map.Entry<String, Locator> le : this.locatorParams.entrySet()) {
+            result.put(le.getKey() + ".type", le.getValue().type.toString());
+            result.put(le.getKey() + ".value", le.getValue().value);
+        }
+        for (Map.Entry<String, ImageArea> pe : this.imageAreaParams.entrySet()) {
+            result.put(pe.getKey(), pe.getValue().getValue());
+        }
+        return result;
     }
 
     private boolean isSkippable() {

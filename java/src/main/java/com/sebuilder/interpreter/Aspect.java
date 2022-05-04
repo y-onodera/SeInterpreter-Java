@@ -12,10 +12,6 @@ import java.util.stream.Collectors;
 
 public class Aspect {
 
-    public static Predicate<Step> NONE = (it) -> false;
-
-    public static Predicate<Step> APPLY = (it) -> true;
-
     private final List<Interceptor> interceptors;
 
     public Aspect() {
@@ -30,9 +26,9 @@ public class Aspect {
         return new Builder(this.interceptors);
     }
 
-    public Advice advice(Step step) {
+    public Advice advice(Step step, InputData vars) {
         return new Advice(interceptors.stream()
-                .filter(interceptor -> interceptor.isPointcut(step))
+                .filter(interceptor -> interceptor.isPointcut(step, vars))
                 .collect(Collectors.toList()));
     }
 

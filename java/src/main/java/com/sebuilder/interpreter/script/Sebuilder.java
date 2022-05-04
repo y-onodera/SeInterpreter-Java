@@ -18,10 +18,7 @@ package com.sebuilder.interpreter.script;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.sebuilder.interpreter.*;
-import com.sebuilder.interpreter.pointcut.LocatorFilter;
-import com.sebuilder.interpreter.pointcut.NegatedFilter;
-import com.sebuilder.interpreter.pointcut.StepTypeFilter;
-import com.sebuilder.interpreter.pointcut.StringParamFilter;
+import com.sebuilder.interpreter.pointcut.*;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,8 +29,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.function.Predicate;
 
 /**
  * Factory to create TestCase objects from a string, a reader or JSONObject.
@@ -260,7 +255,7 @@ public class Sebuilder extends AbstractJsonScriptParser {
             step.put(key, new Locator(stepO.getJSONObject(key).getString("type"), stepO.getJSONObject(key).getString("value")));
         } else if (stepO.optString(key) != null && key.startsWith("imageArea")) {
             step.put(key, new ImageArea(stepO.getString(key)));
-        }else{
+        } else {
             step.put(key, stepO.getString(key));
         }
     }
@@ -292,8 +287,8 @@ public class Sebuilder extends AbstractJsonScriptParser {
         return result;
     }
 
-    protected Predicate<Step> getPointcut(JSONArray pointcuts) throws JSONException {
-        Predicate<Step> result = Aspect.NONE;
+    protected Pointcut getPointcut(JSONArray pointcuts) throws JSONException {
+        Pointcut result = Pointcut.NONE;
         for (int i = 0; i < pointcuts.length(); i++) {
             result = result.or(this.parseFilter(pointcuts.getJSONObject(i)));
         }
@@ -301,29 +296,62 @@ public class Sebuilder extends AbstractJsonScriptParser {
     }
 
 
-    protected Predicate<Step> parseFilter(JSONObject pointcutJSON) throws JSONException {
-        Predicate<Step> pointcut = Aspect.APPLY;
+    protected Pointcut parseFilter(JSONObject pointcutJSON) throws JSONException {
+        Pointcut pointcut = Pointcut.ANY;
         JSONArray keysA = pointcutJSON.names();
-        Map<String, String> stringParam = Maps.newHashMap();
-        Map<String, Locator> locatorParam = Maps.newHashMap();
         for (int j = 0; j < keysA.length(); j++) {
             String key = keysA.getString(j);
             if (key.equals("type")) {
-                pointcut = pointcut.and(new StepTypeFilter(pointcutJSON.getString(key)));
+                if (pointcutJSON.get(key) instanceof JSONArray) {
+                    JSONArray type = pointcutJSON.getJSONArray(key);
+                    Pointcut typeList = Pointcut.NONE;
+                    for (int k = 0; k < type.length(); k++) {
+                        typeList = typeList.or(new StepTypeFilter(type.getString(k)));
+                    }
+                    pointcut = pointcut.and(typeList);
+                } else if (pointcutJSON.get(key) instanceof JSONObject) {
+                    JSONObject type = pointcutJSON.getJSONObject(key);
+                    pointcut = pointcut.and(new StepTypeFilter(type.getString("value"), type.getString("strategy")));
+                } else {
+                    pointcut = pointcut.and(new StepTypeFilter(pointcutJSON.getString(key)));
+                }
             } else if (key.equals("negated")) {
                 pointcut = pointcut.and(new NegatedFilter(pointcutJSON.getBoolean(key)));
+            } else if (key.equals("skip")) {
+                pointcut = pointcut.and(new SkipFilter(pointcutJSON.getBoolean(key)));
             } else if (key.startsWith("locator")) {
                 JSONObject locatorJSON = pointcutJSON.getJSONObject(key);
-                locatorParam.put(key, new Locator(locatorJSON.getString("type"), locatorJSON.getString("value")));
+                if (locatorJSON.get("value") instanceof JSONArray) {
+                    JSONArray type = locatorJSON.getJSONArray("value");
+                    Pointcut typeList = Pointcut.NONE;
+                    for (int k = 0; k < type.length(); k++) {
+                        Locator locator = new Locator(locatorJSON.getString("type"), type.getString(k));
+                        typeList = typeList.or(new LocatorFilter(key, locator));
+                    }
+                    pointcut = pointcut.and(typeList);
+                } else {
+                    Locator locator = new Locator(locatorJSON.getString("type"), locatorJSON.getString("value"));
+                    if (locatorJSON.has("strategy")) {
+                        pointcut = pointcut.and(new LocatorFilter(key, locator, locatorJSON.getString("strategy")));
+                    } else {
+                        pointcut = pointcut.and(new LocatorFilter(key, locator));
+                    }
+                }
             } else {
-                stringParam.put(key, pointcutJSON.getString(key));
+                if (pointcutJSON.get(key) instanceof JSONArray) {
+                    JSONArray type = pointcutJSON.getJSONArray(key);
+                    Pointcut typeList = Pointcut.NONE;
+                    for (int k = 0; k < type.length(); k++) {
+                        typeList = typeList.or(new StringParamFilter(key, type.getString(k)));
+                    }
+                    pointcut = pointcut.and(typeList);
+                } else if (pointcutJSON.get(key) instanceof JSONObject) {
+                    JSONObject type = pointcutJSON.getJSONObject(key);
+                    pointcut = pointcut.and(new StringParamFilter(key, type.getString("value"), type.getString("strategy")));
+                } else {
+                    pointcut = pointcut.and(new StringParamFilter(key, pointcutJSON.getString(key)));
+                }
             }
-        }
-        if (locatorParam.size() > 0) {
-            pointcut = pointcut.and(new LocatorFilter(locatorParam));
-        }
-        if (stringParam.size() > 0) {
-            pointcut = pointcut.and(new StringParamFilter(stringParam));
         }
         return pointcut;
     }
@@ -369,7 +397,7 @@ public class Sebuilder extends AbstractJsonScriptParser {
         return result;
     }
 
-    protected boolean isPreventContextAspect(JSONObject script)throws JSONException {
+    protected boolean isPreventContextAspect(JSONObject script) throws JSONException {
         boolean result = false;
         if (script.has("preventContextAspect")) {
             result = script.getBoolean("preventContextAspect");

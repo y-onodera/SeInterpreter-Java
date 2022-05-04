@@ -1,30 +1,34 @@
 package com.sebuilder.interpreter.pointcut;
 
+import com.sebuilder.interpreter.InputData;
 import com.sebuilder.interpreter.Locator;
+import com.sebuilder.interpreter.Pointcut;
 import com.sebuilder.interpreter.Step;
 
 import java.util.Map;
-import java.util.function.Predicate;
+import java.util.function.BiFunction;
 
-public class LocatorFilter implements Predicate<Step> {
+public class LocatorFilter implements Pointcut {
 
-    private final Map<String, Locator> targetParam;
+    private final String key;
+    private final Locator target;
+    private final BiFunction<String, String, Boolean> strategy;
 
-    public LocatorFilter(Map<String, Locator> targetParam) {
-        this.targetParam = targetParam;
+    public LocatorFilter(String key, Locator target) {
+        this(key, target, "equal");
+    }
+
+    public LocatorFilter(String key, Locator target, String strategy) {
+        this.key = key;
+        this.target = target;
+        this.strategy = STRATEGIES.get(strategy);
     }
 
     @Override
-    public boolean test(Step step) {
-        for (Map.Entry<String, Locator> entry : targetParam.entrySet()) {
-            if (!match(step, entry)) {
-                return false;
-            }
-        }
-        return true;
+    public boolean test(Step step, InputData vars) {
+        return step.locatorContains(this.key)
+                && step.getLocator(this.key).type.equals(target.type)
+                && strategy.apply(vars.bind(step.getLocator(this.key).value), target.value);
     }
 
-    private boolean match(Step step, Map.Entry<String, Locator> entry) {
-        return step.locatorContains(entry.getKey()) && step.getLocator(entry.getKey()).equals(entry.getValue());
-    }
 }

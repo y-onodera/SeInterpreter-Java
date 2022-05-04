@@ -36,6 +36,23 @@
         },
         {
             "negated": false,
+            "script": "return ${reserve_year} + '/' + ${reserve_month} + '/' + (${reserve_day} + ${add_days});",
+            "skip": "false",
+            "type": "storeEval",
+            "variable": "date"
+        },
+        {
+            "locator": {
+                "type": "id",
+                "value": "datePick"
+            },
+            "negated": false,
+            "skip": "false",
+            "text": "${date}",
+            "type": "SetElementText"
+        },
+        {
+            "negated": false,
             "build.xml": "${_dataSourceDir}/build.xml",
             "target": "nextDate",
             "type": "storeAntRun",
@@ -53,23 +70,21 @@
             "type": "SetElementText"
         },
         {
-            "check": "${id:breakfast_on}",
             "locator": {
                 "type": "id",
                 "value": "breakfast_on"
             },
             "negated": false,
-            "skip": "false",
+            "skip": "${id:breakfast_on}",
             "type": "SetElementSelected"
         },
         {
-            "check": "${id:breakfast_off}",
             "locator": {
                 "type": "id",
                 "value": "breakfast_off"
             },
             "negated": false,
-            "skip": "false",
+            "skip": "${id:breakfast_off}",
             "type": "SetElementSelected"
         },
         {
@@ -105,28 +120,22 @@
         {
             "check": "true",
             "locator": {
-                "type": "xpath",
-                "value": "//select[@id='reserve_term']/option[@value='${id:reserve_term}']"
+                "type": "id",
+                "value": "reserve_term"
             },
-            "negated": false,
+            "value": "${id:reserve_term}",
             "skip": "false",
-            "type": "SetElementSelected"
+            "type": "SelectElementValue"
         },
         {
             "check": "true",
             "locator": {
-                "type": "xpath",
-                "value": "//select[@id='headcount']/option[@value='${id:headcount}']"
+                "type": "id",
+                "value": "headcount"
             },
-            "negated": false,
+            "value": "${id:headcount}",
             "skip": "false",
-            "type": "SetElementSelected"
-        },
-        {
-            "file": "inputResult.png",
-            "scroll": "true",
-            "type": "SaveScreenshot",
-            "verify": "false"
+            "type": "SelectElementValue"
         }
     ]
 }

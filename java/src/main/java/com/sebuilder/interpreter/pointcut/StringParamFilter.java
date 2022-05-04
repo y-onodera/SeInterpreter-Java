@@ -1,29 +1,33 @@
 package com.sebuilder.interpreter.pointcut;
 
+import com.sebuilder.interpreter.InputData;
+import com.sebuilder.interpreter.Pointcut;
 import com.sebuilder.interpreter.Step;
 
 import java.util.Map;
-import java.util.function.Predicate;
+import java.util.function.BiFunction;
 
-public class StringParamFilter implements Predicate<Step> {
+public class StringParamFilter implements Pointcut {
 
-    private final Map<String, String> targetParam;
+    private final String key;
+    private final String value;
+    private final BiFunction<String, String, Boolean> strategy;
 
-    public StringParamFilter(Map<String, String> targetParam) {
-        this.targetParam = targetParam;
+
+    public StringParamFilter(String key, String value) {
+        this(key, value, "equal");
+    }
+
+    public StringParamFilter(String key, String value, String strategy) {
+        this.key = key;
+        this.value = value;
+        this.strategy = STRATEGIES.get(strategy);
     }
 
     @Override
-    public boolean test(Step step) {
-        for (Map.Entry<String, String> entry : targetParam.entrySet()) {
-            if (!match(step, entry)) {
-                return false;
-            }
-        }
-        return true;
+    public boolean test(Step step, InputData vars) {
+        return step.containsParam(this.key)
+                && this.strategy.apply(vars.bind(step.getParam(this.key)), this.value);
     }
 
-    private boolean match(Step step, Map.Entry<String, String> entry) {
-        return step.containsParam(entry.getKey()) && step.getParam(entry.getKey()).equals(entry.getValue());
-    }
 }

@@ -4,16 +4,18 @@ import com.sebuilder.interpreter.InputData;
 import com.sebuilder.interpreter.Pointcut;
 import com.sebuilder.interpreter.Step;
 
-public class NegatedFilter implements Pointcut {
+import java.util.function.Predicate;
+
+public class SkipFilter implements Pointcut {
 
     private final boolean target;
 
-    public NegatedFilter(boolean target) {
+    public SkipFilter(boolean target) {
         this.target = target;
     }
 
     @Override
     public boolean test(Step step, InputData vars) {
-        return target == step.isNegated();
+        return step.isSkip(vars) == target;
     }
 }

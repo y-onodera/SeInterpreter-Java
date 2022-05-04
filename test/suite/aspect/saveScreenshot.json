@@ -1,0 +1,78 @@
+{
+  "aspect": [
+    {
+      "pointcut": [
+        {
+          "type": [
+            "SetElementText",
+            "SelectElementValue",
+            "SetElementSelected"
+          ],
+          "skip": false
+        }
+      ],
+      "before": {
+        "steps": [
+          {
+            "file": "_step${target.currentStepIndex}_before_input.png",
+            "scroll": "false",
+            "locator": {
+              "type": "${target.locator.type}",
+              "value": "${target.locator.value}"
+            },
+            "type": "SaveScreenshot"
+          }
+        ]
+      },
+      "after": {
+        "steps": [
+          {
+            "file": "_step${target.currentStepIndex}_after_input.png",
+            "scroll": "false",
+            "locator": {
+              "type": "${target.locator.type}",
+              "value": "${target.locator.value}"
+            },
+            "type": "SaveScreenshot"
+          }
+        ]
+      }
+    },
+    {
+      "pointcut": [
+        {
+          "locator": {
+            "type": "id",
+            "value": [
+              "agree_and_goto_next",
+              "commit"
+            ]
+          }
+        },
+        {
+          "type": "Get"
+        }
+      ],
+      "before": {
+        "steps": [
+          {
+            "file": "before_pageMove.png",
+            "scroll": "true",
+            "verify": "${env.verifyImage}",
+            "type": "SaveScreenshot"
+          }
+        ]
+      },
+      "after": {
+        "steps": [
+          {
+            "file": "after_pageMove.png",
+            "scroll": "true",
+            "verify": "${env.verifyImage}",
+            "type": "SaveScreenshot"
+          }
+        ]
+      }
+    }
+  ]
+}
