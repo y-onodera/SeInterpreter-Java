@@ -35,18 +35,6 @@ public class Locator {
 
     static Locator of(WebDriverWrapper driver, WebElement element) {
         String id = element.getAttribute("id");
-        if ("option".equals(element.getTagName())) {
-            WebElement parent = element.findElement(By.xpath(".."));
-            String parentAttribute = parent.getAttribute("id");
-            if (parent.getTagName().equals("select") && !Strings.isNullOrEmpty(parentAttribute)) {
-                String value = element.getAttribute("value");
-                return new Locator("xpath", String.format("//select[@id='%s']/option[@value='%s']", parentAttribute, value));
-            }
-            String value = parent.getAttribute("value");
-            if (!Strings.isNullOrEmpty(value)) {
-                return new Locator("xpath", WebElements.toXpath(driver, element) + "[@value='" + value + "']");
-            }
-        }
         if (!Strings.isNullOrEmpty(id)) {
             return new Locator("id", id);
         } else if ("a".equals(element.getTagName())) {

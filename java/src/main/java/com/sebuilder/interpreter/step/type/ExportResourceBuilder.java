@@ -25,7 +25,6 @@ public class ExportResourceBuilder {
     private final ArrayList<StepBuilder> steps;
     private StepBuilder currentStep;
     private final boolean needDataSource;
-    private final Locator locator;
     private final WebElement extractFrom;
 
 
@@ -37,17 +36,18 @@ public class ExportResourceBuilder {
         this.currentStep = null;
         this.ctx = aCtx;
         this.needDataSource = this.ctx.containsKey("datasource");
+        Locator locator;
         if (this.ctx.hasLocator()) {
-            this.locator = this.ctx.locator();
+            locator = this.ctx.locator();
         } else {
-            this.locator = new Locator("css selector", "body");
+            locator = new Locator("css selector", "body");
         }
-        extractFrom = this.locator.find(this.ctx);
+        extractFrom = locator.find(this.ctx);
     }
 
     public ExportResource build() {
         this.source.addSteps(this.steps.stream()
-                .map(it -> it.build())
+                .map(StepBuilder::build)
                 .collect(Collectors.toCollection(ArrayList::new)));
         File dataSourceFile = null;
         if (this.needDataSource) {
@@ -64,29 +64,23 @@ public class ExportResourceBuilder {
         }
         this.extractFrom
                 .findElements(By.tagName("input"))
-                .stream()
                 .forEach(element -> {
                     String type = element.getAttribute("type");
                     switch (type) {
-                        case "text":
-                            this.addStep(new SetElementText(), element);
-                            break;
                         case "checkbox":
                         case "radio":
                             this.addStep(new SetElementSelected(), element);
                             break;
                         case "hidden":
                             break;
+                        case "text":
                         default:
-                            this.addStep(new SetElementText(),  element);
+                            this.addStep(new SetElementText(), element);
                     }
                 });
         this.extractFrom
                 .findElements(By.tagName("textarea"))
-                .stream()
-                .forEach(element -> {
-                    this.addStep(new SetElementText(), element);
-                });
+                .forEach(element -> this.addStep(new SetElementText(), element));
         return this;
     }
 
@@ -96,15 +90,7 @@ public class ExportResourceBuilder {
         }
         this.extractFrom
                 .findElements(By.tagName("select"))
-                .stream()
-                .forEach(element -> {
-                    element.findElements(By.tagName("option"))
-                            .stream()
-                            .filter(option -> option.isSelected())
-                            .forEach(option -> {
-                                this.addStep(new SetElementSelected(), option);
-                            });
-                });
+                .forEach(element -> this.addStep(new SelectElementValue(), element));
         return this;
     }
 
@@ -116,9 +102,7 @@ public class ExportResourceBuilder {
                 .findElements(By.tagName("a"))
                 .stream()
                 .filter(element -> !Strings.isNullOrEmpty(element.getText()))
-                .forEach(element -> {
-                    this.addStep(new ClickElement(), element);
-                });
+                .forEach(element -> this.addStep(new ClickElement(), element));
         return this;
     }
 
@@ -128,10 +112,7 @@ public class ExportResourceBuilder {
         }
         this.extractFrom
                 .findElements(By.tagName("button"))
-                .stream()
-                .forEach(element -> {
-                    this.addStep(new ClickElement(), element);
-                });
+                .forEach(element -> this.addStep(new ClickElement(), element));
         return this;
     }
 
@@ -141,10 +122,7 @@ public class ExportResourceBuilder {
         }
         this.extractFrom
                 .findElements(By.tagName("div"))
-                .stream()
-                .forEach(element -> {
-                    this.addStep(new ClickElement(),  element);
-                });
+                .forEach(element -> this.addStep(new ClickElement(), element));
         return this;
     }
 
@@ -154,10 +132,7 @@ public class ExportResourceBuilder {
         }
         this.extractFrom
                 .findElements(By.tagName("span"))
-                .stream()
-                .forEach(element -> {
-                    this.addStep(new ClickElement(), element);
-                });
+                .forEach(element -> this.addStep(new ClickElement(), element));
         return this;
     }
 
@@ -178,15 +153,7 @@ public class ExportResourceBuilder {
         if (!hasLocator) {
             return this;
         }
-        Locator result = this.ctx.detectLocator(element);
-        if (result.value.contains("//select[@id=")) {
-            String id = "id:" + result.value.replaceAll(".+(?=@id='([^']+)').*", "$1");
-            String value = result.value.replaceAll(".+(?=@value='([^']*)').*", "@value='$1'");
-            this.addVariable(id, value.replaceAll("@value='(.*)'", "$1"));
-            this.currentStep.skip("${!has('" + id + "')}");
-            result = new Locator(result.type.toString(), result.value.replace(value, "@value='${" + id + "}'"));
-        }
-        return this.addLocator(result);
+        return this.addLocator(this.ctx.detectLocator(element));
     }
 
     public ExportResourceBuilder addLocator(Locator element) {
@@ -197,14 +164,10 @@ public class ExportResourceBuilder {
     public ExportResourceBuilder stepOption(String opt, String value) {
         if (this.needDataSource && this.currentStep.containsLocatorParam("locator")) {
             Locator locator = this.currentStep.getLocatorParams().get("locator");
-            if (locator.value.contains("//select[@id=")) {
-                this.currentStep.put(opt, value);
-            } else {
-                String valuable = this.addVariable(locator.toPrettyString(), value);
-                this.currentStep.put(opt, valuable)
-                        .skip("${!has('" + valuable.replace("${", "")
-                                .replace("}", "") + "')}");
-            }
+            String valuable = this.addVariable(locator.toPrettyString(), value);
+            this.currentStep.put(opt, valuable)
+                    .skip("${!has('" + valuable.replace("${", "")
+                            .replace("}", "") + "')}");
         } else {
             this.currentStep.put(opt, value);
         }
@@ -213,10 +176,10 @@ public class ExportResourceBuilder {
 
     private String addVariable(String aVariable, String aValue) {
         if (variables.containsKey(aVariable)) {
-            Integer newNo = Integer.valueOf(2);
+            int newNo = 2;
             Integer no = duplicate.get(aVariable);
             if (no != null) {
-                newNo = Integer.valueOf(no.intValue() + 1);
+                newNo = no + 1;
             }
             return "${" + resolveDuplicate(aVariable, newNo, aValue) + "}";
         }
