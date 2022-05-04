@@ -26,6 +26,7 @@ public class StepPresenter {
             , "SetElementSelected"
             , "SetElementNotSelected"
             , "ClearSelections"
+            , "SelectElementValue"
             , "SendKeysToElement"
             , "SendKeysToPathElement"
             , "SubmitElement"
