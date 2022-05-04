@@ -76,7 +76,7 @@ public class SebuilderTest {
 
         private void assertStep(List<Step> results, int i, StepType stepType, Locator.Type locatorName, String locatorValue, boolean isSkip, boolean isNageted) {
             assertEquals(results.get(i).getType(), stepType);
-            assertSame(results.get(i).getLocator("locator").type, locatorName);
+            assertEquals(results.get(i).getLocator("locator").type, locatorName.toString());
             assertEquals(results.get(i).getLocator("locator").value, locatorValue);
             assertEquals(results.get(i).isSkip(new InputData()), isSkip);
             assertEquals(results.get(i).isNegated(), isNageted);
