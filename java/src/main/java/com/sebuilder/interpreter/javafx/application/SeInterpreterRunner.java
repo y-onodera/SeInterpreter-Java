@@ -126,7 +126,7 @@ public class SeInterpreterRunner {
 
     private void setUp() {
         if (this.repl == null) {
-            String[] args = new String[]{CommandLineArgument.DRIVER.getArgument(Context.getBrowser())};
+            String[] args = new String[]{CommandLineArgument.DRIVER.createArgument(Context.getBrowser())};
             this.repl = new SeInterpreterREPL(args, log);
             this.repl.setUpREPL();
         }

@@ -31,7 +31,7 @@ public enum CommandLineArgument {
         return this.key;
     }
 
-    public String getArgument(String aValue) {
+    public String createArgument(String aValue) {
         return this.key + "=" + aValue;
     }
 }

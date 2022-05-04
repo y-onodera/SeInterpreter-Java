@@ -311,7 +311,7 @@ public class Sebuilder extends AbstractJsonScriptParser {
                     pointcut = pointcut.and(typeList);
                 } else if (pointcutJSON.get(key) instanceof JSONObject) {
                     JSONObject type = pointcutJSON.getJSONObject(key);
-                    pointcut = pointcut.and(new StepTypeFilter(type.getString("value"), type.getString("strategy")));
+                    pointcut = pointcut.and(new StepTypeFilter(type.getString("value"), type.getString("method")));
                 } else {
                     pointcut = pointcut.and(new StepTypeFilter(pointcutJSON.getString(key)));
                 }
@@ -331,8 +331,8 @@ public class Sebuilder extends AbstractJsonScriptParser {
                     pointcut = pointcut.and(typeList);
                 } else {
                     Locator locator = new Locator(locatorJSON.getString("type"), locatorJSON.getString("value"));
-                    if (locatorJSON.has("strategy")) {
-                        pointcut = pointcut.and(new LocatorFilter(key, locator, locatorJSON.getString("strategy")));
+                    if (locatorJSON.has("method")) {
+                        pointcut = pointcut.and(new LocatorFilter(key, locator, locatorJSON.getString("method")));
                     } else {
                         pointcut = pointcut.and(new LocatorFilter(key, locator));
                     }
@@ -347,7 +347,7 @@ public class Sebuilder extends AbstractJsonScriptParser {
                     pointcut = pointcut.and(typeList);
                 } else if (pointcutJSON.get(key) instanceof JSONObject) {
                     JSONObject type = pointcutJSON.getJSONObject(key);
-                    pointcut = pointcut.and(new StringParamFilter(key, type.getString("value"), type.getString("strategy")));
+                    pointcut = pointcut.and(new StringParamFilter(key, type.getString("value"), type.getString(Pointcut.METHOD_KEY)));
                 } else {
                     pointcut = pointcut.and(new StringParamFilter(key, pointcutJSON.getString(key)));
                 }

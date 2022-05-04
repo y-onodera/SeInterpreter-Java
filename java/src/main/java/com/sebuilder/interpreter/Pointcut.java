@@ -1,13 +1,12 @@
 package com.sebuilder.interpreter;
 
-import com.google.common.collect.Maps;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
 
 public interface Pointcut {
-    Map<String, BiFunction<String, String, Boolean>> STRATEGIES = new HashMap<>() {
+    String METHOD_KEY = "method";
+    Map<String, BiFunction<String, String, Boolean>> METHODS = new HashMap<>() {
         {
             put("equal", String::equals);
             put("startsWith", String::startsWith);
