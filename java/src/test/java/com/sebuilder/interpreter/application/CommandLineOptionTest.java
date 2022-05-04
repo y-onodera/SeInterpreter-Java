@@ -1,10 +1,12 @@
 package com.sebuilder.interpreter.application;
 
 import com.sebuilder.interpreter.Context;
+import com.sebuilder.interpreter.report.ReportFormat;
 import org.junit.Test;
 
 import java.io.File;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
@@ -17,24 +19,25 @@ public class CommandLineOptionTest {
     @Test
     public void parse() throws Exception {
         target.parse(new String[]{
-                CommandLineArgument.IMPLICITLY_WAIT.getArgument("1000"),
-                CommandLineArgument.PAGE_LOAD_TIMEOUT.getArgument("5000"),
-                CommandLineArgument.DRIVER.getArgument("Edge"),
-                CommandLineArgument.DRIVER_PATH.getArgument("C:/driver/chromedriver.exe"),
+                CommandLineArgument.IMPLICITLY_WAIT.createArgument("1000"),
+                CommandLineArgument.PAGE_LOAD_TIMEOUT.createArgument("5000"),
+                CommandLineArgument.DRIVER.createArgument("Edge"),
+                CommandLineArgument.DRIVER_PATH.createArgument("C:/driver/chromedriver.exe"),
                 CommandLineArgument.DRIVER_CONFIG_PREFIX.key() + "experimental=extension",
                 CommandLineArgument.DRIVER_CONFIG_PREFIX.key() + "binary=C:/binary/chrome.exe",
-                CommandLineArgument.DATASOURCE_ENCODING.getArgument("ascii"),
-                CommandLineArgument.DATASOURCE_DIRECTORY.getArgument("datasource"),
-                CommandLineArgument.SCREENSHOT_OUTPUT.getArgument("saveImage"),
-                CommandLineArgument.TEMPLATE_OUTPUT.getArgument("reverse"),
-                CommandLineArgument.RESULT_OUTPUT.getArgument("report"),
-                CommandLineArgument.JUNIT_REPORT_PREFIX.getArgument("timestamp"),
-                CommandLineArgument.DOWNLOAD_OUTPUT.getArgument("file"),
-                CommandLineArgument.ASPECT.getArgument("test.json"),
-                CommandLineArgument.ENVIRONMENT_PROPERTIES.getArgument("some_environment.properties"),
+                CommandLineArgument.DATASOURCE_ENCODING.createArgument("ascii"),
+                CommandLineArgument.DATASOURCE_DIRECTORY.createArgument("datasource"),
+                CommandLineArgument.SCREENSHOT_OUTPUT.createArgument("saveImage"),
+                CommandLineArgument.TEMPLATE_OUTPUT.createArgument("reverse"),
+                CommandLineArgument.RESULT_OUTPUT.createArgument("report"),
+                CommandLineArgument.JUNIT_REPORT_PREFIX.createArgument("timestamp"),
+                CommandLineArgument.DOWNLOAD_OUTPUT.createArgument("file"),
+                CommandLineArgument.ASPECT.createArgument("test.json"),
+                CommandLineArgument.ENVIRONMENT_PROPERTIES.createArgument("some_environment.properties"),
                 CommandLineArgument.ENVIRONMENT_PROPERTIES_PREFIX.key() + "locale=dn",
-                CommandLineArgument.LOCALE.getArgument("ja"),
-                CommandLineArgument.LOCALE_CONF.getArgument("locale_text.properties"),
+                CommandLineArgument.LOCALE.createArgument("ja"),
+                CommandLineArgument.LOCALE_CONF.createArgument("locale_text.properties"),
+                CommandLineArgument.REPORT_FORMAT.createArgument("ExtentReports"),
                 "test.script", "test2.script"
         });
         assertEquals(Long.valueOf(1000), target.getImplicitlyWait());
@@ -55,6 +58,7 @@ public class CommandLineOptionTest {
         assertEquals("dn", target.getEnvVar("locale"));
         assertEquals(Locale.JAPANESE, target.getLocale());
         assertEquals(new File("locale_text.properties"), target.getLocaleConf());
+        assertEquals(ReportFormat.EXTENT_REPORTS, target.getReportFormat());
         assertEquals(Set.of("test.script", "test2.script"), target.getScripts());
     }
 
@@ -62,7 +66,7 @@ public class CommandLineOptionTest {
     public void parse_fromTextFile() throws Exception {
 
         target.parse(new String[]{
-                "@" + this.getClass().getResource("testparam.text").getFile()
+                "@" + Objects.requireNonNull(this.getClass().getResource("testparam.text")).getFile()
         });
         assertEquals(Long.valueOf(1000), target.getImplicitlyWait());
         assertEquals(Long.valueOf(5000), target.getPageLoadTimeout());
@@ -82,6 +86,7 @@ public class CommandLineOptionTest {
         assertEquals("dn", target.getEnvVar("locale"));
         assertEquals(Locale.JAPANESE, target.getLocale());
         assertEquals(new File("locale_text.properties"), target.getLocaleConf());
+        assertEquals(ReportFormat.EXTENT_REPORTS, target.getReportFormat());
         assertEquals(Set.of("test.script", "test2.script"), target.getScripts());
     }
 
@@ -89,25 +94,26 @@ public class CommandLineOptionTest {
     public void parse_overrideTextFile() throws Exception {
 
         target.parse(new String[]{
-                "@" + this.getClass().getResource("testparam.text").getFile(),
-                CommandLineArgument.IMPLICITLY_WAIT.getArgument("1002"),
-                CommandLineArgument.PAGE_LOAD_TIMEOUT.getArgument("5002"),
-                CommandLineArgument.DRIVER.getArgument("Chrome2"),
-                CommandLineArgument.DRIVER_PATH.getArgument("C:/driver/chromedriver2.exe"),
+                "@" + Objects.requireNonNull(this.getClass().getResource("testparam.text")).getFile(),
+                CommandLineArgument.IMPLICITLY_WAIT.createArgument("1002"),
+                CommandLineArgument.PAGE_LOAD_TIMEOUT.createArgument("5002"),
+                CommandLineArgument.DRIVER.createArgument("Chrome2"),
+                CommandLineArgument.DRIVER_PATH.createArgument("C:/driver/chromedriver2.exe"),
                 CommandLineArgument.DRIVER_CONFIG_PREFIX.key() + "experimental=extension2",
                 CommandLineArgument.DRIVER_CONFIG_PREFIX.key() + "binary=C:/binary/chrome2.exe",
-                CommandLineArgument.DATASOURCE_ENCODING.getArgument("MS932"),
-                CommandLineArgument.DATASOURCE_DIRECTORY.getArgument("input2"),
-                CommandLineArgument.SCREENSHOT_OUTPUT.getArgument("saveImage2"),
-                CommandLineArgument.TEMPLATE_OUTPUT.getArgument("reverse2"),
-                CommandLineArgument.RESULT_OUTPUT.getArgument("report2"),
-                CommandLineArgument.JUNIT_REPORT_PREFIX.getArgument("resultDir"),
-                CommandLineArgument.DOWNLOAD_OUTPUT.getArgument("file2"),
-                CommandLineArgument.ASPECT.getArgument("test2.json"),
-                CommandLineArgument.ENVIRONMENT_PROPERTIES.getArgument("some_environment2.properties"),
+                CommandLineArgument.DATASOURCE_ENCODING.createArgument("MS932"),
+                CommandLineArgument.DATASOURCE_DIRECTORY.createArgument("input2"),
+                CommandLineArgument.SCREENSHOT_OUTPUT.createArgument("saveImage2"),
+                CommandLineArgument.TEMPLATE_OUTPUT.createArgument("reverse2"),
+                CommandLineArgument.RESULT_OUTPUT.createArgument("report2"),
+                CommandLineArgument.JUNIT_REPORT_PREFIX.createArgument("resultDir"),
+                CommandLineArgument.DOWNLOAD_OUTPUT.createArgument("file2"),
+                CommandLineArgument.ASPECT.createArgument("test2.json"),
+                CommandLineArgument.ENVIRONMENT_PROPERTIES.createArgument("some_environment2.properties"),
                 CommandLineArgument.ENVIRONMENT_PROPERTIES_PREFIX.key() + "locale=us",
-                CommandLineArgument.LOCALE.getArgument("ja-JP"),
-                CommandLineArgument.LOCALE_CONF.getArgument("locale_text2.properties"),
+                CommandLineArgument.LOCALE.createArgument("ja-JP"),
+                CommandLineArgument.LOCALE_CONF.createArgument("locale_text2.properties"),
+                CommandLineArgument.REPORT_FORMAT.createArgument("Junit"),
                 "test3.script", "test4.script"
         });
         assertEquals(Long.valueOf(1002), target.getImplicitlyWait());
@@ -128,6 +134,7 @@ public class CommandLineOptionTest {
         assertEquals("us", target.getEnvVar("locale"));
         assertEquals(Locale.JAPAN, target.getLocale());
         assertEquals(new File("locale_text2.properties"), target.getLocaleConf());
+        assertEquals(ReportFormat.JUNIT, target.getReportFormat());
         assertEquals(Set.of("test.script", "test2.script", "test3.script", "test4.script"), target.getScripts());
     }
 
@@ -150,6 +157,7 @@ public class CommandLineOptionTest {
         assertEquals(0, target.getEnvVar().size());
         assertNull(target.getLocale());
         assertNull(target.getLocaleConf());
+        assertEquals(ReportFormat.JUNIT, target.getReportFormat());
         assertEquals(0, target.getScripts().size());
     }
 
