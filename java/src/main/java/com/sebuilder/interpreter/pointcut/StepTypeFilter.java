@@ -21,7 +21,7 @@ public class StepTypeFilter implements Pointcut {
 
     @Override
     public boolean test(Step step, InputData vars) {
-        return method.apply(targetType, step.getType().getStepTypeName());
+        return method.apply(step.getType().getStepTypeName(), this.targetType);
     }
 
 }
