@@ -14,11 +14,11 @@
       "before": {
         "steps": [
           {
-            "file": "_step${target.currentStepIndex}_before_input.png",
+            "file": "input.png",
             "scroll": "false",
             "locator": {
-              "type": "${target.locator.type}",
-              "value": "${target.locator.value}"
+              "type": "${_target.locator.type}",
+              "value": "${_target.locator.value}"
             },
             "type": "SaveScreenshot"
           }
@@ -27,11 +27,11 @@
       "after": {
         "steps": [
           {
-            "file": "_step${target.currentStepIndex}_after_input.png",
+            "file": "input.png",
             "scroll": "false",
             "locator": {
-              "type": "${target.locator.type}",
-              "value": "${target.locator.value}"
+              "type": "${_target.locator.type}",
+              "value": "${_target.locator.value}"
             },
             "type": "SaveScreenshot"
           }
@@ -56,7 +56,7 @@
       "before": {
         "steps": [
           {
-            "file": "before_pageMove.png",
+            "file": "page.png",
             "scroll": "true",
             "verify": "${env.verifyImage}",
             "type": "SaveScreenshot"
@@ -66,7 +66,7 @@
       "after": {
         "steps": [
           {
-            "file": "after_pageMove.png",
+            "file": "page.png",
             "scroll": "true",
             "verify": "${env.verifyImage}",
             "type": "SaveScreenshot"

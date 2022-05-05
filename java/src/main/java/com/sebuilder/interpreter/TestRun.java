@@ -104,6 +104,10 @@ public class TestRun implements WebDriverWrapper {
         return this.testRunStatus.stepIndex();
     }
 
+    public String formatStepIndex() {
+        return String.format("%0" + String.valueOf(this.testCase.steps().size()).length() + "d", currentStepIndex());
+    }
+
     public Step currentStep() {
         return this.testCase.steps().get(currentStepIndex());
     }
@@ -142,7 +146,7 @@ public class TestRun implements WebDriverWrapper {
 
     public Locator locator(@Nonnull String key) {
         Locator l = this.currentStep().getLocator(key);
-        return new Locator(this.bindRuntimeVariables(l.type()),this.bindRuntimeVariables(l.value()));
+        return new Locator(this.bindRuntimeVariables(l.type()), this.bindRuntimeVariables(l.value()));
     }
 
     public boolean hasImageArea(String key) {

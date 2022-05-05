@@ -63,8 +63,8 @@ public record Interceptor(Pointcut pointcut,
         Map<String, String> joinStepInfo = Maps.newHashMap();
         testRun.currentStep()
                 .toMap()
-                .forEach((key, value) -> joinStepInfo.put("target." + key, value));
-        return testRun.vars().add(joinStepInfo).add("target.currentStepIndex", String.valueOf(testRun.currentStepIndex()));
+                .forEach((key, value) -> joinStepInfo.put("_target." + key, value));
+        return testRun.vars().add(joinStepInfo).add("_target.currentStepIndex", String.valueOf(testRun.currentStepIndex()));
     }
 
     TestRunListener createAdviseListener(TestRun testRun) {
@@ -72,7 +72,7 @@ public record Interceptor(Pointcut pointcut,
     }
 
     String getInterceptCaseName(TestRun testRun) {
-        return testRun.getTestRunName() + "_" + testRun.currentStep().getType().getStepTypeName() + "_aspect_";
+        return testRun.getTestRunName() + "_step" + testRun.formatStepIndex() + "_" + testRun.currentStep().getType().getStepTypeName() + "_";
     }
 
 
