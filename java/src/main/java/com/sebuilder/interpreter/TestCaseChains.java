@@ -17,6 +17,10 @@ import java.util.stream.Stream;
 
 public record TestCaseChains(ArrayList<TestCase> testCases, boolean takeOverLastRun) implements Iterable<TestCase> {
 
+    public TestCaseChains() {
+        this(Lists.newArrayList(), false);
+    }
+
     @Override
     @Nonnull
     public Iterator<TestCase> iterator() {
