@@ -10,7 +10,7 @@ public class StringParamFilter implements Pointcut {
 
     private final String key;
     private final String value;
-    private final BiFunction<String, String, Boolean> method;
+    private final String method;
 
 
     public StringParamFilter(String key, String value) {
@@ -20,13 +20,21 @@ public class StringParamFilter implements Pointcut {
     public StringParamFilter(String key, String value, String method) {
         this.key = key;
         this.value = value;
-        this.method = METHODS.get(method);
+        this.method = method;
     }
 
     @Override
     public boolean test(Step step, InputData vars) {
         return step.containsParam(this.key)
-                && this.method.apply(vars.bind(step.getParam(this.key)), this.value);
+                && METHODS.get(this.method).apply(vars.bind(step.getParam(this.key)), this.value);
     }
 
+    @Override
+    public String toString() {
+        return "StringParamFilter{" +
+                "key='" + key + '\'' +
+                ", value='" + value + '\'' +
+                ", method=" + method +
+                '}';
+    }
 }

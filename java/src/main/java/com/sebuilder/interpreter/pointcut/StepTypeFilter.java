@@ -8,7 +8,7 @@ import java.util.function.BiFunction;
 
 public class StepTypeFilter implements Pointcut {
     private final String targetType;
-    private final BiFunction<String, String, Boolean> method;
+    private final String method;
 
     public StepTypeFilter(String targetType) {
         this(targetType, "equal");
@@ -16,12 +16,19 @@ public class StepTypeFilter implements Pointcut {
 
     public StepTypeFilter(String value, String method) {
         this.targetType = value;
-        this.method = METHODS.get(method);
+        this.method = method;
     }
 
     @Override
     public boolean test(Step step, InputData vars) {
-        return method.apply(step.getType().getStepTypeName(), this.targetType);
+        return METHODS.get(this.method).apply(step.getType().getStepTypeName(), this.targetType);
     }
 
+    @Override
+    public String toString() {
+        return "StepTypeFilter{" +
+                "targetType='" + targetType + '\'' +
+                ", method=" + method +
+                '}';
+    }
 }

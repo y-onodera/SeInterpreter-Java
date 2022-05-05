@@ -16,4 +16,11 @@ public class NegatedFilter implements Pointcut {
     public boolean test(Step step, InputData vars) {
         return target == step.isNegated();
     }
+
+    @Override
+    public String toString() {
+        return "NegatedFilter{" +
+                "target=" + target +
+                '}';
+    }
 }

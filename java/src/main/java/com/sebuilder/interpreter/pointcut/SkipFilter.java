@@ -18,4 +18,11 @@ public class SkipFilter implements Pointcut {
     public boolean test(Step step, InputData vars) {
         return step.isSkip(vars) == target;
     }
+
+    @Override
+    public String toString() {
+        return "SkipFilter{" +
+                "target=" + target +
+                '}';
+    }
 }
