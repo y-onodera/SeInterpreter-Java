@@ -445,8 +445,8 @@ public class StepPresenter {
         select.getItems().add("link text");
         Locator current = step.getLocator(locator);
         String type = "";
-        if (!Strings.isNullOrEmpty(current.value)) {
-            type = current.type.toString();
+        if (!Strings.isNullOrEmpty(current.value())) {
+            type = current.type();
         }
         if (this.isDefaultLocator(locator)) {
             this.locatorTypeSelect = select;
@@ -462,7 +462,7 @@ public class StepPresenter {
 
     private TextField resetLocatorText(Step step, String locator) {
         TextField text = new TextField();
-        String value = step.getLocator(locator).value;
+        String value = step.getLocator(locator).value();
         if (this.isDefaultLocator(locator)) {
             this.locatorText = text;
             if (!value.equals("")) {

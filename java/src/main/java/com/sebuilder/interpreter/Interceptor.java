@@ -1,22 +1,15 @@
 package com.sebuilder.interpreter;
 
-import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
-public class Interceptor {
-    private final Pointcut pointcut;
-
-    private final ArrayList<Step> beforeStep;
-
-    private final ArrayList<Step> afterStep;
-
-    private final ArrayList<Step> failureStep;
-
+public record Interceptor(Pointcut pointcut,
+                          ArrayList<Step> beforeStep,
+                          ArrayList<Step> afterStep,
+                          ArrayList<Step> failureStep) {
     public Interceptor(Pointcut pointcut, ArrayList<Step> beforeStep, ArrayList<Step> afterStep, ArrayList<Step> failureStep) {
         this.pointcut = pointcut;
         this.beforeStep = Lists.newArrayList(beforeStep);
@@ -43,7 +36,7 @@ public class Interceptor {
         return this.invokeAdvise(testRun, this.failureStep, "failure");
     }
 
-    protected boolean invokeAdvise(TestRun testRun, ArrayList<Step> steps, String testRunName) {
+    boolean invokeAdvise(TestRun testRun, ArrayList<Step> steps, String testRunName) {
         if (steps.size() == 0) {
             return true;
         }
@@ -52,7 +45,7 @@ public class Interceptor {
         return interceptRun.finish();
     }
 
-    protected TestCase createAdviseCase(ArrayList<Step> steps, String testRunName) {
+    TestCase createAdviseCase(ArrayList<Step> steps, String testRunName) {
         return new TestCaseBuilder()
                 .setName(testRunName)
                 .addSteps(steps)
@@ -60,44 +53,28 @@ public class Interceptor {
                 .build();
     }
 
-    protected TestRun createInterceptorRun(TestRun testRun, TestCase invokeCase) {
+    TestRun createInterceptorRun(TestRun testRun, TestCase invokeCase) {
         return new TestRunBuilder(invokeCase.map(it -> it.isPreventContextAspect(true)))
                 .addTestRunNamePrefix(this.getInterceptCaseName(testRun))
                 .createTestRun(testRun.log(), testRun.driver(), extendsStepVar(testRun), this.createAdviseListener(testRun));
     }
 
-    protected InputData extendsStepVar(TestRun testRun) {
+    InputData extendsStepVar(TestRun testRun) {
         Map<String, String> joinStepInfo = Maps.newHashMap();
         testRun.currentStep()
                 .toMap()
-                .entrySet()
-                .forEach(it -> joinStepInfo.put("target." + it.getKey(), it.getValue()));
+                .forEach((key, value) -> joinStepInfo.put("target." + key, value));
         return testRun.vars().add(joinStepInfo).add("target.currentStepIndex", String.valueOf(testRun.currentStepIndex()));
     }
 
-    protected TestRunListener createAdviseListener(TestRun testRun) {
+    TestRunListener createAdviseListener(TestRun testRun) {
         return testRun.getListener().copy();
     }
 
-    protected String getInterceptCaseName(TestRun testRun) {
+    String getInterceptCaseName(TestRun testRun) {
         return testRun.getTestRunName() + "_" + testRun.currentStep().getType().getStepTypeName() + "_aspect_";
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Interceptor that = (Interceptor) o;
-        return Objects.equal(this.pointcut, that.pointcut) &&
-                Objects.equal(this.beforeStep, that.beforeStep) &&
-                Objects.equal(this.afterStep, that.afterStep) &&
-                Objects.equal(this.failureStep, that.failureStep);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(this.pointcut, this.beforeStep, this.afterStep, this.failureStep);
-    }
 
     public static class Builder {
         private final Aspect.Builder aspectBuilder;

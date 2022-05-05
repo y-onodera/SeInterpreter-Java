@@ -4,25 +4,11 @@ import com.sebuilder.interpreter.InputData;
 import com.sebuilder.interpreter.Pointcut;
 import com.sebuilder.interpreter.Step;
 
-import java.util.function.Predicate;
-
-public class SkipFilter implements Pointcut {
-
-    private final boolean target;
-
-    public SkipFilter(boolean target) {
-        this.target = target;
-    }
+public record SkipFilter(boolean target) implements Pointcut {
 
     @Override
     public boolean test(Step step, InputData vars) {
         return step.isSkip(vars) == target;
     }
 
-    @Override
-    public String toString() {
-        return "SkipFilter{" +
-                "target=" + target +
-                '}';
-    }
 }

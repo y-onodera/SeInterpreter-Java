@@ -81,8 +81,8 @@ public class SebuilderToStringConverter implements TestCaseConverter{
 
     protected JSONObject toJSON(Locator locator) throws JSONException {
         JSONObject o = new JSONObject();
-        o.put("type", locator.type.toString());
-        o.put("value", locator.value);
+        o.put("type", locator.type());
+        o.put("value", locator.value());
         return o;
     }
 

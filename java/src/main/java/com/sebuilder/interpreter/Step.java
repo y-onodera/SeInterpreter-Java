@@ -153,7 +153,7 @@ public class Step {
         }
         sb.append(type.getStepTypeName());
         if (type instanceof GetterUseStep) {
-            sb.append(" negated=" + this.negated);
+            sb.append(" negated=").append(this.negated);
         }
         for (Map.Entry<String, String> pe : this.stringParams.entrySet()) {
             sb.append(" ").append(pe.getKey()).append("=").append(pe.getValue());
@@ -171,8 +171,8 @@ public class Step {
         Map<String, String> result = Maps.newHashMap();
         result.putAll(this.stringParams);
         for (Map.Entry<String, Locator> le : this.locatorParams.entrySet()) {
-            result.put(le.getKey() + ".type", le.getValue().type.toString());
-            result.put(le.getKey() + ".value", le.getValue().value);
+            result.put(le.getKey() + ".type", le.getValue().type());
+            result.put(le.getKey() + ".value", le.getValue().value());
         }
         for (Map.Entry<String, ImageArea> pe : this.imageAreaParams.entrySet()) {
             result.put(pe.getKey(), pe.getValue().getValue());

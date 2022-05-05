@@ -1,7 +1,6 @@
 package com.sebuilder.interpreter;
 
 import com.github.romankh3.image.comparison.model.Rectangle;
-import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 
 import java.math.BigDecimal;
@@ -9,19 +8,9 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ImageArea {
+public record ImageArea(String value) {
 
-    private static Pattern P = Pattern.compile("(?=\\[)\\[((\\d+\\.?\\d*,){3}(\\d+\\.?\\d*))\\]((?=\\[)|$)");
-
-    String value;
-
-    public ImageArea(String value) {
-        this.value = value;
-    }
-
-    public ImageArea(ImageArea imageArea) {
-        this.value = imageArea.value;
-    }
+    private static final Pattern P = Pattern.compile("(?=\\[)\\[((\\d+\\.?\\d*,){3}(\\d+\\.?\\d*))\\]((?=\\[)|$)");
 
     public String getValue() {
         return this.value;
@@ -41,23 +30,4 @@ public class ImageArea {
         return result;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ImageArea)) return false;
-        ImageArea imageArea = (ImageArea) o;
-        return Objects.equal(value, imageArea.value);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(value);
-    }
-
-    @Override
-    public String toString() {
-        return "ImageArea{" +
-                "value='" + value + '\'' +
-                '}';
-    }
 }

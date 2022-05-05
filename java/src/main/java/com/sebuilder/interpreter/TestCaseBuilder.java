@@ -1,7 +1,5 @@
 package com.sebuilder.interpreter;
 
-import com.google.common.base.Predicates;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Map;
@@ -113,7 +111,7 @@ public class TestCaseBuilder {
     }
 
     public TestCaseChains getChains() {
-        return this.chains.map(this.chainConverter, Predicates.alwaysTrue());
+        return this.chains.map(this.chainConverter, testCase -> true);
     }
 
     public boolean isNestedChain() {

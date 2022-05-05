@@ -141,10 +141,8 @@ public class TestRun implements WebDriverWrapper {
     }
 
     public Locator locator(@Nonnull String key) {
-        Locator l = new Locator(this.currentStep().getLocator(key));
-        l.type = this.bindRuntimeVariables(l.type);
-        l.value = this.bindRuntimeVariables(l.value);
-        return l;
+        Locator l = this.currentStep().getLocator(key);
+        return new Locator(this.bindRuntimeVariables(l.type()),this.bindRuntimeVariables(l.value()));
     }
 
     public boolean hasImageArea(String key) {
@@ -152,9 +150,8 @@ public class TestRun implements WebDriverWrapper {
     }
 
     public ImageArea getImageArea(String key) {
-        ImageArea i = new ImageArea(this.currentStep().getImageArea(key));
-        i.value = this.bindRuntimeVariables(i.value);
-        return i;
+        ImageArea i = this.currentStep().getImageArea(key);
+        return new ImageArea(this.bindRuntimeVariables(i.getValue()));
     }
 
     public boolean isStopped() {
@@ -240,11 +237,9 @@ public class TestRun implements WebDriverWrapper {
     public boolean processTestFailure() {
         this.getListener().addFailure(currentStepToString() + " failed.");
         this.getAdvice().invokeFailure(this);
-        // If a verify failed, we just note this but continue.
         if (this.currentStep().getType().isContinueAtFailure()) {
             return false;
         }
-        // In all other cases, we throw an exception to stop the finish.
         throw new AssertionError(currentStepToString() + " failed.");
     }
 

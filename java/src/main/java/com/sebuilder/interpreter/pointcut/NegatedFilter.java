@@ -4,23 +4,11 @@ import com.sebuilder.interpreter.InputData;
 import com.sebuilder.interpreter.Pointcut;
 import com.sebuilder.interpreter.Step;
 
-public class NegatedFilter implements Pointcut {
-
-    private final boolean target;
-
-    public NegatedFilter(boolean target) {
-        this.target = target;
-    }
+public record NegatedFilter(boolean target) implements Pointcut {
 
     @Override
     public boolean test(Step step, InputData vars) {
-        return target == step.isNegated();
+        return this.target == step.isNegated();
     }
 
-    @Override
-    public String toString() {
-        return "NegatedFilter{" +
-                "target=" + target +
-                '}';
-    }
 }

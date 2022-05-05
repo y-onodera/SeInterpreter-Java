@@ -1,6 +1,11 @@
-package com.sebuilder.interpreter;
+package com.sebuilder.interpreter.script;
 
 import com.google.common.collect.Maps;
+import com.sebuilder.interpreter.DataSource;
+import com.sebuilder.interpreter.DataSourceLoader;
+import com.sebuilder.interpreter.ScriptFile;
+import com.sebuilder.interpreter.TestCase;
+import org.junit.Assert;
 
 import java.io.File;
 import java.util.Map;
@@ -36,7 +41,7 @@ public class TestCaseAssert {
     }
 
     public static void assertEqualsNoRelationFile(TestCase result) {
-        assertEquals(ScriptFile.Type.TEST.getDefaultName(), result.name());
+        Assert.assertEquals(ScriptFile.Type.TEST.getDefaultName(), result.name());
         assertEquals("", result.path());
     }
 

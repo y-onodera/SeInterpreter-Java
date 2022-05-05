@@ -2,11 +2,11 @@ package com.sebuilder.interpreter.script;
 
 import com.google.common.base.Strings;
 import com.sebuilder.interpreter.*;
-import com.sebuilder.interpreter.report.JunitTestRunListener;
 import com.sebuilder.interpreter.datasource.Csv;
 import com.sebuilder.interpreter.datasource.DataSourceFactoryImpl;
 import com.sebuilder.interpreter.datasource.Manual;
 import com.sebuilder.interpreter.datasource.None;
+import com.sebuilder.interpreter.report.JunitTestRunListener;
 import com.sebuilder.interpreter.step.Loop;
 import com.sebuilder.interpreter.step.StepTypeFactoryImpl;
 import com.sebuilder.interpreter.step.getter.ElementAttribute;
@@ -27,9 +27,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
 
 @RunWith(Enclosed.class)
 public class SebuilderTest {
@@ -41,9 +41,9 @@ public class SebuilderTest {
     }
 
     static Logger log = LogManager.getLogger(SebuilderTest.class);
-    private static String baseDir = SebuilderTest.class.getResource(".").getPath();
-    private static Sebuilder target = new Sebuilder();
-    private static SebuilderToStringConverter toStringConverter = new SebuilderToStringConverter();
+    private static final String baseDir = Objects.requireNonNull(SebuilderTest.class.getResource(".")).getPath();
+    private static final Sebuilder target = new Sebuilder();
+    private static final SebuilderToStringConverter toStringConverter = new SebuilderToStringConverter();
 
     private static final DataSourceLoader DATA_SET_NONE = new DataSourceLoader(new None(), Map.of(), new File(baseDir));
     private static final DataSourceLoader DATA_SET_CSV = new DataSourceLoader(new Csv(), Map.of("path", "test.csv"), new File(baseDir));
@@ -76,8 +76,8 @@ public class SebuilderTest {
 
         private void assertStep(List<Step> results, int i, StepType stepType, Locator.Type locatorName, String locatorValue, boolean isSkip, boolean isNageted) {
             assertEquals(results.get(i).getType(), stepType);
-            assertEquals(results.get(i).getLocator("locator").type, locatorName.toString());
-            assertEquals(results.get(i).getLocator("locator").value, locatorValue);
+            assertEquals(results.get(i).getLocator("locator").type(), locatorName.toString());
+            assertEquals(results.get(i).getLocator("locator").value(), locatorValue);
             assertEquals(results.get(i).isSkip(new InputData()), isSkip);
             assertEquals(results.get(i).isNegated(), isNageted);
         }

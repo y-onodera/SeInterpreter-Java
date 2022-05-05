@@ -16,7 +16,6 @@
 
 package com.sebuilder.interpreter;
 
-import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -29,9 +28,7 @@ import java.util.List;
  *
  * @author zarkonnen
  */
-public class Locator {
-    public String type;
-    public String value;
+public record Locator(String type, String value) {
 
     static Locator of(WebDriverWrapper driver, WebElement element) {
         String id = element.getAttribute("id");
@@ -47,14 +44,8 @@ public class Locator {
         return new Locator("xpath", WebElements.toXpath(driver, element));
     }
 
-    public Locator(String type, String value) {
-        this.type = type;
-        this.value = value;
-    }
-
     public Locator(Locator l) {
-        this.type = l.type;
-        this.value = l.value;
+        this(l.type, l.value);
     }
 
     public Locator copy() {
@@ -84,20 +75,6 @@ public class Locator {
 
     public String toPrettyString() {
         return this.type + ":" + this.value;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Locator locator = (Locator) o;
-        return type == locator.type &&
-                Objects.equal(value, locator.value);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(type, value);
     }
 
     public enum Type {

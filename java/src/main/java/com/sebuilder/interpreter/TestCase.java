@@ -308,8 +308,7 @@ public class TestCase {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof TestCase)) return false;
-        TestCase testCase = (TestCase) o;
+        if (!(o instanceof TestCase testCase)) return false;
         return shareState == testCase.shareState
                 && nestedChain == testCase.nestedChain
                 && breakNestedChain == testCase.breakNestedChain
