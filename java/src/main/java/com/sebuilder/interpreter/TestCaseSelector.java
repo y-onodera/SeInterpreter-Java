@@ -1,18 +1,18 @@
 package com.sebuilder.interpreter;
 
-public class TestCaseSelector {
-    private final String headName;
-    private final String testCaseName;
-    private final int chainIndex;
+public record TestCaseSelector(String headName,
+                               String testCaseName,
+                               int chainIndex
+) {
 
     public static TestCaseSelector.Builder builder() {
         return new Builder();
     }
 
     private TestCaseSelector(Builder builder) {
-        this.headName = builder.getHeadName();
-        this.testCaseName = builder.getTestCaseName();
-        this.chainIndex = builder.getChainIndex();
+        this(builder.getHeadName()
+                , builder.getTestCaseName()
+                , builder.getChainIndex());
     }
 
     public TestCase findTestCase(TestCase testCase) {
@@ -31,18 +31,6 @@ public class TestCaseSelector {
                 .filter(it -> it.getChains().size() > 0 && it.name().equals(headName))
                 .findFirst()
                 .orElse(null);
-    }
-
-    public String getHeadName() {
-        return headName;
-    }
-
-    public String getTestCaseName() {
-        return testCaseName;
-    }
-
-    public int getChainIndex() {
-        return chainIndex;
     }
 
     public static class Builder {

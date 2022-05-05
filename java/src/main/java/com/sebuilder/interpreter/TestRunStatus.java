@@ -1,17 +1,6 @@
 package com.sebuilder.interpreter;
 
-public class TestRunStatus {
-    private final int stepIndex;
-    private final boolean chainRun;
-    private final boolean finished;
-    private final boolean stopped;
-
-    private TestRunStatus(int stepIndex, boolean chainRun, boolean finished, boolean stop) {
-        this.stepIndex = stepIndex;
-        this.chainRun = chainRun;
-        this.finished = finished;
-        this.stopped = stop;
-    }
+public record TestRunStatus(int stepIndex, boolean chainRun, boolean finished, boolean stopped) {
 
     public static TestRunStatus of(TestCase testCase) {
         return new TestRunStatus(-1, testCase.hasChain(), false, false);

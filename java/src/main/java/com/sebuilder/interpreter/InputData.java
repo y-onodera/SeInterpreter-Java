@@ -10,14 +10,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class InputData {
+public record InputData(LinkedHashMap<String, String> row, boolean lastRow) {
 
     public static final String ROW_NUMBER = "_rowNumber";
     private static final LinkedHashMap<String, String> EMPTY = Maps.newLinkedHashMap();
-
-    private final LinkedHashMap<String, String> row;
-
-    private final boolean lastRow;
 
     public InputData() {
         this(EMPTY, true);
@@ -25,11 +21,6 @@ public class InputData {
 
     public InputData(LinkedHashMap<String, String> row) {
         this(row, false);
-    }
-
-    public InputData(LinkedHashMap<String, String> row, boolean lastRow) {
-        this.row = Maps.newLinkedHashMap(row);
-        this.lastRow = lastRow;
     }
 
     public Map<String, String> input() {
@@ -121,8 +112,8 @@ public class InputData {
         return this.lastRow;
     }
 
-    protected InputData copy() {
-        return new InputData(this.row, this.lastRow);
+    public InputData copy() {
+        return new InputData(new LinkedHashMap<>(this.row), this.lastRow);
     }
 
     private String replaceKeys(String s) {
@@ -143,28 +134,6 @@ public class InputData {
         return result.replaceAll("\\$\\{(.+)}", "$1");
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        InputData inputData = (InputData) o;
-        return isLastRow() == inputData.isLastRow() &&
-                Objects.equal(row, inputData.row);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(row, isLastRow());
-    }
-
-    @Override
-    public String toString() {
-        return "TestData{" +
-                "row=" + row +
-                ", lastRow=" + lastRow +
-                '}';
-    }
-
     public static class Builder {
         private final LinkedHashMap<String, String> row;
 
@@ -176,7 +145,7 @@ public class InputData {
         }
 
         public InputData build() {
-            return new InputData(this.row, this.lastRow);
+            return new InputData(new LinkedHashMap<>(this.row), this.lastRow);
         }
 
         public Builder add(InputData shareInput) {

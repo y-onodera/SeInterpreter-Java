@@ -1,17 +1,12 @@
 package com.sebuilder.interpreter;
 
-import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.Optional;
 
-public class ScriptFile {
-    private final String name;
-    private final String path;
-    private final File relativePath;
-    private final Type type;
+public record ScriptFile(String name, String path, File relativePath, Type type) {
 
     public static ScriptFile of(File file, Type type) {
         if (file != null) {
@@ -39,13 +34,6 @@ public class ScriptFile {
         this(file.getName(), file.getAbsolutePath(), file.getParentFile().getAbsoluteFile(), type);
     }
 
-    public ScriptFile(String name, String path, File relativePath, Type type) {
-        this.name = name;
-        this.path = path;
-        this.relativePath = relativePath;
-        this.type = type;
-    }
-
     public String name() {
         return this.name;
     }
@@ -63,7 +51,7 @@ public class ScriptFile {
     }
 
     public File toFile() {
-        if(Strings.isNullOrEmpty(this.path)){
+        if (Strings.isNullOrEmpty(this.path)) {
             return null;
         }
         return new File(this.path);
@@ -80,32 +68,6 @@ public class ScriptFile {
 
     public ScriptFile changeName(String name) {
         return new ScriptFile(name, this.path, this.relativePath, this.type);
-    }
-
-    @Override
-    public String toString() {
-        return "ScriptFile{" +
-                "name='" + name + '\'' +
-                ", path='" + path + '\'' +
-                ", relativePath=" + relativePath +
-                ", type=" + type +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ScriptFile that = (ScriptFile) o;
-        return Objects.equal(name, that.name) &&
-                Objects.equal(path, that.path) &&
-                Objects.equal(relativePath, that.relativePath) &&
-                type == that.type;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(name, path, relativePath, type);
     }
 
     public enum Type {

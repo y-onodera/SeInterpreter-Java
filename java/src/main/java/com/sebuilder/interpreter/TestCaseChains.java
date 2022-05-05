@@ -1,11 +1,11 @@
 package com.sebuilder.interpreter;
 
-import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.tuple.Pair;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
@@ -15,22 +15,10 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class TestCaseChains implements Iterable<TestCase> {
-
-    private final ArrayList<TestCase> testCases;
-
-    private final boolean takeOverLastRun;
-
-    public TestCaseChains() {
-        this(Lists.newArrayList(), false);
-    }
-
-    public TestCaseChains(ArrayList<TestCase> testCases, boolean takeOverLastRun) {
-        this.testCases = testCases;
-        this.takeOverLastRun = takeOverLastRun;
-    }
+public record TestCaseChains(ArrayList<TestCase> testCases, boolean takeOverLastRun) implements Iterable<TestCase> {
 
     @Override
+    @Nonnull
     public Iterator<TestCase> iterator() {
         return this.testCases.iterator();
     }
@@ -127,7 +115,7 @@ public class TestCaseChains implements Iterable<TestCase> {
         return new TestCaseChains(newTestCases, this.takeOverLastRun);
     }
 
-    protected TestCase selectRecursive(String scriptName, TestCaseChains chain) {
+    TestCase selectRecursive(String scriptName, TestCaseChains chain) {
         for (TestCase target : chain) {
             if (target.name().equals(scriptName)) {
                 return target;
@@ -140,22 +128,8 @@ public class TestCaseChains implements Iterable<TestCase> {
         return null;
     }
 
-    protected TestCase renameDuplicateCase(TestCase target, long nextCount) {
+    TestCase renameDuplicateCase(TestCase target, long nextCount) {
         return target.map(builder -> builder.setName(target.fileName() + String.format("(%d)", nextCount)));
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        TestCaseChains testCases1 = (TestCaseChains) o;
-        return isTakeOverLastRun() == testCases1.isTakeOverLastRun() &&
-                Objects.equal(testCases, testCases1.testCases);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(testCases, isTakeOverLastRun());
     }
 
 }

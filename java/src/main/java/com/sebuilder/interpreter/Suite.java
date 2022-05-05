@@ -5,13 +5,7 @@ import com.google.common.base.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class Suite {
-
-    private final TestCase head;
-
-    public Suite(TestCase head) {
-        this.head = head;
-    }
+public record Suite(TestCase head) {
 
     public String name() {
         return this.head().name();
@@ -19,10 +13,6 @@ public class Suite {
 
     public String path() {
         return this.head().path();
-    }
-
-    public TestCase head() {
-        return this.head;
     }
 
     public TestCaseChains getChains() {
@@ -61,19 +51,6 @@ public class Suite {
             return newValue.toSuite();
         }
         return map(builder -> builder.replace(oldCase, newValue));
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Suite suite = (Suite) o;
-        return Objects.equal(head, suite.head);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(head);
     }
 
 }

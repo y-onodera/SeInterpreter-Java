@@ -27,32 +27,32 @@ import java.util.Map;
  *
  * @author jkowalczyk
  */
-public class Step {
+public record Step(
+        String name,
+        StepType type,
+        boolean negated,
+        Map<String, String> stringParams,
+        Map<String, Locator> locatorParams,
+        Map<String, ImageArea> imageAreaParams
+) {
     public static final String KEY_NAME_SKIP = "skip";
-    private boolean negated;
-    private String name;
-    private final StepType type;
-    private final HashMap<String, String> stringParams = new HashMap<>();
-    private final HashMap<String, Locator> locatorParams = new HashMap<>();
-    private final HashMap<String, ImageArea> imageAreaParams = new HashMap<>();
 
     public Step(StepType type) {
-        this.type = type;
+        this("", type, false);
     }
 
     public Step(String name, StepType type, boolean isNegated) {
-        this.name = name;
-        this.type = type;
-        this.negated = isNegated;
+        this(name, type, isNegated, new HashMap<>(), new HashMap<>(), new HashMap<>());
     }
 
     public Step(StepBuilder stepBuilder) {
-        this.name = stepBuilder.getName();
-        this.type = stepBuilder.getStepType();
-        this.negated = stepBuilder.isNegated();
-        this.stringParams.putAll(stepBuilder.getStringParams());
-        this.locatorParams.putAll(stepBuilder.getLocatorParams());
-        this.imageAreaParams.putAll(stepBuilder.getImageAreaParams());
+        this(stepBuilder.getName()
+                , stepBuilder.getStepType()
+                , stepBuilder.isNegated()
+                , new HashMap<>(stepBuilder.getStringParams())
+                , new HashMap<>(stepBuilder.getLocatorParams())
+                , new HashMap<>(stepBuilder.getImageAreaParams())
+        );
     }
 
     public String getName() {
