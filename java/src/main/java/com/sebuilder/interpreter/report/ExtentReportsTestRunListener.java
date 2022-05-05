@@ -153,6 +153,11 @@ public class ExtentReportsTestRunListener extends TestRunListenerImpl {
     }
 
     @Override
+    public void info(String s) {
+        extentTest.info(s);
+    }
+
+    @Override
     public void endTest() {
         super.endTest();
         this.extentTest.pass("success:" + this.testName);
@@ -163,4 +168,5 @@ public class ExtentReportsTestRunListener extends TestRunListenerImpl {
         super.aggregateResult();
         this.reports.flush();
     }
+
 }

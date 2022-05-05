@@ -58,6 +58,8 @@ public interface TestRunListener {
 
     void reportError(String name, Throwable e);
 
+    void info(String s);
+
     interface Factory {
         TestRunListener create(Logger log);
     }

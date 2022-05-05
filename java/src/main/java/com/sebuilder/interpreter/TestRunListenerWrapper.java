@@ -140,4 +140,9 @@ public class TestRunListenerWrapper implements TestRunListener {
     public void reportError(String name, Throwable e) {
         delegate.reportError(name, e);
     }
+
+    @Override
+    public void info(String s) {
+        delegate.info(s);
+    }
 }

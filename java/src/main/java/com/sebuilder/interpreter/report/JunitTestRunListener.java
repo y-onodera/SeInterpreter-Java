@@ -30,6 +30,7 @@ public class JunitTestRunListener extends TestRunListenerImpl {
     private int runTest;
     private int error;
     private int failed;
+    private int info;
 
     public JunitTestRunListener(Logger aLog) {
         super(aLog);
@@ -39,6 +40,7 @@ public class JunitTestRunListener extends TestRunListenerImpl {
         this.runTest = 0;
         this.error = 0;
         this.failed = 0;
+        this.info = 0;
     }
 
     public JunitTestRunListener(JunitTestRunListener extendFrom) {
@@ -49,6 +51,7 @@ public class JunitTestRunListener extends TestRunListenerImpl {
         this.runTest = 0;
         this.error = 0;
         this.failed = 0;
+        this.info = 0;
     }
 
     @Override
@@ -78,6 +81,7 @@ public class JunitTestRunListener extends TestRunListenerImpl {
         this.runTest = 0;
         this.error = 0;
         this.failed = 0;
+        this.info = 0;
         try {
             this.formatter.setOutput(new FileOutputStream(new File(this.resultDir, "TEST-SeBuilder-" + suite.getName() + "-result.xml")));
             this.formatter.startTestSuite(suite);
@@ -136,6 +140,12 @@ public class JunitTestRunListener extends TestRunListenerImpl {
         super.addFailure(message);
         this.failed++;
         this.formatter.addFailure(this.test, new AssertionError(message));
+    }
+
+    @Override
+    public void info(String s) {
+        this.info++;
+        this.suite.getProperties().put("_info" + this.info, s);
     }
 
     @Override
