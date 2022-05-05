@@ -64,10 +64,8 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
             if (ctx.getBoolean("verify")) {
                 BufferedImage expect = ImageIO.read(new File(Context.getExpectScreenShotDirectory(), fileName));
                 boolean compareResult = this.compare(file, actual, expect, ctx);
-                if (!compareResult) {
-                    File expectFile = ctx.getListener().saveExpectScreenshot(file);
-                    ImageIO.write(expect, "PNG", expectFile);
-                }
+                File expectFile = ctx.getListener().saveExpectScreenshot(file);
+                ImageIO.write(expect, "PNG", expectFile);
                 return compareResult;
             }
             ImageIO.write(actual, "PNG", file);
@@ -109,11 +107,12 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
         }
         ImageComparisonResult result = this.getComparisonResult(file, actualResize, expect, exclude);
         if (result.getRectangles() != null) {
+            StringBuilder sb = new StringBuilder();
             result.getRectangles()
-                    .stream()
-                    .forEach(it -> ctx.log().info("diff rectangle: {},{},{},{}"
+                    .forEach(it -> sb.append(String.format("[%s,%s,%s,%s]"
                             , it.getMinPoint().getX(), it.getMinPoint().getY()
-                            , it.getMaxPoint().getX(), it.getMaxPoint().getY()));
+                            , it.getMaxPoint().getX(), it.getMaxPoint().getY())));
+            ctx.getListener().info("diff rectangle:" + sb);
         }
         ImageIO.write(result.getResult(), "PNG", file);
         return result.getImageComparisonState() == ImageComparisonState.MATCH;
