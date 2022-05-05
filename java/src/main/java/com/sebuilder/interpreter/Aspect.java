@@ -7,7 +7,6 @@ import com.google.common.collect.Sets;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class Aspect {
@@ -71,13 +70,12 @@ public class Aspect {
             return true;
         }
 
-        public boolean invokeFailure(TestRun testRun) {
+        public void invokeFailure(TestRun testRun) {
             for (Interceptor interceptor : this.advices) {
                 if (!interceptor.invokeFailure(testRun)) {
-                    return false;
+                    return;
                 }
             }
-            return true;
         }
     }
 
