@@ -9,74 +9,75 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class StringParamFilterTest {
+
     @Test
-    public void constructValueIsTarSetElementTextType() {
+    public void constructValueIsTargetType() {
         assertTrue(new StringParamFilter("text", "test")
                 .test(new StepBuilder(new SetElementText()).put("text", "${text}").build(), new InputData().add("text", "test")));
     }
 
     @Test
-    public void constructValueEqualTarSetElementTextType() {
+    public void constructValueEqualTargetType() {
         assertTrue(new StringParamFilter("text", "test", "equal")
                 .test(new StepBuilder(new SetElementText()).put("text", "${text}").build(), new InputData().add("text", "test")));
     }
 
     @Test
-    public void constructValueStartsWithTarSetElementTextType() {
+    public void constructValueStartsWithTargetType() {
         assertTrue(new StringParamFilter("text", "test", "startsWith")
                 .test(new StepBuilder(new SetElementText()).put("text", "${text}").build(), new InputData().add("text", "test1")));
     }
 
     @Test
-    public void constructValueEndsWithTarSetElementTextType() {
+    public void constructValueEndsWithTargetType() {
         assertTrue(new StringParamFilter("text", "test", "endsWith")
                 .test(new StepBuilder(new SetElementText()).put("text", "${text}").build(), new InputData().add("text", "some-test")));
     }
 
     @Test
-    public void constructValueContainsTarSetElementTextType() {
+    public void constructValueContainsTargetType() {
         assertTrue(new StringParamFilter("text", "test", "contains")
                 .test(new StepBuilder(new SetElementText()).put("text", "${text}").build(), new InputData().add("text", "this is test method")));
     }
 
     @Test
-    public void constructValueMatchesTarSetElementTextType() {
+    public void constructValueMatchesTargetType() {
         assertTrue(new StringParamFilter("text", ".*test.*", "matches")
                 .test(new StepBuilder(new SetElementText()).put("text", "${text}").build(), new InputData().add("text", "this is test method")));
     }
 
     @Test
-    public void constructValueIsNotTarSetElementTextType() {
+    public void constructValueIsNotTargetType() {
         assertFalse(new StringParamFilter("text", "test")
                 .test(new StepBuilder(new SetElementText()).put("text", "${text}").build(), new InputData().add("text", "test1")));
     }
 
     @Test
-    public void constructValueNotEqualTarSetElementTextType() {
+    public void constructValueNotEqualTargetType() {
         assertFalse(new StringParamFilter("text", "test", "equal")
                 .test(new StepBuilder(new SetElementText()).put("text", "${text}").build(), new InputData().add("text", "test1")));
     }
 
     @Test
-    public void constructValueNotStartsWithTarSetElementTextType() {
+    public void constructValueNotStartsWithTargetType() {
         assertFalse(new StringParamFilter("text", "test", "startsWith")
                 .test(new StepBuilder(new SetElementText()).put("text", "${text}").build(), new InputData().add("text", "this is test")));
     }
 
     @Test
-    public void constructValueNotEndsWithTarSetElementTextType() {
+    public void constructValueNotEndsWithTargetType() {
         assertFalse(new StringParamFilter("text", "test", "endsWith")
                 .test(new StepBuilder(new SetElementText()).put("text", "${text}").build(), new InputData().add("text", "test1")));
     }
 
     @Test
-    public void constructValueNotContainsTarSetElementTextType() {
+    public void constructValueNotContainsTargetType() {
         assertFalse(new StringParamFilter("text", "test", "contains")
                 .test(new StepBuilder(new SetElementText()).put("text", "${text}").build(), new InputData().add("text", "tes")));
     }
 
     @Test
-    public void constructValueNotMatchesTarSetElementTextType() {
+    public void constructValueNotMatchesTargetType() {
         assertFalse(new StringParamFilter("text", ".*test.*", "matches")
                 .test(new StepBuilder(new SetElementText()).put("text", "${text}").build(), new InputData().add("text", "this is a pen")));
     }
