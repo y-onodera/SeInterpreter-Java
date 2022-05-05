@@ -1,6 +1,5 @@
 package com.sebuilder.interpreter;
 
-import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -9,9 +8,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Aspect {
-
-    private final List<Interceptor> interceptors;
+public record Aspect(Collection<Interceptor> interceptors) {
 
     public Aspect() {
         this(Lists.newArrayList());
@@ -31,26 +28,7 @@ public class Aspect {
                 .collect(Collectors.toList()));
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Aspect aspect = (Aspect) o;
-        return Objects.equal(interceptors, aspect.interceptors);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(interceptors);
-    }
-
-    public static class Advice {
-
-        private final List<Interceptor> advices;
-
-        public Advice(List<Interceptor> advices) {
-            this.advices = advices;
-        }
+    public record Advice(List<Interceptor> advices) {
 
         public boolean invokeBefore(TestRun testRun) {
             for (Interceptor interceptor : this.advices) {
