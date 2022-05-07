@@ -26,8 +26,7 @@ public class AntRun extends AbstractGetter {
                 .entrySet()
                 .forEach(entry -> p.setProperty(entry.getKey(), ctx.bindRuntimeVariables(entry.getValue())));
         Context.getEnvironmentProperties()
-                .entrySet()
-                .forEach(entry -> p.setProperty("env." + entry.getKey(), ctx.bindRuntimeVariables(entry.getValue().toString())));
+                .forEach((key, value) -> p.setProperty("env." + key, ctx.bindRuntimeVariables(value.toString())));
         String target = p.getDefaultTarget();
         if (ctx.containsKey("target") && !Strings.isNullOrEmpty(ctx.string("target"))) {
             target = ctx.string("target");
