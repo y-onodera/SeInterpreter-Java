@@ -60,11 +60,6 @@ public class JunitTestRunListener extends TestRunListenerImpl {
     }
 
     @Override
-    public JunitTestRunListener copy() {
-        return new JunitTestRunListener(this);
-    }
-
-    @Override
     public boolean openTestSuite(TestCase testCase, String testRunName, InputData aProperty) {
         boolean result = super.openTestSuite(testCase, testRunName, aProperty);
         this.suite = new JUnitTest();
@@ -145,7 +140,7 @@ public class JunitTestRunListener extends TestRunListenerImpl {
     @Override
     public void info(String s) {
         this.info++;
-        this.suite.getProperties().put("_info" + this.info, s);
+        this.formatter.setSystemOutput("_info%d:%s".formatted(this.info, s));
     }
 
     @Override

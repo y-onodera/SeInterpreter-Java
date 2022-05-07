@@ -37,11 +37,6 @@ public class ExtentReportsTestRunListener extends TestRunListenerImpl {
     }
 
     @Override
-    public ExtentReportsTestRunListener copy() {
-        return new ExtentReportsTestRunListener(this);
-    }
-
-    @Override
     public String getReportFileName() {
         return "ExtentReport.html";
     }
@@ -144,23 +139,26 @@ public class ExtentReportsTestRunListener extends TestRunListenerImpl {
     public void addError(Throwable throwable) {
         super.addError(throwable);
         this.extentTest.fail(throwable);
+        this.extentTest = null;
     }
 
     @Override
     public void addFailure(String message) {
         super.addFailure(message);
         this.extentTest.warning(message);
+        this.extentTest = null;
     }
 
     @Override
     public void info(String s) {
-        extentTest.info(s);
+        this.extentTest.info(s);
     }
 
     @Override
     public void endTest() {
         super.endTest();
         this.extentTest.pass("success:" + this.testName);
+        this.extentTest = null;
     }
 
     @Override

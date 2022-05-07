@@ -129,7 +129,7 @@ public abstract class TestRunListenerImpl implements TestRunListener {
     @Override
     public boolean openTestSuite(TestCase testCase, String testRunName, InputData aProperty) {
         this.suiteName = this.reportPrefix + testRunName.replace("_", ".");
-        this.log.info("open suite:" + testName);
+        this.log.info("open suite:" + this.suiteName);
         this.stepNo = 0;
         this.inputData = aProperty;
         return true;

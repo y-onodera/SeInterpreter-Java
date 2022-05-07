@@ -68,7 +68,20 @@ public record Interceptor(Pointcut pointcut,
     }
 
     TestRunListener createAdviseListener(TestRun testRun) {
-        return testRun.getListener().copy();
+        return new TestRunListenerWrapper(testRun.getListener()) {
+            String testName;
+            @Override
+            public boolean openTestSuite(TestCase testCase, String testRunName, InputData aProperty) {
+                this.testName = testRunName;
+                testRun.log().info("open suite %s".formatted(this.testName));
+                return true;
+            }
+
+            @Override
+            public void closeTestSuite() {
+                testRun.log().info("close suite %s".formatted(this.testName));
+            }
+        };
     }
 
     String getInterceptCaseName(TestRun testRun) {

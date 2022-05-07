@@ -17,11 +17,6 @@ public class TestRunListenerWrapper implements TestRunListener {
     }
 
     @Override
-    public TestRunListener copy() {
-        return new TestRunListenerWrapper(delegate.copy());
-    }
-
-    @Override
     public Logger getLog() {
         return delegate.getLog();
     }

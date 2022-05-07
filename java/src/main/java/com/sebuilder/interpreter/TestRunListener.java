@@ -10,8 +10,6 @@ public interface TestRunListener {
 
     String getReportPrefix();
 
-    TestRunListener copy();
-
     Logger getLog();
 
     File getResultDir();
