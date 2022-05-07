@@ -48,23 +48,30 @@ public class SeInterpreter extends CommandLineRunner implements TestRunner {
         Logger log = LogManager.getLogger(SeInterpreter.class);
         SeInterpreter interpreter = new SeInterpreter(args, log);
         if (interpreter.paths.isEmpty()) {
-            log.info("Configuration successful but no paths to testCases specified. Exiting.");
-            System.exit(0);
-        }
-        try {
-            interpreter.runScripts();
-        } catch (Exception e) {
-            log.fatal("Run error.", e);
+            log.error("Configuration successful but no paths to testCases specified. Exiting.");
             System.exit(1);
         }
+        try {
+            if (!interpreter.runScripts()) {
+                log.error("test failed.");
+                System.exit(1);
+            }
+        } catch (Exception e) {
+            log.fatal("Run error.", e);
+            System.exit(2);
+        }
+        log.info("test success.");
+        System.exit(0);
     }
 
-    public void runScripts() {
+    public boolean runScripts() {
         this.testRunListener.cleanResult();
         try {
+            boolean success = false;
             for (String path : this.paths) {
-                this.loadTestCase(path).run(this, this.testRunListener);
+                success = this.loadTestCase(path).run(this, this.testRunListener);
             }
+            return success;
         } finally {
             if (this.lastRun != null && this.closeDriver) {
                 this.lastRun.driver().quit();
@@ -112,7 +119,7 @@ public class SeInterpreter extends CommandLineRunner implements TestRunner {
 
     @Override
     protected void preSetUp() {
-        paths = new ArrayList<>();
+        this.paths = new ArrayList<>();
     }
 
     @Override
