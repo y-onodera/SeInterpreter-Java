@@ -1,0 +1,120 @@
+{
+  "aspect": [
+    {
+      "pointcut": [
+        {
+          "type": [
+            "SetElementText",
+            "SelectElementValue",
+            "SetElementSelected"
+          ]
+        },
+        {
+          "type": "ClickElement"
+        },
+        {
+          "type": {
+            "value": "Scroll",
+            "method": "startsWith"
+          }
+        }
+      ],
+      "before": {
+        "steps": [
+          {
+            "type": "Get"
+          }
+        ]
+      }
+    },
+    {
+      "pointcut": [
+        {
+          "locator": {
+            "type": "id",
+            "value": [
+              "id1",
+              "id2",
+              "id3"
+            ]
+          }
+        },
+        {
+          "locator": {
+            "type": "name",
+            "value": "name1"
+          }
+        },
+        {
+          "locator": {
+            "type": "link text",
+            "value": "link",
+            "method": "contains"
+          }
+        }
+      ],
+      "before": {
+        "steps": [
+          {
+            "type": "Get"
+          }
+        ]
+      }
+    },
+    {
+      "pointcut": [
+        {
+          "text": [
+            "id1",
+            "id2",
+            "id3"
+          ]
+        },
+        {
+          "text": "text"
+        },
+        {
+          "text": {
+            "value": ".+\\d{3}",
+            "method": "matches"
+          }
+        }
+      ],
+      "before": {
+        "steps": [
+          {
+            "type": "Get"
+          }
+        ]
+      }
+    },
+    {
+      "pointcut": [
+        {
+          "negated": "true"
+        }
+      ],
+      "before": {
+        "steps": [
+          {
+            "type": "Get"
+          }
+        ]
+      }
+    },
+    {
+      "pointcut": [
+        {
+          "skip": "true"
+        }
+      ],
+      "before": {
+        "steps": [
+          {
+            "type": "Get"
+          }
+        ]
+      }
+    }
+  ]
+}

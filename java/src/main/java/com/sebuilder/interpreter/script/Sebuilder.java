@@ -322,10 +322,10 @@ public class Sebuilder extends AbstractJsonScriptParser {
             } else if (key.startsWith("locator")) {
                 JSONObject locatorJSON = pointcutJSON.getJSONObject(key);
                 if (locatorJSON.get("value") instanceof JSONArray) {
-                    JSONArray type = locatorJSON.getJSONArray("value");
+                    JSONArray values = locatorJSON.getJSONArray("value");
                     Pointcut typeList = Pointcut.NONE;
-                    for (int k = 0; k < type.length(); k++) {
-                        Locator locator = new Locator(locatorJSON.getString("type"), type.getString(k));
+                    for (int k = 0; k < values.length(); k++) {
+                        Locator locator = new Locator(locatorJSON.getString("type"), values.getString(k));
                         typeList = typeList.or(new LocatorFilter(key, locator));
                     }
                     pointcut = pointcut.and(typeList);
