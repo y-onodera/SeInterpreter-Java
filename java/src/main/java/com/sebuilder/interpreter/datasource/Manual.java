@@ -27,7 +27,7 @@ public class Manual implements DataSource {
         row.put(InputData.ROW_NUMBER, String.valueOf(1));
         config.keySet()
                 .stream()
-                .forEach(key -> row.put(key, vars.bind(config.get(key))));
+                .forEach(key -> row.put(key, vars.evaluateString(config.get(key))));
         return Lists.newArrayList(new InputData(row).lastRow(true));
     }
 

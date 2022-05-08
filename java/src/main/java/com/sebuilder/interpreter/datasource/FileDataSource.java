@@ -16,7 +16,7 @@ public interface FileDataSource extends DataSource {
 
     @Override
     default String name(Map<String, String> dataSourceConfig, InputData shareInput) {
-        return shareInput.bind(dataSourceConfig.get("path"));
+        return shareInput.evaluateString(dataSourceConfig.get("path"));
     }
 
     default boolean isLoadable(Map<String, String> dataSourceConfig, File relativePath, InputData shareInput) {

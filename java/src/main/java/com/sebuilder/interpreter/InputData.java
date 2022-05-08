@@ -76,18 +76,22 @@ public record InputData(LinkedHashMap<String, String> row, boolean lastRow) {
     }
 
     public boolean evaluate(String target) {
+        return Boolean.parseBoolean(this.evaluateString(target));
+    }
+
+    public String evaluateString(String target) {
         String result = this.bind(target);
         String exp = this.extractExpression(result);
         if (Objects.equal(result, exp)) {
-            return Boolean.parseBoolean(result);
+            return result;
         }
         try {
             JexlEngine jexl = new JexlBuilder().create();
             JexlExpression expression = jexl.createExpression(exp);
             JexlContext jc = new MapContext(Maps.newHashMap(this.row));
-            return Boolean.parseBoolean(expression.evaluate(jc).toString());
+            return result.replace("${" + exp + "}", expression.evaluate(jc).toString());
         } catch (JexlException ex) {
-            return false;
+            return result;
         }
     }
 
@@ -137,7 +141,7 @@ public record InputData(LinkedHashMap<String, String> row, boolean lastRow) {
     }
 
     private String extractExpression(String result) {
-        return result.replaceAll("\\$\\{(.+)}", "$1");
+        return result.replaceAll(".*\\$\\{(.+)}.*", "$1");
     }
 
     public static class Builder {

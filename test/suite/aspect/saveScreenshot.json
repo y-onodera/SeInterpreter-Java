@@ -8,25 +8,14 @@
             "SelectElementValue",
             "SetElementSelected"
           ],
-          "skip": false
+          "skip": "false"
         }
       ],
       "before": {
         "steps": [
           {
-            "file": "input.png",
+            "file": "input${has('_index') ? get('_index') : ''}.png",
             "scroll": "false",
-            "skip": "${has('_index')}",
-            "locator": {
-              "type": "${_target.locator.type}",
-              "value": "${_target.locator.value}"
-            },
-            "type": "SaveScreenshot"
-          },
-          {
-            "file": "input_${_index}.png",
-            "scroll": "false",
-            "skip": "${!has('_index')}",
             "locator": {
               "type": "${_target.locator.type}",
               "value": "${_target.locator.value}"
@@ -38,19 +27,8 @@
       "after": {
         "steps": [
           {
-            "file": "input.png",
+            "file": "input${has('_index') ? get('_index') : ''}.png",
             "scroll": "false",
-            "skip": "${has('_index')}",
-            "locator": {
-              "type": "${_target.locator.type}",
-              "value": "${_target.locator.value}"
-            },
-            "type": "SaveScreenshot"
-          },
-          {
-            "file": "input_${_index}.png",
-            "scroll": "false",
-            "skip": "${!has('_index')}",
             "locator": {
               "type": "${_target.locator.type}",
               "value": "${_target.locator.value}"

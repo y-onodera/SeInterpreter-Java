@@ -14,8 +14,8 @@ public record LocatorFilter(String key, Locator target, String method) implement
     @Override
     public boolean test(Step step, InputData vars) {
         return step.locatorContains(this.key)
-                && vars.bind(step.getLocator(this.key).type()).equals(this.target.type())
-                && METHODS.get(this.method).apply(vars.bind(step.getLocator(this.key).value()), this.target.value());
+                && vars.evaluateString(step.getLocator(this.key).type()).equals(this.target.type())
+                && METHODS.get(this.method).apply(vars.evaluateString(step.getLocator(this.key).value()), this.target.value());
     }
 
 }

@@ -132,7 +132,7 @@ public class Sebuilder extends AbstractJsonScriptParser {
         if (script.has("lazyLoad")) {
             String beforeReplace = script.getString("lazyLoad");
             return this.overrideSetting(script, TestCaseBuilder.lazyLoad(beforeReplace, (runtimeBefore, listener) -> {
-                String fileName = runtimeBefore.getShareInput().bind(beforeReplace);
+                String fileName = runtimeBefore.getShareInput().evaluateString(beforeReplace);
                 JSONObject source = new JSONObject();
                 try {
                     TestCase lazyLoad = loadScript(source.put("path", fileName), suiteFile, listener);

@@ -128,7 +128,7 @@ public class TestRun implements WebDriverWrapper {
     }
 
     public String bindRuntimeVariables(String value) {
-        return this.vars.bind(value);
+        return this.vars.evaluateString(value);
     }
 
     public boolean getBoolean(@Nonnull String key) {

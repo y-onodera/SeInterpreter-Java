@@ -13,7 +13,7 @@ public record StringParamFilter(String key, String value, String method) impleme
     @Override
     public boolean test(Step step, InputData vars) {
         return step.containsParam(this.key)
-                && METHODS.get(this.method).apply(vars.bind(step.getParam(this.key)), this.value);
+                && METHODS.get(this.method).apply(vars.evaluateString(step.getParam(this.key)), this.value);
     }
 
 }
