@@ -28,7 +28,7 @@ public class SetElementSelected extends AbstractStepType implements ConditionalS
     @Override
     public boolean doRun(TestRun ctx) {
         WebElement e = ctx.locator().find(ctx);
-        if (ctx.containsKey("check") && !Boolean.parseBoolean(ctx.string("check"))) {
+        if (ctx.containsKey("check") && !ctx.getBoolean("check")) {
             if (e.isSelected()) {
                 e.click();
             }

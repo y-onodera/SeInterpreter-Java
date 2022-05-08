@@ -1,6 +1,7 @@
 package com.sebuilder.interpreter.step;
 
 import com.google.common.base.Objects;
+import com.sebuilder.interpreter.Step;
 import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
 
@@ -25,20 +26,19 @@ public class Retry extends AbstractStepType implements FlowStep, GetterUseStep {
      * should return false. Other failures should throw a RuntimeException.
      */
     public boolean run(TestRun ctx) {
+        Step thisStep = ctx.currentStep();
+        boolean success = true;
         int actions = getSubSteps(ctx);
         while (!this.test(ctx)) {
             ctx.processTestSuccess();
-            if (!this.runSubStep(ctx, actions)) {
-                ctx.processTestFailure();
-                return false;
-            }
-            ctx.processTestSuccess();
+            success = this.runSubStep(ctx, actions) && success;
             ctx.backStepIndex(actions);
             ctx.startTest();
         }
         ctx.processTestSuccess();
         this.skipSubStep(ctx, actions);
-        return true;
+        ctx.getListener().startTest("End " + ctx.bindRuntimeVariables(thisStep.toPrettyString()));
+        return success;
     }
 
     @Override

@@ -65,6 +65,12 @@ public record InputData(LinkedHashMap<String, String> row, boolean lastRow) {
         return result;
     }
 
+    public InputData remove(String key) {
+        InputData result = this.copy();
+        result.row.remove(key);
+        return result;
+    }
+
     public InputData lastRow(boolean isLastRow) {
         return new InputData(this.row, isLastRow);
     }

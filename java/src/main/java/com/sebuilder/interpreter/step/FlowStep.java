@@ -21,13 +21,11 @@ public interface FlowStep extends StepType {
             }
             boolean stepSuccess = ctx.currentStep().run(ctx);
             exec = exec + subStep;
-            if (exec != actions - 1) {
-                if (stepSuccess) {
-                    success = success && ctx.processTestSuccess() && aspectSuccess;
-                } else {
-                    ctx.processTestFailure();
-                    success = false;
-                }
+            if (stepSuccess) {
+                success = success && ctx.processTestSuccess() && aspectSuccess;
+            } else {
+                ctx.processTestFailure();
+                success = false;
             }
         }
         return success;
@@ -45,9 +43,7 @@ public interface FlowStep extends StepType {
                                     .toPrettyString()
                     )
             );
-            if (i != actions - 1) {
-                ctx.processTestSuccess();
-            }
+            ctx.processTestSuccess();
         }
     }
 

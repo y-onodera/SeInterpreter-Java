@@ -16,6 +16,8 @@
 
 package com.sebuilder.interpreter;
 
+import com.sebuilder.interpreter.step.FlowStep;
+import com.sebuilder.interpreter.step.type.ConditionalStep;
 import javafx.util.Pair;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -76,6 +78,10 @@ public class TestRun implements WebDriverWrapper {
         this.vars = this.vars.add(key, value);
     }
 
+    public void removeVars(String key) {
+        this.vars = this.vars.remove(key);
+    }
+
     public String getTestRunName() {
         return this.testRunName;
     }
@@ -126,7 +132,7 @@ public class TestRun implements WebDriverWrapper {
     }
 
     public boolean getBoolean(@Nonnull String key) {
-        return this.containsKey(key) && Boolean.parseBoolean(this.string(key));
+        return this.containsKey(key) && this.vars().evaluate(this.currentStep().getParam(key));
     }
 
     public String string(@Nonnull String key) {
@@ -203,11 +209,12 @@ public class TestRun implements WebDriverWrapper {
 
     public boolean next() {
         try {
+            boolean conditionalStep = testCase.steps().get(this.testRunStatus.stepIndex() + 1).getType() instanceof FlowStep;
             Pair<Boolean, Boolean> result = this.runTest();
             if (!result.getKey()) {
-                return this.processTestFailure();
+                return this.processTestFailure(conditionalStep);
             }
-            return this.processTestSuccess() && result.getValue();
+            return this.processTestSuccess(conditionalStep) && result.getValue();
         } catch (Throwable e) {
             return this.processTestError(e);
         }
@@ -241,13 +248,26 @@ public class TestRun implements WebDriverWrapper {
     }
 
     public boolean processTestSuccess() {
+        return this.processTestSuccess(false);
+    }
+
+    public boolean processTestSuccess(boolean isConditionalStep) {
         this.getListener().endTest();
+        if (isConditionalStep) {
+            return true;
+        }
         return this.getAdvice().invokeAfter(this);
     }
 
     public boolean processTestFailure() {
+        return this.processTestFailure(false);
+    }
+
+    public boolean processTestFailure(boolean isConditionalStep) {
         this.getListener().addFailure(currentStepToString() + " failed.");
-        this.getAdvice().invokeFailure(this);
+        if (!isConditionalStep) {
+            this.getAdvice().invokeFailure(this);
+        }
         if (this.currentStep().getType().isContinueAtFailure()) {
             return false;
         }
@@ -324,6 +344,7 @@ public class TestRun implements WebDriverWrapper {
             }
         }
     }
+
 
     protected static class ChainRunner implements TestRunner {
         private final TestRun parent;
