@@ -169,6 +169,10 @@ public record Step(
 
     public Map<String, String> toMap() {
         Map<String, String> result = Maps.newHashMap();
+        if (this.name != null) {
+            result.put("name", this.name);
+        }
+        result.put("type", this.type.getStepTypeName());
         result.putAll(this.stringParams);
         for (Map.Entry<String, Locator> le : this.locatorParams.entrySet()) {
             result.put(le.getKey() + ".type", le.getValue().type());
