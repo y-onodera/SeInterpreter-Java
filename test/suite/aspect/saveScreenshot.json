@@ -56,8 +56,37 @@
       "before": {
         "steps": [
           {
+            "type": "storeTitle",
+            "variable": "pageTitle"
+          },
+          {
             "file": "page.png",
             "scroll": "true",
+            "skip": "${get('pageTitle') != '予約情報入力'}",
+            "verify": "${env.verifyImage}",
+            "locatorExclude": {
+              "type": "id",
+              "value": "datePick"
+            },
+            "pixelToleranceLevel": "0.3",
+            "type": "SaveScreenshot"
+          },
+          {
+            "file": "page.png",
+            "scroll": "true",
+            "skip": "${get('pageTitle') != '予約内容確認'}",
+            "verify": "${env.verifyImage}",
+            "locatorExclude": {
+              "type": "id",
+              "value": "term"
+            },
+            "pixelToleranceLevel": "0.3",
+            "type": "SaveScreenshot"
+          },
+          {
+            "file": "page.png",
+            "scroll": "true",
+            "skip": "${get('pageTitle') == '予約情報入力' or get('pageTitle') == '予約内容確認'}",
             "verify": "${env.verifyImage}",
             "type": "SaveScreenshot"
           }
@@ -66,9 +95,54 @@
       "after": {
         "steps": [
           {
+            "type": "storeTitle",
+            "variable": "pageTitle"
+          },
+          {
             "file": "page.png",
             "scroll": "true",
+            "skip": "${get('pageTitle') != '予約情報入力'}",
             "verify": "${env.verifyImage}",
+            "locatorExclude": {
+              "type": "id",
+              "value": "datePick"
+            },
+            "pixelToleranceLevel": "0.3",
+            "type": "SaveScreenshot"
+          },
+          {
+            "file": "page.png",
+            "scroll": "true",
+            "skip": "${get('pageTitle') != '予約内容確認'}",
+            "verify": "${env.verifyImage}",
+            "locatorExclude": {
+              "type": "id",
+              "value": "term"
+            },
+            "pixelToleranceLevel": "0.3",
+            "type": "SaveScreenshot"
+          },
+          {
+            "file": "page.png",
+            "scroll": "true",
+            "skip": "${get('pageTitle') == '予約情報入力' or get('pageTitle') == '予約内容確認'}",
+            "verify": "${env.verifyImage}",
+            "type": "SaveScreenshot"
+          }
+        ]
+      }
+    },
+    {
+      "pointcut": [
+        {
+          "type": "SaveScreenshot",
+          "method": "!equal"
+        }
+      ],
+      "failure": {
+        "steps": [
+          {
+            "file": "error.png",
             "type": "SaveScreenshot"
           }
         ]
