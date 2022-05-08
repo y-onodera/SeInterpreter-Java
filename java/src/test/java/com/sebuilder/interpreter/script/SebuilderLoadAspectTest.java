@@ -172,4 +172,82 @@ public class SebuilderLoadAspectTest {
         }
 
     }
+
+    public static class MultiAdviceTest extends SingleFilter {
+
+        @Test
+        public void adviceWeaverPointcutValue() {
+            var advice = result.advice(new ClickElement().toStep()
+                            .negated(true)
+                            .skip("true")
+                            .locator(new Locator("id", "id1"))
+                            .put("text","text")
+                            .build(), new InputData())
+                    .advices();
+            assertEquals(5, advice.size());
+            assertEquals(1, advice.get(0).beforeStep().size());
+            assertEquals(0, advice.get(0).afterStep().size());
+            assertEquals(0, advice.get(0).failureStep().size());
+            assertEquals(new Get().toStep().build(), advice.get(0).beforeStep().get(0));
+            assertEquals(1, advice.get(1).beforeStep().size());
+            assertEquals(0, advice.get(1).afterStep().size());
+            assertEquals(0, advice.get(1).failureStep().size());
+            assertEquals(new Get().toStep().build(), advice.get(1).beforeStep().get(0));
+            assertEquals(1, advice.get(2).beforeStep().size());
+            assertEquals(0, advice.get(2).afterStep().size());
+            assertEquals(0, advice.get(2).failureStep().size());
+            assertEquals(new Get().toStep().build(), advice.get(2).beforeStep().get(0));
+            assertEquals(1, advice.get(3).beforeStep().size());
+            assertEquals(0, advice.get(3).afterStep().size());
+            assertEquals(0, advice.get(3).failureStep().size());
+            assertEquals(new Get().toStep().build(), advice.get(3).beforeStep().get(0));
+            assertEquals(1, advice.get(4).beforeStep().size());
+            assertEquals(0, advice.get(4).afterStep().size());
+            assertEquals(0, advice.get(4).failureStep().size());
+            assertEquals(new Get().toStep().build(), advice.get(4).beforeStep().get(0));
+        }
+
+    }
+
+    public static class MultiFilterTest extends SingleFilter {
+
+        @Before
+        @Override
+        public void setup() throws IOException {
+            result = target.loadAspect(new File(scriptDir, "aspectWithMultiFilterPointcut.json"));
+        }
+
+        @Test
+        public void adviceWeaverPointcutValue() {
+            assertWeaver(new SetElementText().toStep().locator(new Locator("id","id1")).build(), new InputData());
+        }
+
+        @Test
+        public void adviceNotWeaverStepIsNotPointcutTarget() {
+            assertNotWeaver(new SetElementText().toStep().locator(new Locator("id","id1"))
+                    .skip("true").build(), new InputData());
+            assertNotWeaver(new SetElementText().toStep().locator(new Locator("id","id4"))
+                    .build(), new InputData());
+            assertNotWeaver(new ClickElement().toStep().locator(new Locator("id","id1"))
+                    .build(), new InputData());
+        }
+
+        @Override
+        protected void assertWeaver(Step step, InputData inputData) {
+            var advice = result.advice(step, inputData)
+                    .advices();
+            assertEquals(1, advice.size());
+            assertEquals(2, advice.get(0).beforeStep().size());
+            assertEquals(new Get().toStep().build(), advice.get(0).beforeStep().get(0));
+            assertEquals(new SetElementText().toStep().put("text", "before step").build(), advice.get(0).beforeStep().get(1));
+            assertEquals(2, advice.get(0).afterStep().size());
+            assertEquals(new SetElementText().toStep().put("text", "after step").build(), advice.get(0).afterStep().get(0));
+            assertEquals(new Get().toStep().build(), advice.get(0).afterStep().get(1));
+            assertEquals(2, advice.get(0).failureStep().size());
+            assertEquals(new SetElementSelected().toStep().build(), advice.get(0).failureStep().get(0));
+            assertEquals(new SetElementText().toStep().put("text", "failure step").build(), advice.get(0).failureStep().get(1));
+        }
+    }
+
+
 }

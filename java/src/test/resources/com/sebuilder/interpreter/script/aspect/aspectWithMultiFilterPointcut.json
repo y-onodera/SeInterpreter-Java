@@ -1,0 +1,57 @@
+{
+  "aspect": [
+    {
+      "pointcut": [
+        {
+          "type": [
+            "SetElementText",
+            "SelectElementValue",
+            "SetElementSelected"
+          ],
+          "locator": {
+            "type": "id",
+            "value": [
+              "id1",
+              "id2",
+              "id3"
+            ]
+          },
+          "skip": "false"
+        }
+      ],
+      "after": {
+        "steps": [
+          {
+            "type": "SetElementText",
+            "text": "after step"
+          },
+          {
+            "type": "Get"
+          }
+        ]
+      },
+      "before": {
+        "steps": [
+          {
+            "type": "Get"
+          },
+          {
+            "type": "SetElementText",
+            "text": "before step"
+          }
+        ]
+      },
+      "failure": {
+        "steps": [
+          {
+            "type": "SetElementSelected"
+          },
+          {
+            "type": "SetElementText",
+            "text": "failure step"
+          }
+        ]
+      }
+    }
+  ]
+}
