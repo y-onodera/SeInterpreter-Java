@@ -26,6 +26,7 @@ jobs:
       shell: cmd
     - name: Upload TestReport
       uses: actions/upload-artifact@v3
+      if: ${{ always() }}
       with:
         name: unitTestReport
         path: ./java/target/site
@@ -112,6 +113,7 @@ jobs:
         run: ./bin/java -cp sebuilder-interpreter-2.0.0-SNAPSHOT-jar-with-dependencies.jar com.sebuilder.interpreter.application.SeInterpreter --env=test/suite/env.properties --driver=${{matrix.browser}} --resultoutput=${{matrix.browser}} --driver.remote-url=http://localhost:4444/ --datasource.directory=test/suite/input --reportFormat=ExtentReports --aspectFile=test/suite/aspect/saveScreenshot.json test/suite/testsuite.json
       - name: Upload result
         uses: actions/upload-artifact@v3
+        if: ${{ always() }}
         with:
           name: remote-${{matrix.browser}}-result
           path: ${{matrix.browser}}
@@ -162,6 +164,7 @@ jobs:
         shell: cmd
       - name: Upload result
         uses: actions/upload-artifact@v3
+        if: ${{ always() }}
         with:
           name: locale-${{matrix.browser}}-result
           path: ${{matrix.browser}}
