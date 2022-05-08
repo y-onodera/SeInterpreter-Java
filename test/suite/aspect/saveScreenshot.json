@@ -16,6 +16,17 @@
           {
             "file": "input.png",
             "scroll": "false",
+            "skip": "${has('_index')}",
+            "locator": {
+              "type": "${_target.locator.type}",
+              "value": "${_target.locator.value}"
+            },
+            "type": "SaveScreenshot"
+          },
+          {
+            "file": "input_${_index}.png",
+            "scroll": "false",
+            "skip": "${!has('_index')}",
             "locator": {
               "type": "${_target.locator.type}",
               "value": "${_target.locator.value}"
@@ -29,6 +40,17 @@
           {
             "file": "input.png",
             "scroll": "false",
+            "skip": "${has('_index')}",
+            "locator": {
+              "type": "${_target.locator.type}",
+              "value": "${_target.locator.value}"
+            },
+            "type": "SaveScreenshot"
+          },
+          {
+            "file": "input_${_index}.png",
+            "scroll": "false",
+            "skip": "${!has('_index')}",
             "locator": {
               "type": "${_target.locator.type}",
               "value": "${_target.locator.value}"
@@ -135,8 +157,10 @@
     {
       "pointcut": [
         {
-          "type": "SaveScreenshot",
-          "method": "!equal"
+          "type": {
+            "value":"SaveScreenshot",
+            "method": "!equal"
+          }
         }
       ],
       "failure": {

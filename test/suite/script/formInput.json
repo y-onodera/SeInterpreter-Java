@@ -9,7 +9,7 @@
                 "type": "id",
                 "value": "reserve_year"
             },
-            "negated": false,
+            "negated": "false",
             "skip": "false",
             "type": "storeElementValue",
             "variable": "reserve_year"
@@ -19,7 +19,7 @@
                 "type": "id",
                 "value": "reserve_month"
             },
-            "negated": false,
+            "negated": "false",
             "skip": "false",
             "type": "storeElementValue",
             "variable": "reserve_month"
@@ -29,13 +29,13 @@
                 "type": "id",
                 "value": "reserve_day"
             },
-            "negated": false,
+            "negated": "false",
             "skip": "false",
             "type": "storeElementValue",
             "variable": "reserve_day"
         },
         {
-            "negated": false,
+            "negated": "false",
             "script": "return ${reserve_year} + '/' + ${reserve_month} + '/' + (${reserve_day} + ${add_days});",
             "skip": "false",
             "type": "storeEval",
@@ -46,13 +46,13 @@
                 "type": "id",
                 "value": "datePick"
             },
-            "negated": false,
+            "negated": "false",
             "skip": "false",
             "text": "${date}",
             "type": "SetElementText"
         },
         {
-            "negated": false,
+            "negated": "false",
             "build.xml": "${_dataSourceDir}/build.xml",
             "target": "nextDate",
             "type": "storeAntRun",
@@ -64,7 +64,7 @@
                 "type": "id",
                 "value": "datePick"
             },
-            "negated": false,
+            "negated": "false",
             "skip": "false",
             "text": "${date}",
             "type": "SetElementText"
@@ -74,7 +74,7 @@
                 "type": "id",
                 "value": "breakfast_on"
             },
-            "negated": false,
+            "negated": "false",
             "skip": "${id:breakfast_on}",
             "type": "SetElementSelected"
         },
@@ -83,27 +83,32 @@
                 "type": "id",
                 "value": "breakfast_off"
             },
-            "negated": false,
+            "negated": "false",
             "skip": "${id:breakfast_off}",
             "type": "SetElementSelected"
         },
         {
-            "check": "${id:plan_a}",
+            "type": "Loop",
+            "subStep": "2",
+            "count": "3"
+        },
+        {
+            "check": "${get('_index') % 2 == 0 ? get('id:plan_a') == 'false' : get('id:plan_a') == 'true' }",
             "locator": {
                 "type": "id",
                 "value": "plan_a"
             },
-            "negated": false,
+            "negated": "false",
             "skip": "false",
             "type": "SetElementSelected"
         },
         {
-            "check": "${id:plan_b}",
+            "check": "${get('_index') % 2 == 0 ? get('id:plan_b') == 'false' : get('id:plan_b') == 'true' }",
             "locator": {
                 "type": "id",
                 "value": "plan_b"
             },
-            "negated": false,
+            "negated": "false",
             "skip": "false",
             "type": "SetElementSelected"
         },
@@ -112,7 +117,7 @@
                 "type": "id",
                 "value": "guestname"
             },
-            "negated": false,
+            "negated": "false",
             "skip": "${!has('id:guestname')}",
             "text": "${id:guestname}",
             "type": "SetElementText"
