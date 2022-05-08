@@ -88,6 +88,19 @@
             "type": "SetElementSelected"
         },
         {
+            "type": "ifElementSelected",
+            "locator": {
+                "type": "id",
+                "value": "breakfast_on"
+            },
+            "subStep": "1"
+        },
+        {
+            "file": "if_test.png",
+            "scroll": "false",
+            "type": "SaveScreenshot"
+        },
+        {
             "type": "Loop",
             "subStep": "2",
             "count": "3"
