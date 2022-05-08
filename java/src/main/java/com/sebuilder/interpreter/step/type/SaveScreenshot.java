@@ -90,6 +90,9 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
         if (!o.containsLocatorParam("locatorHeader")) {
             LocatorHolder.super.addDefaultParam("locatorHeader", o);
         }
+        if (!o.containsLocatorParam("locatorExclude")) {
+            LocatorHolder.super.addDefaultParam("locatorExclude", o);
+        }
         if (!o.containsImageAreaParam("imageAreaExclude")) {
             o.put("imageAreaExclude", new ImageArea(""));
         }
@@ -101,11 +104,7 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
         if (this.isSizeMissMatch(actual, expect)) {
             actualResize = this.toSameSize(actual, expect);
         }
-        List<Rectangle> exclude = Lists.newArrayList();
-        if (ctx.hasImageArea("imageAreaExclude")) {
-            exclude = ctx.getImageArea("imageAreaExclude").getRectangles();
-        }
-        ImageComparisonResult result = this.getComparisonResult(file, actualResize, expect, exclude);
+        ImageComparisonResult result = this.getComparisonResult(file, actualResize, expect, ctx);
         if (result.getRectangles() != null) {
             StringBuilder sb = new StringBuilder();
             result.getRectangles()
@@ -126,9 +125,29 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
         return finalImage;
     }
 
-    protected ImageComparisonResult getComparisonResult(File file, BufferedImage actual, BufferedImage expect, java.util.List<Rectangle> rectangles) {
+    protected ImageComparisonResult getComparisonResult(File file, BufferedImage actual, BufferedImage expect, TestRun ctx) {
+        final List<Rectangle> exclude = Lists.newArrayList();
+        double pixelToleranceLevel = 0.1;
+        double allowingPercentOfDifferentPixels = 0.0;
+        if (ctx.hasImageArea("imageAreaExclude")) {
+            exclude.addAll(ctx.getImageArea("imageAreaExclude").getRectangles());
+        }
+        if (ctx.hasLocator("locatorExclude")) {
+            ctx.locator("locatorExclude")
+                    .findElements(ctx)
+                    .forEach(it -> exclude.add(new Rectangle(it.getLocation().getX(), it.getLocation().getY()
+                            , it.getLocation().getX() + it.getSize().getWidth(), it.getLocation().getY() + it.getSize().getHeight())));
+        }
+        if(ctx.containsKey("pixelToleranceLevel")){
+            pixelToleranceLevel = Double.parseDouble(ctx.string("pixelToleranceLevel"));
+        }
+        if(ctx.containsKey("allowingPercentOfDifferentPixels")){
+            allowingPercentOfDifferentPixels = Double.parseDouble(ctx.string("allowingPercentOfDifferentPixels"));
+        }
         return new ImageComparison(expect, actual, file)
-                .setExcludedAreas(rectangles)
+                .setExcludedAreas(exclude)
+                .setPixelToleranceLevel(pixelToleranceLevel)
+                .setAllowingPercentOfDifferentPixels(allowingPercentOfDifferentPixels)
                 .setDrawExcludedRectangles(true)
                 .compareImages();
     }
