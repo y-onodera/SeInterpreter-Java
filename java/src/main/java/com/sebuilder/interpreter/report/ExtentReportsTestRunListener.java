@@ -3,7 +3,6 @@ package com.sebuilder.interpreter.report;
 import com.aventstack.extentreports.ExtentReports;
 import com.aventstack.extentreports.ExtentTest;
 import com.aventstack.extentreports.Status;
-import com.aventstack.extentreports.io.BufferedWriterWriter;
 import com.aventstack.extentreports.reporter.ExtentSparkReporter;
 import com.aventstack.extentreports.reporter.configuration.ViewName;
 import com.aventstack.extentreports.templating.FreemarkerTemplate;
@@ -18,7 +17,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 public class ExtentReportsTestRunListener extends TestRunListenerImpl {

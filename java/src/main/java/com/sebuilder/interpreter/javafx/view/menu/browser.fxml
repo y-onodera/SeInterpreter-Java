@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.*?>
-<?import org.tbee.javafx.scene.layout.fxml.MigPane?>
-<SplitPane orientation="VERTICAL"  maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+<?import org.tbee.javafx.scene.layout.fxml.*?>
+<SplitPane orientation="VERTICAL" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
            xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="com.sebuilder.interpreter.javafx.view.menu.BrowserPresenter">
     <MigPane cols="[45][150][45]" rows="[30][30][30][30]" prefHeight="150" prefWidth="400.0">

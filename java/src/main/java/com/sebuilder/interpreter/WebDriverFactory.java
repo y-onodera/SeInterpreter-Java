@@ -18,13 +18,10 @@ package com.sebuilder.interpreter;
 
 import com.google.common.base.Strings;
 import org.openqa.selenium.Capabilities;
-import org.openqa.selenium.Platform;
-import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.LocalFileDetector;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.net.URL;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
