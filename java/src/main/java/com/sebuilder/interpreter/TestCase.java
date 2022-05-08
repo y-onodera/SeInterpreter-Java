@@ -78,7 +78,7 @@ public record TestCase(ScriptFile scriptFile,
                 if (result == TestRunner.STATUS.STOPPED) {
                     return false;
                 }
-                success = result == TestRunner.STATUS.SUCCESS;
+                success = success && result == TestRunner.STATUS.SUCCESS;
             }
         } catch (IOException e) {
             testRunListener.reportError(materialized.name(), e);
