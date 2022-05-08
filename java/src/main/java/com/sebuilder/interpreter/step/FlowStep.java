@@ -14,18 +14,19 @@ public interface FlowStep extends StepType {
         boolean success = true;
         for (int exec = 0; exec < actions; exec++) {
             ctx.toNextStepIndex();
-            ctx.startTest();
+            boolean aspectSuccess = ctx.startTest();
             int subStep = 0;
             if (ctx.currentStep().getType() instanceof FlowStep) {
                 subStep = this.getSubSteps(ctx);
             }
-            success = success && ctx.currentStep().run(ctx);
+            boolean stepSuccess = ctx.currentStep().run(ctx);
             exec = exec + subStep;
             if (exec != actions - 1) {
-                if (success) {
-                    ctx.processTestSuccess();
+                if (stepSuccess) {
+                    success = success && ctx.processTestSuccess() && aspectSuccess;
                 } else {
                     ctx.processTestFailure();
+                    success = false;
                 }
             }
         }

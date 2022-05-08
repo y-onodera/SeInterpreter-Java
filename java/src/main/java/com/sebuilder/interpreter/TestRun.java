@@ -16,6 +16,7 @@
 
 package com.sebuilder.interpreter;
 
+import javafx.util.Pair;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
@@ -137,7 +138,11 @@ public class TestRun implements WebDriverWrapper {
     }
 
     public boolean hasLocator() {
-        return this.currentStep().locatorContains("locator");
+        return this.hasLocator("locator");
+    }
+
+    public boolean hasLocator(String key) {
+        return this.currentStep().locatorContains(key);
     }
 
     public Locator locator() {
@@ -198,24 +203,27 @@ public class TestRun implements WebDriverWrapper {
 
     public boolean next() {
         try {
-            if (!this.runTest()) {
+            Pair<Boolean, Boolean> result = this.runTest();
+            if (!result.getKey()) {
                 return this.processTestFailure();
             }
-            return this.processTestSuccess();
+            return this.processTestSuccess() && result.getValue();
         } catch (Throwable e) {
             return this.processTestError(e);
         }
     }
 
-    public boolean runTest() {
+    public Pair<Boolean, Boolean> runTest() {
         this.toNextStepIndex();
-        this.startTest();
-        return this.currentStep().run(this);
+        boolean aspectResult = this.startTest();
+        boolean result = this.currentStep().run(this);
+        return new Pair(result, aspectResult);
     }
 
-    public void startTest() {
-        this.getAdvice().invokeBefore(this);
+    public boolean startTest() {
+        boolean aspectSuccess = this.getAdvice().invokeBefore(this);
         this.getListener().startTest(this.currentStepToString());
+        return aspectSuccess;
     }
 
     public void toNextStepIndex() {
@@ -234,8 +242,7 @@ public class TestRun implements WebDriverWrapper {
 
     public boolean processTestSuccess() {
         this.getListener().endTest();
-        this.getAdvice().invokeAfter(this);
-        return true;
+        return this.getAdvice().invokeAfter(this);
     }
 
     public boolean processTestFailure() {
@@ -272,8 +279,8 @@ public class TestRun implements WebDriverWrapper {
 
     protected boolean end(boolean success) {
         this.getListener().closeTestSuite();
-        if (success && this.testRunStatus.isNeedChain()) {
-            return this.chainRun();
+        if (this.testRunStatus.isNeedChain()) {
+            return this.chainRun() && success;
         }
         this.quit();
         return success;
@@ -333,18 +340,17 @@ public class TestRun implements WebDriverWrapper {
         public boolean finish() {
             InputData chainInitialVar = this.parent.vars();
             this.chainIndex = 0;
+            boolean success = true;
             for (TestCase nextChain : this.chains) {
                 final InputData chainVar = chainInitialVar;
-                if (!nextChain.map(it -> it.addAspect(this.parent.getAspect()).setShareInput(chainVar))
-                        .run(this, this.parent.getListener())) {
-                    return false;
-                }
+                success = nextChain.map(it -> it.addAspect(this.parent.getAspect()).setShareInput(chainVar))
+                        .run(this, this.parent.getListener()) && success;
                 if (this.chains.isTakeOverLastRun() && this.lastRunVar != null) {
                     chainInitialVar = this.lastRunVar;
                 }
                 this.chainIndex++;
             }
-            return true;
+            return success;
         }
 
         @Override
