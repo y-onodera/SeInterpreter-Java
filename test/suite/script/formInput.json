@@ -101,6 +101,22 @@
             "type": "SaveScreenshot"
         },
         {
+            "type": "retryElementSelected",
+            "locator": {
+                "type": "id",
+                "value": "plan_b"
+            },
+            "check": "${!get('id:plan_b')}",
+            "subStep": "1"
+        },
+        {
+            "locator": {
+                "type": "id",
+                "value": "plan_b"
+            },
+            "type": "ClickElement"
+        },
+        {
             "type": "Loop",
             "subStep": "2",
             "count": "3"
