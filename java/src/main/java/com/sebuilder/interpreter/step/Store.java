@@ -43,8 +43,8 @@ public class Store extends AbstractStepType implements GetterUseStep {
         if (ctx.currentStep().containsParam("regex")) {
             value = value.replaceAll(ctx.string("regex"), ctx.string("replacement"));
         }
-        if (ctx.currentStep().isNegated()) {
-            value = String.valueOf(!Boolean.valueOf(value));
+        if (ctx.currentStep().negated()) {
+            value = String.valueOf(!Boolean.parseBoolean(value));
         }
         ctx.putVars(ctx.string("variable"), value);
         return true;

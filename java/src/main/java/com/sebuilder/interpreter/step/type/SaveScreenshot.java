@@ -96,8 +96,8 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
         if (!o.containsLocatorParam("locatorExclude")) {
             LocatorHolder.super.addDefaultParam("locatorExclude", o);
         }
-        if (!o.containsImageAreaParam("imageAreaExclude")) {
-            o.put("imageAreaExclude", new ImageArea(""));
+        if (!o.containsStringParam("imageAreaExclude")) {
+            o.put("imageAreaExclude", "");
         }
         return o.apply(LocatorHolder.super::addDefaultParam);
     }
@@ -132,8 +132,8 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
         final List<Rectangle> exclude = Lists.newArrayList();
         double pixelToleranceLevel = 0.1;
         double allowingPercentOfDifferentPixels = 0.0;
-        if (ctx.hasImageArea("imageAreaExclude")) {
-            exclude.addAll(ctx.getImageArea("imageAreaExclude").getRectangles());
+        if (ctx.containsKey("imageAreaExclude")) {
+            exclude.addAll(new ImageArea(ctx.string("imageAreaExclude")).getRectangles());
         }
         if (ctx.hasLocator("locatorExclude")) {
             ctx.locator("locatorExclude")
@@ -141,10 +141,10 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
                     .forEach(it -> exclude.add(new Rectangle(it.getLocation().getX(), it.getLocation().getY()
                             , it.getLocation().getX() + it.getSize().getWidth(), it.getLocation().getY() + it.getSize().getHeight())));
         }
-        if(ctx.containsKey("pixelToleranceLevel")){
+        if (ctx.containsKey("pixelToleranceLevel")) {
             pixelToleranceLevel = Double.parseDouble(ctx.string("pixelToleranceLevel"));
         }
-        if(ctx.containsKey("allowingPercentOfDifferentPixels")){
+        if (ctx.containsKey("allowingPercentOfDifferentPixels")) {
             allowingPercentOfDifferentPixels = Double.parseDouble(ctx.string("allowingPercentOfDifferentPixels"));
         }
         return new ImageComparison(expect, actual, file)

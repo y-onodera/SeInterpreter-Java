@@ -71,15 +71,15 @@ public class SebuilderTest {
             assertStep(results, 6, new ElementAttribute().toPrint(), Locator.Type.XPATH, "//", false, false);
             assertStep(results, 7, new ElementAttribute().toIf(), Locator.Type.ID, "id1", false, false);
             assertStep(results, 8, new ElementAttribute().toRetry(), Locator.Type.NAME, "name1", false, false);
-            assertEquals(results.get(9).getType(), new Loop());
+            assertEquals(results.get(9).type(), new Loop());
         }
 
         private void assertStep(List<Step> results, int i, StepType stepType, Locator.Type locatorName, String locatorValue, boolean isSkip, boolean isNageted) {
-            assertEquals(results.get(i).getType(), stepType);
+            assertEquals(results.get(i).type(), stepType);
             assertEquals(results.get(i).getLocator("locator").type(), locatorName.toString());
             assertEquals(results.get(i).getLocator("locator").value(), locatorValue);
             assertEquals(results.get(i).isSkip(new InputData()), isSkip);
-            assertEquals(results.get(i).isNegated(), isNageted);
+            assertEquals(results.get(i).negated(), isNageted);
         }
     }
 

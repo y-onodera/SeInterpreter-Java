@@ -25,7 +25,7 @@ public interface GetterUseStep extends StepType {
             ctx.getListener().info("expect:" + expect);
             result = expect.equals(got);
         }
-        return result != ctx.currentStep().isNegated();
+        return result != ctx.currentStep().negated();
     }
 
     @Override

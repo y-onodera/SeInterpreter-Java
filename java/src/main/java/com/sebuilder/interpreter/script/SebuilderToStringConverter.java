@@ -59,19 +59,16 @@ public class SebuilderToStringConverter implements TestCaseConverter{
 
     protected JSONObject toJSON(Step s) throws JSONException {
         JSONObject o = new JSONObject();
-        if (s.getName() != null) {
-            o.put("step_name", s.getName());
+        if (s.name() != null) {
+            o.put("step_name", s.name());
         }
-        o.put("type", s.getType().getStepTypeName());
-        o.put("negated", s.isNegated());
+        o.put("type", s.type().getStepTypeName());
+        o.put("negated", s.negated());
         for (String key : s.paramKeys()) {
             o.put(key, s.getParam(key));
         }
         for (String key : s.locatorKeys()) {
             o.put(key, this.toJSON(s.getLocator(key)));
-        }
-        for (String key : s.imageAreaKeys()) {
-            o.put(key, s.getImageArea(key).getValue());
         }
         if (!s.containsParam("skip")) {
             o.put("skip", "false");

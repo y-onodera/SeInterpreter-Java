@@ -160,15 +160,6 @@ public class TestRun implements WebDriverWrapper {
         return new Locator(this.bindRuntimeVariables(l.type()), this.bindRuntimeVariables(l.value()));
     }
 
-    public boolean hasImageArea(String key) {
-        return this.currentStep().imageAreaContains(key);
-    }
-
-    public ImageArea getImageArea(String key) {
-        ImageArea i = this.currentStep().getImageArea(key);
-        return new ImageArea(this.bindRuntimeVariables(i.getValue()));
-    }
-
     public boolean isStopped() {
         return this.testRunStatus.isStopped();
     }
@@ -259,7 +250,7 @@ public class TestRun implements WebDriverWrapper {
     }
 
     public boolean processTestFailure(boolean isAcceptAdvice) {
-        if (!this.currentStep().getType().isContinueAtFailure()) {
+        if (!this.currentStep().type().isContinueAtFailure()) {
             throw new AssertionError(currentStepToString() + " failed.");
         }
         this.getListener().addFailure(currentStepToString() + " failed.");

@@ -19,7 +19,7 @@ public class Print extends AbstractStepType implements GetterUseStep {
     @Override
     public boolean run(TestRun ctx) {
         String value = getter.get(ctx);
-        if (ctx.currentStep().isNegated()) {
+        if (ctx.currentStep().negated()) {
             value = String.valueOf(!Boolean.valueOf(value));
         }
         ctx.log().info(value);

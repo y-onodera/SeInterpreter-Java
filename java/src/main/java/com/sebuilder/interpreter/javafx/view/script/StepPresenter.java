@@ -2,7 +2,10 @@ package com.sebuilder.interpreter.javafx.view.script;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
-import com.sebuilder.interpreter.*;
+import com.sebuilder.interpreter.Locator;
+import com.sebuilder.interpreter.Step;
+import com.sebuilder.interpreter.StepBuilder;
+import com.sebuilder.interpreter.TestCase;
 import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -246,8 +249,6 @@ public class StepPresenter {
 
     private final Map<String, Map<String, Node>> locatorInputs = Maps.newHashMap();
 
-    private final Map<String, Node> imageAreaInputs = Maps.newHashMap();
-
     private Stage dialog;
 
     private int stepIndex;
@@ -289,13 +290,11 @@ public class StepPresenter {
         this.application.executeAndLoggingCaseWhenThrowException(() -> {
             StepBuilder step = new StepBuilder(this.application.getStepTypeOfName(this.selectedStepType));
             for (Map.Entry<String, Node> input : this.inputs.entrySet()) {
-                if (input.getValue() instanceof TextField) {
-                    TextField text = (TextField) input.getValue();
+                if (input.getValue() instanceof TextField text) {
                     if (!Strings.isNullOrEmpty(text.getText())) {
                         step.put(input.getKey(), text.getText());
                     }
-                } else if (input.getValue() instanceof CheckBox) {
-                    CheckBox check = (CheckBox) input.getValue();
+                } else if (input.getValue() instanceof CheckBox check) {
                     if (check.isSelected()) {
                         step.put(input.getKey(), "true");
                     }
@@ -306,12 +305,6 @@ public class StepPresenter {
                 if (!Strings.isNullOrEmpty(type)) {
                     String value = ((TextField) input.getValue().get("value")).getText();
                     step.put(input.getKey(), new Locator(type, value));
-                }
-            }
-            for (Map.Entry<String, Node> input : this.imageAreaInputs.entrySet()) {
-                TextField text = (TextField) input.getValue();
-                if (!Strings.isNullOrEmpty(text.getText())) {
-                    step.put(input.getKey(), new ImageArea(text.getText()));
                 }
             }
             this.editStep(this.action, this.stepIndex, step.build());
@@ -327,8 +320,7 @@ public class StepPresenter {
             row = this.addTextBox(stepWithAllParam, row, "skip");
             row = this.addLocator(stepWithAllParam, row, "locator");
             row = this.constructStringParamView(stepWithAllParam, row, typeName);
-            row = this.constructLocatorParamView(stepWithAllParam, row);
-            this.constructImageAreaParamView(stepWithAllParam, row);
+            this.constructLocatorParamView(stepWithAllParam, row);
             stepEditGrid.getScene().getWindow().sizeToScene();
         });
     }
@@ -366,13 +358,6 @@ public class StepPresenter {
         return row;
     }
 
-    private int constructImageAreaParamView(Step step, int row) {
-        for (String key : step.imageAreaKeys()) {
-            row = addTextBox(key, row, step.getImageArea(key).getValue(), this.imageAreaInputs);
-        }
-        return row;
-    }
-
     private boolean hasGetterType(String typeName) {
         return typeName.startsWith("wait")
                 || typeName.startsWith("assert")
@@ -401,7 +386,7 @@ public class StepPresenter {
     }
 
     private String resetStepType(Step step) {
-        String typeName = step.getType().getStepTypeName();
+        String typeName = step.type().getStepTypeName();
         if (typeName.equals(this.selectedStepType)) {
             return this.selectedStepType;
         }

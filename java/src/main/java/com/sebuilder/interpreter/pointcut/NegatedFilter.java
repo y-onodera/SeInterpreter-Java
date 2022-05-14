@@ -8,7 +8,7 @@ public record NegatedFilter(boolean target) implements Pointcut {
 
     @Override
     public boolean test(Step step, InputData vars) {
-        return this.target == step.isNegated();
+        return this.target == step.negated();
     }
 
 }

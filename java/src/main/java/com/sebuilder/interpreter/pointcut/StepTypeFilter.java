@@ -12,7 +12,7 @@ public record StepTypeFilter(String target, String method) implements Pointcut {
 
     @Override
     public boolean test(Step step, InputData vars) {
-        return METHODS.get(this.method).apply(step.getType().getStepTypeName(), this.target);
+        return METHODS.get(this.method).apply(step.type().getStepTypeName(), this.target);
     }
 
 }

@@ -85,7 +85,7 @@ public record Interceptor(Pointcut pointcut,
     }
 
     String getInterceptCaseName(TestRun testRun) {
-        return testRun.getTestRunName() + "_" + testRun.formatStepIndex() + "_" + testRun.currentStep().getType().getStepTypeName() + "_";
+        return testRun.getTestRunName() + "_" + testRun.formatStepIndex() + "_" + testRun.currentStep().type().getStepTypeName() + "_";
     }
 
 
