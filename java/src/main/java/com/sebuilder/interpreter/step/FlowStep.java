@@ -1,5 +1,6 @@
 package com.sebuilder.interpreter.step;
 
+import com.sebuilder.interpreter.Step;
 import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
@@ -12,39 +13,29 @@ public interface FlowStep extends StepType {
 
     default boolean runSubStep(TestRun ctx, int actions) {
         boolean success = true;
-        for (int exec = 0; exec < actions; exec++) {
-            ctx.toNextStepIndex();
-            boolean aspectSuccess = ctx.startTest();
-            int subStep = 0;
-            if (ctx.currentStep().getType() instanceof FlowStep) {
-                subStep = this.getSubSteps(ctx);
-            }
-            boolean stepSuccess = ctx.currentStep().run(ctx);
-            exec = exec + subStep;
-            if (stepSuccess) {
-                success = success && ctx.processTestSuccess() && aspectSuccess;
-            } else {
-                ctx.processTestFailure();
-                success = false;
-            }
+        int exec = 0;
+        while (exec < actions) {
+            Step.Result result = ctx.runTest();
+            exec = exec + result.execSteps();
+            success = result.success() && success;
         }
         return success;
     }
 
     default void skipSubStep(TestRun ctx, int actions) {
         for (int i = 0; i < actions; i++) {
-            ctx.toNextStepIndex();
-            ctx.getListener().startTest(
-                    ctx.bindRuntimeVariables(
-                            ctx.currentStep()
-                                    .builder()
-                                    .put("skip", "true")
-                                    .build()
-                                    .toPrettyString()
-                    )
-            );
-            ctx.processTestSuccess();
+            ctx.skipTest();
         }
+    }
+
+    @Override
+    default boolean isAcceptEndAdvice() {
+        return false;
+    }
+
+    @Override
+    default int getExecSteps(TestRun ctx) {
+        return this.getSubSteps(ctx);
     }
 
     @Override
@@ -54,5 +45,4 @@ public interface FlowStep extends StepType {
         }
         return o;
     }
-
 }

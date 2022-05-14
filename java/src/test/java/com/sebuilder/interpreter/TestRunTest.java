@@ -20,7 +20,9 @@ import org.mockito.junit.MockitoRule;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.io.File;
+import java.net.URL;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 
 import static org.junit.Assert.*;
@@ -72,6 +74,11 @@ public class TestRunTest {
             TestRunBuilder builder = new TestRunBuilder(this.head);
             this.target = function.apply(builder).createTestRun(this.log, this.driver, this.initialVars, this.listener);
         }
+
+        protected URL getResourceUrl(String name) {
+            return Objects.requireNonNull(this.getClass().getResource(name));
+        }
+
     }
 
     public static class FieldAccessor extends AbstractTestRunTest {
@@ -437,7 +444,7 @@ public class TestRunTest {
             Mockito.doNothing().when(this.listener).endTest();
 
             this.target.toNextStepIndex();
-            this.target.processTestSuccess();
+            this.target.processTestSuccess(true);
 
             Mockito.verify(this.listener).endTest();
         }
@@ -451,7 +458,7 @@ public class TestRunTest {
 
             this.target.toNextStepIndex();
             try {
-                this.target.processTestFailure();
+                this.target.processTestFailure(true);
             } finally {
                 Mockito.verify(this.listener).addFailure("name: ClickElement failed.");
             }
@@ -467,7 +474,7 @@ public class TestRunTest {
 
             this.target.toNextStepIndex();
             try {
-                this.target.processTestError(exception);
+                throw this.target.processTestError(exception);
             } finally {
                 Mockito.verify(this.listener).addError(exception);
             }
@@ -599,7 +606,7 @@ public class TestRunTest {
 
             this.target.toNextStepIndex();
             try {
-                this.target.processTestFailure();
+                this.target.processTestFailure(true);
             } finally {
                 Mockito.verify(this.listener).addFailure("ClickElement text=parameter string failed.");
             }
@@ -626,8 +633,6 @@ public class TestRunTest {
 
     public static class WithChainRun extends AbstractTestRunTest {
 
-        private TestCase chainCase;
-
         private Step chainStep;
 
         @Before
@@ -641,8 +646,8 @@ public class TestRunTest {
             this.chainStep = Mockito.spy(new StepBuilder(new ClickElement())
                     .name("chain")
                     .build());
-            this.chainCase = this.head.builder().setName("chainCase").clearStep().addStep(this.chainStep).build();
-            this.chains = this.chains.append(this.chainCase);
+            TestCase chainCase = this.head.builder().setName("chainCase").clearStep().addStep(this.chainStep).build();
+            this.chains = this.chains.append(chainCase);
             this.resetTestRun();
         }
 
@@ -758,8 +763,6 @@ public class TestRunTest {
 
     public static class WithAspect extends AbstractTestRunTest {
 
-        private TestCase chainCase;
-
         private Step chainStep;
 
         private Step aspectBeforeStep;
@@ -782,8 +785,8 @@ public class TestRunTest {
             this.chainStep = Mockito.spy(new StepBuilder(new ClickElement())
                     .name("chain")
                     .build());
-            this.chainCase = this.head.builder().setName("chainCase").clearStep().addStep(this.chainStep).build();
-            this.chains = this.chains.append(this.chainCase);
+            TestCase chainCase = this.head.builder().setName("chainCase").clearStep().addStep(this.chainStep).build();
+            this.chains = this.chains.append(chainCase);
             this.aspectBeforeStep = Mockito.spy(new StepBuilder(new SetElementText()).build());
             this.aspectAfterStep = Mockito.spy(new StepBuilder(new DoubleClickElement()).build());
             this.interceptor = Mockito.spy(new Interceptor(
@@ -857,8 +860,6 @@ public class TestRunTest {
 
     public static class WithContextAspect extends AbstractTestRunTest {
 
-        private TestCase chainCase;
-
         private Step chainStep;
 
         private Step aspectBeforeStep;
@@ -881,8 +882,8 @@ public class TestRunTest {
             this.chainStep = Mockito.spy(new StepBuilder(new ClickElement())
                     .name("chain")
                     .build());
-            this.chainCase = this.head.builder().setName("chainCase").clearStep().addStep(this.chainStep).build();
-            this.chains = this.chains.append(this.chainCase);
+            TestCase chainCase = this.head.builder().setName("chainCase").clearStep().addStep(this.chainStep).build();
+            this.chains = this.chains.append(chainCase);
             this.resetTestRun();
             this.aspectBeforeStep = Mockito.spy(new StepBuilder(new SetElementText()).build());
             this.aspectAfterStep = Mockito.spy(new StepBuilder(new DoubleClickElement()).build());
@@ -961,8 +962,6 @@ public class TestRunTest {
 
     public static class WithAspectAndContextAspect extends AbstractTestRunTest {
 
-        private TestCase chainCase;
-
         private Step chainStep;
 
         private Step aspectBeforeStep;
@@ -994,8 +993,8 @@ public class TestRunTest {
             this.chainStep = Mockito.spy(new StepBuilder(new ClickElement())
                     .name("chain")
                     .build());
-            this.chainCase = this.head.builder().setName("chainCase").clearStep().addStep(this.chainStep).build();
-            this.chains = this.chains.append(this.chainCase);
+            TestCase chainCase = this.head.builder().setName("chainCase").clearStep().addStep(this.chainStep).build();
+            this.chains = this.chains.append(chainCase);
             this.aspectBeforeStep = Mockito.spy(new StepBuilder(new SetElementText()).build());
             this.aspectAfterStep = Mockito.spy(new StepBuilder(new DoubleClickElement()).build());
             this.interceptor = Mockito.spy(new Interceptor(
@@ -1111,8 +1110,6 @@ public class TestRunTest {
 
     public static class WithSkippableChainRun extends AbstractTestRunTest {
 
-        private TestCase chainStart;
-
         private TestCase chainCase;
 
         private Step chainStep;
@@ -1125,7 +1122,7 @@ public class TestRunTest {
             this.head = new TestCaseBuilder()
                     .setName("suite")
                     .build();
-            this.chainStart = new TestCaseBuilder()
+            TestCase chainStart = new TestCaseBuilder()
                     .setName("chainStart")
                     .addStep(this.step)
                     .build();
@@ -1135,8 +1132,8 @@ public class TestRunTest {
             this.chainCase = this.head.builder().setName("chainCase")
                     .setSkip("${skip}")
                     .clearStep().addStep(this.chainStep).build();
-            this.chainStart = this.chainStart.map(it -> it.addChain(this.chainCase).isChainTakeOverLastRun(true));
-            this.chains = this.chains.append(this.chainStart);
+            chainStart = chainStart.map(it -> it.addChain(this.chainCase).isChainTakeOverLastRun(true));
+            this.chains = this.chains.append(chainStart);
         }
 
         @Test
@@ -1209,8 +1206,6 @@ public class TestRunTest {
 
     public static class WithDataDrivenChainRun extends AbstractTestRunTest {
 
-        private TestCase chainCase;
-
         private Step chainStep;
 
         @Before
@@ -1224,10 +1219,10 @@ public class TestRunTest {
             this.chainStep = Mockito.spy(new StepBuilder(new ClickElement())
                     .name("chain")
                     .build());
-            this.chainCase = this.head.builder().setName("chainCase")
-                    .setDataSource(new Csv(), Map.of("path", this.getClass().getResource("test.csv").getFile()))
+            TestCase chainCase = this.head.builder().setName("chainCase")
+                    .setDataSource(new Csv(), Map.of("path", getResourceUrl("test.csv").getFile()))
                     .clearStep().addStep(this.chainStep).build();
-            this.chains = this.chains.append(this.chainCase);
+            this.chains = this.chains.append(chainCase);
             this.resetTestRun();
         }
 
@@ -1269,8 +1264,6 @@ public class TestRunTest {
 
     public static class WithChainRuns extends AbstractTestRunTest {
 
-        private TestCase chainStart;
-
         private TestCase chainCase;
 
         private TestCase chainCase2;
@@ -1285,7 +1278,7 @@ public class TestRunTest {
             this.step = Mockito.spy(new StepBuilder(new ClickElement())
                     .name("name")
                     .build());
-            this.chainStart = new TestCaseBuilder()
+            TestCase chainStart = new TestCaseBuilder()
                     .setName("chainStart")
                     .addStep(this.step)
                     .build();
@@ -1295,7 +1288,7 @@ public class TestRunTest {
                     .build());
             this.chainCase = this.head.builder().setName("chainCase")
                     .setSkip("${skipChain1}")
-                    .setDataSource(new Csv(), Map.of("path", this.getClass().getResource("test.csv").getFile()))
+                    .setDataSource(new Csv(), Map.of("path", this.getResourceUrl("test.csv").getFile()))
                     .addStep(this.chainStep)
                     .build();
             this.chain2 = Mockito.spy(new StepBuilder(new ClickElement())
@@ -1306,8 +1299,8 @@ public class TestRunTest {
                     .setSkip("${skipChain2}")
                     .addStep(this.chain2)
                     .build();
-            this.chainStart = this.chainStart.map(it -> it.addChain(chainCase).addChain(chainCase2).isChainTakeOverLastRun(true));
-            this.chains = this.chains.append(this.chainStart);
+            chainStart = chainStart.map(it -> it.addChain(chainCase).addChain(chainCase2).isChainTakeOverLastRun(true));
+            this.chains = this.chains.append(chainStart);
             this.initialVars = this.initialVars.add("key", "default");
         }
 
@@ -1548,8 +1541,6 @@ public class TestRunTest {
 
     public static class WithNestedChainRun extends AbstractTestRunTest {
 
-        private TestCase chainStart;
-
         private TestCase chainCase;
 
         private TestCase chainCase2;
@@ -1566,7 +1557,7 @@ public class TestRunTest {
             this.head = new TestCaseBuilder()
                     .setName("suite")
                     .build();
-            this.chainStart = new TestCaseBuilder()
+            TestCase chainStart = new TestCaseBuilder()
                     .setName("chainStart")
                     .addStep(this.step)
                     .build();
@@ -1576,7 +1567,7 @@ public class TestRunTest {
                     .build());
             this.chainCase = this.head.builder().setName("chainCase")
                     .setSkip("${skipChain1}")
-                    .setDataSource(new Csv(), Map.of("path", this.getClass().getResource("test.csv").getFile()))
+                    .setDataSource(new Csv(), Map.of("path", this.getResourceUrl("test.csv").getFile()))
                     .isNestedChain(true)
                     .addStep(this.chainStep).build();
             this.chain2 = Mockito.spy(new StepBuilder(new ClickElement())
@@ -1588,8 +1579,8 @@ public class TestRunTest {
                     .addStep(this.chain2)
                     .build();
             this.chainCase = this.chainCase.map(it -> it.addChain(this.chainCase2).isChainTakeOverLastRun(true));
-            this.chainStart = this.chainStart.map(it -> it.addChain(this.chainCase));
-            this.chains = this.chains.append(this.chainStart);
+            chainStart = chainStart.map(it -> it.addChain(this.chainCase));
+            this.chains = this.chains.append(chainStart);
             this.initialVars = this.initialVars.add("key", "default");
         }
 
@@ -1841,8 +1832,6 @@ public class TestRunTest {
 
     public static class WithBreakNestedChainRun extends AbstractTestRunTest {
 
-        private TestCase chainStart;
-
         private TestCase chainCase;
 
         private TestCase chainCase2;
@@ -1863,7 +1852,7 @@ public class TestRunTest {
             this.head = new TestCaseBuilder()
                     .setName("suite")
                     .build();
-            this.chainStart = new TestCaseBuilder()
+            TestCase chainStart = new TestCaseBuilder()
                     .setName("chainStart")
                     .addStep(this.step)
                     .build();
@@ -1873,7 +1862,7 @@ public class TestRunTest {
                     .build());
             this.chainCase = this.head.builder().setName("chainCase")
                     .setSkip("${skipChain1}")
-                    .setDataSource(new Csv(), Map.of("path", this.getClass().getResource("test.csv").getFile()))
+                    .setDataSource(new Csv(), Map.of("path", this.getResourceUrl("test.csv").getFile()))
                     .isNestedChain(true)
                     .addStep(this.chainStep).build();
             this.chain2 = Mockito.spy(new StepBuilder(new ClickElement())
@@ -1893,8 +1882,8 @@ public class TestRunTest {
                     .addStep(this.chain3)
                     .build();
             this.chainCase = this.chainCase.map(it -> it.addChain(this.chainCase2).isChainTakeOverLastRun(true));
-            this.chainStart = this.chainStart.map(it -> it.addChain(this.chainCase).addChain(this.chainCase3).isChainTakeOverLastRun(true));
-            this.chains = this.chains.append(this.chainStart);
+            chainStart = chainStart.map(it -> it.addChain(this.chainCase).addChain(this.chainCase3).isChainTakeOverLastRun(true));
+            this.chains = this.chains.append(chainStart);
             this.initialVars = this.initialVars.add("key", "default");
         }
 
@@ -1969,8 +1958,6 @@ public class TestRunTest {
 
     public static class WithChainIncludeSuiteRun extends AbstractTestRunTest {
 
-        private TestCase chainStart;
-
         private TestCase chainCase;
 
         private TestCase chainSuiteHeader;
@@ -1993,7 +1980,7 @@ public class TestRunTest {
             this.head = TestCaseBuilder.suite(null)
                     .setName("suite")
                     .build();
-            this.chainStart = new TestCaseBuilder()
+            TestCase chainStart = new TestCaseBuilder()
                     .setName("chainStart")
                     .addStep(this.step)
                     .build();
@@ -2006,7 +1993,7 @@ public class TestRunTest {
                     .build());
             this.chainCase = this.head.builder().setName("chainCase")
                     .setSkip("${skipChain1}")
-                    .setDataSource(new Csv(), Map.of("path", this.getClass().getResource("test.csv").getFile()))
+                    .setDataSource(new Csv(), Map.of("path", this.getResourceUrl("test.csv").getFile()))
                     .addStep(this.chainStep).build();
             this.chain2 = Mockito.spy(new StepBuilder(new ClickElement())
                     .name("chain2")
@@ -2024,8 +2011,8 @@ public class TestRunTest {
                     .addStep(this.chain3)
                     .build();
             this.chainSuiteHeader = this.chainSuiteHeader.map(it -> it.addChain(this.chainCase).addChain(this.chainCase2));
-            this.chainStart = this.chainStart.map(it -> it.addChain(this.chainSuiteHeader).addChain(this.chainCase3).isChainTakeOverLastRun(true));
-            this.chains = this.chains.append(this.chainStart);
+            chainStart = chainStart.map(it -> it.addChain(this.chainSuiteHeader).addChain(this.chainCase3).isChainTakeOverLastRun(true));
+            this.chains = this.chains.append(chainStart);
             this.initialVars = this.initialVars.add("key", "default");
         }
 

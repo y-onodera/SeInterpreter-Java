@@ -45,4 +45,12 @@ public interface StepType extends StepElement {
         return false;
     }
 
+    default boolean isAcceptEndAdvice() {
+        return true;
+    }
+
+    default  int getExecSteps(TestRun ctx) {
+        return 1;
+    }
+
 }

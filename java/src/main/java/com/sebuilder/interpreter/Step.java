@@ -55,6 +55,19 @@ public record Step(
         );
     }
 
+    public Result execute(TestRun ctx) {
+        try {
+            final boolean aspectSuccess = ctx.startTest();
+            int execSteps = this.type.getExecSteps(ctx);
+            if (this.run(ctx)) {
+                return new Result(ctx.processTestSuccess(this.type.isAcceptEndAdvice()) && aspectSuccess, execSteps);
+            }
+            return new Result(ctx.processTestFailure(this.type.isAcceptEndAdvice()), execSteps);
+        } catch (Throwable e) {
+            throw ctx.processTestError(e);
+        }
+    }
+
     public String getName() {
         return name;
     }
@@ -186,6 +199,9 @@ public record Step(
 
     private boolean isSkippable() {
         return this.stringParams.containsKey(KEY_NAME_SKIP);
+    }
+
+    public static record Result(boolean success, int execSteps) {
     }
 
 }

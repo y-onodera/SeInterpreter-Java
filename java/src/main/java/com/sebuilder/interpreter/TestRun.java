@@ -17,8 +17,8 @@
 package com.sebuilder.interpreter;
 
 import com.sebuilder.interpreter.step.FlowStep;
-import com.sebuilder.interpreter.step.type.ConditionalStep;
-import javafx.util.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
@@ -208,23 +208,26 @@ public class TestRun implements WebDriverWrapper {
     }
 
     public boolean next() {
-        try {
-            boolean conditionalStep = testCase.steps().get(this.testRunStatus.stepIndex() + 1).getType() instanceof FlowStep;
-            Pair<Boolean, Boolean> result = this.runTest();
-            if (!result.getKey()) {
-                return this.processTestFailure(conditionalStep);
-            }
-            return this.processTestSuccess(conditionalStep) && result.getValue();
-        } catch (Throwable e) {
-            return this.processTestError(e);
-        }
+        return this.runTest().success();
     }
 
-    public Pair<Boolean, Boolean> runTest() {
+    public Step.Result runTest() {
         this.toNextStepIndex();
-        boolean aspectResult = this.startTest();
-        boolean result = this.currentStep().run(this);
-        return new Pair(result, aspectResult);
+        return this.currentStep().execute(this);
+    }
+
+    public void skipTest() {
+        this.toNextStepIndex();
+        this.getListener().startTest(
+                this.bindRuntimeVariables(
+                        this.currentStep()
+                                .builder()
+                                .put("skip", "true")
+                                .build()
+                                .toPrettyString()
+                )
+        );
+        this.processTestSuccess(false);
     }
 
     public boolean startTest() {
@@ -247,25 +250,17 @@ public class TestRun implements WebDriverWrapper {
         this.testRunStatus = this.testRunStatus.forwardStepIndex(count);
     }
 
-    public boolean processTestSuccess() {
-        return this.processTestSuccess(false);
-    }
-
-    public boolean processTestSuccess(boolean isConditionalStep) {
+    public boolean processTestSuccess(boolean isAcceptAdvice) {
         this.getListener().endTest();
-        if (isConditionalStep) {
+        if (!isAcceptAdvice) {
             return true;
         }
         return this.getAdvice().invokeAfter(this);
     }
 
-    public boolean processTestFailure() {
-        return this.processTestFailure(false);
-    }
-
-    public boolean processTestFailure(boolean isConditionalStep) {
+    public boolean processTestFailure(boolean isAcceptAdvice) {
         this.getListener().addFailure(currentStepToString() + " failed.");
-        if (!isConditionalStep) {
+        if (!isAcceptAdvice) {
             this.getAdvice().invokeFailure(this);
         }
         if (this.currentStep().getType().isContinueAtFailure()) {
@@ -274,10 +269,10 @@ public class TestRun implements WebDriverWrapper {
         throw new AssertionError(currentStepToString() + " failed.");
     }
 
-    public boolean processTestError(Throwable e) {
+    public AssertionError processTestError(Throwable e) {
         this.getListener().addError(e);
         this.getAdvice().invokeFailure(this);
-        throw new AssertionError(currentStepToString() + " failed.", e);
+        return new AssertionError(currentStepToString() + " failed.", e);
     }
 
     public String currentStepToString() {
@@ -344,7 +339,6 @@ public class TestRun implements WebDriverWrapper {
             }
         }
     }
-
 
     protected static class ChainRunner implements TestRunner {
         private final TestRun parent;

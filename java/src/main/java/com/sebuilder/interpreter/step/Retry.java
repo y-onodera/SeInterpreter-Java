@@ -30,12 +30,12 @@ public class Retry extends AbstractStepType implements FlowStep, GetterUseStep {
         boolean success = true;
         int actions = getSubSteps(ctx);
         while (!this.test(ctx)) {
-            ctx.processTestSuccess();
+            ctx.processTestSuccess(false);
             success = this.runSubStep(ctx, actions) && success;
             ctx.backStepIndex(actions);
             ctx.startTest();
         }
-        ctx.processTestSuccess();
+        ctx.processTestSuccess(false);
         this.skipSubStep(ctx, actions);
         ctx.getListener().startTest("End " + ctx.bindRuntimeVariables(thisStep.toPrettyString()));
         return success;
