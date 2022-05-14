@@ -259,14 +259,14 @@ public class TestRun implements WebDriverWrapper {
     }
 
     public boolean processTestFailure(boolean isAcceptAdvice) {
+        if (!this.currentStep().getType().isContinueAtFailure()) {
+            throw new AssertionError(currentStepToString() + " failed.");
+        }
         this.getListener().addFailure(currentStepToString() + " failed.");
         if (!isAcceptAdvice) {
             this.getAdvice().invokeFailure(this);
         }
-        if (this.currentStep().getType().isContinueAtFailure()) {
-            return false;
-        }
-        throw new AssertionError(currentStepToString() + " failed.");
+        return false;
     }
 
     public AssertionError processTestError(Throwable e) {
