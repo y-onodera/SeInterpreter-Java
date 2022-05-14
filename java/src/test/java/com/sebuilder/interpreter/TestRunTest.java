@@ -349,11 +349,6 @@ public class TestRunTest {
         }
 
         @Test
-        public void stepRest() {
-            assertFalse(this.target.stepRest());
-        }
-
-        @Test
         public void absent() {
             final IllegalArgumentException illegalArgumentException = new IllegalArgumentException();
             expectedException.expect(AssertionError.class);
@@ -483,11 +478,6 @@ public class TestRunTest {
         @Test
         public void hasNext() {
             assertTrue(this.target.hasNext());
-        }
-
-        @Test
-        public void stepRest() {
-            assertTrue(this.target.stepRest());
         }
 
         @Test

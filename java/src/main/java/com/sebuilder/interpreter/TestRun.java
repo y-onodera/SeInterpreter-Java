@@ -16,9 +16,6 @@
 
 package com.sebuilder.interpreter;
 
-import com.sebuilder.interpreter.step.FlowStep;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
@@ -123,16 +120,16 @@ public class TestRun implements WebDriverWrapper {
         return this.currentStep().containsParam(key);
     }
 
-    public String text() {
-        return this.string("text");
-    }
-
     public String bindRuntimeVariables(String value) {
         return this.vars.evaluateString(value);
     }
 
     public boolean getBoolean(@Nonnull String key) {
         return this.containsKey(key) && this.vars().evaluate(this.currentStep().getParam(key));
+    }
+
+    public String text() {
+        return this.string("text");
     }
 
     public String string(@Nonnull String key) {
@@ -276,10 +273,6 @@ public class TestRun implements WebDriverWrapper {
     }
 
     protected boolean hasNext() {
-        return this.stepRest();
-    }
-
-    protected boolean stepRest() {
         return testRunStatus.isNeedRunning(this.testCase.steps().size() - 1);
     }
 
