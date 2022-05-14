@@ -62,9 +62,9 @@ public record TestCaseChains(ArrayList<TestCase> testCases, boolean takeOverLast
 
     public TestCaseChains append(int aIndex, TestCase testCase) {
         ArrayList<TestCase> newList = Lists.newArrayList(this.testCases);
-        long countDuplicate = newList.stream().filter(it -> !Strings.isNullOrEmpty(it.getScriptFile().path())
-                && !Strings.isNullOrEmpty(testCase.getScriptFile().path())
-                && it.getScriptFile().path().equals(testCase.getScriptFile().path())).count();
+        long countDuplicate = newList.stream().filter(it -> !Strings.isNullOrEmpty(it.scriptFile().path())
+                && !Strings.isNullOrEmpty(testCase.scriptFile().path())
+                && it.scriptFile().path().equals(testCase.scriptFile().path())).count();
         if (countDuplicate == 0) {
             newList.add(aIndex, testCase);
         } else {
@@ -76,7 +76,7 @@ public record TestCaseChains(ArrayList<TestCase> testCases, boolean takeOverLast
     public TestCaseChains remove(TestCase aTestCase) {
         ArrayList<TestCase> newList = this.testCases
                 .stream()
-                .map(it -> it.map(builder -> builder.setChains(it.getChains().remove(aTestCase))))
+                .map(it -> it.map(builder -> builder.setChains(it.chains().remove(aTestCase))))
                 .filter(it -> !it.name().equals(aTestCase.name()))
                 .collect(Collectors.toCollection(ArrayList::new));
         return new TestCaseChains(newList, this.takeOverLastRun);
@@ -88,7 +88,7 @@ public record TestCaseChains(ArrayList<TestCase> testCases, boolean takeOverLast
                 return aTestCase;
             }
             return testCase;
-        }, it -> !(it.equals(aTestCase) && aTestCase.getScriptFile().type() == ScriptFile.Type.SUITE));
+        }, it -> !(it.equals(aTestCase) && aTestCase.scriptFile().type() == ScriptFile.Type.SUITE));
     }
 
     public TestCaseChains map(Function<TestCase, TestCase> converter, Predicate<TestCase> isChainConvert) {
@@ -97,7 +97,7 @@ public record TestCaseChains(ArrayList<TestCase> testCases, boolean takeOverLast
         for (TestCase testCase : this.testCases) {
             TestCase copy = converter
                     .apply(testCase)
-                    .changeWhenConditionMatch(isChainConvert, matches -> matches.map(it -> it.setChains(matches.getChains().map(converter, isChainConvert))));
+                    .changeWhenConditionMatch(isChainConvert, matches -> matches.map(it -> it.setChains(matches.chains().map(converter, isChainConvert))));
             final String scriptName = copy.name();
             Pair<String, String> key = Pair.of(copy.name(), copy.path());
             if (duplicate.containsKey(key) && !Strings.isNullOrEmpty(key.getValue())) {
@@ -124,7 +124,7 @@ public record TestCaseChains(ArrayList<TestCase> testCases, boolean takeOverLast
             if (target.name().equals(scriptName)) {
                 return target;
             }
-            TestCase recursiveSearch = this.selectRecursive(scriptName, target.getChains());
+            TestCase recursiveSearch = this.selectRecursive(scriptName, target.chains());
             if (recursiveSearch != null) {
                 return recursiveSearch;
             }

@@ -34,20 +34,8 @@ public record ScriptFile(String name, String path, File relativePath, Type type)
         this(file.getName(), file.getAbsolutePath(), file.getParentFile().getAbsoluteFile(), type);
     }
 
-    public String name() {
-        return this.name;
-    }
-
     public String path() {
         return Optional.ofNullable(this.path).orElse("");
-    }
-
-    public File relativePath() {
-        return this.relativePath;
-    }
-
-    public Type type() {
-        return type;
     }
 
     public File toFile() {

@@ -38,10 +38,10 @@ public class SeleniumIDETest {
     }
 
     private void assertChainCaseEquals(TestCase expect, TestCase loaded) {
-        assertEquals(expect.getChains().size(), loaded.getChains().size());
-        for (int i = 0, j = expect.getChains().size(); i < j; i++) {
-            assertEquals(toStringConverter.toString(expect.getChains().get(i)), toStringConverter.toString(loaded.getChains().get(i)));
-            assertChainCaseEquals(expect.getChains().get(i), loaded.getChains().get(i));
+        assertEquals(expect.chains().size(), loaded.chains().size());
+        for (int i = 0, j = expect.chains().size(); i < j; i++) {
+            assertEquals(toStringConverter.toString(expect.chains().get(i)), toStringConverter.toString(loaded.chains().get(i)));
+            assertChainCaseEquals(expect.chains().get(i), loaded.chains().get(i));
         }
     }
 

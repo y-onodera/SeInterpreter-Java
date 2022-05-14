@@ -144,7 +144,7 @@ public class SeInterpreterApplication extends Application {
     public void replaceScript(String text) {
         this.executeAndLoggingCaseWhenThrowException(() -> {
             TestCase replaced = Context.getScriptParser()
-                    .load(text, this.getDisplayTestCase().getScriptFile().toFile(), this.runner.getGlobalListener())
+                    .load(text, this.getDisplayTestCase().scriptFile().toFile(), this.runner.getGlobalListener())
                     .map(it -> it.setName(this.getDisplayTestCase().name()));
             replaceDisplayCase(replaced);
             SuccessDialog.show("commit succeed");
@@ -186,7 +186,7 @@ public class SeInterpreterApplication extends Application {
 
     public TestCase findTestCase(String chainHeadName, String targetName) {
         return this.findChainHead(chainHeadName)
-                .getChains()
+                .chains()
                 .get(targetName);
     }
 
@@ -378,7 +378,7 @@ public class SeInterpreterApplication extends Application {
         long no = this.suite.get()
                 .getChains()
                 .flattenTestCases()
-                .filter(it -> Strings.isNullOrEmpty(it.getScriptFile().path()))
+                .filter(it -> Strings.isNullOrEmpty(it.scriptFile().path()))
                 .count();
         if (no > 0) {
             return result.map(it -> it.setName(result.name() + "(" + no + ")"));
@@ -404,8 +404,8 @@ public class SeInterpreterApplication extends Application {
     }
 
     protected TestCase copyDataSourceTemplate(TestCase it) {
-        if (it.getDataSourceLoader().getDataSourceConfig().containsKey("path")) {
-            File src = new File(this.runner.getTemplateOutputDirectory(), it.getDataSourceLoader().getDataSourceConfig().get("path"));
+        if (it.dataSourceLoader().dataSourceConfig().containsKey("path")) {
+            File src = new File(this.runner.getTemplateOutputDirectory(), it.dataSourceLoader().dataSourceConfig().get("path"));
             if (src.exists()) {
                 final String newDataSourceName = it.name().replace(".json", "");
                 File newDataSource = new File(this.runner.getDataSourceDirectory(), newDataSourceName + ".csv");

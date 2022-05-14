@@ -17,7 +17,7 @@ public class SebuilderToStringConverter implements TestCaseConverter{
 
     @Override
     public String toString(TestCase target) {
-        if (target.getScriptFile().type() == ScriptFile.Type.SUITE) {
+        if (target.scriptFile().type() == ScriptFile.Type.SUITE) {
             return toStringSuite(target);
         }
         return toStringTest(target);
@@ -31,7 +31,7 @@ public class SebuilderToStringConverter implements TestCaseConverter{
                 stepsA.put(this.toJSON(s));
             }
             o.put("steps", stepsA);
-            JSONObject data = this.toJson(target.getDataSourceLoader());
+            JSONObject data = this.toJson(target.dataSourceLoader());
             if (data != null) {
                 o.put("data", data);
             }
@@ -44,13 +44,13 @@ public class SebuilderToStringConverter implements TestCaseConverter{
     protected String toStringSuite(TestCase target) {
         try {
             JSONObject o = new JSONObject();
-            JSONObject data = toJson(target.getDataSourceLoader());
+            JSONObject data = toJson(target.dataSourceLoader());
             if (data != null) {
                 o.put("data", data);
             }
             o.put("type", "suite");
             o.put("scripts", this.toJsonArray(target));
-            o.put("shareState", target.isShareState());
+            o.put("shareState", target.shareState());
             return o.toString(4);
         } catch (JSONException e) {
             throw new RuntimeException(e);
@@ -84,8 +84,8 @@ public class SebuilderToStringConverter implements TestCaseConverter{
     }
 
     protected JSONObject toJson(DataSourceLoader target) throws JSONException {
-        final DataSource dataSource = target.getDataSource();
-        final Map<String, String> dataSourceConfig = target.getDataSourceConfig();
+        final DataSource dataSource = target.dataSource();
+        final Map<String, String> dataSourceConfig = target.dataSourceConfig();
         if (dataSource != DataSource.NONE) {
             JSONObject data = new JSONObject();
             final String sourceName = dataSource.name();
@@ -100,12 +100,12 @@ public class SebuilderToStringConverter implements TestCaseConverter{
 
     protected JSONArray toJsonArray(TestCase target) throws JSONException {
         JSONArray scriptsA = new JSONArray();
-        for (TestCase s : target.getChains()) {
-            if (s.getChains().size() > 0 && s.getScriptFile().type() == ScriptFile.Type.TEST) {
-                JSONObject scriptPaths = this.chainToJson(target.getScriptFile(), s);
+        for (TestCase s : target.chains()) {
+            if (s.chains().size() > 0 && s.scriptFile().type() == ScriptFile.Type.TEST) {
+                JSONObject scriptPaths = this.chainToJson(target.scriptFile(), s);
                 scriptsA.put(scriptPaths);
             } else {
-                scriptsA.put(this.toJson(s, target.getScriptFile()));
+                scriptsA.put(this.toJson(s, target.scriptFile()));
             }
         }
         return scriptsA;
@@ -121,9 +121,9 @@ public class SebuilderToStringConverter implements TestCaseConverter{
     }
 
     protected void addChain(ScriptFile suiteFile, TestCase chainHeader, JSONArray addChainTo) throws JSONException {
-        for (TestCase chainCase : chainHeader.getChains()) {
+        for (TestCase chainCase : chainHeader.chains()) {
             addChainTo.put(this.toJson(chainCase, suiteFile));
-            if (chainCase.getChains().size() > 0 && chainCase.getScriptFile().type() == ScriptFile.Type.TEST) {
+            if (chainCase.chains().size() > 0 && chainCase.scriptFile().type() == ScriptFile.Type.TEST) {
                 this.addChain(suiteFile, chainCase, addChainTo);
             }
         }
@@ -136,19 +136,19 @@ public class SebuilderToStringConverter implements TestCaseConverter{
         } else {
             scriptPath.put("path", scriptFile.relativize(testCase));
         }
-        if (!Objects.equals(testCase.getSkip(), "false")) {
-            scriptPath.put("skip", testCase.getSkip());
+        if (!Objects.equals(testCase.skip(), "false")) {
+            scriptPath.put("skip", testCase.skip());
         }
-        if (testCase.isNestedChain()) {
-            scriptPath.put("nestedChain", testCase.isNestedChain());
+        if (testCase.nestedChain()) {
+            scriptPath.put("nestedChain", "true");
         }
-        if (testCase.isBreakNestedChain()) {
-            scriptPath.put("breakNestedChain", testCase.isBreakNestedChain());
+        if (testCase.breakNestedChain()) {
+            scriptPath.put("breakNestedChain", "true");
         }
-        if (testCase.isPreventContextAspect()) {
-            scriptPath.put("preventContextAspect", testCase.isPreventContextAspect());
+        if (testCase.preventContextAspect()) {
+            scriptPath.put("preventContextAspect", "true");
         }
-        JSONObject data = this.toJson(testCase.getOverrideDataSourceLoader());
+        JSONObject data = this.toJson(testCase.overrideDataSourceLoader());
         if (data != null) {
             scriptPath.put("data", data);
         }

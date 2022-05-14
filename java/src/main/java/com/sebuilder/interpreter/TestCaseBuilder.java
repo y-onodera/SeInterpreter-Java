@@ -21,7 +21,7 @@ public class TestCaseBuilder {
     private String skip;
     private TestCaseChains chains;
     private final Function<TestCase, TestCase> chainConverter = script -> {
-        if (script.isShareState() != this.isShareState()) {
+        if (script.shareState() != this.isShareState()) {
             return script.map(it -> it.isShareState(this.isShareState()));
         }
         return script;
@@ -46,21 +46,21 @@ public class TestCaseBuilder {
     }
 
     public TestCaseBuilder(TestCase test) {
-        this.scriptFile = test.getScriptFile();
+        this.scriptFile = test.scriptFile();
         this.steps = new ArrayList<>(test.steps());
-        this.dataSource = test.getDataSourceLoader().getDataSource();
-        this.dataSourceConfig = test.getDataSourceLoader().getDataSourceConfig();
-        this.aspect = test.getAspect();
-        this.shareState = test.isShareState();
-        this.shareInput = test.getShareInput();
-        this.overrideDataSource = test.getOverrideDataSourceLoader().getDataSource();
-        this.overrideDataSourceConfig = test.getOverrideDataSourceLoader().getDataSourceConfig();
-        this.skip = test.getSkip();
-        this.chains = test.getChains();
-        this.nestedChain = test.isNestedChain();
-        this.breakNestedChain = test.isBreakNestedChain();
-        this.preventContextAspect = test.isPreventContextAspect();
-        this.lazyLoad = test.getLazyLoad();
+        this.dataSource = test.dataSourceLoader().dataSource();
+        this.dataSourceConfig = test.dataSourceLoader().dataSourceConfig();
+        this.aspect = test.aspect();
+        this.shareState = test.shareState();
+        this.shareInput = test.shareInput();
+        this.overrideDataSource = test.overrideDataSourceLoader().dataSource();
+        this.overrideDataSourceConfig = test.overrideDataSourceLoader().dataSourceConfig();
+        this.skip = test.skip();
+        this.chains = test.chains();
+        this.nestedChain = test.nestedChain();
+        this.breakNestedChain = test.breakNestedChain();
+        this.preventContextAspect = test.preventContextAspect();
+        this.lazyLoad = test.lazyLoad();
     }
 
     public static TestCase lazyLoad(String beforeReplace, BiFunction<TestCase, TestRunListener, TestCase> lazyLoad) {
@@ -171,8 +171,8 @@ public class TestCaseBuilder {
     }
 
     public TestCaseBuilder setTestDataSet(DataSourceLoader dataSourceLoader) {
-        this.dataSource = dataSourceLoader.getDataSource();
-        this.dataSourceConfig = dataSourceLoader.getDataSourceConfig();
+        this.dataSource = dataSourceLoader.dataSource();
+        this.dataSourceConfig = dataSourceLoader.dataSourceConfig();
         return this;
     }
 

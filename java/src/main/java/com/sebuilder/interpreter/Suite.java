@@ -14,24 +14,24 @@ public record Suite(TestCase head) {
     }
 
     public TestCaseChains getChains() {
-        return this.head().getChains();
+        return this.head().chains();
     }
 
     public TestCase get(String scriptName) {
         if (this.head().name().equals(scriptName)) {
             return this.head();
         }
-        return this.head().getChains().get(scriptName);
+        return this.head().chains().get(scriptName);
     }
 
     public TestCase get(int index) {
-        return this.head().getChains().get(index);
+        return this.head().chains().get(index);
     }
 
     public DataSourceLoader[] dataSources(Predicate<TestCase> predicate) {
         return this.head.flattenTestCases()
                 .filter(predicate)
-                .filter(it -> it.runtimeDataSet().getDataSource().enableMultiLine())
+                .filter(it -> it.runtimeDataSet().dataSource().enableMultiLine())
                 .map(TestCase::runtimeDataSet)
                 .toArray(DataSourceLoader[]::new);
     }

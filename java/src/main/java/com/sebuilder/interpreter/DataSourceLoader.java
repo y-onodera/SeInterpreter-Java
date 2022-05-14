@@ -28,18 +28,6 @@ public record DataSourceLoader(DataSource dataSource, Map<String, String> dataSo
         return new DataSourceLoader(this.dataSource, this.dataSourceConfig, this.relativePath, aShareInput);
     }
 
-    public DataSource getDataSource() {
-        return this.dataSource;
-    }
-
-    public Map<String, String> getDataSourceConfig() {
-        return Maps.newHashMap(this.dataSourceConfig);
-    }
-
-    public File getRelativePath() {
-        return this.relativePath;
-    }
-
     public List<InputData> loadData() throws IOException {
         return this.dataSource.getData(this.dataSourceConfig, this.relativePath, this.shareInput);
     }

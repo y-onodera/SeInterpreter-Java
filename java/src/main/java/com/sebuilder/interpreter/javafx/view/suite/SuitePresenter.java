@@ -172,7 +172,7 @@ public class SuitePresenter {
             if (name.equals(selectScriptName)) {
                 this.treeViewScriptName.getSelectionModel().select(item);
             }
-            addChainToTreeView(selectScriptName, testCase.getChains(), item);
+            addChainToTreeView(selectScriptName, testCase.chains(), item);
         }
     }
 

@@ -42,7 +42,7 @@ public class ChainLoader {
 
     protected TestCase next() throws JSONException, IOException {
         TestCase loaded = this.sebuilder.loadScript(this.scriptArrays.getJSONObject(this.index++), this.suiteFile.toFile(), this.testRunListener);
-        if (loaded.isNestedChain()) {
+        if (loaded.nestedChain()) {
             loaded = this.loadNestedChain(loaded);
         }
         return loaded;
@@ -62,7 +62,7 @@ public class ChainLoader {
                 this.index++;
             }
             TestCase next = this.sebuilder.loadScript(json, this.suiteFile.toFile(), this.testRunListener);
-            if (next.isNestedChain()) {
+            if (next.nestedChain()) {
                 next = this.loadNestedChain(next);
             }
             final TestCase nextCase = next;

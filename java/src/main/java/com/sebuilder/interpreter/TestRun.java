@@ -62,7 +62,7 @@ public class TestRun implements WebDriverWrapper {
         if (this.testCase.relativePath() != null) {
             this.vars = this.vars.add("_relativePath", this.testCase.relativePath().getAbsolutePath());
         }
-        this.aspect = this.testCase.getAspect();
+        this.aspect = this.testCase.aspect();
         this.preventContextAspect = testRunBuilder.isPreventContextAspect();
         this.testRunStatus = TestRunStatus.of(this.testCase);
     }
@@ -313,7 +313,7 @@ public class TestRun implements WebDriverWrapper {
     }
 
     protected void quit() {
-        if (!this.testCase.isShareState()) {
+        if (!this.testCase.shareState()) {
             this.log.debug("Quitting driver.");
             try {
                 this.driver.quit();
@@ -333,7 +333,7 @@ public class TestRun implements WebDriverWrapper {
 
         public ChainRunner(TestRun parent) {
             this.parent = parent;
-            this.chains = parent.testCase.getChains();
+            this.chains = parent.testCase.chains();
         }
 
         public boolean finish() {

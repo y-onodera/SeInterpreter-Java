@@ -19,7 +19,7 @@ public class TestRunBuilder {
 
     public TestRunBuilder(TestCase testCase) {
         this.testCase = testCase;
-        this.shareInput = testCase.getShareInput();
+        this.shareInput = testCase.shareInput();
     }
 
     public String getScriptName() {
@@ -35,7 +35,7 @@ public class TestRunBuilder {
     }
 
     public boolean isPreventContextAspect() {
-        return this.testCase.isPreventContextAspect();
+        return this.testCase.preventContextAspect();
     }
 
     public TestRunBuilder setShareInput(InputData shareInput) {
@@ -65,7 +65,7 @@ public class TestRunBuilder {
 
     public TestRun createTestRun(Logger log, WebDriverFactory webDriverFactory, Map<String, String> webDriverConfig, Long implicitWaitTime, Long pageLoadWaitTime, InputData initialVars, TestRun previousRun, TestRunListener seInterpreterTestListener) {
         final RemoteWebDriver driver;
-        if (this.testCase.isShareState() && previousRun != null && previousRun.driver() != null) {
+        if (this.testCase.shareState() && previousRun != null && previousRun.driver() != null) {
             driver = previousRun.driver();
         } else {
             driver = createDriver(log, webDriverFactory, webDriverConfig);

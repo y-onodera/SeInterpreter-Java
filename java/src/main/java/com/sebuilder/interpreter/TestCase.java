@@ -87,12 +87,8 @@ public record TestCase(ScriptFile scriptFile,
         return success;
     }
 
-    public ScriptFile getScriptFile() {
-        return scriptFile;
-    }
-
     public File relativePath() {
-        return this.getScriptFile().relativePath();
+        return this.scriptFile().relativePath();
     }
 
     public String name() {
@@ -104,63 +100,19 @@ public record TestCase(ScriptFile scriptFile,
     }
 
     public String fileName() {
-        return this.getScriptFile().relativize(this);
+        return this.scriptFile().relativize(this);
     }
 
     public ArrayList<Step> steps() {
         return Lists.newArrayList(this.steps);
     }
 
-    public DataSourceLoader getDataSourceLoader() {
-        return dataSourceLoader;
-    }
-
-    public Aspect getAspect() {
-        return this.aspect;
-    }
-
-    public boolean isShareState() {
-        return this.shareState;
-    }
-
-    public InputData getShareInput() {
-        return this.shareInput;
-    }
-
-    public DataSourceLoader getOverrideDataSourceLoader() {
-        return overrideDataSourceLoader;
-    }
-
-    public String getSkip() {
-        return skip;
-    }
-
     public boolean hasChain() {
-        return this.getChains().size() > 0;
-    }
-
-    public TestCaseChains getChains() {
-        return this.chains;
-    }
-
-    public boolean isNestedChain() {
-        return this.nestedChain;
-    }
-
-    public boolean isBreakNestedChain() {
-        return this.breakNestedChain;
-    }
-
-    public boolean isPreventContextAspect() {
-        return this.preventContextAspect;
+        return this.chains().size() > 0;
     }
 
     public boolean isLazyLoad() {
-        return this.getLazyLoad() != null;
-    }
-
-    public BiFunction<TestCase, TestRunListener, TestCase> getLazyLoad() {
-        return lazyLoad;
+        return this.lazyLoad() != null;
     }
 
     public List<InputData> loadData() throws IOException {
@@ -168,10 +120,10 @@ public record TestCase(ScriptFile scriptFile,
     }
 
     public DataSourceLoader runtimeDataSet() {
-        if (this.getOverrideDataSourceLoader().getDataSource() != DataSource.NONE) {
-            return this.getOverrideDataSourceLoader().shareInput(this.getShareInput());
+        if (this.overrideDataSourceLoader().dataSource() != DataSource.NONE) {
+            return this.overrideDataSourceLoader().shareInput(this.shareInput());
         }
-        return this.getDataSourceLoader().shareInput(this.getShareInput());
+        return this.dataSourceLoader().shareInput(this.shareInput());
     }
 
     public boolean include(TestCase target) {
@@ -183,7 +135,7 @@ public record TestCase(ScriptFile scriptFile,
     }
 
     public Suite toSuite() {
-        if (this.getScriptFile().type() == ScriptFile.Type.SUITE) {
+        if (this.scriptFile().type() == ScriptFile.Type.SUITE) {
             return new Suite(this);
         }
         return new Suite(TestCaseBuilder.suite(null).addChain(this).build());
@@ -275,7 +227,7 @@ public record TestCase(ScriptFile scriptFile,
     }
 
     boolean skipRunning() {
-        return this.getShareInput().evaluate(this.skip);
+        return this.shareInput().evaluate(this.skip);
     }
 
     TestCase materialized(TestRunListener testRunListener) {
@@ -283,7 +235,7 @@ public record TestCase(ScriptFile scriptFile,
     }
 
     TestCase lazyLoad(TestRunListener testRunListener) {
-        return this.getLazyLoad().apply(this, testRunListener);
+        return this.lazyLoad().apply(this, testRunListener);
     }
 
 }

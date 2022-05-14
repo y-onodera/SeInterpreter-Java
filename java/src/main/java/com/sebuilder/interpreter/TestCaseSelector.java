@@ -17,7 +17,7 @@ public record TestCaseSelector(String headName,
 
     public TestCase findTestCase(TestCase testCase) {
         return this.findChainHead(testCase)
-                .getChains()
+                .chains()
                 .get(testCaseName);
     }
 
@@ -28,7 +28,7 @@ public record TestCaseSelector(String headName,
     public TestCase findChainHead(TestCase testCase) {
         return testCase
                 .flattenTestCases()
-                .filter(it -> it.getChains().size() > 0 && it.name().equals(headName))
+                .filter(it -> it.chains().size() > 0 && it.name().equals(headName))
                 .findFirst()
                 .orElse(null);
     }

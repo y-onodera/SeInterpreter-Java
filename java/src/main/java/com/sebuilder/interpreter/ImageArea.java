@@ -12,10 +12,6 @@ public record ImageArea(String value) {
 
     private static final Pattern P = Pattern.compile("(?=\\[)\\[((\\d+\\.?\\d*,){3}(\\d+\\.?\\d*))\\]((?=\\[)|$)");
 
-    public String getValue() {
-        return this.value;
-    }
-
     public List<Rectangle> getRectangles() {
         List<Rectangle> result = Lists.newArrayList();
         Matcher m = P.matcher(this.value);
