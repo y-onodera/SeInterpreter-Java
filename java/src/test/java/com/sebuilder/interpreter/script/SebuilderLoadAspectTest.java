@@ -47,10 +47,10 @@ public class SebuilderLoadAspectTest {
             var advice = result.advice(step, inputData)
                     .advices();
             assertEquals(1, advice.size());
-            assertEquals(1, advice.get(0).beforeStep().size());
-            assertEquals(new Get().toStep().build(), advice.get(0).beforeStep().get(0));
-            assertEquals(new ArrayList<>(), advice.get(0).afterStep());
-            assertEquals(new ArrayList<>(), advice.get(0).failureStep());
+            assertEquals(1, advice.get(0).beforeStep().steps().size());
+            assertEquals(new Get().toStep().build(), advice.get(0).beforeStep().steps().get(0));
+            assertEquals(new TestCaseBuilder().build(), advice.get(0).afterStep());
+            assertEquals(new TestCaseBuilder().build(), advice.get(0).failureStep());
         }
     }
 
@@ -185,26 +185,26 @@ public class SebuilderLoadAspectTest {
                             .build(), new InputData())
                     .advices();
             assertEquals(5, advice.size());
-            assertEquals(1, advice.get(0).beforeStep().size());
-            assertEquals(0, advice.get(0).afterStep().size());
-            assertEquals(0, advice.get(0).failureStep().size());
-            assertEquals(new Get().toStep().build(), advice.get(0).beforeStep().get(0));
-            assertEquals(1, advice.get(1).beforeStep().size());
-            assertEquals(0, advice.get(1).afterStep().size());
-            assertEquals(0, advice.get(1).failureStep().size());
-            assertEquals(new Get().toStep().build(), advice.get(1).beforeStep().get(0));
-            assertEquals(1, advice.get(2).beforeStep().size());
-            assertEquals(0, advice.get(2).afterStep().size());
-            assertEquals(0, advice.get(2).failureStep().size());
-            assertEquals(new Get().toStep().build(), advice.get(2).beforeStep().get(0));
-            assertEquals(1, advice.get(3).beforeStep().size());
-            assertEquals(0, advice.get(3).afterStep().size());
-            assertEquals(0, advice.get(3).failureStep().size());
-            assertEquals(new Get().toStep().build(), advice.get(3).beforeStep().get(0));
-            assertEquals(1, advice.get(4).beforeStep().size());
-            assertEquals(0, advice.get(4).afterStep().size());
-            assertEquals(0, advice.get(4).failureStep().size());
-            assertEquals(new Get().toStep().build(), advice.get(4).beforeStep().get(0));
+            assertEquals(1, advice.get(0).beforeStep().steps().size());
+            assertEquals(0, advice.get(0).afterStep().steps().size());
+            assertEquals(0, advice.get(0).failureStep().steps().size());
+            assertEquals(new Get().toStep().build(), advice.get(0).beforeStep().steps().get(0));
+            assertEquals(1, advice.get(1).beforeStep().steps().size());
+            assertEquals(0, advice.get(1).afterStep().steps().size());
+            assertEquals(0, advice.get(1).failureStep().steps().size());
+            assertEquals(new Get().toStep().build(), advice.get(1).beforeStep().steps().get(0));
+            assertEquals(1, advice.get(2).beforeStep().steps().size());
+            assertEquals(0, advice.get(2).afterStep().steps().size());
+            assertEquals(0, advice.get(2).failureStep().steps().size());
+            assertEquals(new Get().toStep().build(), advice.get(2).beforeStep().steps().get(0));
+            assertEquals(1, advice.get(3).beforeStep().steps().size());
+            assertEquals(0, advice.get(3).afterStep().steps().size());
+            assertEquals(0, advice.get(3).failureStep().steps().size());
+            assertEquals(new Get().toStep().build(), advice.get(3).beforeStep().steps().get(0));
+            assertEquals(1, advice.get(4).beforeStep().steps().size());
+            assertEquals(0, advice.get(4).afterStep().steps().size());
+            assertEquals(0, advice.get(4).failureStep().steps().size());
+            assertEquals(new Get().toStep().build(), advice.get(4).beforeStep().steps().get(0));
         }
 
     }
@@ -237,15 +237,15 @@ public class SebuilderLoadAspectTest {
             var advice = result.advice(step, inputData)
                     .advices();
             assertEquals(1, advice.size());
-            assertEquals(2, advice.get(0).beforeStep().size());
-            assertEquals(new Get().toStep().build(), advice.get(0).beforeStep().get(0));
-            assertEquals(new SetElementText().toStep().put("text", "before step").build(), advice.get(0).beforeStep().get(1));
-            assertEquals(2, advice.get(0).afterStep().size());
-            assertEquals(new SetElementText().toStep().put("text", "after step").build(), advice.get(0).afterStep().get(0));
-            assertEquals(new Get().toStep().build(), advice.get(0).afterStep().get(1));
-            assertEquals(2, advice.get(0).failureStep().size());
-            assertEquals(new SetElementSelected().toStep().build(), advice.get(0).failureStep().get(0));
-            assertEquals(new SetElementText().toStep().put("text", "failure step").build(), advice.get(0).failureStep().get(1));
+            assertEquals(2, advice.get(0).beforeStep().steps().size());
+            assertEquals(new Get().toStep().build(), advice.get(0).beforeStep().steps().get(0));
+            assertEquals(new SetElementText().toStep().put("text", "before step").build(), advice.get(0).beforeStep().steps().get(1));
+            assertEquals(2, advice.get(0).afterStep().steps().size());
+            assertEquals(new SetElementText().toStep().put("text", "after step").build(), advice.get(0).afterStep().steps().get(0));
+            assertEquals(new Get().toStep().build(), advice.get(0).afterStep().steps().get(1));
+            assertEquals(2, advice.get(0).failureStep().steps().size());
+            assertEquals(new SetElementSelected().toStep().build(), advice.get(0).failureStep().steps().get(0));
+            assertEquals(new SetElementText().toStep().put("text", "failure step").build(), advice.get(0).failureStep().steps().get(1));
         }
     }
 

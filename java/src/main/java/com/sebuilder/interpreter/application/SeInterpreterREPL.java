@@ -76,7 +76,7 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
 
     public TestCase loadScript(String file) {
         try {
-            return Context.getScriptParser().load(new File(file), this.testRunListener);
+            return Context.getScriptParser().load(new File(file));
         } catch (Throwable e) {
             this.log.error(e);
         }

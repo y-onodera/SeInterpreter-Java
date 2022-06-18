@@ -3,7 +3,6 @@ package com.sebuilder.interpreter;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -29,7 +28,7 @@ public class TestCaseBuilder {
     private boolean nestedChain;
     private boolean breakNestedChain;
     private boolean preventContextAspect;
-    private BiFunction<TestCase, TestRunListener, TestCase> lazyLoad;
+    private Function<TestCase, TestCase> lazyLoad;
 
     public TestCaseBuilder() {
         this(new ScriptFile(ScriptFile.Type.TEST));
@@ -63,7 +62,7 @@ public class TestCaseBuilder {
         this.lazyLoad = test.lazyLoad();
     }
 
-    public static TestCase lazyLoad(String beforeReplace, BiFunction<TestCase, TestRunListener, TestCase> lazyLoad) {
+    public static TestCase lazyLoad(String beforeReplace, Function<TestCase, TestCase> lazyLoad) {
         return new TestCaseBuilder()
                 .setName(beforeReplace)
                 .setLazyLoad(lazyLoad)
@@ -126,7 +125,7 @@ public class TestCaseBuilder {
         return this.preventContextAspect;
     }
 
-    public BiFunction<TestCase, TestRunListener, TestCase> getLazyLoad() {
+    public Function<TestCase, TestCase> getLazyLoad() {
         return this.lazyLoad;
     }
 
@@ -275,7 +274,7 @@ public class TestCaseBuilder {
         return this;
     }
 
-    public TestCaseBuilder setLazyLoad(BiFunction<TestCase, TestRunListener, TestCase> lazyLoad) {
+    public TestCaseBuilder setLazyLoad(Function<TestCase, TestCase> lazyLoad) {
         this.lazyLoad = lazyLoad;
         return this;
     }

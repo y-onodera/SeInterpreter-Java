@@ -3,7 +3,6 @@ package com.sebuilder.interpreter.script;
 import com.google.common.collect.Lists;
 import com.sebuilder.interpreter.ScriptFile;
 import com.sebuilder.interpreter.TestCase;
-import com.sebuilder.interpreter.TestRunListener;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -17,13 +16,11 @@ public class ChainLoader {
     private final JSONArray scriptArrays;
     private int index;
     private final List<Integer> alreadyBreak;
-    private final TestRunListener testRunListener;
 
-    public ChainLoader(Sebuilder sebuilder, ScriptFile suiteFile, JSONArray scriptArrays, TestRunListener testRunListener) {
+    public ChainLoader(Sebuilder sebuilder, ScriptFile suiteFile, JSONArray scriptArrays) {
         this.sebuilder = sebuilder;
         this.suiteFile = suiteFile;
         this.scriptArrays = scriptArrays;
-        this.testRunListener = testRunListener;
         this.alreadyBreak = Lists.newArrayList();
     }
 
@@ -41,7 +38,7 @@ public class ChainLoader {
     }
 
     protected TestCase next() throws JSONException, IOException {
-        TestCase loaded = this.sebuilder.loadScript(this.scriptArrays.getJSONObject(this.index++), this.suiteFile.toFile(), this.testRunListener);
+        TestCase loaded = this.sebuilder.loadScript(this.scriptArrays.getJSONObject(this.index++), this.suiteFile.toFile());
         if (loaded.nestedChain()) {
             loaded = this.loadNestedChain(loaded);
         }
@@ -61,7 +58,7 @@ public class ChainLoader {
             } else {
                 this.index++;
             }
-            TestCase next = this.sebuilder.loadScript(json, this.suiteFile.toFile(), this.testRunListener);
+            TestCase next = this.sebuilder.loadScript(json, this.suiteFile.toFile());
             if (next.nestedChain()) {
                 next = this.loadNestedChain(next);
             }

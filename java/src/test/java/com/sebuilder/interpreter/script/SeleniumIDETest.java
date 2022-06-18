@@ -31,8 +31,8 @@ public class SeleniumIDETest {
 
     @Test
     public void load() throws IOException {
-        TestCase expect = new Sebuilder().load(new File(baseDir, "expect/sampleScript.json"), testRunListener);
-        TestCase loaded = target.load(new File(baseDir, "sampleScript.side"), testRunListener);
+        TestCase expect = new Sebuilder().load(new File(baseDir, "expect/sampleScript.json"));
+        TestCase loaded = target.load(new File(baseDir, "sampleScript.side"));
         assertEquals(toStringConverter.toString(expect), toStringConverter.toString(loaded));
         assertChainCaseEquals(expect, loaded);
     }

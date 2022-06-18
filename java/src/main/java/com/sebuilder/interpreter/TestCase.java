@@ -22,7 +22,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -47,7 +46,7 @@ public record TestCase(ScriptFile scriptFile,
                        boolean nestedChain,
                        boolean breakNestedChain,
                        boolean preventContextAspect,
-                       BiFunction<TestCase, TestRunListener, TestCase> lazyLoad) {
+                       Function<TestCase, TestCase> lazyLoad) {
 
     public TestCase(TestCaseBuilder builder) {
         this(builder.getScriptFile(),
@@ -70,7 +69,7 @@ public record TestCase(ScriptFile scriptFile,
         if (this.skipRunning()) {
             return true;
         }
-        final TestCase materialized = this.materialized(testRunListener);
+        final TestCase materialized = this.materialized();
         boolean success = true;
         try {
             for (InputData data : materialized.loadData()) {
@@ -230,12 +229,12 @@ public record TestCase(ScriptFile scriptFile,
         return this.shareInput().evaluate(this.skip);
     }
 
-    TestCase materialized(TestRunListener testRunListener) {
-        return this.changeWhenConditionMatch(TestCase::isLazyLoad, it -> it.lazyLoad(testRunListener));
+    TestCase materialized() {
+        return this.changeWhenConditionMatch(TestCase::isLazyLoad, TestCase::execLazyLoad);
     }
 
-    TestCase lazyLoad(TestRunListener testRunListener) {
-        return this.lazyLoad().apply(this, testRunListener);
+    TestCase execLazyLoad() {
+        return this.lazyLoad().apply(this);
     }
 
 }

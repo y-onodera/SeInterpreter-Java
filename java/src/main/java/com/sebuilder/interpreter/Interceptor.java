@@ -1,25 +1,19 @@
 package com.sebuilder.interpreter;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import java.util.ArrayList;
 import java.util.Map;
 
 public record Interceptor(Pointcut pointcut,
-                          ArrayList<Step> beforeStep,
-                          ArrayList<Step> afterStep,
-                          ArrayList<Step> failureStep) {
-    public Interceptor(Pointcut pointcut, ArrayList<Step> beforeStep, ArrayList<Step> afterStep, ArrayList<Step> failureStep) {
-        this.pointcut = pointcut;
-        this.beforeStep = Lists.newArrayList(beforeStep);
-        this.afterStep = Lists.newArrayList(afterStep);
-        this.failureStep = Lists.newArrayList(failureStep);
-    }
+                          TestCase beforeStep,
+                          TestCase afterStep,
+                          TestCase failureStep) {
 
     public boolean isPointcut(Step step, InputData vars) {
         if (this.pointcut == Pointcut.NONE) {
-            return this.beforeStep.size() == 0 && this.afterStep.size() == 0 && this.failureStep.size() > 0;
+            return this.beforeStep.steps().size() == 0
+                    && this.afterStep.steps().size() == 0
+                    && this.failureStep.steps().size() > 0;
         }
         return this.pointcut.test(step, vars);
     }
@@ -36,8 +30,8 @@ public record Interceptor(Pointcut pointcut,
         return this.invokeAdvise(testRun, this.failureStep, "failure");
     }
 
-    boolean invokeAdvise(TestRun testRun, ArrayList<Step> steps, String testRunName) {
-        if (steps.size() == 0) {
+    boolean invokeAdvise(TestRun testRun, TestCase steps, String testRunName) {
+        if (steps.steps().size() == 0) {
             return true;
         }
         final TestCase adviseCase = this.createAdviseCase(steps, testRunName);
@@ -45,10 +39,9 @@ public record Interceptor(Pointcut pointcut,
         return interceptRun.finish();
     }
 
-    TestCase createAdviseCase(ArrayList<Step> steps, String testRunName) {
-        return new TestCaseBuilder()
+    TestCase createAdviseCase(TestCase steps, String testRunName) {
+        return steps.builder()
                 .setName(testRunName)
-                .addSteps(steps)
                 .isShareState(true)
                 .build();
     }
@@ -70,6 +63,7 @@ public record Interceptor(Pointcut pointcut,
     TestRunListener createAdviseListener(TestRun testRun) {
         return new TestRunListenerWrapper(testRun.getListener()) {
             String testName;
+
             @Override
             public boolean openTestSuite(TestCase testCase, String testRunName, InputData aProperty) {
                 this.testName = testRunName;
@@ -93,11 +87,11 @@ public record Interceptor(Pointcut pointcut,
         private final Aspect.Builder aspectBuilder;
         private Pointcut pointcut = Pointcut.NONE;
 
-        private final ArrayList<Step> beforeStep = Lists.newArrayList();
+        private TestCase beforeStep = new TestCaseBuilder().build();
 
-        private final ArrayList<Step> afterStep = Lists.newArrayList();
+        private TestCase afterStep = new TestCaseBuilder().build();
 
-        private final ArrayList<Step> failureStep = Lists.newArrayList();
+        private TestCase failureStep = new TestCaseBuilder().build();
 
         public Builder(Aspect.Builder builder) {
             aspectBuilder = builder;
@@ -108,18 +102,18 @@ public record Interceptor(Pointcut pointcut,
             return this;
         }
 
-        public Builder addBefore(ArrayList<Step> before) {
-            this.beforeStep.addAll(before);
+        public Builder addBefore(TestCase testCase) {
+            this.beforeStep = testCase;
             return this;
         }
 
-        public Builder addAfter(ArrayList<Step> after) {
-            this.afterStep.addAll(after);
+        public Builder addAfter(TestCase testCase) {
+            this.afterStep = testCase;
             return this;
         }
 
-        public Builder addFailure(ArrayList<Step> failure) {
-            this.failureStep.addAll(failure);
+        public Builder addFailure(TestCase testCase) {
+            this.failureStep = testCase;
             return this;
         }
 

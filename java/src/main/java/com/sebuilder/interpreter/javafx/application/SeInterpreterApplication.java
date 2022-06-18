@@ -62,7 +62,7 @@ public class SeInterpreterApplication extends Application {
         final List<String> unnamed = parameters.getUnnamed();
         if (unnamed.size() > 0) {
             this.resetSuite(getScriptParser()
-                    .load(new File(unnamed.get(0)), this.runner.getGlobalListener())
+                    .load(new File(unnamed.get(0)))
                     .toSuite());
         } else {
             this.reset();
@@ -144,7 +144,7 @@ public class SeInterpreterApplication extends Application {
     public void replaceScript(String text) {
         this.executeAndLoggingCaseWhenThrowException(() -> {
             TestCase replaced = Context.getScriptParser()
-                    .load(text, this.getDisplayTestCase().scriptFile().toFile(), this.runner.getGlobalListener())
+                    .load(text, this.getDisplayTestCase().scriptFile().toFile())
                     .map(it -> it.setName(this.getDisplayTestCase().name()));
             replaceDisplayCase(replaced);
             SuccessDialog.show("commit succeed");
@@ -206,11 +206,11 @@ public class SeInterpreterApplication extends Application {
     }
 
     public void scriptReLoad(File file, String scriptType) {
-        this.executeAndLoggingCaseWhenThrowException(() -> this.resetSuite(getScriptParser(scriptType).load(file, this.runner.getGlobalListener()).toSuite()));
+        this.executeAndLoggingCaseWhenThrowException(() -> this.resetSuite(getScriptParser(scriptType).load(file).toSuite()));
     }
 
     public void importScript(File file) {
-        this.executeAndLoggingCaseWhenThrowException(() -> addScript(getScriptParser().load(file, this.runner.getGlobalListener())));
+        this.executeAndLoggingCaseWhenThrowException(() -> addScript(getScriptParser().load(file)));
     }
 
     public void saveSuite(File file) {

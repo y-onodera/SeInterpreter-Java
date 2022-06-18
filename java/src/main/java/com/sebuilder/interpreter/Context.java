@@ -1,7 +1,6 @@
 package com.sebuilder.interpreter;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sebuilder.interpreter.pointcut.StepTypeFilter;
 import com.sebuilder.interpreter.step.type.SaveScreenshot;
@@ -50,7 +49,7 @@ public enum Context {
     private Aspect aspect = new Aspect().builder()
             .interceptor()
             .setPointcut(new StepTypeFilter(SaveScreenshot.class.getSimpleName(), "!equal"))
-            .addFailure(Lists.newArrayList(new SaveScreenshot().toStep().put("file", "failure.png").build()))
+            .addFailure(new SaveScreenshot().toStep().put("file", "failure.png").build().toTestCase())
             .build()
             .build();
     private final Properties environmentProperties = new Properties();

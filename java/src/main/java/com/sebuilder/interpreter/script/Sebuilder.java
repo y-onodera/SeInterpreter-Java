@@ -62,24 +62,23 @@ public class Sebuilder extends AbstractJsonScriptParser {
     }
 
     @Override
-    protected TestCase load(JSONObject o, File sourceFile, TestRunListener testRunListener) throws JSONException, IOException {
+    protected TestCase load(JSONObject o, File sourceFile) throws JSONException, IOException {
         if (o.optString("type", "script").equals("suite")) {
-            return this.parseSuite(o, sourceFile, testRunListener);
+            return this.parseSuite(o, sourceFile);
         }
         return this.parseScript(o, sourceFile);
     }
 
     /**
-     * @param o               A JSONObject describing a script or a suite.
-     * @param suiteFile       Optionally. the file the JSON was loaded from.
-     * @param testRunListener listener to report error
+     * @param o         A JSONObject describing a script or a suite.
+     * @param suiteFile Optionally. the file the JSON was loaded from.
      * @return A script, ready to finish.
      * @throws JSONException If anything goes wrong with interpreting the JSON.
      */
-    protected TestCase parseSuite(JSONObject o, File suiteFile, TestRunListener testRunListener) throws JSONException, IOException {
+    protected TestCase parseSuite(JSONObject o, File suiteFile) throws JSONException, IOException {
         TestCaseBuilder builder = TestCaseBuilder.suite(suiteFile)
                 .setDataSource(this.getDataSource(o), this.getDataSourceConfig(o));
-        this.loadScripts(o, builder, testRunListener);
+        this.loadScripts(o, builder);
         return builder.setAspect(this.getAspect(o))
                 .build();
     }
@@ -106,36 +105,35 @@ public class Sebuilder extends AbstractJsonScriptParser {
                 .build();
     }
 
-    protected void loadScripts(JSONObject o, TestCaseBuilder builder, TestRunListener testRunListener) throws JSONException, IOException {
+    protected void loadScripts(JSONObject o, TestCaseBuilder builder) throws JSONException, IOException {
         JSONArray scriptLocations = o.getJSONArray("scripts");
         for (int i = 0; i < scriptLocations.length(); i++) {
             JSONObject script = scriptLocations.getJSONObject(i);
             if (script.has("paths")) {
                 JSONArray scriptArrays = script.getJSONArray("paths");
-                this.loadScriptChain(scriptArrays, builder, testRunListener);
+                this.loadScriptChain(scriptArrays, builder);
             } else if (script.has("chain")) {
                 JSONArray scriptArrays = script.getJSONArray("chain");
-                this.loadScriptChain(scriptArrays, builder, testRunListener);
+                this.loadScriptChain(scriptArrays, builder);
             } else {
-                builder.addChain(this.loadScript(script, new File(builder.getScriptFile().path()), testRunListener));
+                builder.addChain(this.loadScript(script, new File(builder.getScriptFile().path())));
             }
         }
     }
 
     /**
-     * @param script          A JSONObject describing a script or a suite where load from.
-     * @param testRunListener listener to report error
+     * @param script A JSONObject describing a script or a suite where load from.
      * @return loaded from file
      * @throws JSONException If anything goes wrong with interpreting the JSON.
      */
-    protected TestCase loadScript(JSONObject script, File suiteFile, TestRunListener testRunListener) throws JSONException, IOException {
+    protected TestCase loadScript(JSONObject script, File suiteFile) throws JSONException, IOException {
         if (script.has("lazyLoad")) {
             String beforeReplace = script.getString("lazyLoad");
-            return this.overrideSetting(script, TestCaseBuilder.lazyLoad(beforeReplace, (runtimeBefore, listener) -> {
+            return this.overrideSetting(script, TestCaseBuilder.lazyLoad(beforeReplace, (runtimeBefore) -> {
                 String fileName = runtimeBefore.shareInput().evaluateString(beforeReplace);
                 JSONObject source = new JSONObject();
                 try {
-                    TestCase lazyLoad = loadScript(source.put("path", fileName), suiteFile, listener);
+                    TestCase lazyLoad = loadScript(source.put("path", fileName), suiteFile);
                     return runtimeBefore.map(it -> it
                             .associateWith(lazyLoad.scriptFile().toFile())
                             .setName(lazyLoad.name())
@@ -151,22 +149,22 @@ public class Sebuilder extends AbstractJsonScriptParser {
         String path = Context.bindEnvironmentProperties(script.getString("path"));
         if (script.has("where") && Strings.isNullOrEmpty(script.getString("where"))) {
             File wherePath = new File(Context.bindEnvironmentProperties(script.getString("where")), path);
-            return this.loadScriptIfExists(wherePath, script, testRunListener);
+            return this.loadScriptIfExists(wherePath, script);
         }
         File f = new File(path);
         if (!f.exists()) {
             f = new File(suiteFile.getAbsoluteFile().getParentFile(), path);
         }
-        return this.loadScriptIfExists(f.getAbsoluteFile(), script, testRunListener);
+        return this.loadScriptIfExists(f.getAbsoluteFile(), script);
     }
 
-    protected void loadScriptChain(JSONArray scriptArrays, TestCaseBuilder builder, TestRunListener testRunListener) throws JSONException, IOException {
-        ChainLoader chainLoader = new ChainLoader(this, builder.getScriptFile(), scriptArrays, testRunListener);
+    protected void loadScriptChain(JSONArray scriptArrays, TestCaseBuilder builder) throws JSONException, IOException {
+        ChainLoader chainLoader = new ChainLoader(this, builder.getScriptFile(), scriptArrays);
         builder.addChain(chainLoader.load());
     }
 
-    protected TestCase loadScriptIfExists(File wherePath, JSONObject script, TestRunListener testRunListener) throws JSONException, IOException {
-        return this.overrideSetting(script, this.load(wherePath, testRunListener));
+    protected TestCase loadScriptIfExists(File wherePath, JSONObject script) throws JSONException, IOException {
+        return this.overrideSetting(script, this.load(wherePath));
     }
 
     protected DataSource getDataSource(JSONObject o) throws JSONException {
@@ -258,7 +256,7 @@ public class Sebuilder extends AbstractJsonScriptParser {
         }
     }
 
-    protected Aspect getAspect(JSONObject o) throws JSONException {
+    protected Aspect getAspect(JSONObject o) throws JSONException, IOException {
         Aspect result = new Aspect();
         if (o.has("aspect")) {
             Aspect.Builder builder = result.builder();
@@ -270,13 +268,13 @@ public class Sebuilder extends AbstractJsonScriptParser {
                     interceptorBuilder.setPointcut(this.getPointcut(aspect.getJSONArray("pointcut")));
                 }
                 if (aspect.has("before")) {
-                    interceptorBuilder.addBefore(this.parseStep(aspect.getJSONObject("before")));
+                    interceptorBuilder.addBefore(this.load(aspect.getJSONObject("before"), null));
                 }
                 if (aspect.has("after")) {
-                    interceptorBuilder.addAfter(this.parseStep(aspect.getJSONObject("after")));
+                    interceptorBuilder.addAfter(this.load(aspect.getJSONObject("after"), null));
                 }
                 if (aspect.has("failure")) {
-                    interceptorBuilder.addFailure(this.parseStep(aspect.getJSONObject("failure")));
+                    interceptorBuilder.addFailure(this.load(aspect.getJSONObject("failure"), null));
                 }
                 interceptorBuilder.build();
             }

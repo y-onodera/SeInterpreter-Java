@@ -111,7 +111,7 @@ public class SeInterpreter extends CommandLineRunner implements TestRunner {
 
     protected TestCase loadTestCase(String path) {
         try {
-            return Context.getScriptParser().load(new File(path), this.testRunListener);
+            return Context.getScriptParser().load(new File(path));
         } catch (IOException e) {
             throw new AssertionError(e);
         }

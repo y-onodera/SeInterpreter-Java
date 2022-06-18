@@ -2,7 +2,6 @@ package com.sebuilder.interpreter.script.seleniumide;
 
 import com.sebuilder.interpreter.Aspect;
 import com.sebuilder.interpreter.TestCase;
-import com.sebuilder.interpreter.TestRunListener;
 import com.sebuilder.interpreter.script.AbstractJsonScriptParser;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -27,7 +26,7 @@ public class SeleniumIDE extends AbstractJsonScriptParser {
     }
 
     @Override
-    protected TestCase load(JSONObject o, File sourceFile, TestRunListener testRunListener) throws JSONException {
+    protected TestCase load(JSONObject o, File sourceFile) throws JSONException {
         SeleniumIDEConverter converter = new SeleniumIDEConverter(o);
         return converter.getResult();
     }

@@ -781,9 +781,9 @@ public class TestRunTest {
             this.aspectAfterStep = Mockito.spy(new StepBuilder(new DoubleClickElement()).build());
             this.interceptor = Mockito.spy(new Interceptor(
                     (step, input) -> "name".equals(step.name())
-                    , Lists.newArrayList(this.aspectBeforeStep)
-                    , Lists.newArrayList(this.aspectAfterStep)
-                    , Lists.newArrayList()));
+                    , this.aspectBeforeStep.toTestCase()
+                    , this.aspectAfterStep.toTestCase()
+                    , new TestCaseBuilder().build()));
             final Aspect aspect = new Aspect(Lists.newArrayList(interceptor));
             Mockito.doReturn(new File(".", "result")).when(this.adviseListener).getResultDir();
             Mockito.doReturn(new File(".", "screenshot")).when(this.adviseListener).getScreenShotOutputDirectory();
@@ -879,9 +879,9 @@ public class TestRunTest {
             this.aspectAfterStep = Mockito.spy(new StepBuilder(new DoubleClickElement()).build());
             this.interceptor = Mockito.spy(new Interceptor(
                     (step, input) -> "chain".equals(step.name())
-                    , Lists.newArrayList(this.aspectBeforeStep)
-                    , Lists.newArrayList(this.aspectAfterStep)
-                    , Lists.newArrayList()));
+                    , this.aspectBeforeStep.toTestCase()
+                    , this.aspectAfterStep.toTestCase()
+                    , new TestCaseBuilder().build()));
             final Aspect aAspect = new Aspect(Lists.newArrayList(interceptor));
             Context.getInstance().setAspect(aAspect);
             Mockito.doReturn(new File(".", "result")).when(this.adviseListener).getResultDir();
@@ -983,15 +983,19 @@ public class TestRunTest {
             this.chainStep = Mockito.spy(new StepBuilder(new ClickElement())
                     .name("chain")
                     .build());
-            TestCase chainCase = this.head.builder().setName("chainCase").clearStep().addStep(this.chainStep).build();
-            this.chains = this.chains.append(chainCase);
+            this.chains = this.chains.append(this.head
+                    .builder()
+                    .setName("chainCase")
+                    .clearStep()
+                    .addStep(this.chainStep)
+                    .build());
             this.aspectBeforeStep = Mockito.spy(new StepBuilder(new SetElementText()).build());
             this.aspectAfterStep = Mockito.spy(new StepBuilder(new DoubleClickElement()).build());
             this.interceptor = Mockito.spy(new Interceptor(
                     (step, input) -> "name".equals(step.name())
-                    , Lists.newArrayList(this.aspectBeforeStep)
-                    , Lists.newArrayList(this.aspectAfterStep)
-                    , Lists.newArrayList()));
+                    , this.aspectBeforeStep.toTestCase()
+                    , this.aspectAfterStep.toTestCase()
+                    , new TestCaseBuilder().build()));
             final Aspect aspect = new Aspect(Lists.newArrayList(interceptor));
             Mockito.doReturn(new File(".", "result")).when(this.adviseListener).getResultDir();
             Mockito.doReturn(new File(".", "screenshot")).when(this.adviseListener).getScreenShotOutputDirectory();
@@ -1003,9 +1007,9 @@ public class TestRunTest {
             this.contextAspectAfterStep = Mockito.spy(new StepBuilder(new DoubleClickElement()).build());
             this.contextInterceptor = Mockito.spy(new Interceptor(
                     (step, input) -> "chain".equals(step.name())
-                    , Lists.newArrayList(this.contextAspectBeforeStep)
-                    , Lists.newArrayList(this.contextAspectAfterStep)
-                    , Lists.newArrayList()));
+                    , this.contextAspectBeforeStep.toTestCase()
+                    , this.contextAspectAfterStep.toTestCase()
+                    , new TestCaseBuilder().build()));
             final Aspect aAspect = new Aspect(Lists.newArrayList(contextInterceptor));
             Context.getInstance().setAspect(aAspect);
             Mockito.doReturn(new File(".", "result")).when(this.contextAdviseListener).getResultDir();
