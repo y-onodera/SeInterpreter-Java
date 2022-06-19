@@ -147,7 +147,7 @@ jobs:
         with:
           repo: "bonigarcia/webdrivermanager"
           regex: "true"
-          file: "webdrivermanager.*-fat\.jar"
+          file: "webdrivermanager.*-fat.*jar"
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: ${{matrix.browser}} webdriver setup
         run: java -jar webdrivermanager-5.1.1-fat`.jar resolveDriverFor ${{matrix.browser}}
