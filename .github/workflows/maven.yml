@@ -146,12 +146,11 @@ jobs:
         uses: dsaltares/fetch-gh-release-asset@master
         with:
           repo: "bonigarcia/webdrivermanager"
-          regex: "true"
-          file: "webdrivermanager.*-fat.*jar"
-          target: "./webdrivermanager-fat.jar"
+          release: "webdrivermanager-5.2.0"
+          file: "webdrivermanager-5.2.0-fat.jar"
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: ${{matrix.browser}} webdriver setup
-        run: java -jar webdrivermanager-fat`.jar resolveDriverFor ${{matrix.browser}}
+        run: java -jar webdrivermanager-5.2.0-fat`.jar resolveDriverFor ${{matrix.browser}}
         shell: pwsh
       - name: Download jre
         uses: actions/download-artifact@v3
