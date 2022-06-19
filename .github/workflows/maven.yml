@@ -161,7 +161,7 @@ jobs:
         with:
           name: executableJar
       - name: browser-test
-        run: bin\java -cp sebuilder-interpreter-2.0.0-SNAPSHOT-jar-with-dependencies.jar com.sebuilder.interpreter.application.SeInterpreter --env.verifyImage=false --env.verifyImage=true --driver=${{matrix.browser}} --resultoutput=${{matrix.browser}} --driverPath=${{matrix.driver}}.exe --datasource.directory=test/suite/input --aspectFile=test/suite/aspect/saveScreenshot.json test/suite/testsuite.json
+        run: bin\java -cp sebuilder-interpreter-2.0.0-SNAPSHOT-jar-with-dependencies.jar com.sebuilder.interpreter.application.SeInterpreter --env.verifyImage=false --driver=${{matrix.browser}} --resultoutput=${{matrix.browser}} --driverPath=${{matrix.driver}}.exe --datasource.directory=test/suite/input --aspectFile=test/suite/aspect/saveScreenshot.json test/suite/testsuite.json
         shell: cmd
       - name: Upload result
         uses: actions/upload-artifact@v3
