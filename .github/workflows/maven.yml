@@ -148,9 +148,10 @@ jobs:
           repo: "bonigarcia/webdrivermanager"
           regex: "true"
           file: "webdrivermanager.*-fat.*jar"
+          target: "webdrivermanager-fat.jar"
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: ${{matrix.browser}} webdriver setup
-        run: java -jar webdrivermanager-5.1.1-fat`.jar resolveDriverFor ${{matrix.browser}}
+        run: java -jar webdrivermanager-fat`.jar resolveDriverFor ${{matrix.browser}}
         shell: pwsh
       - name: Download jre
         uses: actions/download-artifact@v3
