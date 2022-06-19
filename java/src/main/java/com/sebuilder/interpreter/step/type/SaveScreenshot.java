@@ -123,7 +123,7 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
     protected BufferedImage toSameSize(BufferedImage actual, BufferedImage expect) {
         BufferedImage finalImage = new BufferedImage(expect.getWidth(), expect.getHeight(), BufferedImage.TYPE_3BYTE_BGR);
         Graphics2D graphics = finalImage.createGraphics();
-        graphics.drawImage(actual, 0, 0, null);
+        graphics.drawImage(actual.getScaledInstance(expect.getWidth(), expect.getHeight(), Image.SCALE_AREA_AVERAGING), 0, 0, expect.getWidth(), expect.getHeight(), null);
         graphics.dispose();
         return finalImage;
     }
