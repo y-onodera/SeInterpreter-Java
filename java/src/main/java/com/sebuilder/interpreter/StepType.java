@@ -49,7 +49,7 @@ public interface StepType extends StepElement {
         return true;
     }
 
-    default  int getExecSteps(TestRun ctx) {
+    default int getExecSteps(TestRun ctx) {
         return 1;
     }
 

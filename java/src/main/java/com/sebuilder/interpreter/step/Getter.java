@@ -35,6 +35,20 @@ public interface Getter extends StepElement {
      */
     String get(TestRun ctx);
 
+    default boolean test(TestRun ctx) {
+        String got = this.get(ctx);
+        boolean result;
+        if (this.cmpParamName() == null) {
+            result = Boolean.parseBoolean(got);
+        } else {
+            ctx.getListener().info("actual:" + got);
+            String expect = ctx.string(this.cmpParamName());
+            ctx.getListener().info("expect:" + expect);
+            result = expect.equals(got);
+        }
+        return result;
+    }
+
     /**
      * @return The name of the parameter to compare the result of the get to, or null if the get
      * returns a boolean "true"/"false".
@@ -78,4 +92,5 @@ public interface Getter extends StepElement {
         }
         return o;
     }
+
 }

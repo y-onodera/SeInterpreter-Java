@@ -9,7 +9,7 @@ import com.sebuilder.interpreter.step.getter.ElementVisible;
 
 public interface ConditionalStep extends StepType {
 
-    WaitFor waitForActive = ComplexCondition.builder()
+    WaitFor WAIT_FOR_ACTIVE = ComplexCondition.builder()
             .addCondition(new ElementVisible())
             .addCondition(new ElementEnable())
             .build()
@@ -34,6 +34,6 @@ public interface ConditionalStep extends StepType {
     boolean doRun(TestRun ctx);
 
     default WaitFor waitForReady() {
-        return waitForActive;
+        return WAIT_FOR_ACTIVE;
     }
 }

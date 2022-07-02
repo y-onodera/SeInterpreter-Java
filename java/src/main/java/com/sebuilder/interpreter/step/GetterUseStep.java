@@ -15,17 +15,7 @@ public interface GetterUseStep extends StepType {
     }
 
     default boolean test(TestRun ctx) {
-        String got = this.getGetter().get(ctx);
-        boolean result;
-        if (this.getGetter().cmpParamName() == null) {
-            result = Boolean.parseBoolean(got);
-        } else {
-            ctx.getListener().info("actual:" + got);
-            String expect = ctx.string(this.getGetter().cmpParamName());
-            ctx.getListener().info("expect:" + expect);
-            result = expect.equals(got);
-        }
-        return result != ctx.currentStep().negated();
+        return this.getGetter().test(ctx) != ctx.currentStep().negated();
     }
 
     @Override
