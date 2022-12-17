@@ -123,7 +123,7 @@ public class BrowserPresenter {
 
     private void populate() {
         WebDriverFactory webdriverFactory = Context.getWebDriverFactory(this.selectedBrowser);
-        String driverName = webdriverFactory.getDriverName();
+        String driverName = webdriverFactory.getDriverName() + ".exe";
         if (parentDir == null || !parentDir.exists()) {
             File driverParent = new File(Context.getBaseDirectory(), "exe/");
             if (!driverParent.exists()) {

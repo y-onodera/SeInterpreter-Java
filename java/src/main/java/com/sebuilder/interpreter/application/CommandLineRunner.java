@@ -8,6 +8,7 @@ import com.sebuilder.interpreter.script.SebuilderToStringConverter;
 import com.sebuilder.interpreter.script.seleniumide.SeleniumIDE;
 import com.sebuilder.interpreter.step.StepTypeFactoryImpl;
 import org.apache.logging.log4j.Logger;
+import org.openqa.selenium.manager.SeleniumManager;
 
 import java.util.Set;
 
@@ -60,6 +61,8 @@ public abstract class CommandLineRunner {
                             , it -> it.setWebDriverPath(option.getDriverPath())
                     )
                     .setDriverConfig(option.getDriverConfig())
+                    .ifMatch(!Context.isRemote() && Strings.isNullOrEmpty(Context.getWebDriverFactory().getDriverPath())
+                            , it -> it.setWebDriverPath(SeleniumManager.getInstance().getDriverPath(Context.getWebDriverFactory().getDriverName())))
                     .setDataSourceEncoding(option.getDatasourceEncoding())
                     .setDataSourceDirectory(option.getDatasourceDirectory())
                     .setScreenShotOutputDirectory(option.getScreenshotoutput())

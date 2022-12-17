@@ -71,7 +71,7 @@ public class Firefox implements WebDriverFactory {
 
     @Override
     public String getDriverName() {
-        return "geckodriver.exe";
+        return "geckodriver";
     }
 
     @Override

@@ -54,7 +54,7 @@ public class Chrome implements WebDriverFactory {
 
     @Override
     public String getDriverName() {
-        return "chromedriver.exe";
+        return "chromedriver";
     }
 
     @Override

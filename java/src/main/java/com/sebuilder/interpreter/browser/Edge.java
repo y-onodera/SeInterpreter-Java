@@ -49,7 +49,7 @@ public class Edge implements WebDriverFactory {
 
     @Override
     public String getDriverName() {
-        return "msedgedriver.exe";
+        return "msedgedriver";
     }
 
     @Override

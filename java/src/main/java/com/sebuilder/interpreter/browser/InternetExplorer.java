@@ -58,7 +58,7 @@ public class InternetExplorer implements WebDriverFactory {
 
     @Override
     public String getDriverName() {
-        return "IEDriverServer.exe";
+        return "IEDriverServer";
     }
 
     @Override
