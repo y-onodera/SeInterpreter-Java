@@ -123,11 +123,10 @@ jobs:
     runs-on: windows-2019
     strategy:
       matrix:
-        browser: [chrome ,edge ,firefox]
+        browser: [chrome ,edge]
         include:
           - browser: chrome
           - browser: edge
-          - browser: firefox
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK 17
@@ -141,8 +140,6 @@ jobs:
         if: matrix.browser == 'chrome'
       - uses: browser-actions/setup-edge@latest
         if: matrix.browser == 'edge'
-      - uses: browser-actions/setup-firefox@latest
-        if: matrix.browser == 'firefox'
       - name: Download jre
         uses: actions/download-artifact@v3
         with:
