@@ -35,7 +35,7 @@ public class FileDownload extends AbstractStepType implements ConditionalStep, L
 
     static {
         ThreadFactory threadFactory = new DefaultThreadFactory("netty-client-timer", true);
-        TIMER = new HashedWheelTimer(threadFactory, (long) AsyncHttpClientConfigDefaults.defaultHashedWheelTimerTickDuration(), TimeUnit.MILLISECONDS, AsyncHttpClientConfigDefaults.defaultHashedWheelTimerSize());
+        TIMER = new HashedWheelTimer(threadFactory, AsyncHttpClientConfigDefaults.defaultHashedWheelTimerTickDuration(), TimeUnit.MILLISECONDS, AsyncHttpClientConfigDefaults.defaultHashedWheelTimerSize());
     }
 
     @Override
@@ -73,15 +73,13 @@ public class FileDownload extends AbstractStepType implements ConditionalStep, L
         List<Param> param = Lists.newArrayList();
         ctx.locator()
                 .findElements(ctx)
-                .stream()
-                .forEach(element -> {
-                    param.add(new Param(element.getAttribute("name"), element.getAttribute("value")));
-                });
-        ListenableFuture whenResponse = client.executeRequest(new RequestBuilder(HttpConstants.Methods.POST)
+                .forEach(element ->
+                    param.add(new Param(element.getAttribute("name"), element.getAttribute("value"))));
+        ListenableFuture<Response> whenResponse = client.executeRequest(new RequestBuilder(HttpConstants.Methods.POST)
                 .setUri(Uri.create(downloadUrl))
                 .setCharset(charset)
                 .setFormParams(param));
-        this.downLoadFile(ctx, outputFilePath, (Response) whenResponse.get());
+        this.downLoadFile(ctx, outputFilePath, whenResponse.get());
     }
 
     @Override
@@ -100,8 +98,8 @@ public class FileDownload extends AbstractStepType implements ConditionalStep, L
 
     public void getDownloadFile(TestRun ctx, String downloadUrl, String outputFilePath) throws IOException, ExecutionException, InterruptedException {
         AsyncHttpClient client = getHttpClient(ctx, downloadUrl);
-        ListenableFuture whenResponse = client.executeRequest(new RequestBuilder().setUri(Uri.create(downloadUrl)));
-        this.downLoadFile(ctx, outputFilePath, (Response) whenResponse.get());
+        ListenableFuture<Response> whenResponse = client.executeRequest(new RequestBuilder().setUri(Uri.create(downloadUrl)));
+        this.downLoadFile(ctx, outputFilePath, whenResponse.get());
     }
 
     public void downLoadFile(TestRun ctx, String outputFilePath, Response response) throws IOException {
