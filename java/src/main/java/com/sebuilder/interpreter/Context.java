@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import com.sebuilder.interpreter.pointcut.StepTypeFilter;
 import com.sebuilder.interpreter.step.type.SaveScreenshot;
 import org.apache.logging.log4j.Logger;
+import org.openqa.selenium.manager.SeleniumManager;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -164,17 +165,15 @@ public enum Context {
     }
 
     public static String getJunitReportPrefix() {
-        switch (getInstance().junitReportPrefix) {
-            case TIMESTAMP:
-                return "start" + DateTimeFormatter
-                        .ofPattern("yyyyMMddHHmmss")
-                        .format(LocalDateTime.now()) + ".";
-            case RESULT_DIR:
-                return getInstance().resultOutputDirectory
-                        .replace("/", "_")
-                        .replace("\\", "_") + ".";
-        }
-        return "";
+        return switch (getInstance().junitReportPrefix) {
+            case TIMESTAMP -> "start" + DateTimeFormatter
+                    .ofPattern("yyyyMMddHHmmss")
+                    .format(LocalDateTime.now()) + ".";
+            case RESULT_DIR -> getInstance().resultOutputDirectory
+                    .replace("/", "_")
+                    .replace("\\", "_") + ".";
+            default -> "";
+        };
     }
 
     public static String getDownloadDirectory() {
@@ -252,7 +251,11 @@ public enum Context {
     }
 
     public Context setWebDriverPath(String driverPath) {
-        this.wdf.setDriverPath(driverPath);
+        if (Strings.isNullOrEmpty(driverPath)) {
+            this.wdf.setDriverPath(SeleniumManager.getInstance().getDriverPath(this.wdf.getDriverName()));
+        } else {
+            this.wdf.setDriverPath(driverPath);
+        }
         return this;
     }
 
@@ -412,7 +415,7 @@ public enum Context {
             return Stream.of(TestNamePrefix.values())
                     .filter(it -> it.name.equals(name))
                     .findFirst()
-                    .get();
+                    .orElse(NONE);
         }
     }
 
