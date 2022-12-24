@@ -330,7 +330,7 @@ public class SeInterpreterApplication extends Application {
         this.executeAndLoggingCaseWhenThrowException(() -> {
             InputData inputData = this.currentDisplayShareInput(replayOption);
             this.executeTask(this.getDisplayTestCase()
-                            .removeStep(filter)
+                            .filterStep(filter)
                             .map(builder -> builder.setShareInput(inputData).map(replayOption::apply))
                     , log -> new GUITestRunListener(Context.getTestListener(log), this) {
                         @Override

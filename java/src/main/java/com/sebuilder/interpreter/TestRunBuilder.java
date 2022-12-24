@@ -1,5 +1,6 @@
 package com.sebuilder.interpreter;
 
+import com.google.common.base.Strings;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
@@ -92,6 +93,13 @@ public class TestRunBuilder {
         return this.createTestRun(this.testCase.name(), log, driver, initialVars, seInterpreterTestListener);
     }
 
+    public TestRunBuilder copy() {
+        return new TestRunBuilder(this.testCase)
+                .setShareInput(this.shareInput)
+                .addTestRunNamePrefix(this.testRunNamePrefix)
+                .addTestRunNameSuffix(this.testRunNameSuffix);
+    }
+
     protected TestRun createTestRun(String testRunName, Logger log, RemoteWebDriver driver, InputData initialVars, TestRunListener seInterpreterTestListener) {
         InputData data = this.shareInput.clearRowNumber().add(initialVars).lastRow(initialVars.isLastRow());
         return new TestRun(this.getTestRunName(testRunName, data), this, log, driver, data, seInterpreterTestListener);
@@ -99,7 +107,7 @@ public class TestRunBuilder {
 
     protected String getTestRunName(String testRunName, InputData initialVars) {
         String result = testRunName;
-        if (testCase.path() != null && result.contains(".")) {
+        if (isTestCaseAlreadySaved() && result.contains(".")) {
             String suffix = "";
             Matcher m = DUPLICATE_PATTERN.matcher(result);
             if (m.matches()) {
@@ -119,11 +127,8 @@ public class TestRunBuilder {
         return result;
     }
 
-    public TestRunBuilder copy() {
-        return new TestRunBuilder(this.testCase)
-                .setShareInput(this.shareInput)
-                .addTestRunNamePrefix(this.testRunNamePrefix)
-                .addTestRunNameSuffix(this.testRunNameSuffix);
+    protected boolean isTestCaseAlreadySaved() {
+        return Strings.isNullOrEmpty(testCase.path());
     }
 
     private RemoteWebDriver createDriver(Logger log, WebDriverFactory webDriverFactory, Map<String, String> webDriverConfig) {

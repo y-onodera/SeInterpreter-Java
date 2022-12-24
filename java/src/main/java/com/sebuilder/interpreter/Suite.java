@@ -31,8 +31,8 @@ public record Suite(TestCase head) {
     public DataSourceLoader[] dataSources(Predicate<TestCase> predicate) {
         return this.head.flattenTestCases()
                 .filter(predicate)
-                .filter(it -> it.runtimeDataSet().dataSource().enableMultiLine())
                 .map(TestCase::runtimeDataSet)
+                .filter(dataSourceLoader -> dataSourceLoader.dataSource().enableMultiLine())
                 .toArray(DataSourceLoader[]::new);
     }
 

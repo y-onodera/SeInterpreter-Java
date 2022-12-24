@@ -1,19 +1,16 @@
 package com.sebuilder.interpreter;
 
-import com.google.common.base.Objects;
-import com.google.common.collect.Maps;
 import org.apache.commons.jexl3.*;
 import org.openqa.selenium.Keys;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public record InputData(LinkedHashMap<String, String> row, boolean lastRow) {
 
     public static final String ROW_NUMBER = "_rowNumber";
-    private static final LinkedHashMap<String, String> EMPTY = Maps.newLinkedHashMap();
+    private static final LinkedHashMap<String, String> EMPTY = new LinkedHashMap<>();
+    private static final String REGEX_EXPRESSION = ".*\\$\\{(.+)}.*";
 
     public InputData() {
         this(EMPTY, true);
@@ -42,7 +39,7 @@ public record InputData(LinkedHashMap<String, String> row, boolean lastRow) {
     }
 
     public InputData clearRowNumber() {
-        InputData result = copy();
+        InputData result = this.copy();
         result.row.remove(ROW_NUMBER);
         return result;
     }
@@ -82,13 +79,13 @@ public record InputData(LinkedHashMap<String, String> row, boolean lastRow) {
     public String evaluateString(String target) {
         String result = this.bind(target);
         String exp = this.extractExpression(result);
-        if (Objects.equal(result, exp)) {
+        if (Objects.equals(result, exp)) {
             return result;
         }
         try {
             JexlEngine jexl = new JexlBuilder().create();
             JexlExpression expression = jexl.createExpression(exp);
-            JexlContext jc = new MapContext(Maps.newHashMap(this.row));
+            JexlContext jc = new MapContext(new HashMap<>(this.row));
             return result.replace("${" + exp + "}", expression.evaluate(jc).toString());
         } catch (JexlException ex) {
             return result;
@@ -100,18 +97,18 @@ public record InputData(LinkedHashMap<String, String> row, boolean lastRow) {
         String result = this.replaceKeys(s);
         // This kind of variable substitution makes for short code, but it's inefficient.
         result = this.replaceVars(result);
-        if (!Objects.equal(s, result)) {
+        if (!Objects.equals(s, result)) {
             return this.bind(result);
         }
         result = Context.bindEnvironmentProperties(result);
-        if (!Objects.equal(s, result)) {
+        if (!Objects.equals(s, result)) {
             return this.bind(result);
         }
         return result;
     }
 
     public Builder builder() {
-        return new Builder(Maps.newLinkedHashMap(this.row), this.lastRow);
+        return new Builder(new LinkedHashMap<>(this.row), this.lastRow);
     }
 
     public Set<Map.Entry<String, String>> entrySet() {
@@ -141,18 +138,10 @@ public record InputData(LinkedHashMap<String, String> row, boolean lastRow) {
     }
 
     private String extractExpression(String result) {
-        return result.replaceAll(".*\\$\\{(.+)}.*", "$1");
+        return result.replaceAll(REGEX_EXPRESSION, "$1");
     }
 
-    public static class Builder {
-        private final LinkedHashMap<String, String> row;
-
-        private final boolean lastRow;
-
-        public Builder(LinkedHashMap<String, String> row, boolean lastRow) {
-            this.row = row;
-            this.lastRow = lastRow;
-        }
+    public record Builder(LinkedHashMap<String, String> row, boolean lastRow) {
 
         public InputData build() {
             return new InputData(new LinkedHashMap<>(this.row), this.lastRow);

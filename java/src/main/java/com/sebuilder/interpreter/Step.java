@@ -15,7 +15,6 @@
  */
 package com.sebuilder.interpreter;
 
-import com.google.common.collect.Maps;
 import com.sebuilder.interpreter.step.GetterUseStep;
 
 import java.util.Collection;
@@ -55,7 +54,7 @@ public record Step(
 
     public Result execute(TestRun ctx) {
         try {
-            final boolean aspectSuccess = ctx.startTest();
+            boolean aspectSuccess = ctx.startTest();
             int execSteps = this.type.getExecSteps(ctx);
             if (this.run(ctx)) {
                 return new Result(ctx.processTestSuccess(this.type.isAcceptEndAdvice()) && aspectSuccess, execSteps);
@@ -134,33 +133,29 @@ public record Step(
 
     public String toPrettyString() {
         StringBuilder sb = new StringBuilder();
-        if (name != null) {
-            sb.append(name).append(": ");
+        if (this.name != null) {
+            sb.append(this.name).append(": ");
         }
-        sb.append(type.getStepTypeName());
-        if (type instanceof GetterUseStep) {
+        sb.append(this.type.getStepTypeName());
+        if (this.type instanceof GetterUseStep) {
             sb.append(" negated=").append(this.negated);
         }
-        for (Map.Entry<String, String> pe : this.stringParams.entrySet()) {
-            sb.append(" ").append(pe.getKey()).append("=").append(pe.getValue());
-        }
-        for (Map.Entry<String, Locator> le : this.locatorParams.entrySet()) {
-            sb.append(" ").append(le.getKey()).append("=").append(le.getValue().toPrettyString());
-        }
+        this.stringParams.forEach((key, value) -> sb.append(" ").append(key).append("=").append(value));
+        this.locatorParams.forEach((key, value) -> sb.append(" ").append(key).append("=").append(value.toPrettyString()));
         return sb.toString();
     }
 
     public Map<String, String> toMap() {
-        Map<String, String> result = Maps.newHashMap();
+        Map<String, String> result = new HashMap<>();
         if (this.name != null) {
             result.put("name", this.name);
         }
         result.put("type", this.type.getStepTypeName());
         result.putAll(this.stringParams);
-        for (Map.Entry<String, Locator> le : this.locatorParams.entrySet()) {
-            result.put(le.getKey() + ".type", le.getValue().type());
-            result.put(le.getKey() + ".value", le.getValue().value());
-        }
+        this.locatorParams.forEach((key, value) -> {
+            result.put(key + ".type", value.type());
+            result.put(key + ".value", value.value());
+        });
         return result;
     }
 

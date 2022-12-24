@@ -16,9 +16,10 @@
 
 package com.sebuilder.interpreter.step;
 
-import com.google.common.base.Objects;
 import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
+
+import java.util.Objects;
 
 /**
  * Generic Wait that wraps a getter.
@@ -34,7 +35,7 @@ public class WaitFor extends AbstractStepType implements GetterUseStep {
 
     @Override
     public Getter getGetter() {
-        return getter;
+        return this.getter;
     }
 
     @Override
@@ -77,11 +78,11 @@ public class WaitFor extends AbstractStepType implements GetterUseStep {
             return false;
         }
         WaitFor waitFor = (WaitFor) o;
-        return Objects.equal(getGetter(), waitFor.getGetter());
+        return Objects.equals(this.getGetter(), waitFor.getGetter());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(super.hashCode(), getGetter());
+        return Objects.hash(super.hashCode(), this.getGetter());
     }
 }

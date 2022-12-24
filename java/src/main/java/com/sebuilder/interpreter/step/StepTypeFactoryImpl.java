@@ -42,10 +42,9 @@ public class StepTypeFactoryImpl implements com.sebuilder.interpreter.StepTypeFa
      * for "verifyTitle" and also be in the com.sebuilder.interpreter.steptype
      * package.
      */
-    private final HashMap<String, StepType> typesMap = new HashMap<String, StepType>();
+    private final HashMap<String, StepType> typesMap = new HashMap<>();
 
     /**
-     * @param name
      * @return a stepType instance for a given name
      */
     @Override
@@ -86,9 +85,9 @@ public class StepTypeFactoryImpl implements com.sebuilder.interpreter.StepTypeFa
                 if (className.equals("Loop")) {
                     c = Loop.class;
                 } else if (rawStepType) {
-                    c = newStepType(name, className);
+                    c = this.newStepType(name, className);
                 } else {
-                    c = newGetter(name, className);
+                    c = this.newGetter(name, className);
                 }
                 try {
                     Object o = c.getDeclaredConstructor().newInstance();
@@ -123,25 +122,23 @@ public class StepTypeFactoryImpl implements com.sebuilder.interpreter.StepTypeFa
     }
 
     protected Class<?> newGetter(String name, String className) {
-        final String errorMessage = "No implementation class for getter \"" + name + "\" could be found.";
+        String errorMessage = "No implementation class for getter \"" + name + "\" could be found.";
         final String subPackage = ".getter.";
-        return newInstance(className, errorMessage, subPackage);
+        return this.newInstance(className, errorMessage, subPackage);
     }
 
     protected Class<?> newStepType(String name, String className) {
-        final String errorMessage = "No implementation class for step type \"" + name + "\" could be found.";
+        String errorMessage = "No implementation class for step type \"" + name + "\" could be found.";
         final String subPackage = ".type.";
-        return newInstance(className, errorMessage, subPackage);
+        return this.newInstance(className, errorMessage, subPackage);
     }
 
     private Class<?> newInstance(String className, String errorMessage, String subPackage) {
-        Class<?> c = null;
         try {
-            c = Class.forName(DEFAULT_PACKAGE + subPackage + className);
+            return Class.forName(DEFAULT_PACKAGE + subPackage + className);
         } catch (ClassNotFoundException cnfe) {
             throw new RuntimeException(errorMessage, cnfe);
         }
-        return c;
     }
 
 }

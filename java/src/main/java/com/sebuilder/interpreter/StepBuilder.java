@@ -1,7 +1,6 @@
 package com.sebuilder.interpreter;
 
-import com.google.common.collect.Maps;
-
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -9,8 +8,8 @@ public class StepBuilder {
     private boolean negated;
     private String name;
     private final StepType stepType;
-    private final Map<String, String> stringParams = Maps.newHashMap();
-    private final Map<String, Locator> locatorParams = Maps.newHashMap();
+    private final Map<String, String> stringParams = new HashMap<>();
+    private final Map<String, Locator> locatorParams = new HashMap<>();
 
     public StepBuilder(StepType stepType) {
         this(null, stepType, false);

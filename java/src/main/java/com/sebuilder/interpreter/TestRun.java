@@ -109,11 +109,11 @@ public class TestRun implements WebDriverWrapper {
     }
 
     public String formatStepIndex() {
-        return String.format("%0" + String.valueOf(this.testCase.steps().size()).length() + "d", currentStepIndex());
+        return String.format("%0" + String.valueOf(this.testCase.steps().size()).length() + "d", this.currentStepIndex());
     }
 
     public Step currentStep() {
-        return this.testCase.steps().get(currentStepIndex());
+        return this.testCase.steps().get(this.currentStepIndex());
     }
 
     public boolean containsKey(String key) {
@@ -135,7 +135,7 @@ public class TestRun implements WebDriverWrapper {
     public String string(@Nonnull String key) {
         String s = this.currentStep().getParam(key);
         if (s == null) {
-            throw new RuntimeException("Missing parameter \"" + key + "\" at step #" + currentStepIndex() + ".");
+            throw new RuntimeException("Missing parameter \"" + key + "\" at step #" + this.currentStepIndex() + ".");
         }
         return this.bindRuntimeVariables(s);
     }
@@ -248,9 +248,9 @@ public class TestRun implements WebDriverWrapper {
 
     public boolean processTestFailure(boolean isAcceptAdvice) {
         if (!this.currentStep().type().isContinueAtFailure()) {
-            throw new AssertionError(currentStepToString() + " failed.");
+            throw new AssertionError(this.currentStepToString() + " failed.");
         }
-        this.getListener().addFailure(currentStepToString() + " failed.");
+        this.getListener().addFailure(this.currentStepToString() + " failed.");
         if (!isAcceptAdvice) {
             this.getAdvice().invokeFailure(this);
         }
@@ -260,7 +260,7 @@ public class TestRun implements WebDriverWrapper {
     public AssertionError processTestError(Throwable e) {
         this.getListener().addError(e);
         this.getAdvice().invokeFailure(this);
-        return new AssertionError(currentStepToString() + " failed.", e);
+        return new AssertionError(this.currentStepToString() + " failed.", e);
     }
 
     public String currentStepToString() {
@@ -273,7 +273,7 @@ public class TestRun implements WebDriverWrapper {
     }
 
     protected boolean hasNext() {
-        return testRunStatus.isNeedRunning(this.testCase.steps().size() - 1);
+        return this.testRunStatus.isNeedRunning(this.testCase.steps().size() - 1);
     }
 
     protected boolean end(boolean success) {
@@ -305,7 +305,7 @@ public class TestRun implements WebDriverWrapper {
     protected boolean chainRun() {
         this.testRunStatus = this.testRunStatus.chainCalled();
         this.chainRunner = this.createChainRunner();
-        return this.chainRunner.finish();
+        return this.chainRunner.run();
     }
 
     protected ChainRunner createChainRunner() {
@@ -327,6 +327,7 @@ public class TestRun implements WebDriverWrapper {
     protected static class ChainRunner implements TestRunner {
         private final TestRun parent;
         private final TestCaseChains chains;
+        private final boolean takeOverLastRun;
         private TestRun lastRun;
         private InputData lastRunVar;
         private int chainIndex;
@@ -334,19 +335,16 @@ public class TestRun implements WebDriverWrapper {
         public ChainRunner(TestRun parent) {
             this.parent = parent;
             this.chains = parent.testCase.chains();
+            this.takeOverLastRun = this.chains.isTakeOverLastRun();
         }
 
-        public boolean finish() {
-            InputData chainInitialVar = this.parent.vars();
+        public boolean run() {
+            this.lastRunVar = this.parent.vars();
             this.chainIndex = 0;
             boolean success = true;
             for (TestCase nextChain : this.chains) {
-                final InputData chainVar = chainInitialVar;
-                success = nextChain.map(it -> it.addAspect(this.parent.getAspect()).setShareInput(chainVar))
+                success = nextChain.map(it -> it.addAspect(this.parent.getAspect()).setShareInput(this.lastRunVar))
                         .run(this, this.parent.getListener()) && success;
-                if (this.chains.isTakeOverLastRun() && this.lastRunVar != null) {
-                    chainInitialVar = this.lastRunVar;
-                }
                 this.chainIndex++;
             }
             return success;
@@ -364,8 +362,8 @@ public class TestRun implements WebDriverWrapper {
             } else if (!result) {
                 return STATUS.FAILED;
             }
-            if (this.chains.isTakeOverLastRun() && data.isLastRow()) {
-                this.lastRunVar = lastRun.vars();
+            if (this.takeOverLastRun && data.isLastRow()) {
+                this.lastRunVar = this.lastRun.vars();
             }
             return STATUS.SUCCESS;
         }
@@ -376,7 +374,7 @@ public class TestRun implements WebDriverWrapper {
 
         protected void stopRunning() {
             if (this.lastRun != null) {
-                lastRun.stop();
+                this.lastRun.stop();
             }
         }
     }

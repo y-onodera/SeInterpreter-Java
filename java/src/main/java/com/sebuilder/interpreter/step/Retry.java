@@ -1,9 +1,10 @@
 package com.sebuilder.interpreter.step;
 
-import com.google.common.base.Objects;
 import com.sebuilder.interpreter.Step;
 import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
+
+import java.util.Objects;
 
 public class Retry extends AbstractStepType implements FlowStep, GetterUseStep {
 
@@ -15,7 +16,7 @@ public class Retry extends AbstractStepType implements FlowStep, GetterUseStep {
 
     @Override
     public Getter getGetter() {
-        return getter;
+        return this.getter;
     }
 
     /**
@@ -25,10 +26,11 @@ public class Retry extends AbstractStepType implements FlowStep, GetterUseStep {
      * @return Whether the step succeeded. This should be true except for failed verify steps, which
      * should return false. Other failures should throw a RuntimeException.
      */
+    @Override
     public boolean run(TestRun ctx) {
         Step thisStep = ctx.currentStep();
         boolean success = true;
-        int actions = getSubSteps(ctx);
+        int actions = this.getSubSteps(ctx);
         while (!this.test(ctx)) {
             ctx.processTestSuccess(false);
             success = this.runSubStep(ctx, actions) && success;
@@ -53,11 +55,11 @@ public class Retry extends AbstractStepType implements FlowStep, GetterUseStep {
             return false;
         }
         Retry retry = (Retry) o;
-        return Objects.equal(getGetter(), retry.getGetter());
+        return Objects.equals(this.getGetter(), retry.getGetter());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(super.hashCode(), getGetter());
+        return Objects.hash(super.hashCode(), this.getGetter());
     }
 }

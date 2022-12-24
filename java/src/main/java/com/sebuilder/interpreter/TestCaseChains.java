@@ -1,15 +1,10 @@
 package com.sebuilder.interpreter;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -18,7 +13,7 @@ import java.util.stream.Stream;
 public record TestCaseChains(ArrayList<TestCase> testCases, boolean takeOverLastRun) implements Iterable<TestCase> {
 
     public TestCaseChains() {
-        this(Lists.newArrayList(), false);
+        this(new ArrayList<>(), false);
     }
 
     @Override
@@ -53,7 +48,7 @@ public record TestCaseChains(ArrayList<TestCase> testCases, boolean takeOverLast
     }
 
     public TestCaseChains takeOverLastRun(boolean isTakeOverLastRun) {
-        return new TestCaseChains(Lists.newArrayList(this.testCases), isTakeOverLastRun);
+        return new TestCaseChains(new ArrayList<>(this.testCases), isTakeOverLastRun);
     }
 
     public TestCaseChains append(TestCase testCase) {
@@ -61,7 +56,7 @@ public record TestCaseChains(ArrayList<TestCase> testCases, boolean takeOverLast
     }
 
     public TestCaseChains append(int aIndex, TestCase testCase) {
-        ArrayList<TestCase> newList = Lists.newArrayList(this.testCases);
+        ArrayList<TestCase> newList = new ArrayList<>(this.testCases);
         long countDuplicate = newList.stream().filter(it -> !Strings.isNullOrEmpty(it.scriptFile().path())
                 && !Strings.isNullOrEmpty(testCase.scriptFile().path())
                 && it.scriptFile().path().equals(testCase.scriptFile().path())).count();
@@ -92,13 +87,13 @@ public record TestCaseChains(ArrayList<TestCase> testCases, boolean takeOverLast
     }
 
     public TestCaseChains map(Function<TestCase, TestCase> converter, Predicate<TestCase> isChainConvert) {
-        ArrayList<TestCase> newTestCases = Lists.newArrayList();
-        Map<Pair<String, String>, Integer> duplicate = Maps.newHashMap();
+        ArrayList<TestCase> newTestCases = new ArrayList<>();
+        Map<Pair<String, String>, Integer> duplicate = new HashMap<>();
         for (TestCase testCase : this.testCases) {
             TestCase copy = converter
                     .apply(testCase)
                     .changeWhenConditionMatch(isChainConvert, matches -> matches.map(it -> it.setChains(matches.chains().map(converter, isChainConvert))));
-            final String scriptName = copy.name();
+            String scriptName = copy.name();
             Pair<String, String> key = Pair.of(copy.name(), copy.path());
             if (duplicate.containsKey(key) && !Strings.isNullOrEmpty(key.getValue())) {
                 Optional<String> entries = newTestCases

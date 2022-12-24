@@ -1,9 +1,10 @@
 package com.sebuilder.interpreter.step;
 
-import com.google.common.base.Objects;
 import com.sebuilder.interpreter.Step;
 import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
+
+import java.util.Objects;
 
 public class If extends AbstractStepType implements FlowStep, GetterUseStep {
 
@@ -15,14 +16,14 @@ public class If extends AbstractStepType implements FlowStep, GetterUseStep {
 
     @Override
     public Getter getGetter() {
-        return getter;
+        return this.getter;
     }
 
     @Override
     public boolean run(TestRun ctx) {
         Step thisStep = ctx.currentStep();
         boolean success = true;
-        int actions = getSubSteps(ctx);
+        int actions = this.getSubSteps(ctx);
         if (this.test(ctx)) {
             ctx.processTestSuccess(false);
             success = this.runSubStep(ctx, actions);
@@ -42,15 +43,21 @@ public class If extends AbstractStepType implements FlowStep, GetterUseStep {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
         If anIf = (If) o;
-        return Objects.equal(getGetter(), anIf.getGetter());
+        return Objects.equals(this.getGetter(), anIf.getGetter());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(super.hashCode(), getGetter());
+        return Objects.hash(super.hashCode(), this.getGetter());
     }
 }

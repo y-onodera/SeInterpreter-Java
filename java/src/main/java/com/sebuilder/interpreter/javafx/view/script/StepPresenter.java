@@ -270,20 +270,20 @@ public class StepPresenter {
 
     @FXML
     void initialize() {
-        assert stepTypeSelect != null : "fx:id=\"stepTypeSelect\" was not injected: check your FXML file 'stepedit.fxml'.";
-        assert stepEditGrid != null : "fx:id=\"stepEditGrid\" was not injected: check your FXML file 'stepedit.fxml'.";
-        assert labelSelectType != null : "fx:id=\"labelSelectType\" was not injected: check your FXML file 'stepedit.fxml'.";
-        stepTypeSelect.getItems().add("");
+        assert this.stepTypeSelect != null : "fx:id=\"stepTypeSelect\" was not injected: check your FXML file 'stepedit.fxml'.";
+        assert this.stepEditGrid != null : "fx:id=\"stepEditGrid\" was not injected: check your FXML file 'stepedit.fxml'.";
+        assert this.labelSelectType != null : "fx:id=\"labelSelectType\" was not injected: check your FXML file 'stepedit.fxml'.";
+        this.stepTypeSelect.getItems().add("");
         for (String stepType : this.stepTypes()) {
-            stepTypeSelect.getItems().add(stepType);
+            this.stepTypeSelect.getItems().add(stepType);
         }
-        stepTypeSelect.getSelectionModel().select(0);
+        this.stepTypeSelect.getSelectionModel().select(0);
         this.selectedStepType = this.stepTypeSelect.getSelectionModel().getSelectedItem();
     }
 
     @FXML
     void selectType() {
-        String stepType = stepTypeSelect.getSelectionModel().getSelectedItem();
+        String stepType = this.stepTypeSelect.getSelectionModel().getSelectedItem();
         if (Objects.equals(this.selectedStepType, stepType) || Strings.isNullOrEmpty(stepType)) {
             return;
         }
@@ -328,7 +328,7 @@ public class StepPresenter {
             row = this.addLocator(stepWithAllParam, row, "locator");
             row = this.constructStringParamView(stepWithAllParam, row, typeName);
             this.constructLocatorParamView(stepWithAllParam, row);
-            stepEditGrid.getScene().getWindow().sizeToScene();
+            this.stepEditGrid.getScene().getWindow().sizeToScene();
         });
     }
 
@@ -353,13 +353,13 @@ public class StepPresenter {
     private int constructStringParamView(Step step, int row, String typeName) {
         for (String key : step.paramKeys()) {
             if (key.equals("type") || key.equals("skip")
-                    || (key.equals("negated") && !hasGetterType(typeName))) {
+                    || (key.equals("negated") && !this.hasGetterType(typeName))) {
                 continue;
             }
             if (key.equals("negated")) {
-                row = addCheckBox(step, row, key);
+                row = this.addCheckBox(step, row, key);
             } else {
-                row = addTextBox(step, row, key);
+                row = this.addTextBox(step, row, key);
             }
         }
         return row;
@@ -406,10 +406,10 @@ public class StepPresenter {
         if (step.locatorContains(locator)) {
             Label stepEditLabel = new Label();
             stepEditLabel.setText(locator);
-            ComboBox<String> select = resetLocatorSelect(step, locator);
+            ComboBox<String> select = this.resetLocatorSelect(step, locator);
             this.stepEditGrid.add(stepEditLabel, "cell 0 " + row);
             this.stepEditGrid.add(select, "cell 1 " + row++);
-            TextField text = resetLocatorText(step, locator);
+            TextField text = this.resetLocatorText(step, locator);
             Button button = new Button("find");
             button.setOnAction(ae -> this.application.highLightElement(select.getSelectionModel().getSelectedItem(), text.getText()));
             this.stepEditGrid.add(text, "width 150,cell 1 " + row);
@@ -483,7 +483,7 @@ public class StepPresenter {
     }
 
     private int addTextBox(Step step, int row, String key) {
-        return addTextBox(key, row, step.getParam(key), this.inputs);
+        return this.addTextBox(key, row, step.getParam(key), this.inputs);
     }
 
     private int addTextBox(String key, int row, String value, Map<String, Node> inputMap) {
@@ -500,7 +500,7 @@ public class StepPresenter {
     private void editStep(StepView.Action editAction, int stepIndex, Step newStep) {
         TestCase newCase;
         if (editAction == StepView.Action.EDIT) {
-            newCase = this.application.getDisplayTestCase().setSteps(stepIndex, newStep);
+            newCase = this.application.getDisplayTestCase().replaceSteps(stepIndex, newStep);
         } else if (editAction == StepView.Action.INSERT) {
             newCase = this.application.getDisplayTestCase().insertStep(stepIndex, newStep);
         } else {

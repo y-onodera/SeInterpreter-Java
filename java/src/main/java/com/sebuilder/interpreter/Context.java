@@ -1,7 +1,6 @@
 package com.sebuilder.interpreter;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Maps;
 import com.sebuilder.interpreter.pointcut.StepTypeFilter;
 import com.sebuilder.interpreter.step.type.SaveScreenshot;
 import org.apache.logging.log4j.Logger;
@@ -61,7 +60,7 @@ public enum Context {
         try {
             File envPropertyFile = new File("env.properties");
             if (envPropertyFile.exists()) {
-                environmentProperties.load(new InputStreamReader(new FileInputStream(envPropertyFile), StandardCharsets.UTF_8));
+                this.environmentProperties.load(new InputStreamReader(new FileInputStream(envPropertyFile), StandardCharsets.UTF_8));
             }
         } catch (IOException e) {
             throw new AssertionError(e);
@@ -238,7 +237,7 @@ public enum Context {
     }
 
     public Context setBrowser(String browser) {
-        return setWebDriverFactory(getWebDriverFactory(browser));
+        return this.setWebDriverFactory(getWebDriverFactory(browser));
     }
 
     public Context setRemoteUrl(String remoteUrl) {
@@ -399,7 +398,7 @@ public enum Context {
                             , (e1, e2) -> e1
                             , HashMap::new));
         } catch (IOException e) {
-            return Maps.newHashMap();
+            return new HashMap<>();
         }
     }
 

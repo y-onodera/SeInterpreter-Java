@@ -1,13 +1,13 @@
 package com.sebuilder.interpreter;
 
-import com.google.common.collect.Maps;
-
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public record DataSourceLoader(DataSource dataSource, Map<String, String> dataSourceConfig, File relativePath, InputData shareInput) {
+public record DataSourceLoader(DataSource dataSource, Map<String, String> dataSourceConfig, File relativePath,
+                               InputData shareInput) {
 
     public DataSourceLoader(DataSource dataSource, Map<String, String> dataSourceConfig, File relativePath) {
         this(dataSource, dataSourceConfig, relativePath, new InputData());
@@ -17,9 +17,9 @@ public record DataSourceLoader(DataSource dataSource, Map<String, String> dataSo
         this.shareInput = shareInput;
         this.dataSource = dataSource;
         if (dataSourceConfig != null) {
-            this.dataSourceConfig = Maps.newHashMap(dataSourceConfig);
+            this.dataSourceConfig = new HashMap<>(dataSourceConfig);
         } else {
-            this.dataSourceConfig = Maps.newHashMap();
+            this.dataSourceConfig = new HashMap<>();
         }
         this.relativePath = relativePath;
     }

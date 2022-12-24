@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
@@ -69,7 +71,7 @@ public record TestCase(ScriptFile scriptFile,
         if (this.skipRunning()) {
             return true;
         }
-        final TestCase materialized = this.materialized();
+        TestCase materialized = this.materialized();
         boolean success = true;
         try {
             for (InputData data : materialized.loadData()) {
@@ -102,8 +104,9 @@ public record TestCase(ScriptFile scriptFile,
         return this.scriptFile().relativize(this);
     }
 
+    @Override
     public ArrayList<Step> steps() {
-        return Lists.newArrayList(this.steps);
+        return new ArrayList<>(this.steps);
     }
 
     public boolean hasChain() {
@@ -156,19 +159,15 @@ public record TestCase(ScriptFile scriptFile,
     }
 
     public TestCase removeStep(int stepIndex) {
-        return removeStep(i -> i.intValue() != stepIndex);
+        return this.filterStep(i -> i.intValue() != stepIndex);
     }
 
-    public TestCase removeStep(Predicate<Number> filter) {
-        return this.editStep(it -> {
-                    final ArrayList<Step> newSteps = new ArrayList<>();
-                    for (int i = 0, j = this.steps.size(); i < j; i++) {
-                        if (filter.test(i)) {
-                            newSteps.add(this.steps.get(i));
-                        }
-                    }
-                    return newSteps;
-                }
+    public TestCase filterStep(Predicate<Number> filter) {
+        return this.editStep(it ->
+                IntStream.range(0, this.steps.size())
+                        .filter(filter::test)
+                        .mapToObj(this.steps::get)
+                        .collect(Collectors.toCollection(ArrayList::new))
         );
     }
 
@@ -177,13 +176,14 @@ public record TestCase(ScriptFile scriptFile,
                     if (this.steps.size() == 0) {
                         return Lists.newArrayList(newStep);
                     }
-                    final ArrayList<Step> newSteps = new ArrayList<>();
-                    for (int i = 0, j = this.steps.size(); i < j; i++) {
-                        if (i == stepIndex) {
-                            newSteps.add(newStep);
-                        }
-                        newSteps.add(this.steps.get(i));
-                    }
+                    ArrayList<Step> newSteps = new ArrayList<>();
+                    IntStream.range(0, this.steps.size())
+                            .forEach(i -> {
+                                if (i == stepIndex) {
+                                    newSteps.add(newStep);
+                                }
+                                newSteps.add(this.steps.get(i));
+                            });
                     return newSteps;
                 }
         );
@@ -194,30 +194,29 @@ public record TestCase(ScriptFile scriptFile,
                     if (this.steps.size() == 0) {
                         return Lists.newArrayList(newStep);
                     }
-                    final ArrayList<Step> newSteps = new ArrayList<>();
-                    for (int i = 0, j = this.steps.size(); i < j; i++) {
-                        newSteps.add(this.steps.get(i));
-                        if (i == stepIndex) {
-                            newSteps.add(newStep);
-                        }
-                    }
+                    ArrayList<Step> newSteps = new ArrayList<>();
+                    IntStream.range(0, this.steps.size())
+                            .forEach(i -> {
+                                newSteps.add(this.steps.get(i));
+                                if (i == stepIndex) {
+                                    newSteps.add(newStep);
+                                }
+                            });
                     return newSteps;
                 }
         );
     }
 
-    public TestCase setSteps(int stepIndex, Step newStep) {
-        return this.editStep(it -> {
-                    final ArrayList<Step> newSteps = new ArrayList<>();
-                    for (int i = 0, j = this.steps.size(); i < j; i++) {
-                        if (i != stepIndex) {
-                            newSteps.add(this.steps.get(i));
-                        } else {
-                            newSteps.add(newStep);
-                        }
-                    }
-                    return newSteps;
-                }
+    public TestCase replaceSteps(int stepIndex, Step newStep) {
+        return this.editStep(it ->
+                IntStream.range(0, this.steps.size())
+                        .mapToObj(i -> {
+                            if (i != stepIndex) {
+                                return this.steps.get(i);
+                            }
+                            return newStep;
+                        })
+                        .collect(Collectors.toCollection(ArrayList::new))
         );
     }
 

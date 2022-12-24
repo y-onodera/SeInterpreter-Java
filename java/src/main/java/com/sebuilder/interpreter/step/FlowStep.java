@@ -5,6 +5,8 @@ import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
 
+import java.util.stream.IntStream;
+
 public interface FlowStep extends StepType {
 
     default int getSubSteps(TestRun ctx) {
@@ -23,9 +25,7 @@ public interface FlowStep extends StepType {
     }
 
     default void skipSubStep(TestRun ctx, int actions) {
-        for (int i = 0; i < actions; i++) {
-            ctx.skipTest();
-        }
+        IntStream.range(0, actions).forEach(i -> ctx.skipTest());
     }
 
     @Override

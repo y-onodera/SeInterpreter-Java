@@ -16,8 +16,9 @@
 
 package com.sebuilder.interpreter.step;
 
-import com.google.common.base.Objects;
 import com.sebuilder.interpreter.TestRun;
+
+import java.util.Objects;
 
 /**
  * Generic Assert that wraps a getter.
@@ -33,7 +34,7 @@ public class Assert extends AbstractStepType implements GetterUseStep {
 
     @Override
     public Getter getGetter() {
-        return getter;
+        return this.getter;
     }
 
     @Override
@@ -47,11 +48,11 @@ public class Assert extends AbstractStepType implements GetterUseStep {
             return false;
         }
         Assert anAssert = (Assert) o;
-        return Objects.equal(getGetter(), anAssert.getGetter());
+        return Objects.equals(this.getGetter(), anAssert.getGetter());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(super.hashCode(), getGetter());
+        return Objects.hash(super.hashCode(), this.getGetter());
     }
 }

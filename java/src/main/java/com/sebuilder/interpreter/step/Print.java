@@ -1,8 +1,9 @@
 package com.sebuilder.interpreter.step;
 
-import com.google.common.base.Objects;
 import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
+
+import java.util.Objects;
 
 public class Print extends AbstractStepType implements GetterUseStep {
     public final Getter getter;
@@ -13,14 +14,14 @@ public class Print extends AbstractStepType implements GetterUseStep {
 
     @Override
     public Getter getGetter() {
-        return getter;
+        return this.getter;
     }
 
     @Override
     public boolean run(TestRun ctx) {
-        String value = getter.get(ctx);
+        String value = this.getter.get(ctx);
         if (ctx.currentStep().negated()) {
-            value = String.valueOf(!Boolean.valueOf(value));
+            value = String.valueOf(!Boolean.parseBoolean(value));
         }
         ctx.log().info(value);
         return true;
@@ -37,11 +38,11 @@ public class Print extends AbstractStepType implements GetterUseStep {
             return false;
         }
         Print print = (Print) o;
-        return Objects.equal(getGetter(), print.getGetter());
+        return Objects.equals(this.getGetter(), print.getGetter());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(super.hashCode(), getGetter());
+        return Objects.hash(super.hashCode(), this.getGetter());
     }
 }

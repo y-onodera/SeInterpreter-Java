@@ -4,6 +4,7 @@ import com.google.common.base.Strings;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.util.Objects;
 import java.util.Optional;
 
 public record ScriptFile(String name, String path, File relativePath, Type type) {
@@ -51,7 +52,7 @@ public record ScriptFile(String name, String path, File relativePath, Type type)
         } else if (Strings.isNullOrEmpty(s.path())) {
             return s.name();
         }
-        return this.relativePath.toPath().relativize(Paths.get(s.path()).toAbsolutePath()).toString().replace("\\", "/");
+        return Objects.requireNonNull(this.relativePath).toPath().relativize(Paths.get(s.path()).toAbsolutePath()).toString().replace("\\", "/");
     }
 
     public ScriptFile changeName(String name) {

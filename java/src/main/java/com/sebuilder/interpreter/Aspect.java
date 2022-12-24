@@ -1,21 +1,18 @@
 package com.sebuilder.interpreter;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public record Aspect(Collection<Interceptor> interceptors) {
 
     public Aspect() {
-        this(Lists.newArrayList());
+        this(new ArrayList<>());
     }
 
     public Aspect(Collection<Interceptor> interceptors) {
-        this.interceptors = Lists.newArrayList(interceptors);
+        this.interceptors = new ArrayList<>(interceptors);
     }
 
     public Builder builder() {
@@ -23,9 +20,9 @@ public record Aspect(Collection<Interceptor> interceptors) {
     }
 
     public Advice advice(Step step, InputData vars) {
-        return new Advice(interceptors.stream()
+        return new Advice(this.interceptors.stream()
                 .filter(interceptor -> interceptor.isPointcut(step, vars))
-                .collect(Collectors.toList()));
+                .toList());
     }
 
     public record Advice(List<Interceptor> advices) {
@@ -62,7 +59,7 @@ public record Aspect(Collection<Interceptor> interceptors) {
         private final LinkedHashSet<Interceptor> interceptors;
 
         public Builder(Collection<Interceptor> interceptors) {
-            this.interceptors = Sets.newLinkedHashSet(interceptors);
+            this.interceptors = new LinkedHashSet<>(interceptors);
         }
 
         public Interceptor.Builder interceptor() {

@@ -16,8 +16,6 @@
 
 package com.sebuilder.interpreter;
 
-import com.google.common.collect.Lists;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -34,7 +32,7 @@ public interface DataSource {
     DataSource NONE = new DataSource() {
         @Override
         public List<InputData> getData(Map<String, String> config, File relativeTo, InputData vars) {
-            return Lists.newArrayList(new InputData());
+            return List.of(new InputData());
         }
 
         @Override

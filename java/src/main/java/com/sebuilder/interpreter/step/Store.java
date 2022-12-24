@@ -16,9 +16,10 @@
 
 package com.sebuilder.interpreter.step;
 
-import com.google.common.base.Objects;
 import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
+
+import java.util.Objects;
 
 /**
  * Generic Store that wraps a getter.
@@ -34,12 +35,12 @@ public class Store extends AbstractStepType implements GetterUseStep {
 
     @Override
     public Getter getGetter() {
-        return getter;
+        return this.getter;
     }
 
     @Override
     public boolean run(TestRun ctx) {
-        String value = getter.get(ctx);
+        String value = this.getter.get(ctx);
         if (ctx.currentStep().containsParam("regex")) {
             value = value.replaceAll(ctx.string("regex"), ctx.string("replacement"));
         }
@@ -70,11 +71,11 @@ public class Store extends AbstractStepType implements GetterUseStep {
             return false;
         }
         Store store = (Store) o;
-        return Objects.equal(getGetter(), store.getGetter());
+        return Objects.equals(this.getGetter(), store.getGetter());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(super.hashCode(), getGetter());
+        return Objects.hash(super.hashCode(), this.getGetter());
     }
 }
