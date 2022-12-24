@@ -16,16 +16,16 @@ public class InternetExplorer implements WebDriverFactory {
      * @return A RemoteWebDriver of the type produced by this factory.
      */
     @Override
-    public RemoteWebDriver createLocaleDriver(Map<String, String> config) {
+    public RemoteWebDriver createLocaleDriver(final Map<String, String> config) {
         return new InternetExplorerDriver(this.getOptions(config));
     }
 
     @Override
-    public InternetExplorerOptions getOptions(Map<String, String> config) {
-        HashMap<String, String> caps = new HashMap<>();
-        DesiredCapabilities capabilities = new DesiredCapabilities();
+    public InternetExplorerOptions getOptions(final Map<String, String> config) {
+        final HashMap<String, String> caps = new HashMap<>();
+        final DesiredCapabilities capabilities = new DesiredCapabilities();
         capabilities.setCapability("javascriptEnabled", true);
-        InternetExplorerOptions ieOptions = new InternetExplorerOptions(capabilities);
+        final InternetExplorerOptions ieOptions = new InternetExplorerOptions(capabilities);
         config.forEach((key, value) -> {
             if (key.startsWith("ieoption.")) {
                 if (value.toLowerCase().equals(Boolean.TRUE.toString())) {
@@ -47,7 +47,7 @@ public class InternetExplorer implements WebDriverFactory {
     }
 
     @Override
-    public void setDriverPath(String driverPath) {
+    public void setDriverPath(final String driverPath) {
         System.setProperty("webdriver.ie.driver", driverPath);
     }
 

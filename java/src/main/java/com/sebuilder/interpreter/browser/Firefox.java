@@ -37,13 +37,13 @@ public class Firefox implements WebDriverFactory {
      * @return A FirefoxDriver.
      */
     @Override
-    public RemoteWebDriver createLocaleDriver(Map<String, String> config) {
+    public RemoteWebDriver createLocaleDriver(final Map<String, String> config) {
         return new FirefoxDriver(this.getOptions(config));
     }
 
     @Override
-    public FirefoxOptions getOptions(Map<String, String> config) {
-        FirefoxOptions option = new FirefoxOptions();
+    public FirefoxOptions getOptions(final Map<String, String> config) {
+        final FirefoxOptions option = new FirefoxOptions();
         if (config.containsKey("binary")) {
             option.setBinary(new FirefoxBinary(new File(config.get("binary"))));
         }
@@ -61,7 +61,7 @@ public class Firefox implements WebDriverFactory {
     }
 
     @Override
-    public void setDriverPath(String driverPath) {
+    public void setDriverPath(final String driverPath) {
         System.setProperty("webdriver.gecko.driver", driverPath);
     }
 

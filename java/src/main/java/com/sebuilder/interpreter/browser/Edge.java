@@ -13,15 +13,15 @@ import java.util.Map;
 public class Edge implements WebDriverFactory {
 
     @Override
-    public RemoteWebDriver createLocaleDriver(Map<String, String> config) {
+    public RemoteWebDriver createLocaleDriver(final Map<String, String> config) {
         return new EdgeDriver(this.getOptions(config));
     }
 
     @Override
-    public EdgeOptions getOptions(Map<String, String> config) {
-        HashMap<String, String> caps = new HashMap<>();
-        HashMap<String, String> prefs = new HashMap<>();
-        EdgeOptions option = new EdgeOptions();
+    public EdgeOptions getOptions(final Map<String, String> config) {
+        final HashMap<String, String> caps = new HashMap<>();
+        final HashMap<String, String> prefs = new HashMap<>();
+        final EdgeOptions option = new EdgeOptions();
         if (config.containsKey("binary")) {
             option.setBinary(new File(config.get("binary")));
         }
@@ -39,7 +39,7 @@ public class Edge implements WebDriverFactory {
     }
 
     @Override
-    public void setDriverPath(String driverPath) {
+    public void setDriverPath(final String driverPath) {
         System.setProperty("webdriver.edge.driver", driverPath);
     }
 

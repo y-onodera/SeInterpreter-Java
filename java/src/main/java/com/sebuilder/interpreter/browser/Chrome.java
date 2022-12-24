@@ -17,15 +17,15 @@ public class Chrome implements WebDriverFactory {
      * @return A RemoteWebDriver of the type produced by this factory.
      */
     @Override
-    public RemoteWebDriver createLocaleDriver(Map<String, String> config) {
+    public RemoteWebDriver createLocaleDriver(final Map<String, String> config) {
         return new ChromeDriver(this.getOptions(config));
     }
 
     @Override
-    public ChromeOptions getOptions(Map<String, String> config) {
-        HashMap<String, String> caps = new HashMap<>();
-        HashMap<String, String> prefs = new HashMap<>();
-        ChromeOptions option = new ChromeOptions();
+    public ChromeOptions getOptions(final Map<String, String> config) {
+        final HashMap<String, String> caps = new HashMap<>();
+        final HashMap<String, String> prefs = new HashMap<>();
+        final ChromeOptions option = new ChromeOptions();
         if (config.containsKey("binary")) {
             option.setBinary(new File(config.get("binary")));
         }
@@ -43,7 +43,7 @@ public class Chrome implements WebDriverFactory {
     }
 
     @Override
-    public void setDriverPath(String driverPath) {
+    public void setDriverPath(final String driverPath) {
         System.setProperty("webdriver.chrome.driver", driverPath);
     }
 
