@@ -1,8 +1,5 @@
 package com.sebuilder.interpreter.application;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.report.ReportFormat;
 import org.kohsuke.args4j.Argument;
@@ -17,7 +14,7 @@ public class CommandLineOption {
     private Long pageLoadTimeout = (long) -1;
     private String driver = "Chrome";
     private String driverPath;
-    private final Map<String, String> driverConfig = Maps.newHashMap();
+    private final Map<String, String> driverConfig = new HashMap<>();
     private String datasourceEncoding = "UTF-8";
     private String datasourceDirectory = "input";
     private String resultoutput = "result";
@@ -28,24 +25,24 @@ public class CommandLineOption {
     private ReportFormat reportFormat = ReportFormat.JUNIT;
     private String aspectFile;
     private String environmentProperties;
-    private final Map<String, String> envVar = Maps.newHashMap();
+    private final Map<String, String> envVar = new HashMap<>();
     private Locale locale;
     private File localeConf;
-    private final LinkedHashSet<String> scripts = Sets.newLinkedHashSet();
+    private final LinkedHashSet<String> scripts = new LinkedHashSet<>();
     @Argument
-    private List<String> arguments = Lists.newArrayList();
+    private List<String> arguments = new ArrayList<>();
 
-    public void parse(String[] args) throws Exception {
-        CmdLineParser parser = new CmdLineParser(this);
+    public void parse(final String[] args) throws Exception {
+        final CmdLineParser parser = new CmdLineParser(this);
         parser.stopOptionParsing();
         parser.parseArgument(args);
         this.parseArguments();
     }
 
     private void parseArguments() {
-        for (String args : this.arguments) {
+        for (final String args : this.arguments) {
             if (args.startsWith("--")) {
-                String[] kv = args.split("=", 2);
+                final String[] kv = args.split("=", 2);
                 if (kv[0].equals(CommandLineArgument.IMPLICITLY_WAIT.key())) {
                     this.implicitlyWait = Long.valueOf(kv[1]);
                 } else if (kv[0].equals(CommandLineArgument.PAGE_LOAD_TIMEOUT.key())) {
@@ -84,9 +81,13 @@ public class CommandLineOption {
                     this.locale = Locale.forLanguageTag(kv[1]);
                 }
             } else {
-                scripts.add(args);
+                this.scripts.add(args);
             }
         }
+    }
+
+    public void setArguments(final List<String> arguments) {
+        this.arguments = arguments;
     }
 
     public Long getImplicitlyWait() {
@@ -161,11 +162,11 @@ public class CommandLineOption {
         return this.localeConf;
     }
 
-    public String getDriverConfig(String key) {
+    public String getDriverConfig(final String key) {
         return this.driverConfig.get(key);
     }
 
-    public String getEnvVar(String key) {
+    public String getEnvVar(final String key) {
         return this.envVar.get(key);
     }
 

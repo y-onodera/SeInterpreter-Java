@@ -41,12 +41,12 @@ public class TestRun implements WebDriverWrapper {
     private boolean closeDriver;
 
     public TestRun(
-            String testRunName,
-            TestRunBuilder testRunBuilder,
-            Logger log,
-            RemoteWebDriver driver,
-            InputData initialVars,
-            TestRunListener seInterpreterTestListener
+            final String testRunName,
+            final TestRunBuilder testRunBuilder,
+            final Logger log,
+            final RemoteWebDriver driver,
+            final InputData initialVars,
+            final TestRunListener seInterpreterTestListener
     ) {
         this.testRunName = testRunName;
         this.testCase = testRunBuilder.getTestCase();
@@ -71,11 +71,11 @@ public class TestRun implements WebDriverWrapper {
         return this.testCase.relativePath();
     }
 
-    public void putVars(@Nonnull String key, String value) {
+    public void putVars(@Nonnull final String key, final String value) {
         this.vars = this.vars.add(key, value);
     }
 
-    public void removeVars(String key) {
+    public void removeVars(final String key) {
         this.vars = this.vars.remove(key);
     }
 
@@ -116,15 +116,15 @@ public class TestRun implements WebDriverWrapper {
         return this.testCase.steps().get(this.currentStepIndex());
     }
 
-    public boolean containsKey(String key) {
+    public boolean containsKey(final String key) {
         return this.currentStep().containsParam(key);
     }
 
-    public String bindRuntimeVariables(String value) {
+    public String bindRuntimeVariables(final String value) {
         return this.vars.evaluateString(value);
     }
 
-    public boolean getBoolean(@Nonnull String key) {
+    public boolean getBoolean(@Nonnull final String key) {
         return this.containsKey(key) && this.vars().evaluate(this.currentStep().getParam(key));
     }
 
@@ -132,8 +132,8 @@ public class TestRun implements WebDriverWrapper {
         return this.string("text");
     }
 
-    public String string(@Nonnull String key) {
-        String s = this.currentStep().getParam(key);
+    public String string(@Nonnull final String key) {
+        final String s = this.currentStep().getParam(key);
         if (s == null) {
             throw new RuntimeException("Missing parameter \"" + key + "\" at step #" + this.currentStepIndex() + ".");
         }
@@ -144,7 +144,7 @@ public class TestRun implements WebDriverWrapper {
         return this.hasLocator("locator");
     }
 
-    public boolean hasLocator(String key) {
+    public boolean hasLocator(final String key) {
         return this.currentStep().locatorContains(key);
     }
 
@@ -152,8 +152,8 @@ public class TestRun implements WebDriverWrapper {
         return this.locator("locator");
     }
 
-    public Locator locator(@Nonnull String key) {
-        Locator l = this.currentStep().getLocator(key);
+    public Locator locator(@Nonnull final String key) {
+        final Locator l = this.currentStep().getLocator(key);
         return new Locator(this.bindRuntimeVariables(l.type()), this.bindRuntimeVariables(l.value()));
     }
 
@@ -186,7 +186,7 @@ public class TestRun implements WebDriverWrapper {
                 while (this.hasNext()) {
                     success = this.next() && success;
                 }
-            } catch (Throwable e) {
+            } catch (final Throwable e) {
                 return this.absent(e);
             }
             return this.end(success);
@@ -219,7 +219,7 @@ public class TestRun implements WebDriverWrapper {
     }
 
     public boolean startTest() {
-        boolean aspectSuccess = this.getAdvice().invokeBefore(this);
+        final boolean aspectSuccess = this.getAdvice().invokeBefore(this);
         this.getListener().startTest(this.currentStepToString());
         return aspectSuccess;
     }
@@ -229,16 +229,16 @@ public class TestRun implements WebDriverWrapper {
         this.putVars("_stepIndex", String.valueOf(this.currentStepIndex()));
     }
 
-    public void backStepIndex(int count) {
+    public void backStepIndex(final int count) {
         this.forwardStepIndex(count * -1);
     }
 
-    public void forwardStepIndex(int count) {
+    public void forwardStepIndex(final int count) {
         this.getListener().skipTestIndex(count);
         this.testRunStatus = this.testRunStatus.forwardStepIndex(count);
     }
 
-    public boolean processTestSuccess(boolean isAcceptAdvice) {
+    public boolean processTestSuccess(final boolean isAcceptAdvice) {
         this.getListener().endTest();
         if (!isAcceptAdvice) {
             return true;
@@ -246,7 +246,7 @@ public class TestRun implements WebDriverWrapper {
         return this.getAdvice().invokeAfter(this);
     }
 
-    public boolean processTestFailure(boolean isAcceptAdvice) {
+    public boolean processTestFailure(final boolean isAcceptAdvice) {
         if (!this.currentStep().type().isContinueAtFailure()) {
             throw new AssertionError(this.currentStepToString() + " failed.");
         }
@@ -257,7 +257,7 @@ public class TestRun implements WebDriverWrapper {
         return false;
     }
 
-    public AssertionError processTestError(Throwable e) {
+    public AssertionError processTestError(final Throwable e) {
         this.getListener().addError(e);
         this.getAdvice().invokeFailure(this);
         return new AssertionError(this.currentStepToString() + " failed.", e);
@@ -276,7 +276,7 @@ public class TestRun implements WebDriverWrapper {
         return this.testRunStatus.isNeedRunning(this.testCase.steps().size() - 1);
     }
 
-    protected boolean end(boolean success) {
+    protected boolean end(final boolean success) {
         this.getListener().closeTestSuite();
         if (this.testRunStatus.isNeedChain()) {
             return this.chainRun() && success;
@@ -285,7 +285,7 @@ public class TestRun implements WebDriverWrapper {
         return success;
     }
 
-    protected boolean absent(Throwable e) {
+    protected boolean absent(final Throwable e) {
         this.getListener().closeTestSuite();
         // If the head terminates, the driver will be closed automatically.
         this.quit();
@@ -318,7 +318,7 @@ public class TestRun implements WebDriverWrapper {
             try {
                 this.driver.quit();
                 this.closeDriver = true;
-            } catch (Exception e2) {
+            } catch (final Exception e2) {
                 //
             }
         }
@@ -332,7 +332,7 @@ public class TestRun implements WebDriverWrapper {
         private InputData lastRunVar;
         private int chainIndex;
 
-        public ChainRunner(TestRun parent) {
+        public ChainRunner(final TestRun parent) {
             this.parent = parent;
             this.chains = parent.testCase.chains();
             this.takeOverLastRun = this.chains.isTakeOverLastRun();
@@ -342,7 +342,7 @@ public class TestRun implements WebDriverWrapper {
             this.lastRunVar = this.parent.vars();
             this.chainIndex = 0;
             boolean success = true;
-            for (TestCase nextChain : this.chains) {
+            for (final TestCase nextChain : this.chains) {
                 success = nextChain.map(it -> it.addAspect(this.parent.getAspect()).setShareInput(this.lastRunVar))
                         .run(this, this.parent.getListener()) && success;
                 this.chainIndex++;
@@ -351,12 +351,12 @@ public class TestRun implements WebDriverWrapper {
         }
 
         @Override
-        public STATUS execute(TestRunBuilder testRunBuilder, InputData data, TestRunListener testRunListener) {
+        public STATUS execute(final TestRunBuilder testRunBuilder, final InputData data, final TestRunListener testRunListener) {
             if (this.isStopped()) {
                 return STATUS.STOPPED;
             }
             this.lastRun = testRunBuilder.createTestRun(data, this.parent, this.chainIndex);
-            boolean result = this.lastRun.finish();
+            final boolean result = this.lastRun.finish();
             if (this.lastRun.isStopped()) {
                 return STATUS.STOPPED;
             } else if (!result) {

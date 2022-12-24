@@ -35,15 +35,15 @@ public record Step(
 ) {
     public static final String KEY_NAME_SKIP = "skip";
 
-    public Step(StepType type) {
+    public Step(final StepType type) {
         this("", type, false);
     }
 
-    public Step(String name, StepType type, boolean isNegated) {
+    public Step(final String name, final StepType type, final boolean isNegated) {
         this(name, type, isNegated, new HashMap<>(), new HashMap<>());
     }
 
-    public Step(StepBuilder stepBuilder) {
+    public Step(final StepBuilder stepBuilder) {
         this(stepBuilder.getName()
                 , stepBuilder.getStepType()
                 , stepBuilder.isNegated()
@@ -52,27 +52,27 @@ public record Step(
         );
     }
 
-    public Result execute(TestRun ctx) {
+    public Result execute(final TestRun ctx) {
         try {
-            boolean aspectSuccess = ctx.startTest();
-            int execSteps = this.type.getExecSteps(ctx);
+            final boolean aspectSuccess = ctx.startTest();
+            final int execSteps = this.type.getExecSteps(ctx);
             if (this.run(ctx)) {
                 return new Result(ctx.processTestSuccess(this.type.isAcceptEndAdvice()) && aspectSuccess, execSteps);
             }
             return new Result(ctx.processTestFailure(this.type.isAcceptEndAdvice()), execSteps);
-        } catch (Throwable e) {
+        } catch (final Throwable e) {
             throw ctx.processTestError(e);
         }
     }
 
-    public boolean run(TestRun testRun) {
+    public boolean run(final TestRun testRun) {
         if (this.isSkip(testRun.vars())) {
             return true;
         }
         return this.type.run(testRun);
     }
 
-    public boolean isSkip(InputData vars) {
+    public boolean isSkip(final InputData vars) {
         if (this.isSkippable()) {
             return vars.evaluate(this.getParam(KEY_NAME_SKIP));
         }
@@ -83,11 +83,11 @@ public record Step(
         return this.stringParams.keySet();
     }
 
-    public String getParam(String paramName) {
+    public String getParam(final String paramName) {
         return this.stringParams.get(paramName);
     }
 
-    public boolean containsParam(String paramKey) {
+    public boolean containsParam(final String paramKey) {
         return this.stringParams.containsKey(paramKey);
     }
 
@@ -95,11 +95,11 @@ public record Step(
         return this.locatorParams.keySet();
     }
 
-    public Locator getLocator(String key) {
+    public Locator getLocator(final String key) {
         return this.locatorParams.get(key);
     }
 
-    public boolean locatorContains(String key) {
+    public boolean locatorContains(final String key) {
         return this.locatorParams.containsKey(key);
     }
 
@@ -121,7 +121,7 @@ public record Step(
     }
 
     public Step withAllParam() {
-        StepBuilder o = this.builder();
+        final StepBuilder o = this.builder();
         this.type.addDefaultParam(o);
         return o.build();
     }
@@ -132,7 +132,7 @@ public record Step(
     }
 
     public String toPrettyString() {
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
         if (this.name != null) {
             sb.append(this.name).append(": ");
         }
@@ -146,7 +146,7 @@ public record Step(
     }
 
     public Map<String, String> toMap() {
-        Map<String, String> result = new HashMap<>();
+        final Map<String, String> result = new HashMap<>();
         if (this.name != null) {
             result.put("name", this.name);
         }

@@ -2,7 +2,7 @@ package com.sebuilder.interpreter;
 
 public record TestRunStatus(int stepIndex, boolean chainRun, boolean finished, boolean stopped) {
 
-    public static TestRunStatus of(TestCase testCase) {
+    public static TestRunStatus of(final TestCase testCase) {
         return new TestRunStatus(-1, testCase.hasChain(), false, false);
     }
 
@@ -10,7 +10,7 @@ public record TestRunStatus(int stepIndex, boolean chainRun, boolean finished, b
         return new TestRunStatus(this.stepIndex, this.chainRun, false, false);
     }
 
-    public TestRunStatus forwardStepIndex(int count) {
+    public TestRunStatus forwardStepIndex(final int count) {
         return new TestRunStatus(this.stepIndex + count, this.chainRun, this.finished, this.stopped);
     }
 
@@ -34,10 +34,11 @@ public record TestRunStatus(int stepIndex, boolean chainRun, boolean finished, b
         return !this.isStopped() && this.chainRun;
     }
 
-    public boolean isNeedRunning(int aIndex) {
+    public boolean isNeedRunning(final int aIndex) {
         return !this.isStopped() && this.stepIndex < aIndex;
     }
 
+    @Override
     public int stepIndex() {
         return this.stepIndex;
     }

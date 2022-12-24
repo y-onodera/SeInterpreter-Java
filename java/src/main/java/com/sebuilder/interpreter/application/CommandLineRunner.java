@@ -17,10 +17,10 @@ public abstract class CommandLineRunner {
     protected TestRunListener testRunListener;
     protected Logger log;
 
-    protected CommandLineRunner(String[] args, Logger log) {
+    protected CommandLineRunner(final String[] args, final Logger log) {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            if (lastRun != null) {
-                lastRun.driver().quit();
+            if (this.lastRun != null) {
+                this.lastRun.driver().quit();
             }
         }));
         this.log = log;
@@ -31,18 +31,18 @@ public abstract class CommandLineRunner {
                 .setStepTypeFactory(new StepTypeFactoryImpl())
                 .setTestCaseConverter(new SebuilderToStringConverter())
         ;
-        setUp(args);
+        this.setUp(args);
     }
 
-    public void setTestRunListener(TestRunListener testRunListener) {
+    public void setTestRunListener(final TestRunListener testRunListener) {
         this.testRunListener = testRunListener;
     }
 
-    public void reloadBrowserSetting(String browserName, String driverPath, String binaryPath) {
+    public void reloadBrowserSetting(final String browserName, final String driverPath, final String binaryPath) {
         Context.getInstance().setBrowser(browserName, driverPath, binaryPath);
     }
 
-    public void setUp(String[] args) {
+    public void setUp(final String[] args) {
         this.log.info("setUp start");
         if (!this.validateArgs(args)) {
             this.log.info("Usage: [--driver=<drivername] [--driver.<configkey>=<configvalue>...] [--implicitlyWait=<ms>] [--pageLoadTimeout=<ms>] [--stepTypePackage=<package name>] <script path>...");
@@ -50,7 +50,7 @@ public abstract class CommandLineRunner {
         }
         this.preSetUp();
         this.lastRun = null;
-        CommandLineOption option = new CommandLineOption();
+        final CommandLineOption option = new CommandLineOption();
         try {
             option.parse(args);
             Context.getInstance()
@@ -82,7 +82,7 @@ public abstract class CommandLineRunner {
                     .setLocaleConfDir(option.getLocaleConf())
             ;
             this.setScripts(option.getScripts());
-        } catch (Exception e) {
+        } catch (final Exception e) {
             this.log.error("error argument parse:", e);
             System.exit(1);
         }
@@ -90,7 +90,7 @@ public abstract class CommandLineRunner {
         this.log.info("setUp finish");
     }
 
-    protected TestRun getTestRun(TestRunBuilder script, InputData data, TestRunListener testRunListener) {
+    protected TestRun getTestRun(final TestRunBuilder script, final InputData data, final TestRunListener testRunListener) {
         return script.createTestRun(testRunListener.getLog()
                 , Context.getWebDriverFactory()
                 , Context.getDriverConfig()
@@ -101,13 +101,13 @@ public abstract class CommandLineRunner {
                 , testRunListener);
     }
 
-    protected boolean validateArgs(String[] args) {
+    protected boolean validateArgs(final String[] args) {
         return args.length > 0;
     }
 
     protected void preSetUp() {
     }
 
-    protected void setScripts(Set<String> scripts) {
+    protected void setScripts(final Set<String> scripts) {
     }
 }

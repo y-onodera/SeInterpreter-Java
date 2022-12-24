@@ -9,7 +9,7 @@ public record Interceptor(Pointcut pointcut,
                           TestCase afterStep,
                           TestCase failureStep) {
 
-    public boolean isPointcut(Step step, InputData vars) {
+    public boolean isPointcut(final Step step, final InputData vars) {
         if (this.pointcut == Pointcut.NONE) {
             return this.beforeStep.steps().size() == 0
                     && this.afterStep.steps().size() == 0
@@ -18,54 +18,54 @@ public record Interceptor(Pointcut pointcut,
         return this.pointcut.test(step, vars);
     }
 
-    public boolean invokeBefore(TestRun testRun) {
+    public boolean invokeBefore(final TestRun testRun) {
         return this.invokeAdvise(testRun, this.beforeStep, "before");
     }
 
-    public boolean invokeAfter(TestRun testRun) {
+    public boolean invokeAfter(final TestRun testRun) {
         return this.invokeAdvise(testRun, this.afterStep, "after");
     }
 
-    public boolean invokeFailure(TestRun testRun) {
+    public boolean invokeFailure(final TestRun testRun) {
         return this.invokeAdvise(testRun, this.failureStep, "failure");
     }
 
-    boolean invokeAdvise(TestRun testRun, TestCase steps, String testRunName) {
+    boolean invokeAdvise(final TestRun testRun, final TestCase steps, final String testRunName) {
         if (steps.steps().size() == 0) {
             return true;
         }
         final TestCase adviseCase = this.createAdviseCase(steps, testRunName);
-        TestRun interceptRun = this.createInterceptorRun(testRun, adviseCase);
+        final TestRun interceptRun = this.createInterceptorRun(testRun, adviseCase);
         return interceptRun.finish();
     }
 
-    TestCase createAdviseCase(TestCase steps, String testRunName) {
+    TestCase createAdviseCase(final TestCase steps, final String testRunName) {
         return steps.builder()
                 .setName(testRunName)
                 .isShareState(true)
                 .build();
     }
 
-    TestRun createInterceptorRun(TestRun testRun, TestCase invokeCase) {
+    TestRun createInterceptorRun(final TestRun testRun, final TestCase invokeCase) {
         return new TestRunBuilder(invokeCase.map(it -> it.isPreventContextAspect(true)))
                 .addTestRunNamePrefix(this.getInterceptCaseName(testRun))
-                .createTestRun(testRun.log(), testRun.driver(), extendsStepVar(testRun), this.createAdviseListener(testRun));
+                .createTestRun(testRun.log(), testRun.driver(), this.extendsStepVar(testRun), this.createAdviseListener(testRun));
     }
 
-    InputData extendsStepVar(TestRun testRun) {
-        Map<String, String> joinStepInfo = Maps.newHashMap();
+    InputData extendsStepVar(final TestRun testRun) {
+        final Map<String, String> joinStepInfo = Maps.newHashMap();
         testRun.currentStep()
                 .toMap()
                 .forEach((key, value) -> joinStepInfo.put("_target." + key, value));
         return testRun.vars().add(joinStepInfo).add("_target.currentStepIndex", String.valueOf(testRun.currentStepIndex()));
     }
 
-    TestRunListener createAdviseListener(TestRun testRun) {
+    TestRunListener createAdviseListener(final TestRun testRun) {
         return new TestRunListenerWrapper(testRun.getListener()) {
             String testName;
 
             @Override
-            public boolean openTestSuite(TestCase testCase, String testRunName, InputData aProperty) {
+            public boolean openTestSuite(final TestCase testCase, final String testRunName, final InputData aProperty) {
                 this.testName = testRunName;
                 testRun.log().info("open suite %s".formatted(this.testName));
                 return true;
@@ -78,7 +78,7 @@ public record Interceptor(Pointcut pointcut,
         };
     }
 
-    String getInterceptCaseName(TestRun testRun) {
+    String getInterceptCaseName(final TestRun testRun) {
         return testRun.getTestRunName() + "_" + testRun.formatStepIndex() + "_" + testRun.currentStep().type().getStepTypeName() + "_";
     }
 
@@ -93,26 +93,26 @@ public record Interceptor(Pointcut pointcut,
 
         private TestCase failureStep = new TestCaseBuilder().build();
 
-        public Builder(Aspect.Builder builder) {
-            aspectBuilder = builder;
+        public Builder(final Aspect.Builder builder) {
+            this.aspectBuilder = builder;
         }
 
-        public Builder setPointcut(Pointcut pointcut) {
+        public Builder setPointcut(final Pointcut pointcut) {
             this.pointcut = pointcut;
             return this;
         }
 
-        public Builder addBefore(TestCase testCase) {
+        public Builder addBefore(final TestCase testCase) {
             this.beforeStep = testCase;
             return this;
         }
 
-        public Builder addAfter(TestCase testCase) {
+        public Builder addAfter(final TestCase testCase) {
             this.afterStep = testCase;
             return this;
         }
 
-        public Builder addFailure(TestCase testCase) {
+        public Builder addFailure(final TestCase testCase) {
             this.failureStep = testCase;
             return this;
         }

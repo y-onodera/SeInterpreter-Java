@@ -16,7 +16,7 @@ public record InputData(LinkedHashMap<String, String> row, boolean lastRow) {
         this(EMPTY, true);
     }
 
-    public InputData(LinkedHashMap<String, String> row) {
+    public InputData(final LinkedHashMap<String, String> row) {
         this(row, false);
     }
 
@@ -34,65 +34,65 @@ public record InputData(LinkedHashMap<String, String> row, boolean lastRow) {
         return this.get(ROW_NUMBER);
     }
 
-    public String get(String key) {
+    public String get(final String key) {
         return this.row.get(key);
     }
 
     public InputData clearRowNumber() {
-        InputData result = this.copy();
+        final InputData result = this.copy();
         result.row.remove(ROW_NUMBER);
         return result;
     }
 
-    public InputData add(InputData shareInput) {
-        InputData result = this.copy();
+    public InputData add(final InputData shareInput) {
+        final InputData result = this.copy();
         result.row.putAll(shareInput.row);
         return result;
     }
 
-    public InputData add(Map<String, String> initialVars) {
-        InputData result = this.copy();
+    public InputData add(final Map<String, String> initialVars) {
+        final InputData result = this.copy();
         result.row.putAll(initialVars);
         return result;
     }
 
-    public InputData add(String key, String value) {
-        InputData result = this.copy();
+    public InputData add(final String key, final String value) {
+        final InputData result = this.copy();
         result.row.put(key, value);
         return result;
     }
 
-    public InputData remove(String key) {
-        InputData result = this.copy();
+    public InputData remove(final String key) {
+        final InputData result = this.copy();
         result.row.remove(key);
         return result;
     }
 
-    public InputData lastRow(boolean isLastRow) {
+    public InputData lastRow(final boolean isLastRow) {
         return new InputData(this.row, isLastRow);
     }
 
-    public boolean evaluate(String target) {
+    public boolean evaluate(final String target) {
         return Boolean.parseBoolean(this.evaluateString(target));
     }
 
-    public String evaluateString(String target) {
-        String result = this.bind(target);
-        String exp = this.extractExpression(result);
+    public String evaluateString(final String target) {
+        final String result = this.bind(target);
+        final String exp = this.extractExpression(result);
         if (Objects.equals(result, exp)) {
             return result;
         }
         try {
-            JexlEngine jexl = new JexlBuilder().create();
-            JexlExpression expression = jexl.createExpression(exp);
-            JexlContext jc = new MapContext(new HashMap<>(this.row));
+            final JexlEngine jexl = new JexlBuilder().create();
+            final JexlExpression expression = jexl.createExpression(exp);
+            final JexlContext jc = new MapContext(new HashMap<>(this.row));
             return result.replace("${" + exp + "}", expression.evaluate(jc).toString());
-        } catch (JexlException ex) {
+        } catch (final JexlException ex) {
             return result;
         }
     }
 
-    public String bind(String s) {
+    public String bind(final String s) {
         // Sub special keys using the !{keyname} syntax.
         String result = this.replaceKeys(s);
         // This kind of variable substitution makes for short code, but it's inefficient.
@@ -124,20 +124,20 @@ public record InputData(LinkedHashMap<String, String> row, boolean lastRow) {
     }
 
     private String replaceKeys(String s) {
-        for (Keys k : Keys.values()) {
+        for (final Keys k : Keys.values()) {
             s = s.replace("!{" + k.name() + "}", k.toString());
         }
         return s;
     }
 
     private String replaceVars(String variable) {
-        for (Map.Entry<String, String> v : this.row.entrySet()) {
+        for (final Map.Entry<String, String> v : this.row.entrySet()) {
             variable = variable.replace("${" + v.getKey() + "}", v.getValue());
         }
         return variable;
     }
 
-    private String extractExpression(String result) {
+    private String extractExpression(final String result) {
         return result.replaceAll(REGEX_EXPRESSION, "$1");
     }
 
@@ -147,17 +147,17 @@ public record InputData(LinkedHashMap<String, String> row, boolean lastRow) {
             return new InputData(new LinkedHashMap<>(this.row), this.lastRow);
         }
 
-        public Builder add(InputData shareInput) {
+        public Builder add(final InputData shareInput) {
             this.row.putAll(shareInput.row);
             return this;
         }
 
-        public Builder add(Map<String, String> initialVars) {
+        public Builder add(final Map<String, String> initialVars) {
             this.row.putAll(initialVars);
             return this;
         }
 
-        public Builder add(String key, String value) {
+        public Builder add(final String key, final String value) {
             this.row.put(key, value);
             return this;
         }

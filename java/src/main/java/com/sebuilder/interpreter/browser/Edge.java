@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Edge implements WebDriverFactory {
+
     @Override
     public RemoteWebDriver createLocaleDriver(Map<String, String> config) {
         return new EdgeDriver(this.getOptions(config));

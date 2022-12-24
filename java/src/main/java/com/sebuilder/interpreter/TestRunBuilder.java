@@ -18,7 +18,7 @@ public class TestRunBuilder {
     private String testRunNamePrefix;
     private String testRunNameSuffix;
 
-    public TestRunBuilder(TestCase testCase) {
+    public TestRunBuilder(final TestCase testCase) {
         this.testCase = testCase;
         this.shareInput = testCase.shareInput();
     }
@@ -32,19 +32,19 @@ public class TestRunBuilder {
     }
 
     public TestCase getTestCase() {
-        return testCase;
+        return this.testCase;
     }
 
     public boolean isPreventContextAspect() {
         return this.testCase.preventContextAspect();
     }
 
-    public TestRunBuilder setShareInput(InputData shareInput) {
+    public TestRunBuilder setShareInput(final InputData shareInput) {
         this.shareInput = this.shareInput.add(shareInput);
         return this;
     }
 
-    public TestRunBuilder addTestRunNameSuffix(String aTestRunNameSuffix) {
+    public TestRunBuilder addTestRunNameSuffix(final String aTestRunNameSuffix) {
         if (this.testRunNameSuffix == null) {
             this.testRunNameSuffix = "";
         }
@@ -54,7 +54,7 @@ public class TestRunBuilder {
         return this;
     }
 
-    public TestRunBuilder addTestRunNamePrefix(String aTestRunNamePrefix) {
+    public TestRunBuilder addTestRunNamePrefix(final String aTestRunNamePrefix) {
         if (this.testRunNamePrefix == null) {
             this.testRunNamePrefix = "";
         }
@@ -64,12 +64,12 @@ public class TestRunBuilder {
         return this;
     }
 
-    public TestRun createTestRun(Logger log, WebDriverFactory webDriverFactory, Map<String, String> webDriverConfig, Long implicitWaitTime, Long pageLoadWaitTime, InputData initialVars, TestRun previousRun, TestRunListener seInterpreterTestListener) {
+    public TestRun createTestRun(final Logger log, final WebDriverFactory webDriverFactory, final Map<String, String> webDriverConfig, final Long implicitWaitTime, final Long pageLoadWaitTime, final InputData initialVars, final TestRun previousRun, final TestRunListener seInterpreterTestListener) {
         final RemoteWebDriver driver;
         if (this.testCase.shareState() && previousRun != null && previousRun.driver() != null) {
             driver = previousRun.driver();
         } else {
-            driver = createDriver(log, webDriverFactory, webDriverConfig);
+            driver = this.createDriver(log, webDriverFactory, webDriverConfig);
         }
         if (implicitWaitTime != null && implicitWaitTime > 0) {
             driver.manage().timeouts().implicitlyWait(Duration.of(implicitWaitTime, ChronoUnit.SECONDS));
@@ -80,7 +80,7 @@ public class TestRunBuilder {
         return this.createTestRun(log, driver, initialVars, seInterpreterTestListener);
     }
 
-    public TestRun createTestRun(InputData initialVars, TestRun previousRun, int index) {
+    public TestRun createTestRun(final InputData initialVars, final TestRun previousRun, final int index) {
         return this.createTestRun(
                 previousRun.getTestRunName() + "_" + index + "_" + this.testCase.name()
                 , previousRun.log()
@@ -89,7 +89,7 @@ public class TestRunBuilder {
                 , previousRun.getListener());
     }
 
-    public TestRun createTestRun(Logger log, RemoteWebDriver driver, InputData initialVars, TestRunListener seInterpreterTestListener) {
+    public TestRun createTestRun(final Logger log, final RemoteWebDriver driver, final InputData initialVars, final TestRunListener seInterpreterTestListener) {
         return this.createTestRun(this.testCase.name(), log, driver, initialVars, seInterpreterTestListener);
     }
 
@@ -100,16 +100,16 @@ public class TestRunBuilder {
                 .addTestRunNameSuffix(this.testRunNameSuffix);
     }
 
-    protected TestRun createTestRun(String testRunName, Logger log, RemoteWebDriver driver, InputData initialVars, TestRunListener seInterpreterTestListener) {
-        InputData data = this.shareInput.clearRowNumber().add(initialVars).lastRow(initialVars.isLastRow());
+    protected TestRun createTestRun(final String testRunName, final Logger log, final RemoteWebDriver driver, final InputData initialVars, final TestRunListener seInterpreterTestListener) {
+        final InputData data = this.shareInput.clearRowNumber().add(initialVars).lastRow(initialVars.isLastRow());
         return new TestRun(this.getTestRunName(testRunName, data), this, log, driver, data, seInterpreterTestListener);
     }
 
-    protected String getTestRunName(String testRunName, InputData initialVars) {
+    protected String getTestRunName(final String testRunName, final InputData initialVars) {
         String result = testRunName;
-        if (isTestCaseAlreadySaved() && result.contains(".")) {
+        if (this.isTestCaseAlreadySaved() && result.contains(".")) {
             String suffix = "";
-            Matcher m = DUPLICATE_PATTERN.matcher(result);
+            final Matcher m = DUPLICATE_PATTERN.matcher(result);
             if (m.matches()) {
                 suffix = m.group(1);
             }
@@ -128,14 +128,14 @@ public class TestRunBuilder {
     }
 
     protected boolean isTestCaseAlreadySaved() {
-        return Strings.isNullOrEmpty(testCase.path());
+        return !Strings.isNullOrEmpty(this.testCase.path());
     }
 
-    private RemoteWebDriver createDriver(Logger log, WebDriverFactory webDriverFactory, Map<String, String> webDriverConfig) {
+    private RemoteWebDriver createDriver(final Logger log, final WebDriverFactory webDriverFactory, final Map<String, String> webDriverConfig) {
         log.debug("Initialising driver.");
         try {
             return webDriverFactory.make(webDriverConfig);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new RuntimeException("Test finish failed: unable to create driver.", e);
         }
     }

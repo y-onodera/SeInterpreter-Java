@@ -9,26 +9,26 @@ public record TestCaseSelector(String headName,
         return new Builder();
     }
 
-    private TestCaseSelector(Builder builder) {
+    private TestCaseSelector(final Builder builder) {
         this(builder.getHeadName()
                 , builder.getTestCaseName()
                 , builder.getChainIndex());
     }
 
-    public TestCase findTestCase(TestCase testCase) {
+    public TestCase findTestCase(final TestCase testCase) {
         return this.findChainHead(testCase)
                 .chains()
-                .get(testCaseName);
+                .get(this.testCaseName);
     }
 
-    public TestCase findChainHead(Suite suite) {
+    public TestCase findChainHead(final Suite suite) {
         return this.findChainHead(suite.head());
     }
 
-    public TestCase findChainHead(TestCase testCase) {
+    public TestCase findChainHead(final TestCase testCase) {
         return testCase
                 .flattenTestCases()
-                .filter(it -> it.chains().size() > 0 && it.name().equals(headName))
+                .filter(it -> it.chains().size() > 0 && it.name().equals(this.headName))
                 .findFirst()
                 .orElse(null);
     }
@@ -43,28 +43,28 @@ public record TestCaseSelector(String headName,
         }
 
         public String getHeadName() {
-            return headName;
+            return this.headName;
         }
 
-        public Builder setHeadName(String headName) {
+        public Builder setHeadName(final String headName) {
             this.headName = headName;
             return this;
         }
 
         public String getTestCaseName() {
-            return testCaseName;
+            return this.testCaseName;
         }
 
-        public Builder setTestCaseName(String testCaseName) {
+        public Builder setTestCaseName(final String testCaseName) {
             this.testCaseName = testCaseName;
             return this;
         }
 
         public int getChainIndex() {
-            return chainIndex;
+            return this.chainIndex;
         }
 
-        public Builder setChainIndex(int chainIndex) {
+        public Builder setChainIndex(final int chainIndex) {
             this.chainIndex = chainIndex;
             return this;
         }

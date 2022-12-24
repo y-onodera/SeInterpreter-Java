@@ -11,16 +11,16 @@ import java.util.Scanner;
 public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
     private int execCount = 1;
 
-    public SeInterpreterREPL(String[] args, Logger log) {
+    public SeInterpreterREPL(final String[] args, final Logger log) {
         super(args, log);
     }
 
-    public static void main(String[] args) {
-        Logger log = LogManager.getLogger(SeInterpreterREPL.class);
-        SeInterpreterREPL interpreter = new SeInterpreterREPL(args, log);
+    public static void main(final String[] args) {
+        final Logger log = LogManager.getLogger(SeInterpreterREPL.class);
+        final SeInterpreterREPL interpreter = new SeInterpreterREPL(args, log);
         try {
             interpreter.run();
-        } catch (Throwable e) {
+        } catch (final Throwable e) {
             log.fatal("Run error.", e);
             System.exit(1);
         }
@@ -44,7 +44,7 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
         StringBuilder input = null;
         boolean commandInput = false;
         while (scanner.hasNext()) {
-            String line = scanner.nextLine().trim();
+            final String line = scanner.nextLine().trim();
             if (line.equals("exit")) {
                 break;
             } else if (!commandInput && line.startsWith("@")) {
@@ -56,7 +56,7 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
             } else if (commandInput && line.equals("/")) {
                 this.closeScript(input);
                 commandInput = false;
-                TestCase testCase = this.toTestCase(input.toString());
+                final TestCase testCase = this.toTestCase(input.toString());
                 input = null;
                 if (testCase != null) {
                     this.execute(testCase);
@@ -74,32 +74,32 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
         }
     }
 
-    public TestCase loadScript(String file) {
+    public TestCase loadScript(final String file) {
         try {
             return Context.getScriptParser().load(new File(file));
-        } catch (Throwable e) {
+        } catch (final Throwable e) {
             this.log.error(e);
         }
         return new TestCaseBuilder().build();
     }
 
-    public void execute(TestCase target, TestRunListener seInterpreterTestListener) {
-        seInterpreterTestListener.cleanResult(new File(Context.getResultOutputDirectory(), String.valueOf(execCount++)));
+    public void execute(final TestCase target, final TestRunListener seInterpreterTestListener) {
+        seInterpreterTestListener.cleanResult(new File(Context.getResultOutputDirectory(), String.valueOf(this.execCount++)));
         try {
             target.map(it -> it.isShareState(true))
                     .run(this, seInterpreterTestListener);
-        } catch (Throwable t) {
-            log.error(Throwables.getStackTraceAsString(t));
+        } catch (final Throwable t) {
+            this.log.error(Throwables.getStackTraceAsString(t));
         } finally {
             seInterpreterTestListener.aggregateResult();
         }
     }
 
     @Override
-    public STATUS execute(TestRunBuilder testRunBuilder, InputData data, TestRunListener seInterpreterTestListener) {
+    public STATUS execute(final TestRunBuilder testRunBuilder, final InputData data, final TestRunListener seInterpreterTestListener) {
         this.lastRun = this.getTestRun(testRunBuilder, data, seInterpreterTestListener);
         this.log.info("start execute test");
-        boolean result = this.lastRun.finish();
+        final boolean result = this.lastRun.finish();
         this.log.info("finish execute test");
         if (this.lastRun.isStopped()) {
             return STATUS.STOPPED;
@@ -117,16 +117,16 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
     }
 
     @Override
-    protected boolean validateArgs(String[] args) {
+    protected boolean validateArgs(final String[] args) {
         return true;
     }
 
-    private TestCase toTestCase(String cmdInput) {
+    private TestCase toTestCase(final String cmdInput) {
         this.log.info("start load input");
         TestCase result = null;
         try {
             result = Context.getScriptParser().load(cmdInput);
-        } catch (Throwable e) {
+        } catch (final Throwable e) {
             this.log.error(e);
         }
         if (result == null) {
@@ -136,7 +136,7 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
         return result;
     }
 
-    private void execute(TestCase testCase) {
+    private void execute(final TestCase testCase) {
         this.execute(testCase, this.testRunListener);
     }
 
@@ -145,7 +145,7 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
         return new StringBuilder().append("{\"steps\":[");
     }
 
-    private void closeScript(StringBuilder script) {
+    private void closeScript(final StringBuilder script) {
         script.append("]}");
         this.log.info("finish input finish");
     }

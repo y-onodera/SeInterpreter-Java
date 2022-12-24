@@ -9,11 +9,11 @@ import java.util.Map;
 public record DataSourceLoader(DataSource dataSource, Map<String, String> dataSourceConfig, File relativePath,
                                InputData shareInput) {
 
-    public DataSourceLoader(DataSource dataSource, Map<String, String> dataSourceConfig, File relativePath) {
+    public DataSourceLoader(final DataSource dataSource, final Map<String, String> dataSourceConfig, final File relativePath) {
         this(dataSource, dataSourceConfig, relativePath, new InputData());
     }
 
-    public DataSourceLoader(DataSource dataSource, Map<String, String> dataSourceConfig, File relativePath, InputData shareInput) {
+    public DataSourceLoader(final DataSource dataSource, final Map<String, String> dataSourceConfig, final File relativePath, final InputData shareInput) {
         this.shareInput = shareInput;
         this.dataSource = dataSource;
         if (dataSourceConfig != null) {
@@ -24,7 +24,7 @@ public record DataSourceLoader(DataSource dataSource, Map<String, String> dataSo
         this.relativePath = relativePath;
     }
 
-    public DataSourceLoader shareInput(InputData aShareInput) {
+    public DataSourceLoader shareInput(final InputData aShareInput) {
         return new DataSourceLoader(this.dataSource, this.dataSourceConfig, this.relativePath, aShareInput);
     }
 

@@ -30,21 +30,21 @@ import java.util.List;
  */
 public record Locator(String type, String value) {
 
-    static Locator of(WebDriverWrapper driver, WebElement element) {
-        String id = element.getAttribute("id");
+    static Locator of(final WebDriverWrapper driver, final WebElement element) {
+        final String id = element.getAttribute("id");
         if (!Strings.isNullOrEmpty(id)) {
             return new Locator("id", id);
         } else if ("a".equals(element.getTagName())) {
             return new Locator("link text", element.getText());
         }
-        String name = element.getAttribute("name");
+        final String name = element.getAttribute("name");
         if (!Strings.isNullOrEmpty(name)) {
             return new Locator("name", name);
         }
         return new Locator("xpath", WebElements.toXpath(driver, element));
     }
 
-    public Locator(Locator l) {
+    public Locator(final Locator l) {
         this(l.type, l.value);
     }
 
@@ -52,19 +52,19 @@ public record Locator(String type, String value) {
         return new Locator(this);
     }
 
-    public WebElement find(TestRun ctx) {
+    public WebElement find(final TestRun ctx) {
         return this.find(ctx.driver());
     }
 
-    public WebElement find(WebDriver driver) {
+    public WebElement find(final WebDriver driver) {
         return Type.ofName(this.type).find(this.value, driver);
     }
 
-    public List<WebElement> findElements(TestRun ctx) {
+    public List<WebElement> findElements(final TestRun ctx) {
         return this.findElements(ctx.driver());
     }
 
-    public List<WebElement> findElements(WebDriver driver) {
+    public List<WebElement> findElements(final WebDriver driver) {
         return Type.ofName(this.type).findElements(this.value, driver);
     }
 
@@ -80,56 +80,56 @@ public record Locator(String type, String value) {
     public enum Type {
         ID {
             @Override
-            public WebElement find(String value, WebDriver driver) {
+            public WebElement find(final String value, final WebDriver driver) {
                 return driver.findElement(By.id(value));
             }
 
             @Override
-            public List<WebElement> findElements(String value, WebDriver driver) {
+            public List<WebElement> findElements(final String value, final WebDriver driver) {
                 return driver.findElements(By.id(value));
             }
         },
         NAME {
             @Override
-            public WebElement find(String value, WebDriver driver) {
+            public WebElement find(final String value, final WebDriver driver) {
                 return driver.findElement(By.name(value));
             }
 
             @Override
-            public List<WebElement> findElements(String value, WebDriver driver) {
+            public List<WebElement> findElements(final String value, final WebDriver driver) {
                 return driver.findElements(By.name(value));
             }
         },
         LINK_TEXT {
             @Override
-            public WebElement find(String value, WebDriver driver) {
+            public WebElement find(final String value, final WebDriver driver) {
                 return driver.findElement(By.linkText(value));
             }
 
             @Override
-            public List<WebElement> findElements(String value, WebDriver driver) {
+            public List<WebElement> findElements(final String value, final WebDriver driver) {
                 return driver.findElements(By.linkText(value));
             }
         },
         CSS_SELECTOR {
             @Override
-            public WebElement find(String value, WebDriver driver) {
+            public WebElement find(final String value, final WebDriver driver) {
                 return driver.findElement(By.cssSelector(value));
             }
 
             @Override
-            public List<WebElement> findElements(String value, WebDriver driver) {
+            public List<WebElement> findElements(final String value, final WebDriver driver) {
                 return driver.findElements(By.cssSelector(value));
             }
         },
         XPATH {
             @Override
-            public WebElement find(String value, WebDriver driver) {
+            public WebElement find(final String value, final WebDriver driver) {
                 return driver.findElement(By.xpath(value));
             }
 
             @Override
-            public List<WebElement> findElements(String value, WebDriver driver) {
+            public List<WebElement> findElements(final String value, final WebDriver driver) {
                 return driver.findElements(By.xpath(value));
             }
         };
@@ -143,7 +143,7 @@ public record Locator(String type, String value) {
             return this.name().toLowerCase().replace("_", " ");
         }
 
-        public static Type ofName(String name) {
+        public static Type ofName(final String name) {
             return Type.valueOf(name.toUpperCase().replace(" ", "_"));
         }
     }

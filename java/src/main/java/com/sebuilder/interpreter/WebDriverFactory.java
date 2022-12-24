@@ -30,9 +30,9 @@ public interface WebDriverFactory {
      * @param config A key/value mapping of configuration options specific to this factory.
      * @return A RemoteWebDriver of the type produced by this factory.
      */
-    default RemoteWebDriver make(Map<String, String> config) throws Exception {
+    default RemoteWebDriver make(final Map<String, String> config) throws Exception {
         if (config.containsKey(Context.REMOTE_URL_KEY)) {
-            RemoteWebDriver result = new RemoteWebDriver(new URL(config.get(Context.REMOTE_URL_KEY))
+            final RemoteWebDriver result = new RemoteWebDriver(new URL(config.get(Context.REMOTE_URL_KEY))
                     , this.getOptions(config.entrySet()
                     .stream()
                     .filter(it -> !it.getKey().equals(Context.REMOTE_URL_KEY))
@@ -66,7 +66,7 @@ public interface WebDriverFactory {
 
     void setDriverPath(String driverPath);
 
-    default void setBinaryPath(String binaryPath) {
+    default void setBinaryPath(final String binaryPath) {
         if (this.isBinarySelectable()) {
             if (Strings.isNullOrEmpty(binaryPath)) {
                 Context.getDriverConfig().remove("binary");

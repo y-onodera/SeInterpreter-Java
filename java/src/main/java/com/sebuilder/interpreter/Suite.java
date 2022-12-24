@@ -17,18 +17,18 @@ public record Suite(TestCase head) {
         return this.head().chains();
     }
 
-    public TestCase get(String scriptName) {
+    public TestCase get(final String scriptName) {
         if (this.head().name().equals(scriptName)) {
             return this.head();
         }
         return this.head().chains().get(scriptName);
     }
 
-    public TestCase get(int index) {
+    public TestCase get(final int index) {
         return this.head().chains().get(index);
     }
 
-    public DataSourceLoader[] dataSources(Predicate<TestCase> predicate) {
+    public DataSourceLoader[] dataSources(final Predicate<TestCase> predicate) {
         return this.head.flattenTestCases()
                 .filter(predicate)
                 .map(TestCase::runtimeDataSet)
@@ -40,15 +40,15 @@ public record Suite(TestCase head) {
         return new TestCaseBuilder(this.head());
     }
 
-    public Suite map(Function<TestCaseBuilder, TestCaseBuilder> function) {
+    public Suite map(final Function<TestCaseBuilder, TestCaseBuilder> function) {
         return function.apply(this.builder()).build().toSuite();
     }
 
-    public Suite replace(TestCase oldCase, TestCase newValue) {
+    public Suite replace(final TestCase oldCase, final TestCase newValue) {
         if (this.head.equals(oldCase)) {
             return newValue.toSuite();
         }
-        return map(builder -> builder.replace(oldCase, newValue));
+        return this.map(builder -> builder.replace(oldCase, newValue));
     }
 
 }

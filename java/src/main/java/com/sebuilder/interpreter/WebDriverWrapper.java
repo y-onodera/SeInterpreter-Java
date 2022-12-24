@@ -17,11 +17,11 @@ public interface WebDriverWrapper {
     RemoteWebDriver driver();
 
     default String getHtml() {
-        return driver().findElement(By.tagName("html")).getText();
+        return this.driver().findElement(By.tagName("html")).getText();
     }
 
     default WebElement getBody() {
-        return driver().findElement(By.tagName("body"));
+        return this.driver().findElement(By.tagName("body"));
     }
 
     default int getWindowHeight() {
@@ -41,46 +41,46 @@ public interface WebDriverWrapper {
     }
 
     default int getContentHeight() {
-        WebElement body = this.getBody();
+        final WebElement body = this.getBody();
         if (Objects.equals(body.getCssValue("overflow"), "hidden") || Objects.equals(body.getCssValue("overflow-y"), "hidden")) {
-            return getClientHeight();
+            return this.getClientHeight();
         }
         return ((Number) this.executeScript("return Math.max(document.body.scrollHeight, document.body.offsetHeight,document.documentElement.clientHeight, document.documentElement.scrollHeight, document.documentElement.offsetHeight);", new Object[0])).intValue();
     }
 
     default int getContentWidth() {
-        WebElement body = this.getBody();
+        final WebElement body = this.getBody();
         if (Objects.equals(body.getCssValue("overflow"), "hidden") || Objects.equals(body.getCssValue("overflow-x"), "hidden")) {
-            return getClientWidth();
+            return this.getClientWidth();
         }
         return ((Number) this.executeScript("return Math.max(document.body.scrollWidth, document.body.offsetWidth,document.documentElement.clientWidth, document.documentElement.scrollWidth, document.documentElement.offsetWidth);", new Object[0])).intValue();
     }
 
     default BufferedImage getScreenshot() {
-        try (ByteArrayInputStream imageArrayStream = new ByteArrayInputStream(this.driver().getScreenshotAs(OutputType.BYTES))) {
+        try (final ByteArrayInputStream imageArrayStream = new ByteArrayInputStream(this.driver().getScreenshotAs(OutputType.BYTES))) {
             return ImageIO.read(imageArrayStream);
-        } catch (IOException var9) {
+        } catch (final IOException var9) {
             throw new RuntimeException("Can not load screenshot data", var9);
         }
     }
 
-    default BufferedImage getScreenshot(Locator locator) {
-        try (ByteArrayInputStream imageArrayStream = new ByteArrayInputStream(locator.find(this.driver()).getScreenshotAs(OutputType.BYTES))) {
+    default BufferedImage getScreenshot(final Locator locator) {
+        try (final ByteArrayInputStream imageArrayStream = new ByteArrayInputStream(locator.find(this.driver()).getScreenshotAs(OutputType.BYTES))) {
             return ImageIO.read(imageArrayStream);
-        } catch (IOException var9) {
+        } catch (final IOException var9) {
             throw new RuntimeException("Can not load screenshot data", var9);
         }
     }
 
-    default Object executeScript(String s) {
+    default Object executeScript(final String s) {
         return this.executeScript(s, new Object[0]);
     }
 
-    default Object executeScript(String s, Object... params) {
+    default Object executeScript(final String s, final Object... params) {
         return ((JavascriptExecutor) this.driver()).executeScript(s, params);
     }
 
-    default Locator detectLocator(WebElement element) {
+    default Locator detectLocator(final WebElement element) {
         return Locator.of(this, element);
     }
 }

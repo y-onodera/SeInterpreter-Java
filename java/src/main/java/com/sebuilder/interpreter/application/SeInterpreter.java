@@ -39,14 +39,14 @@ public class SeInterpreter extends CommandLineRunner implements TestRunner {
 
     private boolean closeDriver;
 
-    public SeInterpreter(String[] args, Logger log) {
+    public SeInterpreter(final String[] args, final Logger log) {
         super(args, log);
     }
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         InternalLoggerFactory.setDefaultFactory(Log4J2LoggerFactory.INSTANCE);
-        Logger log = LogManager.getLogger(SeInterpreter.class);
-        SeInterpreter interpreter = new SeInterpreter(args, log);
+        final Logger log = LogManager.getLogger(SeInterpreter.class);
+        final SeInterpreter interpreter = new SeInterpreter(args, log);
         if (interpreter.paths.isEmpty()) {
             log.error("Configuration successful but no paths to testCases specified. Exiting.");
             System.exit(1);
@@ -56,7 +56,7 @@ public class SeInterpreter extends CommandLineRunner implements TestRunner {
                 log.error("test failed.");
                 System.exit(1);
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.fatal("Run error.", e);
             System.exit(2);
         }
@@ -68,7 +68,7 @@ public class SeInterpreter extends CommandLineRunner implements TestRunner {
         this.testRunListener.cleanResult();
         try {
             boolean success = false;
-            for (String path : this.paths) {
+            for (final String path : this.paths) {
                 success = this.loadTestCase(path).run(this, this.testRunListener);
             }
             return success;
@@ -81,22 +81,22 @@ public class SeInterpreter extends CommandLineRunner implements TestRunner {
     }
 
     @Override
-    public STATUS execute(TestRunBuilder testRunBuilder, InputData data, TestRunListener aTestRunListener) {
+    public STATUS execute(final TestRunBuilder testRunBuilder, final InputData data, final TestRunListener aTestRunListener) {
         boolean success = false;
         try {
-            this.lastRun = getTestRun(testRunBuilder, data, aTestRunListener);
+            this.lastRun = this.getTestRun(testRunBuilder, data, aTestRunListener);
             if (this.lastRun.finish()) {
                 success = true;
                 this.log.info(testRunBuilder.getScriptName() + " succeeded");
             } else {
                 this.log.info(testRunBuilder.getScriptName() + " failed");
             }
-        } catch (AssertionError e) {
+        } catch (final AssertionError e) {
             this.log.info(testRunBuilder.getScriptName() + " failed", e);
         } finally {
             this.closeDriver = true;
         }
-        boolean stopped = this.lastRun.isStopped();
+        final boolean stopped = this.lastRun.isStopped();
         if (this.lastRun.isCloseDriver()) {
             this.lastRun = null;
             this.closeDriver = false;
@@ -109,10 +109,10 @@ public class SeInterpreter extends CommandLineRunner implements TestRunner {
         return STATUS.SUCCESS;
     }
 
-    protected TestCase loadTestCase(String path) {
+    protected TestCase loadTestCase(final String path) {
         try {
             return Context.getScriptParser().load(new File(path));
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new AssertionError(e);
         }
     }
@@ -123,7 +123,7 @@ public class SeInterpreter extends CommandLineRunner implements TestRunner {
     }
 
     @Override
-    protected void setScripts(Set<String> scripts) {
+    protected void setScripts(final Set<String> scripts) {
         this.paths.addAll(scripts);
     }
 

@@ -23,13 +23,13 @@ public final class Utils {
     private Utils() {
     }
 
-    public static File findFile(File relativeTo, String path) {
-        File precedence = new File(Context.getDataSourceDirectory(), path);
+    public static File findFile(final File relativeTo, final String path) {
+        final File precedence = new File(Context.getDataSourceDirectory(), path);
         if (precedence.exists()) {
             return precedence;
         }
         if (relativeTo != null) {
-            File f = new File(relativeTo, path);
+            final File f = new File(relativeTo, path);
             if (f.exists()) {
                 return f;
             }

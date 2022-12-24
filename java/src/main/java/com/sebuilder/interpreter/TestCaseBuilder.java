@@ -34,7 +34,7 @@ public class TestCaseBuilder {
         this(new ScriptFile(ScriptFile.Type.TEST));
     }
 
-    public TestCaseBuilder(ScriptFile scriptFile) {
+    public TestCaseBuilder(final ScriptFile scriptFile) {
         this.scriptFile = scriptFile;
         this.steps = new ArrayList<>();
         this.dataSource = DataSource.NONE;
@@ -44,7 +44,7 @@ public class TestCaseBuilder {
         this.chains = new TestCaseChains();
     }
 
-    public TestCaseBuilder(TestCase test) {
+    public TestCaseBuilder(final TestCase test) {
         this.scriptFile = test.scriptFile();
         this.steps = new ArrayList<>(test.steps());
         this.dataSource = test.dataSourceLoader().dataSource();
@@ -62,14 +62,14 @@ public class TestCaseBuilder {
         this.lazyLoad = test.lazyLoad();
     }
 
-    public static TestCase lazyLoad(String beforeReplace, Function<TestCase, TestCase> lazyLoad) {
+    public static TestCase lazyLoad(final String beforeReplace, final Function<TestCase, TestCase> lazyLoad) {
         return new TestCaseBuilder()
                 .setName(beforeReplace)
                 .setLazyLoad(lazyLoad)
                 .build();
     }
 
-    public static TestCaseBuilder suite(File suiteFile) {
+    public static TestCaseBuilder suite(final File suiteFile) {
         return new TestCaseBuilder(ScriptFile.of(suiteFile, ScriptFile.Type.SUITE))
                 .isShareState(true);
     }
@@ -133,23 +133,23 @@ public class TestCaseBuilder {
         return new TestCase(this);
     }
 
-    public TestCaseBuilder map(Function<TestCaseBuilder, TestCaseBuilder> function) {
+    public TestCaseBuilder map(final Function<TestCaseBuilder, TestCaseBuilder> function) {
         return function.apply(this);
     }
 
-    public TestCaseBuilder changeWhenConditionMatch(Predicate<TestCaseBuilder> condition, Function<TestCaseBuilder, TestCaseBuilder> function) {
+    public TestCaseBuilder changeWhenConditionMatch(final Predicate<TestCaseBuilder> condition, final Function<TestCaseBuilder, TestCaseBuilder> function) {
         if (condition.test(this)) {
             return function.apply(this);
         }
         return this;
     }
 
-    public TestCaseBuilder associateWith(File target) {
+    public TestCaseBuilder associateWith(final File target) {
         this.scriptFile = ScriptFile.of(target, this.getScriptFile().type());
         return this;
     }
 
-    public TestCaseBuilder setName(String newName) {
+    public TestCaseBuilder setName(final String newName) {
         this.scriptFile = this.scriptFile.changeName(newName);
         return this;
     }
@@ -159,122 +159,122 @@ public class TestCaseBuilder {
         return this;
     }
 
-    public TestCaseBuilder addSteps(ArrayList<Step> steps) {
+    public TestCaseBuilder addSteps(final ArrayList<Step> steps) {
         this.steps.addAll(steps);
         return this;
     }
 
-    public TestCaseBuilder addStep(Step aStep) {
+    public TestCaseBuilder addStep(final Step aStep) {
         this.steps.add(aStep);
         return this;
     }
 
-    public TestCaseBuilder setTestDataSet(DataSourceLoader dataSourceLoader) {
+    public TestCaseBuilder setTestDataSet(final DataSourceLoader dataSourceLoader) {
         this.dataSource = dataSourceLoader.dataSource();
         this.dataSourceConfig = dataSourceLoader.dataSourceConfig();
         return this;
     }
 
-    public TestCaseBuilder setDataSource(DataSource dataSource, Map<String, String> config) {
+    public TestCaseBuilder setDataSource(final DataSource dataSource, final Map<String, String> config) {
         this.dataSource = dataSource;
         this.dataSourceConfig = config;
         return this;
     }
 
-    public TestCaseBuilder addDataSourceConfig(String key, String value) {
+    public TestCaseBuilder addDataSourceConfig(final String key, final String value) {
         this.dataSourceConfig.put(key, value);
         return this;
     }
 
-    public TestCaseBuilder setAspect(Aspect aspect) {
+    public TestCaseBuilder setAspect(final Aspect aspect) {
         this.aspect = aspect;
         return this;
     }
 
-    public TestCaseBuilder addAspect(Aspect aspect) {
+    public TestCaseBuilder addAspect(final Aspect aspect) {
         this.aspect = this.aspect.builder()
                 .add(aspect)
                 .build();
         return this;
     }
 
-    public TestCaseBuilder isShareState(boolean shareState) {
+    public TestCaseBuilder isShareState(final boolean shareState) {
         this.shareState = shareState;
         return this;
     }
 
-    public TestCaseBuilder setShareInput(InputData inputData) {
+    public TestCaseBuilder setShareInput(final InputData inputData) {
         this.shareInput = inputData;
         return this;
     }
 
-    public TestCaseBuilder setOverrideTestDataSet(DataSource dataSource, Map<String, String> config) {
+    public TestCaseBuilder setOverrideTestDataSet(final DataSource dataSource, final Map<String, String> config) {
         this.overrideDataSource = dataSource;
         this.overrideDataSourceConfig = config;
         return this;
     }
 
-    public TestCaseBuilder setSkip(String skip) {
+    public TestCaseBuilder setSkip(final String skip) {
         this.skip = skip;
         return this;
     }
 
-    public TestCaseBuilder setChains(TestCaseChains testCaseChain) {
+    public TestCaseBuilder setChains(final TestCaseChains testCaseChain) {
         this.chains = testCaseChain;
         return this;
     }
 
-    public TestCaseBuilder addChain(TestCase s) {
+    public TestCaseBuilder addChain(final TestCase s) {
         this.chains = this.chains.append(s);
         return this;
     }
 
-    public TestCaseBuilder addChain(TestCase aTestCase, TestCase newTestCase) {
+    public TestCaseBuilder addChain(final TestCase aTestCase, final TestCase newTestCase) {
         final int index = this.chains.indexOf(aTestCase) + 1;
         return this.addChain(newTestCase, index);
     }
 
-    public TestCaseBuilder addChain(TestCase newTestCase, int index) {
+    public TestCaseBuilder addChain(final TestCase newTestCase, final int index) {
         this.chains = this.chains.append(index, newTestCase);
         return this;
     }
 
-    public TestCaseBuilder isChainTakeOverLastRun(boolean b) {
+    public TestCaseBuilder isChainTakeOverLastRun(final boolean b) {
         this.chains = this.chains.takeOverLastRun(b);
         return this;
     }
 
-    public TestCaseBuilder insertTest(TestCase aTestCase, TestCase newTestCase) {
+    public TestCaseBuilder insertTest(final TestCase aTestCase, final TestCase newTestCase) {
         final int index = this.chains.indexOf(aTestCase);
         return this.addChain(newTestCase, index);
     }
 
-    public TestCaseBuilder remove(TestCase aTestCase) {
+    public TestCaseBuilder remove(final TestCase aTestCase) {
         this.chains = this.chains.remove(aTestCase);
         return this;
     }
 
-    public TestCaseBuilder replace(TestCase oldCase, TestCase aTestCase) {
+    public TestCaseBuilder replace(final TestCase oldCase, final TestCase aTestCase) {
         this.chains = this.chains.replaceTest(oldCase, aTestCase);
         return this;
     }
 
-    public TestCaseBuilder isNestedChain(boolean nestedChain) {
+    public TestCaseBuilder isNestedChain(final boolean nestedChain) {
         this.nestedChain = nestedChain;
         return this;
     }
 
-    public TestCaseBuilder isBreakNestedChain(boolean breakNestedChain) {
+    public TestCaseBuilder isBreakNestedChain(final boolean breakNestedChain) {
         this.breakNestedChain = breakNestedChain;
         return this;
     }
 
-    public TestCaseBuilder isPreventContextAspect(boolean preventContextAspect) {
+    public TestCaseBuilder isPreventContextAspect(final boolean preventContextAspect) {
         this.preventContextAspect = preventContextAspect;
         return this;
     }
 
-    public TestCaseBuilder setLazyLoad(Function<TestCase, TestCase> lazyLoad) {
+    public TestCaseBuilder setLazyLoad(final Function<TestCase, TestCase> lazyLoad) {
         this.lazyLoad = lazyLoad;
         return this;
     }

@@ -9,32 +9,33 @@ import java.util.Optional;
 
 public record ScriptFile(String name, String path, File relativePath, Type type) {
 
-    public static ScriptFile of(File file, Type type) {
+    public static ScriptFile of(final File file, final Type type) {
         if (file != null) {
             return new ScriptFile(file, type);
         }
         return new ScriptFile(type.getDefaultName(), type);
     }
 
-    public static ScriptFile of(File file, String defaultName, Type type) {
+    public static ScriptFile of(final File file, final String defaultName, final Type type) {
         if (file != null) {
             return new ScriptFile(file, type);
         }
         return new ScriptFile(defaultName, type);
     }
 
-    public ScriptFile(Type type) {
+    public ScriptFile(final Type type) {
         this(type.getDefaultName(), type);
     }
 
-    public ScriptFile(String name, Type type) {
+    public ScriptFile(final String name, final Type type) {
         this(name, null, null, type);
     }
 
-    public ScriptFile(File file, Type type) {
+    public ScriptFile(final File file, final Type type) {
         this(file.getName(), file.getAbsolutePath(), file.getParentFile().getAbsoluteFile(), type);
     }
 
+    @Override
     public String path() {
         return Optional.ofNullable(this.path).orElse("");
     }
@@ -46,7 +47,7 @@ public record ScriptFile(String name, String path, File relativePath, Type type)
         return new File(this.path);
     }
 
-    public String relativize(TestCase s) {
+    public String relativize(final TestCase s) {
         if (this.relativePath == null && !Strings.isNullOrEmpty(s.path())) {
             return s.path();
         } else if (Strings.isNullOrEmpty(s.path())) {
@@ -55,7 +56,7 @@ public record ScriptFile(String name, String path, File relativePath, Type type)
         return Objects.requireNonNull(this.relativePath).toPath().relativize(Paths.get(s.path()).toAbsolutePath()).toString().replace("\\", "/");
     }
 
-    public ScriptFile changeName(String name) {
+    public ScriptFile changeName(final String name) {
         return new ScriptFile(name, this.path, this.relativePath, this.type);
     }
 
@@ -64,7 +65,7 @@ public record ScriptFile(String name, String path, File relativePath, Type type)
 
         private final String defaultName;
 
-        Type(String defaultName) {
+        Type(final String defaultName) {
             this.defaultName = defaultName;
         }
 

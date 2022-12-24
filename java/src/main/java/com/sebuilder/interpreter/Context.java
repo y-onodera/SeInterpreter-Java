@@ -58,11 +58,11 @@ public enum Context {
 
     Context() {
         try {
-            File envPropertyFile = new File("env.properties");
+            final File envPropertyFile = new File("env.properties");
             if (envPropertyFile.exists()) {
                 this.environmentProperties.load(new InputStreamReader(new FileInputStream(envPropertyFile), StandardCharsets.UTF_8));
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new AssertionError(e);
         }
     }
@@ -112,13 +112,13 @@ public enum Context {
         return getInstance().wdf;
     }
 
-    public static WebDriverFactory getWebDriverFactory(String browser) {
+    public static WebDriverFactory getWebDriverFactory(final String browser) {
         try {
-            String classname = browser.substring(0, 1).toUpperCase() + browser.substring(1);
+            final String classname = browser.substring(0, 1).toUpperCase() + browser.substring(1);
             return (WebDriverFactory) Class.forName("com.sebuilder.interpreter.browser." + classname).getDeclaredConstructor().newInstance();
-        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
+        } catch (final ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
             throw new AssertionError("Unknown WebDriverFactory: " + "com.sebuilder.interpreter.browser." + browser, e);
-        } catch (InstantiationException | IllegalAccessException e) {
+        } catch (final InstantiationException | IllegalAccessException e) {
             throw new AssertionError("Could not instantiate WebDriverFactory " + "com.sebuilder.interpreter.browser." + browser, e);
         }
     }
@@ -127,7 +127,7 @@ public enum Context {
         return getScriptParser(getDefaultScript());
     }
 
-    public static ScriptParser getScriptParser(String scriptType) {
+    public static ScriptParser getScriptParser(final String scriptType) {
         return getInstance().scriptParsers.get(scriptType);
     }
 
@@ -200,47 +200,47 @@ public enum Context {
     }
 
     public static String bindEnvironmentProperties(String variable) {
-        for (Map.Entry<Object, Object> v : getInstance().environmentProperties.entrySet()) {
+        for (final Map.Entry<Object, Object> v : getInstance().environmentProperties.entrySet()) {
             variable = variable.replace("${env." + v.getKey().toString() + "}", v.getValue().toString());
         }
         return variable;
     }
 
-    public static TestRunListener getTestListener(Logger log) {
+    public static TestRunListener getTestListener(final Logger log) {
         return getInstance().testRunListenerFactory.create(log);
     }
 
-    public Context ifMatch(boolean condition, Function<Context, Context> modifier) {
+    public Context ifMatch(final boolean condition, final Function<Context, Context> modifier) {
         if (condition) {
             return modifier.apply(this);
         }
         return this;
     }
 
-    public Context setImplicitlyWaitTime(Long aLong) {
+    public Context setImplicitlyWaitTime(final Long aLong) {
         this.implicitlyWaitTime = aLong;
         return this;
     }
 
-    public Context setPageLoadWaitTime(Long aLong) {
+    public Context setPageLoadWaitTime(final Long aLong) {
         this.pageLoadWaitTime = aLong;
         return this;
     }
 
-    public void setBrowser(String browserName, String driverPath, String binaryPath) {
+    public void setBrowser(final String browserName, final String driverPath, final String binaryPath) {
         this.setBrowser(browserName, driverPath).wdf.setBinaryPath(binaryPath);
     }
 
-    public Context setBrowser(String browserName, String driverPath) {
+    public Context setBrowser(final String browserName, final String driverPath) {
         return this.setBrowser(browserName)
                 .setWebDriverPath(driverPath);
     }
 
-    public Context setBrowser(String browser) {
+    public Context setBrowser(final String browser) {
         return this.setWebDriverFactory(getWebDriverFactory(browser));
     }
 
-    public Context setRemoteUrl(String remoteUrl) {
+    public Context setRemoteUrl(final String remoteUrl) {
         if (Strings.isNullOrEmpty(remoteUrl)) {
             this.driverConfig.remove(REMOTE_URL_KEY);
         } else {
@@ -249,7 +249,7 @@ public enum Context {
         return this;
     }
 
-    public Context setWebDriverPath(String driverPath) {
+    public Context setWebDriverPath(final String driverPath) {
         if (Strings.isNullOrEmpty(driverPath)) {
             this.wdf.setDriverPath(SeleniumManager.getInstance().getDriverPath(this.wdf.getDriverName()));
         } else {
@@ -258,118 +258,118 @@ public enum Context {
         return this;
     }
 
-    public Context setWebDriverFactory(WebDriverFactory webDriverFactory) {
+    public Context setWebDriverFactory(final WebDriverFactory webDriverFactory) {
         this.wdf = webDriverFactory;
         this.browser = webDriverFactory.targetBrowser();
         return this;
     }
 
-    public Context setDriverConfig(Map<String, String> config) {
+    public Context setDriverConfig(final Map<String, String> config) {
         this.driverConfig.putAll(config);
         return this;
     }
 
 
-    public Context addScriptParser(ScriptParser parser) {
+    public Context addScriptParser(final ScriptParser parser) {
         this.scriptParsers.put(parser.type(), parser);
         return this;
     }
 
-    public Context setDefaultScriptParser(ScriptParser parser) {
+    public Context setDefaultScriptParser(final ScriptParser parser) {
         this.defaultScript = parser.type();
         return this.addScriptParser(parser);
     }
 
-    public Context setTestCaseConverter(TestCaseConverter converter) {
+    public Context setTestCaseConverter(final TestCaseConverter converter) {
         this.testCaseConverter = converter;
         return this;
     }
 
-    public Context setStepTypeFactory(StepTypeFactory stepTypeFactory) {
+    public Context setStepTypeFactory(final StepTypeFactory stepTypeFactory) {
         this.stepTypeFactory = stepTypeFactory;
         return this;
     }
 
-    public Context setDataSourceFactory(DataSourceFactory dataSourceFactory) {
+    public Context setDataSourceFactory(final DataSourceFactory dataSourceFactory) {
         this.dataSourceFactory = dataSourceFactory;
         return this;
     }
 
-    public Context setDataSourceDirectory(String dataSourceDirectory) {
+    public Context setDataSourceDirectory(final String dataSourceDirectory) {
         this.dataSourceDirectory = dataSourceDirectory;
         return this;
     }
 
-    public Context setDataSourceEncoding(String dataSourceEncoding) {
+    public Context setDataSourceEncoding(final String dataSourceEncoding) {
         this.dataSourceEncoding = dataSourceEncoding;
         return this;
     }
 
-    public Context setResultOutputDirectory(String aResultOutputDirectory) {
+    public Context setResultOutputDirectory(final String aResultOutputDirectory) {
         this.resultOutputDirectory = aResultOutputDirectory;
         return this;
     }
 
-    public Context setJunitReportPrefix(TestNamePrefix junitReportPrefix) {
+    public Context setJunitReportPrefix(final TestNamePrefix junitReportPrefix) {
         this.junitReportPrefix = junitReportPrefix;
         return this;
     }
 
-    public Context setTestRunListenerFactory(TestRunListener.Factory testRunListenerFactory) {
+    public Context setTestRunListenerFactory(final TestRunListener.Factory testRunListenerFactory) {
         this.testRunListenerFactory = testRunListenerFactory;
         return this;
     }
 
-    public Context setDownloadDirectory(String downloadDirectory) {
+    public Context setDownloadDirectory(final String downloadDirectory) {
         this.downloadDirectory = downloadDirectory;
         return this;
     }
 
-    public Context setScreenShotOutputDirectory(String screenShotOutput) {
+    public Context setScreenShotOutputDirectory(final String screenShotOutput) {
         this.screenShotOutputDirectory = screenShotOutput;
         return this;
     }
 
-    public Context setTemplateOutputDirectory(String aTemplateOutputDirectory) {
+    public Context setTemplateOutputDirectory(final String aTemplateOutputDirectory) {
         this.templateOutputDirectory = aTemplateOutputDirectory;
         return this;
     }
 
-    public Context setAspect(String aspectFileName) {
+    public Context setAspect(final String aspectFileName) {
         try {
             this.aspect = getScriptParser().loadAspect(new File(getBaseDirectory(), aspectFileName));
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new AssertionError(e);
         }
         return this;
     }
 
-    public Context setAspect(Aspect aAspect) {
+    public Context setAspect(final Aspect aAspect) {
         this.aspect = aAspect;
         return this;
     }
 
-    public Context setEnvironmentProperties(String propertyFile) {
+    public Context setEnvironmentProperties(final String propertyFile) {
         this.environmentProperties.clear();
-        try (FileInputStream is = new FileInputStream(propertyFile)) {
+        try (final FileInputStream is = new FileInputStream(propertyFile)) {
             this.environmentProperties.load(is);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new AssertionError(e);
         }
         return this;
     }
 
-    public Context setEnvironmentProperty(Map<String, String> property) {
+    public Context setEnvironmentProperty(final Map<String, String> property) {
         this.environmentProperties.putAll(property);
         return this;
     }
 
-    public Context setLocale(Locale locale) {
+    public Context setLocale(final Locale locale) {
         this.locale = locale;
         return this;
     }
 
-    public Context setLocaleConfDir(File path) {
+    public Context setLocaleConfDir(final File path) {
         this.localeConfDir = path;
         return this;
     }
@@ -386,10 +386,10 @@ public enum Context {
     }
 
     private static Map<String, String> localizeTexts() {
-        File loadFrom = Optional.ofNullable(getInstance().localeConfDir).orElse(getInstance().baseDirectory);
-        Locale currentLocale = Optional.ofNullable(getInstance().locale).orElse(Locale.getDefault());
-        try (URLClassLoader url = new URLClassLoader(new URL[]{loadFrom.toURI().toURL()})) {
-            ResourceBundle resourceBundle = ResourceBundle.getBundle("locale", currentLocale, url);
+        final File loadFrom = Optional.ofNullable(getInstance().localeConfDir).orElse(getInstance().baseDirectory);
+        final Locale currentLocale = Optional.ofNullable(getInstance().locale).orElse(Locale.getDefault());
+        try (final URLClassLoader url = new URLClassLoader(new URL[]{loadFrom.toURI().toURL()})) {
+            final ResourceBundle resourceBundle = ResourceBundle.getBundle("locale", currentLocale, url);
             return resourceBundle.keySet()
                     .stream()
                     .collect(Collectors.toMap(
@@ -397,7 +397,7 @@ public enum Context {
                             , resourceBundle::getString
                             , (e1, e2) -> e1
                             , HashMap::new));
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return new HashMap<>();
         }
     }
@@ -406,11 +406,11 @@ public enum Context {
         TIMESTAMP("timestamp"), RESULT_DIR("resultDir"), NONE("none");
         private final String name;
 
-        TestNamePrefix(String name) {
+        TestNamePrefix(final String name) {
             this.name = name;
         }
 
-        public static TestNamePrefix fromName(String name) {
+        public static TestNamePrefix fromName(final String name) {
             return Stream.of(TestNamePrefix.values())
                     .filter(it -> it.name.equals(name))
                     .findFirst()

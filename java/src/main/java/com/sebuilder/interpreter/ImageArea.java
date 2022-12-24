@@ -13,10 +13,10 @@ public record ImageArea(String value) {
     private static final Pattern P = Pattern.compile("(?=\\[)\\[((\\d+\\.?\\d*,){3}(\\d+\\.?\\d*))\\]((?=\\[)|$)");
 
     public List<Rectangle> getRectangles() {
-        List<Rectangle> result = Lists.newArrayList();
-        Matcher m = P.matcher(this.value);
+        final List<Rectangle> result = Lists.newArrayList();
+        final Matcher m = P.matcher(this.value);
         while (m.find()) {
-            String[] points = m.group(1).split(",");
+            final String[] points = m.group(1).split(",");
             result.add(new Rectangle(new BigDecimal(points[0]).intValue()
                     , new BigDecimal(points[1]).intValue()
                     , new BigDecimal(points[2]).intValue()

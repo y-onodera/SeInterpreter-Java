@@ -27,6 +27,7 @@ import java.io.File;
 import java.util.Map;
 
 public class Firefox implements WebDriverFactory {
+
     /**
      * @param config Key/value pairs treated as required capabilities, with the exception of:
      *               <ul>

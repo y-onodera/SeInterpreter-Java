@@ -31,7 +31,7 @@ public interface DataSource {
 
     DataSource NONE = new DataSource() {
         @Override
-        public List<InputData> getData(Map<String, String> config, File relativeTo, InputData vars) {
+        public List<InputData> getData(final Map<String, String> config, final File relativeTo, final InputData vars) {
             return List.of(new InputData());
         }
 
@@ -43,7 +43,7 @@ public interface DataSource {
 
     List<InputData> getData(Map<String, String> config, File relativeTo, InputData vars) throws IOException;
 
-    default String name(Map<String, String> dataSourceConfig, InputData shareInput) {
+    default String name(final Map<String, String> dataSourceConfig, final InputData shareInput) {
         return this.name();
     }
 
@@ -51,7 +51,7 @@ public interface DataSource {
         return this.getClass().getSimpleName().toLowerCase();
     }
 
-    default boolean isLoadable(Map<String, String> dataSourceConfig, File relativePath, InputData shareInput) {
+    default boolean isLoadable(final Map<String, String> dataSourceConfig, final File relativePath, final InputData shareInput) {
         return false;
     }
 
@@ -59,7 +59,7 @@ public interface DataSource {
         return false;
     }
 
-    default DataSourceWriter writer(Map<String, String> dataSourceConfig, File relativePath, InputData shareInput) {
+    default DataSourceWriter writer(final Map<String, String> dataSourceConfig, final File relativePath, final InputData shareInput) {
         throw new UnsupportedOperationException();
     }
 

@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class InternetExplorer implements WebDriverFactory {
+
     /**
      * @param config A key/value mapping of configuration options specific to this factory.
      * @return A RemoteWebDriver of the type produced by this factory.
@@ -23,7 +24,7 @@ public class InternetExplorer implements WebDriverFactory {
     public InternetExplorerOptions getOptions(Map<String, String> config) {
         HashMap<String, String> caps = new HashMap<>();
         DesiredCapabilities capabilities = new DesiredCapabilities();
-        capabilities.setCapability("javascriptEnabled",true);
+        capabilities.setCapability("javascriptEnabled", true);
         InternetExplorerOptions ieOptions = new InternetExplorerOptions(capabilities);
         config.forEach((key, value) -> {
             if (key.startsWith("ieoption.")) {

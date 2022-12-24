@@ -7,137 +7,137 @@ import java.io.File;
 public class TestRunListenerWrapper implements TestRunListener {
     private final TestRunListener delegate;
 
-    public TestRunListenerWrapper(TestRunListener delegate) {
+    public TestRunListenerWrapper(final TestRunListener delegate) {
         this.delegate = delegate;
     }
 
     @Override
     public String getReportFileName() {
-        return delegate.getReportFileName();
+        return this.delegate.getReportFileName();
     }
 
     @Override
     public Logger getLog() {
-        return delegate.getLog();
+        return this.delegate.getLog();
     }
 
     @Override
     public String getReportPrefix() {
-        return delegate.getReportPrefix();
+        return this.delegate.getReportPrefix();
     }
 
     @Override
     public File getResultDir() {
-        return delegate.getResultDir();
+        return this.delegate.getResultDir();
     }
 
     @Override
     public File getDownloadDirectory() {
-        return delegate.getDownloadDirectory();
+        return this.delegate.getDownloadDirectory();
     }
 
     @Override
     public File getScreenShotOutputDirectory() {
-        return delegate.getScreenShotOutputDirectory();
+        return this.delegate.getScreenShotOutputDirectory();
     }
 
     @Override
     public File getTemplateOutputDirectory() {
-        return delegate.getTemplateOutputDirectory();
+        return this.delegate.getTemplateOutputDirectory();
     }
 
     @Override
     public void cleanResult() {
-        delegate.cleanResult();
+        this.delegate.cleanResult();
     }
 
     @Override
-    public void cleanResult(File dest) {
-        delegate.cleanResult(dest);
+    public void cleanResult(final File dest) {
+        this.delegate.cleanResult(dest);
     }
 
     @Override
     public void cleanDir() {
-        delegate.cleanDir();
+        this.delegate.cleanDir();
     }
 
     @Override
-    public void cleanDir(File dest) {
-        delegate.cleanDir(dest);
+    public void cleanDir(final File dest) {
+        this.delegate.cleanDir(dest);
     }
 
     @Override
-    public void setUpDir(File dest) {
-        delegate.setUpDir(dest);
+    public void setUpDir(final File dest) {
+        this.delegate.setUpDir(dest);
     }
 
     @Override
-    public boolean openTestSuite(TestCase testCase, String testRunName, InputData aProperty) {
-        return delegate.openTestSuite(testCase, testRunName, aProperty);
+    public boolean openTestSuite(final TestCase testCase, final String testRunName, final InputData aProperty) {
+        return this.delegate.openTestSuite(testCase, testRunName, aProperty);
     }
 
     @Override
-    public void startTest(String testName) {
-        delegate.startTest(testName);
+    public void startTest(final String testName) {
+        this.delegate.startTest(testName);
     }
 
     @Override
-    public void skipTestIndex(int count) {
-        delegate.skipTestIndex(count);
+    public void skipTestIndex(final int count) {
+        this.delegate.skipTestIndex(count);
     }
 
     @Override
     public int getStepNo() {
-        return delegate.getStepNo();
+        return this.delegate.getStepNo();
     }
 
     @Override
-    public File addScreenshot(String file) {
+    public File addScreenshot(final String file) {
         return this.delegate.addScreenshot(file);
     }
 
     @Override
-    public File saveExpectScreenshot(File file) {
-        return delegate.saveExpectScreenshot(file);
+    public File saveExpectScreenshot(final File file) {
+        return this.delegate.saveExpectScreenshot(file);
     }
 
     @Override
-    public File addDownloadFile(String file) {
-        return delegate.addDownloadFile(file);
+    public File addDownloadFile(final String file) {
+        return this.delegate.addDownloadFile(file);
     }
 
     @Override
-    public void addError(Throwable throwable) {
-        delegate.addError(throwable);
+    public void addError(final Throwable throwable) {
+        this.delegate.addError(throwable);
     }
 
     @Override
-    public void addFailure(String message) {
-        delegate.addFailure(message);
+    public void addFailure(final String message) {
+        this.delegate.addFailure(message);
     }
 
     @Override
     public void endTest() {
-        delegate.endTest();
+        this.delegate.endTest();
     }
 
     @Override
     public void closeTestSuite() {
-        delegate.closeTestSuite();
+        this.delegate.closeTestSuite();
     }
 
     @Override
     public void aggregateResult() {
-        delegate.aggregateResult();
+        this.delegate.aggregateResult();
     }
 
     @Override
-    public void reportError(String name, Throwable e) {
-        delegate.reportError(name, e);
+    public void reportError(final String name, final Throwable e) {
+        this.delegate.reportError(name, e);
     }
 
     @Override
-    public void info(String s) {
-        delegate.info(s);
+    public void info(final String s) {
+        this.delegate.info(s);
     }
 }

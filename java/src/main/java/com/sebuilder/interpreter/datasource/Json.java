@@ -24,7 +24,11 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import java.io.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.IntStream;
 
 /**
  * JSON-based data source.
@@ -34,39 +38,40 @@ import java.util.*;
 public class Json implements FileDataSource {
 
     @Override
-    public List<InputData> getData(Map<String, String> config, File relativeTo, InputData vars) throws IOException {
-        ArrayList<InputData> data = new ArrayList<>();
-        File f = this.sourceFile(config, relativeTo, vars);
-        String charsetName = Context.getDataSourceEncoding();
-        try (BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(f), charsetName))) {
-            JSONTokener tok = new JSONTokener(r);
-            JSONArray a = new JSONArray(tok);
-            for (int i = 0; i < a.length(); i++) {
-                JSONObject rowO = a.getJSONObject(i);
-                LinkedHashMap<String, String> row = new LinkedHashMap<>();
+    public List<InputData> getData(final Map<String, String> config, final File relativeTo, final InputData vars) throws IOException {
+        final ArrayList<InputData> data = new ArrayList<>();
+        final File f = this.sourceFile(config, relativeTo, vars);
+        final String charsetName = Context.getDataSourceEncoding();
+        try (final BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(f), charsetName))) {
+            final JSONTokener tok = new JSONTokener(r);
+            final JSONArray a = new JSONArray(tok);
+            IntStream.range(0, a.length()).forEach(i -> {
+                final JSONObject rowO = a.getJSONObject(i);
+                final LinkedHashMap<String, String> row = new LinkedHashMap<>();
                 row.put(InputData.ROW_NUMBER, String.valueOf(i + 1));
-                for (Iterator<String> it = rowO.keys(); it.hasNext(); ) {
-                    String key = it.next();
-                    row.put(key, rowO.getString(key));
-                }
+                rowO.keySet().forEach(key -> row.put(key, rowO.getString(key)));
                 data.add(new InputData(row));
-            }
+            });
             if (a.length() > 0) {
                 final int lastRowNumber = a.length() - 1;
-                InputData lastRow = data.get(lastRowNumber).lastRow(true);
+                final InputData lastRow = data.get(lastRowNumber).lastRow(true);
                 data.remove(lastRowNumber);
                 data.add(lastRow);
             }
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             throw new IOException("Unable to get data.", e);
         }
         return data;
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null) return false;
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null) {
+            return false;
+        }
         return this.getClass() == o.getClass();
     }
 

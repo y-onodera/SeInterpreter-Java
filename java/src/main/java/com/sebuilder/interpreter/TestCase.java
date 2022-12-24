@@ -50,7 +50,7 @@ public record TestCase(ScriptFile scriptFile,
                        boolean preventContextAspect,
                        Function<TestCase, TestCase> lazyLoad) {
 
-    public TestCase(TestCaseBuilder builder) {
+    public TestCase(final TestCaseBuilder builder) {
         this(builder.getScriptFile(),
                 builder.getSteps(),
                 builder.getTestDataSet(),
@@ -67,21 +67,21 @@ public record TestCase(ScriptFile scriptFile,
         );
     }
 
-    public boolean run(TestRunner runner, TestRunListener testRunListener) {
+    public boolean run(final TestRunner runner, final TestRunListener testRunListener) {
         if (this.skipRunning()) {
             return true;
         }
-        TestCase materialized = this.materialized();
+        final TestCase materialized = this.materialized();
         boolean success = true;
         try {
-            for (InputData data : materialized.loadData()) {
-                TestRunner.STATUS result = runner.execute(new TestRunBuilder(materialized), data, testRunListener);
+            for (final InputData data : materialized.loadData()) {
+                final TestRunner.STATUS result = runner.execute(new TestRunBuilder(materialized), data, testRunListener);
                 if (result == TestRunner.STATUS.STOPPED) {
                     return false;
                 }
                 success = success && result == TestRunner.STATUS.SUCCESS;
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             testRunListener.reportError(materialized.name(), e);
             throw new AssertionError(e);
         }
@@ -128,7 +128,7 @@ public record TestCase(ScriptFile scriptFile,
         return this.dataSourceLoader().shareInput(this.shareInput());
     }
 
-    public boolean include(TestCase target) {
+    public boolean include(final TestCase target) {
         return this.flattenTestCases().anyMatch(it -> it.equals(target));
     }
 
@@ -147,22 +147,22 @@ public record TestCase(ScriptFile scriptFile,
         return new TestCaseBuilder(this);
     }
 
-    public TestCase map(Function<TestCaseBuilder, TestCaseBuilder> function) {
+    public TestCase map(final Function<TestCaseBuilder, TestCaseBuilder> function) {
         return function.apply(this.builder()).build();
     }
 
-    public TestCase changeWhenConditionMatch(Predicate<TestCase> condition, Function<TestCase, TestCase> function) {
+    public TestCase changeWhenConditionMatch(final Predicate<TestCase> condition, final Function<TestCase, TestCase> function) {
         if (condition.test(this)) {
             return function.apply(this);
         }
         return this;
     }
 
-    public TestCase removeStep(int stepIndex) {
+    public TestCase removeStep(final int stepIndex) {
         return this.filterStep(i -> i.intValue() != stepIndex);
     }
 
-    public TestCase filterStep(Predicate<Number> filter) {
+    public TestCase filterStep(final Predicate<Number> filter) {
         return this.editStep(it ->
                 IntStream.range(0, this.steps.size())
                         .filter(filter::test)
@@ -171,12 +171,12 @@ public record TestCase(ScriptFile scriptFile,
         );
     }
 
-    public TestCase insertStep(int stepIndex, Step newStep) {
+    public TestCase insertStep(final int stepIndex, final Step newStep) {
         return this.editStep(it -> {
                     if (this.steps.size() == 0) {
                         return Lists.newArrayList(newStep);
                     }
-                    ArrayList<Step> newSteps = new ArrayList<>();
+                    final ArrayList<Step> newSteps = new ArrayList<>();
                     IntStream.range(0, this.steps.size())
                             .forEach(i -> {
                                 if (i == stepIndex) {
@@ -189,12 +189,12 @@ public record TestCase(ScriptFile scriptFile,
         );
     }
 
-    public TestCase addStep(int stepIndex, Step newStep) {
+    public TestCase addStep(final int stepIndex, final Step newStep) {
         return this.editStep(it -> {
                     if (this.steps.size() == 0) {
                         return Lists.newArrayList(newStep);
                     }
-                    ArrayList<Step> newSteps = new ArrayList<>();
+                    final ArrayList<Step> newSteps = new ArrayList<>();
                     IntStream.range(0, this.steps.size())
                             .forEach(i -> {
                                 newSteps.add(this.steps.get(i));
@@ -207,7 +207,7 @@ public record TestCase(ScriptFile scriptFile,
         );
     }
 
-    public TestCase replaceSteps(int stepIndex, Step newStep) {
+    public TestCase replaceSteps(final int stepIndex, final Step newStep) {
         return this.editStep(it ->
                 IntStream.range(0, this.steps.size())
                         .mapToObj(i -> {
@@ -220,7 +220,7 @@ public record TestCase(ScriptFile scriptFile,
         );
     }
 
-    public TestCase editStep(Function<ArrayList<Step>, ArrayList<Step>> converter) {
+    public TestCase editStep(final Function<ArrayList<Step>, ArrayList<Step>> converter) {
         return this.map(it -> it.clearStep().addSteps(converter.apply(this.steps)));
     }
 

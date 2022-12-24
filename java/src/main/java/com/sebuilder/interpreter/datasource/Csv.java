@@ -41,19 +41,19 @@ import static com.google.common.io.Files.newWriter;
 public class Csv implements FileDataSource {
 
     @Override
-    public List<InputData> getData(Map<String, String> config, File relativeTo, InputData vars) throws IOException {
-        ArrayList<InputData> data = new ArrayList<>();
-        File f = this.sourceFile(config, relativeTo, vars);
-        String charsetName = Context.getDataSourceEncoding();
-        try (BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(f), charsetName))) {
-            CSVReader csvR = new CSVReader(r);
-            String[] keys = csvR.readNext();
+    public List<InputData> getData(final Map<String, String> config, final File relativeTo, final InputData vars) throws IOException {
+        final ArrayList<InputData> data = new ArrayList<>();
+        final File f = this.sourceFile(config, relativeTo, vars);
+        final String charsetName = Context.getDataSourceEncoding();
+        try (final BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(f), charsetName))) {
+            final CSVReader csvR = new CSVReader(r);
+            final String[] keys = csvR.readNext();
             if (keys != null) {
                 String[] line;
                 int rowNumber = 1;
                 while ((line = csvR.readNext()) != null) {
                     rowNumber++;
-                    LinkedHashMap<String, String> row = new LinkedHashMap<>();
+                    final LinkedHashMap<String, String> row = new LinkedHashMap<>();
                     if (line.length < keys.length) {
                         throw new IOException("Not enough cells in row " + rowNumber + ".");
                     }
@@ -65,25 +65,25 @@ public class Csv implements FileDataSource {
                 }
                 if (rowNumber > 1) {
                     final int lastRowNumber = rowNumber - 2;
-                    InputData lastRow = data.get(lastRowNumber).lastRow(true);
+                    final InputData lastRow = data.get(lastRowNumber).lastRow(true);
                     data.remove(lastRowNumber);
                     data.add(lastRow);
                 }
             }
-        } catch (CsvValidationException e) {
+        } catch (final CsvValidationException e) {
             throw new IOException(e);
         }
         return data;
     }
 
     @Override
-    public DataSourceWriter writer(Map<String, String> dataSourceConfig, File relativePath, InputData shareInput) {
+    public DataSourceWriter writer(final Map<String, String> dataSourceConfig, final File relativePath, final InputData shareInput) {
         return data -> {
-            File target = sourceFile(dataSourceConfig, relativePath, shareInput);
-            try (BufferedWriter writer = newWriter(target, Charset.forName(Context.getDataSourceEncoding()))) {
-                CSVWriter csvwriter = new CSVWriter(writer);
-                String[] header = data.get(0).entrySet().stream().map(Map.Entry::getKey).toArray(String[]::new);
-                List<String[]> rows = data.stream()
+            final File target = this.sourceFile(dataSourceConfig, relativePath, shareInput);
+            try (final BufferedWriter writer = newWriter(target, Charset.forName(Context.getDataSourceEncoding()))) {
+                final CSVWriter csvwriter = new CSVWriter(writer);
+                final String[] header = data.get(0).entrySet().stream().map(Map.Entry::getKey).toArray(String[]::new);
+                final List<String[]> rows = data.stream()
                         .map(it -> it.entrySet().stream().map(Map.Entry::getValue).toArray(String[]::new))
                         .collect(Collectors.toCollection(ArrayList::new));
                 rows.add(0, header);
@@ -93,9 +93,13 @@ public class Csv implements FileDataSource {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null) return false;
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null) {
+            return false;
+        }
         return this.getClass() == o.getClass();
     }
 

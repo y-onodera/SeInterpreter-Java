@@ -16,7 +16,6 @@
 
 package com.sebuilder.interpreter.datasource;
 
-import com.google.common.collect.Lists;
 import com.sebuilder.interpreter.InputData;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -30,6 +29,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 /**
  * XML data source compatible with the standard IDE approach.
@@ -39,38 +39,42 @@ import java.util.Map;
 public class Xml implements FileDataSource {
 
     @Override
-    public List<InputData> getData(Map<String, String> config, File relativeTo, InputData vars) throws IOException {
-        ArrayList<InputData> data = Lists.newArrayList();
-        File f = this.sourceFile(config, relativeTo, vars);
+    public List<InputData> getData(final Map<String, String> config, final File relativeTo, final InputData vars) throws IOException {
+        final ArrayList<InputData> data = new ArrayList<>();
+        final File f = this.sourceFile(config, relativeTo, vars);
         try {
-            Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(f);
-            NodeList rows = doc.getElementsByTagName("test");
-            for (int i = 0; i < rows.getLength(); i++) {
-                Node rowN = rows.item(i);
-                NamedNodeMap attributes = rowN.getAttributes();
-                LinkedHashMap<String, String> row = new LinkedHashMap<String, String>();
+            final Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(f);
+            final NodeList rows = doc.getElementsByTagName("test");
+            IntStream.range(0, rows.getLength()).forEach(i -> {
+                final Node rowN = rows.item(i);
+                final NamedNodeMap attributes = rowN.getAttributes();
+                final LinkedHashMap<String, String> row = new LinkedHashMap<>();
                 row.put(InputData.ROW_NUMBER, String.valueOf(i + 1));
-                for (int j = 0; j < attributes.getLength(); j++) {
-                    row.put(attributes.item(j).getNodeName(), attributes.item(j).getNodeValue());
-                }
+                IntStream.range(0, attributes.getLength()).forEach(j ->
+                        row.put(attributes.item(j).getNodeName(), attributes.item(j).getNodeValue())
+                );
                 data.add(new InputData(row));
-            }
+            });
             if (rows.getLength() > 0) {
                 final int lastRowNumber = rows.getLength() - 1;
-                InputData lastRow = data.get(lastRowNumber).lastRow(true);
+                final InputData lastRow = data.get(lastRowNumber).lastRow(true);
                 data.remove(lastRowNumber);
                 data.add(lastRow);
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new IOException("Unable to get data.", e);
         }
         return data;
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null) return false;
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null) {
+            return false;
+        }
         return this.getClass() == o.getClass();
     }
 
