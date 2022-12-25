@@ -80,21 +80,11 @@ public record Locator(String type, String value) {
     public enum Type {
         ID {
             @Override
-            public WebElement find(final String value, final WebDriver driver) {
-                return driver.findElement(By.id(value));
-            }
-
-            @Override
             public List<WebElement> findElements(final String value, final WebDriver driver) {
                 return driver.findElements(By.id(value));
             }
         },
         NAME {
-            @Override
-            public WebElement find(final String value, final WebDriver driver) {
-                return driver.findElement(By.name(value));
-            }
-
             @Override
             public List<WebElement> findElements(final String value, final WebDriver driver) {
                 return driver.findElements(By.name(value));
@@ -102,21 +92,11 @@ public record Locator(String type, String value) {
         },
         LINK_TEXT {
             @Override
-            public WebElement find(final String value, final WebDriver driver) {
-                return driver.findElement(By.linkText(value));
-            }
-
-            @Override
             public List<WebElement> findElements(final String value, final WebDriver driver) {
                 return driver.findElements(By.linkText(value));
             }
         },
         CSS_SELECTOR {
-            @Override
-            public WebElement find(final String value, final WebDriver driver) {
-                return driver.findElement(By.cssSelector(value));
-            }
-
             @Override
             public List<WebElement> findElements(final String value, final WebDriver driver) {
                 return driver.findElements(By.cssSelector(value));
@@ -124,17 +104,18 @@ public record Locator(String type, String value) {
         },
         XPATH {
             @Override
-            public WebElement find(final String value, final WebDriver driver) {
-                return driver.findElement(By.xpath(value));
-            }
-
-            @Override
             public List<WebElement> findElements(final String value, final WebDriver driver) {
                 return driver.findElements(By.xpath(value));
             }
         };
 
-        public abstract WebElement find(String value, WebDriver driver);
+        public WebElement find(final String value, final WebDriver driver) {
+            final List<WebElement> elements = this.findElements(value, driver);
+            return elements.stream()
+                    .filter(WebElement::isDisplayed)
+                    .findFirst()
+                    .orElse(elements.get(0));
+        }
 
         public abstract List<WebElement> findElements(String value, WebDriver driver);
 

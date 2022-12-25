@@ -10,16 +10,16 @@ import java.util.List;
 public class ElementVisible extends AbstractGetter implements LocatorHolder {
 
     @Override
-    public String get(TestRun ctx) {
-        List<WebElement> result = ctx.locator().findElements(ctx);
+    public String get(final TestRun ctx) {
+        final List<WebElement> result = ctx.locator().findElements(ctx);
         if (result.size() == 0) {
             return "false";
         }
-        return "" + result.get(0).isDisplayed();
+        return "" + result.stream().anyMatch(WebElement::isDisplayed);
     }
 
     @Override
-    public StepBuilder addDefaultParam(StepBuilder o) {
+    public StepBuilder addDefaultParam(final StepBuilder o) {
         return o.apply(LocatorHolder.super::addDefaultParam)
                 .apply(super::addDefaultParam);
     }
