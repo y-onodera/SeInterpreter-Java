@@ -19,26 +19,26 @@ import java.net.URL;
 public class FileDownloadCDP extends AbstractStepType implements ConditionalStep, LocatorHolder {
 
     @Override
-    public boolean doRun(TestRun ctx) {
-        NetworkInterceptor interceptor = new NetworkInterceptor(ctx.driver(), (HttpRequest req) -> {
+    public boolean doRun(final TestRun ctx) {
+        final NetworkInterceptor interceptor = new NetworkInterceptor(ctx.driver(), (HttpRequest req) -> {
             try {
-                HttpResponse res = HttpCommandExecutor.getDefaultClientFactory()
+                final HttpResponse res = HttpCommandExecutor.getDefaultClientFactory()
                         .createClient(new URL(req.getUri()))
                         .execute(req);
-                downLoadFile(ctx, res);
-            } catch (IOException e) {
+                this.downLoadFile(ctx, res);
+            } catch (final IOException e) {
                 throw new RuntimeException(e);
             }
             return new HttpResponse().setStatus(204);
         });
-        WebElement el = ctx.locator().find(ctx);
+        final WebElement el = ctx.locator().find(ctx);
         el.click();
         interceptor.close();
         return true;
     }
 
     @Override
-    public StepBuilder addDefaultParam(StepBuilder o) {
+    public StepBuilder addDefaultParam(final StepBuilder o) {
         if (!o.containsStringParam("filepath")) {
             o.put("filepath", "");
         }
@@ -48,17 +48,16 @@ public class FileDownloadCDP extends AbstractStepType implements ConditionalStep
         return o.apply(LocatorHolder.super::addDefaultParam);
     }
 
-    public void downLoadFile(TestRun ctx, HttpResponse response) throws IOException {
-
-        File outputFile;
+    public void downLoadFile(final TestRun ctx, final HttpResponse response) throws IOException {
+        final File outputFile;
         if (ctx.getBoolean("fixedPath")) {
             outputFile = ctx.getListener().addDownloadFile(ctx.string("filepath"));
         } else {
             outputFile = ctx.getListener().addDownloadFile(ctx.getTestRunName() + "_" + ctx.string("filepath"));
         }
-        try (InputStream inputStream = response.getContent().get(); FileOutputStream fileOutputStream = new FileOutputStream(outputFile)) {
+        try (final InputStream inputStream = response.getContent().get(); final FileOutputStream fileOutputStream = new FileOutputStream(outputFile)) {
             int read;
-            byte[] bytes = new byte[1024];
+            final byte[] bytes = new byte[1024];
             while ((read = inputStream.read(bytes)) != -1) {
                 fileOutputStream.write(bytes, 0, read);
             }
