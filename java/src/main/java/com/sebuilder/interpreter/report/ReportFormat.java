@@ -9,11 +9,11 @@ public enum ReportFormat implements TestRunListener.Factory {
     JUNIT("Junit"), EXTENT_REPORTS("ExtentReports");
     private final String name;
 
-    ReportFormat(String name) {
+    ReportFormat(final String name) {
         this.name = name;
     }
 
-    public static ReportFormat fromName(String name) {
+    public static ReportFormat fromName(final String name) {
         return Stream.of(ReportFormat.values())
                 .filter(it -> it.name.equals(name))
                 .findFirst()
@@ -21,7 +21,7 @@ public enum ReportFormat implements TestRunListener.Factory {
     }
 
     @Override
-    public TestRunListener create(Logger log) {
+    public TestRunListener create(final Logger log) {
         if (this == EXTENT_REPORTS) {
             return new ExtentReportsTestRunListener(log);
         }

@@ -16,7 +16,6 @@
 package com.sebuilder.interpreter.script;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Maps;
 import com.sebuilder.interpreter.*;
 import com.sebuilder.interpreter.pointcut.*;
 import org.json.JSONArray;
@@ -24,11 +23,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Factory to create TestCase objects from a string, a reader or JSONObject.
@@ -42,27 +45,25 @@ public class Sebuilder extends AbstractJsonScriptParser {
      * @return A script, ready to finish.
      */
     @Override
-    public TestCase load(String jsonString) {
+    public TestCase load(final String jsonString) {
         try {
             return this.parseScript(new JSONObject(new JSONTokener(jsonString)), null);
-        } catch (JSONException e) {
+        } catch (final Throwable e) {
             throw new AssertionError("error parse:" + jsonString, e);
         }
     }
 
     @Override
-    public Aspect loadAspect(File f) throws IOException {
-        try (BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(f), StandardCharsets.UTF_8))) {
-            try {
-                return this.getAspect(new JSONObject(new JSONTokener(r)));
-            } catch (JSONException e) {
-                throw new IOException("error load:" + f.getAbsolutePath(), e);
-            }
+    public Aspect loadAspect(final File f) {
+        try (final BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(f), StandardCharsets.UTF_8))) {
+            return this.getAspect(new JSONObject(new JSONTokener(r)));
+        } catch (final Throwable e) {
+            throw new AssertionError("error load:" + f.getAbsolutePath(), e);
         }
     }
 
     @Override
-    protected TestCase load(JSONObject o, File sourceFile) throws JSONException, IOException {
+    protected TestCase load(final JSONObject o, final File sourceFile) {
         if (o.optString("type", "script").equals("suite")) {
             return this.parseSuite(o, sourceFile);
         }
@@ -75,12 +76,11 @@ public class Sebuilder extends AbstractJsonScriptParser {
      * @return A script, ready to finish.
      * @throws JSONException If anything goes wrong with interpreting the JSON.
      */
-    protected TestCase parseSuite(JSONObject o, File suiteFile) throws JSONException, IOException {
-        TestCaseBuilder builder = TestCaseBuilder.suite(suiteFile)
+    protected TestCase parseSuite(final JSONObject o, final File suiteFile) {
+        final TestCaseBuilder builder = TestCaseBuilder.suite(suiteFile)
                 .setDataSource(this.getDataSource(o), this.getDataSourceConfig(o));
         this.loadScripts(o, builder);
-        return builder.setAspect(this.getAspect(o))
-                .build();
+        return builder.setAspect(this.getAspect(o)).build();
     }
 
     /**
@@ -89,7 +89,7 @@ public class Sebuilder extends AbstractJsonScriptParser {
      * @return A script, ready to finish.
      * @throws JSONException If anything goes wrong with interpreting the JSON.
      */
-    protected TestCase parseScript(JSONObject o, File f) throws JSONException {
+    protected TestCase parseScript(final JSONObject o, final File f) {
         return this.create(o, f);
     }
 
@@ -97,7 +97,7 @@ public class Sebuilder extends AbstractJsonScriptParser {
      * @param saveTo file script save to
      * @return A new instance of script
      */
-    protected TestCase create(JSONObject o, File saveTo) throws JSONException {
+    protected TestCase create(final JSONObject o, final File saveTo) {
         return new TestCaseBuilder()
                 .addSteps(this.parseStep(o))
                 .associateWith(saveTo)
@@ -105,20 +105,20 @@ public class Sebuilder extends AbstractJsonScriptParser {
                 .build();
     }
 
-    protected void loadScripts(JSONObject o, TestCaseBuilder builder) throws JSONException, IOException {
-        JSONArray scriptLocations = o.getJSONArray("scripts");
-        for (int i = 0; i < scriptLocations.length(); i++) {
-            JSONObject script = scriptLocations.getJSONObject(i);
+    protected void loadScripts(final JSONObject o, final TestCaseBuilder builder) {
+        final JSONArray scriptLocations = o.getJSONArray("scripts");
+        IntStream.range(0, scriptLocations.length()).forEach(i -> {
+            final JSONObject script = scriptLocations.getJSONObject(i);
             if (script.has("paths")) {
-                JSONArray scriptArrays = script.getJSONArray("paths");
+                final JSONArray scriptArrays = script.getJSONArray("paths");
                 this.loadScriptChain(scriptArrays, builder);
             } else if (script.has("chain")) {
-                JSONArray scriptArrays = script.getJSONArray("chain");
+                final JSONArray scriptArrays = script.getJSONArray("chain");
                 this.loadScriptChain(scriptArrays, builder);
             } else {
                 builder.addChain(this.loadScript(script, new File(builder.getScriptFile().path())));
             }
-        }
+        });
     }
 
     /**
@@ -126,29 +126,25 @@ public class Sebuilder extends AbstractJsonScriptParser {
      * @return loaded from file
      * @throws JSONException If anything goes wrong with interpreting the JSON.
      */
-    protected TestCase loadScript(JSONObject script, File suiteFile) throws JSONException, IOException {
+    protected TestCase loadScript(final JSONObject script, final File suiteFile) {
         if (script.has("lazyLoad")) {
-            String beforeReplace = script.getString("lazyLoad");
+            final String beforeReplace = script.getString("lazyLoad");
             return this.overrideSetting(script, TestCaseBuilder.lazyLoad(beforeReplace, (runtimeBefore) -> {
-                String fileName = runtimeBefore.shareInput().evaluateString(beforeReplace);
-                JSONObject source = new JSONObject();
-                try {
-                    TestCase lazyLoad = loadScript(source.put("path", fileName), suiteFile);
-                    return runtimeBefore.map(it -> it
-                            .associateWith(lazyLoad.scriptFile().toFile())
-                            .setName(lazyLoad.name())
-                            .addSteps(lazyLoad.steps())
-                            .setTestDataSet(lazyLoad.dataSourceLoader())
-                            .addAspect(lazyLoad.aspect())
-                    );
-                } catch (JSONException | IOException e) {
-                    throw new AssertionError(e);
-                }
+                final String fileName = runtimeBefore.shareInput().evaluateString(beforeReplace);
+                final JSONObject source = new JSONObject();
+                final TestCase lazyLoad = this.loadScript(source.put("path", fileName), suiteFile);
+                return runtimeBefore.map(it -> it
+                        .associateWith(lazyLoad.scriptFile().toFile())
+                        .setName(lazyLoad.name())
+                        .addSteps(lazyLoad.steps())
+                        .setTestDataSet(lazyLoad.dataSourceLoader())
+                        .addAspect(lazyLoad.aspect())
+                );
             }));
         }
-        String path = Context.bindEnvironmentProperties(script.getString("path"));
+        final String path = Context.bindEnvironmentProperties(script.getString("path"));
         if (script.has("where") && Strings.isNullOrEmpty(script.getString("where"))) {
-            File wherePath = new File(Context.bindEnvironmentProperties(script.getString("where")), path);
+            final File wherePath = new File(Context.bindEnvironmentProperties(script.getString("where")), path);
             return this.loadScriptIfExists(wherePath, script);
         }
         File f = new File(path);
@@ -158,36 +154,33 @@ public class Sebuilder extends AbstractJsonScriptParser {
         return this.loadScriptIfExists(f.getAbsoluteFile(), script);
     }
 
-    protected void loadScriptChain(JSONArray scriptArrays, TestCaseBuilder builder) throws JSONException, IOException {
-        ChainLoader chainLoader = new ChainLoader(this, builder.getScriptFile(), scriptArrays);
+    protected void loadScriptChain(final JSONArray scriptArrays, final TestCaseBuilder builder) {
+        final ChainLoader chainLoader = new ChainLoader(this, builder.getScriptFile(), scriptArrays);
         builder.addChain(chainLoader.load());
     }
 
-    protected TestCase loadScriptIfExists(File wherePath, JSONObject script) throws JSONException, IOException {
+    protected TestCase loadScriptIfExists(final File wherePath, final JSONObject script) {
         return this.overrideSetting(script, this.load(wherePath));
     }
 
-    protected DataSource getDataSource(JSONObject o) throws JSONException {
+    protected DataSource getDataSource(final JSONObject o) {
         if (!o.has("data")) {
             return DataSource.NONE;
         }
-        JSONObject data = o.getJSONObject("data");
+        final JSONObject data = o.getJSONObject("data");
         return Context.getDataSourceFactory().getDataSource(data.getString("source"));
     }
 
-    protected HashMap<String, String> getDataSourceConfig(JSONObject o) throws JSONException {
+    protected HashMap<String, String> getDataSourceConfig(final JSONObject o) {
         if (!o.has("data")) {
-            return Maps.newHashMap();
+            return new HashMap<>();
         }
-        JSONObject data = o.getJSONObject("data");
-        String sourceName = data.getString("source");
-        HashMap<String, String> config = new HashMap<>();
+        final JSONObject data = o.getJSONObject("data");
+        final String sourceName = data.getString("source");
+        final HashMap<String, String> config = new HashMap<>();
         if (data.has("configs") && data.getJSONObject("configs").has(sourceName)) {
-            JSONObject cfg = data.getJSONObject("configs").getJSONObject(sourceName);
-            for (Iterator<String> itr = cfg.keys(); itr.hasNext(); ) {
-                String key = itr.next();
-                config.put(key, cfg.getString(key));
-            }
+            final JSONObject cfg = data.getJSONObject("configs").getJSONObject(sourceName);
+            cfg.keySet().forEach(key -> config.put(key, cfg.getString(key)));
         }
         return config;
     }
@@ -196,23 +189,18 @@ public class Sebuilder extends AbstractJsonScriptParser {
      * @param o json object step load from
      * @throws JSONException If anything goes wrong with interpreting the JSON.
      */
-    protected ArrayList<Step> parseStep(JSONObject o) throws JSONException {
-        JSONArray stepsA = o.getJSONArray("steps");
-        ArrayList<Step> steps = new ArrayList<>();
-        for (int i = 0; i < stepsA.length(); i++) {
-            this.parseStep(steps, stepsA.getJSONObject(i));
-        }
-        return steps;
+    protected ArrayList<Step> parseStep(final JSONObject o) {
+        final JSONArray stepsA = o.getJSONArray("steps");
+        return IntStream.range(0, stepsA.length())
+                .mapToObj(i -> this.parseStep(stepsA, i))
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     /**
-     * @param stepO json object step load from
      * @throws JSONException If anything goes wrong with interpreting the JSON.
      */
-    protected void parseStep(ArrayList<Step> steps, JSONObject stepO) throws JSONException {
-        StepBuilder step = this.createStep(stepO);
-        this.configureStep(stepO, step);
-        steps.add(step.build());
+    protected Step parseStep(final JSONArray steps, final int i) {
+        return this.createStep(steps.getJSONObject(i));
     }
 
     /**
@@ -220,139 +208,26 @@ public class Sebuilder extends AbstractJsonScriptParser {
      * @return A new instance of step
      * @throws JSONException If anything goes wrong with interpreting the JSON.
      */
-    protected StepBuilder createStep(JSONObject stepO) throws JSONException {
-        StepType type = Context.getStepTypeFactory().getStepTypeOfName(stepO.getString("type"));
-        boolean isNegated = stepO.optBoolean("negated", false);
-        String name = stepO.optString("step_name", null);
-        return new StepBuilder(name, type, isNegated);
-    }
-
-    /**
-     * @param stepO json object step configuration load from
-     * @param step  step configuration to
-     * @throws JSONException If anything goes wrong with interpreting the JSON.
-     */
-    protected void configureStep(JSONObject stepO, StepBuilder step) throws JSONException {
-        JSONArray keysA = stepO.names();
-        for (int j = 0; j < keysA.length(); j++) {
-            this.configureStep(stepO, step, keysA.getString(j));
-        }
-    }
-
-    /**
-     * @param stepO json object step configuration load from
-     * @param step  step configuration to
-     * @param key   configuration key
-     * @throws JSONException If anything goes wrong with interpreting the JSON.
-     */
-    protected void configureStep(JSONObject stepO, StepBuilder step, String key) throws JSONException {
-        if (key.equals("type") || key.equals("negated")) {
-            return;
-        }
-        if (stepO.optJSONObject(key) != null && key.startsWith("locator")) {
-            step.put(key, new Locator(stepO.getJSONObject(key).getString("type"), stepO.getJSONObject(key).getString("value")));
-        } else {
-            step.put(key, stepO.getString(key));
-        }
-    }
-
-    protected Aspect getAspect(JSONObject o) throws JSONException, IOException {
-        Aspect result = new Aspect();
-        if (o.has("aspect")) {
-            Aspect.Builder builder = result.builder();
-            JSONArray aspects = o.getJSONArray("aspect");
-            for (int i = 0; i < aspects.length(); i++) {
-                Interceptor.Builder interceptorBuilder = builder.interceptor();
-                JSONObject aspect = aspects.getJSONObject(i);
-                if (aspect.has("pointcut")) {
-                    interceptorBuilder.setPointcut(this.getPointcut(aspect.getJSONArray("pointcut")));
-                }
-                if (aspect.has("before")) {
-                    interceptorBuilder.addBefore(this.load(aspect.getJSONObject("before"), null));
-                }
-                if (aspect.has("after")) {
-                    interceptorBuilder.addAfter(this.load(aspect.getJSONObject("after"), null));
-                }
-                if (aspect.has("failure")) {
-                    interceptorBuilder.addFailure(this.load(aspect.getJSONObject("failure"), null));
-                }
-                interceptorBuilder.build();
-            }
-            result = builder.build();
-        }
-        return result;
-    }
-
-    protected Pointcut getPointcut(JSONArray pointcuts) throws JSONException {
-        Pointcut result = Pointcut.NONE;
-        for (int i = 0; i < pointcuts.length(); i++) {
-            result = result.or(this.parseFilter(pointcuts.getJSONObject(i)));
-        }
-        return result;
-    }
-
-
-    protected Pointcut parseFilter(JSONObject pointcutJSON) throws JSONException {
-        Pointcut pointcut = Pointcut.ANY;
-        JSONArray keysA = pointcutJSON.names();
-        for (int j = 0; j < keysA.length(); j++) {
-            String key = keysA.getString(j);
-            if (key.equals("type")) {
-                if (pointcutJSON.get(key) instanceof JSONArray) {
-                    JSONArray type = pointcutJSON.getJSONArray(key);
-                    Pointcut typeList = Pointcut.NONE;
-                    for (int k = 0; k < type.length(); k++) {
-                        typeList = typeList.or(new StepTypeFilter(type.getString(k)));
-                    }
-                    pointcut = pointcut.and(typeList);
-                } else if (pointcutJSON.get(key) instanceof JSONObject) {
-                    JSONObject type = pointcutJSON.getJSONObject(key);
-                    pointcut = pointcut.and(new StepTypeFilter(type.getString("value"), type.getString("method")));
-                } else {
-                    pointcut = pointcut.and(new StepTypeFilter(pointcutJSON.getString(key)));
-                }
-            } else if (key.equals("negated")) {
-                pointcut = pointcut.and(new NegatedFilter(pointcutJSON.getBoolean(key)));
-            } else if (key.equals("skip")) {
-                pointcut = pointcut.and(new SkipFilter(pointcutJSON.getBoolean(key)));
-            } else if (key.startsWith("locator")) {
-                JSONObject locatorJSON = pointcutJSON.getJSONObject(key);
-                if (locatorJSON.get("value") instanceof JSONArray) {
-                    JSONArray values = locatorJSON.getJSONArray("value");
-                    Pointcut typeList = Pointcut.NONE;
-                    for (int k = 0; k < values.length(); k++) {
-                        Locator locator = new Locator(locatorJSON.getString("type"), values.getString(k));
-                        typeList = typeList.or(new LocatorFilter(key, locator));
-                    }
-                    pointcut = pointcut.and(typeList);
-                } else {
-                    Locator locator = new Locator(locatorJSON.getString("type"), locatorJSON.getString("value"));
-                    if (locatorJSON.has("method")) {
-                        pointcut = pointcut.and(new LocatorFilter(key, locator, locatorJSON.getString("method")));
+    protected Step createStep(final JSONObject stepO) {
+        final StepType type = Context.getStepTypeFactory().getStepTypeOfName(stepO.getString("type"));
+        final boolean isNegated = stepO.optBoolean("negated", false);
+        final String name = stepO.optString("step_name", null);
+        final StepBuilder step = new StepBuilder(name, type, isNegated);
+        final JSONArray keysA = stepO.names();
+        IntStream.range(0, keysA.length())
+                .mapToObj(keysA::getString)
+                .filter(key -> !key.equals("type") && !key.equals("negated"))
+                .forEach(key -> {
+                    if (stepO.optJSONObject(key) != null && key.startsWith("locator")) {
+                        step.put(key, new Locator(stepO.getJSONObject(key).getString("type"), stepO.getJSONObject(key).getString("value")));
                     } else {
-                        pointcut = pointcut.and(new LocatorFilter(key, locator));
+                        step.put(key, stepO.getString(key));
                     }
-                }
-            } else {
-                if (pointcutJSON.get(key) instanceof JSONArray) {
-                    JSONArray type = pointcutJSON.getJSONArray(key);
-                    Pointcut typeList = Pointcut.NONE;
-                    for (int k = 0; k < type.length(); k++) {
-                        typeList = typeList.or(new StringParamFilter(key, type.getString(k)));
-                    }
-                    pointcut = pointcut.and(typeList);
-                } else if (pointcutJSON.get(key) instanceof JSONObject) {
-                    JSONObject type = pointcutJSON.getJSONObject(key);
-                    pointcut = pointcut.and(new StringParamFilter(key, type.getString("value"), type.getString(Pointcut.METHOD_KEY)));
-                } else {
-                    pointcut = pointcut.and(new StringParamFilter(key, pointcutJSON.getString(key)));
-                }
-            }
-        }
-        return pointcut;
+                });
+        return step.build();
     }
 
-    protected TestCase overrideSetting(JSONObject script, TestCase resultTestCase) throws JSONException {
+    protected TestCase overrideSetting(final JSONObject script, final TestCase resultTestCase) {
         final DataSource dataSource = this.getDataSource(script);
         final HashMap<String, String> config = this.getDataSourceConfig(script);
         final String skip = Sebuilder.this.getSkip(script);
@@ -369,7 +244,7 @@ public class Sebuilder extends AbstractJsonScriptParser {
         );
     }
 
-    protected String getSkip(JSONObject o) throws JSONException {
+    protected String getSkip(final JSONObject o) {
         String result = "false";
         if (o.has("skip")) {
             result = o.getString("skip");
@@ -377,7 +252,7 @@ public class Sebuilder extends AbstractJsonScriptParser {
         return result;
     }
 
-    protected boolean isNestedChain(JSONObject script) throws JSONException {
+    protected boolean isNestedChain(final JSONObject script) {
         boolean result = false;
         if (script.has("nestedChain")) {
             result = script.getBoolean("nestedChain");
@@ -385,7 +260,7 @@ public class Sebuilder extends AbstractJsonScriptParser {
         return result;
     }
 
-    protected boolean isBreakNestedChain(JSONObject script) throws JSONException {
+    protected boolean isBreakNestedChain(final JSONObject script) {
         boolean result = false;
         if (script.has("breakNestedChain")) {
             result = script.getBoolean("breakNestedChain");
@@ -393,11 +268,111 @@ public class Sebuilder extends AbstractJsonScriptParser {
         return result;
     }
 
-    protected boolean isPreventContextAspect(JSONObject script) throws JSONException {
+    protected boolean isPreventContextAspect(final JSONObject script) {
         boolean result = false;
         if (script.has("preventContextAspect")) {
             result = script.getBoolean("preventContextAspect");
         }
         return result;
     }
+
+    protected Aspect getAspect(final JSONObject o) {
+        Aspect result = new Aspect();
+        if (o.has("aspect")) {
+            final Aspect.Builder builder = result.builder();
+            final JSONArray aspects = o.getJSONArray("aspect");
+            IntStream.range(0, aspects.length()).forEach(i -> {
+                final Interceptor.Builder interceptorBuilder = builder.interceptor();
+                final JSONObject aspect = aspects.getJSONObject(i);
+                if (aspect.has("pointcut")) {
+                    interceptorBuilder.setPointcut(this.getPointcut(aspect.getJSONArray("pointcut")));
+                }
+                if (aspect.has("before")) {
+                    interceptorBuilder.addBefore(this.load(aspect.getJSONObject("before"), null));
+                }
+                if (aspect.has("after")) {
+                    interceptorBuilder.addAfter(this.load(aspect.getJSONObject("after"), null));
+                }
+                if (aspect.has("failure")) {
+                    interceptorBuilder.addFailure(this.load(aspect.getJSONObject("failure"), null));
+                }
+                interceptorBuilder.build();
+            });
+            result = builder.build();
+        }
+        return result;
+    }
+
+    protected Pointcut getPointcut(final JSONArray pointcuts) {
+        return IntStream.range(0, pointcuts.length())
+                .mapToObj(i -> this.parseFilter(pointcuts.getJSONObject(i)))
+                .reduce(Pointcut.NONE, Pointcut::or);
+    }
+
+
+    protected Pointcut parseFilter(final JSONObject pointcutJSON) {
+        final JSONArray keysA = pointcutJSON.names();
+        return IntStream.range(0, keysA.length())
+                .mapToObj(j -> this.parseFilter(pointcutJSON, keysA, j))
+                .reduce(Pointcut.ANY, Pointcut::and);
+    }
+
+    protected Pointcut parseFilter(final JSONObject pointcutJSON, final JSONArray keysA, final int j) {
+        final String key = keysA.getString(j);
+        if (key.equals("type")) {
+            return this.getStepTypeFilter(pointcutJSON, key);
+        } else if (key.equals("negated")) {
+            return new NegatedFilter(pointcutJSON.getBoolean(key));
+        } else if (key.equals("skip")) {
+            return new SkipFilter(pointcutJSON.getBoolean(key));
+        } else if (key.startsWith("locator")) {
+            return this.getLocatorFilter(pointcutJSON, key);
+        }
+        return this.getStringFilter(pointcutJSON, key);
+    }
+
+    protected Pointcut getStringFilter(final JSONObject pointcutJSON, final String key) {
+        if (pointcutJSON.get(key) instanceof JSONArray) {
+            final JSONArray type = pointcutJSON.getJSONArray(key);
+            return IntStream.range(0, type.length())
+                    .mapToObj(k -> (Pointcut) new StringParamFilter(key, type.getString(k)))
+                    .reduce(Pointcut.NONE, Pointcut::or);
+        } else if (pointcutJSON.get(key) instanceof JSONObject) {
+            final JSONObject type = pointcutJSON.getJSONObject(key);
+            return new StringParamFilter(key, type.getString("value"), type.getString(Pointcut.METHOD_KEY));
+        }
+        return new StringParamFilter(key, pointcutJSON.getString(key));
+    }
+
+    protected Pointcut getLocatorFilter(final JSONObject pointcutJSON, final String key) {
+        final JSONObject locatorJSON = pointcutJSON.getJSONObject(key);
+        if (locatorJSON.get("value") instanceof JSONArray) {
+            final JSONArray values = locatorJSON.getJSONArray("value");
+            return IntStream.range(0, values.length())
+                    .mapToObj(k -> {
+                        final Locator locator = new Locator(locatorJSON.getString("type"), values.getString(k));
+                        return (Pointcut) new LocatorFilter(key, locator);
+                    })
+                    .reduce(Pointcut.NONE, Pointcut::or);
+        }
+        final Locator locator = new Locator(locatorJSON.getString("type"), locatorJSON.getString("value"));
+        if (locatorJSON.has("method")) {
+            return new LocatorFilter(key, locator, locatorJSON.getString("method"));
+        }
+        return new LocatorFilter(key, locator);
+    }
+
+    protected Pointcut getStepTypeFilter(final JSONObject pointcutJSON, final String key) {
+        if (pointcutJSON.get(key) instanceof JSONArray) {
+            final JSONArray type = pointcutJSON.getJSONArray(key);
+            return IntStream.range(0, type.length())
+                    .mapToObj(k -> (Pointcut) new StepTypeFilter(type.getString(k)))
+                    .reduce(Pointcut.NONE, Pointcut::or);
+        } else if (pointcutJSON.get(key) instanceof JSONObject) {
+            final JSONObject type = pointcutJSON.getJSONObject(key);
+            return new StepTypeFilter(type.getString("value"), type.getString("method"));
+        }
+        return new StepTypeFilter(pointcutJSON.getString(key));
+    }
+
 }

@@ -336,11 +336,7 @@ public enum Context {
     }
 
     public Context setAspect(final String aspectFileName) {
-        try {
-            this.aspect = getScriptParser().loadAspect(new File(getBaseDirectory(), aspectFileName));
-        } catch (final IOException e) {
-            throw new AssertionError(e);
-        }
+        this.aspect = getScriptParser().loadAspect(new File(getBaseDirectory(), aspectFileName));
         return this;
     }
 

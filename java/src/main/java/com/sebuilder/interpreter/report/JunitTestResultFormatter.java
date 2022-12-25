@@ -16,25 +16,25 @@ public class JunitTestResultFormatter extends XMLJUnitResultFormatter {
     private String classname;
 
     @Override
-    public void endTest(Test test) {
-        String testDescription = createDescription(test);
+    public void endTest(final Test test) {
+        final String testDescription = this.createDescription(test);
         if (!this.getTestStarts().containsKey(testDescription)) {
             this.startTest(test);
         }
 
-        Element currentTest;
+        final Element currentTest;
         if (!this.getFailedTests().containsKey(test) && !this.getSkippedTests().containsKey(testDescription) && !this.getIgnoredTests().containsKey(testDescription)) {
             currentTest = this.getDoc().createElement("testcase");
-            String n = JUnitVersionHelper.getTestCaseName(test);
+            final String n = JUnitVersionHelper.getTestCaseName(test);
             currentTest.setAttribute("name", n == null ? "unknown" : n);
             currentTest.setAttribute("classname", this.getClassname());
             this.getRootElement().appendChild(currentTest);
-            this.getTestElements().put(createDescription(test), currentTest);
+            this.getTestElements().put(this.createDescription(test), currentTest);
         } else {
             currentTest = this.getTestElements().get(testDescription);
         }
 
-        Long l = this.getTestStarts().get(createDescription(test));
+        final Long l = this.getTestStarts().get(this.createDescription(test));
         currentTest.setAttribute("time", Double.toString((double) (System.currentTimeMillis() - l) / 1000.0D));
         String downloadPath = "";
         String screenshotPath = "";
@@ -50,51 +50,51 @@ public class JunitTestResultFormatter extends XMLJUnitResultFormatter {
     }
 
     public String getClassname() {
-        return classname;
+        return this.classname;
     }
 
-    public void setClassname(String classname) {
+    public void setClassname(final String classname) {
         this.classname = classname;
     }
 
-    private String createDescription(Test test) throws BuildException {
+    private String createDescription(final Test test) throws BuildException {
         return JUnitVersionHelper.getTestCaseName(test) + "(" + JUnitVersionHelper.getTestCaseClassName(test) + ")";
     }
 
     private Element getRootElement() {
-        return getProperty("rootElement");
+        return this.getProperty("rootElement");
     }
 
     private Document getDoc() {
-        return getProperty("doc");
+        return this.getProperty("doc");
     }
 
     private Hashtable<String, Element> getTestElements() {
-        return getProperty("testElements");
+        return this.getProperty("testElements");
     }
 
     private Map<String, Test> getIgnoredTests() {
-        return getProperty("ignoredTests");
+        return this.getProperty("ignoredTests");
     }
 
     private Map<String, Test> getSkippedTests() {
-        return getProperty("skippedTests");
+        return this.getProperty("skippedTests");
     }
 
     private Map<Test, Test> getFailedTests() {
-        return getProperty("failedTests");
+        return this.getProperty("failedTests");
     }
 
     private Map<String, Long> getTestStarts() {
-        return getProperty("testStarts");
+        return this.getProperty("testStarts");
     }
 
-    private <T> T getProperty(String name) {
+    private <T> T getProperty(final String name) {
         try {
-            Field f = XMLJUnitResultFormatter.class.getDeclaredField(name);
+            final Field f = XMLJUnitResultFormatter.class.getDeclaredField(name);
             f.setAccessible(true);
             return (T) f.get(this);
-        } catch (IllegalAccessException | NoSuchFieldException e) {
+        } catch (final IllegalAccessException | NoSuchFieldException e) {
             throw new RuntimeException(e);
         }
     }

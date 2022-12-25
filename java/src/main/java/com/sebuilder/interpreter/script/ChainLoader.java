@@ -4,10 +4,8 @@ import com.google.common.collect.Lists;
 import com.sebuilder.interpreter.ScriptFile;
 import com.sebuilder.interpreter.TestCase;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.List;
 
 public class ChainLoader {
@@ -17,18 +15,17 @@ public class ChainLoader {
     private int index;
     private final List<Integer> alreadyBreak;
 
-    public ChainLoader(Sebuilder sebuilder, ScriptFile suiteFile, JSONArray scriptArrays) {
+    public ChainLoader(final Sebuilder sebuilder, final ScriptFile suiteFile, final JSONArray scriptArrays) {
         this.sebuilder = sebuilder;
         this.suiteFile = suiteFile;
         this.scriptArrays = scriptArrays;
         this.alreadyBreak = Lists.newArrayList();
     }
 
-    public TestCase load() throws JSONException, IOException {
+    public TestCase load() {
         TestCase result = this.next();
         while (this.hasNext()) {
-            final TestCase next = this.next();
-            result = result.map(it -> it.addChain(next));
+            result = result.map(it -> it.addChain(this.next()));
         }
         return result.map(it -> it.isChainTakeOverLastRun(true));
     }
@@ -37,7 +34,7 @@ public class ChainLoader {
         return this.index < this.scriptArrays.length();
     }
 
-    protected TestCase next() throws JSONException, IOException {
+    protected TestCase next() {
         TestCase loaded = this.sebuilder.loadScript(this.scriptArrays.getJSONObject(this.index++), this.suiteFile.toFile());
         if (loaded.nestedChain()) {
             loaded = this.loadNestedChain(loaded);
@@ -45,13 +42,13 @@ public class ChainLoader {
         return loaded;
     }
 
-    protected TestCase loadNestedChain(TestCase loaded) throws JSONException, IOException {
+    protected TestCase loadNestedChain(final TestCase loaded) {
         if (!this.hasNext()) {
             return loaded;
         }
         TestCase result = loaded;
         while (this.hasNext()) {
-            JSONObject json = this.scriptArrays.getJSONObject(this.index);
+            final JSONObject json = this.scriptArrays.getJSONObject(this.index);
             if (!this.alreadyBreak.contains(this.index) && this.sebuilder.isBreakNestedChain(json)) {
                 this.alreadyBreak.add(this.index);
                 break;

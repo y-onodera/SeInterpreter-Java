@@ -1,7 +1,6 @@
 package com.sebuilder.interpreter;
 
 import java.io.File;
-import java.io.IOException;
 
 public interface ScriptParser {
 
@@ -9,11 +8,11 @@ public interface ScriptParser {
         return this.getClass().getSimpleName();
     }
 
-    TestCase load(File f) throws IOException;
+    TestCase load(File f);
 
     TestCase load(String jsonString);
 
-    TestCase load(String jsonString, File file) throws IOException;
+    TestCase load(String jsonString, File file);
 
-    Aspect loadAspect(File f) throws IOException;
+    Aspect loadAspect(File f);
 }

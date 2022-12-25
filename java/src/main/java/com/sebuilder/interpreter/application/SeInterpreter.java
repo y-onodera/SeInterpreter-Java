@@ -23,7 +23,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Set;
 
@@ -110,11 +109,7 @@ public class SeInterpreter extends CommandLineRunner implements TestRunner {
     }
 
     protected TestCase loadTestCase(final String path) {
-        try {
-            return Context.getScriptParser().load(new File(path));
-        } catch (final IOException e) {
-            throw new AssertionError(e);
-        }
+        return Context.getScriptParser().load(new File(path));
     }
 
     @Override

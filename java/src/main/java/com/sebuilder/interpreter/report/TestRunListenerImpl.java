@@ -22,7 +22,7 @@ public abstract class TestRunListenerImpl implements TestRunListener {
     protected String testName;
     private int stepNo;
 
-    public TestRunListenerImpl(Logger aLog) {
+    public TestRunListenerImpl(final Logger aLog) {
         this.project = new Project();
         this.project.setName("se-interpreter");
         this.project.setBaseDir(new File("."));
@@ -35,7 +35,7 @@ public abstract class TestRunListenerImpl implements TestRunListener {
         this.stepNo = 0;
     }
 
-    protected TestRunListenerImpl(TestRunListener extendFrom) {
+    protected TestRunListenerImpl(final TestRunListener extendFrom) {
         this.project = new Project();
         this.project.setName("se-interpreter");
         this.project.setBaseDir(new File("."));
@@ -86,7 +86,7 @@ public abstract class TestRunListenerImpl implements TestRunListener {
     }
 
     @Override
-    public void cleanResult(File dest) {
+    public void cleanResult(final File dest) {
         this.cleanDir(dest);
         this.setUpDir(dest);
     }
@@ -97,37 +97,37 @@ public abstract class TestRunListenerImpl implements TestRunListener {
     }
 
     @Override
-    public void cleanDir(File dest) {
+    public void cleanDir(final File dest) {
         this.log.info("clean up directory:" + dest.getName());
-        Delete delete = new Delete();
+        final Delete delete = new Delete();
         delete.setProject(this.project);
         delete.setDir(dest);
         delete.execute();
     }
 
     @Override
-    public void setUpDir(File dest) {
+    public void setUpDir(final File dest) {
         this.reportPrefix = Context.getJunitReportPrefix();
         // create directory result save in
         this.resultDir = dest;
-        Mkdir mkdir = new Mkdir();
+        final Mkdir mkdir = new Mkdir();
         mkdir.setProject(this.project);
         mkdir.setDir(this.resultDir);
         mkdir.execute();
-        this.downloadDirectory = new File(resultDir, Context.getDownloadDirectory()).getAbsoluteFile();
+        this.downloadDirectory = new File(this.resultDir, Context.getDownloadDirectory()).getAbsoluteFile();
         mkdir.setDir(this.downloadDirectory);
         mkdir.execute();
-        this.screenShotOutputDirectory = new File(resultDir, Context.getScreenShotOutputDirectory()).getAbsoluteFile();
+        this.screenShotOutputDirectory = new File(this.resultDir, Context.getScreenShotOutputDirectory()).getAbsoluteFile();
         mkdir.setDir(this.screenShotOutputDirectory);
         mkdir.execute();
-        this.templateOutputDirectory = new File(resultDir, Context.getTemplateOutputDirectory()).getAbsoluteFile();
+        this.templateOutputDirectory = new File(this.resultDir, Context.getTemplateOutputDirectory()).getAbsoluteFile();
         mkdir.setDir(this.templateOutputDirectory);
         mkdir.execute();
 
     }
 
     @Override
-    public boolean openTestSuite(TestCase testCase, String testRunName, InputData aProperty) {
+    public boolean openTestSuite(final TestCase testCase, final String testRunName, final InputData aProperty) {
         this.suiteName = this.reportPrefix + testRunName.replace("_", ".");
         this.log.info("open suite:" + this.suiteName);
         this.stepNo = 0;
@@ -136,13 +136,13 @@ public abstract class TestRunListenerImpl implements TestRunListener {
     }
 
     @Override
-    public void startTest(String testName) {
+    public void startTest(final String testName) {
         this.testName = testName;
         this.log.info("start test:" + testName);
     }
 
     @Override
-    public void skipTestIndex(int count) {
+    public void skipTestIndex(final int count) {
         this.stepNo = this.stepNo + count;
     }
 
@@ -152,28 +152,28 @@ public abstract class TestRunListenerImpl implements TestRunListener {
     }
 
     @Override
-    public File addScreenshot(String file) {
+    public File addScreenshot(final String file) {
         return new File(this.getScreenShotOutputDirectory(), file);
     }
 
     @Override
-    public File saveExpectScreenshot(File file) {
+    public File saveExpectScreenshot(final File file) {
         return new File(file.getPath().replaceAll("\\.png$", "") + "_expect.png");
     }
 
     @Override
-    public File addDownloadFile(String file) {
+    public File addDownloadFile(final String file) {
         return new File(this.getDownloadDirectory(), file);
     }
 
     @Override
-    public void addError(Throwable throwable) {
+    public void addError(final Throwable throwable) {
         this.log.info("result error:" + this.testName);
         this.log.error(throwable);
     }
 
     @Override
-    public void addFailure(String message) {
+    public void addFailure(final String message) {
         this.log.info("result failure:" + this.testName);
         this.log.info("cause :" + message);
     }
@@ -194,7 +194,7 @@ public abstract class TestRunListenerImpl implements TestRunListener {
     }
 
     @Override
-    public void reportError(String testCaseName, Throwable toBeReport) {
+    public void reportError(final String testCaseName, final Throwable toBeReport) {
         this.openTestSuite(new TestCaseBuilder().build(), testCaseName, Context.settings());
         this.startTest(testCaseName);
         this.addError(toBeReport);

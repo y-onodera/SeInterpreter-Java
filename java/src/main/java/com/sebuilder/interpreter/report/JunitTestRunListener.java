@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Map;
@@ -32,19 +33,8 @@ public class JunitTestRunListener extends TestRunListenerImpl {
     private int failed;
     private int info;
 
-    public JunitTestRunListener(Logger aLog) {
+    public JunitTestRunListener(final Logger aLog) {
         super(aLog);
-        this.formatter = new JunitTestResultFormatter();
-        this.suite = null;
-        this.test = null;
-        this.runTest = 0;
-        this.error = 0;
-        this.failed = 0;
-        this.info = 0;
-    }
-
-    public JunitTestRunListener(JunitTestRunListener extendFrom) {
-        super(extendFrom);
         this.formatter = new JunitTestResultFormatter();
         this.suite = null;
         this.test = null;
@@ -60,8 +50,8 @@ public class JunitTestRunListener extends TestRunListenerImpl {
     }
 
     @Override
-    public boolean openTestSuite(TestCase testCase, String testRunName, InputData aProperty) {
-        boolean result = super.openTestSuite(testCase, testRunName, aProperty);
+    public boolean openTestSuite(final TestCase testCase, final String testRunName, final InputData aProperty) {
+        final boolean result = super.openTestSuite(testCase, testRunName, aProperty);
         this.suite = new JUnitTest();
         this.suite.setName(this.suiteName);
         this.suite.setRunTime(new Date().getTime());
@@ -78,16 +68,16 @@ public class JunitTestRunListener extends TestRunListenerImpl {
         this.failed = 0;
         this.info = 0;
         try {
-            this.formatter.setOutput(new FileOutputStream(new File(this.resultDir, "TEST-SeBuilder-" + suite.getName() + "-result.xml")));
-            this.formatter.startTestSuite(suite);
-        } catch (FileNotFoundException e) {
+            this.formatter.setOutput(new FileOutputStream(new File(this.resultDir, "TEST-SeBuilder-" + this.suite.getName() + "-result.xml")));
+            this.formatter.startTestSuite(this.suite);
+        } catch (final FileNotFoundException e) {
             throw new IllegalArgumentException(e);
         }
         return result;
     }
 
     @Override
-    public void startTest(String testName) {
+    public void startTest(final String testName) {
         super.startTest(testName);
         this.runTest++;
         this.test = new ResultReportableTestCase(testName);
@@ -96,8 +86,8 @@ public class JunitTestRunListener extends TestRunListenerImpl {
     }
 
     @Override
-    public File addScreenshot(String file) {
-        File result = super.addScreenshot(file);
+    public File addScreenshot(final String file) {
+        final File result = super.addScreenshot(file);
         this.test.setScreenshotPath(this.resultDir.getAbsoluteFile().toPath()
                 .relativize(result.getAbsoluteFile().toPath())
                 .toString());
@@ -105,8 +95,8 @@ public class JunitTestRunListener extends TestRunListenerImpl {
     }
 
     @Override
-    public File saveExpectScreenshot(File file) {
-        File result = super.saveExpectScreenshot(file);
+    public File saveExpectScreenshot(final File file) {
+        final File result = super.saveExpectScreenshot(file);
         this.test.setExpectScreenshotPath(this.resultDir.getAbsoluteFile().toPath()
                 .relativize(result.getAbsoluteFile().toPath())
                 .toString());
@@ -114,9 +104,9 @@ public class JunitTestRunListener extends TestRunListenerImpl {
     }
 
     @Override
-    public File addDownloadFile(String file) {
-        File result = super.addDownloadFile(file);
-        String downloadPath = this.resultDir.getAbsoluteFile().toPath()
+    public File addDownloadFile(final String file) {
+        final File result = super.addDownloadFile(file);
+        final String downloadPath = this.resultDir.getAbsoluteFile().toPath()
                 .relativize(result.getAbsoluteFile().toPath())
                 .toString();
         this.test.setDownloadPath(downloadPath);
@@ -124,21 +114,21 @@ public class JunitTestRunListener extends TestRunListenerImpl {
     }
 
     @Override
-    public void addError(Throwable throwable) {
+    public void addError(final Throwable throwable) {
         super.addError(throwable);
         this.error++;
         this.formatter.addError(this.test, throwable);
     }
 
     @Override
-    public void addFailure(String message) {
+    public void addFailure(final String message) {
         super.addFailure(message);
         this.failed++;
         this.formatter.addFailure(this.test, new AssertionError(message));
     }
 
     @Override
-    public void info(String s) {
+    public void info(final String s) {
         this.info++;
         this.formatter.setSystemOutput("_info%d:%s".formatted(this.info, s));
     }
@@ -161,14 +151,14 @@ public class JunitTestRunListener extends TestRunListenerImpl {
     public void aggregateResult() {
         super.aggregateResult();
         try {
-            new File(this.resultDir, "TEST-SeBuilder-result.xml").createNewFile();
-        } catch (IOException e) {
+            Files.createFile(new File(this.resultDir, "TEST-SeBuilder-result.xml").toPath());
+        } catch (final IOException e) {
             throw new RuntimeException(e);
         }
-        XMLResultAggregator aggregator = new XMLResultAggregator() {
+        final XMLResultAggregator aggregator = new XMLResultAggregator() {
             @Override
             public AggregateTransformer createReport() {
-                AggregateTransformer transformer = new AggregateTransformer(this) {
+                final AggregateTransformer transformer = new AggregateTransformer(this) {
                     @Override
                     protected Resource getStylesheet() {
                         return new URLResource(this.getClass().getResource("/report/junit-noframes.xsl"));
@@ -179,8 +169,8 @@ public class JunitTestRunListener extends TestRunListenerImpl {
             }
 
             @Override
-            protected void addTestSuite(Element root, Element testsuite) {
-                Element copy = (Element) DOMUtil.importNode(root, testsuite);
+            protected void addTestSuite(final Element root, final Element testsuite) {
+                final Element copy = (Element) DOMUtil.importNode(root, testsuite);
                 copy.setAttribute("name", testsuite.getAttribute("name"));
                 copy.setAttribute("id", Integer.toString(this.generatedId));
             }
@@ -189,17 +179,17 @@ public class JunitTestRunListener extends TestRunListenerImpl {
         aggregator.setProject(this.project);
         aggregator.setTodir(this.resultDir);
         aggregator.setTofile("TEST-SeBuilder-result.xml");
-        FileSet fs = new FileSet();
+        final FileSet fs = new FileSet();
         fs.setDir(this.resultDir);
         fs.createInclude().setName("TEST-SeBuilder-*-result.xml");
         aggregator.addFileSet(fs);
-        AggregateTransformer transformer = aggregator.createReport();
+        final AggregateTransformer transformer = aggregator.createReport();
         transformer.setTodir(this.resultDir);
-        AggregateTransformer.Format noFrame = new AggregateTransformer.Format();
+        final AggregateTransformer.Format noFrame = new AggregateTransformer.Format();
         noFrame.setValue(AggregateTransformer.NOFRAMES);
         transformer.setFormat(noFrame);
         aggregator.execute();
-        Delete delete = new Delete();
+        final Delete delete = new Delete();
         delete.setProject(this.project);
         delete.setFile(new File(this.resultDir, "TEST-SeBuilder-result.xml"));
         delete.execute();
@@ -210,15 +200,15 @@ public class JunitTestRunListener extends TestRunListenerImpl {
         private String screenshotPath = "";
         private String expectScreenshotPath = "";
 
-        public ResultReportableTestCase(String testName) {
+        public ResultReportableTestCase(final String testName) {
             super(testName);
         }
 
         public String getScreenshotPath() {
-            return screenshotPath;
+            return this.screenshotPath;
         }
 
-        public void setScreenshotPath(String screenshotPath) {
+        public void setScreenshotPath(final String screenshotPath) {
             this.screenshotPath = screenshotPath;
         }
 
@@ -226,7 +216,7 @@ public class JunitTestRunListener extends TestRunListenerImpl {
             return this.expectScreenshotPath;
         }
 
-        public void setExpectScreenshotPath(String expectScreenshotPath) {
+        public void setExpectScreenshotPath(final String expectScreenshotPath) {
             this.expectScreenshotPath = expectScreenshotPath;
         }
 
@@ -234,7 +224,7 @@ public class JunitTestRunListener extends TestRunListenerImpl {
             return this.downloadPath;
         }
 
-        public void setDownloadPath(String downloadPath) {
+        public void setDownloadPath(final String downloadPath) {
             this.downloadPath = downloadPath;
         }
     }

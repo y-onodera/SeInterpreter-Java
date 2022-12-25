@@ -1,17 +1,17 @@
 package com.sebuilder.interpreter.step.getter;
 
-import com.google.common.base.Objects;
-import com.google.common.collect.Lists;
 import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.step.Getter;
 import com.sebuilder.interpreter.step.WaitFor;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class ComplexCondition extends AbstractGetter {
-    private final List<WaitFor> conditions = Lists.newArrayList();
+    private final List<WaitFor> conditions = new ArrayList<>();
 
-    public ComplexCondition(List<WaitFor> conditions) {
+    public ComplexCondition(final List<WaitFor> conditions) {
         this.conditions.addAll(conditions);
     }
 
@@ -20,8 +20,8 @@ public class ComplexCondition extends AbstractGetter {
     }
 
     @Override
-    public String get(TestRun ctx) {
-        for (WaitFor condition : this.conditions) {
+    public String get(final TestRun ctx) {
+        for (final WaitFor condition : this.conditions) {
             if (!condition.test(ctx)) {
                 return "false";
             }
@@ -30,9 +30,9 @@ public class ComplexCondition extends AbstractGetter {
     }
 
     public static class Builder {
-        List<WaitFor> conditions = Lists.newArrayList();
+        List<WaitFor> conditions = new ArrayList<>();
 
-        public Builder addCondition(Getter condition) {
+        public Builder addCondition(final Getter condition) {
             this.conditions.add(condition.toWaitFor());
             return this;
         }
@@ -43,15 +43,19 @@ public class ComplexCondition extends AbstractGetter {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ComplexCondition that = (ComplexCondition) o;
-        return Objects.equal(conditions, that.conditions);
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        final ComplexCondition that = (ComplexCondition) o;
+        return Objects.equals(this.conditions, that.conditions);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(conditions);
+        return Objects.hash(this.conditions);
     }
 }

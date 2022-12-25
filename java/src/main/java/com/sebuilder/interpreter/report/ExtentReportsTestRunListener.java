@@ -22,16 +22,12 @@ import java.util.stream.Collectors;
 public class ExtentReportsTestRunListener extends TestRunListenerImpl {
 
     private ExtentReports reports;
+
     private ExtentTest extentTest;
 
-    public ExtentReportsTestRunListener(Logger aLog) {
+    public ExtentReportsTestRunListener(final Logger aLog) {
         super(aLog);
         this.reports = null;
-    }
-
-    public ExtentReportsTestRunListener(ExtentReportsTestRunListener extendFrom) {
-        super(extendFrom);
-        this.reports = extendFrom.getExtentReports();
     }
 
     @Override
@@ -39,40 +35,26 @@ public class ExtentReportsTestRunListener extends TestRunListenerImpl {
         return "ExtentReport.html";
     }
 
-    public ExtentReports getExtentReports() {
-        return this.reports;
-    }
-
     @Override
-    public void setUpDir(File dest) {
+    public void setUpDir(final File dest) {
         super.setUpDir(dest);
         this.reports = new ExtentReports();
-        ExtentSparkReporter spark = new ExtentSparkReporter(new File(this.resultDir, this.getReportFileName())) {
+        final ExtentSparkReporter spark = new ExtentSparkReporter(new File(this.resultDir, this.getReportFileName())) {
             @Override
-            protected Configuration createFreemarkerConfig(String templatePath, String encoding) {
+            protected Configuration createFreemarkerConfig(final String templatePath, final String encoding) {
                 return super.createFreemarkerConfig("custom/" + templatePath, encoding);
             }
 
             @Override
-            protected void processTemplate(Template template, File outputFile) throws TemplateException, IOException {
-                String encoding = this.getFreemarkerConfig().getDefaultEncoding();
-                FreemarkerTemplate freemarkerTemplate = new FreemarkerTemplate(this.getFreemarkerConfig()) {
+            protected void processTemplate(final Template template, final File outputFile) throws TemplateException, IOException {
+                final String encoding = this.getFreemarkerConfig().getDefaultEncoding();
+                final FreemarkerTemplate freemarkerTemplate = new FreemarkerTemplate(this.getFreemarkerConfig()) {
                     @Override
-                    public void writeTemplate(Template template, Map<String, Object> templateMap, File outputFile) throws TemplateException, IOException {
-                        String source = this.getSource(template, templateMap);
-                        BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile, Charset.forName(encoding)));
-                        try {
+                    public void writeTemplate(final Template template, final Map<String, Object> templateMap, final File outputFile) throws TemplateException, IOException {
+                        final String source = this.getSource(template, templateMap);
+                        try (final BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile, Charset.forName(encoding)))) {
                             writer.write(source);
-                        } catch (Throwable var7) {
-                            try {
-                                writer.close();
-                            } catch (Throwable var6) {
-                                var7.addSuppressed(var6);
-                            }
-
-                            throw var7;
                         }
-                        writer.close();
                     }
                 };
                 freemarkerTemplate.writeTemplate(template, this.getTemplateModel(), outputFile);
@@ -93,7 +75,7 @@ public class ExtentReportsTestRunListener extends TestRunListenerImpl {
     }
 
     @Override
-    public void startTest(String testName) {
+    public void startTest(final String testName) {
         super.startTest(testName);
         this.extentTest = this.reports.createTest(testName)
                 .assignCategory(this.suiteName);
@@ -106,8 +88,8 @@ public class ExtentReportsTestRunListener extends TestRunListenerImpl {
     }
 
     @Override
-    public File addScreenshot(String file) {
-        File result = super.addScreenshot(file);
+    public File addScreenshot(final String file) {
+        final File result = super.addScreenshot(file);
         this.extentTest.addScreenCaptureFromPath(this.resultDir.getAbsoluteFile().toPath()
                 .relativize(result.getAbsoluteFile().toPath())
                 .toString());
@@ -115,8 +97,8 @@ public class ExtentReportsTestRunListener extends TestRunListenerImpl {
     }
 
     @Override
-    public File saveExpectScreenshot(File file) {
-        File result = super.saveExpectScreenshot(file);
+    public File saveExpectScreenshot(final File file) {
+        final File result = super.saveExpectScreenshot(file);
         this.extentTest.addScreenCaptureFromPath(this.resultDir.getAbsoluteFile().toPath()
                 .relativize(result.getAbsoluteFile().toPath())
                 .toString());
@@ -124,9 +106,9 @@ public class ExtentReportsTestRunListener extends TestRunListenerImpl {
     }
 
     @Override
-    public File addDownloadFile(String file) {
-        File result = super.addDownloadFile(file);
-        String downloadPath = this.resultDir.getAbsoluteFile().toPath()
+    public File addDownloadFile(final String file) {
+        final File result = super.addDownloadFile(file);
+        final String downloadPath = this.resultDir.getAbsoluteFile().toPath()
                 .relativize(result.getAbsoluteFile().toPath())
                 .toString();
         this.extentTest.log(Status.INFO, "<a href=\"" + downloadPath + "\">" + downloadPath + "</a>");
@@ -134,21 +116,21 @@ public class ExtentReportsTestRunListener extends TestRunListenerImpl {
     }
 
     @Override
-    public void addError(Throwable throwable) {
+    public void addError(final Throwable throwable) {
         super.addError(throwable);
         this.extentTest.fail(throwable);
         this.extentTest = null;
     }
 
     @Override
-    public void addFailure(String message) {
+    public void addFailure(final String message) {
         super.addFailure(message);
         this.extentTest.warning(message);
         this.extentTest = null;
     }
 
     @Override
-    public void info(String s) {
+    public void info(final String s) {
         this.extentTest.info(s);
     }
 
