@@ -41,6 +41,7 @@ public class InternetExplorer implements WebDriverFactory {
         });
         caps.forEach(ieOptions::setCapability);
         ieOptions.attachToEdgeChrome()
+                .withEdgeExecutablePath(this.getBinaryPath())
                 .setCapability(InternetExplorerDriver.UNEXPECTED_ALERT_BEHAVIOR, "accept");
         ieOptions.setCapability("disable-popup-blocking", true);
         return ieOptions;
@@ -61,8 +62,4 @@ public class InternetExplorer implements WebDriverFactory {
         return "IEDriverServer";
     }
 
-    @Override
-    public boolean isBinarySelectable() {
-        return true;
-    }
 }

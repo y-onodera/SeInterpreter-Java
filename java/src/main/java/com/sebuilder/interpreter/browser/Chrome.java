@@ -26,11 +26,10 @@ public class Chrome implements WebDriverFactory {
         final HashMap<String, String> caps = new HashMap<>();
         final HashMap<String, String> prefs = new HashMap<>();
         final ChromeOptions option = new ChromeOptions();
-        if (config.containsKey("binary")) {
-            option.setBinary(new File(config.get("binary")));
-        }
         config.forEach((key, value) -> {
-            if (key.startsWith("experimental.")) {
+            if (key.equals("binary")) {
+                option.setBinary(new File(value));
+            } else if (key.startsWith("experimental.")) {
                 prefs.put(key.substring("experimental.".length()), value);
             } else if (key.startsWith("chrome.arguments.")) {
                 option.addArguments("--" + key.substring("chrome.arguments.".length()));
@@ -55,11 +54,6 @@ public class Chrome implements WebDriverFactory {
     @Override
     public String getDriverName() {
         return "chromedriver";
-    }
-
-    @Override
-    public boolean isBinarySelectable() {
-        return true;
     }
 
 }

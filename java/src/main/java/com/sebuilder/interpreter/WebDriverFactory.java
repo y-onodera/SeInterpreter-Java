@@ -55,24 +55,17 @@ public interface WebDriverFactory {
 
     String getDriverPath();
 
-    boolean isBinarySelectable();
-
     default String getBinaryPath() {
-        if (this.isBinarySelectable()) {
-            return Context.getDriverConfig().getOrDefault("binary", null);
-        }
-        return null;
+        return Context.getDriverConfig().getOrDefault("binary", null);
     }
 
     void setDriverPath(String driverPath);
 
     default void setBinaryPath(final String binaryPath) {
-        if (this.isBinarySelectable()) {
-            if (Strings.isNullOrEmpty(binaryPath)) {
-                Context.getDriverConfig().remove("binary");
-            } else {
-                Context.getDriverConfig().put("binary", binaryPath);
-            }
+        if (Strings.isNullOrEmpty(binaryPath)) {
+            Context.getDriverConfig().remove("binary");
+        } else {
+            Context.getDriverConfig().put("binary", binaryPath);
         }
     }
 }

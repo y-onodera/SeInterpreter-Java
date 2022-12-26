@@ -44,14 +44,12 @@ public class Firefox implements WebDriverFactory {
     @Override
     public FirefoxOptions getOptions(final Map<String, String> config) {
         final FirefoxOptions option = new FirefoxOptions();
-        if (config.containsKey("binary")) {
-            option.setBinary(new FirefoxBinary(new File(config.get("binary"))));
-        }
-        if (config.containsKey("profile")) {
-            option.setProfile(new FirefoxProfile(new File(config.get("profile"))));
-        }
         config.forEach((key, value) -> {
-            if (key.startsWith("firefox.options.")) {
+            if (key.equals("binary")) {
+                option.setBinary(new FirefoxBinary(new File(value)));
+            } else if (key.equals("profile")) {
+                option.setProfile(new FirefoxProfile(new File(value)));
+            } else if (key.startsWith("firefox.options.")) {
                 option.addArguments("--" + key.substring("firefox.options.".length()));
             } else {
                 option.addPreference(key, value);
@@ -74,10 +72,5 @@ public class Firefox implements WebDriverFactory {
     public String getDriverName() {
         return "geckodriver";
     }
-
-    @Override
-    public boolean isBinarySelectable() {
-        return true;
-    }
-
+    
 }

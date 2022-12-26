@@ -22,11 +22,10 @@ public class Edge implements WebDriverFactory {
         final HashMap<String, String> caps = new HashMap<>();
         final HashMap<String, String> prefs = new HashMap<>();
         final EdgeOptions option = new EdgeOptions();
-        if (config.containsKey("binary")) {
-            option.setBinary(new File(config.get("binary")));
-        }
         config.forEach((key, value) -> {
-            if (key.startsWith("experimental.")) {
+            if (key.equals("binary")) {
+                option.setBinary(new File(value));
+            } else if (key.startsWith("experimental.")) {
                 prefs.put(key.substring("experimental.".length()), value);
             } else if (key.startsWith("edge.arguments.")) {
                 option.addArguments("--" + key.substring("edge.arguments.".length()));
@@ -53,8 +52,4 @@ public class Edge implements WebDriverFactory {
         return "msedgedriver";
     }
 
-    @Override
-    public boolean isBinarySelectable() {
-        return true;
-    }
 }
