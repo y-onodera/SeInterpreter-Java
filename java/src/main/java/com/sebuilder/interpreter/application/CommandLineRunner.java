@@ -18,7 +18,6 @@ public abstract class CommandLineRunner {
     protected Logger log;
 
     protected CommandLineRunner(final String[] args, final Logger log) {
-        System.setProperty("webdriver.http.factory", "jdk-http-client");
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             if (this.lastRun != null) {
                 this.lastRun.driver().quit();
