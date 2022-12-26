@@ -48,7 +48,7 @@ public class BrowserPresenter {
 
     @FXML
     void selectBrowser() {
-        String browser = browserSelect.getSelectionModel().getSelectedItem();
+        final String browser = this.browserSelect.getSelectionModel().getSelectedItem();
         if (Objects.equals(this.selectedBrowser, browser)) {
             return;
         }
@@ -66,13 +66,13 @@ public class BrowserPresenter {
 
     @FXML
     void driverSearch() {
-        FileChooser fileChooser = new FileChooser();
+        final FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open Resource File");
         fileChooser.setInitialDirectory(this.parentDir);
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("select driver.exe", "*.exe"));
-        Stage stage = new Stage();
+        final Stage stage = new Stage();
         stage.initOwner(this.driverText.getScene().getWindow());
-        File file = fileChooser.showOpenDialog(stage);
+        final File file = fileChooser.showOpenDialog(stage);
         if (file != null && file.exists()) {
             this.parentDir = file.getParentFile().getAbsoluteFile();
             this.driverText.setText(file.getAbsolutePath());
@@ -81,13 +81,13 @@ public class BrowserPresenter {
 
     @FXML
     void binarySearch() {
-        FileChooser fileChooser = new FileChooser();
+        final FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open Resource File");
         fileChooser.setInitialDirectory(this.parentDir);
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("select browser.exe", "*.exe"));
-        Stage stage = new Stage();
+        final Stage stage = new Stage();
         stage.initOwner(this.binaryText.getScene().getWindow());
-        File file = fileChooser.showOpenDialog(stage);
+        final File file = fileChooser.showOpenDialog(stage);
         if (file != null && file.exists()) {
             this.binaryText.setText(file.getAbsolutePath());
         }
@@ -102,7 +102,7 @@ public class BrowserPresenter {
         this.driverText.getScene().getWindow().hide();
     }
 
-    private void init(String remoteUrl, String aSelectedBrowser, String aCurrentDriverPath) {
+    private void init(final String remoteUrl, final String aSelectedBrowser, final String aCurrentDriverPath) {
         this.browserSelect.getItems().add("Chrome");
         this.browserSelect.getItems().add("Firefox");
         this.browserSelect.getItems().add("InternetExplorer");
@@ -122,9 +122,9 @@ public class BrowserPresenter {
     }
 
     private void populate() {
-        WebDriverFactory webdriverFactory = Context.getWebDriverFactory(this.selectedBrowser);
-        String driverName = webdriverFactory.getDriverName() + ".exe";
-        if (parentDir == null || !parentDir.exists()) {
+        final WebDriverFactory webdriverFactory = Context.getWebDriverFactory(this.selectedBrowser);
+        final String driverName = webdriverFactory.getDriverName() + ".exe";
+        if (this.parentDir == null || !this.parentDir.exists()) {
             File driverParent = new File(Context.getBaseDirectory(), "exe/");
             if (!driverParent.exists()) {
                 driverParent = Context.getBaseDirectory();
@@ -132,16 +132,15 @@ public class BrowserPresenter {
             this.parentDir = driverParent.getAbsoluteFile();
         }
         this.remoteUrl.setText(Context.getRemoteUrl());
-        if (Strings.isNullOrEmpty(remoteUrl.getText())) {
-            this.driverText.setText(new File(parentDir, driverName).getAbsolutePath());
+        if (Strings.isNullOrEmpty(this.remoteUrl.getText())) {
+            this.driverText.setText(new File(this.parentDir, driverName).getAbsolutePath());
             if (Objects.equals(this.selectedBrowser, Context.getWebDriverFactory().targetBrowser())) {
                 this.binaryText.setText(Context.getWebDriverFactory().getBinaryPath());
             } else {
                 this.binaryText.setText(null);
             }
         }
-        this.binaryText.setDisable(!webdriverFactory.isBinarySelectable());
-        this.binarySearchButton.setDisable(binaryText.isDisable());
+        this.binarySearchButton.setDisable(this.binaryText.isDisable());
     }
 
 }

@@ -25,7 +25,10 @@ public class InternetExplorer implements WebDriverFactory {
         final HashMap<String, String> caps = new HashMap<>();
         final DesiredCapabilities capabilities = new DesiredCapabilities();
         capabilities.setCapability("javascriptEnabled", true);
-        final InternetExplorerOptions ieOptions = new InternetExplorerOptions(capabilities);
+        final InternetExplorerOptions ieOptions = new InternetExplorerOptions(capabilities)
+                .attachToEdgeChrome();
+        ieOptions.setCapability(InternetExplorerDriver.UNEXPECTED_ALERT_BEHAVIOR, "accept");
+        ieOptions.setCapability("disable-popup-blocking", true);
         config.forEach((key, value) -> {
             if (key.startsWith("ieoption.")) {
                 if (value.toLowerCase().equals(Boolean.TRUE.toString())) {
@@ -35,15 +38,13 @@ public class InternetExplorer implements WebDriverFactory {
                 } else {
                     ieOptions.setCapability(key.substring("ieoption.".length()), value);
                 }
+            } else if (key.equals("binary")) {
+                ieOptions.withEdgeExecutablePath(value);
             } else {
                 caps.put(key, value);
             }
         });
         caps.forEach(ieOptions::setCapability);
-        ieOptions.attachToEdgeChrome()
-                .withEdgeExecutablePath(this.getBinaryPath())
-                .setCapability(InternetExplorerDriver.UNEXPECTED_ALERT_BEHAVIOR, "accept");
-        ieOptions.setCapability("disable-popup-blocking", true);
         return ieOptions;
     }
 
