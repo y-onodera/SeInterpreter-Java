@@ -8,13 +8,13 @@ import javafx.stage.Window;
 public class MainView extends FXMLView {
     private Window window;
 
-    public void open(Stage stage) {
-        Scene scene = new Scene(this.getView());
+    public void open(final Stage stage) {
+        final Scene scene = new Scene(this.getView());
         stage.setTitle("SeInterpreter");
         stage.setScene(scene);
         stage.setResizable(true);
         stage.show();
-        window = scene.getWindow();
+        this.window = scene.getWindow();
     }
 
     public Window getMainWindow() {

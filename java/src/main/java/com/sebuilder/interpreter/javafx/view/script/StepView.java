@@ -10,19 +10,19 @@ import javafx.stage.Window;
 public class StepView extends FXMLView {
 
 
-    public StepView(Window window, int no, Action action) {
-        Scene scene = new Scene(this.getView());
-        Stage dialog = new Stage();
+    public StepView(final Window window, final int no, final Action action) {
+        final Scene scene = new Scene(this.getView());
+        final Stage dialog = new Stage();
         dialog.setScene(scene);
         dialog.initOwner(window);
         dialog.initModality(Modality.WINDOW_MODAL);
         dialog.setTitle("edit step");
-        presenter().init(dialog, no, action);
+        this.presenter().init(dialog, no, action);
         dialog.setResizable(true);
         dialog.show();
     }
 
-    public void refresh(Step step) {
+    public void refresh(final Step step) {
         this.presenter().refreshView(step);
     }
 

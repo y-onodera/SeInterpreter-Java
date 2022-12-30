@@ -5,9 +5,13 @@ import com.sebuilder.interpreter.StepType;
 public abstract class AbstractStepType implements StepType {
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null) return false;
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null) {
+            return false;
+        }
         return this.getClass() == o.getClass();
     }
 

@@ -1,7 +1,6 @@
 package com.sebuilder.interpreter.step.type;
 
 import com.google.common.base.Charsets;
-import com.google.common.io.Files;
 import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
@@ -10,33 +9,33 @@ import com.sebuilder.interpreter.step.LocatorHolder;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.file.Files;
 
 public class ExportTemplate extends AbstractStepType implements LocatorHolder {
 
     @Override
-    public boolean run(TestRun ctx) {
+    public boolean run(final TestRun ctx) {
         try {
-            ExportResource toExport = getExportResource(ctx);
+            final ExportResource toExport = this.getExportResource(ctx);
             if (toExport.hasDataSource()) {
                 toExport.outputDataSourceTemplate();
             }
-            String result = Context.getTestCaseConverter().toString(toExport.getScript());
+            final String result = Context.getTestCaseConverter().toString(toExport.getScript());
             ctx.log().info(result);
             if (ctx.containsKey("file")) {
-                String fileName = ctx.string("file");
-                File outputTo = new File(ctx.getListener().getTemplateOutputDirectory(), fileName);
-                return outputFile(ctx, result, outputTo, Charsets.UTF_8);
+                final String fileName = ctx.string("file");
+                final File outputTo = new File(ctx.getListener().getTemplateOutputDirectory(), fileName);
+                return this.outputFile(ctx, result, outputTo);
             }
             return true;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             ctx.log().error(e);
             return false;
         }
     }
 
     @Override
-    public StepBuilder addDefaultParam(StepBuilder o) {
+    public StepBuilder addDefaultParam(final StepBuilder o) {
         if (!o.containsStringParam("datasource")) {
             o.put("datasource", "");
         }
@@ -46,22 +45,22 @@ public class ExportTemplate extends AbstractStepType implements LocatorHolder {
         return o.apply(LocatorHolder.super::addDefaultParam);
     }
 
-    private boolean outputFile(TestRun ctx, String result, File outputTo, Charset charset) {
-        if (outputTo.exists()) {
-            outputTo.delete();
-        }
+    private boolean outputFile(final TestRun ctx, final String result, final File outputTo) {
         try {
-            outputTo.createNewFile();
-            Files.asCharSink(outputTo, charset).write(result);
-        } catch (IOException e) {
+            if (outputTo.exists()) {
+                Files.delete(outputTo.toPath());
+            }
+            Files.createFile(outputTo.toPath());
+            Files.writeString(outputTo.toPath(), result, Charsets.UTF_8);
+        } catch (final IOException e) {
             ctx.log().error(e);
             return false;
         }
         return true;
     }
 
-    private ExportResource getExportResource(TestRun ctx) {
-        boolean filterTag = ctx.getBoolean("filterTag");
+    private ExportResource getExportResource(final TestRun ctx) {
+        final boolean filterTag = ctx.getBoolean("filterTag");
         return new ExportResourceBuilder(ctx)
                 .addInputStep(!filterTag || ctx.getBoolean("input"))
                 .addSelectStep(!filterTag || ctx.getBoolean("select"))

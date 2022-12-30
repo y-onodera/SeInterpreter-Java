@@ -11,21 +11,21 @@ import java.util.TreeMap;
 public class LocatorInnerScrollElementHandler implements InnerScrollElementHandler {
 
     @Override
-    public TreeMap<Integer, InnerElement> handleTarget(Printable parent) {
-        TreeMap<Integer, InnerElement> innerPrintableElement = Maps.newTreeMap();
+    public TreeMap<Integer, InnerElement> handleTarget(final Printable parent) {
+        final TreeMap<Integer, InnerElement> innerPrintableElement = Maps.newTreeMap();
         this.handleScrollableTag(parent, innerPrintableElement, parent.getCtx());
         return innerPrintableElement;
     }
 
-    public void handleScrollableTag(Printable parent, TreeMap<Integer, InnerElement> innerPrintableElement, TestRun testRun) {
+    public void handleScrollableTag(final Printable parent, final TreeMap<Integer, InnerElement> innerPrintableElement, final TestRun testRun) {
         if (!testRun.currentStep().locatorContains("locator")) {
             return;
         }
-        List<WebElement> elements = testRun.locator().findElements(testRun);
+        final List<WebElement> elements = testRun.locator().findElements(testRun);
         elements.stream()
                 .filter(element -> element.getTagName().equals("iframe"))
                 .forEach(targetFrame -> {
-                            Frame printableFrame = this.toFrame(parent, targetFrame);
+                            final Frame printableFrame = this.toFrame(parent, targetFrame);
                             if (printableFrame.hasVerticalScroll() && printableFrame.getViewportHeight() > 0) {
                                 innerPrintableElement.put(printableFrame.getPointY(), printableFrame);
                             }
@@ -34,10 +34,10 @@ public class LocatorInnerScrollElementHandler implements InnerScrollElementHandl
         elements.stream()
                 .filter(element -> !element.getTagName().equals("iframe"))
                 .filter(element -> {
-                    int scrollHeight = Integer.parseInt(element.getAttribute("scrollHeight"));
-                    int clientHeight = Integer.parseInt(element.getAttribute("clientHeight"));
-                    int scrollWidth = Integer.parseInt(element.getAttribute("scrollWidth"));
-                    int clientWidth = Integer.parseInt(element.getAttribute("clientWidth"));
+                    final int scrollHeight = Integer.parseInt(element.getAttribute("scrollHeight"));
+                    final int clientHeight = Integer.parseInt(element.getAttribute("clientHeight"));
+                    final int scrollWidth = Integer.parseInt(element.getAttribute("scrollWidth"));
+                    final int clientWidth = Integer.parseInt(element.getAttribute("clientWidth"));
                     return (scrollHeight > clientHeight) || (scrollWidth > clientWidth);
                 })
                 .filter(element -> {
@@ -48,10 +48,10 @@ public class LocatorInnerScrollElementHandler implements InnerScrollElementHandl
                             || this.isScrollable(element, element.getCssValue("overflow-x"));
                 })
                 .forEach(targetDiv -> {
-                    ScrollableTag tag = this.toScrollableTag(parent, testRun, targetDiv);
+                    final ScrollableTag tag = this.toScrollableTag(parent, testRun, targetDiv);
                     if (testRun.currentStep().locatorContains("locatorHeader")) {
-                        InnerElement headerArea = this.toScrollableTag(parent, testRun, testRun.locator("locatorHeader").find(testRun));
-                        InnerElement withHeader = new InnerElementWithHeader(tag, headerArea);
+                        final InnerElement headerArea = this.toScrollableTag(parent, testRun, testRun.locator("locatorHeader").find(testRun));
+                        final InnerElement withHeader = new InnerElementWithHeader(tag, headerArea);
                         innerPrintableElement.put(withHeader.getPointY(), withHeader);
                     } else {
                         innerPrintableElement.put(tag.getPointY(), tag);
@@ -59,23 +59,23 @@ public class LocatorInnerScrollElementHandler implements InnerScrollElementHandl
                 });
     }
 
-    public Frame toFrame(Printable parent, WebElement targetFrame) {
-        RemoteWebDriver wd = parent.driver();
-        ScrollableHeight height = Frame.getHeight(parent, wd, targetFrame);
-        ScrollableWidth width = Frame.getWidth(parent, wd, targetFrame);
+    public Frame toFrame(final Printable parent, final WebElement targetFrame) {
+        final RemoteWebDriver wd = parent.driver();
+        final ScrollableHeight height = Frame.getHeight(parent, wd, targetFrame);
+        final ScrollableWidth width = Frame.getWidth(parent, wd, targetFrame);
         wd.switchTo().frame(targetFrame);
-        Frame result = new Frame(parent, targetFrame, this, height, width);
+        final Frame result = new Frame(parent, targetFrame, this, height, width);
         wd.switchTo().parentFrame();
         return result;
     }
 
-    public ScrollableTag toScrollableTag(Printable parent, TestRun testRun, WebElement targetDiv) {
-        ScrollableHeight height = ScrollableTag.getHeight(testRun, targetDiv);
-        ScrollableWidth width = ScrollableTag.getWidth(testRun, targetDiv);
+    public ScrollableTag toScrollableTag(final Printable parent, final TestRun testRun, final WebElement targetDiv) {
+        final ScrollableHeight height = ScrollableTag.getHeight(testRun, targetDiv);
+        final ScrollableWidth width = ScrollableTag.getWidth(testRun, targetDiv);
         return new ScrollableTag(parent, targetDiv, height, width);
     }
 
-    private boolean isScrollable(WebElement element, String overflow) {
+    private boolean isScrollable(final WebElement element, final String overflow) {
         return "auto".equals(overflow) || "scroll".equals(overflow) || ("visible".equals(overflow) && element.getTagName().equals("textarea"));
     }
 }

@@ -9,7 +9,7 @@ import org.openqa.selenium.interactions.Actions;
 public class KeyUp extends AbstractStepType {
 
     @Override
-    public boolean run(TestRun ctx) {
+    public boolean run(final TestRun ctx) {
         new Actions(ctx.driver()).keyUp(Keys.valueOf(ctx.text()))
                 .build()
                 .perform();
@@ -17,7 +17,7 @@ public class KeyUp extends AbstractStepType {
     }
 
     @Override
-    public StepBuilder addDefaultParam(StepBuilder o) {
+    public StepBuilder addDefaultParam(final StepBuilder o) {
         if (!o.containsStringParam("keyName")) {
             o.put("keyName", "");
         }

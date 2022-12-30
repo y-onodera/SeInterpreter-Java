@@ -22,9 +22,9 @@ import com.sebuilder.interpreter.step.AbstractStepType;
 
 public class SwitchToWindowByTitle extends AbstractStepType {
     @Override
-    public boolean run(TestRun ctx) {
-        String title = ctx.string("title");
-        for (String h : ctx.driver().getWindowHandles()) {
+    public boolean run(final TestRun ctx) {
+        final String title = ctx.string("title");
+        for (final String h : ctx.driver().getWindowHandles()) {
             ctx.driver().switchTo().window(h);
             if (ctx.driver().getTitle().equals(title)) {
                 return true;
@@ -34,7 +34,7 @@ public class SwitchToWindowByTitle extends AbstractStepType {
     }
 
     @Override
-    public StepBuilder addDefaultParam(StepBuilder o) {
+    public StepBuilder addDefaultParam(final StepBuilder o) {
         if (!o.containsStringParam("title")) {
             o.put("title", "");
         }

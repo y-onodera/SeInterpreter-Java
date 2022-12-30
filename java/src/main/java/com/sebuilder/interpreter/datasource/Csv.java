@@ -30,6 +30,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static com.google.common.io.Files.newWriter;
 
@@ -49,18 +50,15 @@ public class Csv implements FileDataSource {
             final CSVReader csvR = new CSVReader(r);
             final String[] keys = csvR.readNext();
             if (keys != null) {
-                String[] line;
                 int rowNumber = 1;
-                while ((line = csvR.readNext()) != null) {
+                for (final String[] line : csvR) {
                     rowNumber++;
                     final LinkedHashMap<String, String> row = new LinkedHashMap<>();
                     if (line.length < keys.length) {
-                        throw new IOException("Not enough cells in row " + rowNumber + ".");
+                        throw new AssertionError("Not enough cells in row " + rowNumber + ".");
                     }
                     row.put(InputData.ROW_NUMBER, String.valueOf(rowNumber - 1));
-                    for (int c = 0; c < keys.length; c++) {
-                        row.put(keys[c], line[c]);
-                    }
+                    IntStream.range(0, keys.length).forEach(c -> row.put(keys[c], line[c]));
                     data.add(new InputData(row));
                 }
                 if (rowNumber > 1) {

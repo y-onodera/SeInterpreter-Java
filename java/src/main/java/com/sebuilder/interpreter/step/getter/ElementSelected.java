@@ -22,8 +22,8 @@ import com.sebuilder.interpreter.step.LocatorHolder;
 
 public class ElementSelected extends AbstractGetter implements LocatorHolder {
     @Override
-    public String get(TestRun ctx) {
-        boolean selected = ctx.locator().find(ctx).isSelected();
+    public String get(final TestRun ctx) {
+        final boolean selected = ctx.locator().find(ctx).isSelected();
         if (ctx.containsKey("check") && !ctx.getBoolean("check")) {
             return "" + !selected;
         }
@@ -31,7 +31,7 @@ public class ElementSelected extends AbstractGetter implements LocatorHolder {
     }
 
     @Override
-    public StepBuilder addDefaultParam(StepBuilder o) {
+    public StepBuilder addDefaultParam(final StepBuilder o) {
         if (!o.containsStringParam("check")) {
             o.put("check", "true");
         }

@@ -25,20 +25,20 @@ public class MenuPresenter {
 
     @FXML
     void initialize() {
-        assert paneSeInterpreterMenu != null : "fx:id=\"paneSeInterpreterMenu\" was not injected: check your FXML file 'menu.fxml'.";
+        assert this.paneSeInterpreterMenu != null : "fx:id=\"paneSeInterpreterMenu\" was not injected: check your FXML file 'menu.fxml'.";
     }
 
     @FXML
     void handleScriptOpenFile() {
-        File file = openFileChooser("Open Resource File", "json format (*.json)", "*.json");
+        final File file = this.openFileChooser("Open Resource File", "json format (*.json)", "*.json");
         if (file != null) {
             this.application.scriptReLoad(file);
         }
     }
 
     @FXML
-    public void handleImportSeleniumIDEScript(ActionEvent actionEvent) {
-        File file = openFileChooser("Import SeleniumIDE Script", "side format (*.side)", "*.side");
+    public void handleImportSeleniumIDEScript(final ActionEvent actionEvent) {
+        final File file = this.openFileChooser("Import SeleniumIDE Script", "side format (*.side)", "*.side");
         if (file != null) {
             this.application.scriptReLoad(file, "SeleniumIDE");
         }
@@ -85,12 +85,12 @@ public class MenuPresenter {
 
     @FXML
     void handleReplayScript() {
-        new InputView().open(paneSeInterpreterMenu.getScene().getWindow());
+        new InputView().open(this.paneSeInterpreterMenu.getScene().getWindow());
     }
 
     @FXML
     void handleReplaySetting() {
-        new DatasourceView().open(paneSeInterpreterMenu.getScene().getWindow());
+        new DatasourceView().open(this.paneSeInterpreterMenu.getScene().getWindow());
     }
 
     @FXML
@@ -99,24 +99,24 @@ public class MenuPresenter {
                 .open(Context.getResultOutputDirectory()));
     }
 
-    protected File openFileChooser(String aTitle, String aFilterMessage, String aFilterExtensions) {
-        FileChooser fileChooser = new FileChooser();
+    protected File openFileChooser(final String aTitle, final String aFilterMessage, final String aFilterExtensions) {
+        final FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle(aTitle);
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(aFilterMessage, aFilterExtensions));
         fileChooser.setInitialDirectory(this.getBaseDirectory());
-        Stage stage = new Stage();
-        stage.initOwner(paneSeInterpreterMenu.getScene().getWindow());
+        final Stage stage = new Stage();
+        stage.initOwner(this.paneSeInterpreterMenu.getScene().getWindow());
         return fileChooser.showOpenDialog(stage);
     }
 
     protected void saveSuiteToNewFile() {
-        FileChooser fileSave = new FileChooser();
+        final FileChooser fileSave = new FileChooser();
         fileSave.setTitle("Save Suite File");
         fileSave.getExtensionFilters().add(new FileChooser.ExtensionFilter("json format (*.json)", "*.json"));
         fileSave.setInitialDirectory(this.getBaseDirectory());
-        Stage stage = new Stage();
+        final Stage stage = new Stage();
         stage.initOwner(this.paneSeInterpreterMenu.getScene().getWindow());
-        File file = fileSave.showSaveDialog(stage);
+        final File file = fileSave.showSaveDialog(stage);
         if (file != null) {
             this.application.saveSuite(file);
         }

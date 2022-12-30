@@ -22,13 +22,13 @@ import com.sebuilder.interpreter.step.AbstractStepType;
 
 public class Print extends AbstractStepType {
     @Override
-    public boolean run(TestRun ctx) {
+    public boolean run(final TestRun ctx) {
         ctx.log().info(ctx.string("text"));
         return true;
     }
 
     @Override
-    public StepBuilder addDefaultParam(StepBuilder o) {
+    public StepBuilder addDefaultParam(final StepBuilder o) {
         if (!o.containsStringParam("text")) {
             o.put("text", "");
         }

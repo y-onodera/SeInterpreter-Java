@@ -1,10 +1,7 @@
 package com.sebuilder.interpreter.step.type;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import com.sebuilder.interpreter.*;
-import com.sebuilder.interpreter.datasource.DataSourceFactoryImpl;
-import com.sebuilder.interpreter.step.StepTypeFactoryImpl;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
@@ -16,8 +13,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ExportResourceBuilder {
-    private final StepTypeFactory stepTypeFactory = new StepTypeFactoryImpl();
-    private final DataSourceFactory dataSourceFactory = new DataSourceFactoryImpl();
+    private final StepTypeFactory stepTypeFactory = Context.getStepTypeFactory();
+    private final DataSourceFactory dataSourceFactory = Context.getDataSourceFactory();
     private final TestRun ctx;
     private final Map<String, String> variables;
     private final Map<String, Integer> duplicate;
@@ -28,21 +25,21 @@ public class ExportResourceBuilder {
     private final WebElement extractFrom;
 
 
-    public ExportResourceBuilder(TestRun aCtx) {
+    public ExportResourceBuilder(final TestRun aCtx) {
         this.variables = new LinkedHashMap<>();
         this.duplicate = new HashMap<>();
         this.source = new TestCaseBuilder();
-        this.steps = Lists.newArrayList();
+        this.steps = new ArrayList<>();
         this.currentStep = null;
         this.ctx = aCtx;
         this.needDataSource = this.ctx.containsKey("datasource");
-        Locator locator;
+        final Locator locator;
         if (this.ctx.hasLocator()) {
             locator = this.ctx.locator();
         } else {
             locator = new Locator("css selector", "body");
         }
-        extractFrom = locator.find(this.ctx);
+        this.extractFrom = locator.find(this.ctx);
     }
 
     public ExportResource build() {
@@ -55,17 +52,17 @@ public class ExportResourceBuilder {
             dataSourceFile = new File(this.ctx.getListener().getTemplateOutputDirectory(), fileName);
             this.source.setDataSource(this.dataSourceFactory.getDataSource("csv"), Map.of("path", fileName));
         }
-        return new ExportResource(source.build(), this.variables, dataSourceFile);
+        return new ExportResource(this.source.build(), this.variables, dataSourceFile);
     }
 
-    public ExportResourceBuilder addInputStep(boolean aIsAppend) {
+    public ExportResourceBuilder addInputStep(final boolean aIsAppend) {
         if (!aIsAppend) {
             return this;
         }
         this.extractFrom
                 .findElements(By.tagName("input"))
                 .forEach(element -> {
-                    String type = element.getAttribute("type");
+                    final String type = element.getAttribute("type");
                     switch (type) {
                         case "checkbox":
                         case "radio":
@@ -84,7 +81,7 @@ public class ExportResourceBuilder {
         return this;
     }
 
-    public ExportResourceBuilder addSelectStep(boolean aIsAppend) {
+    public ExportResourceBuilder addSelectStep(final boolean aIsAppend) {
         if (!aIsAppend) {
             return this;
         }
@@ -94,7 +91,7 @@ public class ExportResourceBuilder {
         return this;
     }
 
-    public ExportResourceBuilder addLinkClickStep(boolean aIsAppend) {
+    public ExportResourceBuilder addLinkClickStep(final boolean aIsAppend) {
         if (!aIsAppend) {
             return this;
         }
@@ -106,7 +103,7 @@ public class ExportResourceBuilder {
         return this;
     }
 
-    public ExportResourceBuilder addButtonClickStep(boolean aIsAppend) {
+    public ExportResourceBuilder addButtonClickStep(final boolean aIsAppend) {
         if (!aIsAppend) {
             return this;
         }
@@ -116,7 +113,7 @@ public class ExportResourceBuilder {
         return this;
     }
 
-    public ExportResourceBuilder addDivClickStep(boolean aIsAppend) {
+    public ExportResourceBuilder addDivClickStep(final boolean aIsAppend) {
         if (!aIsAppend) {
             return this;
         }
@@ -126,7 +123,7 @@ public class ExportResourceBuilder {
         return this;
     }
 
-    public ExportResourceBuilder addSpanClickStep(boolean aIsAppend) {
+    public ExportResourceBuilder addSpanClickStep(final boolean aIsAppend) {
         if (!aIsAppend) {
             return this;
         }
@@ -136,35 +133,35 @@ public class ExportResourceBuilder {
         return this;
     }
 
-    public ExportResourceBuilder addStep(Exportable source, WebElement element) {
+    public ExportResourceBuilder addStep(final Exportable source, final WebElement element) {
         this.addStep(source.getTypeName())
                 .addLocator(source.hasLocator(), element);
         source.addElement(this, this.ctx.driver(), element);
         return this;
     }
 
-    public ExportResourceBuilder addStep(String typeName) {
+    public ExportResourceBuilder addStep(final String typeName) {
         this.currentStep = new StepBuilder(this.stepTypeFactory.getStepTypeOfName(typeName));
         this.steps.add(this.currentStep);
         return this;
     }
 
-    public ExportResourceBuilder addLocator(boolean hasLocator, WebElement element) {
+    public ExportResourceBuilder addLocator(final boolean hasLocator, final WebElement element) {
         if (!hasLocator) {
             return this;
         }
         return this.addLocator(this.ctx.detectLocator(element));
     }
 
-    public ExportResourceBuilder addLocator(Locator element) {
+    public ExportResourceBuilder addLocator(final Locator element) {
         this.currentStep.put("locator", element);
         return this;
     }
 
-    public ExportResourceBuilder stepOption(String opt, String value) {
+    public ExportResourceBuilder stepOption(final String opt, final String value) {
         if (this.needDataSource && this.currentStep.containsLocatorParam("locator")) {
-            Locator locator = this.currentStep.getLocatorParams().get("locator");
-            String valuable = this.addVariable(locator.toPrettyString(), value);
+            final Locator locator = this.currentStep.getLocatorParams().get("locator");
+            final String valuable = this.addVariable(locator.toPrettyString(), value);
             this.currentStep.put(opt, valuable)
                     .skip("${!has('" + valuable.replace("${", "")
                             .replace("}", "") + "')}");
@@ -174,23 +171,23 @@ public class ExportResourceBuilder {
         return this;
     }
 
-    private String addVariable(String aVariable, String aValue) {
-        if (variables.containsKey(aVariable)) {
+    private String addVariable(final String aVariable, final String aValue) {
+        if (this.variables.containsKey(aVariable)) {
             int newNo = 2;
-            Integer no = duplicate.get(aVariable);
+            final Integer no = this.duplicate.get(aVariable);
             if (no != null) {
                 newNo = no + 1;
             }
-            return "${" + resolveDuplicate(aVariable, newNo, aValue) + "}";
+            return "${" + this.resolveDuplicate(aVariable, newNo, aValue) + "}";
         }
-        variables.put(aVariable, aValue);
+        this.variables.put(aVariable, aValue);
         return "${" + aVariable + "}";
     }
 
-    private String resolveDuplicate(String aVariable, Integer newNo, String aValue) {
-        duplicate.put(aVariable, newNo);
-        String result = aVariable + newNo.toString();
-        variables.put(result, aValue);
+    private String resolveDuplicate(final String aVariable, final Integer newNo, final String aValue) {
+        this.duplicate.put(aVariable, newNo);
+        final String result = aVariable + newNo.toString();
+        this.variables.put(result, aValue);
         return result;
     }
 

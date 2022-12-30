@@ -21,7 +21,7 @@ import com.sebuilder.interpreter.step.AbstractStepType;
 
 public class DismissAlert extends AbstractStepType {
     @Override
-    public boolean run(TestRun ctx) {
+    public boolean run(final TestRun ctx) {
         ctx.driver().switchTo().alert().dismiss();
         return true;
     }

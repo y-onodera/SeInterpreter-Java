@@ -23,19 +23,19 @@ public class SeInterpreterRunner {
 
     private final TestRunListener globalListener;
 
-    public SeInterpreterRunner(List<String> raw) {
-        this.repl = new SeInterpreterREPL(raw.toArray(new String[0]), log);
+    public SeInterpreterRunner(final List<String> raw) {
+        this.repl = new SeInterpreterREPL(raw.toArray(new String[0]), this.log);
         this.repl.setUpREPL();
         this.globalListener = Context.getTestListener(this.log);
         this.globalListener.setUpDir(Context.getResultOutputDirectory());
     }
 
     public Logger getLog() {
-        return log;
+        return this.log;
     }
 
     public TestRunListener getGlobalListener() {
-        return globalListener;
+        return this.globalListener;
     }
 
     public File getDataSourceDirectory() {
@@ -46,7 +46,7 @@ public class SeInterpreterRunner {
         return this.globalListener.getTemplateOutputDirectory();
     }
 
-    public void reloadSetting(String browserName, String driverPath, String binaryPath) {
+    public void reloadSetting(final String browserName, final String driverPath, final String binaryPath) {
         if (this.isOpen()) {
             this.close();
         } else {
@@ -59,56 +59,56 @@ public class SeInterpreterRunner {
         return this.repl != null;
     }
 
-    public TestCase exportTemplate(Locator locator, List<String> targetTags, boolean withDataSource) {
+    public TestCase exportTemplate(final Locator locator, final List<String> targetTags, final boolean withDataSource) {
         if (!this.isOpen()) {
             this.setUp();
         }
-        String fileName = "Template" + this.exportCount + ".json";
-        StepBuilder export = new ExportTemplate()
+        final String fileName = "Template" + this.exportCount + ".json";
+        final StepBuilder export = new ExportTemplate()
                 .toStep()
                 .locator(locator)
                 .put("file", fileName)
                 .put("filterTag", "true");
-        for (String targetTag : targetTags) {
+        for (final String targetTag : targetTags) {
             export.put(targetTag, "true");
         }
         final String dataSourceName = "Template" + this.exportCount + ".csv";
         if (withDataSource) {
             export.put("datasource", dataSourceName);
         }
-        TestCase get = export.build()
+        final TestCase get = export.build()
                 .toTestCase()
                 .map(it -> it.isPreventContextAspect(true));
-        TestRunListener listener = Context.getTestListener(this.log);
+        final TestRunListener listener = Context.getTestListener(this.log);
         this.repl.execute(get, listener);
-        File exported = new File(listener.getTemplateOutputDirectory(), fileName);
+        final File exported = new File(listener.getTemplateOutputDirectory(), fileName);
         if (!exported.exists()) {
             return new TestCaseBuilder().build();
         }
         this.exportCount++;
         if (withDataSource) {
-            File exportedDataSource = new File(listener.getTemplateOutputDirectory(), dataSourceName);
+            final File exportedDataSource = new File(listener.getTemplateOutputDirectory(), dataSourceName);
             if (exportedDataSource.exists()) {
                 try {
                     Files.copy(exportedDataSource, new File(this.globalListener.getTemplateOutputDirectory(), dataSourceName));
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     this.log.error(e);
                 }
             }
         }
-        TestCase result = this.repl.loadScript(exported.getAbsolutePath());
+        final TestCase result = this.repl.loadScript(exported.getAbsolutePath());
         return result.builder()
                 .associateWith(null)
                 .setName(result.name())
                 .build();
     }
 
-    public void run(TestCase testCase) {
-        TestRunListener listener = Context.getTestListener(this.log);
+    public void run(final TestCase testCase) {
+        final TestRunListener listener = Context.getTestListener(this.log);
         this.repl.execute(testCase, listener);
     }
 
-    public SeInterpreterRunTask createRunScriptTask(TestCase currentDisplay, Function<Logger, TestRunListener> listenerFactory) {
+    public SeInterpreterRunTask createRunScriptTask(final TestCase currentDisplay, final Function<Logger, TestRunListener> listenerFactory) {
         return this.createBackgroundTask(currentDisplay, listenerFactory.apply(this.log));
     }
 
@@ -126,13 +126,13 @@ public class SeInterpreterRunner {
 
     private void setUp() {
         if (this.repl == null) {
-            String[] args = new String[]{CommandLineArgument.DRIVER.createArgument(Context.getBrowser())};
-            this.repl = new SeInterpreterREPL(args, log);
+            final String[] args = new String[]{CommandLineArgument.DRIVER.createArgument(Context.getBrowser())};
+            this.repl = new SeInterpreterREPL(args, this.log);
             this.repl.setUpREPL();
         }
     }
 
-    private SeInterpreterRunTask createBackgroundTask(TestCase testCase, TestRunListener listener) {
+    private SeInterpreterRunTask createBackgroundTask(final TestCase testCase, final TestRunListener listener) {
         if (!this.isOpen()) {
             this.setUp();
         }

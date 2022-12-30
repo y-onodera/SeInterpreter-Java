@@ -22,14 +22,14 @@ import com.sebuilder.interpreter.step.AbstractStepType;
 
 public class AnswerAlert extends AbstractStepType {
     @Override
-    public boolean run(TestRun ctx) {
+    public boolean run(final TestRun ctx) {
         ctx.driver().switchTo().alert().sendKeys(ctx.text());
         ctx.driver().switchTo().alert().accept();
         return true;
     }
 
     @Override
-    public StepBuilder addDefaultParam(StepBuilder o) {
+    public StepBuilder addDefaultParam(final StepBuilder o) {
         if (!o.containsStringParam("text")) {
             o.put("text", "");
         }

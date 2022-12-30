@@ -7,7 +7,7 @@ import org.openqa.selenium.Dimension;
 
 public class SetWindowSize extends AbstractStepType {
     @Override
-    public boolean run(TestRun ctx) {
+    public boolean run(final TestRun ctx) {
         ctx.driver().manage().window().setSize(new Dimension(
                 Integer.parseInt(ctx.string("width")),
                 Integer.parseInt(ctx.string("height"))));
@@ -15,7 +15,7 @@ public class SetWindowSize extends AbstractStepType {
     }
 
     @Override
-    public StepBuilder addDefaultParam(StepBuilder o) {
+    public StepBuilder addDefaultParam(final StepBuilder o) {
         if (!o.containsStringParam("width")) {
             o.put("width", "");
         }

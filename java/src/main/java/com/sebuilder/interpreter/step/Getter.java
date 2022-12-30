@@ -35,14 +35,14 @@ public interface Getter extends StepElement {
      */
     String get(TestRun ctx);
 
-    default boolean test(TestRun ctx) {
-        String got = this.get(ctx);
-        boolean result;
+    default boolean test(final TestRun ctx) {
+        final String got = this.get(ctx);
+        final boolean result;
         if (this.cmpParamName() == null) {
             result = Boolean.parseBoolean(got);
         } else {
             ctx.getListener().info("actual:" + got);
-            String expect = ctx.string(this.cmpParamName());
+            final String expect = ctx.string(this.cmpParamName());
             ctx.getListener().info("expect:" + expect);
             result = expect.equals(got);
         }
@@ -84,7 +84,7 @@ public interface Getter extends StepElement {
     }
 
     @Override
-    default StepBuilder addDefaultParam(StepBuilder o) {
+    default StepBuilder addDefaultParam(final StepBuilder o) {
         if (this.cmpParamName() != null) {
             if (!o.containsStringParam(this.cmpParamName())) {
                 o.put(this.cmpParamName(), "");

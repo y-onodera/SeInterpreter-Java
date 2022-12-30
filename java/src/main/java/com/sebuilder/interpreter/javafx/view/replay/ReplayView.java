@@ -9,9 +9,9 @@ import javafx.stage.Window;
 
 public class ReplayView extends FXMLView {
 
-    public void open(Window window, SeInterpreterRunTask task) {
-        Scene scene = new Scene(this.getView());
-        Stage runProgressDialog = new Stage();
+    public void open(final Window window, final SeInterpreterRunTask task) {
+        final Scene scene = new Scene(this.getView());
+        final Stage runProgressDialog = new Stage();
         runProgressDialog.setScene(scene);
         runProgressDialog.initOwner(window);
         runProgressDialog.initModality(Modality.WINDOW_MODAL);

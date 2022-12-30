@@ -27,7 +27,7 @@ import java.util.HashMap;
  * @author zarkonnen
  */
 public class DataSourceFactoryImpl implements com.sebuilder.interpreter.DataSourceFactory {
- 
+
     public static final String DEFAULT_DATA_SOURCE_PACKAGE = "com.sebuilder.interpreter.datasource";
 
     /**
@@ -36,26 +36,25 @@ public class DataSourceFactoryImpl implements com.sebuilder.interpreter.DataSour
     private final HashMap<String, DataSource> sourcesMap = new HashMap<>();
 
     @Override
-    public DataSource getDataSource(String sourceName) {
+    public DataSource getDataSource(final String sourceName) {
         this.loadDataSource(sourceName);
         return this.sourcesMap.get(sourceName);
     }
 
-    protected void loadDataSource(String sourceName) {
+    protected void loadDataSource(final String sourceName) {
         if (!this.sourcesMap.containsKey(sourceName)) {
-            String className = sourceName.substring(0, 1).toUpperCase() + sourceName.substring(1).toLowerCase();
-            Class c;
+            final String className = sourceName.substring(0, 1).toUpperCase() + sourceName.substring(1).toLowerCase();
+            final Class c;
             try {
                 c = Class.forName(DEFAULT_DATA_SOURCE_PACKAGE + "." + className);
-            } catch (ClassNotFoundException cnfe) {
+            } catch (final ClassNotFoundException cnfe) {
                 throw new RuntimeException("No implementation class for data source \"" + sourceName + "\" could be found.", cnfe);
             }
             try {
-                Object o = c.getDeclaredConstructor().newInstance();
-                this.sourcesMap.put(sourceName, (DataSource) o);
-            } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException ie) {
+                this.sourcesMap.put(sourceName, (DataSource) c.getDeclaredConstructor().newInstance());
+            } catch (final InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException ie) {
                 throw new RuntimeException(c.getName() + " could not be instantiated.", ie);
-            } catch (ClassCastException cce) {
+            } catch (final ClassCastException cce) {
                 throw new RuntimeException(c.getName() + " does not extend DataSource.", cce);
             }
         }

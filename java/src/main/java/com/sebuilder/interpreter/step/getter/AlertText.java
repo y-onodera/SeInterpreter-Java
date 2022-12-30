@@ -21,7 +21,7 @@ import com.sebuilder.interpreter.TestRun;
 public class AlertText extends AbstractGetter {
 
     @Override
-    public String get(TestRun ctx) {
+    public String get(final TestRun ctx) {
         return ctx.driver().switchTo().alert().getText();
     }
 

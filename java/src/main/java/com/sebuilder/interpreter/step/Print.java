@@ -8,7 +8,7 @@ import java.util.Objects;
 public class Print extends AbstractStepType implements GetterUseStep {
     public final Getter getter;
 
-    public Print(Getter getter) {
+    public Print(final Getter getter) {
         this.getter = getter;
     }
 
@@ -18,7 +18,7 @@ public class Print extends AbstractStepType implements GetterUseStep {
     }
 
     @Override
-    public boolean run(TestRun ctx) {
+    public boolean run(final TestRun ctx) {
         String value = this.getter.get(ctx);
         if (ctx.currentStep().negated()) {
             value = String.valueOf(!Boolean.parseBoolean(value));
@@ -28,16 +28,16 @@ public class Print extends AbstractStepType implements GetterUseStep {
     }
 
     @Override
-    public StepBuilder addDefaultParam(StepBuilder o) {
+    public StepBuilder addDefaultParam(final StepBuilder o) {
         return GetterUseStep.super.addDefaultParam(o);
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (!super.equals(o)) {
             return false;
         }
-        Print print = (Print) o;
+        final Print print = (Print) o;
         return Objects.equals(this.getGetter(), print.getGetter());
     }
 

@@ -8,13 +8,13 @@ import com.sebuilder.interpreter.TestRunListenerWrapper;
 public class GUITestRunListener extends TestRunListenerWrapper {
     private final SeInterpreterApplication application;
 
-    public GUITestRunListener(TestRunListener delegate, SeInterpreterApplication application) {
+    public GUITestRunListener(final TestRunListener delegate, final SeInterpreterApplication application) {
         super(delegate);
         this.application = application;
     }
 
     @Override
-    public boolean openTestSuite(TestCase testCase, String testRunName, InputData aProperty) {
+    public boolean openTestSuite(final TestCase testCase, final String testRunName, final InputData aProperty) {
         if (this.application.getSuite().get(testCase.name()) != null) {
             this.application.selectScript(testCase.name());
         }
@@ -22,19 +22,19 @@ public class GUITestRunListener extends TestRunListenerWrapper {
     }
 
     @Override
-    public void startTest(String testName) {
+    public void startTest(final String testName) {
         super.startTest(testName);
         this.application.updateReplayStatus(this.getStepNo(), Result.START);
     }
 
     @Override
-    public void addError(Throwable throwable) {
+    public void addError(final Throwable throwable) {
         this.application.updateReplayStatus(this.getStepNo(), Result.ERROR);
         super.addError(throwable);
     }
 
     @Override
-    public void addFailure(String message) {
+    public void addFailure(final String message) {
         this.application.updateReplayStatus(this.getStepNo(), Result.FAILURE);
         super.addFailure(message);
     }

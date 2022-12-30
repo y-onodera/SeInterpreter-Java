@@ -47,21 +47,21 @@ public class SeInterpreterApplication extends Application {
 
     private MainView mainView;
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         launch(args);
     }
 
     @Override
-    public void start(Stage stage) throws Exception {
+    public void start(final Stage stage) throws Exception {
         System.setProperty("log4j.configurationFile", "log4j2-gui.xml");
         InternalLoggerFactory.setDefaultFactory(Log4J2LoggerFactory.INSTANCE);
         Injector.setModelOrService(SeInterpreterApplication.class, this);
-        final Parameters parameters = getParameters();
+        final Parameters parameters = this.getParameters();
         this.runner = new SeInterpreterRunner(parameters.getRaw());
         this.errorDialog = new ErrorDialog(this.runner.getLog());
         final List<String> unnamed = parameters.getUnnamed();
         if (unnamed.size() > 0) {
-            this.resetSuite(getScriptParser()
+            this.resetSuite(this.getScriptParser()
                     .load(new File(unnamed.get(0)))
                     .toSuite());
         } else {
@@ -117,19 +117,19 @@ public class SeInterpreterApplication extends Application {
         return this.getDisplayScriptDataSources(it -> it.include(this.getDisplayTestCase()));
     }
 
-    public DataSourceLoader[] getDisplayScriptDataSources(Predicate<TestCase> predicate) {
+    public DataSourceLoader[] getDisplayScriptDataSources(final Predicate<TestCase> predicate) {
         return this.getSuite().dataSources(predicate);
     }
 
-    public void executeAndLoggingCaseWhenThrowException(ThrowableAction action) {
+    public void executeAndLoggingCaseWhenThrowException(final ThrowableAction action) {
         try {
             action.execute();
-        } catch (Throwable th) {
+        } catch (final Throwable th) {
             this.errorDialog.show(th.getMessage(), th);
         }
     }
 
-    public void changeScriptViewType(ViewType viewType) {
+    public void changeScriptViewType(final ViewType viewType) {
         this.scriptViewType.setValue(viewType);
     }
 
@@ -137,22 +137,22 @@ public class SeInterpreterApplication extends Application {
         this.resetSuite(this.templateScript().toSuite());
     }
 
-    public void selectScript(String newValue) {
+    public void selectScript(final String newValue) {
         this.displayTestCase.setValue(this.getSuite().get(newValue));
     }
 
-    public void replaceScript(String text) {
+    public void replaceScript(final String text) {
         this.executeAndLoggingCaseWhenThrowException(() -> {
-            TestCase replaced = Context.getScriptParser()
+            final TestCase replaced = Context.getScriptParser()
                     .load(text, this.getDisplayTestCase().scriptFile().toFile())
                     .map(it -> it.setName(this.getDisplayTestCase().name()));
-            replaceDisplayCase(replaced);
+            this.replaceDisplayCase(replaced);
             SuccessDialog.show("commit succeed");
         });
     }
 
     public void insertScript() {
-        TestCase newTestCase = this.templateScript();
+        final TestCase newTestCase = this.templateScript();
         this.resetScript(this.getSuite().map(it -> it.insertTest(this.getDisplayTestCase(), newTestCase)), newTestCase);
     }
 
@@ -160,13 +160,13 @@ public class SeInterpreterApplication extends Application {
         this.addScript(this.templateScript());
     }
 
-    public void addScript(TestCase newTestCase) {
+    public void addScript(final TestCase newTestCase) {
         this.resetScript(this.getSuite().map(it -> it.addChain(this.getDisplayTestCase(), newTestCase)), newTestCase);
     }
 
-    public void addScript(String chainHeadName, int i, TestCase dragged) {
-        TestCase before = this.findChainHead(chainHeadName);
-        TestCase after = before.map(it -> it.addChain(dragged, i));
+    public void addScript(final String chainHeadName, final int i, final TestCase dragged) {
+        final TestCase before = this.findChainHead(chainHeadName);
+        final TestCase after = before.map(it -> it.addChain(dragged, i));
         this.resetScript(this.getSuite().replace(before, after)
                 , TestCaseSelector.builder()
                         .setHeadName(after.name())
@@ -179,49 +179,49 @@ public class SeInterpreterApplication extends Application {
         this.resetSuite(this.getSuite().map(it -> it.remove(this.getDisplayTestCase())));
     }
 
-    public void removeScriptFromChain(String chainHeadName, String targetName) {
-        TestCase target = this.findTestCase(chainHeadName, targetName);
+    public void removeScriptFromChain(final String chainHeadName, final String targetName) {
+        final TestCase target = this.findTestCase(chainHeadName, targetName);
         this.resetSuite(this.getSuite().map(it -> it.remove(target)));
     }
 
-    public TestCase findTestCase(String chainHeadName, String targetName) {
+    public TestCase findTestCase(final String chainHeadName, final String targetName) {
         return this.findChainHead(chainHeadName)
                 .chains()
                 .get(targetName);
     }
 
-    public TestCase findChainHead(String chainHeadName) {
+    public TestCase findChainHead(final String chainHeadName) {
         return TestCaseSelector.builder()
                 .setHeadName(chainHeadName)
                 .build()
                 .findChainHead(this.getSuite());
     }
 
-    public void resetSuite(Suite newSuite) {
+    public void resetSuite(final Suite newSuite) {
         this.resetScript(newSuite, newSuite.head());
     }
 
-    public void scriptReLoad(File file) {
+    public void scriptReLoad(final File file) {
         this.scriptReLoad(file, Context.getDefaultScript());
     }
 
-    public void scriptReLoad(File file, String scriptType) {
-        this.executeAndLoggingCaseWhenThrowException(() -> this.resetSuite(getScriptParser(scriptType).load(file).toSuite()));
+    public void scriptReLoad(final File file, final String scriptType) {
+        this.executeAndLoggingCaseWhenThrowException(() -> this.resetSuite(this.getScriptParser(scriptType).load(file).toSuite()));
     }
 
-    public void importScript(File file) {
-        this.executeAndLoggingCaseWhenThrowException(() -> addScript(getScriptParser().load(file)));
+    public void importScript(final File file) {
+        this.executeAndLoggingCaseWhenThrowException(() -> this.addScript(this.getScriptParser().load(file)));
     }
 
-    public void saveSuite(File file) {
+    public void saveSuite(final File file) {
         this.suite.setValue(this.getSuite().map(builder -> builder.associateWith(file)));
         this.saveSuite();
     }
 
     public void saveSuite() {
         this.executeAndLoggingCaseWhenThrowException(() -> {
-            File target = new File(this.getSuite().path());
-            List<TestCase> notAssociateFile = Lists.newArrayList();
+            final File target = new File(this.getSuite().path());
+            final List<TestCase> notAssociateFile = Lists.newArrayList();
             this.getSuite().getChains().forEach(it -> {
                 if (Strings.isNullOrEmpty(it.path())) {
                     notAssociateFile.add(it);
@@ -232,15 +232,15 @@ public class SeInterpreterApplication extends Application {
                 Files.createDirectories(scriptSaveTo.toPath());
             }
             notAssociateFile.forEach(it -> {
-                String oldName = it.name();
+                final String oldName = it.name();
                 String newName = oldName;
                 if (!oldName.endsWith(".json")) {
                     newName = newName + ".json";
                 }
-                File saveTo = new File(scriptSaveTo, newName);
-                TestCase save = this.changeAssociateFile(it.builder().associateWith(saveTo).build(), "");
+                final File saveTo = new File(scriptSaveTo, newName);
+                final TestCase save = this.changeAssociateFile(it.builder().associateWith(saveTo).build(), "");
                 this.saveContents(saveTo, this.getTestCaseConverter().toString(save));
-                Suite newSuite = this.getSuite().replace(it, save);
+                final Suite newSuite = this.getSuite().replace(it, save);
                 if (it == this.getDisplayTestCase()) {
                     this.resetScript(newSuite, save);
                 } else {
@@ -251,13 +251,13 @@ public class SeInterpreterApplication extends Application {
         });
     }
 
-    public StepType getStepTypeOfName(String stepType) {
+    public StepType getStepTypeOfName(final String stepType) {
         return Context
                 .getStepTypeFactory()
                 .getStepTypeOfName(stepType);
     }
 
-    public Step createStep(String stepType) {
+    public Step createStep(final String stepType) {
         return this.getStepTypeOfName(stepType)
                 .toStep()
                 .build()
@@ -265,12 +265,12 @@ public class SeInterpreterApplication extends Application {
                 .steps().get(0);
     }
 
-    public void replaceDisplayCase(TestCase newCase) {
+    public void replaceDisplayCase(final TestCase newCase) {
         this.resetScript(this.getSuite().replace(this.getDisplayTestCase(), newCase), newCase);
     }
 
-    public void saveTestCase(File target) {
-        TestCase save = this.changeAssociateFile(
+    public void saveTestCase(final File target) {
+        final TestCase save = this.changeAssociateFile(
                 this.getDisplayTestCase().map(builder -> builder.associateWith(target))
                 , this.getDisplayTestCase().path());
         this.saveContents(target, this.getTestCaseConverter().toString(save));
@@ -281,7 +281,7 @@ public class SeInterpreterApplication extends Application {
         this.saveContents(new File(this.getDisplayTestCase().path()), this.getTestCaseConverter().toString(this.getDisplayTestCase()));
     }
 
-    public void browserSetting(String selectedBrowser, String remoteUrl, String driverPath, String binaryPath) {
+    public void browserSetting(final String selectedBrowser, final String remoteUrl, final String driverPath, final String binaryPath) {
         this.runner.reloadSetting(selectedBrowser, driverPath, binaryPath);
         if (!Strings.isNullOrEmpty(remoteUrl)) {
             Context.getInstance().setRemoteUrl(remoteUrl);
@@ -300,8 +300,8 @@ public class SeInterpreterApplication extends Application {
         this.runner.close();
     }
 
-    public void highLightElement(String locatorType, String value) {
-        Step highLightElement = new HighLightElement()
+    public void highLightElement(final String locatorType, final String value) {
+        final Step highLightElement = new HighLightElement()
                 .toStep()
                 .locator(new Locator(locatorType, value))
                 .build();
@@ -309,7 +309,7 @@ public class SeInterpreterApplication extends Application {
                 .map(it -> it.isPreventContextAspect(true)));
     }
 
-    public TestCase exportTemplate(Locator locator, List<String> targetTags, boolean withDataSource) {
+    public TestCase exportTemplate(final Locator locator, final List<String> targetTags, final boolean withDataSource) {
         return this.runner.exportTemplate(locator, targetTags, withDataSource);
     }
 
@@ -317,18 +317,18 @@ public class SeInterpreterApplication extends Application {
         this.executeTask(this.getSuite().head(), this.listener());
     }
 
-    public void runScript(ReplayOption replayOption) {
+    public void runScript(final ReplayOption replayOption) {
         this.executeAndLoggingCaseWhenThrowException(() -> {
-            InputData inputData = this.currentDisplayShareInput(replayOption);
+            final InputData inputData = this.currentDisplayShareInput(replayOption);
             this.executeTask(this.getDisplayTestCase()
                             .map(builder -> builder.setShareInput(inputData).map(replayOption::apply))
                     , this.listener());
         });
     }
 
-    public void runStep(ReplayOption replayOption, Predicate<Number> filter, Function<Integer, Integer> function) {
+    public void runStep(final ReplayOption replayOption, final Predicate<Number> filter, final Function<Integer, Integer> function) {
         this.executeAndLoggingCaseWhenThrowException(() -> {
-            InputData inputData = this.currentDisplayShareInput(replayOption);
+            final InputData inputData = this.currentDisplayShareInput(replayOption);
             this.executeTask(this.getDisplayTestCase()
                             .filterStep(filter)
                             .map(builder -> builder.setShareInput(inputData).map(replayOption::apply))
@@ -345,7 +345,7 @@ public class SeInterpreterApplication extends Application {
         this.runner.stopRunning();
     }
 
-    public void updateReplayStatus(int stepNo, Result result) {
+    public void updateReplayStatus(final int stepNo, final Result result) {
         this.replayStatus.setValue(new Pair<>(stepNo, result));
     }
 
@@ -357,7 +357,7 @@ public class SeInterpreterApplication extends Application {
         return this.getScriptParser(Context.getDefaultScript());
     }
 
-    protected ScriptParser getScriptParser(String scriptType) {
+    protected ScriptParser getScriptParser(final String scriptType) {
         return Context.getScriptParser(scriptType);
     }
 
@@ -365,17 +365,17 @@ public class SeInterpreterApplication extends Application {
         return Context.getTestCaseConverter();
     }
 
-    protected void resetScript(Suite aSuite, TestCase toSelect) {
+    protected void resetScript(final Suite aSuite, final TestCase toSelect) {
         this.suite.setValue(aSuite);
         this.selectScript(toSelect.name());
     }
 
     protected TestCase templateScript() {
-        TestCase result = new Get().toStep().put("url", "https://www.google.com").build().toTestCase();
+        final TestCase result = new Get().toStep().put("url", "https://www.google.com").build().toTestCase();
         if (this.suite.get() == null) {
             return result;
         }
-        long no = this.suite.get()
+        final long no = this.suite.get()
                 .getChains()
                 .flattenTestCases()
                 .filter(it -> Strings.isNullOrEmpty(it.scriptFile().path()))
@@ -386,14 +386,14 @@ public class SeInterpreterApplication extends Application {
         return result;
     }
 
-    protected TestCase changeAssociateFile(TestCase exportTo, String oldPath) {
+    protected TestCase changeAssociateFile(final TestCase exportTo, final String oldPath) {
         if (Strings.isNullOrEmpty(oldPath)) {
             return this.copyDataSourceTemplate(exportTo);
         }
         return exportTo;
     }
 
-    protected void saveContents(File target, String content) {
+    protected void saveContents(final File target, final String content) {
         this.executeAndLoggingCaseWhenThrowException(() -> {
             if (!target.exists()) {
                 Files.createFile(target.toPath());
@@ -403,9 +403,9 @@ public class SeInterpreterApplication extends Application {
         });
     }
 
-    protected TestCase copyDataSourceTemplate(TestCase it) {
+    protected TestCase copyDataSourceTemplate(final TestCase it) {
         if (it.dataSourceLoader().dataSourceConfig().containsKey("path")) {
-            File src = new File(this.runner.getTemplateOutputDirectory(), it.dataSourceLoader().dataSourceConfig().get("path"));
+            final File src = new File(this.runner.getTemplateOutputDirectory(), it.dataSourceLoader().dataSourceConfig().get("path"));
             if (src.exists()) {
                 final String newDataSourceName = it.name().replace(".json", "");
                 File newDataSource = new File(this.runner.getDataSourceDirectory(), newDataSourceName + ".csv");
@@ -422,26 +422,26 @@ public class SeInterpreterApplication extends Application {
         return it;
     }
 
-    protected InputData currentDisplayShareInput(ReplayOption replayOption) throws IOException {
+    protected InputData currentDisplayShareInput(final ReplayOption replayOption) throws IOException {
         return replayOption.reduceShareInput(this.replayShareInput()
-                , this.getDisplayScriptDataSources(it -> it.include(getDisplayTestCase()) && !it.equals(getDisplayTestCase())));
+                , this.getDisplayScriptDataSources(it -> it.include(this.getDisplayTestCase()) && !it.equals(this.getDisplayTestCase())));
     }
 
     protected Function<Logger, TestRunListener> listener() {
         return log -> new GUITestRunListener(Context.getTestListener(log), this);
     }
 
-    protected void executeTask(TestCase replayCase, Function<Logger, TestRunListener> listenerFactory) {
-        SeInterpreterRunTask task = this.runner.createRunScriptTask(replayCase, listenerFactory);
+    protected void executeTask(final TestCase replayCase, final Function<Logger, TestRunListener> listenerFactory) {
+        final SeInterpreterRunTask task = this.runner.createRunScriptTask(replayCase, listenerFactory);
         this.executeAndLoggingCaseWhenThrowException(() -> {
-            ExecutorService executor = Executors.newSingleThreadExecutor();
+            final ExecutorService executor = Executors.newSingleThreadExecutor();
             this.showProgressbar(task);
             task.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED, wse -> executor.shutdown());
             executor.submit(task);
         });
     }
 
-    protected void showProgressbar(SeInterpreterRunTask task) {
+    protected void showProgressbar(final SeInterpreterRunTask task) {
         new ReplayView().open(this.mainView.getMainWindow(), task);
     }
 

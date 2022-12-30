@@ -22,7 +22,7 @@ import com.sebuilder.interpreter.step.LocatorHolder;
 
 public class SubmitElement extends AbstractStepType implements ConditionalStep, LocatorHolder {
     @Override
-    public boolean doRun(TestRun ctx) {
+    public boolean doRun(final TestRun ctx) {
         ctx.locator().find(ctx).submit();
         return true;
     }

@@ -8,9 +8,9 @@ import org.openqa.selenium.interactions.Actions;
 public class ClickElementAt extends AbstractStepType {
 
     @Override
-    public boolean run(TestRun ctx) {
-        int pointY = Integer.parseInt(ctx.string("pointY"));
-        int pointX = Integer.parseInt(ctx.string("pointX"));
+    public boolean run(final TestRun ctx) {
+        final int pointY = Integer.parseInt(ctx.string("pointY"));
+        final int pointX = Integer.parseInt(ctx.string("pointX"));
         new Actions(ctx.driver())
                 .moveByOffset(pointX, pointY)
                 .click()
@@ -20,7 +20,7 @@ public class ClickElementAt extends AbstractStepType {
     }
 
     @Override
-    public StepBuilder addDefaultParam(StepBuilder o) {
+    public StepBuilder addDefaultParam(final StepBuilder o) {
         if (!o.containsStringParam("pointX")) {
             o.put("pointX", "");
         }

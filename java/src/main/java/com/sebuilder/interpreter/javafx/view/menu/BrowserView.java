@@ -8,9 +8,9 @@ import javafx.stage.Window;
 
 public class BrowserView extends FXMLView {
 
-    public void open(Window window) {
-        Scene scene = new Scene(this.getView());
-        Stage browserSettingDialog = new Stage();
+    public void open(final Window window) {
+        final Scene scene = new Scene(this.getView());
+        final Stage browserSettingDialog = new Stage();
         browserSettingDialog.setScene(scene);
         browserSettingDialog.initOwner(window);
         browserSettingDialog.initModality(Modality.WINDOW_MODAL);

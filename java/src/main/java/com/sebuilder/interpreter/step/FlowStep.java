@@ -9,22 +9,22 @@ import java.util.stream.IntStream;
 
 public interface FlowStep extends StepType {
 
-    default int getSubSteps(TestRun ctx) {
+    default int getSubSteps(final TestRun ctx) {
         return Integer.parseInt(ctx.string("subStep"));
     }
 
-    default boolean runSubStep(TestRun ctx, int actions) {
+    default boolean runSubStep(final TestRun ctx, final int actions) {
         boolean success = true;
         int exec = 0;
         while (exec < actions) {
-            Step.Result result = ctx.runTest();
+            final Step.Result result = ctx.runTest();
             exec = exec + result.execSteps();
             success = result.success() && success;
         }
         return success;
     }
 
-    default void skipSubStep(TestRun ctx, int actions) {
+    default void skipSubStep(final TestRun ctx, final int actions) {
         IntStream.range(0, actions).forEach(i -> ctx.skipTest());
     }
 
@@ -34,12 +34,12 @@ public interface FlowStep extends StepType {
     }
 
     @Override
-    default int getExecSteps(TestRun ctx) {
+    default int getExecSteps(final TestRun ctx) {
         return this.getSubSteps(ctx);
     }
 
     @Override
-    default StepBuilder addDefaultParam(StepBuilder o) {
+    default StepBuilder addDefaultParam(final StepBuilder o) {
         if (!o.containsStringParam("subStep")) {
             o.put("subStep", "");
         }

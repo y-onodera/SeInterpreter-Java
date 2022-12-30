@@ -23,8 +23,8 @@ import org.openqa.selenium.Cookie;
 
 public class DeleteCookie extends AbstractStepType {
     @Override
-    public boolean run(TestRun ctx) {
-        Cookie c = ctx.driver().manage().getCookieNamed(ctx.string("name"));
+    public boolean run(final TestRun ctx) {
+        final Cookie c = ctx.driver().manage().getCookieNamed(ctx.string("name"));
         if (c != null) {
             ctx.driver().manage().deleteCookie(c);
         }
@@ -32,7 +32,7 @@ public class DeleteCookie extends AbstractStepType {
     }
 
     @Override
-    public StepBuilder addDefaultParam(StepBuilder o) {
+    public StepBuilder addDefaultParam(final StepBuilder o) {
         if (!o.containsStringParam("name")) {
             o.put("name", "");
         }

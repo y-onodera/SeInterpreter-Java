@@ -13,34 +13,34 @@ import java.util.Objects;
 public class HighLightElement extends AbstractStepType implements LocatorHolder {
 
     @Override
-    public boolean run(TestRun ctx) {
-        Cache.reflesh(ctx);
+    public boolean run(final TestRun ctx) {
+        Cache.refresh(ctx);
         boolean result = false;
-        for (WebElement element : ctx.locator().findElements(ctx)) {
+        for (final WebElement element : ctx.locator().findElements(ctx)) {
             Cache.originalStyle(ctx, element);
-            toggleHighlight(ctx, element, "2px solid red");
+            toggleHighlight(ctx, element);
             result = true;
         }
         return result;
     }
 
-    static void toggleHighlight(TestRun ctx, WebElement element, String aStyle) {
-        toggleBorder(ctx, element, aStyle);
+    static void toggleHighlight(final TestRun ctx, final WebElement element) {
+        toggleBorder(ctx, element, "2px solid red");
         if (isChangeOutline(element)) {
-            toggleOutline(ctx, element, aStyle);
+            toggleOutline(ctx, element, "2px solid red");
         }
     }
 
-    private static boolean isChangeOutline(WebElement element) {
-        String type = element.getAttribute("type");
+    private static boolean isChangeOutline(final WebElement element) {
+        final String type = element.getAttribute("type");
         return Objects.equals(type, "checkbox") || Objects.equals(type, "radio");
     }
 
-    private static void toggleOutline(TestRun ctx, WebElement element, String aStyle) {
+    private static void toggleOutline(final TestRun ctx, final WebElement element, final String aStyle) {
         ctx.executeScript("arguments[0].style.outline = '" + aStyle + "'; return [];", element);
     }
 
-    private static void toggleBorder(TestRun ctx, WebElement element, String aStyle) {
+    private static void toggleBorder(final TestRun ctx, final WebElement element, final String aStyle) {
         ctx.executeScript("arguments[0].style.border = '" + aStyle + "'; return [];", element);
     }
 
@@ -48,47 +48,34 @@ public class HighLightElement extends AbstractStepType implements LocatorHolder 
         private static String currentUrl;
         static Map<Locator, BackupStyle> cache = Maps.newHashMap();
 
-        public static void reflesh(TestRun aCtx) {
-            String newUrl = aCtx.driver().getCurrentUrl();
+        public static void refresh(final TestRun aCtx) {
+            final String newUrl = aCtx.driver().getCurrentUrl();
             if (Objects.equals(currentUrl, newUrl)) {
-                cache.entrySet()
-                        .stream()
-                        .forEach(entry -> {
-                            entry.getKey().
-                                    findElements(aCtx)
-                                    .stream()
-                                    .forEach(element -> {
-                                        BackupStyle style = entry.getValue();
-                                        toggleBorder(aCtx, element, style.border);
-                                        if (isChangeOutline(element)) {
-                                            toggleOutline(aCtx, element, style.outline);
-                                        }
-                                    });
-                        });
+                cache.forEach((key, style) -> key.
+                        findElements(aCtx)
+                        .forEach(element -> {
+                            toggleBorder(aCtx, element, style.border);
+                            if (isChangeOutline(element)) {
+                                toggleOutline(aCtx, element, style.outline);
+                            }
+                        }));
             }
             currentUrl = newUrl;
             cache.clear();
         }
 
-        public static void originalStyle(TestRun ctx, WebElement element) {
-            String originalBorder = (String) ctx.executeScript("return arguments[0].style.border;", element);
+        public static void originalStyle(final TestRun ctx, final WebElement element) {
+            final String originalBorder = (String) ctx.executeScript("return arguments[0].style.border;", element);
             String originalOutline = null;
             if (isChangeOutline(element)) {
                 originalOutline = (String) ctx.executeScript("return arguments[0].style.outline;", element);
             }
-            Locator locator = ctx.detectLocator(element);
+            final Locator locator = ctx.detectLocator(element);
             cache.put(locator, new BackupStyle(originalBorder, originalOutline));
         }
 
     }
 
-    private static class BackupStyle {
-        private final String border;
-        private final String outline;
-
-        public BackupStyle(String border, String outline) {
-            this.border = border;
-            this.outline = outline;
-        }
+    private record BackupStyle(String border, String outline) {
     }
 }

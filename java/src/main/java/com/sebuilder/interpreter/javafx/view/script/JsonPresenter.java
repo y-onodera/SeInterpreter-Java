@@ -22,16 +22,16 @@ public class JsonPresenter {
 
     @FXML
     void initialize() {
-        assert textAreaStep != null : "fx:id=\"textAreaStep\" was not injected: check your FXML file 'seleniumbuilder.fxml'.";
-        assert buttonJsonCommit != null : "fx:id=\"buttonJsonCommit\" was not injected: check your FXML file 'seleniumbuilder.fxml'.";
+        assert this.textAreaStep != null : "fx:id=\"textAreaStep\" was not injected: check your FXML file 'seleniumbuilder.fxml'.";
+        assert this.buttonJsonCommit != null : "fx:id=\"buttonJsonCommit\" was not injected: check your FXML file 'seleniumbuilder.fxml'.";
         this.application.displayTestCaseProperty().addListener((observed, oldValue, newValue) -> {
-            if (application.scriptViewTypeProperty().get() == ViewType.TEXT) {
-                showScriptAsText();
+            if (this.application.scriptViewTypeProperty().get() == ViewType.TEXT) {
+                this.showScriptAsText();
             }
         });
         this.application.scriptViewTypeProperty().addListener((ObservableValue<? extends ViewType> observed, ViewType oldValue, ViewType newValue) -> {
             if (newValue == ViewType.TEXT) {
-                showScriptAsText();
+                this.showScriptAsText();
             }
         });
     }

@@ -12,15 +12,15 @@ import org.openqa.selenium.support.ui.Select;
 public class SelectElementValue extends AbstractStepType implements ConditionalStep, Exportable, LocatorHolder {
 
     @Override
-    public boolean doRun(TestRun ctx) {
-        WebElement e = ctx.locator().find(ctx);
-        Select select = new Select(e);
+    public boolean doRun(final TestRun ctx) {
+        final WebElement e = ctx.locator().find(ctx);
+        final Select select = new Select(e);
         select.selectByValue(ctx.string("value"));
         return true;
     }
 
     @Override
-    public void addElement(ExportResourceBuilder builder, RemoteWebDriver driver, WebElement element) {
+    public void addElement(final ExportResourceBuilder builder, final RemoteWebDriver driver, final WebElement element) {
         element.findElements(By.tagName("option"))
                 .stream()
                 .filter(WebElement::isSelected)
@@ -29,7 +29,7 @@ public class SelectElementValue extends AbstractStepType implements ConditionalS
     }
 
     @Override
-    public StepBuilder addDefaultParam(StepBuilder o) {
+    public StepBuilder addDefaultParam(final StepBuilder o) {
         if (!o.containsStringParam("value")) {
             o.put("value", "");
         }

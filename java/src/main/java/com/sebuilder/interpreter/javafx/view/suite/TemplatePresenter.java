@@ -46,7 +46,7 @@ public class TemplatePresenter {
         assert this.exportButton != null : "fx:id=\"exportButton\" was not injected: check your FXML file 'exportsetting.fxml'.";
         assert this.listTargetTag != null : "fx:id=\"listTargetTag\" was not injected: check your FXML file 'exportsetting.fxml'.";
         assert this.selectParentLocator != null : "fx:id=\"selectParentLocator\" was not injected: check your FXML file 'exportsetting.fxml'.";
-        assert checkWithDataSource != null : "fx:id=\"checkWithDataSource\" was not injected: check your FXML file 'exportsetting.fxml'.";
+        assert this.checkWithDataSource != null : "fx:id=\"checkWithDataSource\" was not injected: check your FXML file 'exportsetting.fxml'.";
         this.selectParentLocator.getItems().clear();
         this.selectParentLocator.getItems().add(DEFAULT_PARENT);
         this.selectParentLocator.getItems().add("id");
@@ -78,7 +78,7 @@ public class TemplatePresenter {
 
     @FXML
     void selectLocator() {
-        String locator = this.selectParentLocator.getSelectionModel().getSelectedItem();
+        final String locator = this.selectParentLocator.getSelectionModel().getSelectedItem();
         if (this.exportSettingsGrid.getChildren().contains(this.textLocatorValue)) {
             if (DEFAULT_PARENT.equals(locator)) {
                 this.removeLocatorValue();
@@ -91,10 +91,10 @@ public class TemplatePresenter {
 
     @FXML
     void execExport() {
-        String locator = this.selectParentLocator.getSelectionModel().getSelectedItem();
-        String locatorValue = this.textLocatorValue.getText();
-        List<String> targetTag = listTargetTag.getSelectionModel().getSelectedItems();
-        TestCase template;
+        final String locator = this.selectParentLocator.getSelectionModel().getSelectedItem();
+        final String locatorValue = this.textLocatorValue.getText();
+        final List<String> targetTag = this.listTargetTag.getSelectionModel().getSelectedItems();
+        final TestCase template;
         if (DEFAULT_PARENT.equals(locator)) {
             template = this.application.exportTemplate(new Locator("css selector", DEFAULT_PARENT), targetTag, this.checkWithDataSource.isSelected());
         } else {

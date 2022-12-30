@@ -39,52 +39,52 @@ public class ScriptPresenter {
 
     @FXML
     void initialize() {
-        assert tableColumnScriptBodyStep != null : "fx:id=\"tableColumnScriptBodyStep\" was not injected: check your FXML file 'seleniumbuilderscriptbody.fxml'.";
-        assert tableColumnScriptBodyNo != null : "fx:id=\"tableColumnScriptBodyNo\" was not injected: check your FXML file 'seleniumbuilderscriptbody.fxml'.";
-        assert tableViewScriptBody != null : "fx:id=\"tableViewScriptBody\" was not injected: check your FXML file 'seleniumbuilderscriptbody.fxml'.";
+        assert this.tableColumnScriptBodyStep != null : "fx:id=\"tableColumnScriptBodyStep\" was not injected: check your FXML file 'seleniumbuilderscriptbody.fxml'.";
+        assert this.tableColumnScriptBodyNo != null : "fx:id=\"tableColumnScriptBodyNo\" was not injected: check your FXML file 'seleniumbuilderscriptbody.fxml'.";
+        assert this.tableViewScriptBody != null : "fx:id=\"tableViewScriptBody\" was not injected: check your FXML file 'seleniumbuilderscriptbody.fxml'.";
         this.tableColumnScriptBodyNo.setCellValueFactory(body -> body.getValue().noProperty().asObject());
         this.tableColumnScriptBodyStep.setCellValueFactory(body -> body.getValue().stepProperty());
         this.tableViewScriptBody.setRowFactory(new DragAndDropTableViewRowFactory<>() {
             @Override
-            protected void updateItemCallback(TableRow<ScriptBody> tableRow, ScriptBody scriptBody, boolean b) {
-                for (Result result : Result.values()) {
+            protected void updateItemCallback(final TableRow<ScriptBody> tableRow, final ScriptBody scriptBody, final boolean b) {
+                for (final Result result : Result.values()) {
                     tableRow.getStyleClass().remove(result.toString().toLowerCase());
                 }
                 if (!b && !tableRow.isEmpty()) {
                     tableRow.getItem().runningResultProperty().addListener((ObservableValue<? extends String> observed, String oldValue, String newValue) -> {
-                        for (Result result : Result.values()) {
+                        for (final Result result : Result.values()) {
                             tableRow.getStyleClass().remove(result.toString().toLowerCase());
                         }
                         if (!Strings.isNullOrEmpty(newValue)) {
                             tableRow.getStyleClass().add(newValue.toLowerCase());
                         }
                     });
-                    tableRow.setOnMouseClicked(ev ->{
-                        if (ev.getButton().equals(MouseButton.PRIMARY) && ev.getClickCount() == 2){
-                            handleStepEdit();
+                    tableRow.setOnMouseClicked(ev -> {
+                        if (ev.getButton().equals(MouseButton.PRIMARY) && ev.getClickCount() == 2) {
+                            ScriptPresenter.this.handleStepEdit();
                         }
                     });
                 }
             }
 
             @Override
-            protected void move(int draggedIndex, int dropIndex) {
+            protected void move(final int draggedIndex, final int dropIndex) {
                 ScriptPresenter.this.moveStep(draggedIndex, dropIndex);
             }
         });
         this.application.displayTestCaseProperty().addListener((observed, oldValue, newValue) -> {
-            if (application.scriptViewTypeProperty().get() == ViewType.TABLE) {
-                refreshTable();
+            if (this.application.scriptViewTypeProperty().get() == ViewType.TABLE) {
+                this.refreshTable();
             }
         });
         this.application.scriptViewTypeProperty().addListener((ObservableValue<? extends ViewType> observed, ViewType oldValue, ViewType newValue) -> {
             if (newValue == ViewType.TABLE) {
-                refreshTable();
+                this.refreshTable();
             }
         });
         this.application.replayStatusProperty().addListener((observed, oldVar, newVar) -> {
             if (newVar != null) {
-                handleStepResult(newVar.getKey(), newVar.getValue());
+                this.handleStepResult(newVar.getKey(), newVar.getValue());
             }
         });
         this.refreshTable();
@@ -92,7 +92,7 @@ public class ScriptPresenter {
 
     @FXML
     void handleStepDelete() {
-        int stepNo = this.tableViewScriptBody.getSelectionModel().getSelectedItem().noProperty().intValue();
+        final int stepNo = this.tableViewScriptBody.getSelectionModel().getSelectedItem().noProperty().intValue();
         this.application.replaceDisplayCase(this.application.getDisplayTestCase().removeStep(stepNo - 1));
     }
 
@@ -108,8 +108,8 @@ public class ScriptPresenter {
 
     @FXML
     void handleStepEdit() {
-        StepView stepView = this.initStepEditDialog(StepView.Action.EDIT);
-        ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
+        final StepView stepView = this.initStepEditDialog(StepView.Action.EDIT);
+        final ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
         stepView.refresh(this.application.getDisplayTestCase()
                 .steps()
                 .get(item.no.intValue() - 1)
@@ -118,19 +118,20 @@ public class ScriptPresenter {
 
     @FXML
     void handleRunStep() {
-        InputView inputView = new InputView();
+        final InputView inputView = new InputView();
         inputView.setOnclickReplayStart((it) -> {
-            ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
-            this.application.runStep(it, i -> item.no.intValue() - 1 == i.intValue(), i -> i + item.no.intValue() - 1);
+            final ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
+            final int no = item.no.intValue() - 1;
+            this.application.runStep(it, i -> no == i.intValue(), i -> i + no);
         });
         inputView.open(this.tableViewScriptBody.getScene().getWindow());
     }
 
     @FXML
     void handleRunFromHere() {
-        InputView inputView = new InputView();
+        final InputView inputView = new InputView();
         inputView.setOnclickReplayStart((it) -> {
-            ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
+            final ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
             this.application.runStep(it, i -> item.no.intValue() - 1 <= i.intValue(), i -> i + item.no.intValue() - 1);
         });
         inputView.open(this.tableViewScriptBody.getScene().getWindow());
@@ -138,17 +139,17 @@ public class ScriptPresenter {
 
     @FXML
     void handleRunToHere() {
-        InputView inputView = new InputView();
+        final InputView inputView = new InputView();
         inputView.setOnclickReplayStart((it) -> {
-            ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
+            final ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
             this.application.runStep(it, i -> item.no.intValue() - 1 >= i.intValue(), i -> i);
         });
         inputView.open(this.tableViewScriptBody.getScene().getWindow());
     }
 
-    private void moveStep(int from, int to) {
-        Step step = this.application.getDisplayTestCase().steps().get(from);
-        TestCase newCase;
+    private void moveStep(final int from, final int to) {
+        final Step step = this.application.getDisplayTestCase().steps().get(from);
+        final TestCase newCase;
         if (to > from) {
             newCase = this.application.getDisplayTestCase().addStep(to, step)
                     .removeStep(from);
@@ -163,29 +164,29 @@ public class ScriptPresenter {
         this.application.executeAndLoggingCaseWhenThrowException(() -> {
             this.tableViewScriptBody.getItems().setAll(new ArrayList<>());
             int no = 1;
-            for (Step step : this.application.getDisplayTestCase().steps()) {
-                ScriptBody row = new ScriptBody(no++, step.toPrettyString(), "");
+            for (final Step step : this.application.getDisplayTestCase().steps()) {
+                final ScriptBody row = new ScriptBody(no++, step.toPrettyString(), "");
                 this.tableViewScriptBody.getItems().add(row);
             }
             this.tableViewScriptBody.refresh();
         });
     }
 
-    private void handleStepResult(int stepNo, Result result) {
-        List<ScriptBody> bodies = this.tableViewScriptBody.getItems();
+    private void handleStepResult(final int stepNo, final Result result) {
+        final List<ScriptBody> bodies = this.tableViewScriptBody.getItems();
         if (bodies.size() >= stepNo) {
-            ScriptBody target = bodies.get(stepNo - 1);
+            final ScriptBody target = bodies.get(stepNo - 1);
             target.setRunningResult(result.name());
         }
     }
 
-    private StepView initStepEditDialog(StepView.Action action) {
-        ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
+    private StepView initStepEditDialog(final StepView.Action action) {
+        final ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
         int no = 0;
         if (item != null) {
             no = item.no.intValue() - 1;
         }
-        return new StepView(tableViewScriptBody.getScene().getWindow(), no, action);
+        return new StepView(this.tableViewScriptBody.getScene().getWindow(), no, action);
     }
 
     private static class ScriptBody {
@@ -195,7 +196,7 @@ public class ScriptPresenter {
 
         private final StringProperty runningResult;
 
-        public ScriptBody(int no, String step, String runningResult) {
+        public ScriptBody(final int no, final String step, final String runningResult) {
             this.no = new SimpleIntegerProperty(no);
             this.step = new SimpleStringProperty(step);
             if (runningResult != null) {
@@ -217,7 +218,7 @@ public class ScriptPresenter {
             return this.runningResult;
         }
 
-        public void setRunningResult(String runningResult) {
+        public void setRunningResult(final String runningResult) {
             this.runningResult.set(runningResult);
         }
 

@@ -9,11 +9,11 @@ public abstract class AbstractInnerElement extends AbstractPrintable implements 
     private final ScrollableHeight height;
     private final ScrollableWidth width;
 
-    public AbstractInnerElement(Printable parentPage
-            , WebElement element
-            , InnerScrollElementHandler innerScrollElementHandler
-            , ScrollableHeight height
-            , ScrollableWidth width
+    public AbstractInnerElement(final Printable parentPage
+            , final WebElement element
+            , final InnerScrollElementHandler innerScrollElementHandler
+            , final ScrollableHeight height
+            , final ScrollableWidth width
     ) {
         super(parentPage.getCtx());
         this.parent = parentPage;

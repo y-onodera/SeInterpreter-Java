@@ -14,12 +14,12 @@ import java.util.Objects;
 public class AntRun extends AbstractGetter {
 
     @Override
-    public String get(TestRun ctx) {
-        File buildFile = Utils.findFile(ctx.getRelativePath(), ctx.string("build.xml"));
-        Project p = new Project();
+    public String get(final TestRun ctx) {
+        final File buildFile = Utils.findFile(ctx.getRelativePath(), ctx.string("build.xml"));
+        final Project p = new Project();
         p.setUserProperty("ant.file", buildFile.getAbsolutePath());
         p.init();
-        ProjectHelper helper = ProjectHelper.getProjectHelper();
+        final ProjectHelper helper = ProjectHelper.getProjectHelper();
         p.addReference("ant.projectHelper", helper);
         helper.parse(p, buildFile);
         ctx.vars()
@@ -41,7 +41,7 @@ public class AntRun extends AbstractGetter {
     }
 
     @Override
-    public StepBuilder addDefaultParam(StepBuilder o) {
+    public StepBuilder addDefaultParam(final StepBuilder o) {
         if (!o.containsStringParam("build.xml")) {
             o.put("build.xml", "${_baseDir}/build.xml");
         }

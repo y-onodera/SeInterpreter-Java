@@ -48,7 +48,7 @@ public class StepTypeFactoryImpl implements com.sebuilder.interpreter.StepTypeFa
      * @return a stepType instance for a given name
      */
     @Override
-    public StepType getStepTypeOfName(String name) {
+    public StepType getStepTypeOfName(final String name) {
         try {
             if (!this.typesMap.containsKey(name)) {
                 String className = name.substring(0, 1).toUpperCase() + name.substring(1);
@@ -81,7 +81,7 @@ public class StepTypeFactoryImpl implements com.sebuilder.interpreter.StepTypeFa
                     className = className.substring("retry".length());
                     rawStepType = false;
                 }
-                Class<?> c;
+                final Class<?> c;
                 if (className.equals("Loop")) {
                     c = Loop.class;
                 } else if (rawStepType) {
@@ -90,7 +90,7 @@ public class StepTypeFactoryImpl implements com.sebuilder.interpreter.StepTypeFa
                     c = this.newGetter(name, className);
                 }
                 try {
-                    Object o = c.getDeclaredConstructor().newInstance();
+                    final Object o = c.getDeclaredConstructor().newInstance();
                     if (name.startsWith("assert")) {
                         this.typesMap.put(name, ((Getter) o).toAssert());
                     } else if (name.startsWith("verify")) {
@@ -108,36 +108,36 @@ public class StepTypeFactoryImpl implements com.sebuilder.interpreter.StepTypeFa
                     } else {
                         this.typesMap.put(name, (StepType) o);
                     }
-                } catch (InstantiationException | IllegalAccessException ie) {
+                } catch (final InstantiationException | IllegalAccessException ie) {
                     throw new RuntimeException(c.getName() + " could not be instantiated.", ie);
-                } catch (ClassCastException cce) {
+                } catch (final ClassCastException cce) {
                     throw new RuntimeException(c.getName() + " does not extend "
                             + (rawStepType ? "StepType" : "Getter") + ".", cce);
                 }
             }
             return this.typesMap.get(name);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new RuntimeException("Step type \"" + name + "\" is not implemented.", e);
         }
     }
 
-    protected Class<?> newGetter(String name, String className) {
-        String errorMessage = "No implementation class for getter \"" + name + "\" could be found.";
+    protected Class<?> newGetter(final String name, final String className) {
+        final String errorMessage = "No implementation class for getter \"" + name + "\" could be found.";
         final String subPackage = ".getter.";
         return this.newInstance(className, errorMessage, subPackage);
     }
 
-    protected Class<?> newStepType(String name, String className) {
-        String errorMessage = "No implementation class for step type \"" + name + "\" could be found.";
+    protected Class<?> newStepType(final String name, final String className) {
+        final String errorMessage = "No implementation class for step type \"" + name + "\" could be found.";
         final String subPackage = ".type.";
         return this.newInstance(className, errorMessage, subPackage);
     }
 
-    private Class<?> newInstance(String className, String errorMessage, String subPackage) {
+    private Class<?> newInstance(final String className, final String errorMessage, final String subPackage) {
         try {
             return Class.forName(DEFAULT_PACKAGE + subPackage + className);
-        } catch (ClassNotFoundException cnfe) {
-            throw new RuntimeException(errorMessage, cnfe);
+        } catch (final ClassNotFoundException e) {
+            throw new RuntimeException(errorMessage, e);
         }
     }
 

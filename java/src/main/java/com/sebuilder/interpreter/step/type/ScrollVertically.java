@@ -11,11 +11,11 @@ import com.sebuilder.interpreter.step.LocatorHolder;
 public class ScrollVertically extends AbstractStepType implements Exportable, LocatorHolder {
 
     @Override
-    public boolean run(TestRun ctx) {
-        ScrollableHeight height;
-        if(ctx.hasLocator()) {
+    public boolean run(final TestRun ctx) {
+        final ScrollableHeight height;
+        if (ctx.hasLocator()) {
             height = ScrollableTag.getHeight(ctx, ctx.locator().find(ctx));
-        }else {
+        } else {
             height = Page.getHeight(ctx);
         }
         height.scrollVertically(Integer.parseInt(ctx.string("pointY")));
@@ -23,7 +23,7 @@ public class ScrollVertically extends AbstractStepType implements Exportable, Lo
     }
 
     @Override
-    public StepBuilder addDefaultParam(StepBuilder o) {
+    public StepBuilder addDefaultParam(final StepBuilder o) {
         if (!o.containsStringParam("pointY")) {
             o.put("pointY", "");
         }

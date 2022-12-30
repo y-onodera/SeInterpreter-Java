@@ -1,17 +1,17 @@
 package com.sebuilder.interpreter.script.seleniumide;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import com.sebuilder.interpreter.Step;
 import com.sebuilder.interpreter.TestCase;
 import com.sebuilder.interpreter.TestCaseBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class SeleniumIDEConverter {
 
@@ -44,7 +44,7 @@ public class SeleniumIDEConverter {
     private String url;
     private final JSONObject source;
 
-    public SeleniumIDEConverter(JSONObject source) {
+    public SeleniumIDEConverter(final JSONObject source) {
         this.source = source;
     }
 
@@ -56,64 +56,58 @@ public class SeleniumIDEConverter {
         return this.url;
     }
 
-    public TestCase parseTest(JSONObject test) throws JSONException {
-        TestCaseBuilder builder = new TestCaseBuilder()
+    public TestCase parseTest(final JSONObject test) {
+        final TestCaseBuilder builder = new TestCaseBuilder()
                 .setName(test.getString("name") + ".json");
-        JSONArray commands = test.getJSONArray("commands");
-        for (int i = 0, j = commands.length(); i < j; i++) {
-            SeleniumIDECommand command = new SeleniumIDECommand(commands.getJSONObject(i));
-            if (!this.support(command)) {
-                logger.error("command {} is currently not supported", command.command());
-                continue;
-            }
-            builder.addStep(this.convert(command));
-        }
+        final JSONArray commands = test.getJSONArray("commands");
+        IntStream.range(0, commands.length())
+                .mapToObj(i -> new SeleniumIDECommand(commands.getJSONObject(i)))
+                .filter(command -> {
+                    if (!this.support(command)) {
+                        logger.error("command {} is currently not supported", command.command());
+                        return false;
+                    }
+                    return true;
+                }).forEach(command -> builder.addStep(this.convert(command)));
         return builder.build();
     }
 
-    public TestCase getResult() throws JSONException {
+    public TestCase getResult() {
         if (!this.source.has("tests")) {
             return new TestCaseBuilder().build();
         }
         this.url = this.source.getString("url");
-        TestCaseBuilder builder = TestCaseBuilder.suite(null)
+        final TestCaseBuilder builder = TestCaseBuilder.suite(null)
                 .setName(this.source.getString("name"));
-        JSONArray suites = this.source.getJSONArray("suites");
-        for (int i = 0, j = suites.length(); i < j; i++) {
-            JSONObject suite = suites.getJSONObject(i);
-            builder.addChain(parseSuite(suite));
-        }
+        final JSONArray suites = this.source.getJSONArray("suites");
+        IntStream.range(0, suites.length()).forEach(i -> builder.addChain(this.parseSuite(suites.getJSONObject(i))));
         return builder.build();
     }
 
-    private TestCase parseSuite(JSONObject suite) throws JSONException {
-        List<String> testIdList = getTestIdList(suite);
-        JSONArray tests = this.source.getJSONArray("tests");
-        TestCaseBuilder suiteBuilder = TestCaseBuilder.suite(null)
+    private TestCase parseSuite(final JSONObject suite) {
+        final List<String> testIdList = this.getTestIdList(suite);
+        final JSONArray tests = this.source.getJSONArray("tests");
+        final TestCaseBuilder suiteBuilder = TestCaseBuilder.suite(null)
                 .setName(suite.getString("name") + ".json");
-        for (int i = 0, j = tests.length(); i < j; i++) {
-            JSONObject test = tests.getJSONObject(i);
-            if (testIdList.contains(test.getString("id"))) {
-                suiteBuilder.addChain(this.parseTest(test));
-            }
-        }
+        IntStream.range(0, tests.length())
+                .mapToObj(tests::getJSONObject)
+                .filter(test -> testIdList.contains(test.getString("id")))
+                .forEach(test -> suiteBuilder.addChain(this.parseTest(test)));
         return suiteBuilder.build();
     }
 
-    private List<String> getTestIdList(JSONObject suite) throws JSONException {
-        List<String> result = Lists.newArrayList();
-        JSONArray testIds = suite.getJSONArray("tests");
-        for (int i = 0, j = testIds.length(); i < j; i++) {
-            result.add(testIds.getString(i));
-        }
-        return result;
+    private List<String> getTestIdList(final JSONObject suite) {
+        final JSONArray testIds = suite.getJSONArray("tests");
+        return IntStream.range(0, testIds.length())
+                .mapToObj(testIds::getString)
+                .collect(Collectors.toList());
     }
 
-    private boolean support(SeleniumIDECommand command) throws JSONException {
+    private boolean support(final SeleniumIDECommand command) {
         return CONVERT_MAP.containsKey(command.command());
     }
 
-    private Step convert(SeleniumIDECommand command) throws JSONException {
+    private Step convert(final SeleniumIDECommand command) {
         return CONVERT_MAP.get(command.command()).toStep(this, command);
     }
 

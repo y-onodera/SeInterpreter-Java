@@ -42,38 +42,38 @@ public class DataSetPresenter {
 
     private EventHandler<ActionEvent> onclick;
 
-    public void showDataSet(DataSourceLoader resource) throws IOException {
+    public void showDataSet(final DataSourceLoader resource) throws IOException {
         this.resource = resource;
-        List<InputData> inputData = this.resource.loadData();
-        int row = Math.max(inputData.size(), DEFAULT_ROWS);
-        int column = inputData.size() < 1 || inputData.get(0).input().size() < DEFAULT_COLUMNS ? DEFAULT_COLUMNS : inputData.get(0).input().size();
-        GridBase grid = new GridBase(row, column);
-        ObservableList<ObservableList<SpreadsheetCell>> rows = FXCollections.observableArrayList();
+        final List<InputData> inputData = this.resource.loadData();
+        final int row = Math.max(inputData.size(), DEFAULT_ROWS);
+        final int column = inputData.size() < 1 || inputData.get(0).input().size() < DEFAULT_COLUMNS ? DEFAULT_COLUMNS : inputData.get(0).input().size();
+        final GridBase grid = new GridBase(row, column);
+        final ObservableList<ObservableList<SpreadsheetCell>> rows = FXCollections.observableArrayList();
         inputData.forEach(it -> {
             if (Integer.parseInt(it.rowNumber()) == 1) {
-                addRow(rows, 0, column, it, Map.Entry::getKey, cell -> {
+                this.addRow(rows, 0, column, it, Map.Entry::getKey, cell -> {
                     cell.getStyleClass().add("header");
                     return cell;
                 });
             }
-            addRow(rows, Integer.parseInt(it.rowNumber()), column, it, Map.Entry::getValue);
+            this.addRow(rows, Integer.parseInt(it.rowNumber()), column, it, Map.Entry::getValue);
         });
         if (rows.size() < DEFAULT_ROWS) {
             for (int current = rows.size(); current < DEFAULT_ROWS; current++) {
-                addRow(rows, current, column, new InputData(), Map.Entry::getValue);
+                this.addRow(rows, current, column, new InputData(), Map.Entry::getValue);
             }
         }
         grid.setRows(rows);
-        sheet = new ExcelLikeSpreadSheetView(grid);
-        sheet.getFixedRows().add(0);
-        AnchorPane.setTopAnchor(sheet, 0.0);
-        AnchorPane.setBottomAnchor(sheet, 0.0);
-        AnchorPane.setRightAnchor(sheet, 0.0);
-        AnchorPane.setLeftAnchor(sheet, 0.0);
-        this.gridParentPane.getChildren().add(sheet);
+        this.sheet = new ExcelLikeSpreadSheetView(grid);
+        this.sheet.getFixedRows().add(0);
+        AnchorPane.setTopAnchor(this.sheet, 0.0);
+        AnchorPane.setBottomAnchor(this.sheet, 0.0);
+        AnchorPane.setRightAnchor(this.sheet, 0.0);
+        AnchorPane.setLeftAnchor(this.sheet, 0.0);
+        this.gridParentPane.getChildren().add(this.sheet);
     }
 
-    public void setOnclick(EventHandler<ActionEvent> onclick) {
+    public void setOnclick(final EventHandler<ActionEvent> onclick) {
         this.onclick = onclick;
     }
 
@@ -86,34 +86,34 @@ public class DataSetPresenter {
     }
 
     @FXML
-    public void saveDataSet(ActionEvent actionEvent) {
-        ObservableList<ObservableList<SpreadsheetCell>> rows = this.sheet.getGrid().getRows();
-        List<Pair<Integer, String>> header = rows.get(0)
+    public void saveDataSet(final ActionEvent actionEvent) {
+        final ObservableList<ObservableList<SpreadsheetCell>> rows = this.sheet.getGrid().getRows();
+        final List<Pair<Integer, String>> header = rows.get(0)
                 .stream()
                 .filter(it -> !Strings.isNullOrEmpty(it.getText()))
                 .map(it -> new Pair<>(it.getColumn(), it.getText()))
                 .collect(Collectors.toList());
-        ArrayList<InputData> saveContents = rows.subList(1, rows.size() - 1).stream()
-                .filter(it -> hasValue(it, header))
-                .map(it -> toTestData(it, header))
+        final ArrayList<InputData> saveContents = rows.subList(1, rows.size() - 1).stream()
+                .filter(it -> this.hasValue(it, header))
+                .map(it -> this.toTestData(it, header))
                 .collect(Collectors.toCollection(ArrayList::new));
         if (saveContents.size() > 0) {
             this.application.executeAndLoggingCaseWhenThrowException(() -> {
                 this.resource.writer().write(saveContents);
                 SuccessDialog.show("save succeed");
                 this.reloadDataSet();
-                if (onclick != null) {
+                if (this.onclick != null) {
                     this.onclick.handle(actionEvent);
                 }
             });
         }
     }
 
-    protected InputData toTestData(ObservableList<SpreadsheetCell> row, List<Pair<Integer, String>> header) {
+    protected InputData toTestData(final ObservableList<SpreadsheetCell> row, final List<Pair<Integer, String>> header) {
         return header.stream()
                 .map(it -> {
                     String value = "";
-                    if (isExistsCell(row, it)) {
+                    if (this.isExistsCell(row, it)) {
                         value = row.get(it.getKey()).getText();
                     }
                     return new InputData().add(it.getValue(), value);
@@ -121,30 +121,30 @@ public class DataSetPresenter {
                 .reduce(new InputData(), InputData::add);
     }
 
-    protected boolean hasValue(ObservableList<SpreadsheetCell> row, List<Pair<Integer, String>> header) {
-        return header.stream().anyMatch(it -> isExistsCell(row, it) && !Strings.isNullOrEmpty(row.get(it.getKey()).getText()));
+    protected boolean hasValue(final ObservableList<SpreadsheetCell> row, final List<Pair<Integer, String>> header) {
+        return header.stream().anyMatch(it -> this.isExistsCell(row, it) && !Strings.isNullOrEmpty(row.get(it.getKey()).getText()));
     }
 
-    protected void addRow(ObservableList<ObservableList<SpreadsheetCell>> rows, int row, int column, InputData it, Function<Map.Entry<String, String>, String> map) {
+    protected void addRow(final ObservableList<ObservableList<SpreadsheetCell>> rows, final int row, final int column, final InputData it, final Function<Map.Entry<String, String>, String> map) {
         this.addRow(rows, row, column, it, map, cell -> cell);
     }
 
-    protected void addRow(ObservableList<ObservableList<SpreadsheetCell>> rows, int row, int column, InputData it, Function<Map.Entry<String, String>, String> map, Function<SpreadsheetCell, SpreadsheetCell> setStyle) {
+    protected void addRow(final ObservableList<ObservableList<SpreadsheetCell>> rows, final int row, final int column, final InputData it, final Function<Map.Entry<String, String>, String> map, final Function<SpreadsheetCell, SpreadsheetCell> setStyle) {
         final ObservableList<SpreadsheetCell> dataRow = FXCollections.observableArrayList();
         int col = 0;
-        for (Map.Entry<String, String> entry : it.input().entrySet()) {
-            SpreadsheetCell cell = TEXT_AREA.createCell(row, col, 1, 1, map.apply(entry));
+        for (final Map.Entry<String, String> entry : it.input().entrySet()) {
+            final SpreadsheetCell cell = TEXT_AREA.createCell(row, col, 1, 1, map.apply(entry));
             dataRow.add(setStyle.apply(cell));
             col++;
         }
         for (; col < column; col++) {
-            SpreadsheetCell cell = TEXT_AREA.createCell(row, col, 1, 1, null);
+            final SpreadsheetCell cell = TEXT_AREA.createCell(row, col, 1, 1, null);
             dataRow.add(setStyle.apply(cell));
         }
         rows.add(dataRow);
     }
 
-    private boolean isExistsCell(ObservableList<SpreadsheetCell> row, Pair<Integer, String> it) {
+    private boolean isExistsCell(final ObservableList<SpreadsheetCell> row, final Pair<Integer, String> it) {
         return row.size() > it.getKey() && row.get(it.getKey()) != null;
     }
 }

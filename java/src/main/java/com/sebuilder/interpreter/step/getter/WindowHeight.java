@@ -4,7 +4,7 @@ import com.sebuilder.interpreter.TestRun;
 
 public class WindowHeight extends AbstractGetter {
     @Override
-    public String get(TestRun ctx) {
+    public String get(final TestRun ctx) {
         return String.valueOf(ctx.getWindowHeight());
     }
 

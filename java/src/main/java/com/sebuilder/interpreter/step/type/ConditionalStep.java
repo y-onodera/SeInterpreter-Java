@@ -23,10 +23,10 @@ public interface ConditionalStep extends StepType {
      * should return false. Other failures should throw a RuntimeException.
      */
     @Override
-    default boolean run(TestRun ctx) {
-        WaitFor waitForReady = waitForReady();
+    default boolean run(final TestRun ctx) {
+        final WaitFor waitForReady = this.waitForReady();
         if (waitForReady.run(ctx)) {
-            return doRun(ctx);
+            return this.doRun(ctx);
         }
         return false;
     }

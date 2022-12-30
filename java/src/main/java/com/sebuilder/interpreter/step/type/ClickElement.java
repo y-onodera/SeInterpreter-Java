@@ -23,7 +23,7 @@ import com.sebuilder.interpreter.step.LocatorHolder;
 public class ClickElement extends AbstractStepType implements ConditionalStep, Exportable, LocatorHolder {
 
     @Override
-    public boolean doRun(TestRun ctx) {
+    public boolean doRun(final TestRun ctx) {
         ctx.locator().find(ctx).click();
         return true;
     }

@@ -28,7 +28,7 @@ import java.util.Objects;
 public class Assert extends AbstractStepType implements GetterUseStep {
     public final Getter getter;
 
-    public Assert(Getter getter) {
+    public Assert(final Getter getter) {
         this.getter = getter;
     }
 
@@ -38,16 +38,16 @@ public class Assert extends AbstractStepType implements GetterUseStep {
     }
 
     @Override
-    public boolean run(TestRun ctx) {
+    public boolean run(final TestRun ctx) {
         return this.test(ctx);
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (!super.equals(o)) {
             return false;
         }
-        Assert anAssert = (Assert) o;
+        final Assert anAssert = (Assert) o;
         return Objects.equals(this.getGetter(), anAssert.getGetter());
     }
 

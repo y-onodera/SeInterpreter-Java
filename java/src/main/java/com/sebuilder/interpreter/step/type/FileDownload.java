@@ -1,6 +1,5 @@
 package com.sebuilder.interpreter.step.type;
 
-import com.google.common.collect.Lists;
 import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.step.AbstractStepType;
@@ -24,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -70,7 +70,7 @@ public class FileDownload extends AbstractStepType implements ConditionalStep, L
     public void postDownloadFile(final TestRun ctx, final String downloadUrl, final String outputFilePath) throws IOException, ExecutionException, InterruptedException {
         final AsyncHttpClient client = this.getHttpClient(ctx, downloadUrl);
         final Charset charset = Charset.forName(StandardCharsets.UTF_8.name());
-        final List<Param> param = Lists.newArrayList();
+        final List<Param> param = new ArrayList<>();
         ctx.locator()
                 .findElements(ctx)
                 .forEach(element ->
@@ -104,7 +104,6 @@ public class FileDownload extends AbstractStepType implements ConditionalStep, L
     }
 
     public void downLoadFile(final TestRun ctx, final String outputFilePath, final Response response) throws IOException {
-
         final File outputFile;
         if (ctx.getBoolean("fixedPath")) {
             outputFile = ctx.getListener().addDownloadFile(outputFilePath);

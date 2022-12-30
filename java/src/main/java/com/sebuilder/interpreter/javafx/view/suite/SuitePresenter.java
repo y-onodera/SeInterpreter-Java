@@ -44,7 +44,7 @@ public class SuitePresenter {
             private TestCase dragged;
 
             @Override
-            protected void updateItemCallback(TreeCell<String> treeCell, String s, boolean b) {
+            protected void updateItemCallback(final TreeCell<String> treeCell, final String s, final boolean b) {
                 if (Strings.isNullOrEmpty(s) || b) {
                     treeCell.setText(null);
                 } else {
@@ -53,16 +53,16 @@ public class SuitePresenter {
             }
 
             @Override
-            protected void removeDragItemFromPreviousParent(TreeItem<String> droppedItemParent) {
+            protected void removeDragItemFromPreviousParent(final TreeItem<String> droppedItemParent) {
                 super.removeDragItemFromPreviousParent(droppedItemParent);
-                this.dragged = application.findTestCase(droppedItemParent.getValue(), getDraggedItem().getValue());
-                application.removeScriptFromChain(droppedItemParent.getValue(), getDraggedItem().getValue());
+                this.dragged = SuitePresenter.this.application.findTestCase(droppedItemParent.getValue(), this.getDraggedItem().getValue());
+                SuitePresenter.this.application.removeScriptFromChain(droppedItemParent.getValue(), this.getDraggedItem().getValue());
             }
 
             @Override
-            protected void addDropItemToNewParent(TreeItem<String> droppedItemParent, int i) {
+            protected void addDropItemToNewParent(final TreeItem<String> droppedItemParent, final int i) {
                 super.addDropItemToNewParent(droppedItemParent, i);
-                application.addScript(droppedItemParent.getValue(), i, this.dragged);
+                SuitePresenter.this.application.addScript(droppedItemParent.getValue(), i, this.dragged);
                 this.dragged = null;
             }
 
@@ -75,9 +75,9 @@ public class SuitePresenter {
                 this.findItem(newValue).ifPresent(it -> this.treeViewScriptName.getSelectionModel().select(it));
             }
             try {
-                openDataSource.setDisable(!observed.getValue().runtimeDataSet().isLoadable() || observed.getValue().loadData().size() <= 0);
-            } catch (IOException e) {
-                openDataSource.setDisable(true);
+                this.openDataSource.setDisable(!observed.getValue().runtimeDataSet().isLoadable() || observed.getValue().loadData().size() <= 0);
+            } catch (final IOException e) {
+                this.openDataSource.setDisable(true);
             }
         });
         this.showScriptView();
@@ -107,18 +107,18 @@ public class SuitePresenter {
 
     @FXML
     void handleScriptCreateTemplate() {
-        new TemplateView(treeViewScriptName.getScene().getWindow());
+        new TemplateView(this.treeViewScriptName.getScene().getWindow());
     }
 
     @FXML
     void handleScriptImport() {
-        FileChooser fileChooser = new FileChooser();
+        final FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open Resource File");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("json format (*.json)", "*.json"));
         fileChooser.setInitialDirectory(this.getBaseDirectory());
-        Stage stage = new Stage();
-        stage.initOwner(treeViewScriptName.getScene().getWindow());
-        File file = fileChooser.showOpenDialog(stage);
+        final Stage stage = new Stage();
+        stage.initOwner(this.treeViewScriptName.getScene().getWindow());
+        final File file = fileChooser.showOpenDialog(stage);
         if (file != null) {
             this.application.importScript(file);
         }
@@ -145,16 +145,16 @@ public class SuitePresenter {
     }
 
     private void showScriptView() {
-        Suite suite = this.application.getSuite();
-        TreeItem<String> root = new TreeItem<>(suite.name());
+        final Suite suite = this.application.getSuite();
+        final TreeItem<String> root = new TreeItem<>(suite.name());
         root.setExpanded(true);
         this.treeViewScriptName.setRoot(root);
         this.refreshScriptView(suite, this.application.getDisplayTestCase().name());
     }
 
-    private void refreshScriptView(Suite suite, String selectScriptName) {
+    private void refreshScriptView(final Suite suite, final String selectScriptName) {
         this.treeViewScriptName.getRoot().getChildren().clear();
-        addChainToTreeView(selectScriptName, suite.getChains(), this.treeViewScriptName.getRoot());
+        this.addChainToTreeView(selectScriptName, suite.getChains(), this.treeViewScriptName.getRoot());
         this.treeViewScriptName.getSelectionModel()
                 .selectedItemProperty()
                 .addListener((observable, oldValue, newValue) -> {
@@ -164,49 +164,49 @@ public class SuitePresenter {
                 });
     }
 
-    private void addChainToTreeView(String selectScriptName, TestCaseChains chains, TreeItem<String> parent) {
-        for (TestCase testCase : chains) {
-            String name = testCase.name();
-            TreeItem<String> item = new TreeItem<>(name);
+    private void addChainToTreeView(final String selectScriptName, final TestCaseChains chains, final TreeItem<String> parent) {
+        chains.forEach(testCase -> {
+            final String name = testCase.name();
+            final TreeItem<String> item = new TreeItem<>(name);
             parent.getChildren().add(item);
             if (name.equals(selectScriptName)) {
                 this.treeViewScriptName.getSelectionModel().select(item);
             }
-            addChainToTreeView(selectScriptName, testCase.chains(), item);
-        }
+            this.addChainToTreeView(selectScriptName, testCase.chains(), item);
+        });
     }
 
-    private Optional<TreeItem<String>> findItem(TestCase newValue) {
+    private Optional<TreeItem<String>> findItem(final TestCase newValue) {
         return this.treeItems()
                 .filter(it -> newValue.name().equals(it.getValue()))
                 .findFirst();
     }
 
     private Stream<TreeItem<String>> treeItems() {
-        List<TreeItem<String>> result = Lists.newArrayList();
+        final List<TreeItem<String>> result = Lists.newArrayList();
         this.collectItems(this.treeViewScriptName.getRoot().getChildren(), result);
         return result.stream();
     }
 
-    private void collectItems(List<TreeItem<String>> source, List<TreeItem<String>> result) {
-        source.forEach(collectItems(result));
+    private void collectItems(final List<TreeItem<String>> source, final List<TreeItem<String>> result) {
+        source.forEach(this.collectItems(result));
     }
 
-    private Consumer<TreeItem<String>> collectItems(List<TreeItem<String>> result) {
+    private Consumer<TreeItem<String>> collectItems(final List<TreeItem<String>> result) {
         return it -> {
             result.add(it);
             if (it.getChildren().size() > 0) {
-                collectItems(it.getChildren(), result);
+                this.collectItems(it.getChildren(), result);
             }
         };
     }
 
     private void saveTestCaseToNewFile() {
-        FileChooser fileSave = new FileChooser();
+        final FileChooser fileSave = new FileChooser();
         fileSave.setTitle("Save TestCase File");
         fileSave.getExtensionFilters().add(new FileChooser.ExtensionFilter("json format (*.json)", "*.json"));
         fileSave.setInitialDirectory(this.getBaseDirectory());
-        File file = fileSave.showSaveDialog(treeViewScriptName.getScene().getWindow());
+        final File file = fileSave.showSaveDialog(this.treeViewScriptName.getScene().getWindow());
         if (file != null) {
             this.application.saveTestCase(file);
         }

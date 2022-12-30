@@ -29,7 +29,7 @@ import java.util.Objects;
 public class Store extends AbstractStepType implements GetterUseStep {
     public final Getter getter;
 
-    public Store(Getter getter) {
+    public Store(final Getter getter) {
         this.getter = getter;
     }
 
@@ -39,7 +39,7 @@ public class Store extends AbstractStepType implements GetterUseStep {
     }
 
     @Override
-    public boolean run(TestRun ctx) {
+    public boolean run(final TestRun ctx) {
         String value = this.getter.get(ctx);
         if (ctx.currentStep().containsParam("regex")) {
             value = value.replaceAll(ctx.string("regex"), ctx.string("replacement"));
@@ -52,7 +52,7 @@ public class Store extends AbstractStepType implements GetterUseStep {
     }
 
     @Override
-    public StepBuilder addDefaultParam(StepBuilder o) {
+    public StepBuilder addDefaultParam(final StepBuilder o) {
         if (!o.containsStringParam("regex")) {
             o.put("regex", "");
         }
@@ -66,11 +66,11 @@ public class Store extends AbstractStepType implements GetterUseStep {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (!super.equals(o)) {
             return false;
         }
-        Store store = (Store) o;
+        final Store store = (Store) o;
         return Objects.equals(this.getGetter(), store.getGetter());
     }
 

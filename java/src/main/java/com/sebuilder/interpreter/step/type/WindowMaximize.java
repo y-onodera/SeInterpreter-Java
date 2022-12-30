@@ -12,7 +12,7 @@ public class WindowMaximize extends AbstractStepType {
      * should return false. Other failures should throw a RuntimeException.
      */
     @Override
-    public boolean run(TestRun ctx) {
+    public boolean run(final TestRun ctx) {
         ctx.driver().manage().window().maximize();
         return true;
     }

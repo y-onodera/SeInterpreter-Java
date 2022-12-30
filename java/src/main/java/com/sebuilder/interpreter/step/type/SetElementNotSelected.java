@@ -23,8 +23,8 @@ import org.openqa.selenium.WebElement;
 
 public class SetElementNotSelected extends AbstractStepType implements ConditionalStep, LocatorHolder {
     @Override
-    public boolean doRun(TestRun ctx) {
-        WebElement e = ctx.locator().find(ctx);
+    public boolean doRun(final TestRun ctx) {
+        final WebElement e = ctx.locator().find(ctx);
         if (e.isSelected()) {
             e.click();
         }

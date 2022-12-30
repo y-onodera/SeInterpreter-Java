@@ -21,8 +21,8 @@ import com.sebuilder.interpreter.TestRun;
 
 public class Eval extends AbstractGetter {
     @Override
-    public String get(TestRun ctx) {
-        Object result = ctx.executeScript(ctx.string("script"));
+    public String get(final TestRun ctx) {
+        final Object result = ctx.executeScript(ctx.string("script"));
         return result == null ? null : result.toString();
     }
 
@@ -32,7 +32,7 @@ public class Eval extends AbstractGetter {
     }
 
     @Override
-    public StepBuilder addDefaultParam(StepBuilder o) {
+    public StepBuilder addDefaultParam(final StepBuilder o) {
         if (!o.containsStringParam("script")) {
             o.put("script", "return true;");
         }

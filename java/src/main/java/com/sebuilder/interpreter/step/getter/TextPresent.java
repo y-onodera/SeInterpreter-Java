@@ -21,12 +21,12 @@ import com.sebuilder.interpreter.TestRun;
 
 public class TextPresent extends AbstractGetter {
     @Override
-    public String get(TestRun ctx) {
+    public String get(final TestRun ctx) {
         return Boolean.toString(ctx.getHtml().contains(ctx.text()));
     }
 
     @Override
-    public StepBuilder addDefaultParam(StepBuilder o) {
+    public StepBuilder addDefaultParam(final StepBuilder o) {
         if (!o.containsStringParam("text")) {
             o.put("text", "");
         }

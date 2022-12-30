@@ -13,7 +13,7 @@ public abstract class AbstractPrintable implements Printable {
     private int innerScrollHeight;
     private int innerScrollWidth;
 
-    protected AbstractPrintable(TestRun ctx) {
+    protected AbstractPrintable(final TestRun ctx) {
         this.ctx = ctx;
     }
 
@@ -55,7 +55,7 @@ public abstract class AbstractPrintable implements Printable {
         return this.innerScrollableElement;
     }
 
-    protected void handleInnerScrollElement(InnerScrollElementHandler innerScrollElementHandler) {
+    protected void handleInnerScrollElement(final InnerScrollElementHandler innerScrollElementHandler) {
         this.innerScrollableElement = innerScrollElementHandler.handleTarget(this);
         this.innerScrollHeight = this.getInnerVerticalScrollableElement()
                 .values()

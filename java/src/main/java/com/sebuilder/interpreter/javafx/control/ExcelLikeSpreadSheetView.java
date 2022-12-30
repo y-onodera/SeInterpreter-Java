@@ -5,7 +5,6 @@ import com.google.common.collect.Maps;
 import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
-import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.*;
@@ -18,13 +17,14 @@ public class ExcelLikeSpreadSheetView extends SpreadsheetView {
 
     public static final SpreadsheetCellType.StringType TEXT_AREA = new SpreadsheetCellType.StringType() {
         @Override
-        public SpreadsheetCellEditor createEditor(SpreadsheetView view) {
-            TextArea textArea = new TextArea();
+        public SpreadsheetCellEditor createEditor(final SpreadsheetView view) {
+            final TextArea textArea = new TextArea();
             textArea.setWrapText(true);
             textArea.minHeightProperty().bind(textArea.maxHeightProperty());
             return new SpreadsheetCellEditor(view) {
 
-                public void startEdit(Object value, String format, Object... options) {
+                @Override
+                public void startEdit(final Object value, final String format, final Object... options) {
                     if (value instanceof String || value == null) {
                         textArea.setText((String) value);
                     }
@@ -33,25 +33,30 @@ public class ExcelLikeSpreadSheetView extends SpreadsheetView {
                     textArea.selectAll();
                 }
 
+                @Override
                 public String getControlValue() {
                     return textArea.getText();
                 }
 
+                @Override
                 public void end() {
                     textArea.setOnKeyPressed(null);
                 }
 
+                @Override
                 public TextArea getEditor() {
                     return textArea;
                 }
 
+                @Override
                 public double getMaxHeight() {
                     return 1.7976931348623157E308D;
                 }
 
                 private void attachEnterEscapeEventHandler() {
-                    textArea.addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
-                        public void handle(KeyEvent keyEvent) {
+                    textArea.addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<>() {
+                        @Override
+                        public void handle(final KeyEvent keyEvent) {
                             if (keyEvent.getCode() == KeyCode.ENTER) {
                                 if (keyEvent.isAltDown()) {
                                     textArea.replaceSelection("\n");
@@ -88,32 +93,32 @@ public class ExcelLikeSpreadSheetView extends SpreadsheetView {
 
     private final KeyCombination redoKeypad;
 
-    public ExcelLikeSpreadSheetView(GridBase grid) {
+    public ExcelLikeSpreadSheetView(final GridBase grid) {
         super(grid);
         grid.addEventHandler(GridChange.GRID_CHANGE_EVENT, change -> {
-            redoStack.clear();
-            undoStack.push(change);
+            this.redoStack.clear();
+            this.undoStack.push(change);
         });
         this.undoKeypad = new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN);
         this.redoKeypad = new KeyCodeCombination(KeyCode.Y, KeyCombination.SHORTCUT_DOWN);
         this.getChildren().get(0).addEventFilter(KeyEvent.KEY_PRESSED, (keyEvent) -> {
-            if (undoKeypad.match(keyEvent)) {
-                if (undoStack.size() > 0) {
-                    GridChange change = undoStack.pop();
-                    redoStack.push(change);
-                    SpreadsheetCell cell = (SpreadsheetCell) ((ObservableList) this.getGrid().getRows().get(change.getRow())).get(change.getColumn());
-                    Object convertedValue = cell.getCellType().convertValue(change.getOldValue());
+            if (this.undoKeypad.match(keyEvent)) {
+                if (this.undoStack.size() > 0) {
+                    final GridChange change = this.undoStack.pop();
+                    this.redoStack.push(change);
+                    final SpreadsheetCell cell = this.getGrid().getRows().get(change.getRow()).get(change.getColumn());
+                    final Object convertedValue = cell.getCellType().convertValue(change.getOldValue());
                     cell.setItem(convertedValue);
-                    this.getSelectionModel().focus(cell.getRow(), getColumns().get(cell.getColumn()));
+                    this.getSelectionModel().focus(cell.getRow(), this.getColumns().get(cell.getColumn()));
                 }
-            } else if (redoKeypad.match(keyEvent)) {
-                if (redoStack.size() > 0) {
-                    GridChange change = redoStack.pop();
-                    undoStack.push(change);
-                    SpreadsheetCell cell = (SpreadsheetCell) ((ObservableList) this.getGrid().getRows().get(change.getRow())).get(change.getColumn());
-                    Object convertedValue = cell.getCellType().convertValue(change.getNewValue());
+            } else if (this.redoKeypad.match(keyEvent)) {
+                if (this.redoStack.size() > 0) {
+                    final GridChange change = this.redoStack.pop();
+                    this.undoStack.push(change);
+                    final SpreadsheetCell cell = this.getGrid().getRows().get(change.getRow()).get(change.getColumn());
+                    final Object convertedValue = cell.getCellType().convertValue(change.getNewValue());
                     cell.setItem(convertedValue);
-                    this.getSelectionModel().focus(cell.getRow(), getColumns().get(cell.getColumn()));
+                    this.getSelectionModel().focus(cell.getRow(), this.getColumns().get(cell.getColumn()));
                 }
             }
         });
@@ -123,9 +128,9 @@ public class ExcelLikeSpreadSheetView extends SpreadsheetView {
     @Override
     public void copyClipboard() {
         super.copyClipboard();
-        Object content = Clipboard.getSystemClipboard().getContent(this.getSpreadSheetDataFormat());
+        final Object content = Clipboard.getSystemClipboard().getContent(this.getSpreadSheetDataFormat());
         if (content != null) {
-            ClipboardContent newContent = new ClipboardContent();
+            final ClipboardContent newContent = new ClipboardContent();
             newContent.put(this.getSpreadSheetDataFormat(), content);
             newContent.putString(this.toString((ArrayList<ClipboardCell>) content));
             Clipboard.getSystemClipboard().setContent(newContent);
@@ -134,39 +139,38 @@ public class ExcelLikeSpreadSheetView extends SpreadsheetView {
 
     @Override
     public void pasteClipboard() {
-        Clipboard clipboard = Clipboard.getSystemClipboard();
+        final Clipboard clipboard = Clipboard.getSystemClipboard();
         if (this.isPasteOutsideApplication(clipboard)) {
-            ClipboardContent newContent = new ClipboardContent();
+            final ClipboardContent newContent = new ClipboardContent();
             newContent.put(this.getSpreadSheetDataFormat(), this.toClipboardCell(clipboard.getContent(DataFormat.PLAIN_TEXT).toString()));
             Clipboard.getSystemClipboard().setContent(newContent);
         }
         super.pasteClipboard();
     }
 
-    protected boolean isPasteOutsideApplication(Clipboard clipboard) {
-        return clipboard.getContent(DataFormat.PLAIN_TEXT) != null && clipboard.getContent(getSpreadSheetDataFormat()) == null;
+    protected boolean isPasteOutsideApplication(final Clipboard clipboard) {
+        return clipboard.getContent(DataFormat.PLAIN_TEXT) != null && clipboard.getContent(this.getSpreadSheetDataFormat()) == null;
     }
 
-    protected String toString(ArrayList<ClipboardCell> content) {
-        Map<Integer, StringBuilder> copy = Maps.newLinkedHashMap();
-        for (ClipboardCell cell : content) {
-            copy.merge(cell.getRow()
-                    , new StringBuilder(cell.getValue() == null ? "" : "\"" + cell.getValue() + "\"")
-                    , (summary, newVal) -> summary.append("\t").append(newVal));
-        }
-        StringJoiner result = new StringJoiner("\r\n");
+    protected String toString(final ArrayList<ClipboardCell> content) {
+        final Map<Integer, StringBuilder> copy = Maps.newLinkedHashMap();
+        content.forEach(cell ->
+                copy.merge(cell.getRow()
+                        , new StringBuilder(cell.getValue() == null ? "" : "\"" + cell.getValue() + "\"")
+                        , (summary, newVal) -> summary.append("\t").append(newVal)));
+        final StringJoiner result = new StringJoiner("\r\n");
         copy.values().forEach(result::add);
         return result.toString();
     }
 
-    protected List<ClipboardCell> toClipboardCell(String content) {
+    protected List<ClipboardCell> toClipboardCell(final String content) {
         int rowNo = 0;
-        List<ClipboardCell> pasteContents = Lists.newArrayList();
-        CSVReader csvR = new CSVReaderBuilder(new StringReader(content)).withCSVParser(new CSVParserBuilder().withSeparator('\t').build()).build();
-        for (String[] row : csvR) {
+        final List<ClipboardCell> pasteContents = Lists.newArrayList();
+        final CSVReader csvR = new CSVReaderBuilder(new StringReader(content)).withCSVParser(new CSVParserBuilder().withSeparator('\t').build()).build();
+        for (final String[] row : csvR) {
             int columnNo = 0;
-            for (String column : row) {
-                SpreadsheetCell cell = TEXT_AREA.createCell(rowNo, columnNo, 1, 1, column);
+            for (final String column : row) {
+                final SpreadsheetCell cell = TEXT_AREA.createCell(rowNo, columnNo, 1, 1, column);
                 pasteContents.add(new ClipboardCell(rowNo, columnNo, cell));
                 columnNo++;
             }

@@ -25,10 +25,10 @@ import java.util.Date;
 
 public class AddCookie extends AbstractStepType {
     @Override
-    public boolean run(TestRun ctx) {
-        Cookie.Builder cb = new Cookie.Builder(ctx.string("name"), ctx.string("value"));
-        for (String opt : ctx.string("options").split(",")) {
-            String[] kv = opt.split("=", 2);
+    public boolean run(final TestRun ctx) {
+        final Cookie.Builder cb = new Cookie.Builder(ctx.string("name"), ctx.string("value"));
+        for (final String opt : ctx.string("options").split(",")) {
+            final String[] kv = opt.split("=", 2);
             if (kv.length == 1) {
                 continue;
             }
@@ -45,7 +45,7 @@ public class AddCookie extends AbstractStepType {
     }
 
     @Override
-    public StepBuilder addDefaultParam(StepBuilder o) {
+    public StepBuilder addDefaultParam(final StepBuilder o) {
         if (!o.containsStringParam("name")) {
             o.put("name", "");
         }

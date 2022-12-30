@@ -12,17 +12,17 @@ import java.io.IOException;
 
 public class DataSetView extends FXMLView {
 
-    public void showDataSet(DataSourceLoader resource, Window parentWindow) throws IOException {
+    public void showDataSet(final DataSourceLoader resource, final Window parentWindow) throws IOException {
         this.presenter().showDataSet(resource);
-        Stage stage = new Stage();
+        final Stage stage = new Stage();
         stage.initOwner(parentWindow);
-        Scene scene = new Scene(this.getView());
+        final Scene scene = new Scene(this.getView());
         stage.setTitle(resource.name());
         stage.setScene(scene);
         stage.show();
     }
 
-    public void onClick(EventHandler<ActionEvent> handler){
+    public void onClick(final EventHandler<ActionEvent> handler) {
         this.presenter().setOnclick(handler);
     }
 

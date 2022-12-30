@@ -22,13 +22,13 @@ import com.sebuilder.interpreter.step.AbstractStepType;
 
 public class SwitchToWindow extends AbstractStepType {
     @Override
-    public boolean run(TestRun ctx) {
+    public boolean run(final TestRun ctx) {
         ctx.driver().switchTo().window(ctx.string("name"));
         return true;
     }
 
     @Override
-    public StepBuilder addDefaultParam(StepBuilder o) {
+    public StepBuilder addDefaultParam(final StepBuilder o) {
         if (!o.containsStringParam("name")) {
             o.put("name", "");
         }

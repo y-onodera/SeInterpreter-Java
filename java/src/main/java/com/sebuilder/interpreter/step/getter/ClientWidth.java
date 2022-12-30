@@ -6,7 +6,7 @@ import com.sebuilder.interpreter.step.LocatorHolder;
 
 public class ClientWidth extends AbstractGetter implements LocatorHolder {
     @Override
-    public String get(TestRun ctx) {
+    public String get(final TestRun ctx) {
         if (ctx.hasLocator()) {
             return String.valueOf(ctx.locator().find(ctx).getCssValue("clientWidth"));
         }
@@ -19,7 +19,7 @@ public class ClientWidth extends AbstractGetter implements LocatorHolder {
     }
 
     @Override
-    public StepBuilder addDefaultParam(StepBuilder o) {
+    public StepBuilder addDefaultParam(final StepBuilder o) {
         return o.apply(LocatorHolder.super::addDefaultParam)
                 .apply(super::addDefaultParam);
     }

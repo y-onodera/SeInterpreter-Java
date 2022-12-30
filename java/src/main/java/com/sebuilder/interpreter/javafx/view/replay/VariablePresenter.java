@@ -26,20 +26,20 @@ public class VariablePresenter {
 
     private InputData resource;
 
-    public void open(InputData var) {
+    public void open(final InputData var) {
         this.resource = var;
-        GridBase grid = new GridBase(50, 2);
+        final GridBase grid = new GridBase(50, 2);
         grid.getColumnHeaders().addAll("key", "value");
-        ObservableList<ObservableList<SpreadsheetCell>> rows = FXCollections.observableArrayList();
+        final ObservableList<ObservableList<SpreadsheetCell>> rows = FXCollections.observableArrayList();
         int i = 0;
-        for (Map.Entry<String, String> entry : var.input().entrySet()) {
+        for (final Map.Entry<String, String> entry : var.input().entrySet()) {
             final ObservableList<SpreadsheetCell> dataRow = FXCollections.observableArrayList();
             dataRow.add(TEXT_AREA.createCell(i, 0, 1, 1, entry.getKey()));
             dataRow.add(TEXT_AREA.createCell(i, 1, 1, 1, entry.getValue()));
             rows.add(dataRow);
             i++;
         }
-        for (int j = 50; i < j; i++) {
+        for (final int j = 50; i < j; i++) {
             final ObservableList<SpreadsheetCell> dataRow = FXCollections.observableArrayList();
             dataRow.add(TEXT_AREA.createCell(i, 0, 1, 1, ""));
             dataRow.add(TEXT_AREA.createCell(i, 1, 1, 1, ""));
@@ -73,7 +73,7 @@ public class VariablePresenter {
         this.open(this.resource);
     }
 
-    public void setOnclick(Consumer<InputData> onclick) {
+    public void setOnclick(final Consumer<InputData> onclick) {
         this.onclick = onclick;
     }
 

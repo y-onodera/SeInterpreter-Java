@@ -11,7 +11,7 @@ public class ScrollableWidth implements Scrollable {
     private final int scrollableWidth;
     private final boolean ignoreScroll;
 
-    public ScrollableWidth(Builder builder) {
+    public ScrollableWidth(final Builder builder) {
         this.wd = builder.getWebDriver();
         this.targetElement = builder.getTargetElement();
         this.pointX = builder.getPointX();
@@ -26,7 +26,7 @@ public class ScrollableWidth implements Scrollable {
     }
 
     public WebElement getTargetElement() {
-        return targetElement;
+        return this.targetElement;
     }
 
     public int getPointX() {
@@ -49,22 +49,22 @@ public class ScrollableWidth implements Scrollable {
         return !this.ignoreScroll && this.getScrollableWidth() > this.getViewportWidth();
     }
 
-    public boolean isEnableMoveScrollLeftTo(int aPointX) {
+    public boolean isEnableMoveScrollLeftTo(final int aPointX) {
         return aPointX + this.getViewportWidth() < this.getScrollableWidth();
     }
 
-    public void scrollHorizontally(int nextLeft) {
+    public void scrollHorizontally(final int nextLeft) {
         if (this.hasHorizontalScroll()) {
             if (this.getTargetElement() != null) {
                 this.executeScript("arguments[0].scrollLeft = arguments[1]; return [];", this.getTargetElement(), nextLeft);
             } else {
                 this.executeScript("scrollTo(arguments[0],document.documentElement.scrollTop); return [];", nextLeft);
             }
-            waitForScrolling();
+            this.waitForScrolling();
         }
     }
 
-    public int scrollOutHorizontally(int nextLeft) {
+    public int scrollOutHorizontally(final int nextLeft) {
         if (this.isEnableMoveScrollLeftTo(nextLeft)) {
             this.scrollHorizontally(nextLeft);
             return 0;
@@ -90,7 +90,7 @@ public class ScrollableWidth implements Scrollable {
         }
 
         public RemoteWebDriver getWebDriver() {
-            return webDriver;
+            return this.webDriver;
         }
 
         public WebElement getTargetElement() {
@@ -98,47 +98,47 @@ public class ScrollableWidth implements Scrollable {
         }
 
         public int getPointX() {
-            return pointX;
+            return this.pointX;
         }
 
         public int getViewportWidth() {
-            return viewportWidth;
+            return this.viewportWidth;
         }
 
         public int getScrollableWidth() {
-            return scrollableWidth;
+            return this.scrollableWidth;
         }
 
         public boolean isIgnoreScroll() {
-            return ignoreScroll;
+            return this.ignoreScroll;
         }
 
-        public Builder setWebDriver(RemoteWebDriver webDriver) {
+        public Builder setWebDriver(final RemoteWebDriver webDriver) {
             this.webDriver = webDriver;
             return this;
         }
 
-        public Builder setPointX(int pointX) {
+        public Builder setPointX(final int pointX) {
             this.pointX = pointX;
             return this;
         }
 
-        public Builder setViewportWidth(int viewportWidth) {
+        public Builder setViewportWidth(final int viewportWidth) {
             this.viewportWidth = viewportWidth;
             return this;
         }
 
-        public Builder setScrollableWidth(int scrollableWidth) {
+        public Builder setScrollableWidth(final int scrollableWidth) {
             this.scrollableWidth = scrollableWidth;
             return this;
         }
 
-        public Builder setTargetElement(WebElement targetElement) {
+        public Builder setTargetElement(final WebElement targetElement) {
             this.targetElement = targetElement;
             return this;
         }
 
-        public Builder isIgnoreScroll(boolean ignoreScroll) {
+        public Builder isIgnoreScroll(final boolean ignoreScroll) {
             this.ignoreScroll = ignoreScroll;
             return this;
         }

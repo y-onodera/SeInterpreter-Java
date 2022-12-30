@@ -21,11 +21,11 @@ import org.openqa.selenium.NoAlertPresentException;
 
 public class AlertPresent extends AbstractGetter {
     @Override
-    public String get(TestRun ctx) {
+    public String get(final TestRun ctx) {
         try {
             ctx.driver().switchTo().alert();
             return "" + true;
-        } catch (NoAlertPresentException e) {
+        } catch (final NoAlertPresentException e) {
             return "" + false;
         }
     }

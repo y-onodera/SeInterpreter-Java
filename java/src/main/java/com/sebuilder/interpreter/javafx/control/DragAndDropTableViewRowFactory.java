@@ -12,12 +12,12 @@ public abstract class DragAndDropTableViewRowFactory<T> implements Callback<Tabl
     private TableRow<T> dropZone;
 
     @Override
-    public TableRow<T> call(TableView<T> tableView) {
-        TableRow<T> row = new TableRow<>() {
+    public TableRow<T> call(final TableView<T> tableView) {
+        final TableRow<T> row = new TableRow<>() {
             @Override
-            protected void updateItem(T scriptBody, boolean b) {
+            protected void updateItem(final T scriptBody, final boolean b) {
                 super.updateItem(scriptBody, b);
-                updateItemCallback(this,scriptBody, b);
+                DragAndDropTableViewRowFactory.this.updateItemCallback(this, scriptBody, b);
             }
 
         };
@@ -28,29 +28,29 @@ public abstract class DragAndDropTableViewRowFactory<T> implements Callback<Tabl
         return row;
     }
 
-    protected void updateItemCallback(TableRow<T> tableRow, T scriptBody, boolean b) {
+    protected void updateItemCallback(final TableRow<T> tableRow, final T scriptBody, final boolean b) {
         // default non implement
     }
 
-    protected void dragDetected(MouseEvent event, TableRow<T> row, TableView<T> tableView) {
+    protected void dragDetected(final MouseEvent event, final TableRow<T> row, final TableView<T> tableView) {
         if (!row.isEmpty()) {
-            Integer index = row.getIndex();
-            Dragboard db = row.startDragAndDrop(TransferMode.MOVE);
+            final Integer index = row.getIndex();
+            final Dragboard db = row.startDragAndDrop(TransferMode.MOVE);
             db.setDragView(row.snapshot(null, null));
-            ClipboardContent cc = new ClipboardContent();
+            final ClipboardContent cc = new ClipboardContent();
             cc.put(Constant.SERIALIZED_MIME_TYPE, index);
             db.setContent(cc);
             event.consume();
         }
     }
 
-    protected void dragOver(DragEvent event, TableRow<T> row, TableView<T> tableView) {
-        Dragboard db = event.getDragboard();
+    protected void dragOver(final DragEvent event, final TableRow<T> row, final TableView<T> tableView) {
+        final Dragboard db = event.getDragboard();
         if (db.hasContent(Constant.SERIALIZED_MIME_TYPE)) {
             if (row.getIndex() != (Integer) db.getContent(Constant.SERIALIZED_MIME_TYPE)) {
                 event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
                 if (!Objects.equals(this.dropZone, row)) {
-                    clearDropLocation();
+                    this.clearDropLocation();
                     this.dropZone = row;
                     this.dropZone.setStyle(Constant.DROP_HINT_STYLE);
                 }
@@ -59,17 +59,17 @@ public abstract class DragAndDropTableViewRowFactory<T> implements Callback<Tabl
         }
     }
 
-    protected void dragAndDrop(DragEvent event, TableRow<T> row, TableView<T> tableView) {
-        Dragboard db = event.getDragboard();
+    protected void dragAndDrop(final DragEvent event, final TableRow<T> row, final TableView<T> tableView) {
+        final Dragboard db = event.getDragboard();
         if (db.hasContent(Constant.SERIALIZED_MIME_TYPE)) {
-            int draggedIndex = (Integer) db.getContent(Constant.SERIALIZED_MIME_TYPE);
-            int dropIndex;
+            final int draggedIndex = (Integer) db.getContent(Constant.SERIALIZED_MIME_TYPE);
+            final int dropIndex;
             if (row.isEmpty()) {
                 dropIndex = tableView.getItems().size() - 1;
             } else {
                 dropIndex = row.getIndex();
             }
-            move(draggedIndex, dropIndex);
+            this.move(draggedIndex, dropIndex);
             event.setDropCompleted(false);
             event.consume();
         }

@@ -21,7 +21,7 @@ import com.sebuilder.interpreter.TestRun;
 
 public class CookiePresent extends AbstractGetter {
     @Override
-    public String get(TestRun ctx) {
+    public String get(final TestRun ctx) {
         return "" + (ctx.driver().manage().getCookieNamed(ctx.string("name")) != null);
     }
 
@@ -31,7 +31,7 @@ public class CookiePresent extends AbstractGetter {
     }
 
     @Override
-    public StepBuilder addDefaultParam(StepBuilder o) {
+    public StepBuilder addDefaultParam(final StepBuilder o) {
         if (!o.containsStringParam("name")) {
             o.put("name", "");
         }

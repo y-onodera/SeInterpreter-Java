@@ -10,28 +10,22 @@ import org.apache.logging.log4j.Logger;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-public class ErrorDialog {
+public record ErrorDialog(Logger log) {
 
-    private final Logger log;
-
-    public ErrorDialog(Logger log) {
-        this.log = log;
-    }
-
-    public void show(String message, Throwable th) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
+    public void show(final String message, final Throwable th) {
+        final Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Exception Dialog");
         alert.setHeaderText(null);
         alert.setContentText(message);
 
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
+        final StringWriter sw = new StringWriter();
+        final PrintWriter pw = new PrintWriter(sw);
         th.printStackTrace(pw);
-        String exceptionText = sw.toString();
+        final String exceptionText = sw.toString();
         this.log.error(exceptionText);
 
-        Label label = new Label("The exception stacktrace was:");
-        TextArea textArea = new TextArea(exceptionText);
+        final Label label = new Label("The exception stacktrace was:");
+        final TextArea textArea = new TextArea(exceptionText);
         textArea.setEditable(false);
         textArea.setWrapText(true);
 
@@ -40,7 +34,7 @@ public class ErrorDialog {
         GridPane.setVgrow(textArea, Priority.ALWAYS);
         GridPane.setHgrow(textArea, Priority.ALWAYS);
 
-        GridPane expContent = new GridPane();
+        final GridPane expContent = new GridPane();
         expContent.setMaxWidth(Double.MAX_VALUE);
         expContent.add(label, 0, 0);
         expContent.add(textArea, 0, 1);

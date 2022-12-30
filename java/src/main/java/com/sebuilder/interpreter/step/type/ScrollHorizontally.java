@@ -11,11 +11,11 @@ import com.sebuilder.interpreter.step.LocatorHolder;
 public class ScrollHorizontally extends AbstractStepType implements Exportable, LocatorHolder {
 
     @Override
-    public boolean run(TestRun ctx) {
-        ScrollableWidth width;
-        if(ctx.hasLocator()) {
+    public boolean run(final TestRun ctx) {
+        final ScrollableWidth width;
+        if (ctx.hasLocator()) {
             width = ScrollableTag.getWidth(ctx, ctx.locator().find(ctx));
-        }else {
+        } else {
             width = Page.getWidth(ctx);
         }
         width.scrollHorizontally(Integer.parseInt(ctx.string("pointX")));
@@ -23,7 +23,7 @@ public class ScrollHorizontally extends AbstractStepType implements Exportable, 
     }
 
     @Override
-    public StepBuilder addDefaultParam(StepBuilder o) {
+    public StepBuilder addDefaultParam(final StepBuilder o) {
         if (!o.containsStringParam("pointX")) {
             o.put("pointX", "");
         }

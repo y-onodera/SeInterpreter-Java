@@ -11,28 +11,31 @@ import java.io.InputStreamReader;
 public class Cmd extends AbstractGetter {
 
     @Override
-    public String get(TestRun ctx) {
-        String[] cmd = ctx.string("cmd").split(",");
-        ProcessBuilder pb = new ProcessBuilder(cmd);
+    public String get(final TestRun ctx) {
+        final String[] cmd = ctx.string("cmd").split(",");
+        final ProcessBuilder pb = new ProcessBuilder(cmd);
         // 標準エラー出力を標準出力にマージする
         pb.redirectErrorStream(true);
         try {
-            Process process = pb.start();
-            InputStream in = process.getInputStream();
-            BufferedReader br = new BufferedReader(new InputStreamReader(in, "MS932"));
+            final Process process = pb.start();
+            final InputStream in = process.getInputStream();
+            final BufferedReader br = new BufferedReader(new InputStreamReader(in, "MS932"));
             String stdout = "";
             while ((stdout = br.readLine()) != null) {
                 // 不要なメッセージを表示しない
-                if (Strings.isNullOrEmpty(stdout))
+                if (Strings.isNullOrEmpty(stdout)) {
                     continue;
-                if (stdout.contains("echo off "))
+                }
+                if (stdout.contains("echo off ")) {
                     continue;
-                if (stdout.contains("続行するには何かキーを押してください "))
+                }
+                if (stdout.contains("続行するには何かキーを押してください ")) {
                     continue;
+                }
                 ctx.log().info(stdout);
             }
             return String.valueOf(process.waitFor());
-        } catch (InterruptedException | IOException e) {
+        } catch (final InterruptedException | IOException e) {
             ctx.log().error(e);
             return "false";
         }

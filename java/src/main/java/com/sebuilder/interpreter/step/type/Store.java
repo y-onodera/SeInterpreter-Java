@@ -22,13 +22,13 @@ import com.sebuilder.interpreter.step.AbstractStepType;
 
 public class Store extends AbstractStepType {
     @Override
-    public boolean run(TestRun ctx) {
+    public boolean run(final TestRun ctx) {
         ctx.putVars(ctx.string("variable"), ctx.string("text"));
         return true;
     }
 
     @Override
-    public StepBuilder addDefaultParam(StepBuilder o) {
+    public StepBuilder addDefaultParam(final StepBuilder o) {
         if (!o.containsStringParam("variable")) {
             o.put("variable", "");
         }

@@ -24,7 +24,7 @@ import org.openqa.selenium.interactions.Actions;
 public class MouseOverElement extends AbstractStepType implements ConditionalStep, LocatorHolder {
 
     @Override
-    public boolean doRun(TestRun ctx) {
+    public boolean doRun(final TestRun ctx) {
         new Actions(ctx.driver()).moveToElement(ctx.locator().find(ctx)).build().perform();
         return true;
     }

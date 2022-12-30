@@ -7,12 +7,12 @@ import com.sebuilder.interpreter.TestRun;
 public class Loop extends AbstractStepType implements FlowStep {
 
     @Override
-    public boolean run(TestRun ctx) {
-        Step thisStep = ctx.currentStep();
+    public boolean run(final TestRun ctx) {
+        final Step thisStep = ctx.currentStep();
         boolean success = true;
         ctx.processTestSuccess(false);
-        int actions = getSubSteps(ctx);
-        int count = Integer.parseInt(ctx.string("count"));
+        final int actions = this.getSubSteps(ctx);
+        final int count = Integer.parseInt(ctx.string("count"));
         for (int i = 0; i < count; i++) {
             ctx.putVars("_index", String.valueOf(i + 1));
             success = this.runSubStep(ctx, actions) && success;
@@ -26,7 +26,7 @@ public class Loop extends AbstractStepType implements FlowStep {
     }
 
     @Override
-    public StepBuilder addDefaultParam(StepBuilder o) {
+    public StepBuilder addDefaultParam(final StepBuilder o) {
         if (!o.containsStringParam("count")) {
             o.put("count", "");
         }

@@ -22,7 +22,7 @@ import com.sebuilder.interpreter.step.LocatorHolder;
 
 public class ElementStyle extends AbstractGetter implements LocatorHolder {
     @Override
-    public String get(TestRun ctx) {
+    public String get(final TestRun ctx) {
         return ctx.locator().find(ctx).getCssValue(ctx.string("propertyName"));
     }
 
@@ -32,7 +32,7 @@ public class ElementStyle extends AbstractGetter implements LocatorHolder {
     }
 
     @Override
-    public StepBuilder addDefaultParam(StepBuilder o) {
+    public StepBuilder addDefaultParam(final StepBuilder o) {
         if (!o.containsStringParam("propertyName")) {
             o.put("propertyName", "");
         }

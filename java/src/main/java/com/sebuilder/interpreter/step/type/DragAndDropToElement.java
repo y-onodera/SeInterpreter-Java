@@ -25,7 +25,7 @@ import org.openqa.selenium.interactions.Actions;
 
 public class DragAndDropToElement extends AbstractStepType implements ConditionalStep, LocatorHolder {
     @Override
-    public boolean doRun(TestRun ctx) {
+    public boolean doRun(final TestRun ctx) {
         new Actions(ctx.driver()).dragAndDrop(
                 ctx.locator().find(ctx),
                 ctx.locator("locator2").find(ctx)).build().perform();
@@ -33,7 +33,7 @@ public class DragAndDropToElement extends AbstractStepType implements Conditiona
     }
 
     @Override
-    public StepBuilder addDefaultParam(StepBuilder o) {
+    public StepBuilder addDefaultParam(final StepBuilder o) {
         if (!o.containsLocatorParam("locator2")) {
             o.put("locator2", new Locator("id", ""));
         }

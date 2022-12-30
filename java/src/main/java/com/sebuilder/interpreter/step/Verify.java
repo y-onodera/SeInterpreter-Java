@@ -23,7 +23,7 @@ package com.sebuilder.interpreter.step;
  */
 public class Verify extends Assert {
 
-    public Verify(Getter getter) {
+    public Verify(final Getter getter) {
         super(getter);
     }
 

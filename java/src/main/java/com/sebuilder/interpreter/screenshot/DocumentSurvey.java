@@ -11,24 +11,26 @@ public interface DocumentSurvey extends WebDriverWrapper {
 
     int getImageWidth();
 
+    @Override
     int getWindowHeight();
 
+    @Override
     int getWindowWidth();
 
     default int getFullHeight() {
-        WebElement body = this.getBody();
+        final WebElement body = this.getBody();
         if (Objects.equals(body.getCssValue("overflow"), "hidden") || Objects.equals(body.getCssValue("overflow-y"), "hidden")) {
             return this.getWindowHeight();
         }
-        return ((Number) executeScript("return Math.max(document.body.scrollHeight, document.body.offsetHeight,document.documentElement.clientHeight, document.documentElement.scrollHeight, document.documentElement.offsetHeight);")).intValue();
+        return ((Number) this.executeScript("return Math.max(document.body.scrollHeight, document.body.offsetHeight,document.documentElement.clientHeight, document.documentElement.scrollHeight, document.documentElement.offsetHeight);")).intValue();
     }
 
     default int getFullWidth() {
-        WebElement body = getBody();
+        final WebElement body = this.getBody();
         if (Objects.equals(body.getCssValue("overflow"), "hidden") || Objects.equals(body.getCssValue("overflow-x"), "hidden")) {
-            return getWindowWidth();
+            return this.getWindowWidth();
         }
-        return ((Number) executeScript("return Math.max(document.body.scrollWidth, document.body.offsetWidth,document.documentElement.clientWidth, document.documentElement.scrollWidth, document.documentElement.offsetWidth);")).intValue();
+        return ((Number) this.executeScript("return Math.max(document.body.scrollWidth, document.body.offsetWidth,document.documentElement.clientWidth, document.documentElement.scrollWidth, document.documentElement.offsetWidth);")).intValue();
     }
 
 }

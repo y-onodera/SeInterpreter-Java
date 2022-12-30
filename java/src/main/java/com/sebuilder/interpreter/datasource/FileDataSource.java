@@ -10,19 +10,21 @@ import static com.sebuilder.interpreter.Utils.findFile;
 
 public interface FileDataSource extends DataSource {
 
-    default File sourceFile(Map<String, String> config, File relativeTo, InputData vars) {
+    default File sourceFile(final Map<String, String> config, final File relativeTo, final InputData vars) {
         return findFile(relativeTo, this.name(config, vars));
     }
 
     @Override
-    default String name(Map<String, String> dataSourceConfig, InputData shareInput) {
+    default String name(final Map<String, String> dataSourceConfig, final InputData shareInput) {
         return shareInput.evaluateString(dataSourceConfig.get("path"));
     }
 
-    default boolean isLoadable(Map<String, String> dataSourceConfig, File relativePath, InputData shareInput) {
+    @Override
+    default boolean isLoadable(final Map<String, String> dataSourceConfig, final File relativePath, final InputData shareInput) {
         return this.sourceFile(dataSourceConfig, relativePath, shareInput).exists();
     }
 
+    @Override
     default boolean enableMultiLine() {
         return true;
     }

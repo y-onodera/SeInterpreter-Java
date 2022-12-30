@@ -11,9 +11,9 @@ import java.util.function.Consumer;
 
 public class InputView extends FXMLView {
 
-    public void open(Window window) {
-        Scene scene = new Scene(this.getView());
-        Stage scriptSettingDialog = new Stage();
+    public void open(final Window window) {
+        final Scene scene = new Scene(this.getView());
+        final Stage scriptSettingDialog = new Stage();
         scriptSettingDialog.setScene(scene);
         scriptSettingDialog.initOwner(window);
         scriptSettingDialog.initModality(Modality.WINDOW_MODAL);
@@ -22,7 +22,7 @@ public class InputView extends FXMLView {
         scriptSettingDialog.show();
     }
 
-    public void setOnclickReplayStart(Consumer<ReplayOption> onClick) {
-        ((InputPresenter)this.getPresenter()).setOnclickReplayStart(onClick);
+    public void setOnclickReplayStart(final Consumer<ReplayOption> onClick) {
+        ((InputPresenter) this.getPresenter()).setOnclickReplayStart(onClick);
     }
 }

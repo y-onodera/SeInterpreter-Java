@@ -12,7 +12,7 @@ public class ScrollableHeight implements Scrollable {
     private final int scrollableHeight;
     private final boolean ignoreScroll;
 
-    public ScrollableHeight(Builder builder) {
+    public ScrollableHeight(final Builder builder) {
         this.wd = builder.getWebDriver();
         this.targetElement = builder.getTargetElement();
         this.pointY = builder.getPointY();
@@ -27,7 +27,7 @@ public class ScrollableHeight implements Scrollable {
     }
 
     public WebElement getTargetElement() {
-        return targetElement;
+        return this.targetElement;
     }
 
     public int getViewportHeight() {
@@ -50,23 +50,23 @@ public class ScrollableHeight implements Scrollable {
         return !this.ignoreScroll && this.getScrollableHeight() > this.getViewportHeight();
     }
 
-    public boolean isEnableMoveScrollTopTo(int aPointY) {
+    public boolean isEnableMoveScrollTopTo(final int aPointY) {
         return aPointY + this.getViewportHeight() < this.getScrollableHeight();
     }
 
-    public void scrollVertically(int nextTop) {
+    public void scrollVertically(final int nextTop) {
         if (this.hasVerticalScroll()) {
             if (this.getTargetElement() != null) {
                 this.executeScript("arguments[0].scrollTop = arguments[1]; return [];", this.getTargetElement(), nextTop);
             } else {
                 this.executeScript("scrollTo(document.documentElement.scrollLeft,arguments[0]); return [];", nextTop);
             }
-            waitForScrolling();
+            this.waitForScrolling();
         }
     }
 
-    public int scrollOutVertically(int toBeScroll, int scrolledHeight) {
-        int nextScrollTop = toBeScroll + scrolledHeight;
+    public int scrollOutVertically(final int toBeScroll, final int scrolledHeight) {
+        final int nextScrollTop = toBeScroll + scrolledHeight;
         if (this.isEnableMoveScrollTopTo(nextScrollTop)) {
             this.scrollVertically(nextScrollTop);
             return 0;
@@ -92,19 +92,19 @@ public class ScrollableHeight implements Scrollable {
         }
 
         public RemoteWebDriver getWebDriver() {
-            return webDriver;
+            return this.webDriver;
         }
 
         public int getPointY() {
-            return pointY;
+            return this.pointY;
         }
 
         public int getViewportHeight() {
-            return viewportHeight;
+            return this.viewportHeight;
         }
 
         public int getScrollableHeight() {
-            return scrollableHeight;
+            return this.scrollableHeight;
         }
 
         public WebElement getTargetElement() {
@@ -115,32 +115,32 @@ public class ScrollableHeight implements Scrollable {
             return this.ignoreScroll;
         }
 
-        public Builder setWebDriver(RemoteWebDriver remoteWebDriver) {
+        public Builder setWebDriver(final RemoteWebDriver remoteWebDriver) {
             this.webDriver = remoteWebDriver;
             return this;
         }
 
-        public Builder setPointY(int pointY) {
+        public Builder setPointY(final int pointY) {
             this.pointY = pointY;
             return this;
         }
 
-        public Builder setViewportHeight(int viewportHeight) {
+        public Builder setViewportHeight(final int viewportHeight) {
             this.viewportHeight = viewportHeight;
             return this;
         }
 
-        public Builder setScrollableHeight(int scrollableHeight) {
+        public Builder setScrollableHeight(final int scrollableHeight) {
             this.scrollableHeight = scrollableHeight;
             return this;
         }
 
-        public Builder setTargetElement(WebElement targetElement) {
+        public Builder setTargetElement(final WebElement targetElement) {
             this.targetElement = targetElement;
             return this;
         }
 
-        public ScrollableHeight.Builder isIgnoreScroll(boolean ignoreScroll) {
+        public ScrollableHeight.Builder isIgnoreScroll(final boolean ignoreScroll) {
             this.ignoreScroll = ignoreScroll;
             return this;
         }

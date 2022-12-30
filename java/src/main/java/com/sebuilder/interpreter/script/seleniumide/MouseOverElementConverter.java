@@ -3,7 +3,6 @@ package com.sebuilder.interpreter.script.seleniumide;
 import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.step.type.MouseOverElement;
-import org.json.JSONException;
 
 public class MouseOverElementConverter extends AbstractLocatorStepConverter {
 
@@ -13,7 +12,7 @@ public class MouseOverElementConverter extends AbstractLocatorStepConverter {
     }
 
     @Override
-    protected void configure(StepBuilder builder, SeleniumIDEConverter converter, SeleniumIDECommand command) throws JSONException {
+    protected void configure(final StepBuilder builder, final SeleniumIDEConverter converter, final SeleniumIDECommand command) {
 
     }
 }

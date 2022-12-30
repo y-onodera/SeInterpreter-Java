@@ -23,7 +23,7 @@ import org.openqa.selenium.interactions.Actions;
 
 public class ClickAndHoldElement extends AbstractStepType implements ConditionalStep, LocatorHolder {
     @Override
-    public boolean doRun(TestRun ctx) {
+    public boolean doRun(final TestRun ctx) {
         new Actions(ctx.driver()).clickAndHold(ctx.locator().find(ctx)).build().perform();
         return true;
     }

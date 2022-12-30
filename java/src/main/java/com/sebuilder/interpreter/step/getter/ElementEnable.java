@@ -10,8 +10,8 @@ import java.util.List;
 public class ElementEnable extends AbstractGetter implements LocatorHolder {
 
     @Override
-    public String get(TestRun ctx) {
-        List<WebElement> result = ctx.locator().findElements(ctx);
+    public String get(final TestRun ctx) {
+        final List<WebElement> result = ctx.locator().findElements(ctx);
         if (result.size() == 0) {
             return "false";
         }
@@ -19,7 +19,7 @@ public class ElementEnable extends AbstractGetter implements LocatorHolder {
     }
 
     @Override
-    public StepBuilder addDefaultParam(StepBuilder o) {
+    public StepBuilder addDefaultParam(final StepBuilder o) {
         return o.apply(LocatorHolder.super::addDefaultParam)
                 .apply(super::addDefaultParam);
     }

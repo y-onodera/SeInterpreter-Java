@@ -6,6 +6,7 @@ import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.Layout;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
+import org.apache.logging.log4j.core.config.Property;
 import org.apache.logging.log4j.core.config.plugins.Plugin;
 import org.apache.logging.log4j.core.config.plugins.PluginAttribute;
 import org.apache.logging.log4j.core.config.plugins.PluginElement;
@@ -31,13 +32,13 @@ public final class TextAreaAppender extends AbstractAppender {
 
 
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
-    private final Lock readLock = rwLock.readLock();
+    private final Lock readLock = this.rwLock.readLock();
 
 
-    protected TextAreaAppender(String name, Filter filter,
-                               Layout<? extends Serializable> layout,
-                               final boolean ignoreExceptions) {
-        super(name, filter, layout, ignoreExceptions);
+    TextAreaAppender(final String name, final Filter filter,
+                     final Layout<? extends Serializable> layout,
+                     final boolean ignoreExceptions) {
+        super(name, filter, layout, ignoreExceptions, Property.EMPTY_ARRAY);
     }
 
     /**
@@ -46,10 +47,10 @@ public final class TextAreaAppender extends AbstractAppender {
      * @param event Log event with log data
      */
     @Override
-    public void append(LogEvent event) {
-        readLock.lock();
+    public void append(final LogEvent event) {
+        this.readLock.lock();
 
-        final String message = new String(getLayout().toByteArray(event));
+        final String message = new String(this.getLayout().toByteArray(event));
 
         // append log text to TextArea
         try {
@@ -73,7 +74,7 @@ public final class TextAreaAppender extends AbstractAppender {
             ex.printStackTrace();
 
         } finally {
-            readLock.unlock();
+            this.readLock.unlock();
         }
     }
 
@@ -89,7 +90,7 @@ public final class TextAreaAppender extends AbstractAppender {
      */
     @PluginFactory
     public static TextAreaAppender createAppender(
-            @PluginAttribute("name") String name,
+            @PluginAttribute("name") final String name,
             @PluginElement("Layout") Layout<? extends Serializable> layout,
             @PluginElement("Filter") final Filter filter) {
         if (name == null) {
@@ -108,7 +109,7 @@ public final class TextAreaAppender extends AbstractAppender {
      *
      * @param textArea TextArea to append
      */
-    public static void setTextArea(TextArea textArea) {
+    public static void setTextArea(final TextArea textArea) {
         TextAreaAppender.textArea = textArea;
     }
 }

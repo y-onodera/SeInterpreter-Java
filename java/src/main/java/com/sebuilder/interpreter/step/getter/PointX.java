@@ -6,7 +6,7 @@ import com.sebuilder.interpreter.step.LocatorHolder;
 
 public class PointX extends AbstractGetter implements LocatorHolder {
     @Override
-    public String get(TestRun ctx) {
+    public String get(final TestRun ctx) {
         return String.valueOf(ctx.locator().find(ctx).getRect().getX());
     }
 
@@ -16,7 +16,7 @@ public class PointX extends AbstractGetter implements LocatorHolder {
     }
 
     @Override
-    public StepBuilder addDefaultParam(StepBuilder o) {
+    public StepBuilder addDefaultParam(final StepBuilder o) {
         return o.apply(LocatorHolder.super::addDefaultParam)
                 .apply(super::addDefaultParam);
     }

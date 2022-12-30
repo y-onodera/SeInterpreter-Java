@@ -24,12 +24,12 @@ import java.util.ArrayList;
 
 public class SwitchToWindowByIndex extends AbstractStepType {
     @Override
-    public boolean run(TestRun ctx) {
+    public boolean run(final TestRun ctx) {
         // Converting the set into a List is hopefully OK because it's a
         // LinkedHashSet, and so the order should be the same as from the
         // server.
-        ArrayList<String> handles = new ArrayList<String>(ctx.driver().getWindowHandles());
-        int index = Integer.parseInt(ctx.string("index"));
+        final ArrayList<String> handles = new ArrayList<String>(ctx.driver().getWindowHandles());
+        final int index = Integer.parseInt(ctx.string("index"));
         if (index >= handles.size()) {
             throw new ArrayIndexOutOfBoundsException("Cannot switch to window index " + index + ". There are only " + handles.size() + " window handles available.");
         }
@@ -38,7 +38,7 @@ public class SwitchToWindowByIndex extends AbstractStepType {
     }
 
     @Override
-    public StepBuilder addDefaultParam(StepBuilder o) {
+    public StepBuilder addDefaultParam(final StepBuilder o) {
         if (!o.containsStringParam("index")) {
             o.put("index", "");
         }

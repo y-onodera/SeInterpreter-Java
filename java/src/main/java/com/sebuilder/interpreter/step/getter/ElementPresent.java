@@ -22,12 +22,12 @@ import com.sebuilder.interpreter.step.LocatorHolder;
 
 public class ElementPresent extends AbstractGetter implements LocatorHolder {
     @Override
-    public String get(TestRun ctx) {
+    public String get(final TestRun ctx) {
         return "" + (!ctx.locator().findElements(ctx).isEmpty());
     }
 
     @Override
-    public StepBuilder addDefaultParam(StepBuilder o) {
+    public StepBuilder addDefaultParam(final StepBuilder o) {
         return o.apply(LocatorHolder.super::addDefaultParam)
                 .apply(super::addDefaultParam);
     }

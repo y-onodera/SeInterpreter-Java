@@ -6,7 +6,7 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 public interface Exportable {
 
     default String getTypeName() {
-        String simpleClassName = this.getClass().getSimpleName();
+        final String simpleClassName = this.getClass().getSimpleName();
         return simpleClassName.substring(0, 1).toLowerCase() + simpleClassName.substring(1);
     }
 
@@ -14,7 +14,7 @@ public interface Exportable {
         return true;
     }
 
-    default void addElement(ExportResourceBuilder builder, RemoteWebDriver driver, WebElement element) {
+    default void addElement(final ExportResourceBuilder builder, final RemoteWebDriver driver, final WebElement element) {
         // non defalut implementation
     }
 

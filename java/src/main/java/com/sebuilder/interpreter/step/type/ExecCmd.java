@@ -19,7 +19,7 @@ public class ExecCmd extends AbstractStepType implements GetterUseStep {
     }
 
     @Override
-    public boolean run(TestRun ctx) {
+    public boolean run(final TestRun ctx) {
         if (ctx.containsKey(this.getGetter().cmpParamName())) {
             return this.test(ctx);
         }
@@ -27,7 +27,7 @@ public class ExecCmd extends AbstractStepType implements GetterUseStep {
     }
 
     @Override
-    public StepBuilder addDefaultParam(StepBuilder o) {
+    public StepBuilder addDefaultParam(final StepBuilder o) {
         if (!o.containsStringParam("cmd")) {
             o.put("cmd", "");
         }

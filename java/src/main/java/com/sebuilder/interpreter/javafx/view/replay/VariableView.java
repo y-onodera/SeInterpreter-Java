@@ -10,18 +10,18 @@ import java.util.function.Consumer;
 
 public class VariableView extends FXMLView {
 
-    public void open(InputData var, Window window) {
+    public void open(final InputData var, final Window window) {
         this.presenter().open(var);
-        Stage stage = new Stage();
+        final Stage stage = new Stage();
         stage.initOwner(window);
         stage.setResizable(false);
-        Scene scene = new Scene(this.getView());
+        final Scene scene = new Scene(this.getView());
         stage.setTitle("runtime variable");
         stage.setScene(scene);
         stage.show();
     }
 
-    public void onClick(Consumer<InputData> handler){
+    public void onClick(final Consumer<InputData> handler) {
         this.presenter().setOnclick(handler);
     }
 

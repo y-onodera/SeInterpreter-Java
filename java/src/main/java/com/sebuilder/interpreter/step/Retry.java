@@ -10,7 +10,7 @@ public class Retry extends AbstractStepType implements FlowStep, GetterUseStep {
 
     private final Getter getter;
 
-    public Retry(Getter getter) {
+    public Retry(final Getter getter) {
         this.getter = getter;
     }
 
@@ -27,10 +27,10 @@ public class Retry extends AbstractStepType implements FlowStep, GetterUseStep {
      * should return false. Other failures should throw a RuntimeException.
      */
     @Override
-    public boolean run(TestRun ctx) {
-        Step thisStep = ctx.currentStep();
+    public boolean run(final TestRun ctx) {
+        final Step thisStep = ctx.currentStep();
         boolean success = true;
-        int actions = this.getSubSteps(ctx);
+        final int actions = this.getSubSteps(ctx);
         while (!this.test(ctx)) {
             ctx.processTestSuccess(false);
             success = this.runSubStep(ctx, actions) && success;
@@ -44,17 +44,17 @@ public class Retry extends AbstractStepType implements FlowStep, GetterUseStep {
     }
 
     @Override
-    public StepBuilder addDefaultParam(StepBuilder o) {
-        StepBuilder result = FlowStep.super.addDefaultParam(o);
+    public StepBuilder addDefaultParam(final StepBuilder o) {
+        final StepBuilder result = FlowStep.super.addDefaultParam(o);
         return GetterUseStep.super.addDefaultParam(result);
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (!super.equals(o)) {
             return false;
         }
-        Retry retry = (Retry) o;
+        final Retry retry = (Retry) o;
         return Objects.equals(this.getGetter(), retry.getGetter());
     }
 

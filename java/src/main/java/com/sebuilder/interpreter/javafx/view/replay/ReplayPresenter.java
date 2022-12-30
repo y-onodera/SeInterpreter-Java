@@ -44,30 +44,30 @@ public class ReplayPresenter {
 
     @FXML
     void initialize() {
-        assert stop != null : "fx:id=\"stop\" was not injected: check your FXML file 'runprogress.fxml'.";
-        assert scriptDataSetProgress != null : "fx:id=\"scriptDataSetProgress\" was not injected: check your FXML file 'runprogress.fxml'.";
-        assert openDir != null : "fx:id=\"openDir\" was not injected: check your FXML file 'runprogress.fxml'.";
-        assert scriptName != null : "fx:id=\"scriptName\" was not injected: check your FXML file 'runprogress.fxml'.";
-        assert runStatus != null : "fx:id=\"runStatus\" was not injected: check your FXML file 'runprogress.fxml'.";
-        assert openLog != null : "fx:id=\"openLog\" was not injected: check your FXML file 'runprogress.fxml'.";
+        assert this.stop != null : "fx:id=\"stop\" was not injected: check your FXML file 'runprogress.fxml'.";
+        assert this.scriptDataSetProgress != null : "fx:id=\"scriptDataSetProgress\" was not injected: check your FXML file 'runprogress.fxml'.";
+        assert this.openDir != null : "fx:id=\"openDir\" was not injected: check your FXML file 'runprogress.fxml'.";
+        assert this.scriptName != null : "fx:id=\"scriptName\" was not injected: check your FXML file 'runprogress.fxml'.";
+        assert this.runStatus != null : "fx:id=\"runStatus\" was not injected: check your FXML file 'runprogress.fxml'.";
+        assert this.openLog != null : "fx:id=\"openLog\" was not injected: check your FXML file 'runprogress.fxml'.";
     }
 
     @FXML
-    void handleReplayStop(ActionEvent event) throws Exception {
+    void handleReplayStop(final ActionEvent event) {
         this.application.stopReplay();
     }
 
     @FXML
-    void handleOpenReplayLog(ActionEvent event) throws IOException {
+    void handleOpenReplayLog(final ActionEvent event) throws IOException {
         Desktop.getDesktop().open(new File(this.lastRunResultDir.get(), this.application.getReportFileName()));
     }
 
     @FXML
-    void handleOpenDirectory(ActionEvent event) throws IOException {
+    void handleOpenDirectory(final ActionEvent event) throws IOException {
         Desktop.getDesktop().open(new File(this.lastRunResultDir.get()));
     }
 
-    public void bind(Task task) {
+    public void bind(final Task<String> task) {
         this.scriptName.textProperty().bind(task.messageProperty());
         this.scriptDataSetProgress.progressProperty().bind(task.progressProperty());
         this.runStatus.textProperty().bind(task.stateProperty().asString());

@@ -8,9 +8,9 @@ import javafx.stage.Window;
 
 public class DatasourceView extends FXMLView {
 
-    public void open(Window window) {
-        Scene scene = new Scene(this.getView());
-        Stage scriptSettingDialog = new Stage();
+    public void open(final Window window) {
+        final Scene scene = new Scene(this.getView());
+        final Stage scriptSettingDialog = new Stage();
         scriptSettingDialog.setScene(scene);
         scriptSettingDialog.initOwner(window);
         scriptSettingDialog.initModality(Modality.WINDOW_MODAL);

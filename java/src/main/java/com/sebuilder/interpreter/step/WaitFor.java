@@ -29,7 +29,7 @@ import java.util.Objects;
 public class WaitFor extends AbstractStepType implements GetterUseStep {
     public final Getter getter;
 
-    public WaitFor(Getter getter) {
+    public WaitFor(final Getter getter) {
         this.getter = getter;
     }
 
@@ -39,7 +39,7 @@ public class WaitFor extends AbstractStepType implements GetterUseStep {
     }
 
     @Override
-    public boolean run(TestRun ctx) {
+    public boolean run(final TestRun ctx) {
         int maxWaitMs = 60000; // qqDPS Eventually get this from somewhere.
         if (ctx.containsKey("maxWait")) {
             maxWaitMs = Integer.parseInt(ctx.string("maxWait"));
@@ -48,13 +48,13 @@ public class WaitFor extends AbstractStepType implements GetterUseStep {
         if (ctx.containsKey("interval")) {
             intervalMs = Integer.parseInt(ctx.string("interval"));
         }
-        long stopBy = System.currentTimeMillis() + maxWaitMs;
+        final long stopBy = System.currentTimeMillis() + maxWaitMs;
         // NB: If the step is negated, a result of "true"  means that we haven't succeeded yet.
         //     If the step is normal,  a result of "false" means that we haven't succeeded yet.
         while (!this.test(ctx) && System.currentTimeMillis() < stopBy) {
             try {
                 Thread.sleep(intervalMs);
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }
@@ -62,7 +62,7 @@ public class WaitFor extends AbstractStepType implements GetterUseStep {
     }
 
     @Override
-    public StepBuilder addDefaultParam(StepBuilder o) {
+    public StepBuilder addDefaultParam(final StepBuilder o) {
         if (!o.containsStringParam("maxWait")) {
             o.put("maxWait", "60000");
         }
@@ -73,11 +73,11 @@ public class WaitFor extends AbstractStepType implements GetterUseStep {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (!super.equals(o)) {
             return false;
         }
-        WaitFor waitFor = (WaitFor) o;
+        final WaitFor waitFor = (WaitFor) o;
         return Objects.equals(this.getGetter(), waitFor.getGetter());
     }
 

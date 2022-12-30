@@ -14,12 +14,12 @@ public interface GetterUseStep extends StepType {
         return typeName.substring(0, 1).toLowerCase() + typeName.substring(1) + this.getGetter().getClass().getSimpleName();
     }
 
-    default boolean test(TestRun ctx) {
+    default boolean test(final TestRun ctx) {
         return this.getGetter().test(ctx) != ctx.currentStep().negated();
     }
 
     @Override
-    default StepBuilder addDefaultParam(StepBuilder o) {
+    default StepBuilder addDefaultParam(final StepBuilder o) {
         return this.getGetter().addDefaultParam(o);
     }
 

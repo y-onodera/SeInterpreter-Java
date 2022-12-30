@@ -6,9 +6,8 @@ import com.sebuilder.interpreter.TestRun;
 public class Variable extends AbstractGetter {
 
     @Override
-    public String get(TestRun ctx) {
-        String variableName = ctx.string("variable");
-        return ctx.bindRuntimeVariables("${" + variableName + "}");
+    public String get(final TestRun ctx) {
+        return ctx.bindRuntimeVariables("${" + ctx.string("variable") + "}");
     }
 
     @Override
@@ -17,7 +16,7 @@ public class Variable extends AbstractGetter {
     }
 
     @Override
-    public StepBuilder addDefaultParam(StepBuilder o) {
+    public StepBuilder addDefaultParam(final StepBuilder o) {
         if (!o.containsStringParam("variable")) {
             o.put("variable", "");
         }

@@ -23,7 +23,7 @@ import org.openqa.selenium.support.ui.Select;
 
 public class ClearSelections extends AbstractStepType implements ConditionalStep, LocatorHolder {
     @Override
-    public boolean doRun(TestRun ctx) {
+    public boolean doRun(final TestRun ctx) {
         new Select(ctx.locator().find(ctx)).deselectAll();
         return true;
     }

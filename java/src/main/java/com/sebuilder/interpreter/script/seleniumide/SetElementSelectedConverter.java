@@ -4,13 +4,12 @@ import com.sebuilder.interpreter.Locator;
 import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.step.type.SetElementSelected;
-import org.json.JSONException;
 
 public class SetElementSelectedConverter extends AbstractStepConverter {
 
     private final Input input;
 
-    public SetElementSelectedConverter(Input input) {
+    public SetElementSelectedConverter(final Input input) {
         this.input = input;
     }
 
@@ -20,17 +19,17 @@ public class SetElementSelectedConverter extends AbstractStepConverter {
     }
 
     @Override
-    protected void configure(StepBuilder builder, SeleniumIDEConverter converter, SeleniumIDECommand command) throws JSONException {
+    protected void configure(final StepBuilder builder, final SeleniumIDEConverter converter, final SeleniumIDECommand command) {
         if (this.input == Input.SELECT) {
-            String optionPath = String.format("/option[. = '%s']", command.value().replace("label=", ""));
-            builder.locator(new Locator("xpath", targetToXpath(command) + optionPath));
+            final String optionPath = String.format("/option[. = '%s']", command.value().replace("label=", ""));
+            builder.locator(new Locator("xpath", this.targetToXpath(command) + optionPath));
         } else {
-            builder.locator(new Locator("xpath", targetToXpath(command)));
+            builder.locator(new Locator("xpath", this.targetToXpath(command)));
         }
     }
 
-    private String targetToXpath(SeleniumIDECommand command) throws JSONException {
-        String target = command.target();
+    private String targetToXpath(final SeleniumIDECommand command) {
+        final String target = command.target();
         if (target.startsWith("id=")) {
             return String.format("//*[@id='%s']", target.replace("id=", ""));
         } else if (target.startsWith("name=")) {

@@ -22,13 +22,13 @@ import com.sebuilder.interpreter.step.AbstractStepType;
 
 public class SwitchToFrameByIndex extends AbstractStepType {
     @Override
-    public boolean run(TestRun ctx) {
+    public boolean run(final TestRun ctx) {
         ctx.driver().switchTo().frame(Integer.parseInt(ctx.string("index")));
         return true;
     }
 
     @Override
-    public StepBuilder addDefaultParam(StepBuilder o) {
+    public StepBuilder addDefaultParam(final StepBuilder o) {
         if (!o.containsStringParam("index")) {
             o.put("index", "");
         }

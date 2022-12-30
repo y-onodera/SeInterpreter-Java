@@ -26,11 +26,11 @@ public interface HorizontalSurvey extends DocumentSurvey {
         return this.getWidth().hasHorizontalScroll();
     }
 
-    default void scrollHorizontally(int scrollX) {
+    default void scrollHorizontally(final int scrollX) {
         this.getWidth().scrollHorizontally(scrollX);
     }
 
-    default int scrollOutHorizontally(int printedWidth) {
+    default int scrollOutHorizontally(final int printedWidth) {
         return this.getWidth().scrollOutHorizontally(printedWidth);
     }
 
@@ -42,11 +42,11 @@ public interface HorizontalSurvey extends DocumentSurvey {
 
     Map<Integer, InnerElement> getInnerHorizontalScrollableElement();
 
-    default int convertImageWidth(int documentWidth) {
+    default int convertImageWidth(final int documentWidth) {
         return documentWidth * this.getImageWidth() / this.getWindowWidth();
     }
 
-    default int convertDocumentWidth(int imageWidth) {
+    default int convertDocumentWidth(final int imageWidth) {
         return imageWidth * this.getWindowWidth() / this.getImageWidth();
     }
 }

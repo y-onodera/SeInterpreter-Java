@@ -14,7 +14,7 @@ public class InnerElementWithHeader implements InnerElement {
     private final ScrollableWidth width;
     private final ScrollableHeight height;
 
-    public InnerElementWithHeader(InnerElement element, InnerElement headerElement) {
+    public InnerElementWithHeader(final InnerElement element, final InnerElement headerElement) {
         this.element = element;
         this.headerElement = new ScrollableTag(headerElement.getParent()
                 , element.getElement()
@@ -45,20 +45,20 @@ public class InnerElementWithHeader implements InnerElement {
     }
 
     @Override
-    public BufferedImage printImage(VerticalPrinter aPrinter, int fromPointY) {
-        int imageHeight = this.getFullImageHeight();
-        int imageWidth = this.getFullImageWidth();
-        BufferedImage result = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_3BYTE_BGR);
-        Graphics2D graphics = result.createGraphics();
+    public BufferedImage printImage(final VerticalPrinter aPrinter, final int fromPointY) {
+        final int imageHeight = this.getFullImageHeight();
+        final int imageWidth = this.getFullImageWidth();
+        final BufferedImage result = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_3BYTE_BGR);
+        final Graphics2D graphics = result.createGraphics();
         BufferedImage headerImage = this.headerElement.printImage(new HorizontalPrinter());
         headerImage = headerImage.getSubimage(0
-                , element.convertImageHeight(fromPointY)
+                , this.element.convertImageHeight(fromPointY)
                 , headerImage.getWidth()
-                , element.convertImageHeight(this.element.getPointY() - this.headerElement.getPointY()));
+                , this.element.convertImageHeight(this.element.getPointY() - this.headerElement.getPointY()));
         graphics.drawImage(headerImage, 0, 0, null);
-        int mainImageStartFrom = element.convertDocumentHeight(headerImage.getHeight()) + fromPointY;
+        final int mainImageStartFrom = this.element.convertDocumentHeight(headerImage.getHeight()) + fromPointY;
         graphics.drawImage(this.element.printImage(aPrinter
-                , mainImageStartFrom)
+                        , mainImageStartFrom)
                 , 0
                 , headerImage.getHeight()
                 , null);
@@ -67,23 +67,23 @@ public class InnerElementWithHeader implements InnerElement {
     }
 
     @Override
-    public BufferedImage printImage(HorizontalPrinter aPrinter) {
-        return element.printImage(aPrinter);
+    public BufferedImage printImage(final HorizontalPrinter aPrinter) {
+        return this.element.printImage(aPrinter);
     }
 
     @Override
     public Map<Integer, InnerElement> getInnerScrollableElement() {
-        return element.getInnerScrollableElement();
+        return this.element.getInnerScrollableElement();
     }
 
     @Override
     public WebElement getElement() {
-        return element.getElement();
+        return this.element.getElement();
     }
 
     @Override
     public Printable getParent() {
-        return element.getParent();
+        return this.element.getParent();
     }
 
     @Override
@@ -102,17 +102,17 @@ public class InnerElementWithHeader implements InnerElement {
     }
 
     @Override
-    public int nextPrintableHeight(int remainViewPortHeight, int printedHeight) {
+    public int nextPrintableHeight(final int remainViewPortHeight, final int printedHeight) {
         return this.element.nextPrintableHeight(remainViewPortHeight, printedHeight);
     }
 
     @Override
-    public int convertImageHeight(int documentHeight) {
+    public int convertImageHeight(final int documentHeight) {
         return this.element.convertImageHeight(documentHeight);
     }
 
     @Override
-    public int convertDocumentHeight(int imageHeight) {
+    public int convertDocumentHeight(final int imageHeight) {
         return this.element.convertDocumentHeight(imageHeight);
     }
 
@@ -167,19 +167,19 @@ public class InnerElementWithHeader implements InnerElement {
     }
 
     @Override
-    public int convertImageWidth(int documentWidth) {
+    public int convertImageWidth(final int documentWidth) {
         return this.element.convertImageWidth(documentWidth);
     }
 
     @Override
-    public int convertDocumentWidth(int imageWidth) {
+    public int convertDocumentWidth(final int imageWidth) {
         return this.element.convertDocumentWidth(imageWidth);
     }
 
     private static class Height extends ScrollableHeight {
         private final InnerElement element;
 
-        public Height(InnerElement element, InnerElement headerElement) {
+        public Height(final InnerElement element, final InnerElement headerElement) {
             super(new ScrollableHeight.Builder()
                     .setWebDriver(element.driver())
                     .setPointY(headerElement.getPointY())
@@ -200,17 +200,17 @@ public class InnerElementWithHeader implements InnerElement {
         }
 
         @Override
-        public boolean isEnableMoveScrollTopTo(int aPointY) {
+        public boolean isEnableMoveScrollTopTo(final int aPointY) {
             return this.element.isEnableMoveScrollTopTo(aPointY);
         }
 
         @Override
-        public void scrollVertically(int scrollY) {
+        public void scrollVertically(final int scrollY) {
             this.element.scrollVertically(scrollY);
         }
 
         @Override
-        public int scrollOutVertically(int printedHeight, int scrolledHeight) {
+        public int scrollOutVertically(final int printedHeight, final int scrolledHeight) {
             return this.element.scrollOutVertically(printedHeight, scrolledHeight);
         }
     }

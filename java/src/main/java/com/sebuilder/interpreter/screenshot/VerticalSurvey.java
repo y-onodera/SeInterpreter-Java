@@ -26,19 +26,19 @@ public interface VerticalSurvey extends DocumentSurvey {
         return this.getHeight().hasVerticalScroll();
     }
 
-    default boolean isEnableMoveScrollTopTo(int aPointY) {
+    default boolean isEnableMoveScrollTopTo(final int aPointY) {
         return this.getHeight().isEnableMoveScrollTopTo(aPointY);
     }
 
-    default void scrollVertically(int scrollY) {
+    default void scrollVertically(final int scrollY) {
         this.getHeight().scrollVertically(scrollY);
     }
 
-    default int scrollOutVertically(int toBeScrollOut, int scrolledHeight) {
+    default int scrollOutVertically(final int toBeScrollOut, final int scrolledHeight) {
         return this.getHeight().scrollOutVertically(toBeScrollOut, scrolledHeight);
     }
 
-    default int nextPrintableHeight(int remainViewPortHeight, int printedHeight) {
+    default int nextPrintableHeight(final int remainViewPortHeight, final int printedHeight) {
         return Math.min(remainViewPortHeight, this.getScrollableHeight() - printedHeight);
     }
 
@@ -50,11 +50,11 @@ public interface VerticalSurvey extends DocumentSurvey {
 
     Map<Integer, InnerElement> getInnerVerticalScrollableElement();
 
-    default int convertImageHeight(int documentHeight) {
+    default int convertImageHeight(final int documentHeight) {
         return documentHeight * this.getImageHeight() / this.getWindowHeight();
     }
 
-    default int convertDocumentHeight(int imageHeight) {
+    default int convertDocumentHeight(final int imageHeight) {
         return imageHeight * this.getWindowHeight() / this.getImageHeight();
     }
 

@@ -13,9 +13,9 @@ public class Page extends AbstractPrintable {
     private final ScrollableHeight height;
     private final ScrollableWidth width;
 
-    public Page(TestRun ctx, InnerScrollElementHandler innerScrollElementHandler) {
+    public Page(final TestRun ctx, final InnerScrollElementHandler innerScrollElementHandler) {
         super(ctx);
-        BufferedImage image = getScreenshot();
+        final BufferedImage image = this.getScreenshot();
         this.height = getHeight(ctx);
         this.width = getWidth(ctx);
         this.imageHeight = image.getHeight();
@@ -25,7 +25,7 @@ public class Page extends AbstractPrintable {
         this.handleInnerScrollElement(innerScrollElementHandler);
     }
 
-    public static ScrollableWidth getWidth(TestRun ctx) {
+    public static ScrollableWidth getWidth(final TestRun ctx) {
         return new ScrollableWidth.Builder()
                 .setWebDriver(ctx.driver())
                 .setViewportWidth(ctx.getClientWidth())
@@ -33,7 +33,7 @@ public class Page extends AbstractPrintable {
                 .build();
     }
 
-    public static  ScrollableHeight getHeight(TestRun ctx) {
+    public static ScrollableHeight getHeight(final TestRun ctx) {
         return new ScrollableHeight.Builder()
                 .setWebDriver(ctx.driver())
                 .setViewportHeight(ctx.getClientHeight())

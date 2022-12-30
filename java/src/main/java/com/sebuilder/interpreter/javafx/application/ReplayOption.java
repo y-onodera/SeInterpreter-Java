@@ -13,19 +13,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class ReplayOption {
-    private final Map<String, Pair<Integer, InputData>> dataLoadSettings;
-    private final boolean isAspectTakeOver;
+public record ReplayOption(
+        Map<String, Pair<Integer, InputData>> dataLoadSettings,
+        boolean isAspectTakeOver) {
 
-    public ReplayOption(Map<String, Pair<Integer, InputData>> dataLoadSettings, boolean isAspectTakeOver) {
-        this.dataLoadSettings = dataLoadSettings;
-        this.isAspectTakeOver = isAspectTakeOver;
-    }
-
-    public InputData reduceShareInput(InputData defaultValue, DataSourceLoader[] shareDataSources) throws IOException {
+    public InputData reduceShareInput(final InputData defaultValue, final DataSourceLoader[] shareDataSources) throws IOException {
         InputData result = defaultValue;
-        for (DataSourceLoader loader : shareDataSources) {
-            DataSourceLoader withShareInput = loader.shareInput(result);
+        for (final DataSourceLoader loader : shareDataSources) {
+            final DataSourceLoader withShareInput = loader.shareInput(result);
             if (withShareInput.isLoadable()) {
                 result = this.merge(result, withShareInput);
             }
@@ -33,11 +28,11 @@ public class ReplayOption {
         return result;
     }
 
-    public Iterable<DataSourceLoader> filterLoadableSource(InputData replayShareInput, DataSourceLoader[] displayTestCaseDataSources) throws IOException {
-        List<DataSourceLoader> result = Lists.newArrayList();
+    public Iterable<DataSourceLoader> filterLoadableSource(final InputData replayShareInput, final DataSourceLoader[] displayTestCaseDataSources) throws IOException {
+        final List<DataSourceLoader> result = Lists.newArrayList();
         InputData shareInput = replayShareInput;
-        for (DataSourceLoader loader : displayTestCaseDataSources) {
-            DataSourceLoader withShareInput = loader.shareInput(shareInput);
+        for (final DataSourceLoader loader : displayTestCaseDataSources) {
+            final DataSourceLoader withShareInput = loader.shareInput(shareInput);
             if (withShareInput.isLoadable()) {
                 result.add(withShareInput);
                 shareInput = this.merge(shareInput, withShareInput);
@@ -46,7 +41,7 @@ public class ReplayOption {
         return result;
     }
 
-    public TestCaseBuilder apply(TestCaseBuilder target) {
+    public TestCaseBuilder apply(final TestCaseBuilder target) {
         final TestCase targetBuild = target.isPreventContextAspect(!this.isAspectTakeOver).build();
         final Pair<Integer, InputData> runtimeInfo = this.dataLoadSettings.get(targetBuild.runtimeDataSet().name());
         return target.changeWhenConditionMatch(it -> runtimeInfo != null
@@ -56,20 +51,20 @@ public class ReplayOption {
                                 .get(runtimeInfo.getKey() - 1)
                                 .add(runtimeInfo.getValue())
                                 .input());
-                    } catch (IOException e) {
+                    } catch (final IOException e) {
                         throw new RuntimeException(e);
                     }
                 });
     }
 
-    private InputData merge(InputData shareInput, DataSourceLoader withShareInput) throws IOException {
-        Pair<Integer, InputData> setting = this.getSetting(withShareInput.name());
+    private InputData merge(final InputData shareInput, final DataSourceLoader withShareInput) throws IOException {
+        final Pair<Integer, InputData> setting = this.getSetting(withShareInput.name());
         return shareInput
                 .add(withShareInput.loadData().get(setting.getKey() - 1))
                 .add(setting.getValue());
     }
 
-    private Pair<Integer, InputData> getSetting(String dataSetName) {
+    private Pair<Integer, InputData> getSetting(final String dataSetName) {
         return Optional.ofNullable(this.dataLoadSettings.get(dataSetName))
                 .orElse(new Pair<>(1, new InputData()));
     }

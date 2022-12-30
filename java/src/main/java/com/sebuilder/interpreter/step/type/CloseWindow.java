@@ -6,7 +6,7 @@ import com.sebuilder.interpreter.step.AbstractStepType;
 public class CloseWindow extends AbstractStepType {
 
     @Override
-    public boolean run(TestRun ctx) {
+    public boolean run(final TestRun ctx) {
         ctx.driver().close();
         return true;
     }

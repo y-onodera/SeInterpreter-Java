@@ -10,7 +10,7 @@ public class If extends AbstractStepType implements FlowStep, GetterUseStep {
 
     private final Getter getter;
 
-    public If(Getter getter) {
+    public If(final Getter getter) {
         this.getter = getter;
     }
 
@@ -20,10 +20,10 @@ public class If extends AbstractStepType implements FlowStep, GetterUseStep {
     }
 
     @Override
-    public boolean run(TestRun ctx) {
-        Step thisStep = ctx.currentStep();
+    public boolean run(final TestRun ctx) {
+        final Step thisStep = ctx.currentStep();
         boolean success = true;
-        int actions = this.getSubSteps(ctx);
+        final int actions = this.getSubSteps(ctx);
         if (this.test(ctx)) {
             ctx.processTestSuccess(false);
             success = this.runSubStep(ctx, actions);
@@ -36,13 +36,13 @@ public class If extends AbstractStepType implements FlowStep, GetterUseStep {
     }
 
     @Override
-    public StepBuilder addDefaultParam(StepBuilder o) {
-        StepBuilder result = FlowStep.super.addDefaultParam(o);
+    public StepBuilder addDefaultParam(final StepBuilder o) {
+        final StepBuilder result = FlowStep.super.addDefaultParam(o);
         return GetterUseStep.super.addDefaultParam(result);
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
@@ -52,7 +52,7 @@ public class If extends AbstractStepType implements FlowStep, GetterUseStep {
         if (!super.equals(o)) {
             return false;
         }
-        If anIf = (If) o;
+        final If anIf = (If) o;
         return Objects.equals(this.getGetter(), anIf.getGetter());
     }
 

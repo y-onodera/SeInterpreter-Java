@@ -15,7 +15,7 @@ public class SeInterpreterRunTask extends Task<String> {
     private final SeInterpreterREPL repl;
     private final TestCase target;
 
-    public SeInterpreterRunTask(Logger log, TestRunListener listener, SeInterpreterREPL repl, TestCase target) {
+    public SeInterpreterRunTask(final Logger log, final TestRunListener listener, final SeInterpreterREPL repl, final TestCase target) {
         this.log = log;
         this.listener = listener;
         this.repl = repl;
@@ -24,34 +24,34 @@ public class SeInterpreterRunTask extends Task<String> {
 
     @Override
     protected String call() {
-        Boolean result = true;
+        boolean result = true;
         try {
             this.log.info("operation recieve");
-            updateMessage("setup running....");
+            this.updateMessage("setup running....");
             this.repl.execute(this.target, new TestRunListenerWrapper(this.listener) {
                 private int currentScriptSteps;
 
                 @Override
-                public boolean openTestSuite(TestCase testCase, String testRunName, InputData aProperty) {
+                public boolean openTestSuite(final TestCase testCase, final String testRunName, final InputData aProperty) {
                     this.currentScriptSteps = testCase.steps().size();
-                    updateMessage(testRunName);
-                    updateProgress(0, this.currentScriptSteps);
+                    SeInterpreterRunTask.this.updateMessage(testRunName);
+                    SeInterpreterRunTask.this.updateProgress(0, this.currentScriptSteps);
                     return super.openTestSuite(testCase, testRunName, aProperty);
                 }
 
                 @Override
-                public void startTest(String testName) {
-                    updateProgress(this.getStepNo(), this.currentScriptSteps);
+                public void startTest(final String testName) {
+                    SeInterpreterRunTask.this.updateProgress(this.getStepNo(), this.currentScriptSteps);
                     super.startTest(testName);
                 }
 
                 @Override
                 public void aggregateResult() {
                     super.aggregateResult();
-                    updateValue(getResultDir().getAbsolutePath());
+                    SeInterpreterRunTask.this.updateValue(this.getResultDir().getAbsolutePath());
                 }
             });
-        } catch (Throwable ex) {
+        } catch (final Throwable ex) {
             result = false;
             this.log.error(ex);
         }

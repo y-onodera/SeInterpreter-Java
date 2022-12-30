@@ -23,7 +23,7 @@ import com.sebuilder.interpreter.step.LocatorHolder;
 public class ElementAttribute extends AbstractGetter implements LocatorHolder {
 
     @Override
-    public String get(TestRun ctx) {
+    public String get(final TestRun ctx) {
         return ctx.locator()
                 .find(ctx).getAttribute(ctx.string("attributeName"));
     }
@@ -34,7 +34,7 @@ public class ElementAttribute extends AbstractGetter implements LocatorHolder {
     }
 
     @Override
-    public StepBuilder addDefaultParam(StepBuilder o) {
+    public StepBuilder addDefaultParam(final StepBuilder o) {
         if (!o.containsStringParam("attributeName")) {
             o.put("attributeName", "");
         }

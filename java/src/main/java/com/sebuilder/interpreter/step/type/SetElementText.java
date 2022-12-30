@@ -27,12 +27,12 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 public class SetElementText extends AbstractStepType implements ConditionalStep, Exportable, LocatorHolder {
 
     @Override
-    public boolean doRun(TestRun ctx) {
-        WebElement el = ctx.locator().find(ctx);
+    public boolean doRun(final TestRun ctx) {
+        final WebElement el = ctx.locator().find(ctx);
         el.click();
         el.clear();
-        String input = ctx.text();
-        if (isIncludeHalfWidthText(input)) {
+        final String input = ctx.text();
+        if (this.isIncludeHalfWidthText(input)) {
             ctx.executeScript("arguments[0].value = arguments[1]", el, input);
         } else {
             el.sendKeys(input);
@@ -42,7 +42,7 @@ public class SetElementText extends AbstractStepType implements ConditionalStep,
     }
 
     @Override
-    public void addElement(ExportResourceBuilder builder, RemoteWebDriver driver, WebElement element) {
+    public void addElement(final ExportResourceBuilder builder, final RemoteWebDriver driver, final WebElement element) {
         String text = element.getText();
         if (text.isEmpty()) {
             text = element.getAttribute("value");
@@ -51,18 +51,18 @@ public class SetElementText extends AbstractStepType implements ConditionalStep,
     }
 
     @Override
-    public StepBuilder addDefaultParam(StepBuilder o) {
+    public StepBuilder addDefaultParam(final StepBuilder o) {
         if (!o.containsStringParam("text")) {
             o.put("text", "");
         }
         return o.apply(LocatorHolder.super::addDefaultParam);
     }
 
-    private boolean isIncludeHalfWidthText(String input) {
-        return input.chars().anyMatch(i -> isHalfWidth((char) i));
+    private boolean isIncludeHalfWidthText(final String input) {
+        return input.chars().anyMatch(i -> this.isHalfWidth((char) i));
     }
 
-    private boolean isHalfWidth(char c) {
+    private boolean isHalfWidth(final char c) {
         return '\uFF65' <= c && c <= '\uFF9F';
     }
 

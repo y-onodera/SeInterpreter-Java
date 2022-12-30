@@ -20,7 +20,7 @@ import com.sebuilder.interpreter.TestRun;
 
 public class PageSource extends AbstractGetter {
     @Override
-    public String get(TestRun ctx) {
+    public String get(final TestRun ctx) {
         return ctx.driver().getPageSource();
     }
 
