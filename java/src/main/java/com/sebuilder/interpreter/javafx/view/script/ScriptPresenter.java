@@ -121,8 +121,7 @@ public class ScriptPresenter {
         final InputView inputView = new InputView();
         inputView.setOnclickReplayStart((it) -> {
             final ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
-            final int no = item.no.intValue() - 1;
-            this.application.runStep(it, i -> no == i.intValue(), i -> i + no);
+            this.application.runStep(it, i -> item.compareIndex(i.intValue()) == 0, i -> i + item.index(), false);
         });
         inputView.open(this.tableViewScriptBody.getScene().getWindow());
     }
@@ -132,7 +131,7 @@ public class ScriptPresenter {
         final InputView inputView = new InputView();
         inputView.setOnclickReplayStart((it) -> {
             final ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
-            this.application.runStep(it, i -> item.no.intValue() - 1 <= i.intValue(), i -> i + item.no.intValue() - 1);
+            this.application.runStep(it, i -> item.compareIndex(i.intValue()) <= 0, i -> i + item.index(), true);
         });
         inputView.open(this.tableViewScriptBody.getScene().getWindow());
     }
@@ -142,7 +141,7 @@ public class ScriptPresenter {
         final InputView inputView = new InputView();
         inputView.setOnclickReplayStart((it) -> {
             final ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
-            this.application.runStep(it, i -> item.no.intValue() - 1 >= i.intValue(), i -> i);
+            this.application.runStep(it, i -> item.compareIndex(i.intValue()) >= 0, i -> i, false);
         });
         inputView.open(this.tableViewScriptBody.getScene().getWindow());
     }
@@ -222,6 +221,13 @@ public class ScriptPresenter {
             this.runningResult.set(runningResult);
         }
 
+        public int compareIndex(final int index) {
+            return Integer.compare(this.index(), index);
+        }
+
+        public int index() {
+            return this.no.intValue() - 1;
+        }
     }
 
 }

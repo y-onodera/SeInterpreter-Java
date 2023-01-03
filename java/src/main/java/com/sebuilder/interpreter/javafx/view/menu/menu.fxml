@@ -13,7 +13,8 @@
             <Menu id="menuScript" fx:id="menuScript" mnemonicParsing="false" text="Script">
                 <MenuItem id="menuTestOpenFile" fx:id="menuScriptOpenFile" mnemonicParsing="false"
                           onAction="#handleScriptOpenFile" text="Open File"/>
-                <MenuItem id="menuTestImportSeleniumIDEScript" fx:id="menuImportSeleniumIDEScript" mnemonicParsing="false"
+                <MenuItem id="menuTestImportSeleniumIDEScript" fx:id="menuImportSeleniumIDEScript"
+                          mnemonicParsing="false"
                           onAction="#handleImportSeleniumIDEScript" text="Import SeleniumIDE Script"/>
                 <MenuItem id="menuTestSuiteSave" fx:id="menuSaveSuite" mnemonicParsing="false"
                           onAction="#handleSaveSuite" text="Save Suite"/>
@@ -27,10 +28,10 @@
                           onAction="#handleReplaySuite" text="Run Suite"/>
                 <MenuItem id="menuRunScript" fx:id="menuBrowserRunScript" mnemonicParsing="false"
                           onAction="#handleReplayScript" text="Run Script"/>
-                <MenuItem fx:id="menuReplaySetting" mnemonicParsing="false" onAction="#handleReplaySetting"
-                          text="Setting"/>
                 <MenuItem fx:id="menuOpenResult" mnemonicParsing="false" onAction="#handleOpenResult"
                           text="Open Result"/>
+                <MenuItem fx:id="menuReplaySetting" mnemonicParsing="false" onAction="#handleReplaySetting"
+                          text="Setting"/>
             </Menu>
             <Menu id="menuBrowser" fx:id="menuBrowser" mnemonicParsing="false" text="Browser">
                 <MenuItem fx:id="menuBrowserOpen" mnemonicParsing="false" onAction="#handleBrowserOpen"

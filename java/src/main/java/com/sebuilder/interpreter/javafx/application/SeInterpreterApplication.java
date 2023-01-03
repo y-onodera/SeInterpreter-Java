@@ -326,12 +326,14 @@ public class SeInterpreterApplication extends Application {
         });
     }
 
-    public void runStep(final ReplayOption replayOption, final Predicate<Number> filter, final Function<Integer, Integer> function) {
+    public void runStep(final ReplayOption replayOption, final Predicate<Number> filter, final Function<Integer, Integer> function, final boolean isChainTakeOver) {
         this.executeAndLoggingCaseWhenThrowException(() -> {
             final InputData inputData = this.currentDisplayShareInput(replayOption);
             this.executeTask(this.getDisplayTestCase()
                             .filterStep(filter)
-                            .map(builder -> builder.setShareInput(inputData).map(replayOption::apply))
+                            .map(builder -> builder.setShareInput(inputData)
+                                    .map(replayOption::apply)
+                                    .changeWhenConditionMatch(it -> !isChainTakeOver, it -> it.setChains(new TestCaseChains())))
                     , log -> new GUITestRunListener(Context.getTestListener(log), this) {
                         @Override
                         public int getStepNo() {

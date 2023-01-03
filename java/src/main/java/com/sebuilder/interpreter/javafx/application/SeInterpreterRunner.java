@@ -59,6 +59,11 @@ public class SeInterpreterRunner {
         return this.repl != null;
     }
 
+    public void run(final TestCase testCase) {
+        final TestRunListener listener = Context.getTestListener(this.log);
+        this.repl.execute(testCase, listener);
+    }
+
     public TestCase exportTemplate(final Locator locator, final List<String> targetTags, final boolean withDataSource) {
         if (!this.isOpen()) {
             this.setUp();
@@ -103,11 +108,6 @@ public class SeInterpreterRunner {
                 .build();
     }
 
-    public void run(final TestCase testCase) {
-        final TestRunListener listener = Context.getTestListener(this.log);
-        this.repl.execute(testCase, listener);
-    }
-
     public SeInterpreterRunTask createRunScriptTask(final TestCase currentDisplay, final Function<Logger, TestRunListener> listenerFactory) {
         return this.createBackgroundTask(currentDisplay, listenerFactory.apply(this.log));
     }
@@ -138,4 +138,5 @@ public class SeInterpreterRunner {
         }
         return new SeInterpreterRunTask(this.log, listener, this.repl, testCase);
     }
+
 }
