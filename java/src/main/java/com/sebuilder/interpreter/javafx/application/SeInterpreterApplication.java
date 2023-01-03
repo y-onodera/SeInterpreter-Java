@@ -336,8 +336,8 @@ public class SeInterpreterApplication extends Application {
                                     .changeWhenConditionMatch(it -> !isChainTakeOver, it -> it.setChains(new TestCaseChains())))
                     , log -> new GUITestRunListener(Context.getTestListener(log), this) {
                         @Override
-                        public int getStepNo() {
-                            return function.apply(super.getStepNo());
+                        public int getStepIndex() {
+                            return function.apply(super.getStepIndex());
                         }
                     });
         });

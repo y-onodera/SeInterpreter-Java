@@ -22,26 +22,41 @@ public class GUITestRunListener extends TestRunListenerWrapper {
     }
 
     @Override
+    public void setStepIndex(final int count) {
+        if (!this.delegate.isAspectRunning()) {
+            super.setStepIndex(count);
+        }
+    }
+
+    @Override
     public void startTest(final String testName) {
         super.startTest(testName);
-        this.application.updateReplayStatus(this.getStepNo(), Result.START);
+        if (!this.delegate.isAspectRunning()) {
+            this.application.updateReplayStatus(this.getStepIndex(), Result.START);
+        }
     }
 
     @Override
     public void addError(final Throwable throwable) {
-        this.application.updateReplayStatus(this.getStepNo(), Result.ERROR);
         super.addError(throwable);
+        if (!this.delegate.isAspectRunning()) {
+            this.application.updateReplayStatus(this.getStepIndex(), Result.ERROR);
+        }
     }
 
     @Override
     public void addFailure(final String message) {
-        this.application.updateReplayStatus(this.getStepNo(), Result.FAILURE);
         super.addFailure(message);
+        if (!this.delegate.isAspectRunning()) {
+            this.application.updateReplayStatus(this.getStepIndex(), Result.FAILURE);
+        }
     }
 
     @Override
     public void endTest() {
-        this.application.updateReplayStatus(this.getStepNo(), Result.SUCCESS);
         super.endTest();
+        if (!this.delegate.isAspectRunning()) {
+            this.application.updateReplayStatus(this.getStepIndex(), Result.SUCCESS);
+        }
     }
 }

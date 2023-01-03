@@ -20,7 +20,8 @@ public abstract class TestRunListenerImpl implements TestRunListener {
     protected String suiteName;
     protected InputData inputData;
     protected String testName;
-    private int stepNo;
+    private int stepIndex;
+    private boolean aspectRunning;
 
     public TestRunListenerImpl(final Logger aLog) {
         this.project = new Project();
@@ -32,7 +33,7 @@ public abstract class TestRunListenerImpl implements TestRunListener {
         this.downloadDirectory = null;
         this.screenShotOutputDirectory = null;
         this.templateOutputDirectory = null;
-        this.stepNo = 0;
+        this.stepIndex = 0;
     }
 
     protected TestRunListenerImpl(final TestRunListener extendFrom) {
@@ -46,7 +47,7 @@ public abstract class TestRunListenerImpl implements TestRunListener {
         this.downloadDirectory = extendFrom.getDownloadDirectory();
         this.screenShotOutputDirectory = extendFrom.getScreenShotOutputDirectory();
         this.templateOutputDirectory = extendFrom.getTemplateOutputDirectory();
-        this.stepNo = 0;
+        this.stepIndex = 0;
     }
 
     @Override
@@ -130,7 +131,7 @@ public abstract class TestRunListenerImpl implements TestRunListener {
     public boolean openTestSuite(final TestCase testCase, final String testRunName, final InputData aProperty) {
         this.suiteName = this.reportPrefix + testRunName.replace("_", ".");
         this.log.info("open suite:" + this.suiteName);
-        this.stepNo = 0;
+        this.stepIndex = 0;
         this.inputData = aProperty;
         return true;
     }
@@ -142,13 +143,23 @@ public abstract class TestRunListenerImpl implements TestRunListener {
     }
 
     @Override
-    public void skipTestIndex(final int count) {
-        this.stepNo = this.stepNo + count;
+    public void setStepIndex(final int index) {
+        this.stepIndex = index;
     }
 
     @Override
-    public int getStepNo() {
-        return this.stepNo;
+    public int getStepIndex() {
+        return this.stepIndex;
+    }
+
+    @Override
+    public void isAspectRunning(final boolean aspectRunning) {
+        this.aspectRunning = aspectRunning;
+    }
+
+    @Override
+    public boolean isAspectRunning() {
+        return this.aspectRunning;
     }
 
     @Override

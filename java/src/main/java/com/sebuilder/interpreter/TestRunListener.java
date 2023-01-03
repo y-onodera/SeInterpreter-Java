@@ -34,9 +34,9 @@ public interface TestRunListener {
 
     void startTest(String testName);
 
-    void skipTestIndex(int count);
+    void setStepIndex(int count);
 
-    int getStepNo();
+    int getStepIndex();
 
     File addScreenshot(String file);
 
@@ -57,6 +57,10 @@ public interface TestRunListener {
     void reportError(String name, Throwable e);
 
     void info(String s);
+
+    void isAspectRunning(boolean aspectRunning);
+
+    boolean isAspectRunning();
 
     interface Factory {
         TestRunListener create(Logger log);

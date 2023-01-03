@@ -5,7 +5,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.File;
 
 public class TestRunListenerWrapper implements TestRunListener {
-    private final TestRunListener delegate;
+    protected final TestRunListener delegate;
 
     public TestRunListenerWrapper(final TestRunListener delegate) {
         this.delegate = delegate;
@@ -82,13 +82,23 @@ public class TestRunListenerWrapper implements TestRunListener {
     }
 
     @Override
-    public void skipTestIndex(final int count) {
-        this.delegate.skipTestIndex(count);
+    public void setStepIndex(final int count) {
+        this.delegate.setStepIndex(count);
     }
 
     @Override
-    public int getStepNo() {
-        return this.delegate.getStepNo();
+    public int getStepIndex() {
+        return this.delegate.getStepIndex();
+    }
+
+    @Override
+    public void isAspectRunning(final boolean aspectRunning) {
+        this.delegate.isAspectRunning(aspectRunning);
+    }
+
+    @Override
+    public boolean isAspectRunning() {
+        return this.delegate.isAspectRunning();
     }
 
     @Override

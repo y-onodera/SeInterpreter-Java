@@ -234,8 +234,8 @@ public class TestRun implements WebDriverWrapper {
     }
 
     public void forwardStepIndex(final int count) {
-        this.getListener().skipTestIndex(count);
         this.testRunStatus = this.testRunStatus.forwardStepIndex(count);
+        this.getListener().setStepIndex(this.currentStepIndex());
     }
 
     public boolean processTestSuccess(final boolean isAcceptAdvice) {

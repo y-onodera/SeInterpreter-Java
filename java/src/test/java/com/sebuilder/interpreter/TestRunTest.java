@@ -1,8 +1,8 @@
 package com.sebuilder.interpreter;
 
 import com.google.common.collect.Lists;
-import com.sebuilder.interpreter.report.TestRunListenerImpl;
 import com.sebuilder.interpreter.datasource.Csv;
+import com.sebuilder.interpreter.report.TestRunListenerImpl;
 import com.sebuilder.interpreter.step.getter.ElementAttribute;
 import com.sebuilder.interpreter.step.type.ClickElement;
 import com.sebuilder.interpreter.step.type.DoubleClickElement;
@@ -69,13 +69,13 @@ public class TestRunTest {
             this.resetTestRun(it -> it);
         }
 
-        protected void resetTestRun(Function<TestRunBuilder, TestRunBuilder> function) {
+        protected void resetTestRun(final Function<TestRunBuilder, TestRunBuilder> function) {
             this.head = this.head.builder().setAspect(this.aspect).setChains(this.chains).build();
-            TestRunBuilder builder = new TestRunBuilder(this.head);
+            final TestRunBuilder builder = new TestRunBuilder(this.head);
             this.target = function.apply(builder).createTestRun(this.log, this.driver, this.initialVars, this.listener);
         }
 
-        protected URL getResourceUrl(String name) {
+        protected URL getResourceUrl(final String name) {
             return Objects.requireNonNull(this.getClass().getResource(name));
         }
 
@@ -114,7 +114,7 @@ public class TestRunTest {
 
         @Test
         public void vars() {
-            InputData actual = this.target.vars();
+            final InputData actual = this.target.vars();
             assertEquals(7, actual.entrySet().size());
             assertEquals(Context.getBrowser(), actual.get("_browser"));
             assertEquals(Context.getBaseDirectory().getAbsolutePath(), actual.get("_baseDir"));
@@ -134,7 +134,7 @@ public class TestRunTest {
         public void putVars() {
             assertNull(this.target.vars().get("key"));
             this.target.putVars("key", "test");
-            assertEquals("test", target.vars().get("key"));
+            assertEquals("test", this.target.vars().get("key"));
         }
     }
 
@@ -148,7 +148,7 @@ public class TestRunTest {
 
         @Test
         public void vars() {
-            InputData actual = this.target.vars();
+            final InputData actual = this.target.vars();
             assertEquals(8, actual.entrySet().size());
             assertEquals(Context.getBrowser(), actual.get("_browser"));
             assertEquals(Context.getBaseDirectory().getAbsolutePath(), actual.get("_baseDir"));
@@ -292,8 +292,8 @@ public class TestRunTest {
 
         @Before
         public void setUp() {
-            TestRunBuilder builder = new TestRunBuilder(head.map(it -> it.setChains(chains)));
-            this.target = builder.createTestRun(log, driver, initialVars, listener);
+            final TestRunBuilder builder = new TestRunBuilder(this.head.map(it -> it.setChains(this.chains)));
+            this.target = builder.createTestRun(this.log, this.driver, this.initialVars, this.listener);
         }
 
         @Test
@@ -324,7 +324,7 @@ public class TestRunTest {
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName()), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).closeTestSuite();
 
-            assertTrue(target.finish());
+            assertTrue(this.target.finish());
 
             Mockito.verify(this.listener)
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName()), Mockito.any(InputData.class));
@@ -351,8 +351,8 @@ public class TestRunTest {
         @Test
         public void absent() {
             final IllegalArgumentException illegalArgumentException = new IllegalArgumentException();
-            expectedException.expect(AssertionError.class);
-            expectedException.expectCause(CoreMatchers.is(illegalArgumentException));
+            this.expectedException.expect(AssertionError.class);
+            this.expectedException.expectCause(CoreMatchers.is(illegalArgumentException));
             Mockito.doNothing().when(this.listener).closeTestSuite();
             try {
                 this.target.absent(illegalArgumentException);
@@ -414,7 +414,7 @@ public class TestRunTest {
             Mockito.doNothing().when(this.listener).endTest();
             Mockito.doNothing().when(this.listener).closeTestSuite();
 
-            assertTrue(target.finish());
+            assertTrue(this.target.finish());
 
             Mockito.verify(this.listener)
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName()), Mockito.any(InputData.class));
@@ -447,8 +447,8 @@ public class TestRunTest {
         @Test
         public void processTestFailure() {
 
-            expectedException.expect(AssertionError.class);
-            expectedException.expectMessage("name: ClickElement failed.");
+            this.expectedException.expect(AssertionError.class);
+            this.expectedException.expectMessage("name: ClickElement failed.");
             Mockito.doNothing().when(this.listener).addFailure("name: ClickElement failed.");
 
             this.target.toNextStepIndex();
@@ -463,8 +463,8 @@ public class TestRunTest {
         public void processTestError() {
 
             final IllegalArgumentException exception = new IllegalArgumentException();
-            expectedException.expect(AssertionError.class);
-            expectedException.expectCause(CoreMatchers.is(exception));
+            this.expectedException.expect(AssertionError.class);
+            this.expectedException.expectCause(CoreMatchers.is(exception));
             Mockito.doNothing().when(this.listener).addError(exception);
 
             this.target.toNextStepIndex();
@@ -482,14 +482,14 @@ public class TestRunTest {
 
         @Test
         public void next() {
-            Mockito.doNothing().when(this.listener).skipTestIndex(1);
+            Mockito.doNothing().when(this.listener).setStepIndex(1);
             Mockito.doNothing().when(this.listener).startTest("name: ClickElement");
             Mockito.doReturn(true).when(this.step).run(this.target);
             Mockito.doNothing().when(this.listener).endTest();
 
             assertTrue(this.target.next());
 
-            Mockito.verify(this.listener).skipTestIndex(1);
+            Mockito.verify(this.listener).setStepIndex(1);
             Mockito.verify(this.listener).startTest("name: ClickElement");
             Mockito.verify(this.step).run(this.target);
             Mockito.verify(this.listener).endTest();
@@ -497,9 +497,9 @@ public class TestRunTest {
 
         @Test
         public void next_fail() {
-            expectedException.expect(AssertionError.class);
-            expectedException.expectMessage("name: ClickElement failed.");
-            Mockito.doNothing().when(this.listener).skipTestIndex(1);
+            this.expectedException.expect(AssertionError.class);
+            this.expectedException.expectMessage("name: ClickElement failed.");
+            Mockito.doNothing().when(this.listener).setStepIndex(1);
             Mockito.doNothing().when(this.listener).startTest("name: ClickElement");
             Mockito.doReturn(false)
                     .when(this.step)
@@ -509,7 +509,7 @@ public class TestRunTest {
             try {
                 this.target.next();
             } finally {
-                Mockito.verify(this.listener).skipTestIndex(1);
+                Mockito.verify(this.listener).setStepIndex(1);
                 Mockito.verify(this.listener).startTest("name: ClickElement");
                 Mockito.verify(this.step).run(this.target);
                 Mockito.verify(this.listener).addFailure("name: ClickElement failed.");
@@ -524,7 +524,7 @@ public class TestRunTest {
                     .addStep(this.step)
                     .build();
             this.resetTestRun();
-            Mockito.doNothing().when(this.listener).skipTestIndex(1);
+            Mockito.doNothing().when(this.listener).setStepIndex(1);
             Mockito.doNothing().when(this.listener).startTest("verifyElementAttribute negated=false");
             Mockito.doReturn(false)
                     .when(this.step)
@@ -533,7 +533,7 @@ public class TestRunTest {
 
             assertFalse(this.target.next());
 
-            Mockito.verify(this.listener).skipTestIndex(1);
+            Mockito.verify(this.listener).setStepIndex(1);
             Mockito.verify(this.listener).startTest("verifyElementAttribute negated=false");
             Mockito.verify(this.step).run(this.target);
             Mockito.verify(this.listener).addFailure("verifyElementAttribute negated=false failed.");
@@ -542,9 +542,9 @@ public class TestRunTest {
         @Test
         public void next_error() {
             final NullPointerException nullPointerException = new NullPointerException();
-            expectedException.expect(AssertionError.class);
-            expectedException.expectCause(CoreMatchers.is(nullPointerException));
-            Mockito.doNothing().when(this.listener).skipTestIndex(1);
+            this.expectedException.expect(AssertionError.class);
+            this.expectedException.expectCause(CoreMatchers.is(nullPointerException));
+            Mockito.doNothing().when(this.listener).setStepIndex(1);
             Mockito.doNothing().when(this.listener).startTest("name: ClickElement");
             Mockito.doThrow(nullPointerException)
                     .when(this.step)
@@ -553,7 +553,7 @@ public class TestRunTest {
             try {
                 this.target.next();
             } finally {
-                Mockito.verify(this.listener).skipTestIndex(1);
+                Mockito.verify(this.listener).setStepIndex(1);
                 Mockito.verify(this.listener).startTest("name: ClickElement");
                 Mockito.verify(this.step).run(this.target);
                 Mockito.verify(this.listener).addError(nullPointerException);
@@ -590,7 +590,7 @@ public class TestRunTest {
         @Test
         public void processTestFailure() {
 
-            expectedException.expect(AssertionError.class);
+            this.expectedException.expect(AssertionError.class);
 
             Mockito.doNothing().when(this.listener).addFailure("ClickElement text=parameter string failed.");
 
@@ -605,7 +605,7 @@ public class TestRunTest {
 
         @Test
         public void next() {
-            Mockito.doNothing().when(this.listener).skipTestIndex(1);
+            Mockito.doNothing().when(this.listener).setStepIndex(1);
             Mockito.doNothing().when(this.listener).startTest("ClickElement text=parameter string");
             Mockito.doReturn(true)
                     .when(this.step)
@@ -614,7 +614,7 @@ public class TestRunTest {
 
             assertTrue(this.target.next());
 
-            Mockito.verify(this.listener).skipTestIndex(1);
+            Mockito.verify(this.listener).setStepIndex(1);
             Mockito.verify(this.listener).startTest("ClickElement text=parameter string");
             Mockito.verify(this.step).run(this.target);
             Mockito.verify(this.listener).endTest();
@@ -636,7 +636,7 @@ public class TestRunTest {
             this.chainStep = Mockito.spy(new StepBuilder(new ClickElement())
                     .name("chain")
                     .build());
-            TestCase chainCase = this.head.builder().setName("chainCase").clearStep().addStep(this.chainStep).build();
+            final TestCase chainCase = this.head.builder().setName("chainCase").clearStep().addStep(this.chainStep).build();
             this.chains = this.chains.append(chainCase);
             this.resetTestRun();
         }
@@ -656,7 +656,7 @@ public class TestRunTest {
             Mockito.doNothing().when(this.listener).startTest("chain: ClickElement");
             Mockito.doReturn(true).when(this.chainStep).run(Mockito.any());
 
-            assertTrue(target.finish());
+            assertTrue(this.target.finish());
 
             Mockito.verify(this.listener)
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName()), Mockito.any(InputData.class));
@@ -672,8 +672,8 @@ public class TestRunTest {
 
         @Test
         public void finish_failureMain() {
-            expectedException.expect(AssertionError.class);
-            expectedException.expectMessage("name: ClickElement failed.");
+            this.expectedException.expect(AssertionError.class);
+            this.expectedException.expectMessage("name: ClickElement failed.");
             Mockito.doReturn(true)
                     .when(this.listener)
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName()), Mockito.any(InputData.class));
@@ -683,7 +683,7 @@ public class TestRunTest {
             Mockito.doNothing().when(this.listener).addFailure("name: ClickElement failed.");
 
             try {
-                target.finish();
+                this.target.finish();
             } finally {
                 Mockito.verify(this.listener)
                         .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName()), Mockito.any(InputData.class));
@@ -701,8 +701,8 @@ public class TestRunTest {
 
         @Test
         public void finish_failureChain() {
-            expectedException.expect(AssertionError.class);
-            expectedException.expectMessage("chain: ClickElement failed.");
+            this.expectedException.expect(AssertionError.class);
+            this.expectedException.expectMessage("chain: ClickElement failed.");
             Mockito.doReturn(true)
                     .when(this.listener)
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName()), Mockito.any(InputData.class));
@@ -717,7 +717,7 @@ public class TestRunTest {
             Mockito.doReturn(false).when(this.chainStep).run(Mockito.any());
             Mockito.doNothing().when(this.listener).addFailure("chain: ClickElement failed.");
             try {
-                target.finish();
+                this.target.finish();
             } finally {
                 Mockito.verify(this.listener)
                         .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName()), Mockito.any(InputData.class));
@@ -735,7 +735,7 @@ public class TestRunTest {
 
         @Test
         public void next() {
-            Mockito.doNothing().when(this.listener).skipTestIndex(1);
+            Mockito.doNothing().when(this.listener).setStepIndex(1);
             Mockito.doNothing().when(this.listener).startTest("name: ClickElement");
             Mockito.doReturn(true)
                     .when(this.step)
@@ -744,7 +744,7 @@ public class TestRunTest {
 
             assertTrue(this.target.next());
 
-            Mockito.verify(this.listener).skipTestIndex(1);
+            Mockito.verify(this.listener).setStepIndex(1);
             Mockito.verify(this.listener).startTest("name: ClickElement");
             Mockito.verify(this.step).run(this.target);
             Mockito.verify(this.listener).endTest();
@@ -775,7 +775,7 @@ public class TestRunTest {
             this.chainStep = Mockito.spy(new StepBuilder(new ClickElement())
                     .name("chain")
                     .build());
-            TestCase chainCase = this.head.builder().setName("chainCase").clearStep().addStep(this.chainStep).build();
+            final TestCase chainCase = this.head.builder().setName("chainCase").clearStep().addStep(this.chainStep).build();
             this.chains = this.chains.append(chainCase);
             this.aspectBeforeStep = Mockito.spy(new StepBuilder(new SetElementText()).build());
             this.aspectAfterStep = Mockito.spy(new StepBuilder(new DoubleClickElement()).build());
@@ -784,7 +784,7 @@ public class TestRunTest {
                     , this.aspectBeforeStep.toTestCase()
                     , this.aspectAfterStep.toTestCase()
                     , new TestCaseBuilder().build()));
-            final Aspect aspect = new Aspect(Lists.newArrayList(interceptor));
+            final Aspect aspect = new Aspect(Lists.newArrayList(this.interceptor));
             Mockito.doReturn(new File(".", "result")).when(this.adviseListener).getResultDir();
             Mockito.doReturn(new File(".", "screenshot")).when(this.adviseListener).getScreenShotOutputDirectory();
             Mockito.doReturn(new File(".", "template")).when(this.adviseListener).getTemplateOutputDirectory();
@@ -823,7 +823,7 @@ public class TestRunTest {
             Mockito.doNothing().when(this.listener).startTest("chain: ClickElement");
             Mockito.doReturn(true).when(this.chainStep).run(Mockito.any());
 
-            assertTrue(target.finish());
+            assertTrue(this.target.finish());
 
             Mockito.verify(this.listener)
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName()), Mockito.any(InputData.class));
@@ -872,7 +872,7 @@ public class TestRunTest {
             this.chainStep = Mockito.spy(new StepBuilder(new ClickElement())
                     .name("chain")
                     .build());
-            TestCase chainCase = this.head.builder().setName("chainCase").clearStep().addStep(this.chainStep).build();
+            final TestCase chainCase = this.head.builder().setName("chainCase").clearStep().addStep(this.chainStep).build();
             this.chains = this.chains.append(chainCase);
             this.resetTestRun();
             this.aspectBeforeStep = Mockito.spy(new StepBuilder(new SetElementText()).build());
@@ -882,7 +882,7 @@ public class TestRunTest {
                     , this.aspectBeforeStep.toTestCase()
                     , this.aspectAfterStep.toTestCase()
                     , new TestCaseBuilder().build()));
-            final Aspect aAspect = new Aspect(Lists.newArrayList(interceptor));
+            final Aspect aAspect = new Aspect(Lists.newArrayList(this.interceptor));
             Context.getInstance().setAspect(aAspect);
             Mockito.doReturn(new File(".", "result")).when(this.adviseListener).getResultDir();
             Mockito.doReturn(new File(".", "screenshot")).when(this.adviseListener).getScreenShotOutputDirectory();
@@ -925,7 +925,7 @@ public class TestRunTest {
             Mockito.doNothing().when(this.adviseListener).startTest("DoubleClickElement");
             Mockito.doReturn(true).when(this.aspectAfterStep).run(Mockito.any());
 
-            assertTrue(target.finish());
+            assertTrue(this.target.finish());
 
             Mockito.verify(this.listener)
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName()), Mockito.any(InputData.class));
@@ -996,7 +996,7 @@ public class TestRunTest {
                     , this.aspectBeforeStep.toTestCase()
                     , this.aspectAfterStep.toTestCase()
                     , new TestCaseBuilder().build()));
-            final Aspect aspect = new Aspect(Lists.newArrayList(interceptor));
+            final Aspect aspect = new Aspect(Lists.newArrayList(this.interceptor));
             Mockito.doReturn(new File(".", "result")).when(this.adviseListener).getResultDir();
             Mockito.doReturn(new File(".", "screenshot")).when(this.adviseListener).getScreenShotOutputDirectory();
             Mockito.doReturn(new File(".", "template")).when(this.adviseListener).getTemplateOutputDirectory();
@@ -1010,7 +1010,7 @@ public class TestRunTest {
                     , this.contextAspectBeforeStep.toTestCase()
                     , this.contextAspectAfterStep.toTestCase()
                     , new TestCaseBuilder().build()));
-            final Aspect aAspect = new Aspect(Lists.newArrayList(contextInterceptor));
+            final Aspect aAspect = new Aspect(Lists.newArrayList(this.contextInterceptor));
             Context.getInstance().setAspect(aAspect);
             Mockito.doReturn(new File(".", "result")).when(this.contextAdviseListener).getResultDir();
             Mockito.doReturn(new File(".", "screenshot")).when(this.contextAdviseListener).getScreenShotOutputDirectory();
@@ -1068,7 +1068,7 @@ public class TestRunTest {
             Mockito.doNothing().when(this.contextAdviseListener).startTest("DoubleClickElement");
             Mockito.doReturn(true).when(this.contextAspectAfterStep).run(Mockito.any());
 
-            assertTrue(target.finish());
+            assertTrue(this.target.finish());
 
             Mockito.verify(this.listener)
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName()), Mockito.any(InputData.class));
@@ -1150,7 +1150,7 @@ public class TestRunTest {
             Mockito.doNothing().when(this.listener).startTest("chain: ClickElement");
             Mockito.doReturn(true).when(this.chainStep).run(Mockito.any());
 
-            assertTrue(target.finish());
+            assertTrue(this.target.finish());
 
             Mockito.verify(this.listener)
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite"), Mockito.any(InputData.class));
@@ -1181,7 +1181,7 @@ public class TestRunTest {
             Mockito.doNothing().when(this.listener).endTest();
             Mockito.doNothing().when(this.listener).closeTestSuite();
 
-            assertTrue(target.finish());
+            assertTrue(this.target.finish());
 
             Mockito.verify(this.listener)
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite"), Mockito.any(InputData.class));
@@ -1213,8 +1213,8 @@ public class TestRunTest {
             this.chainStep = Mockito.spy(new StepBuilder(new ClickElement())
                     .name("chain")
                     .build());
-            TestCase chainCase = this.head.builder().setName("chainCase")
-                    .setDataSource(new Csv(), Map.of("path", getResourceUrl("test.csv").getFile()))
+            final TestCase chainCase = this.head.builder().setName("chainCase")
+                    .setDataSource(new Csv(), Map.of("path", this.getResourceUrl("test.csv").getFile()))
                     .clearStep().addStep(this.chainStep).build();
             this.chains = this.chains.append(chainCase);
             this.resetTestRun();
@@ -1238,7 +1238,7 @@ public class TestRunTest {
                     .when(this.listener)
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName() + "_0_chainCase_row_2"), Mockito.any(InputData.class));
 
-            assertTrue(target.finish());
+            assertTrue(this.target.finish());
 
             Mockito.verify(this.listener)
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq(ScriptFile.Type.TEST.getDefaultName()), Mockito.any(InputData.class));
@@ -1293,7 +1293,7 @@ public class TestRunTest {
                     .setSkip("${skipChain2}")
                     .addStep(this.chain2)
                     .build();
-            chainStart = chainStart.map(it -> it.addChain(chainCase).addChain(chainCase2).isChainTakeOverLastRun(true));
+            chainStart = chainStart.map(it -> it.addChain(this.chainCase).addChain(this.chainCase2).isChainTakeOverLastRun(true));
             this.chains = this.chains.append(chainStart);
             this.initialVars = this.initialVars.add("key", "default");
         }
@@ -1327,7 +1327,7 @@ public class TestRunTest {
             Mockito.doNothing().when(this.listener).startTest("chain2: ClickElement key=2");
             Mockito.doReturn(true).when(this.chain2).run(Mockito.any());
 
-            assertTrue(target.finish());
+            assertTrue(this.target.finish());
 
             Mockito.verify(this.listener)
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite"), Mockito.any(InputData.class));
@@ -1370,7 +1370,7 @@ public class TestRunTest {
             Mockito.doNothing().when(this.listener).startTest("chain2: ClickElement key=default");
             Mockito.doReturn(true).when(this.chain2).run(Mockito.any());
 
-            assertTrue(target.finish());
+            assertTrue(this.target.finish());
 
             Mockito.verify(this.listener)
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite"), Mockito.any(InputData.class));
@@ -1417,7 +1417,7 @@ public class TestRunTest {
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_2"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("chain: ClickElement key=2");
 
-            assertTrue(target.finish());
+            assertTrue(this.target.finish());
 
             Mockito.verify(this.listener)
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite"), Mockito.any(InputData.class));
@@ -1455,7 +1455,7 @@ public class TestRunTest {
             Mockito.doReturn(true).when(this.step).run(Mockito.any());
             Mockito.doNothing().when(this.listener).endTest();
 
-            assertTrue(target.finish());
+            assertTrue(this.target.finish());
 
             Mockito.verify(this.listener)
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite"), Mockito.any(InputData.class));
@@ -1508,7 +1508,7 @@ public class TestRunTest {
             Mockito.doReturn(true).when(this.chain2).run(Mockito.any());
 
             this.target.putVars("key", "change");
-            assertTrue(target.finish());
+            assertTrue(this.target.finish());
 
             Mockito.verify(this.listener)
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite"), Mockito.any(InputData.class));
@@ -1611,7 +1611,7 @@ public class TestRunTest {
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_2_0_chainCase2"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("chain2: ClickElement key=2");
 
-            assertTrue(target.finish());
+            assertTrue(this.target.finish());
 
             Mockito.verify(this.listener)
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite"), Mockito.any(InputData.class));
@@ -1652,7 +1652,7 @@ public class TestRunTest {
             Mockito.doReturn(true).when(this.step).run(Mockito.any());
             Mockito.doNothing().when(this.listener).endTest();
 
-            assertTrue(target.finish());
+            assertTrue(this.target.finish());
 
             Mockito.verify(this.listener)
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite"), Mockito.any(InputData.class));
@@ -1699,7 +1699,7 @@ public class TestRunTest {
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite_0_chainStart_0_chainCase_row_2"), Mockito.any(InputData.class));
             Mockito.doNothing().when(this.listener).startTest("chain: ClickElement key=2");
 
-            assertTrue(target.finish());
+            assertTrue(this.target.finish());
 
             Mockito.verify(this.listener)
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite"), Mockito.any(InputData.class));
@@ -1739,7 +1739,7 @@ public class TestRunTest {
             Mockito.doNothing().when(this.listener).endTest();
             Mockito.doNothing().when(this.listener).closeTestSuite();
 
-            assertTrue(target.finish());
+            assertTrue(this.target.finish());
 
             Mockito.verify(this.listener)
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite"), Mockito.any(InputData.class));
@@ -1796,7 +1796,7 @@ public class TestRunTest {
             Mockito.doNothing().when(this.listener).startTest("chain2: ClickElement key=2");
 
             this.target.putVars("key", "change");
-            assertTrue(target.finish());
+            assertTrue(this.target.finish());
 
             Mockito.verify(this.listener)
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite"), Mockito.any(InputData.class));
@@ -1919,7 +1919,7 @@ public class TestRunTest {
             Mockito.doNothing().when(this.listener).startTest("chain3: ClickElement key=2");
             Mockito.doReturn(true).when(this.chain3).run(Mockito.any());
 
-            assertTrue(target.finish());
+            assertTrue(this.target.finish());
 
             Mockito.verify(this.listener)
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite"), Mockito.any(InputData.class));
@@ -2047,7 +2047,7 @@ public class TestRunTest {
             Mockito.doNothing().when(this.listener).startTest("chain3: ClickElement key=default");
             Mockito.doReturn(true).when(this.chain3).run(Mockito.any());
 
-            assertTrue(target.finish());
+            assertTrue(this.target.finish());
 
             Mockito.verify(this.listener)
                     .openTestSuite(Mockito.any(TestCase.class), Mockito.eq("suite"), Mockito.any(InputData.class));
@@ -2080,7 +2080,7 @@ public class TestRunTest {
     public static class Quit extends AbstractTestRunTest {
         @Test
         public void quit() {
-            TestRunBuilder builder = new TestRunBuilder(this.head.map(it -> it.setChains(this.chains)));
+            final TestRunBuilder builder = new TestRunBuilder(this.head.map(it -> it.setChains(this.chains)));
             this.target = builder.createTestRun(this.log, this.driver, this.initialVars, this.listener);
             this.target.quit();
             Mockito.verify(this.log).debug("Quitting driver.");
@@ -2090,7 +2090,7 @@ public class TestRunTest {
         @Test
         public void quit_withParentDriver() {
             this.head = this.head.builder().isShareState(true).build();
-            resetTestRun();
+            this.resetTestRun();
             this.target.quit();
             Mockito.verify(this.driver, Mockito.never()).quit();
         }

@@ -112,7 +112,7 @@ public class ScriptPresenter {
         final ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
         stepView.refresh(this.application.getDisplayTestCase()
                 .steps()
-                .get(item.no.intValue() - 1)
+                .get(item.index())
         );
     }
 
@@ -171,12 +171,12 @@ public class ScriptPresenter {
         });
     }
 
-    private void handleStepResult(final int stepNo, final Result result) {
+    private void handleStepResult(final int stepIndex, final Result result) {
         final List<ScriptBody> bodies = this.tableViewScriptBody.getItems();
-        if (bodies.size() >= stepNo) {
-            final ScriptBody target = bodies.get(stepNo - 1);
-            target.setRunningResult(result.name());
-        }
+        bodies.stream()
+                .filter(item -> item.index() == stepIndex)
+                .findFirst()
+                .ifPresent(target -> target.setRunningResult(result.name()));
     }
 
     private StepView initStepEditDialog(final StepView.Action action) {

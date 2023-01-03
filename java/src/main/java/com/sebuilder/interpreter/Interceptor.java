@@ -67,6 +67,7 @@ public record Interceptor(Pointcut pointcut,
             @Override
             public boolean openTestSuite(final TestCase testCase, final String testRunName, final InputData aProperty) {
                 this.testName = testRunName;
+                this.isAspectRunning(true);
                 testRun.log().info("open suite %s".formatted(this.testName));
                 return true;
             }
@@ -74,6 +75,7 @@ public record Interceptor(Pointcut pointcut,
             @Override
             public void closeTestSuite() {
                 testRun.log().info("close suite %s".formatted(this.testName));
+                this.isAspectRunning(false);
             }
         };
     }
