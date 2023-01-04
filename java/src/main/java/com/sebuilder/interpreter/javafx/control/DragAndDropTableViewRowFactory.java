@@ -14,10 +14,15 @@ public abstract class DragAndDropTableViewRowFactory<T> implements Callback<Tabl
     @Override
     public TableRow<T> call(final TableView<T> tableView) {
         final TableRow<T> row = new TableRow<>() {
+            int notEmptyValCount = 0;
+
             @Override
-            protected void updateItem(final T scriptBody, final boolean b) {
-                super.updateItem(scriptBody, b);
-                DragAndDropTableViewRowFactory.this.updateItemCallback(this, scriptBody, b);
+            protected void updateItem(final T scriptBody, final boolean empty) {
+                if (!empty) {
+                    this.notEmptyValCount++;
+                }
+                super.updateItem(scriptBody, empty);
+                DragAndDropTableViewRowFactory.this.updateItemCallback(this, scriptBody, empty, this.notEmptyValCount);
             }
 
         };
@@ -28,7 +33,7 @@ public abstract class DragAndDropTableViewRowFactory<T> implements Callback<Tabl
         return row;
     }
 
-    protected void updateItemCallback(final TableRow<T> tableRow, final T scriptBody, final boolean b) {
+    protected void updateItemCallback(final TableRow<T> tableRow, final T scriptBody, final boolean b, final int notEmptyValCount) {
         // default non implement
     }
 

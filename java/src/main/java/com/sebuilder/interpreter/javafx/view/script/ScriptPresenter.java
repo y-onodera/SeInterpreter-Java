@@ -46,11 +46,11 @@ public class ScriptPresenter {
         this.tableColumnScriptBodyStep.setCellValueFactory(body -> body.getValue().stepProperty());
         this.tableViewScriptBody.setRowFactory(new DragAndDropTableViewRowFactory<>() {
             @Override
-            protected void updateItemCallback(final TableRow<ScriptBody> tableRow, final ScriptBody scriptBody, final boolean b) {
+            protected void updateItemCallback(final TableRow<ScriptBody> tableRow, final ScriptBody scriptBody, final boolean empty, final int notEmptyValCount) {
                 for (final Result result : Result.values()) {
                     tableRow.getStyleClass().remove(result.toString().toLowerCase());
                 }
-                if (!b && !tableRow.isEmpty()) {
+                if (!empty && !tableRow.isEmpty() && notEmptyValCount == 1) {
                     tableRow.getItem().runningResultProperty().addListener((ObservableValue<? extends String> observed, String oldValue, String newValue) -> {
                         for (final Result result : Result.values()) {
                             tableRow.getStyleClass().remove(result.toString().toLowerCase());
@@ -64,6 +64,10 @@ public class ScriptPresenter {
                             ScriptPresenter.this.handleStepEdit();
                         }
                     });
+                    final String currentStyle = tableRow.getItem().runningResultProperty().get();
+                    if (!Strings.isNullOrEmpty(currentStyle)) {
+                        tableRow.getStyleClass().add(currentStyle.toLowerCase());
+                    }
                 }
             }
 
@@ -189,6 +193,7 @@ public class ScriptPresenter {
     }
 
     private static class ScriptBody {
+
         private final IntegerProperty no;
 
         private final StringProperty step;
@@ -228,6 +233,7 @@ public class ScriptPresenter {
         public int index() {
             return this.no.intValue() - 1;
         }
+
     }
 
 }
