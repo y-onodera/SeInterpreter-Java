@@ -33,7 +33,7 @@ public class SeInterpreterRunTask extends Task<String> {
 
                 @Override
                 public boolean openTestSuite(final TestCase testCase, final String testRunName, final InputData aProperty) {
-                    this.currentScriptSteps = testCase.steps().size() - 1;
+                    this.currentScriptSteps = testCase.steps().size();
                     SeInterpreterRunTask.this.updateMessage(testRunName);
                     SeInterpreterRunTask.this.updateProgress(0, this.currentScriptSteps);
                     return super.openTestSuite(testCase, testRunName, aProperty);
@@ -41,7 +41,7 @@ public class SeInterpreterRunTask extends Task<String> {
 
                 @Override
                 public void startTest(final String testName) {
-                    SeInterpreterRunTask.this.updateProgress(this.getStepIndex(), this.currentScriptSteps);
+                    SeInterpreterRunTask.this.updateProgress(this.getStepIndex() + 1, this.currentScriptSteps);
                     super.startTest(testName);
                 }
 
