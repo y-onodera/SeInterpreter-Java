@@ -50,20 +50,22 @@ public class ScriptPresenter {
                 for (final Result result : Result.values()) {
                     tableRow.getStyleClass().remove(result.toString().toLowerCase());
                 }
-                if (!empty && !tableRow.isEmpty() && notEmptyValCount == 1) {
-                    tableRow.getItem().runningResultProperty().addListener((ObservableValue<? extends String> observed, String oldValue, String newValue) -> {
-                        for (final Result result : Result.values()) {
-                            tableRow.getStyleClass().remove(result.toString().toLowerCase());
-                        }
-                        if (!Strings.isNullOrEmpty(newValue)) {
-                            tableRow.getStyleClass().add(newValue.toLowerCase());
-                        }
-                    });
-                    tableRow.setOnMouseClicked(ev -> {
-                        if (ev.getButton().equals(MouseButton.PRIMARY) && ev.getClickCount() == 2) {
-                            ScriptPresenter.this.handleStepEdit();
-                        }
-                    });
+                if (!empty && !tableRow.isEmpty()) {
+                    if (notEmptyValCount == 1) {
+                        tableRow.getItem().runningResultProperty().addListener((ObservableValue<? extends String> observed, String oldValue, String newValue) -> {
+                            for (final Result result : Result.values()) {
+                                tableRow.getStyleClass().remove(result.toString().toLowerCase());
+                            }
+                            if (!Strings.isNullOrEmpty(newValue)) {
+                                tableRow.getStyleClass().add(newValue.toLowerCase());
+                            }
+                        });
+                        tableRow.setOnMouseClicked(ev -> {
+                            if (ev.getButton().equals(MouseButton.PRIMARY) && ev.getClickCount() == 2) {
+                                ScriptPresenter.this.handleStepEdit();
+                            }
+                        });
+                    }
                     final String currentStyle = tableRow.getItem().runningResultProperty().get();
                     if (!Strings.isNullOrEmpty(currentStyle)) {
                         tableRow.getStyleClass().add(currentStyle.toLowerCase());
