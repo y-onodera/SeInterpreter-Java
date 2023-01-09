@@ -24,7 +24,9 @@
             <Label text="Running Status" GridPane.rowIndex="2"/>
             <Label fx:id="runStatus" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
         </GridPane>
-        <HBox alignment="TOP_CENTER" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
+        <HBox alignment="TOP_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
+            <Button fx:id="stepOver" alignment="CENTER" mnemonicParsing="false" onAction="#handleStepOver"
+                    text="step over"/>
             <Button fx:id="stop" alignment="CENTER" mnemonicParsing="false" onAction="#handleReplayStop"
                     text="Stop"/>
             <Button fx:id="openLog" mnemonicParsing="false" onAction="#handleOpenReplayLog" text="Report"/>

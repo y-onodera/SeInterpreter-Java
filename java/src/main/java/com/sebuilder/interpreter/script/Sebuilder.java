@@ -281,23 +281,25 @@ public class Sebuilder extends AbstractJsonScriptParser {
         if (o.has("aspect")) {
             final Aspect.Builder builder = result.builder();
             final JSONArray aspects = o.getJSONArray("aspect");
-            IntStream.range(0, aspects.length()).forEach(i -> {
-                final Interceptor.Builder interceptorBuilder = builder.interceptor();
-                final JSONObject aspect = aspects.getJSONObject(i);
-                if (aspect.has("pointcut")) {
-                    interceptorBuilder.setPointcut(this.getPointcut(aspect.getJSONArray("pointcut")));
-                }
-                if (aspect.has("before")) {
-                    interceptorBuilder.addBefore(this.load(aspect.getJSONObject("before"), null));
-                }
-                if (aspect.has("after")) {
-                    interceptorBuilder.addAfter(this.load(aspect.getJSONObject("after"), null));
-                }
-                if (aspect.has("failure")) {
-                    interceptorBuilder.addFailure(this.load(aspect.getJSONObject("failure"), null));
-                }
-                interceptorBuilder.build();
-            });
+            IntStream.range(0, aspects.length()).forEach(i ->
+                    builder.add(() -> {
+                        final ExtraStepExecuteInterceptor.Builder interceptorBuilder = new ExtraStepExecuteInterceptor.Builder();
+                        final JSONObject aspect = aspects.getJSONObject(i);
+                        if (aspect.has("pointcut")) {
+                            interceptorBuilder.setPointcut(this.getPointcut(aspect.getJSONArray("pointcut")));
+                        }
+                        if (aspect.has("before")) {
+                            interceptorBuilder.addBefore(this.load(aspect.getJSONObject("before"), null));
+                        }
+                        if (aspect.has("after")) {
+                            interceptorBuilder.addAfter(this.load(aspect.getJSONObject("after"), null));
+                        }
+                        if (aspect.has("failure")) {
+                            interceptorBuilder.addFailure(this.load(aspect.getJSONObject("failure"), null));
+                        }
+                        return interceptorBuilder.get();
+                    })
+            );
             result = builder.build();
         }
         return result;

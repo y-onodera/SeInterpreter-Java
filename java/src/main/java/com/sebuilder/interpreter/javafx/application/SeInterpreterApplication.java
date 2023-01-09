@@ -322,7 +322,8 @@ public class SeInterpreterApplication extends Application {
             final InputData inputData = this.currentDisplayShareInput(replayOption);
             this.executeTask(this.getDisplayTestCase()
                             .map(builder -> builder.setShareInput(inputData).map(replayOption::apply))
-                    , this.listener());
+                    , this.listener()
+                    , replayOption.debugger());
         });
     }
 
@@ -339,7 +340,8 @@ public class SeInterpreterApplication extends Application {
                         public int getStepIndex() {
                             return function.apply(super.getStepIndex());
                         }
-                    });
+                    }
+                    , replayOption.debugger());
         });
     }
 
@@ -434,17 +436,21 @@ public class SeInterpreterApplication extends Application {
     }
 
     protected void executeTask(final TestCase replayCase, final Function<Logger, TestRunListener> listenerFactory) {
+        this.executeTask(replayCase, listenerFactory, null);
+    }
+
+    protected void executeTask(final TestCase replayCase, final Function<Logger, TestRunListener> listenerFactory, final Debugger debugger) {
         final SeInterpreterRunTask task = this.runner.createRunScriptTask(replayCase, listenerFactory);
         this.executeAndLoggingCaseWhenThrowException(() -> {
             final ExecutorService executor = Executors.newSingleThreadExecutor();
-            this.showProgressbar(task);
+            this.showProgressbar(task, debugger);
             task.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED, wse -> executor.shutdown());
             executor.submit(task);
         });
     }
 
-    protected void showProgressbar(final SeInterpreterRunTask task) {
-        new ReplayView().open(this.mainView.getMainWindow(), task);
+    protected void showProgressbar(final SeInterpreterRunTask task, final Debugger debugger) {
+        new ReplayView().open(this.mainView.getMainWindow(), task, debugger);
     }
 
     public interface ThrowableAction {

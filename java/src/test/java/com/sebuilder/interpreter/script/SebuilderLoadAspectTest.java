@@ -10,8 +10,8 @@ import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
 
@@ -28,29 +28,29 @@ public class SebuilderLoadAspectTest {
 
         protected Sebuilder target = new Sebuilder();
 
-        protected File scriptDir = new File(SebuilderLoadAspectTest.class.getResource(".").getPath(), "aspect");
+        protected File scriptDir = new File(Objects.requireNonNull(SebuilderLoadAspectTest.class.getResource(".")).getPath(), "aspect");
 
         protected Aspect result;
 
         @Before
-        public void setup() throws IOException {
-            result = target.loadAspect(new File(scriptDir, "aspectWithSingleFilterPointcut.json"));
+        public void setup() {
+            this.result = this.target.loadAspect(new File(this.scriptDir, "aspectWithSingleFilterPointcut.json"));
         }
 
-        protected void assertNotWeaver(Step step, InputData inputData) {
-            var advice = result.advice(step, inputData)
+        protected void assertNotWeaver(final Step step, final InputData inputData) {
+            final var advice = this.result.advice(step, inputData)
                     .advices();
             assertEquals(0, advice.size());
         }
 
-        protected void assertWeaver(Step step, InputData inputData) {
-            var advice = result.advice(step, inputData)
+        protected void assertWeaver(final Step step, final InputData inputData) {
+            final var advice = this.result.advice(step, inputData)
                     .advices();
             assertEquals(1, advice.size());
-            assertEquals(1, advice.get(0).beforeStep().steps().size());
-            assertEquals(new Get().toStep().build(), advice.get(0).beforeStep().steps().get(0));
-            assertEquals(new TestCaseBuilder().build(), advice.get(0).afterStep());
-            assertEquals(new TestCaseBuilder().build(), advice.get(0).failureStep());
+            assertEquals(1, getInterceptor(advice, 0).beforeStep().steps().size());
+            assertEquals(new Get().toStep().build(), getInterceptor(advice, 0).beforeStep().steps().get(0));
+            assertEquals(new TestCaseBuilder().build(), getInterceptor(advice, 0).afterStep());
+            assertEquals(new TestCaseBuilder().build(), getInterceptor(advice, 0).failureStep());
         }
     }
 
@@ -58,24 +58,24 @@ public class SebuilderLoadAspectTest {
 
         @Test
         public void adviceWeaverPointcutValue() {
-            assertWeaver(new StepBuilder(new SendKeysToElement()).put("text", "text").build(), new InputData());
+            this.assertWeaver(new StepBuilder(new SendKeysToElement()).put("text", "text").build(), new InputData());
         }
 
         @Test
         public void adviceWeaverPointcutValues() {
-            assertWeaver(new StepBuilder(new SendKeysToElement()).put("text", "id1").build(), new InputData());
-            assertWeaver(new StepBuilder(new SendKeysToElement()).put("text", "id2").build(), new InputData());
-            assertWeaver(new StepBuilder(new SendKeysToElement()).put("text", "id3").build(), new InputData());
+            this.assertWeaver(new StepBuilder(new SendKeysToElement()).put("text", "id1").build(), new InputData());
+            this.assertWeaver(new StepBuilder(new SendKeysToElement()).put("text", "id2").build(), new InputData());
+            this.assertWeaver(new StepBuilder(new SendKeysToElement()).put("text", "id3").build(), new InputData());
         }
 
         @Test
         public void adviceWeaverStepEqualsPointcutMethod() {
-            assertWeaver(new StepBuilder(new SendKeysToElement()).put("text", "agent007").build(), new InputData());
+            this.assertWeaver(new StepBuilder(new SendKeysToElement()).put("text", "agent007").build(), new InputData());
         }
 
         @Test
         public void adviceNotWeaverStepIsNotPointcutTarget() {
-            assertNotWeaver(new StepBuilder(new SendKeysToElement()).put("text", "007").build(), new InputData());
+            this.assertNotWeaver(new StepBuilder(new SendKeysToElement()).put("text", "007").build(), new InputData());
         }
 
     }
@@ -84,24 +84,24 @@ public class SebuilderLoadAspectTest {
 
         @Test
         public void adviceWeaverPointcutValue() {
-            assertWeaver(new StepBuilder(new ClickElement()).build(), new InputData());
+            this.assertWeaver(new StepBuilder(new ClickElement()).build(), new InputData());
         }
 
         @Test
         public void adviceWeaverPointcutValues() {
-            assertWeaver(new StepBuilder(new SetElementSelected()).build(), new InputData());
-            assertWeaver(new StepBuilder(new SetElementText()).build(), new InputData());
-            assertWeaver(new StepBuilder(new SelectElementValue()).build(), new InputData());
+            this.assertWeaver(new StepBuilder(new SetElementSelected()).build(), new InputData());
+            this.assertWeaver(new StepBuilder(new SetElementText()).build(), new InputData());
+            this.assertWeaver(new StepBuilder(new SelectElementValue()).build(), new InputData());
         }
 
         @Test
         public void adviceWeaverStepEqualsPointcutMethod() {
-            assertWeaver(new StepBuilder(new ScrollDown()).build(), new InputData());
+            this.assertWeaver(new StepBuilder(new ScrollDown()).build(), new InputData());
         }
 
         @Test
         public void adviceNotWeaverStepIsNotPointcutTarget() {
-            assertNotWeaver(new StepBuilder(new Get()).build(), new InputData());
+            this.assertNotWeaver(new StepBuilder(new Get()).build(), new InputData());
         }
 
     }
@@ -110,12 +110,12 @@ public class SebuilderLoadAspectTest {
 
         @Test
         public void adviceWeaverPointcutValue() {
-            assertWeaver(new StepBuilder(new Get()).negated(true).build(), new InputData());
+            this.assertWeaver(new StepBuilder(new Get()).negated(true).build(), new InputData());
         }
 
         @Test
         public void adviceNotWeaverStepIsNotPointcutTarget() {
-            assertNotWeaver(new StepBuilder(new Get()).build(), new InputData());
+            this.assertNotWeaver(new StepBuilder(new Get()).build(), new InputData());
         }
 
     }
@@ -124,34 +124,34 @@ public class SebuilderLoadAspectTest {
 
         @Test
         public void adviceWeaverPointcutValue() {
-            assertWeaver(new StepBuilder(new DoubleClickElement())
+            this.assertWeaver(new StepBuilder(new DoubleClickElement())
                     .locator(new Locator("name", "name1"))
                     .build(), new InputData());
         }
 
         @Test
         public void adviceWeaverPointcutValues() {
-            assertWeaver(new StepBuilder(new DoubleClickElement())
+            this.assertWeaver(new StepBuilder(new DoubleClickElement())
                     .locator(new Locator("id", "id1"))
                     .build(), new InputData());
-            assertWeaver(new StepBuilder(new DoubleClickElement())
+            this.assertWeaver(new StepBuilder(new DoubleClickElement())
                     .locator(new Locator("id", "id2"))
                     .build(), new InputData());
-            assertWeaver(new StepBuilder(new DoubleClickElement())
+            this.assertWeaver(new StepBuilder(new DoubleClickElement())
                     .locator(new Locator("id", "id3"))
                     .build(), new InputData());
         }
 
         @Test
         public void adviceWeaverStepEqualsPointcutMethod() {
-            assertWeaver(new StepBuilder(new DoubleClickElement())
+            this.assertWeaver(new StepBuilder(new DoubleClickElement())
                     .locator(new Locator("link text", "some link text"))
                     .build(), new InputData());
         }
 
         @Test
         public void adviceNotWeaverStepIsNotPointcutTarget() {
-            assertNotWeaver(new StepBuilder(new DoubleClickElement())
+            this.assertNotWeaver(new StepBuilder(new DoubleClickElement())
                     .locator(new Locator("css selector", "some link text"))
                     .build(), new InputData());
         }
@@ -163,12 +163,12 @@ public class SebuilderLoadAspectTest {
 
         @Test
         public void adviceWeaverPointcutValue() {
-            assertWeaver(new StepBuilder(new Get()).skip("true").build(), new InputData());
+            this.assertWeaver(new StepBuilder(new Get()).skip("true").build(), new InputData());
         }
 
         @Test
         public void adviceNotWeaverStepIsNotPointcutTarget() {
-            assertNotWeaver(new StepBuilder(new Get()).build(), new InputData());
+            this.assertNotWeaver(new StepBuilder(new Get()).build(), new InputData());
         }
 
     }
@@ -177,34 +177,34 @@ public class SebuilderLoadAspectTest {
 
         @Test
         public void adviceWeaverPointcutValue() {
-            var advice = result.advice(new ClickElement().toStep()
+            final var advice = this.result.advice(new ClickElement().toStep()
                             .negated(true)
                             .skip("true")
                             .locator(new Locator("id", "id1"))
-                            .put("text","text")
+                            .put("text", "text")
                             .build(), new InputData())
                     .advices();
             assertEquals(5, advice.size());
-            assertEquals(1, advice.get(0).beforeStep().steps().size());
-            assertEquals(0, advice.get(0).afterStep().steps().size());
-            assertEquals(0, advice.get(0).failureStep().steps().size());
-            assertEquals(new Get().toStep().build(), advice.get(0).beforeStep().steps().get(0));
-            assertEquals(1, advice.get(1).beforeStep().steps().size());
-            assertEquals(0, advice.get(1).afterStep().steps().size());
-            assertEquals(0, advice.get(1).failureStep().steps().size());
-            assertEquals(new Get().toStep().build(), advice.get(1).beforeStep().steps().get(0));
-            assertEquals(1, advice.get(2).beforeStep().steps().size());
-            assertEquals(0, advice.get(2).afterStep().steps().size());
-            assertEquals(0, advice.get(2).failureStep().steps().size());
-            assertEquals(new Get().toStep().build(), advice.get(2).beforeStep().steps().get(0));
-            assertEquals(1, advice.get(3).beforeStep().steps().size());
-            assertEquals(0, advice.get(3).afterStep().steps().size());
-            assertEquals(0, advice.get(3).failureStep().steps().size());
-            assertEquals(new Get().toStep().build(), advice.get(3).beforeStep().steps().get(0));
-            assertEquals(1, advice.get(4).beforeStep().steps().size());
-            assertEquals(0, advice.get(4).afterStep().steps().size());
-            assertEquals(0, advice.get(4).failureStep().steps().size());
-            assertEquals(new Get().toStep().build(), advice.get(4).beforeStep().steps().get(0));
+            assertEquals(1, getInterceptor(advice, 0).beforeStep().steps().size());
+            assertEquals(0, getInterceptor(advice, 0).afterStep().steps().size());
+            assertEquals(0, getInterceptor(advice, 0).failureStep().steps().size());
+            assertEquals(new Get().toStep().build(), getInterceptor(advice, 0).beforeStep().steps().get(0));
+            assertEquals(1, getInterceptor(advice, 1).beforeStep().steps().size());
+            assertEquals(0, getInterceptor(advice, 1).afterStep().steps().size());
+            assertEquals(0, getInterceptor(advice, 1).failureStep().steps().size());
+            assertEquals(new Get().toStep().build(), getInterceptor(advice, 1).beforeStep().steps().get(0));
+            assertEquals(1, getInterceptor(advice, 2).beforeStep().steps().size());
+            assertEquals(0, getInterceptor(advice, 2).afterStep().steps().size());
+            assertEquals(0, getInterceptor(advice, 2).failureStep().steps().size());
+            assertEquals(new Get().toStep().build(), getInterceptor(advice, 2).beforeStep().steps().get(0));
+            assertEquals(1, getInterceptor(advice, 3).beforeStep().steps().size());
+            assertEquals(0, getInterceptor(advice, 3).afterStep().steps().size());
+            assertEquals(0, getInterceptor(advice, 3).failureStep().steps().size());
+            assertEquals(new Get().toStep().build(), getInterceptor(advice, 3).beforeStep().steps().get(0));
+            assertEquals(1, getInterceptor(advice, 4).beforeStep().steps().size());
+            assertEquals(0, getInterceptor(advice, 4).afterStep().steps().size());
+            assertEquals(0, getInterceptor(advice, 4).failureStep().steps().size());
+            assertEquals(new Get().toStep().build(), getInterceptor(advice, 4).beforeStep().steps().get(0));
         }
 
     }
@@ -213,41 +213,44 @@ public class SebuilderLoadAspectTest {
 
         @Before
         @Override
-        public void setup() throws IOException {
-            result = target.loadAspect(new File(scriptDir, "aspectWithMultiFilterPointcut.json"));
+        public void setup() {
+            this.result = this.target.loadAspect(new File(this.scriptDir, "aspectWithMultiFilterPointcut.json"));
         }
 
         @Test
         public void adviceWeaverPointcutValue() {
-            assertWeaver(new SetElementText().toStep().locator(new Locator("id","id1")).build(), new InputData());
+            this.assertWeaver(new SetElementText().toStep().locator(new Locator("id", "id1")).build(), new InputData());
         }
 
         @Test
         public void adviceNotWeaverStepIsNotPointcutTarget() {
-            assertNotWeaver(new SetElementText().toStep().locator(new Locator("id","id1"))
+            this.assertNotWeaver(new SetElementText().toStep().locator(new Locator("id", "id1"))
                     .skip("true").build(), new InputData());
-            assertNotWeaver(new SetElementText().toStep().locator(new Locator("id","id4"))
+            this.assertNotWeaver(new SetElementText().toStep().locator(new Locator("id", "id4"))
                     .build(), new InputData());
-            assertNotWeaver(new ClickElement().toStep().locator(new Locator("id","id1"))
+            this.assertNotWeaver(new ClickElement().toStep().locator(new Locator("id", "id1"))
                     .build(), new InputData());
         }
 
         @Override
-        protected void assertWeaver(Step step, InputData inputData) {
-            var advice = result.advice(step, inputData)
+        protected void assertWeaver(final Step step, final InputData inputData) {
+            final var advice = this.result.advice(step, inputData)
                     .advices();
             assertEquals(1, advice.size());
-            assertEquals(2, advice.get(0).beforeStep().steps().size());
-            assertEquals(new Get().toStep().build(), advice.get(0).beforeStep().steps().get(0));
-            assertEquals(new SetElementText().toStep().put("text", "before step").build(), advice.get(0).beforeStep().steps().get(1));
-            assertEquals(2, advice.get(0).afterStep().steps().size());
-            assertEquals(new SetElementText().toStep().put("text", "after step").build(), advice.get(0).afterStep().steps().get(0));
-            assertEquals(new Get().toStep().build(), advice.get(0).afterStep().steps().get(1));
-            assertEquals(2, advice.get(0).failureStep().steps().size());
-            assertEquals(new SetElementSelected().toStep().build(), advice.get(0).failureStep().steps().get(0));
-            assertEquals(new SetElementText().toStep().put("text", "failure step").build(), advice.get(0).failureStep().steps().get(1));
+            assertEquals(2, getInterceptor(advice, 0).beforeStep().steps().size());
+            assertEquals(new Get().toStep().build(), getInterceptor(advice, 0).beforeStep().steps().get(0));
+            assertEquals(new SetElementText().toStep().put("text", "before step").build(), getInterceptor(advice, 0).beforeStep().steps().get(1));
+            assertEquals(2, getInterceptor(advice, 0).afterStep().steps().size());
+            assertEquals(new SetElementText().toStep().put("text", "after step").build(), getInterceptor(advice, 0).afterStep().steps().get(0));
+            assertEquals(new Get().toStep().build(), getInterceptor(advice, 0).afterStep().steps().get(1));
+            assertEquals(2, getInterceptor(advice, 0).failureStep().steps().size());
+            assertEquals(new SetElementSelected().toStep().build(), getInterceptor(advice, 0).failureStep().steps().get(0));
+            assertEquals(new SetElementText().toStep().put("text", "failure step").build(), getInterceptor(advice, 0).failureStep().steps().get(1));
         }
     }
 
+    private static ExtraStepExecuteInterceptor getInterceptor(final List<Interceptor> advice, final int index) {
+        return (ExtraStepExecuteInterceptor) advice.get(index);
+    }
 
 }

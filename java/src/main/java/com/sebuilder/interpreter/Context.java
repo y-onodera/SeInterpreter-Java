@@ -47,10 +47,10 @@ public enum Context {
     private TestCaseConverter testCaseConverter;
     private StepTypeFactory stepTypeFactory;
     private Aspect aspect = new Aspect().builder()
-            .interceptor()
-            .setPointcut(new StepTypeFilter(SaveScreenshot.class.getSimpleName(), "!equal"))
-            .addFailure(new SaveScreenshot().toStep().put("file", "failure.png").build().toTestCase())
-            .build()
+            .add(new ExtraStepExecuteInterceptor.Builder()
+                    .setPointcut(new StepTypeFilter(SaveScreenshot.class.getSimpleName(), "!equal"))
+                    .addFailure(new SaveScreenshot().toStep().put("file", "failure.png").build().toTestCase())
+            )
             .build();
     private final Properties environmentProperties = new Properties();
     private Locale locale;

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.function.Supplier;
 
 public record Aspect(Collection<Interceptor> interceptors) {
 
@@ -62,8 +63,9 @@ public record Aspect(Collection<Interceptor> interceptors) {
             this.interceptors = new LinkedHashSet<>(interceptors);
         }
 
-        public Interceptor.Builder interceptor() {
-            return new Interceptor.Builder(this);
+        public Builder add(final Supplier<Interceptor> interceptorSupplier) {
+            this.interceptors.add(interceptorSupplier.get());
+            return this;
         }
 
         public Builder add(final Interceptor interceptor) {
@@ -83,5 +85,6 @@ public record Aspect(Collection<Interceptor> interceptors) {
         public Aspect build() {
             return new Aspect(this.interceptors);
         }
+
     }
 }

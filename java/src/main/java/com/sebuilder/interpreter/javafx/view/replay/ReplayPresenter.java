@@ -1,10 +1,10 @@
 package com.sebuilder.interpreter.javafx.view.replay;
 
+import com.sebuilder.interpreter.javafx.application.Debugger;
 import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -21,6 +21,9 @@ public class ReplayPresenter {
 
     @Inject
     private SeInterpreterApplication application;
+
+    @FXML
+    public Button stepOver;
 
     @FXML
     private Button stop;
@@ -42,6 +45,8 @@ public class ReplayPresenter {
 
     private final StringProperty lastRunResultDir = new SimpleStringProperty();
 
+    private Debugger debugger;
+
     @FXML
     void initialize() {
         assert this.stop != null : "fx:id=\"stop\" was not injected: check your FXML file 'runprogress.fxml'.";
@@ -53,21 +58,33 @@ public class ReplayPresenter {
     }
 
     @FXML
-    void handleReplayStop(final ActionEvent event) {
+    public void handleStepOver() {
+        this.application.executeAndLoggingCaseWhenThrowException(() -> {
+            this.debugger.stepOver();
+        });
+    }
+
+    @FXML
+    void handleReplayStop() {
+        if (this.stepOver.isVisible()) {
+            this.application.executeAndLoggingCaseWhenThrowException(() -> {
+                this.debugger.stop();
+            });
+        }
         this.application.stopReplay();
     }
 
     @FXML
-    void handleOpenReplayLog(final ActionEvent event) throws IOException {
+    void handleOpenReplayLog() throws IOException {
         Desktop.getDesktop().open(new File(this.lastRunResultDir.get(), this.application.getReportFileName()));
     }
 
     @FXML
-    void handleOpenDirectory(final ActionEvent event) throws IOException {
+    void handleOpenDirectory() throws IOException {
         Desktop.getDesktop().open(new File(this.lastRunResultDir.get()));
     }
 
-    public void bind(final Task<String> task) {
+    public void bind(final Task<String> task, final Debugger debugger) {
         this.scriptName.textProperty().bind(task.messageProperty());
         this.scriptDataSetProgress.progressProperty().bind(task.progressProperty());
         this.runStatus.textProperty().bind(task.stateProperty().asString());
@@ -75,5 +92,11 @@ public class ReplayPresenter {
         this.openLog.disableProperty().bind(task.stateProperty().isEqualTo(RUNNING));
         this.openDir.disableProperty().bind(task.stateProperty().isEqualTo(RUNNING));
         this.lastRunResultDir.bind(task.valueProperty());
+        this.debugger = debugger;
+        this.stepOver.visibleProperty().set(debugger != null);
+        if (this.debugger != null) {
+            this.stepOver.disableProperty().bind(this.debugger.disableProperty());
+        }
     }
+
 }

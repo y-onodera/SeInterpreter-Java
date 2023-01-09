@@ -1,10 +1,7 @@
 package com.sebuilder.interpreter.javafx.application;
 
 import com.google.common.collect.Lists;
-import com.sebuilder.interpreter.DataSourceLoader;
-import com.sebuilder.interpreter.InputData;
-import com.sebuilder.interpreter.TestCase;
-import com.sebuilder.interpreter.TestCaseBuilder;
+import com.sebuilder.interpreter.*;
 import com.sebuilder.interpreter.datasource.Manual;
 import javafx.util.Pair;
 
@@ -15,7 +12,12 @@ import java.util.Optional;
 
 public record ReplayOption(
         Map<String, Pair<Integer, InputData>> dataLoadSettings,
-        boolean isAspectTakeOver) {
+        boolean isAspectTakeOver,
+        Debugger debugger) {
+    public ReplayOption(final Map<String, Pair<Integer, InputData>> dataLoadSettings,
+                        final boolean isAspectTakeOver) {
+        this(dataLoadSettings, isAspectTakeOver, null);
+    }
 
     public InputData reduceShareInput(final InputData defaultValue, final DataSourceLoader[] shareDataSources) throws IOException {
         InputData result = defaultValue;
@@ -54,7 +56,8 @@ public record ReplayOption(
                     } catch (final IOException e) {
                         throw new RuntimeException(e);
                     }
-                });
+                }).changeWhenConditionMatch(it -> this.debugger != null
+                , it -> it.addAspect(new Aspect().builder().add(this.debugger).build()));
     }
 
     private InputData merge(final InputData shareInput, final DataSourceLoader withShareInput) throws IOException {
@@ -69,4 +72,7 @@ public record ReplayOption(
                 .orElse(new Pair<>(1, new InputData()));
     }
 
+    public ReplayOption withDebug() {
+        return new ReplayOption(this.dataLoadSettings, this.isAspectTakeOver, new Debugger());
+    }
 }
