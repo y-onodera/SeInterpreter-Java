@@ -14,12 +14,18 @@ public class SeInterpreterRunTask extends Task<String> {
     private final TestRunListener listener;
     private final SeInterpreterREPL repl;
     private final TestCase target;
+    private final Debugger debugger;
 
-    public SeInterpreterRunTask(final Logger log, final TestRunListener listener, final SeInterpreterREPL repl, final TestCase target) {
+    public SeInterpreterRunTask(final Logger log, final TestRunListener listener, final SeInterpreterREPL repl, final TestCase target, final Debugger debugger) {
         this.log = log;
         this.listener = listener;
         this.repl = repl;
-        this.target = target;
+        this.target = target.map(it -> it.addAspect(debugger.toAspect()));
+        this.debugger = debugger;
+    }
+
+    public Debugger getDebugger() {
+        return this.debugger;
     }
 
     @Override

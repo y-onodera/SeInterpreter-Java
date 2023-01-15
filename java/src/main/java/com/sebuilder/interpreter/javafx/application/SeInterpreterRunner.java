@@ -108,8 +108,8 @@ public class SeInterpreterRunner {
                 .build();
     }
 
-    public SeInterpreterRunTask createRunScriptTask(final TestCase currentDisplay, final Function<Logger, TestRunListener> listenerFactory) {
-        return this.createBackgroundTask(currentDisplay, listenerFactory.apply(this.log));
+    public SeInterpreterRunTask createRunScriptTask(final TestCase currentDisplay, final Debugger debugger, final Function<Logger, TestRunListener> listenerFactory) {
+        return this.createBackgroundTask(currentDisplay, debugger, listenerFactory.apply(this.log));
     }
 
     public void stopRunning() {
@@ -132,11 +132,11 @@ public class SeInterpreterRunner {
         }
     }
 
-    private SeInterpreterRunTask createBackgroundTask(final TestCase testCase, final TestRunListener listener) {
+    private SeInterpreterRunTask createBackgroundTask(final TestCase testCase, final Debugger debugger, final TestRunListener listener) {
         if (!this.isOpen()) {
             this.setUp();
         }
-        return new SeInterpreterRunTask(this.log, listener, this.repl, testCase);
+        return new SeInterpreterRunTask(this.log, listener, this.repl, testCase, debugger);
     }
 
 }

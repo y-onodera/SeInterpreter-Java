@@ -436,21 +436,21 @@ public class SeInterpreterApplication extends Application {
     }
 
     protected void executeTask(final TestCase replayCase, final Function<Logger, TestRunListener> listenerFactory) {
-        this.executeTask(replayCase, listenerFactory, null);
+        this.executeTask(replayCase, listenerFactory, new Debugger(BreakPoint.DO_NOT_BREAK));
     }
 
     protected void executeTask(final TestCase replayCase, final Function<Logger, TestRunListener> listenerFactory, final Debugger debugger) {
-        final SeInterpreterRunTask task = this.runner.createRunScriptTask(replayCase, listenerFactory);
+        final SeInterpreterRunTask task = this.runner.createRunScriptTask(replayCase, debugger, listenerFactory);
         this.executeAndLoggingCaseWhenThrowException(() -> {
             final ExecutorService executor = Executors.newSingleThreadExecutor();
-            this.showProgressbar(task, debugger);
+            this.showProgressbar(task);
             task.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED, wse -> executor.shutdown());
             executor.submit(task);
         });
     }
 
-    protected void showProgressbar(final SeInterpreterRunTask task, final Debugger debugger) {
-        new ReplayView().open(this.mainView.getMainWindow(), task, debugger);
+    protected void showProgressbar(final SeInterpreterRunTask task) {
+        new ReplayView().open(this.mainView.getMainWindow(), task);
     }
 
     public interface ThrowableAction {

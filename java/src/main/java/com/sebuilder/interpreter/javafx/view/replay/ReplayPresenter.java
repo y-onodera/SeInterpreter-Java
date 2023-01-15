@@ -2,13 +2,15 @@ package com.sebuilder.interpreter.javafx.view.replay;
 
 import com.sebuilder.interpreter.javafx.application.Debugger;
 import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
+import com.sebuilder.interpreter.javafx.application.SeInterpreterRunTask;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.layout.HBox;
 
 import javax.inject.Inject;
 import java.awt.*;
@@ -23,10 +25,22 @@ public class ReplayPresenter {
     private SeInterpreterApplication application;
 
     @FXML
+    public HBox runOperation;
+
+    @FXML
     public Button stepOver;
 
     @FXML
+    public Button resume;
+
+    @FXML
+    public Button pause;
+
+    @FXML
     private Button stop;
+
+    @FXML
+    public HBox resultOperation;
 
     @FXML
     private Button openLog;
@@ -59,18 +73,22 @@ public class ReplayPresenter {
 
     @FXML
     public void handleStepOver() {
-        this.application.executeAndLoggingCaseWhenThrowException(() -> {
-            this.debugger.stepOver();
-        });
+        this.application.executeAndLoggingCaseWhenThrowException(() -> this.debugger.stepOver());
+    }
+
+    @FXML
+    public void handlePause() {
+        this.application.executeAndLoggingCaseWhenThrowException(() -> this.debugger.pause());
+    }
+
+    @FXML
+    public void handleResume() {
+        this.application.executeAndLoggingCaseWhenThrowException(() -> this.debugger.resume());
     }
 
     @FXML
     void handleReplayStop() {
-        if (this.stepOver.isVisible()) {
-            this.application.executeAndLoggingCaseWhenThrowException(() -> {
-                this.debugger.stop();
-            });
-        }
+        this.application.executeAndLoggingCaseWhenThrowException(() -> this.debugger.stop());
         this.application.stopReplay();
     }
 
@@ -84,19 +102,20 @@ public class ReplayPresenter {
         Desktop.getDesktop().open(new File(this.lastRunResultDir.get()));
     }
 
-    public void bind(final Task<String> task, final Debugger debugger) {
+    public void bind(final SeInterpreterRunTask task) {
+        this.debugger = task.getDebugger();
         this.scriptName.textProperty().bind(task.messageProperty());
         this.scriptDataSetProgress.progressProperty().bind(task.progressProperty());
         this.runStatus.textProperty().bind(task.stateProperty().asString());
-        this.stop.disableProperty().bind(task.stateProperty().isNotEqualTo(RUNNING));
-        this.openLog.disableProperty().bind(task.stateProperty().isEqualTo(RUNNING));
-        this.openDir.disableProperty().bind(task.stateProperty().isEqualTo(RUNNING));
+        final BooleanBinding taskRunning = task.stateProperty().isEqualTo(RUNNING);
+        this.runOperation.visibleProperty().bind(taskRunning);
+        this.stepOver.disableProperty().bind(this.debugger.debugStatusProperty().isNotEqualTo("await"));
+        this.resume.disableProperty().bind(this.debugger.debugStatusProperty().isNotEqualTo("await"));
+        this.pause.disableProperty().bind(this.debugger.debugStatusProperty().isEqualTo("await")
+                .or(this.debugger.debugStatusProperty().isEqualTo("stepOver")));
+        this.stop.disableProperty().bind(this.debugger.debugStatusProperty().isEqualTo("stepOver"));
+        this.resultOperation.visibleProperty().bind(taskRunning.not());
         this.lastRunResultDir.bind(task.valueProperty());
-        this.debugger = debugger;
-        this.stepOver.visibleProperty().set(debugger != null);
-        if (this.debugger != null) {
-            this.stepOver.disableProperty().bind(this.debugger.disableProperty());
-        }
     }
 
 }

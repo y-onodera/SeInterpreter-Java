@@ -1,6 +1,11 @@
 package com.sebuilder.interpreter;
 
 public interface Interceptor {
+
+    default Aspect toAspect() {
+        return new Aspect().builder().add(this).build();
+    }
+
     default boolean isPointcut(final Step step, final InputData vars) {
         return false;
     }
