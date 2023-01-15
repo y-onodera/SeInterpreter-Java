@@ -65,7 +65,10 @@ public class DataSetPresenter {
         }
         grid.setRows(rows);
         this.sheet = new ExcelLikeSpreadSheetView(grid);
-        this.sheet.getColumns().forEach(it -> it.setMinWidth(175.0));
+        this.sheet.getColumns().forEach(it -> {
+            it.setPrefWidth(50.0);
+            it.setResizable(true);
+        });
         this.sheet.getFixedRows().add(0);
         AnchorPane.setTopAnchor(this.sheet, 0.0);
         AnchorPane.setBottomAnchor(this.sheet, 0.0);
