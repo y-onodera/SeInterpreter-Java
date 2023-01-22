@@ -9,7 +9,6 @@ public class SuccessDialog {
         alert.setTitle("Information Dialog");
         alert.setHeaderText(null);
         alert.setContentText(message);
-
         alert.showAndWait();
     }
 }

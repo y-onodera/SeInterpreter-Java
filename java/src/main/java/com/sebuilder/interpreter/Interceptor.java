@@ -21,4 +21,9 @@ public interface Interceptor {
     default boolean invokeFailure(final TestRun testRun) {
         return true;
     }
+
+    default boolean isTargetingChain() {
+        return true;
+    }
+
 }

@@ -102,18 +102,18 @@ public class ReplayPresenter {
         Desktop.getDesktop().open(new File(this.lastRunResultDir.get()));
     }
 
-    public void bind(final SeInterpreterRunTask task) {
+    public void populate(final SeInterpreterRunTask task) {
         this.debugger = task.getDebugger();
         this.scriptName.textProperty().bind(task.messageProperty());
         this.scriptDataSetProgress.progressProperty().bind(task.progressProperty());
         this.runStatus.textProperty().bind(task.stateProperty().asString());
         final BooleanBinding taskRunning = task.stateProperty().isEqualTo(RUNNING);
         this.runOperation.visibleProperty().bind(taskRunning);
-        this.stepOver.disableProperty().bind(this.debugger.debugStatusProperty().isNotEqualTo("await"));
-        this.resume.disableProperty().bind(this.debugger.debugStatusProperty().isNotEqualTo("await"));
-        this.pause.disableProperty().bind(this.debugger.debugStatusProperty().isEqualTo("await")
-                .or(this.debugger.debugStatusProperty().isEqualTo("stepOver")));
-        this.stop.disableProperty().bind(this.debugger.debugStatusProperty().isEqualTo("stepOver"));
+        this.stepOver.disableProperty().bind(this.debugger.debugStatusProperty().isNotEqualTo(Debugger.STATUS.await));
+        this.resume.disableProperty().bind(this.debugger.debugStatusProperty().isNotEqualTo(Debugger.STATUS.await));
+        this.pause.disableProperty().bind(this.debugger.debugStatusProperty().isEqualTo(Debugger.STATUS.await)
+                .or(this.debugger.debugStatusProperty().isEqualTo(Debugger.STATUS.stepOver)));
+        this.stop.disableProperty().bind(this.debugger.debugStatusProperty().isEqualTo(Debugger.STATUS.stepOver));
         this.resultOperation.visibleProperty().bind(taskRunning.not());
         this.lastRunResultDir.bind(task.valueProperty());
     }

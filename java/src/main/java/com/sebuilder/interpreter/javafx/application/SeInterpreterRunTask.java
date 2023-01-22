@@ -20,8 +20,9 @@ public class SeInterpreterRunTask extends Task<String> {
         this.log = log;
         this.listener = listener;
         this.repl = repl;
-        this.target = target.map(it -> it.addAspect(debugger.toAspect()));
         this.debugger = debugger;
+        this.target = target.map(this.debugger.append())
+                .map(it -> it.mapChains(this.debugger.append(), testCase -> true));
     }
 
     public Debugger getDebugger() {

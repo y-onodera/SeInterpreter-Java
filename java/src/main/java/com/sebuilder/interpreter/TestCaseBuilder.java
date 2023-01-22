@@ -19,11 +19,11 @@ public class TestCaseBuilder {
     private Map<String, String> overrideDataSourceConfig;
     private String skip;
     private TestCaseChains chains;
-    private final Function<TestCase, TestCase> chainConverter = script -> {
-        if (script.shareState() != this.isShareState()) {
-            return script.map(it -> it.isShareState(this.isShareState()));
+    private final Function<TestCaseBuilder, TestCaseBuilder> chainConverter = src -> {
+        if (src.isShareState() != this.isShareState()) {
+            return src.isShareState(this.isShareState());
         }
-        return script;
+        return src;
     };
     private boolean nestedChain;
     private boolean breakNestedChain;
@@ -137,10 +137,15 @@ public class TestCaseBuilder {
         return function.apply(this);
     }
 
-    public TestCaseBuilder changeWhenConditionMatch(final Predicate<TestCaseBuilder> condition, final Function<TestCaseBuilder, TestCaseBuilder> function) {
+    public TestCaseBuilder mapWhen(final Predicate<TestCaseBuilder> condition, final Function<TestCaseBuilder, TestCaseBuilder> function) {
         if (condition.test(this)) {
             return function.apply(this);
         }
+        return this;
+    }
+
+    public TestCaseBuilder mapChains(final Function<TestCaseBuilder, TestCaseBuilder> converter, final Predicate<TestCase> isNestChainConvert) {
+        this.setChains(this.chains.map(converter, isNestChainConvert));
         return this;
     }
 
@@ -188,6 +193,13 @@ public class TestCaseBuilder {
 
     public TestCaseBuilder setAspect(final Aspect aspect) {
         this.aspect = aspect;
+        return this;
+    }
+
+    public TestCaseBuilder insertAspect(final Aspect aspect) {
+        this.aspect = this.aspect.builder()
+                .insert(aspect)
+                .build();
         return this;
     }
 
@@ -278,4 +290,5 @@ public class TestCaseBuilder {
         this.lazyLoad = lazyLoad;
         return this;
     }
+
 }

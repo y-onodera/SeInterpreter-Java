@@ -151,9 +151,9 @@ public record TestCase(ScriptFile scriptFile,
         return function.apply(this.builder()).build();
     }
 
-    public TestCase changeWhenConditionMatch(final Predicate<TestCase> condition, final Function<TestCase, TestCase> function) {
+    public TestCase mapWhen(final Predicate<TestCase> condition, final Function<TestCaseBuilder, TestCaseBuilder> function) {
         if (condition.test(this)) {
-            return function.apply(this);
+            return function.apply(this.builder()).build();
         }
         return this;
     }
@@ -229,7 +229,7 @@ public record TestCase(ScriptFile scriptFile,
     }
 
     TestCase materialized() {
-        return this.changeWhenConditionMatch(TestCase::isLazyLoad, TestCase::execLazyLoad);
+        return this.mapWhen(TestCase::isLazyLoad, target -> target.build().execLazyLoad().builder());
     }
 
     TestCase execLazyLoad() {

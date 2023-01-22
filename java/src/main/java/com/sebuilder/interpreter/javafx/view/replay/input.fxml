@@ -37,7 +37,6 @@
               spacing="10.0">
             <CheckBox alignment="CENTER_LEFT" text="take screenshot if replay is failed" fx:id="aspectTakeOver"/>
             <Button alignment="CENTER" mnemonicParsing="false" onAction="#handleReplayStart" text="replay start"/>
-            <Button alignment="CENTER" mnemonicParsing="false" onAction="#handleDebugStart" text="debug start"/>
         </HBox>
     </SplitPane>
 </AnchorPane>

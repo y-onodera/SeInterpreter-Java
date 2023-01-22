@@ -1,44 +1,39 @@
 package com.sebuilder.interpreter.javafx.application;
 
-import com.sebuilder.interpreter.InputData;
-import com.sebuilder.interpreter.Interceptor;
-import com.sebuilder.interpreter.Step;
+import com.sebuilder.interpreter.TestCaseBuilder;
 import com.sebuilder.interpreter.TestRun;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 
-import java.util.Objects;
 import java.util.concurrent.Exchanger;
+import java.util.function.Function;
 
-public class Debugger implements Interceptor {
+public class Debugger {
 
     private final Exchanger<String> exchanger;
 
-    private final StringProperty debugStatus = new SimpleStringProperty();
+    private final ObjectProperty<STATUS> debugStatus;
 
-    private BreakPoint breakPoint;
-
-    public Debugger(final BreakPoint breakPoint) {
+    public Debugger() {
         this.exchanger = new Exchanger<>();
-        this.breakPoint = breakPoint;
+        this.debugStatus = new SimpleObjectProperty<>();
+        this.reset();
     }
 
-    public StringProperty debugStatusProperty() {
+    public ObjectProperty<STATUS> debugStatusProperty() {
         return this.debugStatus;
     }
 
-    @Override
-    public boolean isPointcut(final Step step, final InputData vars) {
-        return this.breakPoint.apply(step, vars);
+    public STATUS getDebugStatus() {
+        return this.debugStatus.get();
     }
 
-    @Override
-    public boolean invokeBefore(final TestRun testRun) {
+    public boolean await(final TestRun testRun) {
         try {
-            this.debugStatus.set("await");
-            final String lastOperation = this.exchanger.exchange("await");
+            this.debugStatus.set(STATUS.await);
+            final STATUS lastOperation = STATUS.valueOf(this.exchanger.exchange(this.debugStatus.get().name()));
             this.debugStatus.set(lastOperation);
-            if (Objects.equals(lastOperation, "stop")) {
+            if (this.debugStatus.get() == STATUS.stop) {
                 testRun.stop();
             }
             return true;
@@ -48,23 +43,32 @@ public class Debugger implements Interceptor {
     }
 
     public void stepOver() throws InterruptedException {
-        this.breakPoint = BreakPoint.STEP_BY_STEP;
-        this.exchanger.exchange("stepOver");
+        this.exchanger.exchange(STATUS.stepOver.name());
     }
 
     public void stop() throws InterruptedException {
         this.pause();
-        this.exchanger.exchange("stop");
+        this.exchanger.exchange(STATUS.stop.name());
     }
 
     public void resume() throws InterruptedException {
-        if (this.breakPoint == BreakPoint.STEP_BY_STEP) {
-            this.breakPoint = BreakPoint.DO_NOT_BREAK;
-        }
-        this.exchanger.exchange("resume");
+        this.exchanger.exchange(STATUS.resume.name());
     }
 
     public void pause() {
-        this.breakPoint = BreakPoint.STEP_BY_STEP;
+        this.debugStatus.set(STATUS.pause);
+    }
+
+    public Debugger reset() {
+        this.debugStatus.set(STATUS.resume);
+        return this;
+    }
+
+    public Function<TestCaseBuilder, TestCaseBuilder> append() {
+        return it -> BreakPoint.isSetting().test(it.getAspect()) ? it : it.insertAspect(new BreakPoint(BreakPoint.DO_NOT_BREAK, this).toAspect());
+    }
+
+    public static enum STATUS {
+        await, stepOver, stop, pause, resume
     }
 }

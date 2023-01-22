@@ -35,6 +35,8 @@ public class SeInterpreterApplication extends Application {
 
     private SeInterpreterRunner runner;
 
+    private final Debugger debugger = new Debugger();
+
     private ErrorDialog errorDialog;
 
     private final ObjectProperty<Suite> suite = new SimpleObjectProperty<>();
@@ -322,8 +324,7 @@ public class SeInterpreterApplication extends Application {
             final InputData inputData = this.currentDisplayShareInput(replayOption);
             this.executeTask(this.getDisplayTestCase()
                             .map(builder -> builder.setShareInput(inputData).map(replayOption::apply))
-                    , this.listener()
-                    , replayOption.debugger());
+                    , this.listener());
         });
     }
 
@@ -334,14 +335,13 @@ public class SeInterpreterApplication extends Application {
                             .filterStep(filter)
                             .map(builder -> builder.setShareInput(inputData)
                                     .map(replayOption::apply)
-                                    .changeWhenConditionMatch(it -> !isChainTakeOver, it -> it.setChains(new TestCaseChains())))
+                                    .mapWhen(it -> !isChainTakeOver, it -> it.setChains(new TestCaseChains())))
                     , log -> new GUITestRunListener(Context.getTestListener(log), this) {
                         @Override
                         public int getStepIndex() {
                             return function.apply(super.getStepIndex());
                         }
-                    }
-                    , replayOption.debugger());
+                    });
         });
     }
 
@@ -351,6 +351,12 @@ public class SeInterpreterApplication extends Application {
 
     public void updateReplayStatus(final int stepNo, final Result result) {
         this.replayStatus.setValue(new Pair<>(stepNo, result));
+    }
+
+    public void addBreakPoint(final int stepIndex, final Pointcut pointcut) {
+        final Pointcut stepFilter = (step, var) -> Integer.parseInt(var.get("_stepIndex")) == stepIndex;
+        final Aspect aspect = new BreakPoint(stepFilter.and(pointcut), this.debugger).toAspect();
+        this.replaceDisplayCase(this.getDisplayTestCase().map(it -> it.insertAspect(aspect)));
     }
 
     public String getReportFileName() {
@@ -436,11 +442,7 @@ public class SeInterpreterApplication extends Application {
     }
 
     protected void executeTask(final TestCase replayCase, final Function<Logger, TestRunListener> listenerFactory) {
-        this.executeTask(replayCase, listenerFactory, new Debugger(BreakPoint.DO_NOT_BREAK));
-    }
-
-    protected void executeTask(final TestCase replayCase, final Function<Logger, TestRunListener> listenerFactory, final Debugger debugger) {
-        final SeInterpreterRunTask task = this.runner.createRunScriptTask(replayCase, debugger, listenerFactory);
+        final SeInterpreterRunTask task = this.runner.createRunScriptTask(replayCase, this.debugger.reset(), listenerFactory);
         this.executeAndLoggingCaseWhenThrowException(() -> {
             final ExecutorService executor = Executors.newSingleThreadExecutor();
             this.showProgressbar(task);

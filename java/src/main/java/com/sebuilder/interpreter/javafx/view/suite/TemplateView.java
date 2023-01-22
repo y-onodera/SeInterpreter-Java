@@ -8,7 +8,7 @@ import javafx.stage.Window;
 
 public class TemplateView extends FXMLView {
 
-    public TemplateView(final Window window) {
+    public void open(final Window window) {
         final Scene scene = new Scene(this.getView());
         final Stage exportSettingDialog = new Stage();
         exportSettingDialog.setScene(scene);

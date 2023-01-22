@@ -26,7 +26,7 @@ public class VariablePresenter {
 
     private InputData resource;
 
-    public void open(final InputData var) {
+    public void populate(final InputData var) {
         this.resource = var;
         final GridBase grid = new GridBase(50, 2);
         grid.getColumnHeaders().addAll("key", "value");
@@ -70,7 +70,7 @@ public class VariablePresenter {
     @FXML
     void reload() {
         this.gridParentPane.getChildren().clear();
-        this.open(this.resource);
+        this.populate(this.resource);
     }
 
     public void setOnclick(final Consumer<InputData> onclick) {

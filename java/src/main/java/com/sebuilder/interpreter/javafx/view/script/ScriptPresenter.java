@@ -18,6 +18,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.input.MouseButton;
+import javafx.stage.Window;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -124,32 +125,38 @@ public class ScriptPresenter {
 
     @FXML
     void handleRunStep() {
+        final ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
         final InputView inputView = new InputView();
-        inputView.setOnclickReplayStart((it) -> {
-            final ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
-            this.application.runStep(it, i -> item.compareIndex(i.intValue()) == 0, i -> i + item.index(), false);
-        });
-        inputView.open(this.tableViewScriptBody.getScene().getWindow());
+        inputView.setOnclickReplayStart((it) ->
+                this.application.runStep(it, i -> item.compareIndex(i.intValue()) == 0, i -> i + item.index(), false)
+        );
+        inputView.open(this.currentWindow());
     }
 
     @FXML
     void handleRunFromHere() {
+        final ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
         final InputView inputView = new InputView();
-        inputView.setOnclickReplayStart((it) -> {
-            final ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
-            this.application.runStep(it, i -> item.compareIndex(i.intValue()) <= 0, i -> i + item.index(), true);
-        });
-        inputView.open(this.tableViewScriptBody.getScene().getWindow());
+        inputView.setOnclickReplayStart((it) ->
+                this.application.runStep(it, i -> item.compareIndex(i.intValue()) <= 0, i -> i + item.index(), true)
+        );
+        inputView.open(this.currentWindow());
     }
 
     @FXML
     void handleRunToHere() {
+        final ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
         final InputView inputView = new InputView();
-        inputView.setOnclickReplayStart((it) -> {
-            final ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
-            this.application.runStep(it, i -> item.compareIndex(i.intValue()) >= 0, i -> i, false);
-        });
-        inputView.open(this.tableViewScriptBody.getScene().getWindow());
+        inputView.setOnclickReplayStart((it) ->
+                this.application.runStep(it, i -> item.compareIndex(i.intValue()) >= 0, i -> i, false)
+        );
+        inputView.open(this.currentWindow());
+    }
+
+    @FXML
+    public void handleAddBreakPoint() {
+        final ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
+        new BreakPointView().open(this.currentWindow(), item.index());
     }
 
     private void moveStep(final int from, final int to) {
@@ -191,7 +198,13 @@ public class ScriptPresenter {
         if (item != null) {
             no = item.no.intValue() - 1;
         }
-        return new StepView(this.tableViewScriptBody.getScene().getWindow(), no, action);
+        final StepView stepView = new StepView();
+        stepView.open(this.currentWindow(), no, action);
+        return stepView;
+    }
+
+    private Window currentWindow() {
+        return this.tableViewScriptBody.getScene().getWindow();
     }
 
     private static class ScriptBody {

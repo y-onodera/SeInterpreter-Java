@@ -235,7 +235,7 @@ public class Sebuilder extends AbstractJsonScriptParser {
         final boolean breakNestedChain = this.isBreakNestedChain(script);
         final boolean preventContextAspect = this.isPreventContextAspect(script);
         return resultTestCase.map(it -> it.setSkip(skip)
-                .changeWhenConditionMatch(target -> dataSource != null
+                .mapWhen(target -> dataSource != null
                         , matches -> matches.setOverrideTestDataSet(dataSource, config)
                 )
                 .isNestedChain(nestedChain)

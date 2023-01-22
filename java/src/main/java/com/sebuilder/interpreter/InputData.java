@@ -12,6 +12,15 @@ public record InputData(LinkedHashMap<String, String> row, boolean lastRow) {
     private static final LinkedHashMap<String, String> EMPTY = new LinkedHashMap<>();
     private static final String REGEX_EXPRESSION = ".*\\$\\{(.+)}.*";
 
+    public static boolean isVariable(final String target) {
+        final String exp = extractExpression(target);
+        return !Objects.equals(target, exp);
+    }
+
+    private static String extractExpression(final String result) {
+        return result.replaceAll(REGEX_EXPRESSION, "$1");
+    }
+
     public InputData() {
         this(EMPTY, true);
     }
@@ -78,7 +87,7 @@ public record InputData(LinkedHashMap<String, String> row, boolean lastRow) {
 
     public String evaluateString(final String target) {
         final String result = this.bind(target);
-        final String exp = this.extractExpression(result);
+        final String exp = extractExpression(result);
         if (Objects.equals(result, exp)) {
             return result;
         }
@@ -135,10 +144,6 @@ public record InputData(LinkedHashMap<String, String> row, boolean lastRow) {
             variable = variable.replace("${" + v.getKey() + "}", v.getValue());
         }
         return variable;
-    }
-
-    private String extractExpression(final String result) {
-        return result.replaceAll(REGEX_EXPRESSION, "$1");
     }
 
     public record Builder(LinkedHashMap<String, String> row, boolean lastRow) {

@@ -11,11 +11,11 @@ import java.util.function.Consumer;
 public class VariableView extends FXMLView {
 
     public void open(final InputData var, final Window window) {
-        this.presenter().open(var);
+        final Scene scene = new Scene(this.getView());
         final Stage stage = new Stage();
+        this.presenter().populate(var);
         stage.initOwner(window);
         stage.setResizable(false);
-        final Scene scene = new Scene(this.getView());
         stage.setTitle("runtime variable");
         stage.setScene(scene);
         stage.show();

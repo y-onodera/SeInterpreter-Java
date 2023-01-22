@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import org.controlsfx.control.SearchableComboBox?>
+<?import org.tbee.javafx.scene.layout.fxml.*?>
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="420.0"
+            xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.sebuilder.interpreter.javafx.view.script.BreakPointPresenter">
+    <SplitPane orientation="VERTICAL" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+               minWidth="-Infinity"
+               xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+        <MigPane fx:id="conditionEditGrid" cols="[100][100][100]" rows="[]" prefWidth="420.0">
+            <Label text="var"/>
+            <Label text="method"/>
+            <Label text="value" MigPane.cc="wrap"/>
+            <SearchableComboBox fx:id="varSelect"/>
+            <SearchableComboBox fx:id="methodSelect" onAction="#selectMethod"/>
+            <TextField fx:id="targetValue" MigPane.cc="wrap"/>
+        </MigPane>
+        <MigPane cols="[grow]" rows="[30]" maxHeight="40" prefWidth="420.0">
+            <Button fx:id="apply" mnemonicParsing="false" text="apply" onAction="#stepApply" MigPane.cc="align right"/>
+        </MigPane>
+    </SplitPane>
+</AnchorPane>

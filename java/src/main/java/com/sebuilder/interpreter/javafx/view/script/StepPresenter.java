@@ -262,7 +262,7 @@ public class StepPresenter {
 
     private StepView.Action action;
 
-    public void init(final Stage dialog, final int stepIndex, final StepView.Action action) {
+    public void populate(final Stage dialog, final int stepIndex, final StepView.Action action) {
         this.dialog = dialog;
         this.stepIndex = stepIndex;
         this.action = action;
@@ -327,7 +327,7 @@ public class StepPresenter {
             row = this.addTextBox(stepWithAllParam, row, "skip");
             row = this.addLocator(stepWithAllParam, row, "locator");
             row = this.constructStringParamView(stepWithAllParam, row, typeName);
-            this.constructLocatorParamView(stepWithAllParam, row);
+            row = this.constructLocatorParamView(stepWithAllParam, row);
             this.stepEditGrid.getScene().getWindow().sizeToScene();
         });
     }

@@ -42,7 +42,7 @@ public class DataSetPresenter {
 
     private EventHandler<ActionEvent> onclick;
 
-    public void showDataSet(final DataSourceLoader resource) throws IOException {
+    public void populate(final DataSourceLoader resource) throws IOException {
         this.resource = resource;
         final List<InputData> inputData = this.resource.loadData();
         final int row = Math.max(inputData.size(), DEFAULT_ROWS);
@@ -85,7 +85,7 @@ public class DataSetPresenter {
     void reloadDataSet() {
         this.application.executeAndLoggingCaseWhenThrowException(() -> {
             this.gridParentPane.getChildren().clear();
-            this.showDataSet(this.resource);
+            this.populate(this.resource);
         });
     }
 

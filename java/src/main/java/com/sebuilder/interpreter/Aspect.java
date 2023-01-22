@@ -57,7 +57,7 @@ public record Aspect(Collection<Interceptor> interceptors) {
 
     public static class Builder {
 
-        private final LinkedHashSet<Interceptor> interceptors;
+        private LinkedHashSet<Interceptor> interceptors;
 
         public Builder(final Collection<Interceptor> interceptors) {
             this.interceptors = new LinkedHashSet<>(interceptors);
@@ -80,6 +80,14 @@ public record Aspect(Collection<Interceptor> interceptors) {
 
         public Builder add(final Aspect other) {
             return this.add(other.interceptors);
+        }
+
+        public Builder insert(final Aspect other) {
+            final LinkedHashSet<Interceptor> newInterceptors = new LinkedHashSet<>();
+            newInterceptors.addAll(other.interceptors);
+            newInterceptors.addAll(this.interceptors);
+            this.interceptors = newInterceptors;
+            return this;
         }
 
         public Aspect build() {

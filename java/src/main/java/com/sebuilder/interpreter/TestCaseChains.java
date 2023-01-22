@@ -79,20 +79,19 @@ public record TestCaseChains(ArrayList<TestCase> testCases, boolean takeOverLast
 
     public TestCaseChains replaceTest(final TestCase oldTestCase, final TestCase aTestCase) {
         return this.map(testCase -> {
-            if (testCase.equals(oldTestCase)) {
-                return aTestCase;
+            if (testCase.build().equals(oldTestCase)) {
+                return aTestCase.builder();
             }
             return testCase;
         }, it -> !(it.equals(aTestCase) && aTestCase.scriptFile().type() == ScriptFile.Type.SUITE));
     }
 
-    public TestCaseChains map(final Function<TestCase, TestCase> converter, final Predicate<TestCase> isChainConvert) {
+    public TestCaseChains map(final Function<TestCaseBuilder, TestCaseBuilder> converter, final Predicate<TestCase> isNestChainConvert) {
         final ArrayList<TestCase> newTestCases = new ArrayList<>();
         final Map<Pair<String, String>, Integer> duplicate = new HashMap<>();
         for (final TestCase testCase : this.testCases) {
-            TestCase copy = converter
-                    .apply(testCase)
-                    .changeWhenConditionMatch(isChainConvert, matches -> matches.map(it -> it.setChains(matches.chains().map(converter, isChainConvert))));
+            TestCase copy = testCase.map(converter)
+                    .mapWhen(isNestChainConvert, matches -> matches.setChains(matches.getChains().map(converter, isNestChainConvert)));
             final String scriptName = copy.name();
             final Pair<String, String> key = Pair.of(copy.name(), copy.path());
             if (duplicate.containsKey(key) && !Strings.isNullOrEmpty(key.getValue())) {

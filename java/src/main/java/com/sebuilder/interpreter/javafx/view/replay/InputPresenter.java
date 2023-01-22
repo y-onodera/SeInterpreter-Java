@@ -16,6 +16,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.stage.Window;
 import javafx.util.Pair;
 import javafx.util.converter.IntegerStringConverter;
 
@@ -89,7 +90,7 @@ public class InputPresenter {
                             InputPresenter.this.shareInputs.put(data.getResourceName(), new Pair<>(data.getRow(), data.getRuntimeVariable()));
                             InputPresenter.this.refreshTable();
                         });
-                        variableView.open(data.getRuntimeVariable(), InputPresenter.this.inputResourceTableView.getScene().getWindow());
+                        variableView.open(data.getRuntimeVariable(), InputPresenter.this.currentWindow());
                     });
                     this.setGraphic(btn);
                 }
@@ -101,11 +102,6 @@ public class InputPresenter {
     @FXML
     public void handleReplayStart() {
         this.onclickReplayStart.accept(this.createReplayOption());
-    }
-
-    @FXML
-    public void handleDebugStart() {
-        this.onclickReplayStart.accept(this.createReplayOption().withDebug());
     }
 
     public void setOnclickReplayStart(final Consumer<ReplayOption> onclickReplayStart) {
@@ -127,6 +123,10 @@ public class InputPresenter {
 
     private ReplayOption createReplayOption() {
         return new ReplayOption(this.shareInputs, this.aspectTakeOver.isSelected());
+    }
+
+    private Window currentWindow() {
+        return InputPresenter.this.inputResourceTableView.getScene().getWindow();
     }
 
     class InputResource {
@@ -222,7 +222,7 @@ public class InputPresenter {
                 InputPresenter.this.application.executeAndLoggingCaseWhenThrowException(() -> {
                     final DataSetView dataSetView = new DataSetView();
                     dataSetView.onClick(e -> InputPresenter.this.refreshTable());
-                    dataSetView.showDataSet(data.getLoader(), InputPresenter.this.inputResourceTableView.getScene().getWindow());
+                    dataSetView.open(data.getLoader(), InputPresenter.this.currentWindow());
                 });
             });
             return btn;

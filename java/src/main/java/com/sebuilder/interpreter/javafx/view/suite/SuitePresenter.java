@@ -85,7 +85,7 @@ public class SuitePresenter {
 
     @FXML
     public void handleOpenDataSource() {
-        this.application.executeAndLoggingCaseWhenThrowException(() -> new DataSetView().showDataSet(this.application.getDisplayTestCaseDataSource(), this.treeViewScriptName.getScene().getWindow()));
+        this.application.executeAndLoggingCaseWhenThrowException(() -> new DataSetView().open(this.application.getDisplayTestCaseDataSource(), this.treeViewScriptName.getScene().getWindow()));
     }
 
     @FXML
@@ -107,7 +107,7 @@ public class SuitePresenter {
 
     @FXML
     void handleScriptCreateTemplate() {
-        new TemplateView(this.treeViewScriptName.getScene().getWindow());
+        new TemplateView().open(this.treeViewScriptName.getScene().getWindow());
     }
 
     @FXML

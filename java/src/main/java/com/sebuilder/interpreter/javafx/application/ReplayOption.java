@@ -15,12 +15,7 @@ import java.util.Optional;
 
 public record ReplayOption(
         Map<String, Pair<Integer, InputData>> dataLoadSettings,
-        boolean isAspectTakeOver,
-        Debugger debugger) {
-    public ReplayOption(final Map<String, Pair<Integer, InputData>> dataLoadSettings,
-                        final boolean isAspectTakeOver) {
-        this(dataLoadSettings, isAspectTakeOver, new Debugger(BreakPoint.DO_NOT_BREAK));
-    }
+        boolean isAspectTakeOver) {
 
     public InputData reduceShareInput(final InputData defaultValue, final DataSourceLoader[] shareDataSources) throws IOException {
         InputData result = defaultValue;
@@ -49,7 +44,7 @@ public record ReplayOption(
     public TestCaseBuilder apply(final TestCaseBuilder target) {
         final TestCase targetBuild = target.isPreventContextAspect(!this.isAspectTakeOver).build();
         final Pair<Integer, InputData> runtimeInfo = this.dataLoadSettings.get(targetBuild.runtimeDataSet().name());
-        return target.changeWhenConditionMatch(it -> runtimeInfo != null
+        return target.mapWhen(it -> runtimeInfo != null
                 , it -> {
                     try {
                         return it.setOverrideTestDataSet(new Manual(), targetBuild.loadData()
@@ -74,7 +69,4 @@ public record ReplayOption(
                 .orElse(new Pair<>(1, new InputData()));
     }
 
-    public ReplayOption withDebug() {
-        return new ReplayOption(this.dataLoadSettings, this.isAspectTakeOver, new Debugger(BreakPoint.STEP_BY_STEP));
-    }
 }
