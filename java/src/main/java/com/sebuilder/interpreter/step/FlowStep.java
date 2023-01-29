@@ -17,7 +17,7 @@ public interface FlowStep extends StepType {
         boolean success = true;
         int exec = 0;
         while (exec < actions) {
-            final Step.Result result = ctx.runTest();
+            final Step.Result result = ctx.runStep();
             exec = exec + result.execSteps();
             success = result.success() && success;
         }

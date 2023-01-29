@@ -329,20 +329,15 @@ public class SeInterpreterApplication extends Application {
         });
     }
 
-    public void runStep(final ReplayOption replayOption, final Predicate<Number> filter, final Function<Integer, Integer> function, final boolean isChainTakeOver) {
+    public void runStep(final ReplayOption replayOption, final StepRunFilter filter, final boolean isChainTakeOver) {
         this.executeAndLoggingCaseWhenThrowException(() -> {
             final InputData inputData = this.currentDisplayShareInput(replayOption);
             this.executeTask(this.getDisplayTestCase()
-                            .filterStep(filter)
-                            .map(builder -> builder.setShareInput(inputData)
+                            .map(builder -> builder.setStepFilter(filter)
+                                    .setShareInput(inputData)
                                     .map(replayOption::apply)
                                     .mapWhen(it -> !isChainTakeOver, it -> it.setChains(new TestCaseChains())))
-                    , log -> new GUITestRunListener(Context.getTestListener(log), this) {
-                        @Override
-                        public int getStepIndex() {
-                            return function.apply(super.getStepIndex());
-                        }
-                    });
+                    , log -> new GUITestRunListener(Context.getTestListener(log), this));
         });
     }
 

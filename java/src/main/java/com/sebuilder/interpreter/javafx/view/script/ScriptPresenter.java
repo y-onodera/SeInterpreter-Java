@@ -134,7 +134,7 @@ public class ScriptPresenter {
         final StepDefine item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
         final InputView inputView = new InputView();
         inputView.setOnclickReplayStart((it) ->
-                this.application.runStep(it, i -> item.compareIndex(i.intValue()) == 0, i -> i + item.index(), false)
+                this.application.runStep(it, (step, var) -> item.compareIndex(var.stepIndex()) == 0, false)
         );
         inputView.open(this.currentWindow());
     }
@@ -144,7 +144,7 @@ public class ScriptPresenter {
         final StepDefine item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
         final InputView inputView = new InputView();
         inputView.setOnclickReplayStart((it) ->
-                this.application.runStep(it, i -> item.compareIndex(i.intValue()) <= 0, i -> i + item.index(), true)
+                this.application.runStep(it, (step, var) -> item.compareIndex(var.stepIndex()) <= 0, true)
         );
         inputView.open(this.currentWindow());
     }
@@ -154,7 +154,7 @@ public class ScriptPresenter {
         final StepDefine item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
         final InputView inputView = new InputView();
         inputView.setOnclickReplayStart((it) ->
-                this.application.runStep(it, i -> item.compareIndex(i.intValue()) >= 0, i -> i, false)
+                this.application.runStep(it, (step, var) -> item.compareIndex(var.stepIndex()) >= 0, false)
         );
         inputView.open(this.currentWindow());
     }

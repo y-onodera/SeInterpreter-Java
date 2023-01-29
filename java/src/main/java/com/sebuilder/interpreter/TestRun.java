@@ -35,6 +35,7 @@ public class TestRun implements WebDriverWrapper {
     private final Logger log;
     private final TestRunListener listener;
     private final Aspect aspect;
+    private final StepRunFilter stepRunFilter;
     private final boolean preventContextAspect;
     private InputData vars;
     private TestRunStatus testRunStatus;
@@ -64,6 +65,7 @@ public class TestRun implements WebDriverWrapper {
             this.vars = this.vars.add("_relativePath", this.testCase.relativePath().getAbsolutePath());
         }
         this.aspect = this.testCase.aspect();
+        this.stepRunFilter = this.testCase.stepRunFilter();
         this.preventContextAspect = testRunBuilder.isPreventContextAspect();
         this.testRunStatus = TestRunStatus.of(this.testCase);
     }
@@ -201,12 +203,15 @@ public class TestRun implements WebDriverWrapper {
     }
 
     public boolean next() {
-        return this.runTest().success();
+        return this.runStep().success();
     }
 
-    public Step.Result runTest() {
+    public Step.Result runStep() {
         this.toNextStepIndex();
-        return this.currentStep().execute(this);
+        if (this.stepRunFilter.pass(this.currentStep(), this.vars)) {
+            return this.currentStep().execute(this);
+        }
+        return new Step.Result(true, 0);
     }
 
     public void skipTest() {
@@ -231,7 +236,7 @@ public class TestRun implements WebDriverWrapper {
 
     public void toNextStepIndex() {
         this.forwardStepIndex(1);
-        this.putVars("_stepIndex", String.valueOf(this.currentStepIndex()));
+        this.vars = this.vars.stepIndex(this.currentStepIndex());
     }
 
     public void backStepIndex(final int count) {

@@ -11,6 +11,7 @@ public record InputData(LinkedHashMap<String, String> row, boolean lastRow) {
     public static final String ROW_NUMBER = "_rowNumber";
     private static final LinkedHashMap<String, String> EMPTY = new LinkedHashMap<>();
     private static final String REGEX_EXPRESSION = ".*\\$\\{(.+)}.*";
+    private static final String STEP_INDEX = "_stepIndex";
 
     public static boolean isVariable(final String target) {
         final String exp = extractExpression(target);
@@ -43,8 +44,16 @@ public record InputData(LinkedHashMap<String, String> row, boolean lastRow) {
         return this.get(ROW_NUMBER);
     }
 
+    public int stepIndex() {
+        return Integer.parseInt(this.get(STEP_INDEX));
+    }
+
     public String get(final String key) {
         return this.row.get(key);
+    }
+
+    public InputData stepIndex(final int index) {
+        return this.add(STEP_INDEX, String.valueOf(index));
     }
 
     public InputData clearRowNumber() {

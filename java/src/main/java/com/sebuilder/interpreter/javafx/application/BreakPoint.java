@@ -38,7 +38,7 @@ public record BreakPoint(Map<Integer, Pointcut> condition, Debugger debugger) im
             case await:
             case resume:
         }
-        final Integer stepIndex = Integer.valueOf(vars.get("_stepIndex"));
+        final Integer stepIndex = vars.stepIndex();
         return this.condition.containsKey(stepIndex) && this.condition.get(stepIndex).test(step, vars);
     }
 

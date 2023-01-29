@@ -13,6 +13,7 @@ public class TestCaseBuilder {
     private DataSource dataSource;
     private Map<String, String> dataSourceConfig;
     private Aspect aspect;
+    private StepRunFilter stepRunFilter;
     private boolean shareState;
     private InputData shareInput;
     private DataSource overrideDataSource;
@@ -39,6 +40,7 @@ public class TestCaseBuilder {
         this.steps = new ArrayList<>();
         this.dataSource = DataSource.NONE;
         this.aspect = new Aspect();
+        this.stepRunFilter = StepRunFilter.ALL_PASS;
         this.overrideDataSource = DataSource.NONE;
         this.skip = "false";
         this.chains = new TestCaseChains();
@@ -50,6 +52,7 @@ public class TestCaseBuilder {
         this.dataSource = test.dataSourceLoader().dataSource();
         this.dataSourceConfig = test.dataSourceLoader().dataSourceConfig();
         this.aspect = test.aspect();
+        this.stepRunFilter = test.stepRunFilter();
         this.shareState = test.shareState();
         this.shareInput = test.shareInput();
         this.overrideDataSource = test.overrideDataSourceLoader().dataSource();
@@ -88,6 +91,10 @@ public class TestCaseBuilder {
 
     public Aspect getAspect() {
         return this.aspect;
+    }
+
+    public StepRunFilter getStepFilter() {
+        return this.stepRunFilter;
     }
 
     public boolean isShareState() {
@@ -212,6 +219,11 @@ public class TestCaseBuilder {
 
     public TestCaseBuilder filterAspect(final Predicate<Interceptor> condition) {
         return this.setAspect(this.aspect.filter(condition));
+    }
+
+    public TestCaseBuilder setStepFilter(final StepRunFilter stepRunFilter) {
+        this.stepRunFilter = stepRunFilter;
+        return this;
     }
 
     public TestCaseBuilder isShareState(final boolean shareState) {
