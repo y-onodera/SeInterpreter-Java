@@ -15,7 +15,7 @@ public class BreakPointView extends FXMLView {
         dialog.setScene(scene);
         dialog.initOwner(window);
         dialog.initModality(Modality.WINDOW_MODAL);
-        dialog.setTitle("edit step");
+        dialog.setTitle("add breakpoint");
         dialog.setResizable(true);
         dialog.show();
     }

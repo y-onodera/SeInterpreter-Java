@@ -47,6 +47,7 @@ public class BreakPointPresenter {
                 .filter(key -> InputData.isVariable(target.getLocator(key).value()))
                 .forEach(key -> this.varSelect.getItems().add(key + ":value"));
         this.varSelect.getSelectionModel().select(0);
+        this.varSelect.disableProperty().set(this.varSelect.getItems().size() == 1);
         this.methodSelect.getItems().add("always");
         this.methodSelect.getSelectionModel().select(0);
         this.methodSelect.disableProperty().bind(this.varSelect.valueProperty().isEqualTo("")
