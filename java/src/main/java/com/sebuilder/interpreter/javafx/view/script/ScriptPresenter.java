@@ -3,26 +3,31 @@ package com.sebuilder.interpreter.javafx.view.script;
 import com.google.common.base.Strings;
 import com.sebuilder.interpreter.Step;
 import com.sebuilder.interpreter.TestCase;
+import com.sebuilder.interpreter.javafx.application.BreakPoint;
 import com.sebuilder.interpreter.javafx.application.Result;
 import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
 import com.sebuilder.interpreter.javafx.application.ViewType;
 import com.sebuilder.interpreter.javafx.control.DragAndDropTableViewRowFactory;
 import com.sebuilder.interpreter.javafx.view.replay.InputView;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.input.MouseButton;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.stage.Window;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class ScriptPresenter {
 
@@ -30,24 +35,25 @@ public class ScriptPresenter {
     private SeInterpreterApplication application;
 
     @FXML
-    private TableColumn<ScriptBody, String> tableColumnScriptBodyStep;
+    private TableColumn<StepDefine, StepNo> tableColumnScriptBodyNo;
 
     @FXML
-    private TableColumn<ScriptBody, Integer> tableColumnScriptBodyNo;
+    private TableColumn<StepDefine, String> tableColumnScriptBodyStep;
 
     @FXML
-    private TableView<ScriptBody> tableViewScriptBody;
+    private TableView<StepDefine> tableViewScriptBody;
 
     @FXML
     void initialize() {
         assert this.tableColumnScriptBodyStep != null : "fx:id=\"tableColumnScriptBodyStep\" was not injected: check your FXML file 'seleniumbuilderscriptbody.fxml'.";
         assert this.tableColumnScriptBodyNo != null : "fx:id=\"tableColumnScriptBodyNo\" was not injected: check your FXML file 'seleniumbuilderscriptbody.fxml'.";
         assert this.tableViewScriptBody != null : "fx:id=\"tableViewScriptBody\" was not injected: check your FXML file 'seleniumbuilderscriptbody.fxml'.";
-        this.tableColumnScriptBodyNo.setCellValueFactory(body -> body.getValue().noProperty().asObject());
-        this.tableColumnScriptBodyStep.setCellValueFactory(body -> body.getValue().stepProperty());
+        this.tableColumnScriptBodyNo.setCellValueFactory(body -> body.getValue().noProperty());
+        this.tableColumnScriptBodyNo.setCellFactory(cell -> new StepNoCell());
+        this.tableColumnScriptBodyStep.setCellValueFactory(body -> body.getValue().scriptProperty());
         this.tableViewScriptBody.setRowFactory(new DragAndDropTableViewRowFactory<>() {
             @Override
-            protected void updateItemCallback(final TableRow<ScriptBody> tableRow, final ScriptBody scriptBody, final boolean empty, final int notEmptyValCount) {
+            protected void updateItemCallback(final TableRow<StepDefine> tableRow, final StepDefine stepDefine, final boolean empty, final int notEmptyValCount) {
                 for (final Result result : Result.values()) {
                     tableRow.getStyleClass().remove(result.toString().toLowerCase());
                 }
@@ -99,8 +105,8 @@ public class ScriptPresenter {
 
     @FXML
     void handleStepDelete() {
-        final int stepNo = this.tableViewScriptBody.getSelectionModel().getSelectedItem().noProperty().intValue();
-        this.application.replaceDisplayCase(this.application.getDisplayTestCase().removeStep(stepNo - 1));
+        final int stepIndex = this.tableViewScriptBody.getSelectionModel().getSelectedItem().index();
+        this.application.replaceDisplayCase(this.application.getDisplayTestCase().removeStep(stepIndex));
     }
 
     @FXML
@@ -116,7 +122,7 @@ public class ScriptPresenter {
     @FXML
     void handleStepEdit() {
         final StepView stepView = this.initStepEditDialog(StepView.Action.EDIT);
-        final ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
+        final StepDefine item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
         stepView.refresh(this.application.getDisplayTestCase()
                 .steps()
                 .get(item.index())
@@ -125,7 +131,7 @@ public class ScriptPresenter {
 
     @FXML
     void handleRunStep() {
-        final ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
+        final StepDefine item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
         final InputView inputView = new InputView();
         inputView.setOnclickReplayStart((it) ->
                 this.application.runStep(it, i -> item.compareIndex(i.intValue()) == 0, i -> i + item.index(), false)
@@ -135,7 +141,7 @@ public class ScriptPresenter {
 
     @FXML
     void handleRunFromHere() {
-        final ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
+        final StepDefine item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
         final InputView inputView = new InputView();
         inputView.setOnclickReplayStart((it) ->
                 this.application.runStep(it, i -> item.compareIndex(i.intValue()) <= 0, i -> i + item.index(), true)
@@ -145,7 +151,7 @@ public class ScriptPresenter {
 
     @FXML
     void handleRunToHere() {
-        final ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
+        final StepDefine item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
         final InputView inputView = new InputView();
         inputView.setOnclickReplayStart((it) ->
                 this.application.runStep(it, i -> item.compareIndex(i.intValue()) >= 0, i -> i, false)
@@ -155,8 +161,14 @@ public class ScriptPresenter {
 
     @FXML
     public void handleAddBreakPoint() {
-        final ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
+        final StepDefine item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
         new BreakPointView().open(this.currentWindow(), item.index());
+    }
+
+    @FXML
+    public void handleRemoveBreakPoint() {
+        final StepDefine item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
+        this.application.removeBreakPoint(item.index());
     }
 
     private void moveStep(final int from, final int to) {
@@ -176,8 +188,16 @@ public class ScriptPresenter {
         this.application.executeAndLoggingCaseWhenThrowException(() -> {
             this.tableViewScriptBody.getItems().setAll(new ArrayList<>());
             int no = 1;
+            final List<Integer> hasBreakPoint = new ArrayList<>();
+            final Optional<BreakPoint> breakPoint = BreakPoint.findFrom(this.application.getDisplayTestCase().aspect());
+            breakPoint.ifPresent(it -> hasBreakPoint.addAll(it.targetStepIndex()));
             for (final Step step : this.application.getDisplayTestCase().steps()) {
-                final ScriptBody row = new ScriptBody(no++, step.toPrettyString(), "");
+                final StepDefine row;
+                if (hasBreakPoint.contains(no - 1)) {
+                    row = new StepDefine(new StepNo(no++).withBreakPoint(), step.toPrettyString(), "");
+                } else {
+                    row = new StepDefine(new StepNo(no++), step.toPrettyString(), "");
+                }
                 this.tableViewScriptBody.getItems().add(row);
             }
             this.tableViewScriptBody.refresh();
@@ -185,7 +205,7 @@ public class ScriptPresenter {
     }
 
     private void handleStepResult(final int stepIndex, final Result result) {
-        final List<ScriptBody> bodies = this.tableViewScriptBody.getItems();
+        final List<StepDefine> bodies = this.tableViewScriptBody.getItems();
         bodies.stream()
                 .filter(item -> item.index() == stepIndex)
                 .findFirst()
@@ -193,10 +213,10 @@ public class ScriptPresenter {
     }
 
     private StepView initStepEditDialog(final StepView.Action action) {
-        final ScriptBody item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
+        final StepDefine item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
         int no = 0;
         if (item != null) {
-            no = item.no.intValue() - 1;
+            no = item.index();
         }
         final StepView stepView = new StepView();
         stepView.open(this.currentWindow(), no, action);
@@ -207,17 +227,17 @@ public class ScriptPresenter {
         return this.tableViewScriptBody.getScene().getWindow();
     }
 
-    private static class ScriptBody {
+    static class StepDefine {
 
-        private final IntegerProperty no;
+        private final ObjectProperty<StepNo> no;
 
-        private final StringProperty step;
+        private final StringProperty script;
 
         private final StringProperty runningResult;
 
-        public ScriptBody(final int no, final String step, final String runningResult) {
-            this.no = new SimpleIntegerProperty(no);
-            this.step = new SimpleStringProperty(step);
+        public StepDefine(final StepNo stepNo, final String step, final String runningResult) {
+            this.no = new SimpleObjectProperty<>(stepNo);
+            this.script = new SimpleStringProperty(step);
             if (runningResult != null) {
                 this.runningResult = new SimpleStringProperty(runningResult);
             } else {
@@ -225,12 +245,12 @@ public class ScriptPresenter {
             }
         }
 
-        public IntegerProperty noProperty() {
+        public ObjectProperty<StepNo> noProperty() {
             return this.no;
         }
 
-        public StringProperty stepProperty() {
-            return this.step;
+        public StringProperty scriptProperty() {
+            return this.script;
         }
 
         public StringProperty runningResultProperty() {
@@ -246,9 +266,33 @@ public class ScriptPresenter {
         }
 
         public int index() {
-            return this.no.intValue() - 1;
+            return this.no.get().no - 1;
         }
 
+    }
+
+    private record StepNo(Integer no, Circle breakPoint) {
+        StepNo(final Integer no) {
+            this(no, null);
+        }
+
+        StepNo withBreakPoint() {
+            return new StepNo(this.no, new Circle(3, Color.RED));
+        }
+    }
+
+    private static class StepNoCell extends TableCell<StepDefine, StepNo> {
+        @Override
+        protected void updateItem(final StepNo item, final boolean empty) {
+            super.updateItem(item, empty);
+            if (empty) {
+                this.setText(null);
+                this.setGraphic(null);
+            } else {
+                this.setText(item.no.toString());
+                this.setGraphic(item.breakPoint);
+            }
+        }
     }
 
 }

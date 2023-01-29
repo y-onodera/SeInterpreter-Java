@@ -196,18 +196,22 @@ public class TestCaseBuilder {
         return this;
     }
 
-    public TestCaseBuilder insertAspect(final Aspect aspect) {
+    public TestCaseBuilder insertAspect(final Iterable<Interceptor> aspect) {
         this.aspect = this.aspect.builder()
                 .insert(aspect)
                 .build();
         return this;
     }
 
-    public TestCaseBuilder addAspect(final Aspect aspect) {
+    public TestCaseBuilder addAspect(final Iterable<Interceptor> aspect) {
         this.aspect = this.aspect.builder()
                 .add(aspect)
                 .build();
         return this;
+    }
+
+    public TestCaseBuilder filterAspect(final Predicate<Interceptor> condition) {
+        return this.setAspect(this.aspect.filter(condition));
     }
 
     public TestCaseBuilder isShareState(final boolean shareState) {

@@ -5,6 +5,7 @@ import com.sebuilder.interpreter.TestRun;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
+import java.util.HashMap;
 import java.util.concurrent.Exchanger;
 import java.util.function.Function;
 
@@ -65,10 +66,10 @@ public class Debugger {
     }
 
     public Function<TestCaseBuilder, TestCaseBuilder> append() {
-        return it -> BreakPoint.isSetting().test(it.getAspect()) ? it : it.insertAspect(new BreakPoint(BreakPoint.DO_NOT_BREAK, this).toAspect());
+        return it -> BreakPoint.isSetting().test(it.getAspect()) ? it : it.insertAspect(new BreakPoint(new HashMap<>(), this).toAspect());
     }
 
-    public static enum STATUS {
+    public enum STATUS {
         await, stepOver, stop, pause, resume
     }
 }

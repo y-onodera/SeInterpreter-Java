@@ -22,7 +22,6 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 /**
  * A single finish of a test head.
@@ -106,8 +105,8 @@ public class TestRun implements WebDriverWrapper {
         return this.aspect;
     }
 
-    public Aspect getAspect(final Predicate<Interceptor> filter) {
-        return new Aspect(this.aspect.interceptors().stream().filter(filter).collect(Collectors.toList()));
+    public Aspect getAspect(final Predicate<Interceptor> condition) {
+        return this.aspect.filter(condition);
     }
 
     public int currentStepIndex() {

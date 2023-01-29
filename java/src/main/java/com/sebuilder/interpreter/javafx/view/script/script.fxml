@@ -28,6 +28,8 @@
                     <MenuItem mnemonicParsing="false" onAction="#handleRunStep" text="run step"/>
                     <MenuItem mnemonicParsing="false" onAction="#handleRunFromHere" text="run from Here"/>
                     <MenuItem mnemonicParsing="false" onAction="#handleRunToHere" text="run to Here"/>
+                    <MenuItem mnemonicParsing="false" onAction="#handleAddBreakPoint" text="add breakpoint"/>
+                    <MenuItem mnemonicParsing="false" onAction="#handleRemoveBreakPoint" text="remove breakpoint"/>
                 </items>
             </ContextMenu>
         </contextMenu>

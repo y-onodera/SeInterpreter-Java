@@ -1,19 +1,30 @@
 package com.sebuilder.interpreter;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
-public record Aspect(Collection<Interceptor> interceptors) {
+public record Aspect(Iterable<Interceptor> interceptors) implements Iterable<Interceptor> {
+
+    public static Aspect from(final Stream<Interceptor> interceptors) {
+        return new Aspect(interceptors.collect(Collectors.toList()));
+    }
 
     public Aspect() {
         this(new ArrayList<>());
     }
 
-    public Aspect(final Collection<Interceptor> interceptors) {
-        this.interceptors = new ArrayList<>(interceptors);
+    public Aspect(final Iterable<Interceptor> interceptors) {
+        final ArrayList<Interceptor> src = new ArrayList<>();
+        interceptors.forEach(src::add);
+        this.interceptors = src;
     }
 
     public Builder builder() {
@@ -21,9 +32,23 @@ public record Aspect(Collection<Interceptor> interceptors) {
     }
 
     public Advice advice(final Step step, final InputData vars) {
-        return new Advice(this.interceptors.stream()
+        return new Advice(this.getStream()
                 .filter(interceptor -> interceptor.isPointcut(step, vars))
                 .toList());
+    }
+
+    public Stream<Interceptor> getStream() {
+        return StreamSupport.stream(this.interceptors.spliterator(), false);
+    }
+
+    @Override
+    @Nonnull
+    public Iterator<Interceptor> iterator() {
+        return this.interceptors.iterator();
+    }
+
+    public Aspect filter(final Predicate<Interceptor> condition) {
+        return from(this.getStream().filter(condition));
     }
 
     public record Advice(List<Interceptor> advices) {
@@ -59,8 +84,9 @@ public record Aspect(Collection<Interceptor> interceptors) {
 
         private LinkedHashSet<Interceptor> interceptors;
 
-        public Builder(final Collection<Interceptor> interceptors) {
-            this.interceptors = new LinkedHashSet<>(interceptors);
+        public Builder(final Iterable<Interceptor> interceptors) {
+            this.interceptors = new LinkedHashSet<>();
+            interceptors.forEach(this.interceptors::add);
         }
 
         public Builder add(final Supplier<Interceptor> interceptorSupplier) {
@@ -73,18 +99,14 @@ public record Aspect(Collection<Interceptor> interceptors) {
             return this;
         }
 
-        public Builder add(final Collection<Interceptor> interceptor) {
-            this.interceptors.addAll(interceptor);
+        public Builder add(final Iterable<Interceptor> interceptor) {
+            interceptor.forEach(this.interceptors::add);
             return this;
         }
 
-        public Builder add(final Aspect other) {
-            return this.add(other.interceptors);
-        }
-
-        public Builder insert(final Aspect other) {
+        public Builder insert(final Iterable<Interceptor> other) {
             final LinkedHashSet<Interceptor> newInterceptors = new LinkedHashSet<>();
-            newInterceptors.addAll(other.interceptors);
+            other.forEach(newInterceptors::add);
             newInterceptors.addAll(this.interceptors);
             this.interceptors = newInterceptors;
             return this;

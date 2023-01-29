@@ -9,21 +9,22 @@ import com.sebuilder.interpreter.pointcut.LocatorFilter;
 import com.sebuilder.interpreter.pointcut.SkipFilter;
 import com.sebuilder.interpreter.pointcut.StringParamFilter;
 import javafx.fxml.FXML;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import org.controlsfx.control.SearchableComboBox;
 
 import javax.inject.Inject;
 import java.util.Objects;
+import java.util.Optional;
 
 public class BreakPointPresenter {
 
     @Inject
     private SeInterpreterApplication application;
     @FXML
-    public SearchableComboBox<String> methodSelect;
+    public ComboBox<String> methodSelect;
     @FXML
-    private SearchableComboBox<String> varSelect;
+    private ComboBox<String> varSelect;
     @FXML
     public TextField targetValue;
 
@@ -34,7 +35,7 @@ public class BreakPointPresenter {
     public void populate(final Stage dialog, final int stepIndex) {
         this.dialog = dialog;
         this.stepIndex = stepIndex;
-        final Step target = this.application.getDisplayTestCase().steps().get(stepIndex);
+        final Step target = this.application.getDisplayTestCase().steps().get(this.stepIndex);
         this.varSelect.getItems().add("");
         target.paramKeys().stream()
                 .filter(key -> InputData.isVariable(target.getParam(key)))
@@ -47,18 +48,33 @@ public class BreakPointPresenter {
                 .forEach(key -> this.varSelect.getItems().add(key + ":value"));
         this.varSelect.getSelectionModel().select(0);
         this.methodSelect.getItems().add("always");
-        if (this.varSelect.getItems().size() > 1) {
-            for (final String stepType : this.conditionMethods()) {
-                this.methodSelect.getItems().add(stepType);
-            }
-        }
         this.methodSelect.getSelectionModel().select(0);
-        this.varSelect.disableProperty().bind(this.methodSelect.valueProperty().isEqualTo("always"));
-        this.targetValue.disableProperty().bind(this.varSelect.disableProperty());
+        this.methodSelect.disableProperty().bind(this.varSelect.valueProperty().isEqualTo("")
+                .or(this.varSelect.valueProperty().isEqualTo("skip")));
+        this.targetValue.disableProperty().bind(this.varSelect.valueProperty().isEqualTo(""));
     }
 
     @FXML
-    public void selectMethod() {
+    public void selectVar() {
+        switch (Optional.ofNullable(this.varSelect.getSelectionModel().getSelectedItem()).orElse("")) {
+            case "skip" -> {
+                this.methodSelect.getItems().clear();
+                this.methodSelect.getItems().add("equal");
+                this.methodSelect.getSelectionModel().select("equal");
+            }
+            case "" -> {
+                this.methodSelect.getItems().clear();
+                this.methodSelect.getItems().add("always");
+                this.methodSelect.getSelectionModel().select("always");
+                this.targetValue.setText("");
+            }
+            default -> {
+                this.methodSelect.getItems().clear();
+                for (final String stepType : this.conditionMethods()) {
+                    this.methodSelect.getItems().add(stepType);
+                }
+            }
+        }
     }
 
     @FXML

@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -354,9 +355,26 @@ public class SeInterpreterApplication extends Application {
     }
 
     public void addBreakPoint(final int stepIndex, final Pointcut pointcut) {
-        final Pointcut stepFilter = (step, var) -> Integer.parseInt(var.get("_stepIndex")) == stepIndex;
-        final Aspect aspect = new BreakPoint(stepFilter.and(pointcut), this.debugger).toAspect();
-        this.replaceDisplayCase(this.getDisplayTestCase().map(it -> it.insertAspect(aspect)));
+        final BreakPoint breakPoint = BreakPoint.findFrom(this.getDisplayTestCase().aspect())
+                .orElseGet(() -> new BreakPoint(new HashMap<>(), this.debugger))
+                .addCondition(stepIndex, pointcut);
+        this.replaceDisplayCase(this.getDisplayTestCase().map(it ->
+                it.filterAspect(BreakPoint.typeMatch().negate())
+                        .insertAspect(breakPoint.toAspect())));
+    }
+
+    public void removeBreakPoint(final int stepIndex) {
+        BreakPoint.findFrom(this.getDisplayTestCase().aspect()).ifPresent(current -> {
+            final BreakPoint breakPoint = current.removeCondition(stepIndex);
+            if (breakPoint.condition().size() == 0) {
+                this.replaceDisplayCase(this.getDisplayTestCase().map(it ->
+                        it.filterAspect(BreakPoint.typeMatch().negate())));
+            } else {
+                this.replaceDisplayCase(this.getDisplayTestCase().map(it ->
+                        it.filterAspect(BreakPoint.typeMatch().negate())
+                                .insertAspect(breakPoint.toAspect())));
+            }
+        });
     }
 
     public String getReportFileName() {
