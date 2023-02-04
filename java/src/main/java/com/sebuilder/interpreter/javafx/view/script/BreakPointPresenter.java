@@ -105,7 +105,7 @@ public class BreakPointPresenter {
         } else if (key.equals("skip")) {
             return new SkipFilter(Boolean.parseBoolean(this.targetValue.getText()));
         }
-        return new StringParamFilter(this.methodSelect.getSelectionModel().getSelectedItem(), key, this.targetValue.getText());
+        return new StringParamFilter(key, this.targetValue.getText(), this.methodSelect.getSelectionModel().getSelectedItem());
     }
 
 }
