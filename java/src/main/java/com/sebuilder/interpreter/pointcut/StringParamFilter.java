@@ -11,7 +11,7 @@ public record StringParamFilter(String key, String value, String method) impleme
     }
 
     @Override
-    public boolean test(final Step step, final InputData vars) {
+    public boolean isHandle(final Step step, final InputData vars) {
         return step.containsParam(this.key)
                 && METHODS.get(this.method).apply(vars.evaluateString(step.getParam(this.key)), this.value);
     }

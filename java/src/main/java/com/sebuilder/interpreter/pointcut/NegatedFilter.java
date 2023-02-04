@@ -7,7 +7,7 @@ import com.sebuilder.interpreter.Step;
 public record NegatedFilter(boolean target) implements Pointcut {
 
     @Override
-    public boolean test(final Step step, final InputData vars) {
+    public boolean isHandle(final Step step, final InputData vars) {
         return this.target == step.negated();
     }
 

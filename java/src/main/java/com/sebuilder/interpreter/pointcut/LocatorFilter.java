@@ -12,7 +12,7 @@ public record LocatorFilter(String key, Locator target, String method) implement
     }
 
     @Override
-    public boolean test(final Step step, final InputData vars) {
+    public boolean isHandle(final Step step, final InputData vars) {
         return step.locatorContains(this.key)
                 && vars.evaluateString(step.getLocator(this.key).type()).equals(this.target.type())
                 && METHODS.get(this.method).apply(vars.evaluateString(step.getLocator(this.key).value()), this.target.value());

@@ -18,79 +18,79 @@ public class LocatorFilterTest {
     @Test
     public void constructValueIsNotTargetType() {
         assertFalse(new LocatorFilter("locator", new Locator("id", "id1"))
-                .test(param, new InputData().add("type", "name").add("value", "id1")));
+                .isHandle(param, new InputData().add("type", "name").add("value", "id1")));
     }
 
     @Test
     public void constructValueIsTarget() {
         assertTrue(new LocatorFilter("locator", new Locator("id", "id1"))
-                .test(param, new InputData().add("type", "id").add("value", "id1")));
+                .isHandle(param, new InputData().add("type", "id").add("value", "id1")));
     }
 
     @Test
     public void constructValueEqualTarget() {
         assertTrue(new LocatorFilter("locator", new Locator("id", "id1"), "equal")
-                .test(param, new InputData().add("type", "id").add("value", "id1")));
+                .isHandle(param, new InputData().add("type", "id").add("value", "id1")));
     }
 
     @Test
     public void constructValueStartsWithTarget() {
         assertTrue(new LocatorFilter("locator", new Locator("id", "id"), "startsWith")
-                .test(param, new InputData().add("type", "id").add("value", "id1")));
+                .isHandle(param, new InputData().add("type", "id").add("value", "id1")));
     }
 
     @Test
     public void constructValueEndsWithTarget() {
         assertTrue(new LocatorFilter("locator", new Locator("id", "1"), "endsWith")
-                .test(param, new InputData().add("type", "id").add("value", "id1")));
+                .isHandle(param, new InputData().add("type", "id").add("value", "id1")));
     }
 
     @Test
     public void constructValueContainsTarget() {
         assertTrue(new LocatorFilter("locator", new Locator("id", "d"), "contains")
-                .test(param, new InputData().add("type", "id").add("value", "id1")));
+                .isHandle(param, new InputData().add("type", "id").add("value", "id1")));
     }
 
     @Test
     public void constructValueMatchesTarget() {
         assertTrue(new LocatorFilter("locator", new Locator("id", "id\\d"), "matches")
-                .test(param, new InputData().add("type", "id").add("value", "id1")));
+                .isHandle(param, new InputData().add("type", "id").add("value", "id1")));
     }
 
     @Test
     public void constructValueIsNotTarget() {
         assertFalse(new LocatorFilter("locator", new Locator("id", "id2"))
-                .test(param, new InputData().add("type", "id").add("value", "id1")));
+                .isHandle(param, new InputData().add("type", "id").add("value", "id1")));
     }
 
     @Test
     public void constructValueNotEqualTarget() {
         assertFalse(new LocatorFilter("locator", new Locator("id", "id2"), "equal")
-                .test(param, new InputData().add("type", "id").add("value", "id1")));
+                .isHandle(param, new InputData().add("type", "id").add("value", "id1")));
     }
 
     @Test
     public void constructValueNotStartsWithTarget() {
         assertFalse(new LocatorFilter("locator", new Locator("id", "d"), "startsWith")
-                .test(param, new InputData().add("type", "id").add("value", "id1")));
+                .isHandle(param, new InputData().add("type", "id").add("value", "id1")));
     }
 
     @Test
     public void constructValueNotEndsWithTarget() {
         assertFalse(new LocatorFilter("locator", new Locator("id", "d"), "endsWith")
-                .test(param, new InputData().add("type", "id").add("value", "id1")));
+                .isHandle(param, new InputData().add("type", "id").add("value", "id1")));
     }
 
     @Test
     public void constructValueNotContainsTarget() {
         assertFalse(new LocatorFilter("locator", new Locator("id", "2"), "contains")
-                .test(param, new InputData().add("type", "id").add("value", "id1")));
+                .isHandle(param, new InputData().add("type", "id").add("value", "id1")));
     }
 
     @Test
     public void constructValueNotMatchesTarget() {
         assertFalse(new LocatorFilter("locator", new Locator("id", "id\\d{2}"), "matches")
-                .test(param, new InputData().add("type", "id").add("value", "id1")));
+                .isHandle(param, new InputData().add("type", "id").add("value", "id1")));
     }
 
 }

@@ -12,25 +12,25 @@ public class SkipFilterTest {
     @Test
     public void constructValueTrueAndTargetSkipTrueResultTrue() {
         assertTrue(new SkipFilter(true)
-                .test(new StepBuilder(new SetElementText()).put("skip", "${test}").build(), new InputData().add("test", "true")));
+                .isHandle(new StepBuilder(new SetElementText()).put("skip", "${test}").build(), new InputData().add("test", "true")));
     }
 
     @Test
     public void constructValueFalseAndTargetSkipTrueResultFalse() {
         assertFalse(new SkipFilter(false)
-                .test(new StepBuilder(new SetElementText()).put("skip", "${test}").build(), new InputData().add("test", "true")));
+                .isHandle(new StepBuilder(new SetElementText()).put("skip", "${test}").build(), new InputData().add("test", "true")));
     }
 
     @Test
     public void constructValueFalseAndTargetSkipFalseResultTrue() {
         assertTrue(new SkipFilter(false)
-                .test(new StepBuilder(new SetElementText()).put("skip", "${test}").build(), new InputData().add("test", "false")));
+                .isHandle(new StepBuilder(new SetElementText()).put("skip", "${test}").build(), new InputData().add("test", "false")));
     }
 
     @Test
     public void constructValueTrueAndTargetSkipFalseResultFalse() {
         assertFalse(new SkipFilter(true)
-                .test(new StepBuilder(new SetElementText()).put("skip", "${test}").build(), new InputData().add("test", "false")));
+                .isHandle(new StepBuilder(new SetElementText()).put("skip", "${test}").build(), new InputData().add("test", "false")));
     }
 
 

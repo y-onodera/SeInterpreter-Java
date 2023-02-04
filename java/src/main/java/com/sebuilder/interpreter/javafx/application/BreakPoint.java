@@ -34,12 +34,12 @@ public record BreakPoint(Map<Integer, Pointcut> condition, Debugger debugger) im
             case stepOver:
             case stop:
             case pause:
-                return STEP_BY_STEP.test(step, vars);
+                return STEP_BY_STEP.isHandle(step, vars);
             case await:
             case resume:
         }
         final Integer stepIndex = vars.stepIndex();
-        return this.condition.containsKey(stepIndex) && this.condition.get(stepIndex).test(step, vars);
+        return this.condition.containsKey(stepIndex) && this.condition.get(stepIndex).isHandle(step, vars);
     }
 
     @Override

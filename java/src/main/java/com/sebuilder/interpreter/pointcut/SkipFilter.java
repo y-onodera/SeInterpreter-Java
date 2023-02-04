@@ -7,7 +7,7 @@ import com.sebuilder.interpreter.Step;
 public record SkipFilter(boolean target) implements Pointcut {
 
     @Override
-    public boolean test(final Step step, final InputData vars) {
+    public boolean isHandle(final Step step, final InputData vars) {
         return step.isSkip(vars) == this.target;
     }
 

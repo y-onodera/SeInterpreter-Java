@@ -35,7 +35,7 @@ public class TestRun implements WebDriverWrapper {
     private final Logger log;
     private final TestRunListener listener;
     private final Aspect aspect;
-    private final StepRunFilter stepRunFilter;
+    private final Pointcut stepRunFilter;
     private final boolean preventContextAspect;
     private InputData vars;
     private TestRunStatus testRunStatus;
@@ -208,7 +208,7 @@ public class TestRun implements WebDriverWrapper {
 
     public Step.Result runStep() {
         this.toNextStepIndex();
-        if (this.stepRunFilter.pass(this.currentStep(), this.vars)) {
+        if (this.stepRunFilter.isHandle(this.currentStep(), this.vars)) {
             return this.currentStep().execute(this);
         }
         return new Step.Result(true, 0);

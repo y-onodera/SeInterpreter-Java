@@ -17,7 +17,7 @@ public record ExtraStepExecuteInterceptor(Pointcut pointcut,
                     && this.afterStep.steps().size() == 0
                     && this.failureStep.steps().size() > 0;
         }
-        return this.pointcut.test(step, vars);
+        return this.pointcut.isHandle(step, vars);
     }
 
     @Override

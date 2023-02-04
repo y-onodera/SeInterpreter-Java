@@ -11,7 +11,7 @@ public record StepTypeFilter(String target, String method) implements Pointcut {
     }
 
     @Override
-    public boolean test(final Step step, final InputData vars) {
+    public boolean isHandle(final Step step, final InputData vars) {
         return METHODS.get(this.method).apply(step.type().getStepTypeName(), this.target);
     }
 

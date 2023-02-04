@@ -13,7 +13,7 @@ public class TestCaseBuilder {
     private DataSource dataSource;
     private Map<String, String> dataSourceConfig;
     private Aspect aspect;
-    private StepRunFilter stepRunFilter;
+    private Pointcut stepRunFilter;
     private boolean shareState;
     private InputData shareInput;
     private DataSource overrideDataSource;
@@ -40,7 +40,7 @@ public class TestCaseBuilder {
         this.steps = new ArrayList<>();
         this.dataSource = DataSource.NONE;
         this.aspect = new Aspect();
-        this.stepRunFilter = StepRunFilter.ALL_PASS;
+        this.stepRunFilter = Pointcut.ANY;
         this.overrideDataSource = DataSource.NONE;
         this.skip = "false";
         this.chains = new TestCaseChains();
@@ -93,7 +93,7 @@ public class TestCaseBuilder {
         return this.aspect;
     }
 
-    public StepRunFilter getStepFilter() {
+    public Pointcut getStepRunFilter() {
         return this.stepRunFilter;
     }
 
@@ -221,7 +221,7 @@ public class TestCaseBuilder {
         return this.setAspect(this.aspect.filter(condition));
     }
 
-    public TestCaseBuilder setStepFilter(final StepRunFilter stepRunFilter) {
+    public TestCaseBuilder setStepRunFilter(final Pointcut stepRunFilter) {
         this.stepRunFilter = stepRunFilter;
         return this;
     }
