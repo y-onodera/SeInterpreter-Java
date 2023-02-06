@@ -18,7 +18,7 @@ public class StringParamFilterTest {
 
     @Test
     public void constructValueEqualTargetType() {
-        assertTrue(new StringParamFilter("text", "test", "equal")
+        assertTrue(new StringParamFilter("text", "test", "equals")
                 .isHandle(new StepBuilder(new SetElementText()).put("text", "${text}").build(), new InputData().add("text", "test")));
     }
 
@@ -54,7 +54,7 @@ public class StringParamFilterTest {
 
     @Test
     public void constructValueNotEqualTargetType() {
-        assertFalse(new StringParamFilter("text", "test", "equal")
+        assertFalse(new StringParamFilter("text", "test", "equals")
                 .isHandle(new StepBuilder(new SetElementText()).put("text", "${text}").build(), new InputData().add("text", "test1")));
     }
 

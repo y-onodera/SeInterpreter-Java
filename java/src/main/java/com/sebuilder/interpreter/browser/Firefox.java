@@ -72,5 +72,5 @@ public class Firefox implements WebDriverFactory {
     public String getDriverName() {
         return "geckodriver";
     }
-    
+
 }

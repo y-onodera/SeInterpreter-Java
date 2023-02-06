@@ -8,109 +8,110 @@ import com.sebuilder.interpreter.step.type.SetElementSelected;
 import com.sebuilder.interpreter.step.type.SetElementText;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-public class StepTypeFilterTest {
+public class TypeFilterTest {
 
     @Test
     public void constructValueIsTargetTypeResultTrue() {
-        assertTrue(new StepTypeFilter("SetElementText")
+        assertTrue(new TypeFilter("SetElementText")
                 .isHandle(new StepBuilder(new SetElementText()).build(), new InputData()));
     }
 
     @Test
     public void constructValueEqualTargetTypeResultTrue() {
-        assertTrue(new StepTypeFilter("SetElementText", "equal")
+        assertTrue(new TypeFilter("SetElementText", "equals")
                 .isHandle(new StepBuilder(new SetElementText()).build(), new InputData()));
     }
 
     @Test
     public void constructValueStartsWithTargetTypeResultTrue() {
-        assertTrue(new StepTypeFilter("Set", "startsWith")
+        assertTrue(new TypeFilter("Set", "startsWith")
                 .isHandle(new StepBuilder(new SetElementText()).build(), new InputData()));
     }
 
     @Test
     public void constructValueEndsWithTargetTypeResultTrue() {
-        assertTrue(new StepTypeFilter("Text", "endsWith")
+        assertTrue(new TypeFilter("Text", "endsWith")
                 .isHandle(new StepBuilder(new SetElementText()).build(), new InputData()));
     }
 
     @Test
     public void constructValueContainsTargetTypeResultTrue() {
-        assertTrue(new StepTypeFilter("Element", "contains")
+        assertTrue(new TypeFilter("Element", "contains")
                 .isHandle(new StepBuilder(new SetElementText()).build(), new InputData()));
     }
 
     @Test
     public void constructValueMatchesTargetTypeResultTrue() {
-        assertTrue(new StepTypeFilter(".*Element.*", "matches")
+        assertTrue(new TypeFilter(".*Element.*", "matches")
                 .isHandle(new StepBuilder(new SetElementText()).build(), new InputData()));
     }
 
     @Test
     public void negateConstructValueEqualTargetTypeResultTrue() {
-        assertTrue(new StepTypeFilter("SetElementText", "!equal")
+        assertTrue(new TypeFilter("SetElementText", "!equals")
                 .isHandle(new StepBuilder(new SelectElementValue()).build(), new InputData()));
     }
 
     @Test
     public void negateConstructValueStartsWithTargetTypeResultTrue() {
-        assertTrue(new StepTypeFilter("Set", "!startsWith")
+        assertTrue(new TypeFilter("Set", "!startsWith")
                 .isHandle(new StepBuilder(new SelectElementValue()).build(), new InputData()));
     }
 
     @Test
     public void negateConstructValueEndsWithTargetTypeResultTrue() {
-        assertTrue(new StepTypeFilter("Text", "!endsWith")
+        assertTrue(new TypeFilter("Text", "!endsWith")
                 .isHandle(new StepBuilder(new SetElementSelected()).build(), new InputData()));
     }
 
     @Test
     public void negateConstructValueNotContainsTargetTypeResultTrue() {
-        assertTrue(new StepTypeFilter("Element", "!contains")
+        assertTrue(new TypeFilter("Element", "!contains")
                 .isHandle(new StepBuilder(new Get()).build(), new InputData()));
     }
 
     @Test
     public void negateConstructValueNotMatchesTargetTypeResultTrue() {
-        assertTrue(new StepTypeFilter(".*Element.*", "!matches")
+        assertTrue(new TypeFilter(".*Element.*", "!matches")
                 .isHandle(new StepBuilder(new Get()).build(), new InputData()));
     }
 
     @Test
     public void constructValueIsNotTargetTypeResultFalse() {
-        assertFalse(new StepTypeFilter("SetElementText")
+        assertFalse(new TypeFilter("SetElementText")
                 .isHandle(new StepBuilder(new SetElementSelected()).build(), new InputData()));
     }
 
     @Test
     public void constructValueNotEqualTargetTypeResultFalse() {
-        assertFalse(new StepTypeFilter("SetElementText", "equal")
+        assertFalse(new TypeFilter("SetElementText", "equals")
                 .isHandle(new StepBuilder(new SetElementSelected()).build(), new InputData()));
     }
 
     @Test
     public void constructValueNotStartsWithTargetTypeResultFalse() {
-        assertFalse(new StepTypeFilter("Set", "startsWith")
+        assertFalse(new TypeFilter("Set", "startsWith")
                 .isHandle(new StepBuilder(new Get()).build(), new InputData()));
     }
 
     @Test
     public void constructValueNotEndsWithTargetTypeResultFalse() {
-        assertFalse(new StepTypeFilter("Text", "endsWith")
+        assertFalse(new TypeFilter("Text", "endsWith")
                 .isHandle(new StepBuilder(new Get()).build(), new InputData()));
     }
 
     @Test
     public void constructValueNotContainsTargetTypeResultFalse() {
-        assertFalse(new StepTypeFilter("Element", "contains")
+        assertFalse(new TypeFilter("Element", "contains")
                 .isHandle(new StepBuilder(new Get()).build(), new InputData()));
     }
 
     @Test
     public void constructValueNotMatchesTargetTypeResultFalse() {
-        assertFalse(new StepTypeFilter(".*Element.*", "matches")
+        assertFalse(new TypeFilter(".*Element.*", "matches")
                 .isHandle(new StepBuilder(new Get()).build(), new InputData()));
     }
 

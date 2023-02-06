@@ -51,17 +51,18 @@ public class BreakPointPresenter {
         this.methodSelect.getItems().add("always");
         this.methodSelect.getSelectionModel().select(0);
         this.methodSelect.disableProperty().bind(this.varSelect.valueProperty().isEqualTo("")
-                .or(this.varSelect.valueProperty().isEqualTo("skip")));
+                .or(this.varSelect.valueProperty().isEqualTo("skip"))
+                .or(this.varSelect.valueProperty().isEqualTo("negated")));
         this.targetValue.disableProperty().bind(this.varSelect.valueProperty().isEqualTo(""));
     }
 
     @FXML
     public void selectVar() {
         switch (Optional.ofNullable(this.varSelect.getSelectionModel().getSelectedItem()).orElse("")) {
-            case "skip" -> {
+            case "skip", "negated" -> {
                 this.methodSelect.getItems().clear();
-                this.methodSelect.getItems().add("equal");
-                this.methodSelect.getSelectionModel().select("equal");
+                this.methodSelect.getItems().add("equals");
+                this.methodSelect.getSelectionModel().select("equals");
             }
             case "" -> {
                 this.methodSelect.getItems().clear();

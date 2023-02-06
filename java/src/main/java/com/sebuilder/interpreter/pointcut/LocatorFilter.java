@@ -5,10 +5,13 @@ import com.sebuilder.interpreter.Locator;
 import com.sebuilder.interpreter.Pointcut;
 import com.sebuilder.interpreter.Step;
 
-public record LocatorFilter(String key, Locator target, String method) implements Pointcut {
+import java.util.HashMap;
+import java.util.Map;
+
+public record LocatorFilter(String key, Locator target, String method) implements Pointcut.Exportable {
 
     public LocatorFilter(final String key, final Locator target) {
-        this(key, target, "equal");
+        this(key, target, "equals");
     }
 
     @Override
@@ -18,4 +21,14 @@ public record LocatorFilter(String key, Locator target, String method) implement
                 && METHODS.get(this.method).apply(vars.evaluateString(step.getLocator(this.key).value()), this.target.value());
     }
 
+    @Override
+    public Map<String, String> params() {
+        final Map<String, String> result = new HashMap<>();
+        result.put("type", this.target.type());
+        result.put("value", this.target.value());
+        if (!this.method.equals("equals")) {
+            result.put("method", this.method);
+        }
+        return result;
+    }
 }

@@ -7,16 +7,15 @@ import com.sebuilder.interpreter.Step;
 import java.util.HashMap;
 import java.util.Map;
 
-public record StringParamFilter(String key, String target, String method) implements Pointcut.Exportable {
+public record TypeFilter(String target, String method) implements Pointcut.Exportable {
 
-    public StringParamFilter(final String key, final String value) {
-        this(key, value, "equals");
+    public TypeFilter(final String targetType) {
+        this(targetType, "equals");
     }
 
     @Override
     public boolean isHandle(final Step step, final InputData vars) {
-        return step.containsParam(this.key)
-                && METHODS.get(this.method).apply(vars.evaluateString(step.getParam(this.key)), this.target);
+        return METHODS.get(this.method).apply(step.type().getStepTypeName(), this.target);
     }
 
     @Override
@@ -36,5 +35,4 @@ public record StringParamFilter(String key, String target, String method) implem
         }
         return Exportable.super.value();
     }
-
 }

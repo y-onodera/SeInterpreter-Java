@@ -12,11 +12,12 @@ public class TestCaseBuilder {
     private final ArrayList<Step> steps;
     private DataSource dataSource;
     private Map<String, String> dataSourceConfig;
-    private Aspect aspect;
-    private Pointcut stepRunFilter;
     private boolean shareState;
     private InputData shareInput;
     private DataSource overrideDataSource;
+    private Aspect aspect;
+    private Pointcut includeTestRun;
+    private Pointcut excludeTestRun;
     private Map<String, String> overrideDataSourceConfig;
     private String skip;
     private TestCaseChains chains;
@@ -39,9 +40,10 @@ public class TestCaseBuilder {
         this.scriptFile = scriptFile;
         this.steps = new ArrayList<>();
         this.dataSource = DataSource.NONE;
-        this.aspect = new Aspect();
-        this.stepRunFilter = Pointcut.ANY;
         this.overrideDataSource = DataSource.NONE;
+        this.aspect = new Aspect();
+        this.includeTestRun = Pointcut.ANY;
+        this.excludeTestRun = Pointcut.NONE;
         this.skip = "false";
         this.chains = new TestCaseChains();
     }
@@ -51,12 +53,13 @@ public class TestCaseBuilder {
         this.steps = new ArrayList<>(test.steps());
         this.dataSource = test.dataSourceLoader().dataSource();
         this.dataSourceConfig = test.dataSourceLoader().dataSourceConfig();
-        this.aspect = test.aspect();
-        this.stepRunFilter = test.stepRunFilter();
         this.shareState = test.shareState();
         this.shareInput = test.shareInput();
         this.overrideDataSource = test.overrideDataSourceLoader().dataSource();
         this.overrideDataSourceConfig = test.overrideDataSourceLoader().dataSourceConfig();
+        this.aspect = test.aspect();
+        this.includeTestRun = test.includeTestRun();
+        this.excludeTestRun = test.excludeTestRun();
         this.skip = test.skip();
         this.chains = test.chains();
         this.nestedChain = test.nestedChain();
@@ -93,8 +96,12 @@ public class TestCaseBuilder {
         return this.aspect;
     }
 
-    public Pointcut getStepRunFilter() {
-        return this.stepRunFilter;
+    public Pointcut getIncludeTestRun() {
+        return this.includeTestRun;
+    }
+
+    public Pointcut getExcludeTestRun() {
+        return this.excludeTestRun;
     }
 
     public boolean isShareState() {
@@ -221,8 +228,13 @@ public class TestCaseBuilder {
         return this.setAspect(this.aspect.filter(condition));
     }
 
-    public TestCaseBuilder setStepRunFilter(final Pointcut stepRunFilter) {
-        this.stepRunFilter = stepRunFilter;
+    public TestCaseBuilder setIncludeTestRun(final Pointcut includeTestRun) {
+        this.includeTestRun = includeTestRun;
+        return this;
+    }
+
+    public TestCaseBuilder setExcludeTestRun(final Pointcut excludeTestRun) {
+        this.excludeTestRun = excludeTestRun;
         return this;
     }
 

@@ -1,7 +1,7 @@
 package com.sebuilder.interpreter;
 
 import com.google.common.base.Strings;
-import com.sebuilder.interpreter.pointcut.StepTypeFilter;
+import com.sebuilder.interpreter.pointcut.TypeFilter;
 import com.sebuilder.interpreter.step.type.SaveScreenshot;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.manager.SeleniumManager;
@@ -48,7 +48,7 @@ public enum Context {
     private StepTypeFactory stepTypeFactory;
     private Aspect aspect = new Aspect().builder()
             .add(new ExtraStepExecuteInterceptor.Builder()
-                    .setPointcut(new StepTypeFilter(SaveScreenshot.class.getSimpleName(), "!equal"))
+                    .setPointcut(new TypeFilter(SaveScreenshot.class.getSimpleName(), "!equals"))
                     .addFailure(new SaveScreenshot().toStep().put("file", "failure.png").build().toTestCase())
             )
             .build();

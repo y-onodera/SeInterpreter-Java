@@ -2,19 +2,15 @@ package com.sebuilder.interpreter.script;
 
 import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.TestCase;
-import com.sebuilder.interpreter.TestRunListener;
-import com.sebuilder.interpreter.report.JunitTestRunListener;
 import com.sebuilder.interpreter.datasource.DataSourceFactoryImpl;
 import com.sebuilder.interpreter.script.seleniumide.SeleniumIDE;
 import com.sebuilder.interpreter.step.StepTypeFactoryImpl;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.IOException;
+import java.util.Objects;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class SeleniumIDETest {
     static {
@@ -23,25 +19,23 @@ public class SeleniumIDETest {
                 .setDataSourceFactory(new DataSourceFactoryImpl());
     }
 
-    static Logger log = LogManager.getLogger(SeleniumIDETest.class);
-    private String baseDir = SeleniumIDETest.class.getResource("./seleniumide").getPath();
-    private SeleniumIDE target = new SeleniumIDE();
-    private SebuilderToStringConverter toStringConverter = new SebuilderToStringConverter();
-    protected TestRunListener testRunListener = new JunitTestRunListener(log);
+    private final String baseDir = Objects.requireNonNull(SeleniumIDETest.class.getResource("./seleniumide")).getPath();
+    private final SeleniumIDE target = new SeleniumIDE();
+    private final SebuilderToStringConverter toStringConverter = new SebuilderToStringConverter();
 
     @Test
-    public void load() throws IOException {
-        TestCase expect = new Sebuilder().load(new File(baseDir, "expect/sampleScript.json"));
-        TestCase loaded = target.load(new File(baseDir, "sampleScript.side"));
-        assertEquals(toStringConverter.toString(expect), toStringConverter.toString(loaded));
-        assertChainCaseEquals(expect, loaded);
+    public void load() {
+        final TestCase expect = new Sebuilder().load(new File(this.baseDir, "expect/sampleScript.json"));
+        final TestCase loaded = this.target.load(new File(this.baseDir, "sampleScript.side"));
+        assertEquals(this.toStringConverter.toString(expect), this.toStringConverter.toString(loaded));
+        this.assertChainCaseEquals(expect, loaded);
     }
 
-    private void assertChainCaseEquals(TestCase expect, TestCase loaded) {
+    private void assertChainCaseEquals(final TestCase expect, final TestCase loaded) {
         assertEquals(expect.chains().size(), loaded.chains().size());
         for (int i = 0, j = expect.chains().size(); i < j; i++) {
-            assertEquals(toStringConverter.toString(expect.chains().get(i)), toStringConverter.toString(loaded.chains().get(i)));
-            assertChainCaseEquals(expect.chains().get(i), loaded.chains().get(i));
+            assertEquals(this.toStringConverter.toString(expect.chains().get(i)), this.toStringConverter.toString(loaded.chains().get(i)));
+            this.assertChainCaseEquals(expect.chains().get(i), loaded.chains().get(i));
         }
     }
 

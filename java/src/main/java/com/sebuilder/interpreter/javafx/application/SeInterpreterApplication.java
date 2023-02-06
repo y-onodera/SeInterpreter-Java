@@ -333,7 +333,7 @@ public class SeInterpreterApplication extends Application {
         this.executeAndLoggingCaseWhenThrowException(() -> {
             final InputData inputData = this.currentDisplayShareInput(replayOption);
             this.executeTask(this.getDisplayTestCase()
-                            .map(builder -> builder.setStepRunFilter(filter)
+                            .map(builder -> builder.setIncludeTestRun(filter)
                                     .setShareInput(inputData)
                                     .map(replayOption::apply)
                                     .mapWhen(it -> !isChainTakeOver, it -> it.setChains(new TestCaseChains())))

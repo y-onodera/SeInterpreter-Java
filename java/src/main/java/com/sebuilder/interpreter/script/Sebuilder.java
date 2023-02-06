@@ -30,6 +30,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -230,14 +231,28 @@ public class Sebuilder extends AbstractJsonScriptParser {
     protected TestCase overrideSetting(final JSONObject script, final TestCase resultTestCase) {
         final DataSource dataSource = this.getDataSource(script);
         final HashMap<String, String> config = this.getDataSourceConfig(script);
-        final String skip = Sebuilder.this.getSkip(script);
+        final String skip = this.getSkip(script);
         final boolean nestedChain = this.isNestedChain(script);
         final boolean breakNestedChain = this.isBreakNestedChain(script);
         final boolean preventContextAspect = this.isPreventContextAspect(script);
+        final Pointcut includeTestRun;
+        if (script.has("include")) {
+            includeTestRun = this.getPointcut(script.getJSONArray("include")).orElse(Pointcut.ANY);
+        } else {
+            includeTestRun = Pointcut.ANY;
+        }
+        final Pointcut excludeTestRun;
+        if (script.has("exclude")) {
+            excludeTestRun = this.getPointcut(script.getJSONArray("exclude")).orElse(Pointcut.NONE);
+        } else {
+            excludeTestRun = Pointcut.NONE;
+        }
         return resultTestCase.map(it -> it.setSkip(skip)
                 .mapWhen(target -> dataSource != null
                         , matches -> matches.setOverrideTestDataSet(dataSource, config)
                 )
+                .setIncludeTestRun(includeTestRun)
+                .setExcludeTestRun(excludeTestRun)
                 .isNestedChain(nestedChain)
                 .isBreakNestedChain(breakNestedChain)
                 .isPreventContextAspect(preventContextAspect)
@@ -286,7 +301,7 @@ public class Sebuilder extends AbstractJsonScriptParser {
                         final ExtraStepExecuteInterceptor.Builder interceptorBuilder = new ExtraStepExecuteInterceptor.Builder();
                         final JSONObject aspect = aspects.getJSONObject(i);
                         if (aspect.has("pointcut")) {
-                            interceptorBuilder.setPointcut(this.getPointcut(aspect.getJSONArray("pointcut")));
+                            interceptorBuilder.setPointcut(this.getPointcut(aspect.getJSONArray("pointcut")).orElse(Pointcut.NONE));
                         }
                         if (aspect.has("before")) {
                             interceptorBuilder.addBefore(this.load(aspect.getJSONObject("before"), null));
@@ -305,48 +320,52 @@ public class Sebuilder extends AbstractJsonScriptParser {
         return result;
     }
 
-    protected Pointcut getPointcut(final JSONArray pointcuts) {
+    protected Optional<Pointcut> getPointcut(final JSONArray pointcuts) {
         return IntStream.range(0, pointcuts.length())
                 .mapToObj(i -> this.parseFilter(pointcuts.getJSONObject(i)))
-                .reduce(Pointcut.NONE, Pointcut::or);
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .reduce(Pointcut::or);
     }
 
 
-    protected Pointcut parseFilter(final JSONObject pointcutJSON) {
+    protected Optional<Pointcut> parseFilter(final JSONObject pointcutJSON) {
         final JSONArray keysA = pointcutJSON.names();
         return IntStream.range(0, keysA.length())
                 .mapToObj(j -> this.parseFilter(pointcutJSON, keysA, j))
-                .reduce(Pointcut.ANY, Pointcut::and);
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .reduce(Pointcut::and);
     }
 
-    protected Pointcut parseFilter(final JSONObject pointcutJSON, final JSONArray keysA, final int j) {
+    protected Optional<Pointcut> parseFilter(final JSONObject pointcutJSON, final JSONArray keysA, final int j) {
         final String key = keysA.getString(j);
         if (key.equals("type")) {
-            return this.getStepTypeFilter(pointcutJSON, key);
+            return this.getTypeFilter(pointcutJSON, key);
         } else if (key.equals("negated")) {
-            return new NegatedFilter(pointcutJSON.getBoolean(key));
+            return Optional.of(new NegatedFilter(pointcutJSON.getBoolean(key)));
         } else if (key.equals("skip")) {
-            return new SkipFilter(pointcutJSON.getBoolean(key));
+            return Optional.of(new SkipFilter(pointcutJSON.getBoolean(key)));
         } else if (key.startsWith("locator")) {
             return this.getLocatorFilter(pointcutJSON, key);
         }
         return this.getStringFilter(pointcutJSON, key);
     }
 
-    protected Pointcut getStringFilter(final JSONObject pointcutJSON, final String key) {
+    protected Optional<Pointcut> getStringFilter(final JSONObject pointcutJSON, final String key) {
         if (pointcutJSON.get(key) instanceof JSONArray) {
             final JSONArray type = pointcutJSON.getJSONArray(key);
             return IntStream.range(0, type.length())
                     .mapToObj(k -> (Pointcut) new StringParamFilter(key, type.getString(k)))
-                    .reduce(Pointcut.NONE, Pointcut::or);
+                    .reduce(Pointcut::or);
         } else if (pointcutJSON.get(key) instanceof JSONObject) {
             final JSONObject type = pointcutJSON.getJSONObject(key);
-            return new StringParamFilter(key, type.getString("value"), type.getString(Pointcut.METHOD_KEY));
+            return Optional.of(new StringParamFilter(key, type.getString("value"), type.getString(Pointcut.METHOD_KEY)));
         }
-        return new StringParamFilter(key, pointcutJSON.getString(key));
+        return Optional.of(new StringParamFilter(key, pointcutJSON.getString(key)));
     }
 
-    protected Pointcut getLocatorFilter(final JSONObject pointcutJSON, final String key) {
+    protected Optional<Pointcut> getLocatorFilter(final JSONObject pointcutJSON, final String key) {
         final JSONObject locatorJSON = pointcutJSON.getJSONObject(key);
         if (locatorJSON.get("value") instanceof JSONArray) {
             final JSONArray values = locatorJSON.getJSONArray("value");
@@ -355,26 +374,26 @@ public class Sebuilder extends AbstractJsonScriptParser {
                         final Locator locator = new Locator(locatorJSON.getString("type"), values.getString(k));
                         return (Pointcut) new LocatorFilter(key, locator);
                     })
-                    .reduce(Pointcut.NONE, Pointcut::or);
+                    .reduce(Pointcut::or);
         }
         final Locator locator = new Locator(locatorJSON.getString("type"), locatorJSON.getString("value"));
         if (locatorJSON.has("method")) {
-            return new LocatorFilter(key, locator, locatorJSON.getString("method"));
+            return Optional.of(new LocatorFilter(key, locator, locatorJSON.getString("method")));
         }
-        return new LocatorFilter(key, locator);
+        return Optional.of(new LocatorFilter(key, locator));
     }
 
-    protected Pointcut getStepTypeFilter(final JSONObject pointcutJSON, final String key) {
+    protected Optional<Pointcut> getTypeFilter(final JSONObject pointcutJSON, final String key) {
         if (pointcutJSON.get(key) instanceof JSONArray) {
             final JSONArray type = pointcutJSON.getJSONArray(key);
             return IntStream.range(0, type.length())
-                    .mapToObj(k -> (Pointcut) new StepTypeFilter(type.getString(k)))
-                    .reduce(Pointcut.NONE, Pointcut::or);
+                    .mapToObj(k -> (Pointcut) new TypeFilter(type.getString(k)))
+                    .reduce(Pointcut::or);
         } else if (pointcutJSON.get(key) instanceof JSONObject) {
             final JSONObject type = pointcutJSON.getJSONObject(key);
-            return new StepTypeFilter(type.getString("value"), type.getString("method"));
+            return Optional.of(new TypeFilter(type.getString("value"), type.getString("method")));
         }
-        return new StepTypeFilter(pointcutJSON.getString(key));
+        return Optional.of(new TypeFilter(pointcutJSON.getString(key)));
     }
 
 }

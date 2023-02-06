@@ -4,8 +4,8 @@ import com.sebuilder.interpreter.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.IntStream;
 
 public class SebuilderToStringConverter implements TestCaseConverter {
 
@@ -137,6 +137,97 @@ public class SebuilderToStringConverter implements TestCaseConverter {
         if (data != null) {
             scriptPath.put("data", data);
         }
+        if (testCase.includeTestRun() != Pointcut.ANY) {
+            final Collection<JSONObject> results = this.toJson(testCase.includeTestRun());
+            if (results.size() > 0) {
+                scriptPath.put("include", results);
+            }
+        }
+        if (testCase.excludeTestRun() != Pointcut.NONE) {
+            final Collection<JSONObject> results = this.toJson(testCase.excludeTestRun());
+            if (results.size() > 0) {
+                scriptPath.put("exclude", results);
+            }
+        }
         return scriptPath;
+    }
+
+    protected Collection<JSONObject> toJson(final Pointcut pointcut) {
+        final List<JSONObject> results = new ArrayList<>();
+        if (pointcut instanceof Pointcut.Or or) {
+            results.addAll(this.toJson(or.origin()));
+            results.addAll(this.toJson(or.other()));
+            return results;
+        } else if (pointcut instanceof Pointcut.And and) {
+            final JSONObject result = new JSONObject();
+            for (final JSONObject origin : this.toJson(and.origin())) {
+                final JSONArray keys = origin.names();
+                IntStream.range(0, keys.length())
+                        .forEach(i -> this.mergeAndCondition(result, origin, keys.getString(i)));
+            }
+            for (final JSONObject other : this.toJson(and.other())) {
+                final JSONArray keys = other.names();
+                IntStream.range(0, keys.length())
+                        .forEach(i -> this.mergeAndCondition(result, other, keys.getString(i)));
+            }
+            return List.of(result);
+        } else if (pointcut instanceof Pointcut.Exportable target) {
+            results.add(this.toJson(target));
+        }
+        return results;
+    }
+
+    protected void mergeAndCondition(final JSONObject result, final JSONObject origin, final String key) {
+        if (result.has(key)) {
+            final Object obj = result.get(key);
+            if (obj instanceof JSONObject valueObj) {
+                final JSONObject addObj = origin.getJSONObject(key);
+                addObj.names().toList()
+                        .stream()
+                        .map(Object::toString)
+                        .filter(it -> valueObj.has(it) && !valueObj.get(it).equals(addObj.get(it)))
+                        .forEach(it -> this.mergeListableValue(valueObj, addObj, it, valueObj.get(it)));
+            } else {
+                this.mergeListableValue(result, origin, key, obj);
+            }
+        } else {
+            result.put(key, origin.get(key));
+        }
+    }
+
+    protected void mergeListableValue(final JSONObject valueObj, final JSONObject addObj, final String objectKey, final Object o) {
+        if (o instanceof String value) {
+            valueObj.remove(objectKey);
+            final JSONArray values = new JSONArray();
+            values.put(value);
+            this.mergeToArray(addObj, objectKey, values);
+            valueObj.put(objectKey, values);
+        } else if (o instanceof JSONArray values) {
+            this.mergeToArray(addObj, objectKey, values);
+        }
+    }
+
+    protected void mergeToArray(final JSONObject origin, final String key, final JSONArray values) {
+        if (origin.get(key) instanceof String addValue) {
+            values.put(addValue);
+        } else if (origin.get(key) instanceof JSONArray addValues) {
+            IntStream.range(0, addValues.length())
+                    .mapToObj(addValues::get)
+                    .forEach(values::put);
+        }
+    }
+
+    protected JSONObject toJson(final Pointcut.Exportable target) {
+        final JSONObject result = new JSONObject();
+        if (target.params().size() == 0) {
+            result.put(target.key(), target.value());
+        } else {
+            final JSONObject values = new JSONObject();
+            for (final Map.Entry<String, String> entry : target.params().entrySet()) {
+                values.put(entry.getKey(), entry.getValue());
+            }
+            result.put(target.key(), values);
+        }
+        return result;
     }
 }

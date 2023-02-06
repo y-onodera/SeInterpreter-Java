@@ -75,8 +75,8 @@ public class TestRunTest {
             this.target = function.apply(builder).createTestRun(this.log, this.driver, this.initialVars, this.listener);
         }
 
-        protected URL getResourceUrl(final String name) {
-            return Objects.requireNonNull(this.getClass().getResource(name));
+        protected URL getResourceUrl() {
+            return Objects.requireNonNull(this.getClass().getResource("test.csv"));
         }
 
     }
@@ -1215,7 +1215,7 @@ public class TestRunTest {
                     .name("chain")
                     .build());
             final TestCase chainCase = this.head.builder().setName("chainCase")
-                    .setDataSource(new Csv(), Map.of("path", this.getResourceUrl("test.csv").getFile()))
+                    .setDataSource(new Csv(), Map.of("path", this.getResourceUrl().getFile()))
                     .clearStep().addStep(this.chainStep).build();
             this.chains = this.chains.append(chainCase);
             this.resetTestRun();
@@ -1284,7 +1284,7 @@ public class TestRunTest {
                     .build());
             this.chainCase = this.head.builder().setName("chainCase")
                     .setSkip("${skipChain1}")
-                    .setDataSource(new Csv(), Map.of("path", this.getResourceUrl("test.csv").getFile()))
+                    .setDataSource(new Csv(), Map.of("path", this.getResourceUrl().getFile()))
                     .addStep(this.chainStep)
                     .build();
             this.chain2 = Mockito.spy(new StepBuilder(new ClickElement())
@@ -1568,7 +1568,7 @@ public class TestRunTest {
                     .build());
             this.chainCase = this.head.builder().setName("chainCase")
                     .setSkip("${skipChain1}")
-                    .setDataSource(new Csv(), Map.of("path", this.getResourceUrl("test.csv").getFile()))
+                    .setDataSource(new Csv(), Map.of("path", this.getResourceUrl().getFile()))
                     .isNestedChain(true)
                     .addStep(this.chainStep).build();
             this.chain2 = Mockito.spy(new StepBuilder(new ClickElement())
@@ -1868,7 +1868,7 @@ public class TestRunTest {
                     .build());
             this.chainCase = this.head.builder().setName("chainCase")
                     .setSkip("${skipChain1}")
-                    .setDataSource(new Csv(), Map.of("path", this.getResourceUrl("test.csv").getFile()))
+                    .setDataSource(new Csv(), Map.of("path", this.getResourceUrl().getFile()))
                     .isNestedChain(true)
                     .addStep(this.chainStep).build();
             this.chain2 = Mockito.spy(new StepBuilder(new ClickElement())
@@ -2000,7 +2000,7 @@ public class TestRunTest {
                     .build());
             this.chainCase = this.head.builder().setName("chainCase")
                     .setSkip("${skipChain1}")
-                    .setDataSource(new Csv(), Map.of("path", this.getResourceUrl("test.csv").getFile()))
+                    .setDataSource(new Csv(), Map.of("path", this.getResourceUrl().getFile()))
                     .addStep(this.chainStep).build();
             this.chain2 = Mockito.spy(new StepBuilder(new ClickElement())
                     .name("chain2")

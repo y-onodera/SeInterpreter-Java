@@ -35,7 +35,8 @@ public class TestRun implements WebDriverWrapper {
     private final Logger log;
     private final TestRunListener listener;
     private final Aspect aspect;
-    private final Pointcut stepRunFilter;
+    private final Pointcut includeFilter;
+    private final Pointcut excludeFilter;
     private final boolean preventContextAspect;
     private InputData vars;
     private TestRunStatus testRunStatus;
@@ -65,7 +66,8 @@ public class TestRun implements WebDriverWrapper {
             this.vars = this.vars.add("_relativePath", this.testCase.relativePath().getAbsolutePath());
         }
         this.aspect = this.testCase.aspect();
-        this.stepRunFilter = this.testCase.stepRunFilter();
+        this.includeFilter = this.testCase.includeTestRun();
+        this.excludeFilter = this.testCase.excludeTestRun();
         this.preventContextAspect = testRunBuilder.isPreventContextAspect();
         this.testRunStatus = TestRunStatus.of(this.testCase);
     }
@@ -208,7 +210,8 @@ public class TestRun implements WebDriverWrapper {
 
     public Step.Result runStep() {
         this.toNextStepIndex();
-        if (this.stepRunFilter.isHandle(this.currentStep(), this.vars)) {
+        if (this.includeFilter.isHandle(this.currentStep(), this.vars)
+                && !this.excludeFilter.isHandle(this.currentStep(), this.vars)) {
             return this.currentStep().execute(this);
         }
         return new Step.Result(true, 0);

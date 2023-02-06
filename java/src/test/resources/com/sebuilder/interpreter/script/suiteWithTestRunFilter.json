@@ -1,0 +1,62 @@
+{
+  "type": "suite",
+  "scripts": [
+    {
+      "chain": [
+        {
+          "path": "scriptWithNoContents.json",
+          "include": [
+            {
+              "type": "SetElementText",
+              "locator": {
+                "type": "id",
+                "value": "id1"
+              },
+              "skip": "false"
+            }
+          ],
+          "exclude": [
+            {
+              "type": "SetElementText",
+              "locator": {
+                "type": "id",
+                "value": "id1"
+              }
+            }
+          ]
+        },
+        {
+          "path": "scriptWithSteps.json",
+          "skip": "true",
+          "include": [
+            {
+              "type": [
+                "SetElementText",
+                "SelectElementValue",
+                "SetElementSelected"
+              ],
+              "locator": {
+                "type": "id",
+                "value": [
+                  "id1",
+                  "id2",
+                  "id3"
+                ]
+              },
+              "text": {
+                "value": "false",
+                "method": "contains"
+              }
+            }
+          ]
+        },
+        {
+          "path": "scriptWithDataSource.json",
+          "data": {
+            "source": "none"
+          }
+        }
+      ]
+    }
+  ]
+}
