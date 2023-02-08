@@ -4,8 +4,10 @@ import com.sebuilder.interpreter.InputData;
 import com.sebuilder.interpreter.Locator;
 import com.sebuilder.interpreter.Pointcut;
 import com.sebuilder.interpreter.Step;
+import com.sebuilder.interpreter.javafx.application.BreakPoint;
 import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
 import com.sebuilder.interpreter.pointcut.LocatorFilter;
+import com.sebuilder.interpreter.pointcut.NegatedFilter;
 import com.sebuilder.interpreter.pointcut.SkipFilter;
 import com.sebuilder.interpreter.pointcut.StringParamFilter;
 import javafx.fxml.FXML;
@@ -54,6 +56,35 @@ public class BreakPointPresenter {
                 .or(this.varSelect.valueProperty().isEqualTo("skip"))
                 .or(this.varSelect.valueProperty().isEqualTo("negated")));
         this.targetValue.disableProperty().bind(this.varSelect.valueProperty().isEqualTo(""));
+        final Optional<BreakPoint> breakPoint = BreakPoint.findFrom(this.application.getDisplayTestCase().aspect());
+        breakPoint.ifPresent(current -> {
+            if (current.condition().containsKey(stepIndex)) {
+                final Pointcut condition = current.condition().get(stepIndex);
+                if (condition instanceof SkipFilter skip) {
+                    this.varSelect.getSelectionModel().select(skip.key());
+                    this.methodSelect.getSelectionModel().select("equals");
+                    this.targetValue.setText(Boolean.toString(skip.target()));
+                } else if (condition instanceof NegatedFilter negated) {
+                    this.varSelect.getSelectionModel().select(negated.key());
+                    this.methodSelect.getSelectionModel().select("equals");
+                    this.targetValue.setText(Boolean.toString(negated.target()));
+                } else if (condition instanceof LocatorFilter locator) {
+                    if (this.varSelect.getItems().filtered(it -> it.endsWith(":type")).size() > 0) {
+                        this.varSelect.getSelectionModel().select(locator.key() + ":type");
+                        this.methodSelect.getSelectionModel().select(locator.method());
+                        this.targetValue.setText(locator.target().type());
+                    } else {
+                        this.varSelect.getSelectionModel().select(locator.key() + ":value");
+                        this.methodSelect.getSelectionModel().select(locator.method());
+                        this.targetValue.setText(locator.target().value());
+                    }
+                } else if (condition instanceof StringParamFilter string) {
+                    this.varSelect.getSelectionModel().select(string.key());
+                    this.methodSelect.getSelectionModel().select(string.method());
+                    this.targetValue.setText(string.target());
+                }
+            }
+        });
     }
 
     @FXML
@@ -98,13 +129,15 @@ public class BreakPointPresenter {
         if (key.endsWith(":type")) {
             final Locator l = target.getLocator(key.replace(":type", ""));
             final Locator pointcut = new Locator(this.targetValue.getText(), l.value());
-            return new LocatorFilter(this.methodSelect.getSelectionModel().getSelectedItem(), pointcut);
+            return new LocatorFilter(key.replace(":type", ""), pointcut, this.methodSelect.getSelectionModel().getSelectedItem());
         } else if (key.endsWith(":value")) {
             final Locator l = target.getLocator(key.replace(":value", ""));
             final Locator pointcut = new Locator(l.type(), this.targetValue.getText());
-            return new LocatorFilter(this.methodSelect.getSelectionModel().getSelectedItem(), pointcut);
+            return new LocatorFilter(key.replace(":value", ""), pointcut, this.methodSelect.getSelectionModel().getSelectedItem());
         } else if (key.equals("skip")) {
             return new SkipFilter(Boolean.parseBoolean(this.targetValue.getText()));
+        } else if (key.equals("negated")) {
+            return new NegatedFilter(Boolean.parseBoolean(this.targetValue.getText()));
         }
         return new StringParamFilter(key, this.targetValue.getText(), this.methodSelect.getSelectionModel().getSelectedItem());
     }
