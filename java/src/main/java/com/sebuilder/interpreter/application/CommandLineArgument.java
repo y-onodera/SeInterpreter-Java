@@ -15,6 +15,7 @@ public enum CommandLineArgument {
     DOWNLOAD_OUTPUT("--downloadoutput"),
     SCREENSHOT_OUTPUT("--screenshotoutput"),
     TEMPLATE_OUTPUT("--templateoutput"),
+    EXPECT_SCREENSHOT_DIRECTORY("--expectScreenshotDirectory"),
     ASPECT("--aspectFile"),
     ENVIRONMENT_PROPERTIES("--env"),
     ENVIRONMENT_PROPERTIES_PREFIX("--env."),
@@ -23,7 +24,7 @@ public enum CommandLineArgument {
 
     private final String key;
 
-    CommandLineArgument(String aKey) {
+    CommandLineArgument(final String aKey) {
         this.key = aKey;
     }
 
@@ -31,7 +32,7 @@ public enum CommandLineArgument {
         return this.key;
     }
 
-    public String createArgument(String aValue) {
+    public String createArgument(final String aValue) {
         return this.key + "=" + aValue;
     }
 }

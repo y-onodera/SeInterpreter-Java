@@ -41,6 +41,7 @@ public enum Context {
     private TestRunListener.Factory testRunListenerFactory;
     private String downloadDirectory;
     private String screenShotOutputDirectory;
+    private String expectScreenShotDirectory;
     private String templateOutputDirectory;
     private String defaultScript = "sebuilder";
     private final Map<String, ScriptParser> scriptParsers = new HashMap<>();
@@ -196,7 +197,10 @@ public enum Context {
     }
 
     public static File getExpectScreenShotDirectory() {
-        return new File(getDataSourceDirectory(), getScreenShotOutputDirectory());
+        if (getInstance().expectScreenShotDirectory == null || getInstance().expectScreenShotDirectory.isBlank()) {
+            return new File(getDataSourceDirectory(), getScreenShotOutputDirectory());
+        }
+        return new File(getInstance().expectScreenShotDirectory);
     }
 
     public static String bindEnvironmentProperties(String variable) {
@@ -327,6 +331,11 @@ public enum Context {
 
     public Context setScreenShotOutputDirectory(final String screenShotOutput) {
         this.screenShotOutputDirectory = screenShotOutput;
+        return this;
+    }
+
+    public Context setExpectScreenShotDirectory(final String expectScreenShot) {
+        this.expectScreenShotDirectory = expectScreenShot;
         return this;
     }
 

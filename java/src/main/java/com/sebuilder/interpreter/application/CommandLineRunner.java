@@ -66,6 +66,7 @@ public abstract class CommandLineRunner {
                     .setDataSourceEncoding(option.getDatasourceEncoding())
                     .setDataSourceDirectory(option.getDatasourceDirectory())
                     .setScreenShotOutputDirectory(option.getScreenshotoutput())
+                    .setExpectScreenShotDirectory(option.getExpectScreenshotDirectory())
                     .setTemplateOutputDirectory(option.getTemplateoutput())
                     .setResultOutputDirectory(option.getResultoutput())
                     .setJunitReportPrefix(option.getJunitReportPrefix())

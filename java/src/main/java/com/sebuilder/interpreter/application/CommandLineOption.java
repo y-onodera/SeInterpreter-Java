@@ -22,6 +22,7 @@ public class CommandLineOption {
     private String downloadoutput = "download";
     private String screenshotoutput = "screenshot";
     private String templateoutput = "template";
+    private String expectScreenshotDirectory;
     private ReportFormat reportFormat = ReportFormat.JUNIT;
     private String aspectFile;
     private String environmentProperties;
@@ -63,6 +64,8 @@ public class CommandLineOption {
                     this.templateoutput = kv[1];
                 } else if (kv[0].equals(CommandLineArgument.RESULT_OUTPUT.key())) {
                     this.resultoutput = kv[1];
+                } else if (kv[0].equals(CommandLineArgument.EXPECT_SCREENSHOT_DIRECTORY.key())) {
+                    this.expectScreenshotDirectory = kv[1];
                 } else if (kv[0].equals(CommandLineArgument.JUNIT_REPORT_PREFIX.key())) {
                     this.junitReportPrefix = Context.TestNamePrefix.fromName(kv[1]);
                 } else if (kv[0].equals(CommandLineArgument.REPORT_FORMAT.key())) {
@@ -174,4 +177,7 @@ public class CommandLineOption {
         return this.scripts;
     }
 
+    public String getExpectScreenshotDirectory() {
+        return this.expectScreenshotDirectory;
+    }
 }

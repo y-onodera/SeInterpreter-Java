@@ -65,10 +65,12 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
                 actual = target.printImage(new VerticalPrinter(), 0);
             }
             if (ctx.getBoolean("verify")) {
-                final BufferedImage expect = ImageIO.read(new File(Context.getExpectScreenShotDirectory(), fileName));
+                final File expectFile = ctx.containsKey("expect") && !ctx.string("expect").isBlank()
+                        ? new File(ctx.string("expect")) : new File(Context.getExpectScreenShotDirectory(), fileName);
+                final BufferedImage expect = ImageIO.read(expectFile);
                 final boolean compareResult = this.compare(file, actual, expect, ctx);
-                final File expectFile = ctx.getListener().saveExpectScreenshot(file);
-                ImageIO.write(expect, "PNG", expectFile);
+                final File targetPath = ctx.getListener().saveExpectScreenshot(file);
+                ImageIO.write(expect, "PNG", targetPath);
                 return compareResult;
             }
             ImageIO.write(actual, "PNG", file);
@@ -86,6 +88,9 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
         }
         if (!o.containsStringParam("verify")) {
             o.put("verify", "false");
+        }
+        if (!o.containsStringParam("expect")) {
+            o.put("expect", "");
         }
         if (!o.containsStringParam("scroll")) {
             o.put("scroll", "true");
