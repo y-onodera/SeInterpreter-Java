@@ -31,7 +31,7 @@
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-tag"></i></a>
           <ul id="tag-toggle" class="dropdown-menu dropdown-md p-v-0">
-            <#list report.categoryCtx.set as context><a class="dropdown-item" href="#">${context.attr.name}</a></#list>
+            <#list report.categoryCtx.set?sort_by(['attr','name']) as context><a class="dropdown-item" href="#">${context.attr.name}</a></#list>
           </ul>
         </li>
         </#if>
