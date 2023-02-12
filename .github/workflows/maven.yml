@@ -121,7 +121,7 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        browser: [chrome ,edge　,firefox]
+        browser: [chrome ,edge ,firefox]
         include:
           - browser: chrome
             expect: test/suite/expect/Chrome_screenshot
