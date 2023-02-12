@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-    runs-on: windows-2019
+    runs-on: windows-latest
     steps:
     - uses: actions/checkout@v3
     - name: Set up JDK 17
@@ -120,7 +120,7 @@ jobs:
 
   locale-browser-test:
     needs: [build ,jlink]
-    runs-on: windows-2019
+    runs-on: windows-latest
     strategy:
       matrix:
         browser: [chrome ,edge]
@@ -138,10 +138,6 @@ jobs:
           java-package: 'jdk+fx'
           distribution: 'zulu'
           cache: maven
-      - uses: browser-actions/setup-chrome@latest
-        if: matrix.browser == 'chrome'
-      - uses: browser-actions/setup-edge@latest
-        if: matrix.browser == 'edge'
       - name: Download jre
         uses: actions/download-artifact@v3
         with:
