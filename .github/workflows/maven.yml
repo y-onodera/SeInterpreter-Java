@@ -15,10 +15,10 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build with Maven
-      run: mvn package test allure:report -Pbuild -fjava/pom.xml
+      run: |
+          set JAVA_HOME = ${{ env.JAVA_HOME_17_X64 }}
+          mvn package test allure:report -Pbuild -fjava/pom.xml
       shell: cmd
-      env:
-        JAVA_HOME: ${{env.JAVA_HOME_17_X64}}
     - name: Upload TestReport
       uses: actions/upload-artifact@v3
       if: ${{ always() }}
