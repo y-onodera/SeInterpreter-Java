@@ -15,9 +15,10 @@
  */
 package com.sebuilder.interpreter.script;
 
-import com.google.common.base.Strings;
-import com.sebuilder.interpreter.*;
-import com.sebuilder.interpreter.pointcut.*;
+import com.sebuilder.interpreter.Aspect;
+import com.sebuilder.interpreter.Step;
+import com.sebuilder.interpreter.TestCase;
+import com.sebuilder.interpreter.TestCaseBuilder;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -29,9 +30,6 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
@@ -40,6 +38,27 @@ import java.util.stream.IntStream;
  * @author jkowalczyk
  */
 public class Sebuilder extends AbstractJsonScriptParser {
+
+    final PointcutLoader pointcutLoader;
+
+    final DataSourceConfigLoader dataSourceConfigLoader;
+
+    final StepLoader stepLoader;
+
+    final OverrideSettingLoader overrideSettingLoader;
+
+    final AspectLoader aspectLoader;
+
+    final ImportLoader importLoader;
+
+    public Sebuilder() {
+        this.stepLoader = new StepLoader();
+        this.dataSourceConfigLoader = new DataSourceConfigLoader();
+        this.pointcutLoader = new PointcutLoader();
+        this.aspectLoader = new AspectLoader(this, this.pointcutLoader);
+        this.overrideSettingLoader = new OverrideSettingLoader(this.pointcutLoader, this.dataSourceConfigLoader);
+        this.importLoader = new ImportLoader();
+    }
 
     /**
      * @param jsonString A JSON string describing a script or suite.
@@ -57,7 +76,7 @@ public class Sebuilder extends AbstractJsonScriptParser {
     @Override
     public Aspect loadAspect(final File f) {
         try (final BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(f), StandardCharsets.UTF_8))) {
-            return this.getAspect(new JSONObject(new JSONTokener(r)));
+            return this.aspectLoader.load(new JSONObject(new JSONTokener(r)));
         } catch (final Throwable e) {
             throw new AssertionError("error load:" + f.getAbsolutePath(), e);
         }
@@ -79,9 +98,9 @@ public class Sebuilder extends AbstractJsonScriptParser {
      */
     protected TestCase parseSuite(final JSONObject o, final File suiteFile) {
         final TestCaseBuilder builder = TestCaseBuilder.suite(suiteFile)
-                .setDataSource(this.getDataSource(o), this.getDataSourceConfig(o));
+                .setDataSource(this.dataSourceConfigLoader.getDataSource(o), this.dataSourceConfigLoader.getDataSourceConfig(o));
         this.loadScripts(o, builder);
-        return builder.setAspect(this.getAspect(o)).build();
+        return builder.setAspect(this.aspectLoader.load(o)).build();
     }
 
     /**
@@ -102,8 +121,12 @@ public class Sebuilder extends AbstractJsonScriptParser {
         return new TestCaseBuilder()
                 .addSteps(this.parseStep(o))
                 .associateWith(saveTo)
-                .setDataSource(this.getDataSource(o), this.getDataSourceConfig(o))
+                .setDataSource(this.dataSourceConfigLoader.getDataSource(o), this.dataSourceConfigLoader.getDataSourceConfig(o))
                 .build();
+    }
+
+    protected ArrayList<Step> parseStep(final JSONObject o) {
+        return this.stepLoader.load(o);
     }
 
     protected void loadScripts(final JSONObject o, final TestCaseBuilder builder) {
@@ -130,7 +153,7 @@ public class Sebuilder extends AbstractJsonScriptParser {
     protected TestCase loadScript(final JSONObject script, final File suiteFile) {
         if (script.has("lazyLoad")) {
             final String beforeReplace = script.getString("lazyLoad");
-            return this.overrideSetting(script, TestCaseBuilder.lazyLoad(beforeReplace, (runtimeBefore) -> {
+            return this.overrideSettingLoader.load(script, TestCaseBuilder.lazyLoad(beforeReplace, (runtimeBefore) -> {
                 final String fileName = runtimeBefore.shareInput().evaluateString(beforeReplace);
                 final JSONObject source = new JSONObject();
                 final TestCase lazyLoad = this.loadScript(source.put("path", fileName), suiteFile);
@@ -143,257 +166,16 @@ public class Sebuilder extends AbstractJsonScriptParser {
                 );
             }));
         }
-        final String path = Context.bindEnvironmentProperties(script.getString("path"));
-        if (script.has("where") && Strings.isNullOrEmpty(script.getString("where"))) {
-            final File wherePath = new File(Context.bindEnvironmentProperties(script.getString("where")), path);
-            return this.loadScriptIfExists(wherePath, script);
-        }
-        File f = new File(path);
-        if (!f.exists()) {
-            f = new File(suiteFile.getAbsoluteFile().getParentFile(), path);
-        }
-        return this.loadScriptIfExists(f.getAbsoluteFile(), script);
+        return this.importLoader.load(script, suiteFile.getAbsoluteFile().getParentFile(), this::loadScriptIfExists);
     }
 
     protected void loadScriptChain(final JSONArray scriptArrays, final TestCaseBuilder builder) {
-        final ChainLoader chainLoader = new ChainLoader(this, builder.getScriptFile(), scriptArrays);
+        final ChainLoader chainLoader = new ChainLoader(this, this.overrideSettingLoader, builder.getScriptFile(), scriptArrays);
         builder.addChain(chainLoader.load());
     }
 
     protected TestCase loadScriptIfExists(final File wherePath, final JSONObject script) {
-        return this.overrideSetting(script, this.load(wherePath));
-    }
-
-    protected DataSource getDataSource(final JSONObject o) {
-        if (!o.has("data")) {
-            return DataSource.NONE;
-        }
-        final JSONObject data = o.getJSONObject("data");
-        return Context.getDataSourceFactory().getDataSource(data.getString("source"));
-    }
-
-    protected HashMap<String, String> getDataSourceConfig(final JSONObject o) {
-        if (!o.has("data")) {
-            return new HashMap<>();
-        }
-        final JSONObject data = o.getJSONObject("data");
-        final String sourceName = data.getString("source");
-        final HashMap<String, String> config = new HashMap<>();
-        if (data.has("configs") && data.getJSONObject("configs").has(sourceName)) {
-            final JSONObject cfg = data.getJSONObject("configs").getJSONObject(sourceName);
-            cfg.keySet().forEach(key -> config.put(key, cfg.getString(key)));
-        }
-        return config;
-    }
-
-    /**
-     * @param o json object step load from
-     * @throws JSONException If anything goes wrong with interpreting the JSON.
-     */
-    protected ArrayList<Step> parseStep(final JSONObject o) {
-        final JSONArray stepsA = o.getJSONArray("steps");
-        return IntStream.range(0, stepsA.length())
-                .mapToObj(i -> this.parseStep(stepsA, i))
-                .collect(Collectors.toCollection(ArrayList::new));
-    }
-
-    /**
-     * @throws JSONException If anything goes wrong with interpreting the JSON.
-     */
-    protected Step parseStep(final JSONArray steps, final int i) {
-        return this.createStep(steps.getJSONObject(i));
-    }
-
-    /**
-     * @param stepO json object step load from
-     * @return A new instance of step
-     * @throws JSONException If anything goes wrong with interpreting the JSON.
-     */
-    protected Step createStep(final JSONObject stepO) {
-        final StepType type = Context.getStepTypeFactory().getStepTypeOfName(stepO.getString("type"));
-        final boolean isNegated = stepO.optBoolean("negated", false);
-        final String name = stepO.optString("step_name", null);
-        final StepBuilder step = new StepBuilder(name, type, isNegated);
-        final JSONArray keysA = stepO.names();
-        IntStream.range(0, keysA.length())
-                .mapToObj(keysA::getString)
-                .filter(key -> !key.equals("type") && !key.equals("negated"))
-                .forEach(key -> {
-                    if (stepO.optJSONObject(key) != null && key.startsWith("locator")) {
-                        step.put(key, new Locator(stepO.getJSONObject(key).getString("type"), stepO.getJSONObject(key).getString("value")));
-                    } else {
-                        step.put(key, stepO.getString(key));
-                    }
-                });
-        return step.build();
-    }
-
-    protected TestCase overrideSetting(final JSONObject script, final TestCase resultTestCase) {
-        final DataSource dataSource = this.getDataSource(script);
-        final HashMap<String, String> config = this.getDataSourceConfig(script);
-        final String skip = this.getSkip(script);
-        final boolean nestedChain = this.isNestedChain(script);
-        final boolean breakNestedChain = this.isBreakNestedChain(script);
-        final boolean preventContextAspect = this.isPreventContextAspect(script);
-        final Pointcut includeTestRun;
-        if (script.has("include")) {
-            includeTestRun = this.getPointcut(script.getJSONArray("include")).orElse(Pointcut.ANY);
-        } else {
-            includeTestRun = Pointcut.ANY;
-        }
-        final Pointcut excludeTestRun;
-        if (script.has("exclude")) {
-            excludeTestRun = this.getPointcut(script.getJSONArray("exclude")).orElse(Pointcut.NONE);
-        } else {
-            excludeTestRun = Pointcut.NONE;
-        }
-        return resultTestCase.map(it -> it.setSkip(skip)
-                .mapWhen(target -> dataSource != null
-                        , matches -> matches.setOverrideTestDataSet(dataSource, config)
-                )
-                .setIncludeTestRun(includeTestRun)
-                .setExcludeTestRun(excludeTestRun)
-                .isNestedChain(nestedChain)
-                .isBreakNestedChain(breakNestedChain)
-                .isPreventContextAspect(preventContextAspect)
-        );
-    }
-
-    protected String getSkip(final JSONObject o) {
-        String result = "false";
-        if (o.has("skip")) {
-            result = o.getString("skip");
-        }
-        return result;
-    }
-
-    protected boolean isNestedChain(final JSONObject script) {
-        boolean result = false;
-        if (script.has("nestedChain")) {
-            result = script.getBoolean("nestedChain");
-        }
-        return result;
-    }
-
-    protected boolean isBreakNestedChain(final JSONObject script) {
-        boolean result = false;
-        if (script.has("breakNestedChain")) {
-            result = script.getBoolean("breakNestedChain");
-        }
-        return result;
-    }
-
-    protected boolean isPreventContextAspect(final JSONObject script) {
-        boolean result = false;
-        if (script.has("preventContextAspect")) {
-            result = script.getBoolean("preventContextAspect");
-        }
-        return result;
-    }
-
-    protected Aspect getAspect(final JSONObject o) {
-        Aspect result = new Aspect();
-        if (o.has("aspect")) {
-            final Aspect.Builder builder = result.builder();
-            final JSONArray aspects = o.getJSONArray("aspect");
-            IntStream.range(0, aspects.length()).forEach(i ->
-                    builder.add(() -> {
-                        final ExtraStepExecuteInterceptor.Builder interceptorBuilder = new ExtraStepExecuteInterceptor.Builder();
-                        final JSONObject aspect = aspects.getJSONObject(i);
-                        if (aspect.has("pointcut")) {
-                            interceptorBuilder.setPointcut(this.getPointcut(aspect.getJSONArray("pointcut")).orElse(Pointcut.NONE));
-                        }
-                        if (aspect.has("before")) {
-                            interceptorBuilder.addBefore(this.load(aspect.getJSONObject("before"), null));
-                        }
-                        if (aspect.has("after")) {
-                            interceptorBuilder.addAfter(this.load(aspect.getJSONObject("after"), null));
-                        }
-                        if (aspect.has("failure")) {
-                            interceptorBuilder.addFailure(this.load(aspect.getJSONObject("failure"), null));
-                        }
-                        return interceptorBuilder.get();
-                    })
-            );
-            result = builder.build();
-        }
-        return result;
-    }
-
-    protected Optional<Pointcut> getPointcut(final JSONArray pointcuts) {
-        return IntStream.range(0, pointcuts.length())
-                .mapToObj(i -> this.parseFilter(pointcuts.getJSONObject(i)))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .reduce(Pointcut::or);
-    }
-
-
-    protected Optional<Pointcut> parseFilter(final JSONObject pointcutJSON) {
-        final JSONArray keysA = pointcutJSON.names();
-        return IntStream.range(0, keysA.length())
-                .mapToObj(j -> this.parseFilter(pointcutJSON, keysA, j))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .reduce(Pointcut::and);
-    }
-
-    protected Optional<Pointcut> parseFilter(final JSONObject pointcutJSON, final JSONArray keysA, final int j) {
-        final String key = keysA.getString(j);
-        if (key.equals("type")) {
-            return this.getTypeFilter(pointcutJSON, key);
-        } else if (key.equals("negated")) {
-            return Optional.of(new NegatedFilter(pointcutJSON.getBoolean(key)));
-        } else if (key.equals("skip")) {
-            return Optional.of(new SkipFilter(pointcutJSON.getBoolean(key)));
-        } else if (key.startsWith("locator")) {
-            return this.getLocatorFilter(pointcutJSON, key);
-        }
-        return this.getStringFilter(pointcutJSON, key);
-    }
-
-    protected Optional<Pointcut> getStringFilter(final JSONObject pointcutJSON, final String key) {
-        if (pointcutJSON.get(key) instanceof JSONArray) {
-            final JSONArray type = pointcutJSON.getJSONArray(key);
-            return IntStream.range(0, type.length())
-                    .mapToObj(k -> (Pointcut) new StringParamFilter(key, type.getString(k)))
-                    .reduce(Pointcut::or);
-        } else if (pointcutJSON.get(key) instanceof JSONObject) {
-            final JSONObject type = pointcutJSON.getJSONObject(key);
-            return Optional.of(new StringParamFilter(key, type.getString("value"), type.getString(Pointcut.METHOD_KEY)));
-        }
-        return Optional.of(new StringParamFilter(key, pointcutJSON.getString(key)));
-    }
-
-    protected Optional<Pointcut> getLocatorFilter(final JSONObject pointcutJSON, final String key) {
-        final JSONObject locatorJSON = pointcutJSON.getJSONObject(key);
-        if (locatorJSON.get("value") instanceof JSONArray) {
-            final JSONArray values = locatorJSON.getJSONArray("value");
-            return IntStream.range(0, values.length())
-                    .mapToObj(k -> {
-                        final Locator locator = new Locator(locatorJSON.getString("type"), values.getString(k));
-                        return (Pointcut) new LocatorFilter(key, locator);
-                    })
-                    .reduce(Pointcut::or);
-        }
-        final Locator locator = new Locator(locatorJSON.getString("type"), locatorJSON.getString("value"));
-        if (locatorJSON.has("method")) {
-            return Optional.of(new LocatorFilter(key, locator, locatorJSON.getString("method")));
-        }
-        return Optional.of(new LocatorFilter(key, locator));
-    }
-
-    protected Optional<Pointcut> getTypeFilter(final JSONObject pointcutJSON, final String key) {
-        if (pointcutJSON.get(key) instanceof JSONArray) {
-            final JSONArray type = pointcutJSON.getJSONArray(key);
-            return IntStream.range(0, type.length())
-                    .mapToObj(k -> (Pointcut) new TypeFilter(type.getString(k)))
-                    .reduce(Pointcut::or);
-        } else if (pointcutJSON.get(key) instanceof JSONObject) {
-            final JSONObject type = pointcutJSON.getJSONObject(key);
-            return Optional.of(new TypeFilter(type.getString("value"), type.getString("method")));
-        }
-        return Optional.of(new TypeFilter(pointcutJSON.getString(key)));
+        return this.overrideSettingLoader.load(script, this.load(wherePath));
     }
 
 }

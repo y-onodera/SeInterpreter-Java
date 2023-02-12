@@ -5,10 +5,10 @@ import com.google.common.collect.Maps;
 import java.util.Map;
 import java.util.function.Supplier;
 
-public record ExtraStepExecuteInterceptor(Pointcut pointcut,
-                                          TestCase beforeStep,
-                                          TestCase afterStep,
-                                          TestCase failureStep) implements Interceptor {
+public record ExtraStepExecutor(Pointcut pointcut,
+                                TestCase beforeStep,
+                                TestCase afterStep,
+                                TestCase failureStep) implements Interceptor {
 
     @Override
     public boolean isPointcut(final Step step, final InputData vars) {
@@ -121,7 +121,7 @@ public record ExtraStepExecuteInterceptor(Pointcut pointcut,
 
         @Override
         public Interceptor get() {
-            return new ExtraStepExecuteInterceptor(this.pointcut, this.beforeStep, this.afterStep, this.failureStep);
+            return new ExtraStepExecutor(this.pointcut, this.beforeStep, this.afterStep, this.failureStep);
         }
     }
 }

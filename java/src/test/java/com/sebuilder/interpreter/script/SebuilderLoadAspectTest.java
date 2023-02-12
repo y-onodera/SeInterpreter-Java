@@ -249,8 +249,8 @@ public class SebuilderLoadAspectTest {
         }
     }
 
-    private static ExtraStepExecuteInterceptor getInterceptor(final List<Interceptor> advice, final int index) {
-        return (ExtraStepExecuteInterceptor) advice.get(index);
+    private static ExtraStepExecutor getInterceptor(final List<Interceptor> advice, final int index) {
+        return (ExtraStepExecutor) advice.get(index);
     }
 
 }

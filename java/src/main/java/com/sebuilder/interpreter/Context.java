@@ -48,7 +48,7 @@ public enum Context {
     private TestCaseConverter testCaseConverter;
     private StepTypeFactory stepTypeFactory;
     private Aspect aspect = new Aspect().builder()
-            .add(new ExtraStepExecuteInterceptor.Builder()
+            .add(new ExtraStepExecutor.Builder()
                     .setPointcut(new TypeFilter(SaveScreenshot.class.getSimpleName(), "!equals"))
                     .addFailure(new SaveScreenshot().toStep().put("file", "failure.png").build().toTestCase())
             )

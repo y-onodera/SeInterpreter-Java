@@ -14,9 +14,11 @@ public class ChainLoader {
     private final JSONArray scriptArrays;
     private int index;
     private final List<Integer> alreadyBreak;
+    private final OverrideSettingLoader overrideSettingLoader;
 
-    public ChainLoader(final Sebuilder sebuilder, final ScriptFile suiteFile, final JSONArray scriptArrays) {
+    public ChainLoader(final Sebuilder sebuilder, final OverrideSettingLoader overrideSettingLoader, final ScriptFile suiteFile, final JSONArray scriptArrays) {
         this.sebuilder = sebuilder;
+        this.overrideSettingLoader = overrideSettingLoader;
         this.suiteFile = suiteFile;
         this.scriptArrays = scriptArrays;
         this.alreadyBreak = Lists.newArrayList();
@@ -49,7 +51,7 @@ public class ChainLoader {
         TestCase result = loaded;
         while (this.hasNext()) {
             final JSONObject json = this.scriptArrays.getJSONObject(this.index);
-            if (!this.alreadyBreak.contains(this.index) && this.sebuilder.isBreakNestedChain(json)) {
+            if (!this.alreadyBreak.contains(this.index) && this.overrideSettingLoader.isBreakNestedChain(json)) {
                 this.alreadyBreak.add(this.index);
                 break;
             } else {

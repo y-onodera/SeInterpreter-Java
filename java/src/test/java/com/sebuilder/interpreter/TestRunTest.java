@@ -755,7 +755,7 @@ public class TestRunTest {
 
         private Step aspectAfterStep;
 
-        private ExtraStepExecuteInterceptor interceptor;
+        private ExtraStepExecutor interceptor;
 
         @Mock
         private TestRunListenerImpl adviseListener;
@@ -775,7 +775,7 @@ public class TestRunTest {
             this.chains = this.chains.append(chainCase);
             this.aspectBeforeStep = Mockito.spy(new StepBuilder(new SetElementText()).build());
             this.aspectAfterStep = Mockito.spy(new StepBuilder(new DoubleClickElement()).build());
-            this.interceptor = Mockito.spy(new ExtraStepExecuteInterceptor(
+            this.interceptor = Mockito.spy(new ExtraStepExecutor(
                     (step, input) -> "name".equals(step.name())
                     , this.aspectBeforeStep.toTestCase()
                     , this.aspectAfterStep.toTestCase()
@@ -853,7 +853,7 @@ public class TestRunTest {
 
         private Step aspectAfterStep;
 
-        private ExtraStepExecuteInterceptor interceptor;
+        private ExtraStepExecutor interceptor;
 
         @Mock
         private TestRunListenerImpl adviseListener;
@@ -874,7 +874,7 @@ public class TestRunTest {
             this.resetTestRun();
             this.aspectBeforeStep = Mockito.spy(new StepBuilder(new SetElementText()).build());
             this.aspectAfterStep = Mockito.spy(new StepBuilder(new DoubleClickElement()).build());
-            this.interceptor = Mockito.spy(new ExtraStepExecuteInterceptor(
+            this.interceptor = Mockito.spy(new ExtraStepExecutor(
                     (step, input) -> "chain".equals(step.name())
                     , this.aspectBeforeStep.toTestCase()
                     , this.aspectAfterStep.toTestCase()
@@ -956,13 +956,13 @@ public class TestRunTest {
 
         private Step aspectAfterStep;
 
-        private ExtraStepExecuteInterceptor interceptor;
+        private ExtraStepExecutor interceptor;
 
         private Step contextAspectBeforeStep;
 
         private Step contextAspectAfterStep;
 
-        private ExtraStepExecuteInterceptor contextInterceptor;
+        private ExtraStepExecutor contextInterceptor;
 
         @Mock
         private TestRunListenerImpl adviseListener;
@@ -989,7 +989,7 @@ public class TestRunTest {
                     .build());
             this.aspectBeforeStep = Mockito.spy(new StepBuilder(new SetElementText()).build());
             this.aspectAfterStep = Mockito.spy(new StepBuilder(new DoubleClickElement()).build());
-            this.interceptor = Mockito.spy(new ExtraStepExecuteInterceptor(
+            this.interceptor = Mockito.spy(new ExtraStepExecutor(
                     (step, input) -> "name".equals(step.name())
                     , this.aspectBeforeStep.toTestCase()
                     , this.aspectAfterStep.toTestCase()
@@ -1003,7 +1003,7 @@ public class TestRunTest {
             this.resetTestRun();
             this.contextAspectBeforeStep = Mockito.spy(new StepBuilder(new SetElementText()).build());
             this.contextAspectAfterStep = Mockito.spy(new StepBuilder(new DoubleClickElement()).build());
-            this.contextInterceptor = Mockito.spy(new ExtraStepExecuteInterceptor(
+            this.contextInterceptor = Mockito.spy(new ExtraStepExecutor(
                     (step, input) -> "chain".equals(step.name())
                     , this.contextAspectBeforeStep.toTestCase()
                     , this.contextAspectAfterStep.toTestCase()
