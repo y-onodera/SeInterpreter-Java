@@ -104,7 +104,9 @@ public record InputData(LinkedHashMap<String, String> row, boolean lastRow) {
             final JexlEngine jexl = new JexlBuilder().create();
             final JexlExpression expression = jexl.createExpression(exp);
             final JexlContext jc = new MapContext(new HashMap<>(this.row));
-            return result.replace("${" + exp + "}", expression.evaluate(jc).toString());
+            return Optional.ofNullable(expression.evaluate(jc))
+                    .map(it -> result.replace("${" + exp + "}", it.toString()))
+                    .orElse(result);
         } catch (final JexlException ex) {
             return result;
         }
