@@ -69,6 +69,7 @@
               "value": "datePick"
             },
             "pixelToleranceLevel": "0.3",
+            "allowingPercentOfDifferentPixels": "0.1",
             "type": "SaveScreenshot"
           },
           {
@@ -81,6 +82,7 @@
               "value": "#term,#price"
             },
             "pixelToleranceLevel": "0.3",
+            "allowingPercentOfDifferentPixels": "0.1",
             "type": "SaveScreenshot"
           },
           {
@@ -89,6 +91,7 @@
             "skip": "${get('pageTitle') == '予約情報入力' or get('pageTitle') == '予約内容確認'}",
             "verify": "${env.verifyImage}",
             "pixelToleranceLevel": "0.3",
+            "allowingPercentOfDifferentPixels": "0.1",
             "type": "SaveScreenshot"
           }
         ]
@@ -109,6 +112,7 @@
               "value": "datePick"
             },
             "pixelToleranceLevel": "0.3",
+            "allowingPercentOfDifferentPixels": "0.1",
             "type": "SaveScreenshot"
           },
           {
@@ -121,6 +125,7 @@
               "value": "#term,#price"
             },
             "pixelToleranceLevel": "0.3",
+            "allowingPercentOfDifferentPixels": "0.1",
             "type": "SaveScreenshot"
           },
           {
@@ -129,6 +134,7 @@
             "skip": "${get('pageTitle') == '予約情報入力' or get('pageTitle') == '予約内容確認'}",
             "verify": "${env.verifyImage}",
             "pixelToleranceLevel": "0.3",
+            "allowingPercentOfDifferentPixels": "0.1",
             "type": "SaveScreenshot"
           }
         ]
