@@ -141,7 +141,9 @@ jobs:
           name: executableJar
       - name: browser-test
         run: |
-          set PATH =
+          rd %CHROMEWEBDRIVER%
+          rd %EDGEWEBDRIVER%
+          rd %GECKOWEBDRIVER%
           bin\java -cp sebuilder-interpreter-2.0.0-SNAPSHOT-jar-with-dependencies.jar com.sebuilder.interpreter.application.SeInterpreter --env.verifyImage=true --expectScreenshotDirectory=${{matrix.expect}} --driver=${{matrix.browser}} --resultoutput=${{matrix.browser}} --datasource.directory=test/suite/input --aspectFile=test/suite/aspect/saveScreenshot.json test/suite/testsuite.json
         shell: cmd
       - name: Upload result
