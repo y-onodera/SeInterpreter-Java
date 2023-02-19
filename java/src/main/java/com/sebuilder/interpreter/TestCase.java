@@ -228,15 +228,20 @@ public record TestCase(ScriptFile scriptFile,
         return this.map(it -> it.clearStep().addSteps(converter.apply(this.steps)));
     }
 
-    boolean skipRunning() {
+    public boolean skipRunning() {
         return this.shareInput().evaluate(this.skip);
     }
 
-    TestCase materialized() {
-        return this.mapWhen(TestCase::isLazyLoad, target -> target.build().execLazyLoad().builder());
+    public TestCase materialized() {
+        return this.mapWhen(TestCase::isLazyLoad, target -> target.build().execLazyLoad().builder())
+                .builder()
+                .setIncludeTestRun(this.includeTestRun().materialize(this.shareInput))
+                .setExcludeTestRun(this.excludeTestRun().materialize(this.shareInput))
+                .setAspect(this.aspect().materialize(this.shareInput))
+                .build();
     }
 
-    TestCase execLazyLoad() {
+    public TestCase execLazyLoad() {
         return this.lazyLoad().apply(this);
     }
 

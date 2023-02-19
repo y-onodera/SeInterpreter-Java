@@ -16,9 +16,9 @@ import java.util.Objects;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Enclosed.class)
-public class SebuilderLoadAspectTest {
+public class AspectLoaderTest {
 
-    public static abstract class SingleFilter {
+    public static abstract class AssertWeaverSupport {
 
         static {
             Context.getInstance()
@@ -28,7 +28,7 @@ public class SebuilderLoadAspectTest {
 
         protected Sebuilder target = new Sebuilder();
 
-        protected File scriptDir = new File(Objects.requireNonNull(SebuilderLoadAspectTest.class.getResource(".")).getPath(), "aspect");
+        protected File scriptDir = new File(Objects.requireNonNull(AspectLoaderTest.class.getResource(".")).getPath(), "aspect");
 
         protected Aspect result;
 
@@ -54,7 +54,7 @@ public class SebuilderLoadAspectTest {
         }
     }
 
-    public static class StringParamPointcutTest extends SingleFilter {
+    public static class StringParamPointcutTest extends AssertWeaverSupport {
 
         @Test
         public void adviceWeaverPointcutValue() {
@@ -80,7 +80,7 @@ public class SebuilderLoadAspectTest {
 
     }
 
-    public static class TypePointcutTest extends SingleFilter {
+    public static class TypePointcutTest extends AssertWeaverSupport {
 
         @Test
         public void adviceWeaverPointcutValue() {
@@ -106,7 +106,7 @@ public class SebuilderLoadAspectTest {
 
     }
 
-    public static class NegatePointcutTest extends SingleFilter {
+    public static class NegatePointcutTest extends AssertWeaverSupport {
 
         @Test
         public void adviceWeaverPointcutValue() {
@@ -120,7 +120,7 @@ public class SebuilderLoadAspectTest {
 
     }
 
-    public static class LocatorPointcutTest extends SingleFilter {
+    public static class LocatorPointcutTest extends AssertWeaverSupport {
 
         @Test
         public void adviceWeaverPointcutValue() {
@@ -159,7 +159,7 @@ public class SebuilderLoadAspectTest {
     }
 
 
-    public static class SkipPointcutTest extends SingleFilter {
+    public static class SkipPointcutTest extends AssertWeaverSupport {
 
         @Test
         public void adviceWeaverPointcutValue() {
@@ -173,7 +173,7 @@ public class SebuilderLoadAspectTest {
 
     }
 
-    public static class MultiAdviceTest extends SingleFilter {
+    public static class MultiAdviceTest extends AssertWeaverSupport {
 
         @Test
         public void adviceWeaverPointcutValue() {
@@ -209,7 +209,7 @@ public class SebuilderLoadAspectTest {
 
     }
 
-    public static class MultiFilterTest extends SingleFilter {
+    public static class MultiFilterTest extends AssertWeaverSupport {
 
         @Before
         @Override
@@ -247,6 +247,17 @@ public class SebuilderLoadAspectTest {
             assertEquals(new SetElementSelected().toStep().build(), getInterceptor(advice, 0).failureStep().steps().get(0));
             assertEquals(new SetElementText().toStep().put("text", "failure step").build(), getInterceptor(advice, 0).failureStep().steps().get(1));
         }
+    }
+
+    public static class ImportFilterTest extends MultiFilterTest {
+
+        @Before
+        @Override
+        public void setup() {
+            this.result = this.target.loadAspect(new File(this.scriptDir, "aspectWithImportPointcut.json"))
+                    .materialize(new InputData());
+        }
+
     }
 
     private static ExtraStepExecutor getInterceptor(final List<Interceptor> advice, final int index) {

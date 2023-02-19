@@ -1,10 +1,7 @@
 package com.sebuilder.interpreter.script;
 
 import com.google.common.base.Strings;
-import com.sebuilder.interpreter.Context;
-import com.sebuilder.interpreter.DataSourceLoader;
-import com.sebuilder.interpreter.Locator;
-import com.sebuilder.interpreter.TestCase;
+import com.sebuilder.interpreter.*;
 import com.sebuilder.interpreter.datasource.Csv;
 import com.sebuilder.interpreter.datasource.DataSourceFactoryImpl;
 import com.sebuilder.interpreter.datasource.Manual;
@@ -52,15 +49,17 @@ public class SebuilderTest {
     public static abstract class ParseResultTest {
         protected TestCase result;
 
+        protected InputData sharInput = new InputData();
+
         @Test
         public void parseResultContents() {
-            this.getTestCaseAssert().run(this.result);
+            this.getTestCaseAssert().run(this.result.builder().setShareInput(this.sharInput).build());
         }
 
         @Test
         public void parseResultReversible() {
             final TestCase reverse = target.load(toStringConverter.toString(this.result), Strings.isNullOrEmpty(this.result.path()) ? null : new File(this.result.path()));
-            this.getTestCaseAssert().run(reverse);
+            this.getTestCaseAssert().run(reverse.builder().setShareInput(this.sharInput).build());
         }
 
         public abstract TestCaseAssert getTestCaseAssert();
@@ -84,7 +83,7 @@ public class SebuilderTest {
                     .assertOverrideDataSource(TestCaseAssert::assertEqualsNoOverrideDataSource)
                     .assertLazy(TestCaseAssert::assertNotLazyLoad)
                     .assertNestedChain(TestCaseAssert::assertNotNestedChain)
-                    .create();
+                    .build();
         }
     }
 
@@ -99,7 +98,7 @@ public class SebuilderTest {
         public TestCaseAssert getTestCaseAssert() {
             return TestCaseAssert.of()
                     .assertFileAttribute(TestCaseAssert.assertEqualsFileAttribute(testFileScriptWithNoContents))
-                    .create();
+                    .build();
         }
 
     }
@@ -116,7 +115,7 @@ public class SebuilderTest {
             return TestCaseAssert.of()
                     .assertFileAttribute(TestCaseAssert.assertEqualsFileAttribute(testFileScriptWithDataSource))
                     .assertDataSource(TestCaseAssert.assertEqualsDataSet(DATA_SET_CSV))
-                    .create();
+                    .build();
         }
     }
 
@@ -132,7 +131,7 @@ public class SebuilderTest {
             return TestCaseAssert.of()
                     .assertFileAttribute(TestCaseAssert.assertEqualsFileAttribute(testFileScriptWithSteps))
                     .assertStep(TestCaseAssert.assertEqualsStepCount(10))
-                    .create();
+                    .build();
         }
     }
 
@@ -149,7 +148,7 @@ public class SebuilderTest {
                     .assertFileAttribute(TestCaseAssert.assertEqualsFileAttribute(testFileScriptWithFullContents))
                     .assertStep(TestCaseAssert.assertEqualsStepCount(9))
                     .assertDataSource(TestCaseAssert.assertEqualsDataSet(DATA_SET_CSV))
-                    .create();
+                    .build();
         }
     }
 
@@ -166,7 +165,7 @@ public class SebuilderTest {
         public TestCaseAssert getTestCaseAssert() {
             return TestCaseAssert.of()
                     .assertFileAttribute(TestCaseAssert.assertEqualsFileAttribute(this.testFile))
-                    .create();
+                    .build();
         }
     }
 
@@ -185,7 +184,7 @@ public class SebuilderTest {
             return TestCaseAssert.of()
                     .assertFileAttribute(TestCaseAssert.assertEqualsFileAttribute(this.testFile))
                     .assertDataSource(TestCaseAssert.assertEqualsDataSet(DATA_SET_CSV))
-                    .create();
+                    .build();
         }
     }
 
@@ -206,17 +205,17 @@ public class SebuilderTest {
                     .assertChainCase(0, new ParseScriptNoContents().getTestCaseAssert()
                             .builder()
                             .assertOverrideDataSource(TestCaseAssert.assertEqualsOverrideDataSst(DATA_SET_OVERRIDE_CSV))
-                            .create())
+                            .build())
                     .assertChainCase(1, new ParseScriptTypeWithSteps().getTestCaseAssert()
                             .builder()
                             .assertSkip(TestCaseAssert.assertEqualsSkip("true"))
-                            .create())
+                            .build())
                     .assertChainCase(2, new ParseScriptTypeWithDataSource().getTestCaseAssert()
                             .builder()
                             .assertOverrideDataSource(TestCaseAssert.assertEqualsOverrideDataSst(DATA_SET_NONE))
-                            .create())
+                            .build())
                     .assertDataSource(TestCaseAssert::assertEqualsNoDataSource)
-                    .create();
+                    .build();
         }
     }
 
@@ -241,14 +240,14 @@ public class SebuilderTest {
                             .assertChainCase(0, new ParseScriptTypeWithSteps().getTestCaseAssert()
                                     .builder()
                                     .assertSkip(TestCaseAssert.assertEqualsSkip("true"))
-                                    .create())
+                                    .build())
                             .assertChainCase(1, new ParseScriptTypeWithDataSource().getTestCaseAssert()
                                     .builder()
                                     .assertOverrideDataSource(TestCaseAssert.assertEqualsOverrideDataSst(DATA_SET_NONE))
-                                    .create())
-                            .create())
+                                    .build())
+                            .build())
                     .assertDataSource(TestCaseAssert::assertEqualsNoDataSource)
-                    .create();
+                    .build();
         }
     }
 
@@ -273,13 +272,13 @@ public class SebuilderTest {
                             .assertChainCase(1, new ParseScriptNoContents().getTestCaseAssert()
                                     .builder()
                                     .assertFileAttribute(TestCaseAssert.assertEqualsFileAttribute("scriptWithNoContents.json", testFileScriptWithNoContents))
-                                    .create())
+                                    .build())
                             .assertChainCase(2, new ParseScriptTypeWithSteps().getTestCaseAssert()
                                     .builder()
                                     .assertFileAttribute(TestCaseAssert.assertEqualsFileAttribute("scriptWithSteps.json(1)", testFileScriptWithSteps))
-                                    .create())
-                            .create())
-                    .create();
+                                    .build())
+                            .build())
+                    .build();
         }
     }
 
@@ -309,10 +308,10 @@ public class SebuilderTest {
                                     .assertChainCase(0, new ParseScriptTypeWithDataSource().getTestCaseAssert()
                                             .builder()
                                             .assertOverrideDataSource(TestCaseAssert.assertEqualsOverrideDataSst(DATA_SET_NONE))
-                                            .create())
-                                    .create())
-                            .create())
-                    .create();
+                                            .build())
+                                    .build())
+                            .build())
+                    .build();
         }
     }
 
@@ -333,17 +332,17 @@ public class SebuilderTest {
                     .assertChainCase(0, new ParseScriptNoContents().getTestCaseAssert()
                             .builder()
                             .assertOverrideDataSource(TestCaseAssert.assertEqualsOverrideDataSst(new DataSourceLoader(new Csv(), Map.of("path", "${path}/override.csv"), new File(baseDir))))
-                            .create())
+                            .build())
                     .assertChainCase(1, new ParseScriptTypeWithSteps().getTestCaseAssert()
                             .builder()
                             .assertSkip(TestCaseAssert.assertEqualsSkip("true"))
-                            .create())
+                            .build())
                     .assertChainCase(2, new ParseScriptTypeWithDataSource().getTestCaseAssert()
                             .builder()
                             .assertOverrideDataSource(TestCaseAssert.assertEqualsOverrideDataSst(DATA_SET_NONE))
-                            .create())
+                            .build())
                     .assertDataSource(TestCaseAssert::assertEqualsNoDataSource)
-                    .create();
+                    .build();
         }
     }
 
@@ -366,19 +365,19 @@ public class SebuilderTest {
                             .assertSkip(TestCaseAssert.assertEqualsSkip("${skip1}"))
                             .assertOverrideDataSource(TestCaseAssert.assertEqualsOverrideDataSst(DATA_SET_OVERRIDE_LAZY))
                             .assertLazy(TestCaseAssert::assertLazyLoad)
-                            .create())
+                            .build())
                     .assertChainCase(1, new ParseScriptTypeWithSteps().getTestCaseAssert()
                             .builder()
                             .assertSkip(TestCaseAssert.assertEqualsSkip("true"))
-                            .create())
+                            .build())
                     .assertChainCase(2, new ParseScriptTypeWithDataSource().getTestCaseAssert()
                             .builder()
                             .assertOverrideDataSource(TestCaseAssert.assertEqualsOverrideDataSst(DATA_SET_NONE))
-                            .create())
+                            .build())
                     .assertDataSource(TestCaseAssert.assertEqualsDataSet(new DataSourceLoader(new Manual()
                             , Map.of("script1", "scriptWithNoContents", "skip1", "false", "dataSource1", "override")
                             , new File(baseDir))))
-                    .create();
+                    .build();
         }
     }
 
@@ -404,18 +403,18 @@ public class SebuilderTest {
                             .assertChainCase(0, new ParseScriptTypeWithSteps().getTestCaseAssert()
                                     .builder()
                                     .assertSkip(TestCaseAssert.assertEqualsSkip("true"))
-                                    .create())
+                                    .build())
                             .assertChainCase(1, TestCaseAssert.of()
                                     .assertFileAttribute(TestCaseAssert.assertEqualsFileAttribute("${script3}.json"))
                                     .assertSkip(TestCaseAssert.assertEqualsSkip("false"))
                                     .assertOverrideDataSource(TestCaseAssert.assertEqualsOverrideDataSst(new DataSourceLoader(new Csv(), Map.of("path", "${dataSource3}.csv"), null)))
                                     .assertLazy(TestCaseAssert::assertLazyLoad)
-                                    .create())
-                            .create())
+                                    .build())
+                            .build())
                     .assertDataSource(TestCaseAssert.assertEqualsDataSet(new DataSourceLoader(new Manual()
                             , Map.of("script1", "scriptWithDataSource", "script3", "scriptWithNoContents", "dataSource3", "csv/override")
                             , new File(baseDir))))
-                    .create();
+                    .build();
         }
     }
 
@@ -435,7 +434,7 @@ public class SebuilderTest {
                     .assertChainCaseCounts(TestCaseAssert.assertEqualsChainCaseCount(2))
                     .assertChainCase(0, new ParseScriptNoContents().getTestCaseAssert())
                     .assertChainCase(1, new ParseSuiteWithScripts().getTestCaseAssert())
-                    .create();
+                    .build();
         }
     }
 
@@ -446,11 +445,13 @@ public class SebuilderTest {
         @Before
         public void setUp() {
             this.result = target.load(this.testFile);
+            this.sharInput = this.sharInput.add("excludeImport", "pointcut/locatorFilter.json");
         }
 
         @Override
         public TestCaseAssert getTestCaseAssert() {
             return TestCaseAssert.of()
+                    .materialized(true)
                     .assertFileAttribute(TestCaseAssert.assertEqualsFileAttribute(this.testFile))
                     .assertChainCaseCounts(TestCaseAssert.assertEqualsChainCaseCount(1))
                     .assertChainCase(0, new ParseScriptNoContents().getTestCaseAssert()
@@ -477,14 +478,25 @@ public class SebuilderTest {
                                                             .or(new LocatorFilter("locator", new Locator("id", "id3"))))
                                             , it))
                                     .assertSkip(TestCaseAssert.assertEqualsSkip("true"))
-                                    .create())
+                                    .build())
                             .assertChainCase(1, new ParseScriptTypeWithDataSource().getTestCaseAssert()
                                     .builder()
                                     .assertOverrideDataSource(TestCaseAssert.assertEqualsOverrideDataSst(DATA_SET_NONE))
-                                    .create())
-                            .create())
+                                    .assertIncludeTestRun(it -> assertEquals(
+                                            new TypeFilter("SetElementText")
+                                                    .or(new TypeFilter("SelectElementValue"))
+                                                    .or(new TypeFilter("SetElementSelected"))
+                                                    .and(new SkipFilter(false))
+                                            , it))
+                                    .assertExcludeTestRun(it -> assertEquals(
+                                            new LocatorFilter("locator", new Locator("id", "id1"))
+                                                    .or(new LocatorFilter("locator", new Locator("id", "id2")))
+                                                    .or(new LocatorFilter("locator", new Locator("id", "id3")))
+                                            , it))
+                                    .build())
+                            .build())
                     .assertDataSource(TestCaseAssert::assertEqualsNoDataSource)
-                    .create();
+                    .build();
         }
     }
 

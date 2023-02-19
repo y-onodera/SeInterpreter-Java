@@ -10,16 +10,23 @@ import java.util.function.BiFunction;
 public class ImportLoader {
 
     public <R> R load(final JSONObject src, final File baseDir, final BiFunction<File, JSONObject, R> loadFunction) {
-        final String path = Context.bindEnvironmentProperties(src.getString("path"));
         if (src.has("where") && !Strings.isNullOrEmpty(src.getString("where"))) {
-            final File wherePath = new File(Context.bindEnvironmentProperties(src.getString("where")), path);
+            final File wherePath = this.toFile(src.getString("where"), src.getString("path"));
             return loadFunction.apply(wherePath, src);
         }
-        File f = new File(path);
+        return loadFunction.apply(this.toFile(baseDir, src.getString("path")), src);
+    }
+
+    protected File toFile(final String baseDir, final String path) {
+        return this.toFile(new File(Context.bindEnvironmentProperties(baseDir)), path);
+    }
+
+    protected File toFile(final File baseDir, final String path) {
+        File f = new File(baseDir, path);
         if (!f.exists()) {
-            f = new File(baseDir, path);
+            f = new File(Context.bindEnvironmentProperties(path));
         }
-        return loadFunction.apply(f.getAbsoluteFile(), src);
+        return f.getAbsoluteFile();
     }
 
 }

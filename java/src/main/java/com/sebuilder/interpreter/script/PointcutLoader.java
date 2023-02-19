@@ -1,46 +1,84 @@
 package com.sebuilder.interpreter.script;
 
+import com.google.common.base.Strings;
 import com.sebuilder.interpreter.Locator;
 import com.sebuilder.interpreter.Pointcut;
 import com.sebuilder.interpreter.pointcut.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
 public class PointcutLoader {
 
-    public Optional<Pointcut> getPointcut(final JSONArray pointcuts) {
+    public Optional<Pointcut> load(final File f, final File baseDir) {
+        final File path = new File(baseDir, f.getPath());
+        if (path.exists()) {
+            return this.load(path);
+        }
+        return this.load(f);
+    }
+
+    public Optional<Pointcut> load(final File f) {
+        try (final BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(f), StandardCharsets.UTF_8))) {
+            return this.load(new JSONArray(new JSONTokener(r)), f.getAbsoluteFile().getParentFile());
+        } catch (final Throwable e) {
+            throw new AssertionError("error load:" + f.getAbsolutePath(), e);
+        }
+    }
+
+    public Optional<Pointcut> load(final JSONArray pointcuts, final File baseDir) {
         return IntStream.range(0, pointcuts.length())
-                .mapToObj(i -> this.parseFilter(pointcuts.getJSONObject(i)))
+                .mapToObj(i -> this.parseFilter(pointcuts.getJSONObject(i), baseDir))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .reduce(Pointcut::or);
     }
 
 
-    protected Optional<Pointcut> parseFilter(final JSONObject pointcutJSON) {
+    protected Optional<Pointcut> parseFilter(final JSONObject pointcutJSON, final File baseDir) {
         final JSONArray keysA = pointcutJSON.names();
         return IntStream.range(0, keysA.length())
-                .mapToObj(j -> this.parseFilter(pointcutJSON, keysA, j))
+                .mapToObj(j -> this.parseFilter(pointcutJSON, keysA, j, baseDir))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .reduce(Pointcut::and);
     }
 
-    protected Optional<Pointcut> parseFilter(final JSONObject pointcutJSON, final JSONArray keysA, final int j) {
+    protected Optional<Pointcut> parseFilter(final JSONObject json, final JSONArray keysA, final int j, final File baseDir) {
         final String key = keysA.getString(j);
-        if (key.equals("type")) {
-            return this.getTypeFilter(pointcutJSON, key);
+        if (key.equals("import")) {
+            return this.importScript(json, key, baseDir);
+        } else if (key.equals("type")) {
+            return this.getTypeFilter(json, key);
         } else if (key.equals("negated")) {
-            return Optional.of(new NegatedFilter(pointcutJSON.getBoolean(key)));
+            return Optional.of(new NegatedFilter(json.getBoolean(key)));
         } else if (key.equals("skip")) {
-            return Optional.of(new SkipFilter(pointcutJSON.getBoolean(key)));
+            return Optional.of(new SkipFilter(json.getBoolean(key)));
         } else if (key.startsWith("locator")) {
-            return this.getLocatorFilter(pointcutJSON, key);
+            return this.getLocatorFilter(json, key);
         }
-        return this.getStringFilter(pointcutJSON, key);
+        return this.getStringFilter(json, key);
+    }
+
+    protected Optional<Pointcut> importScript(final JSONObject src, final String key, final File baseDir) {
+        if (src.get(key) instanceof String value) {
+            return Optional.of(new ImportFilter(value, (path) -> this.load(path, baseDir).orElseThrow()));
+        }
+        final JSONObject importObj = src.getJSONObject(key);
+        final String pathValue = importObj.getString("path");
+        if (importObj.has("where") && !Strings.isNullOrEmpty(importObj.getString("where"))) {
+            return Optional.of(new ImportFilter(pathValue, importObj.getString("where")
+                    , (path) -> this.load(path, baseDir).orElseThrow()));
+        }
+        return Optional.of(new ImportFilter(pathValue, (path) -> this.load(path, baseDir).orElseThrow()));
     }
 
     protected Optional<Pointcut> getStringFilter(final JSONObject pointcutJSON, final String key) {

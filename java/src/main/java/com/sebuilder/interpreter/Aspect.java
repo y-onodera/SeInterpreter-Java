@@ -51,6 +51,10 @@ public record Aspect(Iterable<Interceptor> interceptors) implements Iterable<Int
         return from(this.getStream().filter(condition));
     }
 
+    public Aspect materialize(final InputData shareInput) {
+        return from(this.getStream().map(it -> it.materialize(shareInput)));
+    }
+
     public record Advice(List<Interceptor> advices) {
 
         public boolean invokeBefore(final TestRun testRun) {

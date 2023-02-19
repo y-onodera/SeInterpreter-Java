@@ -6,6 +6,10 @@ public interface Interceptor {
         return new Aspect().builder().add(this).build();
     }
 
+    default Interceptor materialize(final InputData shareInput) {
+        return this;
+    }
+
     default boolean isPointcut(final Step step, final InputData vars) {
         return false;
     }

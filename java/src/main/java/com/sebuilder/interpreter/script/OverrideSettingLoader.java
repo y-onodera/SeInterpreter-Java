@@ -5,6 +5,7 @@ import com.sebuilder.interpreter.Pointcut;
 import com.sebuilder.interpreter.TestCase;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.HashMap;
 
 public class OverrideSettingLoader {
@@ -18,7 +19,7 @@ public class OverrideSettingLoader {
         this.dataSourceConfigLoader = dataSourceConfigLoader;
     }
 
-    public TestCase load(final JSONObject script, final TestCase resultTestCase) {
+    public TestCase load(final JSONObject script, final File baseDir, final TestCase resultTestCase) {
         final DataSource dataSource = this.dataSourceConfigLoader.getDataSource(script);
         final HashMap<String, String> config = this.dataSourceConfigLoader.getDataSourceConfig(script);
         final String skip = this.getSkip(script);
@@ -27,13 +28,13 @@ public class OverrideSettingLoader {
         final boolean preventContextAspect = this.isPreventContextAspect(script);
         final Pointcut includeTestRun;
         if (script.has("include")) {
-            includeTestRun = this.pointcutLoader.getPointcut(script.getJSONArray("include")).orElse(Pointcut.ANY);
+            includeTestRun = this.pointcutLoader.load(script.getJSONArray("include"), baseDir).orElse(Pointcut.ANY);
         } else {
             includeTestRun = Pointcut.ANY;
         }
         final Pointcut excludeTestRun;
         if (script.has("exclude")) {
-            excludeTestRun = this.pointcutLoader.getPointcut(script.getJSONArray("exclude")).orElse(Pointcut.NONE);
+            excludeTestRun = this.pointcutLoader.load(script.getJSONArray("exclude"), baseDir).orElse(Pointcut.NONE);
         } else {
             excludeTestRun = Pointcut.NONE;
         }

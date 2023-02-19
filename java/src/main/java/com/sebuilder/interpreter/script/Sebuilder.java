@@ -54,10 +54,10 @@ public class Sebuilder extends AbstractJsonScriptParser {
     public Sebuilder() {
         this.stepLoader = new StepLoader();
         this.dataSourceConfigLoader = new DataSourceConfigLoader();
+        this.importLoader = new ImportLoader();
         this.pointcutLoader = new PointcutLoader();
         this.aspectLoader = new AspectLoader(this, this.pointcutLoader);
         this.overrideSettingLoader = new OverrideSettingLoader(this.pointcutLoader, this.dataSourceConfigLoader);
-        this.importLoader = new ImportLoader();
     }
 
     /**
@@ -76,7 +76,7 @@ public class Sebuilder extends AbstractJsonScriptParser {
     @Override
     public Aspect loadAspect(final File f) {
         try (final BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(f), StandardCharsets.UTF_8))) {
-            return this.aspectLoader.load(new JSONObject(new JSONTokener(r)));
+            return this.aspectLoader.load(new JSONObject(new JSONTokener(r)), f.getAbsoluteFile().getParentFile());
         } catch (final Throwable e) {
             throw new AssertionError("error load:" + f.getAbsolutePath(), e);
         }
@@ -100,7 +100,7 @@ public class Sebuilder extends AbstractJsonScriptParser {
         final TestCaseBuilder builder = TestCaseBuilder.suite(suiteFile)
                 .setDataSource(this.dataSourceConfigLoader.getDataSource(o), this.dataSourceConfigLoader.getDataSourceConfig(o));
         this.loadScripts(o, builder);
-        return builder.setAspect(this.aspectLoader.load(o)).build();
+        return builder.setAspect(this.aspectLoader.load(o, suiteFile.getAbsoluteFile().getParentFile())).build();
     }
 
     /**
@@ -151,9 +151,10 @@ public class Sebuilder extends AbstractJsonScriptParser {
      * @throws JSONException If anything goes wrong with interpreting the JSON.
      */
     protected TestCase loadScript(final JSONObject script, final File suiteFile) {
+        final File suiteWhere = suiteFile.getAbsoluteFile().getParentFile();
         if (script.has("lazyLoad")) {
             final String beforeReplace = script.getString("lazyLoad");
-            return this.overrideSettingLoader.load(script, TestCaseBuilder.lazyLoad(beforeReplace, (runtimeBefore) -> {
+            return this.overrideSettingLoader.load(script, suiteWhere, TestCaseBuilder.lazyLoad(beforeReplace, (runtimeBefore) -> {
                 final String fileName = runtimeBefore.shareInput().evaluateString(beforeReplace);
                 final JSONObject source = new JSONObject();
                 final TestCase lazyLoad = this.loadScript(source.put("path", fileName), suiteFile);
@@ -166,7 +167,7 @@ public class Sebuilder extends AbstractJsonScriptParser {
                 );
             }));
         }
-        return this.importLoader.load(script, suiteFile.getAbsoluteFile().getParentFile(), this::loadScriptIfExists);
+        return this.importLoader.load(script, suiteWhere, this::loadScriptIfExists);
     }
 
     protected void loadScriptChain(final JSONArray scriptArrays, final TestCaseBuilder builder) {
@@ -175,7 +176,7 @@ public class Sebuilder extends AbstractJsonScriptParser {
     }
 
     protected TestCase loadScriptIfExists(final File wherePath, final JSONObject script) {
-        return this.overrideSettingLoader.load(script, this.load(wherePath));
+        return this.overrideSettingLoader.load(script, wherePath.getParentFile(), this.load(wherePath));
     }
 
 }

@@ -11,6 +11,15 @@ public record ExtraStepExecutor(Pointcut pointcut,
                                 TestCase failureStep) implements Interceptor {
 
     @Override
+    public Interceptor materialize(final InputData shareInput) {
+        return new ExtraStepExecutor(this.pointcut.materialize(shareInput)
+                , this.beforeStep.mapWhen(TestCase::isLazyLoad, it -> it.setShareInput(shareInput).build().execLazyLoad().builder())
+                , this.afterStep.mapWhen(TestCase::isLazyLoad, it -> it.setShareInput(shareInput).build().execLazyLoad().builder())
+                , this.failureStep.mapWhen(TestCase::isLazyLoad, it -> it.setShareInput(shareInput).build().execLazyLoad().builder())
+        );
+    }
+
+    @Override
     public boolean isPointcut(final Step step, final InputData vars) {
         if (this.pointcut == Pointcut.NONE) {
             return this.beforeStep.steps().size() == 0
@@ -33,6 +42,26 @@ public record ExtraStepExecutor(Pointcut pointcut,
     @Override
     public boolean invokeFailure(final TestRun testRun) {
         return this.invokeAdvise(testRun, this.failureStep, "failure");
+    }
+
+    public TestRunListener createAdviseListener(final TestRun testRun) {
+        return new TestRunListenerWrapper(testRun.getListener()) {
+            String testName;
+
+            @Override
+            public boolean openTestSuite(final TestCase testCase, final String testRunName, final InputData aProperty) {
+                this.testName = testRunName;
+                this.isAspectRunning(true);
+                testRun.log().info("open suite %s".formatted(this.testName));
+                return true;
+            }
+
+            @Override
+            public void closeTestSuite() {
+                testRun.log().info("close suite %s".formatted(this.testName));
+                this.isAspectRunning(false);
+            }
+        };
     }
 
     boolean invokeAdvise(final TestRun testRun, final TestCase steps, final String testRunName) {
@@ -63,26 +92,6 @@ public record ExtraStepExecutor(Pointcut pointcut,
                 .toMap()
                 .forEach((key, value) -> joinStepInfo.put("_target." + key, value));
         return testRun.vars().add(joinStepInfo).add("_target.currentStepIndex", String.valueOf(testRun.currentStepIndex()));
-    }
-
-    TestRunListener createAdviseListener(final TestRun testRun) {
-        return new TestRunListenerWrapper(testRun.getListener()) {
-            String testName;
-
-            @Override
-            public boolean openTestSuite(final TestCase testCase, final String testRunName, final InputData aProperty) {
-                this.testName = testRunName;
-                this.isAspectRunning(true);
-                testRun.log().info("open suite %s".formatted(this.testName));
-                return true;
-            }
-
-            @Override
-            public void closeTestSuite() {
-                testRun.log().info("close suite %s".formatted(this.testName));
-                this.isAspectRunning(false);
-            }
-        };
     }
 
     String getInterceptCaseName(final TestRun testRun) {

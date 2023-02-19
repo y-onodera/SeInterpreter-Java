@@ -6,6 +6,7 @@ import com.sebuilder.interpreter.Pointcut;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.stream.IntStream;
 
 public class AspectLoader {
@@ -19,7 +20,7 @@ public class AspectLoader {
         this.pointcutLoader = pointcutLoader;
     }
 
-    protected Aspect load(final JSONObject o) {
+    protected Aspect load(final JSONObject o, final File baseDir) {
         Aspect result = new Aspect();
         if (o.has("aspect")) {
             final Aspect.Builder builder = result.builder();
@@ -29,7 +30,9 @@ public class AspectLoader {
                         final ExtraStepExecutor.Builder interceptorBuilder = new ExtraStepExecutor.Builder();
                         final JSONObject aspect = aspects.getJSONObject(i);
                         if (aspect.has("pointcut")) {
-                            interceptorBuilder.setPointcut(this.pointcutLoader.getPointcut(aspect.getJSONArray("pointcut")).orElse(Pointcut.NONE));
+                            interceptorBuilder.setPointcut(this.pointcutLoader
+                                    .load(aspect.getJSONArray("pointcut"), baseDir)
+                                    .orElse(Pointcut.NONE));
                         }
                         if (aspect.has("before")) {
                             interceptorBuilder.addBefore(this.sebuilder.load(aspect.getJSONObject("before"), null));

@@ -11,6 +11,7 @@ import java.util.function.Consumer;
 import static org.junit.Assert.*;
 
 public class TestCaseAssert {
+    private boolean materialized;
     private final Consumer<TestCase> assertFileAttribute;
     private final Consumer<TestCase> assertStep;
     private final Consumer<TestCase> assertDataSource;
@@ -23,18 +24,19 @@ public class TestCaseAssert {
     private final Consumer<TestCase> assertChainCaseCounts;
     private final Map<Integer, TestCaseAssert> assertChainCases = Maps.newHashMap();
 
-    public TestCaseAssert(final Builder aBuilder) {
-        this.assertFileAttribute = aBuilder.assertFileAttribute;
-        this.assertStep = aBuilder.assertStep;
-        this.assertDataSource = aBuilder.assertDataSource;
-        this.assertSkip = aBuilder.assertSkip;
-        this.assertOverrideDataSource = aBuilder.assertOverrideDataSource;
-        this.assertIncludeTestRun = aBuilder.assertIncludeTestRun;
-        this.assertExcludeTestRun = aBuilder.assertExcludeTestRun;
-        this.assertLazy = aBuilder.assertLazy;
-        this.assertNestedChain = aBuilder.assertNestedChain;
-        this.assertChainCaseCounts = aBuilder.assertChainCaseCounts;
-        this.assertChainCases.putAll(aBuilder.assertChainCases);
+    public TestCaseAssert(final Builder builder) {
+        this.materialized = builder.materialized;
+        this.assertFileAttribute = builder.assertFileAttribute;
+        this.assertStep = builder.assertStep;
+        this.assertDataSource = builder.assertDataSource;
+        this.assertSkip = builder.assertSkip;
+        this.assertOverrideDataSource = builder.assertOverrideDataSource;
+        this.assertIncludeTestRun = builder.assertIncludeTestRun;
+        this.assertExcludeTestRun = builder.assertExcludeTestRun;
+        this.assertLazy = builder.assertLazy;
+        this.assertNestedChain = builder.assertNestedChain;
+        this.assertChainCaseCounts = builder.assertChainCaseCounts;
+        this.assertChainCases.putAll(builder.assertChainCases);
     }
 
     public static Builder of() {
@@ -126,17 +128,19 @@ public class TestCaseAssert {
     }
 
     public void run(final TestCase target) {
-        this.assertFileAttribute.accept(target);
-        this.assertStep.accept(target);
-        this.assertDataSource.accept(target);
-        this.assertSkip.accept(target);
-        this.assertOverrideDataSource.accept(target);
-        this.assertIncludeTestRun.accept(target.includeTestRun());
-        this.assertExcludeTestRun.accept(target.excludeTestRun());
-        this.assertLazy.accept(target);
-        this.assertNestedChain.accept(target);
-        this.assertChainCaseCounts.accept(target);
-        this.assertChainCases.forEach((key, value) -> value.run(target.chains().get(key)));
+        final TestCase actual = this.materialized ? target.materialized() : target;
+        this.assertFileAttribute.accept(actual);
+        this.assertStep.accept(actual);
+        this.assertDataSource.accept(actual);
+        this.assertSkip.accept(actual);
+        this.assertOverrideDataSource.accept(actual);
+        this.assertIncludeTestRun.accept(actual.includeTestRun());
+        this.assertExcludeTestRun.accept(actual.excludeTestRun());
+        this.assertLazy.accept(actual);
+        this.assertNestedChain.accept(actual);
+        this.assertChainCaseCounts.accept(actual);
+        this.assertChainCases.forEach((key, value) -> value.builder().materialized(this.materialized).build()
+                .run(actual.chains().get(key).builder().setShareInput(actual.shareInput()).build()));
     }
 
     public Builder builder() {
@@ -144,6 +148,7 @@ public class TestCaseAssert {
     }
 
     public static class Builder {
+        private boolean materialized;
         private Consumer<TestCase> assertFileAttribute;
         private Consumer<TestCase> assertStep;
         private Consumer<TestCase> assertDataSource;
@@ -157,6 +162,7 @@ public class TestCaseAssert {
         private final Map<Integer, TestCaseAssert> assertChainCases = Maps.newHashMap();
 
         public Builder() {
+            this.materialized = false;
             this.assertFileAttribute = TestCaseAssert::assertEqualsNoRelationFile;
             this.assertStep = TestCaseAssert::assertEqualsNoStep;
             this.assertDataSource = TestCaseAssert::assertEqualsNoDataSource;
@@ -170,6 +176,7 @@ public class TestCaseAssert {
         }
 
         public Builder(final TestCaseAssert testCaseAssert) {
+            this.materialized = testCaseAssert.materialized;
             this.assertFileAttribute = testCaseAssert.assertFileAttribute;
             this.assertStep = testCaseAssert.assertStep;
             this.assertDataSource = testCaseAssert.assertDataSource;
@@ -181,6 +188,11 @@ public class TestCaseAssert {
             this.assertNestedChain = testCaseAssert.assertNestedChain;
             this.assertChainCaseCounts = testCaseAssert.assertChainCaseCounts;
             this.assertChainCases.putAll(testCaseAssert.assertChainCases);
+        }
+
+        public Builder materialized(final boolean materialized) {
+            this.materialized = materialized;
+            return this;
         }
 
         public Builder assertFileAttribute(final Consumer<TestCase> assertion) {
@@ -242,7 +254,7 @@ public class TestCaseAssert {
             return this;
         }
 
-        public TestCaseAssert create() {
+        public TestCaseAssert build() {
             return new TestCaseAssert(this);
         }
 

@@ -1,0 +1,45 @@
+{
+  "aspect": [
+    {
+      "pointcut": [
+        {
+          "import": "../pointcut/multiFilter.json",
+          "skip": "false"
+        }
+      ],
+      "after": {
+        "steps": [
+          {
+            "type": "SetElementText",
+            "text": "after step"
+          },
+          {
+            "type": "Get"
+          }
+        ]
+      },
+      "before": {
+        "steps": [
+          {
+            "type": "Get"
+          },
+          {
+            "type": "SetElementText",
+            "text": "before step"
+          }
+        ]
+      },
+      "failure": {
+        "steps": [
+          {
+            "type": "SetElementSelected"
+          },
+          {
+            "type": "SetElementText",
+            "text": "failure step"
+          }
+        ]
+      }
+    }
+  ]
+}
