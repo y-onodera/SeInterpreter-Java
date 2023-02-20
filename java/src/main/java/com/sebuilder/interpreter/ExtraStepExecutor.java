@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 
 import java.util.Map;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public record ExtraStepExecutor(Pointcut pointcut,
                                 TestCase beforeStep,
@@ -11,12 +12,12 @@ public record ExtraStepExecutor(Pointcut pointcut,
                                 TestCase failureStep) implements Interceptor {
 
     @Override
-    public Interceptor materialize(final InputData shareInput) {
-        return new ExtraStepExecutor(this.pointcut.materialize(shareInput)
+    public Stream<Interceptor> materialize(final InputData shareInput) {
+        return Stream.of(new ExtraStepExecutor(this.pointcut.materialize(shareInput)
                 , this.beforeStep.mapWhen(TestCase::isLazyLoad, it -> it.setShareInput(shareInput).build().execLazyLoad().builder())
                 , this.afterStep.mapWhen(TestCase::isLazyLoad, it -> it.setShareInput(shareInput).build().execLazyLoad().builder())
                 , this.failureStep.mapWhen(TestCase::isLazyLoad, it -> it.setShareInput(shareInput).build().execLazyLoad().builder())
-        );
+        ));
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.sebuilder.interpreter.script;
 
+import com.sebuilder.interpreter.Aspect;
 import com.sebuilder.interpreter.DataSource;
 import com.sebuilder.interpreter.Pointcut;
 import com.sebuilder.interpreter.TestCase;
@@ -10,12 +11,15 @@ import java.util.HashMap;
 
 public class OverrideSettingLoader {
 
+    private final AspectLoader aspectLoader;
+
     private final PointcutLoader pointcutLoader;
 
     private final DataSourceConfigLoader dataSourceConfigLoader;
 
-    public OverrideSettingLoader(final PointcutLoader pointcutLoader, final DataSourceConfigLoader dataSourceConfigLoader) {
-        this.pointcutLoader = pointcutLoader;
+    public OverrideSettingLoader(final AspectLoader aspectLoader, final DataSourceConfigLoader dataSourceConfigLoader) {
+        this.aspectLoader = aspectLoader;
+        this.pointcutLoader = aspectLoader.pointcutLoader();
         this.dataSourceConfigLoader = dataSourceConfigLoader;
     }
 
@@ -28,15 +32,21 @@ public class OverrideSettingLoader {
         final boolean preventContextAspect = this.isPreventContextAspect(script);
         final Pointcut includeTestRun;
         if (script.has("include")) {
-            includeTestRun = this.pointcutLoader.load(script.getJSONArray("include"), baseDir).orElse(Pointcut.ANY);
+            includeTestRun = this.pointcutLoader.load(script, "include", baseDir).orElse(Pointcut.ANY);
         } else {
             includeTestRun = Pointcut.ANY;
         }
         final Pointcut excludeTestRun;
         if (script.has("exclude")) {
-            excludeTestRun = this.pointcutLoader.load(script.getJSONArray("exclude"), baseDir).orElse(Pointcut.NONE);
+            excludeTestRun = this.pointcutLoader.load(script, "exclude", baseDir).orElse(Pointcut.NONE);
         } else {
             excludeTestRun = Pointcut.NONE;
+        }
+        final Aspect aspect;
+        if (script.has("aspect")) {
+            aspect = this.aspectLoader.load(script, baseDir);
+        } else {
+            aspect = new Aspect();
         }
         return resultTestCase.map(it -> it.setSkip(skip)
                 .mapWhen(target -> dataSource != null
@@ -44,6 +54,7 @@ public class OverrideSettingLoader {
                 )
                 .setIncludeTestRun(includeTestRun)
                 .setExcludeTestRun(excludeTestRun)
+                .setAspect(aspect)
                 .isNestedChain(nestedChain)
                 .isBreakNestedChain(breakNestedChain)
                 .isPreventContextAspect(preventContextAspect)

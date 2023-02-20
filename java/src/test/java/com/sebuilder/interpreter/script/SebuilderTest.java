@@ -11,6 +11,10 @@ import com.sebuilder.interpreter.pointcut.SkipFilter;
 import com.sebuilder.interpreter.pointcut.StringParamFilter;
 import com.sebuilder.interpreter.pointcut.TypeFilter;
 import com.sebuilder.interpreter.step.StepTypeFactoryImpl;
+import com.sebuilder.interpreter.step.type.Get;
+import com.sebuilder.interpreter.step.type.SetElementSelected;
+import com.sebuilder.interpreter.step.type.SetElementText;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
@@ -500,4 +504,99 @@ public class SebuilderTest {
         }
     }
 
+    public static class ParseSuiteWithAspect extends ParseResultTest {
+
+        private final File testFile = new File(baseDir, "suiteWithAspect.json");
+
+        @Before
+        public void setUp() {
+            this.result = target.load(this.testFile);
+        }
+
+        @Override
+        public TestCaseAssert getTestCaseAssert() {
+            return TestCaseAssert.of()
+                    .materialized(true)
+                    .assertFileAttribute(TestCaseAssert.assertEqualsFileAttribute(this.testFile))
+                    .assertChainCaseCounts(TestCaseAssert.assertEqualsChainCaseCount(1))
+                    .assertChainCase(0, new ParseScriptNoContents().getTestCaseAssert()
+                            .builder()
+                            .assertAspect(it -> Assert.assertEquals(new Aspect().builder()
+                                    .add(new ExtraStepExecutor.Builder()
+                                            .setPointcut(new TypeFilter("SetElementText")
+                                                    .or(new TypeFilter("SelectElementValue"))
+                                                    .or(new TypeFilter("SetElementSelected"))
+                                                    .and(new LocatorFilter("locator", new Locator("id", "id1"))
+                                                            .or(new LocatorFilter("locator", new Locator("id", "id2")))
+                                                            .or(new LocatorFilter("locator", new Locator("id", "id3"))))
+                                                    .and(new SkipFilter(false))
+                                            ).addAfter(new TestCaseBuilder()
+                                                    .addStep(new SetElementText().toStep().put("text", "after step").build())
+                                                    .addStep(new Get().toStep().build())
+                                                    .build()
+                                            ).addBefore(new TestCaseBuilder()
+                                                    .addStep(new Get().toStep().build())
+                                                    .addStep(new SetElementText().toStep().put("text", "before step").build())
+                                                    .build()
+                                            ).addFailure(new TestCaseBuilder()
+                                                    .addStep(new SetElementSelected().toStep().build())
+                                                    .addStep(new SetElementText().toStep().put("text", "failure step").build())
+                                                    .build()
+                                            )
+                                    )
+                                    .build(), it))
+                            .assertChainCaseCounts(2)
+                            .assertChainCase(0, new ParseScriptTypeWithSteps().getTestCaseAssert()
+                                    .builder()
+                                    .assertAspect(it -> Assert.assertEquals(new Aspect().builder()
+                                            .add(new ExtraStepExecutor.Builder()
+                                                    .setPointcut(new SkipFilter(false)
+                                                            .and(new TypeFilter("SetElementText")
+                                                                    .or(new TypeFilter("SelectElementValue"))
+                                                                    .or(new TypeFilter("SetElementSelected"))
+                                                            )
+                                                            .and(new LocatorFilter("locator", new Locator("id", "id1"))
+                                                                    .or(new LocatorFilter("locator", new Locator("id", "id2")))
+                                                                    .or(new LocatorFilter("locator", new Locator("id", "id3"))))
+                                                    ).addAfter(new TestCaseBuilder()
+                                                            .addStep(new SetElementText().toStep()
+                                                                    .put("text", "after step")
+                                                                    .put(Step.KEY_NAME_SKIP, "false")
+                                                                    .build())
+                                                            .addStep(new Get().toStep()
+                                                                    .put(Step.KEY_NAME_SKIP, "false")
+                                                                    .build())
+                                                            .build()
+                                                    ).addBefore(new TestCaseBuilder()
+                                                            .addStep(new Get().toStep()
+                                                                    .put(Step.KEY_NAME_SKIP, "false")
+                                                                    .build())
+                                                            .addStep(new SetElementText().toStep()
+                                                                    .put("text", "before step")
+                                                                    .put(Step.KEY_NAME_SKIP, "false")
+                                                                    .build())
+                                                            .build()
+                                                    ).addFailure(new TestCaseBuilder()
+                                                            .addStep(new SetElementSelected().toStep()
+                                                                    .put(Step.KEY_NAME_SKIP, "false")
+                                                                    .build())
+                                                            .addStep(new SetElementText().toStep()
+                                                                    .put("text", "failure step")
+                                                                    .put(Step.KEY_NAME_SKIP, "false")
+                                                                    .build())
+                                                            .build()
+                                                    )
+                                            )
+                                            .build(), it))
+                                    .build()
+                            )
+                            .assertChainCase(1, new ParseScriptTypeWithDataSource().getTestCaseAssert()
+                                    .builder()
+                                    .assertOverrideDataSource(TestCaseAssert.assertEqualsOverrideDataSst(DATA_SET_NONE))
+                                    .build())
+                            .build())
+                    .assertDataSource(TestCaseAssert::assertEqualsNoDataSource)
+                    .build();
+        }
+    }
 }

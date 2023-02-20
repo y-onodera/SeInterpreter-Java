@@ -28,27 +28,25 @@
         {
           "path": "scriptWithSteps.json",
           "skip": "true",
-          "include": [
-            {
-              "type": [
-                "SetElementText",
-                "SelectElementValue",
-                "SetElementSelected"
-              ],
-              "locator": {
-                "type": "id",
-                "value": [
-                  "id1",
-                  "id2",
-                  "id3"
-                ]
-              },
-              "text": {
-                "value": "false",
-                "method": "contains"
-              }
+          "include": {
+            "type": [
+              "SetElementText",
+              "SelectElementValue",
+              "SetElementSelected"
+            ],
+            "locator": {
+              "type": "id",
+              "value": [
+                "id1",
+                "id2",
+                "id3"
+              ]
+            },
+            "text": {
+              "value": "false",
+              "method": "contains"
             }
-          ]
+          }
         },
         {
           "path": "scriptWithDataSource.json",
@@ -64,11 +62,9 @@
               "skip": "false"
             }
           ],
-          "exclude": [
-            {
-              "import": "${excludeImport}"
-            }
-          ]
+          "exclude": {
+            "import": "${excludeImport}"
+          }
         }
       ]
     }

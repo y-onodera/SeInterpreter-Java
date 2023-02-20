@@ -19,6 +19,7 @@ public class TestCaseAssert {
     private final Consumer<TestCase> assertOverrideDataSource;
     private final Consumer<Pointcut> assertIncludeTestRun;
     private final Consumer<Pointcut> assertExcludeTestRun;
+    private final Consumer<Aspect> assertAspect;
     private final Consumer<TestCase> assertLazy;
     private final Consumer<TestCase> assertNestedChain;
     private final Consumer<TestCase> assertChainCaseCounts;
@@ -33,6 +34,7 @@ public class TestCaseAssert {
         this.assertOverrideDataSource = builder.assertOverrideDataSource;
         this.assertIncludeTestRun = builder.assertIncludeTestRun;
         this.assertExcludeTestRun = builder.assertExcludeTestRun;
+        this.assertAspect = builder.assertAspect;
         this.assertLazy = builder.assertLazy;
         this.assertNestedChain = builder.assertNestedChain;
         this.assertChainCaseCounts = builder.assertChainCaseCounts;
@@ -136,6 +138,7 @@ public class TestCaseAssert {
         this.assertOverrideDataSource.accept(actual);
         this.assertIncludeTestRun.accept(actual.includeTestRun());
         this.assertExcludeTestRun.accept(actual.excludeTestRun());
+        this.assertAspect.accept(actual.aspect());
         this.assertLazy.accept(actual);
         this.assertNestedChain.accept(actual);
         this.assertChainCaseCounts.accept(actual);
@@ -156,6 +159,7 @@ public class TestCaseAssert {
         private Consumer<TestCase> assertOverrideDataSource;
         private Consumer<Pointcut> assertIncludeTestRun;
         private Consumer<Pointcut> assertExcludeTestRun;
+        private Consumer<Aspect> assertAspect;
         private Consumer<TestCase> assertLazy;
         private Consumer<TestCase> assertNestedChain;
         private Consumer<TestCase> assertChainCaseCounts;
@@ -170,6 +174,7 @@ public class TestCaseAssert {
             this.assertOverrideDataSource = TestCaseAssert::assertEqualsNoOverrideDataSource;
             this.assertIncludeTestRun = it -> assertSame(Pointcut.ANY, it);
             this.assertExcludeTestRun = it -> assertSame(Pointcut.NONE, it);
+            this.assertAspect = it -> assertEquals(new Aspect(), it);
             this.assertLazy = TestCaseAssert::assertNotLazyLoad;
             this.assertNestedChain = TestCaseAssert::assertNotNestedChain;
             this.assertChainCaseCounts = TestCaseAssert::assertEqualsNoChainCase;
@@ -184,6 +189,7 @@ public class TestCaseAssert {
             this.assertOverrideDataSource = testCaseAssert.assertOverrideDataSource;
             this.assertIncludeTestRun = testCaseAssert.assertIncludeTestRun;
             this.assertExcludeTestRun = testCaseAssert.assertExcludeTestRun;
+            this.assertAspect = testCaseAssert.assertAspect;
             this.assertLazy = testCaseAssert.assertLazy;
             this.assertNestedChain = testCaseAssert.assertNestedChain;
             this.assertChainCaseCounts = testCaseAssert.assertChainCaseCounts;
@@ -227,6 +233,11 @@ public class TestCaseAssert {
 
         public Builder assertExcludeTestRun(final Consumer<Pointcut> assertion) {
             this.assertExcludeTestRun = assertion;
+            return this;
+        }
+
+        public Builder assertAspect(final Consumer<Aspect> assertion) {
+            this.assertAspect = assertion;
             return this;
         }
 

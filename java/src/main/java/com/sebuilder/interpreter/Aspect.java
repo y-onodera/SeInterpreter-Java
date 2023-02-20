@@ -38,7 +38,7 @@ public record Aspect(Iterable<Interceptor> interceptors) implements Iterable<Int
     }
 
     public Stream<Interceptor> getStream() {
-        return StreamSupport.stream(this.interceptors.spliterator(), false);
+        return this.toStream(this.interceptors);
     }
 
     @Override
@@ -52,7 +52,7 @@ public record Aspect(Iterable<Interceptor> interceptors) implements Iterable<Int
     }
 
     public Aspect materialize(final InputData shareInput) {
-        return from(this.getStream().map(it -> it.materialize(shareInput)));
+        return from(this.getStream().flatMap(it -> it.materialize(shareInput)));
     }
 
     public record Advice(List<Interceptor> advices) {
@@ -82,6 +82,10 @@ public record Aspect(Iterable<Interceptor> interceptors) implements Iterable<Int
                 }
             }
         }
+    }
+
+    private Stream<Interceptor> toStream(final Iterable<Interceptor> materialize) {
+        return StreamSupport.stream(materialize.spliterator(), false);
     }
 
     public static class Builder {

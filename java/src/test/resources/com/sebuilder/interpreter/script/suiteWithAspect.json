@@ -1,0 +1,85 @@
+{
+  "type": "suite",
+  "scripts": [
+    {
+      "chain": [
+        {
+          "path": "scriptWithNoContents.json",
+          "aspect": {
+            "import": "aspect/aspectWithImportPointcut.json"
+          }
+        },
+        {
+          "path": "scriptWithSteps.json",
+          "aspect": [
+            {
+              "pointcut": [
+                {
+                  "type": [
+                    "SetElementText",
+                    "SelectElementValue",
+                    "SetElementSelected"
+                  ],
+                  "locator": {
+                    "type": "id",
+                    "value": [
+                      "id1",
+                      "id2",
+                      "id3"
+                    ]
+                  },
+                  "skip": "false"
+                }
+              ],
+              "after": {
+                "steps": [
+                  {
+                    "type": "SetElementText",
+                    "text": "after step",
+                    "skip": "false"
+                  },
+                  {
+                    "type": "Get",
+                    "skip": "false"
+                  }
+                ]
+              },
+              "before": {
+                "steps": [
+                  {
+                    "type": "Get",
+                    "skip": "false"
+                  },
+                  {
+                    "type": "SetElementText",
+                    "text": "before step",
+                    "skip": "false"
+                  }
+                ]
+              },
+              "failure": {
+                "steps": [
+                  {
+                    "type": "SetElementSelected",
+                    "skip": "false"
+                  },
+                  {
+                    "type": "SetElementText",
+                    "text": "failure step",
+                    "skip": "false"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "path": "scriptWithDataSource.json",
+          "data": {
+            "source": "none"
+          }
+        }
+      ]
+    }
+  ]
+}

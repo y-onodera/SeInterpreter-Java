@@ -28,10 +28,21 @@ public class PointcutLoader {
 
     public Optional<Pointcut> load(final File f) {
         try (final BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(f), StandardCharsets.UTF_8))) {
-            return this.load(new JSONArray(new JSONTokener(r)), f.getAbsoluteFile().getParentFile());
+            return this.load(new JSONObject(new JSONTokener(r)), f.getAbsoluteFile().getParentFile());
         } catch (final Throwable e) {
             throw new AssertionError("error load:" + f.getAbsolutePath(), e);
         }
+    }
+
+    public Optional<Pointcut> load(final JSONObject jsonObject, final File parentFile) {
+        return this.load(jsonObject, "pointcut", parentFile);
+    }
+
+    public Optional<Pointcut> load(final JSONObject jsonObject, final String key, final File parentFile) {
+        if (jsonObject.get(key) instanceof JSONObject object) {
+            return this.parseFilter(object, parentFile);
+        }
+        return this.load(jsonObject.getJSONArray(key), parentFile);
     }
 
     public Optional<Pointcut> load(final JSONArray pointcuts, final File baseDir) {
@@ -46,14 +57,13 @@ public class PointcutLoader {
     protected Optional<Pointcut> parseFilter(final JSONObject pointcutJSON, final File baseDir) {
         final JSONArray keysA = pointcutJSON.names();
         return IntStream.range(0, keysA.length())
-                .mapToObj(j -> this.parseFilter(pointcutJSON, keysA, j, baseDir))
+                .mapToObj(j -> this.parseFilter(pointcutJSON, keysA.getString(j), baseDir))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .reduce(Pointcut::and);
     }
 
-    protected Optional<Pointcut> parseFilter(final JSONObject json, final JSONArray keysA, final int j, final File baseDir) {
-        final String key = keysA.getString(j);
+    protected Optional<Pointcut> parseFilter(final JSONObject json, final String key, final File baseDir) {
         if (key.equals("import")) {
             return this.importScript(json, key, baseDir);
         } else if (key.equals("type")) {

@@ -24,11 +24,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.stream.IntStream;
 
@@ -57,7 +53,7 @@ public class Sebuilder extends AbstractJsonScriptParser {
         this.importLoader = new ImportLoader();
         this.pointcutLoader = new PointcutLoader();
         this.aspectLoader = new AspectLoader(this, this.pointcutLoader);
-        this.overrideSettingLoader = new OverrideSettingLoader(this.pointcutLoader, this.dataSourceConfigLoader);
+        this.overrideSettingLoader = new OverrideSettingLoader(this.aspectLoader, this.dataSourceConfigLoader);
     }
 
     /**
@@ -75,11 +71,7 @@ public class Sebuilder extends AbstractJsonScriptParser {
 
     @Override
     public Aspect loadAspect(final File f) {
-        try (final BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(f), StandardCharsets.UTF_8))) {
-            return this.aspectLoader.load(new JSONObject(new JSONTokener(r)), f.getAbsoluteFile().getParentFile());
-        } catch (final Throwable e) {
-            throw new AssertionError("error load:" + f.getAbsolutePath(), e);
-        }
+        return this.aspectLoader.load(f);
     }
 
     @Override

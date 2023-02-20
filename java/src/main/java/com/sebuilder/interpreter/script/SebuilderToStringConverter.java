@@ -11,18 +11,22 @@ public class SebuilderToStringConverter implements TestCaseConverter {
 
     @Override
     public String toString(final Suite target) {
-        return this.toStringSuite(target.head());
+        return this.toString(target.head());
     }
 
     @Override
     public String toString(final TestCase target) {
-        if (target.scriptFile().type() == ScriptFile.Type.SUITE) {
-            return this.toStringSuite(target);
-        }
-        return this.toStringTest(target);
+        return this.toJson(target).toString(4);
     }
 
-    protected String toStringTest(final TestCase target) {
+    protected JSONObject toJson(final TestCase target) {
+        if (target.scriptFile().type() == ScriptFile.Type.SUITE) {
+            return this.toJsonSuite(target);
+        }
+        return this.toJsonTest(target);
+    }
+
+    protected JSONObject toJsonTest(final TestCase target) {
         final JSONObject o = new JSONObject();
         final JSONArray stepsA = new JSONArray();
         target.steps().forEach(s -> stepsA.put(this.toJSON(s)));
@@ -31,10 +35,10 @@ public class SebuilderToStringConverter implements TestCaseConverter {
         if (data != null) {
             o.put("data", data);
         }
-        return o.toString(4);
+        return o;
     }
 
-    protected String toStringSuite(final TestCase target) {
+    protected JSONObject toJsonSuite(final TestCase target) {
         final JSONObject o = new JSONObject();
         final JSONObject data = this.toJson(target.dataSourceLoader());
         if (data != null) {
@@ -43,7 +47,7 @@ public class SebuilderToStringConverter implements TestCaseConverter {
         o.put("type", "suite");
         o.put("scripts", this.toJsonArray(target));
         o.put("shareState", target.shareState());
-        return o.toString(4);
+        return o;
     }
 
     protected JSONObject toJSON(final Step s) {
@@ -139,17 +143,60 @@ public class SebuilderToStringConverter implements TestCaseConverter {
         }
         if (testCase.includeTestRun() != Pointcut.ANY) {
             final Collection<JSONObject> results = this.toJson(testCase.includeTestRun());
-            if (results.size() > 0) {
+            if (results.size() == 1) {
+                scriptPath.put("include", results.iterator().next());
+            } else if (results.size() > 0) {
                 scriptPath.put("include", results);
             }
         }
         if (testCase.excludeTestRun() != Pointcut.NONE) {
             final Collection<JSONObject> results = this.toJson(testCase.excludeTestRun());
-            if (results.size() > 0) {
+            if (results.size() == 1) {
+                scriptPath.put("exclude", results.iterator().next());
+            } else if (results.size() > 0) {
                 scriptPath.put("exclude", results);
             }
         }
+        if (!testCase.aspect().equals(new Aspect())) {
+            final Collection<JSONObject> results = this.toJson(testCase.aspect());
+            if (results.size() == 1) {
+                scriptPath.put("aspect", results.iterator().next());
+            } else if (results.size() > 0) {
+                scriptPath.put("aspect", results);
+            }
+        }
         return scriptPath;
+    }
+
+    protected Collection<JSONObject> toJson(final Aspect aspect) {
+        final List<JSONObject> results = new ArrayList<>();
+        for (final Interceptor interceptor : aspect) {
+            if (interceptor instanceof Interceptor.Exportable exportable) {
+                results.add(this.toJson(exportable));
+            } else if (interceptor instanceof ExtraStepExecutor extra) {
+                final JSONObject result = new JSONObject();
+                result.put("pointcut", this.toJson(extra.pointcut()));
+                result.put("before", this.toJson(extra.beforeStep()));
+                result.put("after", this.toJson(extra.afterStep()));
+                result.put("failure", this.toJson(extra.failureStep()));
+                results.add(result);
+            }
+        }
+        return results;
+    }
+
+    protected JSONObject toJson(final Interceptor.Exportable target) {
+        final JSONObject result = new JSONObject();
+        if (target.params().size() == 0) {
+            result.put(target.key(), target.value());
+        } else {
+            final JSONObject values = new JSONObject();
+            for (final Map.Entry<String, String> entry : target.params().entrySet()) {
+                values.put(entry.getKey(), entry.getValue());
+            }
+            result.put(target.key(), values);
+        }
+        return result;
     }
 
     protected Collection<JSONObject> toJson(final Pointcut pointcut) {
@@ -175,6 +222,20 @@ public class SebuilderToStringConverter implements TestCaseConverter {
             results.add(this.toJson(target));
         }
         return results;
+    }
+
+    protected JSONObject toJson(final Pointcut.Exportable target) {
+        final JSONObject result = new JSONObject();
+        if (target.params().size() == 0) {
+            result.put(target.key(), target.value());
+        } else {
+            final JSONObject values = new JSONObject();
+            for (final Map.Entry<String, String> entry : target.params().entrySet()) {
+                values.put(entry.getKey(), entry.getValue());
+            }
+            result.put(target.key(), values);
+        }
+        return result;
     }
 
     protected void mergeAndCondition(final JSONObject result, final JSONObject origin, final String key) {
@@ -215,19 +276,5 @@ public class SebuilderToStringConverter implements TestCaseConverter {
                     .mapToObj(addValues::get)
                     .forEach(values::put);
         }
-    }
-
-    protected JSONObject toJson(final Pointcut.Exportable target) {
-        final JSONObject result = new JSONObject();
-        if (target.params().size() == 0) {
-            result.put(target.key(), target.value());
-        } else {
-            final JSONObject values = new JSONObject();
-            for (final Map.Entry<String, String> entry : target.params().entrySet()) {
-                values.put(entry.getKey(), entry.getValue());
-            }
-            result.put(target.key(), values);
-        }
-        return result;
     }
 }
