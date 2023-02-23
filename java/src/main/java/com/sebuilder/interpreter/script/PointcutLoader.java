@@ -53,7 +53,7 @@ public record PointcutLoader(ImportLoader importLoader) {
     }
 
 
-    protected Optional<Pointcut> parseFilter(final JSONObject pointcutJSON, final File baseDir) {
+    public Optional<Pointcut> parseFilter(final JSONObject pointcutJSON, final File baseDir) {
         final JSONArray keysA = pointcutJSON.names();
         return IntStream.range(0, keysA.length())
                 .mapToObj(j -> this.parseFilter(pointcutJSON, keysA.getString(j), baseDir))
@@ -62,7 +62,7 @@ public record PointcutLoader(ImportLoader importLoader) {
                 .reduce(Pointcut::and);
     }
 
-    protected Optional<Pointcut> parseFilter(final JSONObject json, final String key, final File baseDir) {
+    public Optional<Pointcut> parseFilter(final JSONObject json, final String key, final File baseDir) {
         if (key.equals("import")) {
             return this.importScript(json, key, baseDir);
         } else if (key.equals("type")) {
@@ -77,12 +77,12 @@ public record PointcutLoader(ImportLoader importLoader) {
         return this.getStringFilter(json, key);
     }
 
-    protected Optional<Pointcut> importScript(final JSONObject src, final String key, final File baseDir) {
+    public Optional<Pointcut> importScript(final JSONObject src, final String key, final File baseDir) {
         return this.importLoader.load(src, key, (value, where) ->
                 Optional.of(new ImportFilter(value, where, (path) -> this.load(path, baseDir).orElseThrow())));
     }
 
-    protected Optional<Pointcut> getStringFilter(final JSONObject pointcutJSON, final String key) {
+    public Optional<Pointcut> getStringFilter(final JSONObject pointcutJSON, final String key) {
         if (pointcutJSON.get(key) instanceof JSONArray) {
             final JSONArray type = pointcutJSON.getJSONArray(key);
             return IntStream.range(0, type.length())
@@ -95,7 +95,7 @@ public record PointcutLoader(ImportLoader importLoader) {
         return Optional.of(new StringParamFilter(key, pointcutJSON.getString(key)));
     }
 
-    protected Optional<Pointcut> getLocatorFilter(final JSONObject pointcutJSON, final String key) {
+    public Optional<Pointcut> getLocatorFilter(final JSONObject pointcutJSON, final String key) {
         final JSONObject locatorJSON = pointcutJSON.getJSONObject(key);
         if (locatorJSON.get("value") instanceof JSONArray) {
             final JSONArray values = locatorJSON.getJSONArray("value");
@@ -113,7 +113,7 @@ public record PointcutLoader(ImportLoader importLoader) {
         return Optional.of(new LocatorFilter(key, locator));
     }
 
-    protected Optional<Pointcut> getTypeFilter(final JSONObject pointcutJSON, final String key) {
+    public Optional<Pointcut> getTypeFilter(final JSONObject pointcutJSON, final String key) {
         if (pointcutJSON.get(key) instanceof JSONArray) {
             final JSONArray type = pointcutJSON.getJSONArray(key);
             return IntStream.range(0, type.length())
