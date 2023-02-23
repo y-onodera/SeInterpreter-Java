@@ -1,6 +1,5 @@
 package com.sebuilder.interpreter.script;
 
-import com.google.common.base.Strings;
 import com.sebuilder.interpreter.Locator;
 import com.sebuilder.interpreter.Pointcut;
 import com.sebuilder.interpreter.pointcut.*;
@@ -16,7 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
-public class PointcutLoader {
+public record PointcutLoader(ImportLoader importLoader) {
 
     public Optional<Pointcut> load(final File f, final File baseDir) {
         final File path = new File(baseDir, f.getPath());
@@ -79,16 +78,8 @@ public class PointcutLoader {
     }
 
     protected Optional<Pointcut> importScript(final JSONObject src, final String key, final File baseDir) {
-        if (src.get(key) instanceof String value) {
-            return Optional.of(new ImportFilter(value, (path) -> this.load(path, baseDir).orElseThrow()));
-        }
-        final JSONObject importObj = src.getJSONObject(key);
-        final String pathValue = importObj.getString("path");
-        if (importObj.has("where") && !Strings.isNullOrEmpty(importObj.getString("where"))) {
-            return Optional.of(new ImportFilter(pathValue, importObj.getString("where")
-                    , (path) -> this.load(path, baseDir).orElseThrow()));
-        }
-        return Optional.of(new ImportFilter(pathValue, (path) -> this.load(path, baseDir).orElseThrow()));
+        return this.importLoader.load(src, key, (value, where) ->
+                Optional.of(new ImportFilter(value, where, (path) -> this.load(path, baseDir).orElseThrow())));
     }
 
     protected Optional<Pointcut> getStringFilter(final JSONObject pointcutJSON, final String key) {

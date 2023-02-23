@@ -1,6 +1,5 @@
 package com.sebuilder.interpreter.script;
 
-import com.google.common.base.Strings;
 import com.sebuilder.interpreter.Aspect;
 import com.sebuilder.interpreter.ExtraStepExecutor;
 import com.sebuilder.interpreter.Interceptor;
@@ -58,16 +57,8 @@ public record AspectLoader(Sebuilder sebuilder, PointcutLoader pointcutLoader) {
 
     private Interceptor toInterceptor(final JSONObject aspect, final File baseDir) {
         if (aspect.has("import")) {
-            if (aspect.get("import") instanceof String value) {
-                return new ImportInterceptor(value, (path) -> this.load(path, baseDir));
-            }
-            final JSONObject importObj = aspect.getJSONObject("import");
-            final String pathValue = importObj.getString("path");
-            if (importObj.has("where") && !Strings.isNullOrEmpty(importObj.getString("where"))) {
-                return new ImportInterceptor(pathValue, importObj.getString("where")
-                        , (path) -> this.load(path, baseDir));
-            }
-            return new ImportInterceptor(pathValue, (path) -> this.load(path, baseDir));
+            return this.pointcutLoader.importLoader().load(aspect, "import", (value, where) ->
+                    new ImportInterceptor(value, where, (path) -> this.load(path, baseDir)));
         }
         final ExtraStepExecutor.Builder interceptorBuilder = new ExtraStepExecutor.Builder();
         if (aspect.has("pointcut")) {

@@ -15,10 +15,7 @@
  */
 package com.sebuilder.interpreter.script;
 
-import com.sebuilder.interpreter.Aspect;
-import com.sebuilder.interpreter.Step;
-import com.sebuilder.interpreter.TestCase;
-import com.sebuilder.interpreter.TestCaseBuilder;
+import com.sebuilder.interpreter.*;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -51,7 +48,7 @@ public class Sebuilder extends AbstractJsonScriptParser {
         this.stepLoader = new StepLoader();
         this.dataSourceConfigLoader = new DataSourceConfigLoader();
         this.importLoader = new ImportLoader();
-        this.pointcutLoader = new PointcutLoader();
+        this.pointcutLoader = new PointcutLoader(this.importLoader);
         this.aspectLoader = new AspectLoader(this, this.pointcutLoader);
         this.overrideSettingLoader = new OverrideSettingLoader(this.aspectLoader, this.dataSourceConfigLoader);
     }
@@ -159,7 +156,8 @@ public class Sebuilder extends AbstractJsonScriptParser {
                 );
             }));
         }
-        return this.importLoader.load(script, suiteWhere, this::loadScriptIfExists);
+        return this.importLoader.load(script, (path, where) ->
+                this.loadScriptIfExists(this.toFile(suiteWhere, where, path), script));
     }
 
     protected void loadScriptChain(final JSONArray scriptArrays, final TestCaseBuilder builder) {
@@ -169,6 +167,22 @@ public class Sebuilder extends AbstractJsonScriptParser {
 
     protected TestCase loadScriptIfExists(final File wherePath, final JSONObject script) {
         return this.overrideSettingLoader.load(script, wherePath.getParentFile(), this.load(wherePath));
+    }
+
+    protected File toFile(final File baseDir, final String where, final String path) {
+        if (where.isBlank()) {
+            return this.toFile(baseDir, path);
+        }
+        return this.toFile(new File(Context.bindEnvironmentProperties(where)), path);
+    }
+
+    protected File toFile(final File baseDir, final String path) {
+        final String target = Context.bindEnvironmentProperties(path);
+        File f = new File(baseDir, target);
+        if (!f.exists()) {
+            f = new File(target);
+        }
+        return f.getAbsoluteFile();
     }
 
 }

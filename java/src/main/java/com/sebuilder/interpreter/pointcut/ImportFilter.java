@@ -12,10 +12,6 @@ import java.util.function.Function;
 public record ImportFilter(String path, String where,
                            Function<File, Pointcut> loadFunction) implements Pointcut.Exportable {
 
-    public ImportFilter(final String path, final Function<File, Pointcut> loadFunction) {
-        this(path, "", loadFunction);
-    }
-
     @Override
     public boolean isHandle(final Step step, final InputData var) {
         return this.materialize(var).isHandle(step, var);
