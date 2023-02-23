@@ -13,10 +13,6 @@ import java.util.stream.StreamSupport;
 public record ImportInterceptor(String path, String where,
                                 Function<File, Iterable<Interceptor>> loadFunction) implements Interceptor.Exportable {
 
-    public ImportInterceptor(final String path, final Function<File, Iterable<Interceptor>> loadFunction) {
-        this(path, "", loadFunction);
-    }
-
     @Override
     public Stream<Interceptor> materialize(final InputData shareInput) {
         final String runtimePath = shareInput.evaluateString(this.path);
