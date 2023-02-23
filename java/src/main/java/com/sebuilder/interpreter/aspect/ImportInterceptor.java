@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public record ImportInterceptor(String path, String where,
-                                Function<File, Iterable<Interceptor>> loadFunction) implements Interceptor.Exportable {
+                                Function<File, Iterable<Interceptor>> loadFunction) implements Interceptor.ExportableInterceptor {
 
     @Override
     public Stream<Interceptor> materialize(final InputData shareInput) {
@@ -40,7 +40,7 @@ public record ImportInterceptor(String path, String where,
         if (this.where.isBlank()) {
             return this.path;
         }
-        return Interceptor.Exportable.super.value();
+        return ExportableInterceptor.super.value();
     }
 
 }

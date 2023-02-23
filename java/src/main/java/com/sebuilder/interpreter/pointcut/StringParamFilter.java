@@ -7,7 +7,7 @@ import com.sebuilder.interpreter.Step;
 import java.util.HashMap;
 import java.util.Map;
 
-public record StringParamFilter(String key, String target, String method) implements Pointcut.Exportable {
+public record StringParamFilter(String key, String target, String method) implements Pointcut.ExportablePointcut {
 
     public StringParamFilter(final String key, final String value) {
         this(key, value, "equals");
@@ -34,7 +34,7 @@ public record StringParamFilter(String key, String target, String method) implem
         if (this.method.equals("equals")) {
             return this.target;
         }
-        return Exportable.super.value();
+        return ExportablePointcut.super.value();
     }
 
 }

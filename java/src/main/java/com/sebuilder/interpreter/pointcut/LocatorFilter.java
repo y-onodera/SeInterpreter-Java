@@ -8,7 +8,7 @@ import com.sebuilder.interpreter.Step;
 import java.util.HashMap;
 import java.util.Map;
 
-public record LocatorFilter(String key, Locator target, String method) implements Pointcut.Exportable {
+public record LocatorFilter(String key, Locator target, String method) implements Pointcut.ExportablePointcut {
 
     public LocatorFilter(final String key, final Locator target) {
         this(key, target, "equals");

@@ -171,7 +171,7 @@ public class SebuilderToStringConverter implements TestCaseConverter {
     protected Collection<JSONObject> toJson(final Aspect aspect) {
         final List<JSONObject> results = new ArrayList<>();
         for (final Interceptor interceptor : aspect) {
-            if (interceptor instanceof Interceptor.Exportable exportable) {
+            if (interceptor instanceof Exportable exportable) {
                 results.add(this.toJson(exportable));
             } else if (interceptor instanceof ExtraStepExecutor extra) {
                 final JSONObject result = new JSONObject();
@@ -183,20 +183,6 @@ public class SebuilderToStringConverter implements TestCaseConverter {
             }
         }
         return results;
-    }
-
-    protected JSONObject toJson(final Interceptor.Exportable target) {
-        final JSONObject result = new JSONObject();
-        if (target.params().size() == 0) {
-            result.put(target.key(), target.value());
-        } else {
-            final JSONObject values = new JSONObject();
-            for (final Map.Entry<String, String> entry : target.params().entrySet()) {
-                values.put(entry.getKey(), entry.getValue());
-            }
-            result.put(target.key(), values);
-        }
-        return result;
     }
 
     protected Collection<JSONObject> toJson(final Pointcut pointcut) {
@@ -218,21 +204,19 @@ public class SebuilderToStringConverter implements TestCaseConverter {
                         .forEach(i -> this.mergeAndCondition(result, other, keys.getString(i)));
             }
             return List.of(result);
-        } else if (pointcut instanceof Pointcut.Exportable target) {
+        } else if (pointcut instanceof Exportable target) {
             results.add(this.toJson(target));
         }
         return results;
     }
 
-    protected JSONObject toJson(final Pointcut.Exportable target) {
+    protected JSONObject toJson(final Exportable target) {
         final JSONObject result = new JSONObject();
         if (target.params().size() == 0) {
             result.put(target.key(), target.value());
         } else {
             final JSONObject values = new JSONObject();
-            for (final Map.Entry<String, String> entry : target.params().entrySet()) {
-                values.put(entry.getKey(), entry.getValue());
-            }
+            target.params().forEach(values::put);
             result.put(target.key(), values);
         }
         return result;

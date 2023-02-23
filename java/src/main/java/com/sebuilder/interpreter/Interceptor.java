@@ -1,7 +1,5 @@
 package com.sebuilder.interpreter;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.Stream;
 
 public interface Interceptor {
@@ -34,19 +32,11 @@ public interface Interceptor {
         return true;
     }
 
-    interface Exportable extends Interceptor {
+    interface ExportableInterceptor extends Interceptor, Exportable {
+        @Override
         default String key() {
             return this.getClass().getSimpleName().replace("Interceptor", "").toLowerCase();
         }
-
-        default Map<String, String> params() {
-            return new HashMap<>();
-        }
-
-        default String value() {
-            return "";
-        }
-
     }
 
 }

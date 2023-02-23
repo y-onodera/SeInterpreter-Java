@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 public record ImportFilter(String path, String where,
-                           Function<File, Pointcut> loadFunction) implements Pointcut.Exportable {
+                           Function<File, Pointcut> loadFunction) implements Pointcut.ExportablePointcut {
 
     @Override
     public boolean isHandle(final Step step, final InputData var) {
@@ -43,7 +43,7 @@ public record ImportFilter(String path, String where,
         if (this.where.isBlank()) {
             return this.path;
         }
-        return Exportable.super.value();
+        return ExportablePointcut.super.value();
     }
 
 }

@@ -61,19 +61,11 @@ public interface Pointcut {
         return new And(this, other);
     }
 
-    interface Exportable extends Pointcut {
+    interface ExportablePointcut extends Pointcut, Exportable {
+        @Override
         default String key() {
             return this.getClass().getSimpleName().replace("Filter", "").toLowerCase();
         }
-
-        default Map<String, String> params() {
-            return new HashMap<>();
-        }
-
-        default String value() {
-            return "";
-        }
-
     }
 
     record Or(Pointcut origin, Pointcut other) implements Pointcut {
