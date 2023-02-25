@@ -12,7 +12,7 @@ public interface Interceptor {
         return Stream.of(this);
     }
 
-    default boolean isPointcut(final Step step, final InputData vars) {
+    default boolean isPointcut(final TestRun testRun, final Step step, final InputData vars) {
         return false;
     }
 

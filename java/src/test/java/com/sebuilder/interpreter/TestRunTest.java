@@ -776,7 +776,7 @@ public class TestRunTest {
             this.aspectBeforeStep = Mockito.spy(new StepBuilder(new SetElementText()).build());
             this.aspectAfterStep = Mockito.spy(new StepBuilder(new DoubleClickElement()).build());
             this.interceptor = Mockito.spy(new ExtraStepExecutor(
-                    (step, input) -> "name".equals(step.name())
+                    (testRun, step, input) -> "name".equals(step.name())
                     , this.aspectBeforeStep.toTestCase()
                     , this.aspectAfterStep.toTestCase()
                     , new TestCaseBuilder().build()));
@@ -875,7 +875,7 @@ public class TestRunTest {
             this.aspectBeforeStep = Mockito.spy(new StepBuilder(new SetElementText()).build());
             this.aspectAfterStep = Mockito.spy(new StepBuilder(new DoubleClickElement()).build());
             this.interceptor = Mockito.spy(new ExtraStepExecutor(
-                    (step, input) -> "chain".equals(step.name())
+                    (testRun, step, input) -> "chain".equals(step.name())
                     , this.aspectBeforeStep.toTestCase()
                     , this.aspectAfterStep.toTestCase()
                     , new TestCaseBuilder().build()));
@@ -990,7 +990,7 @@ public class TestRunTest {
             this.aspectBeforeStep = Mockito.spy(new StepBuilder(new SetElementText()).build());
             this.aspectAfterStep = Mockito.spy(new StepBuilder(new DoubleClickElement()).build());
             this.interceptor = Mockito.spy(new ExtraStepExecutor(
-                    (step, input) -> "name".equals(step.name())
+                    (testRun, step, input) -> "name".equals(step.name())
                     , this.aspectBeforeStep.toTestCase()
                     , this.aspectAfterStep.toTestCase()
                     , new TestCaseBuilder().build()));
@@ -1004,7 +1004,7 @@ public class TestRunTest {
             this.contextAspectBeforeStep = Mockito.spy(new StepBuilder(new SetElementText()).build());
             this.contextAspectAfterStep = Mockito.spy(new StepBuilder(new DoubleClickElement()).build());
             this.contextInterceptor = Mockito.spy(new ExtraStepExecutor(
-                    (step, input) -> "chain".equals(step.name())
+                    (testRun, step, input) -> "chain".equals(step.name())
                     , this.contextAspectBeforeStep.toTestCase()
                     , this.contextAspectAfterStep.toTestCase()
                     , new TestCaseBuilder().build()));

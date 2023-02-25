@@ -6,11 +6,10 @@ import com.sebuilder.interpreter.datasource.Csv;
 import com.sebuilder.interpreter.datasource.DataSourceFactoryImpl;
 import com.sebuilder.interpreter.datasource.Manual;
 import com.sebuilder.interpreter.datasource.None;
-import com.sebuilder.interpreter.pointcut.LocatorFilter;
-import com.sebuilder.interpreter.pointcut.SkipFilter;
-import com.sebuilder.interpreter.pointcut.StringParamFilter;
-import com.sebuilder.interpreter.pointcut.TypeFilter;
+import com.sebuilder.interpreter.pointcut.*;
 import com.sebuilder.interpreter.step.StepTypeFactoryImpl;
+import com.sebuilder.interpreter.step.getter.ElementEnable;
+import com.sebuilder.interpreter.step.getter.ElementPresent;
 import com.sebuilder.interpreter.step.type.Get;
 import com.sebuilder.interpreter.step.type.SetElementSelected;
 import com.sebuilder.interpreter.step.type.SetElementText;
@@ -21,6 +20,7 @@ import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -490,7 +490,11 @@ public class SebuilderTest {
                                             new TypeFilter("SetElementText")
                                                     .or(new TypeFilter("SelectElementValue"))
                                                     .or(new TypeFilter("SetElementSelected"))
+                                                    .and(new VerifyFilter(false, new ElementEnable().toVerify(), new HashMap<>()))
                                                     .and(new SkipFilter(false))
+                                                    .and(new VerifyFilter(false, new ElementPresent().toVerify(), new HashMap<>() {{
+                                                        this.put("negated", "false");
+                                                    }}))
                                             , it))
                                     .assertExcludeTestRun(it -> assertEquals(
                                             new LocatorFilter("locator", new Locator("id", "id1"))

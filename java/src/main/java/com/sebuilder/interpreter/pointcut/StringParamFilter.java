@@ -3,6 +3,7 @@ package com.sebuilder.interpreter.pointcut;
 import com.sebuilder.interpreter.InputData;
 import com.sebuilder.interpreter.Pointcut;
 import com.sebuilder.interpreter.Step;
+import com.sebuilder.interpreter.TestRun;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,7 +15,7 @@ public record StringParamFilter(String key, String target, String method) implem
     }
 
     @Override
-    public boolean isHandle(final Step step, final InputData vars) {
+    public boolean isHandle(final TestRun testRun, final Step step, final InputData vars) {
         return step.containsParam(this.key)
                 && METHODS.get(this.method).apply(vars.evaluateString(step.getParam(this.key)), this.target);
     }

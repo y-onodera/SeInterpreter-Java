@@ -3,6 +3,7 @@ package com.sebuilder.interpreter.pointcut;
 import com.sebuilder.interpreter.InputData;
 import com.sebuilder.interpreter.Pointcut;
 import com.sebuilder.interpreter.Step;
+import com.sebuilder.interpreter.TestRun;
 
 import java.io.File;
 import java.util.HashMap;
@@ -13,8 +14,8 @@ public record ImportFilter(String path, String where,
                            Function<File, Pointcut> loadFunction) implements Pointcut.ExportablePointcut {
 
     @Override
-    public boolean isHandle(final Step step, final InputData var) {
-        return this.materialize(var).isHandle(step, var);
+    public boolean isHandle(final TestRun testRun, final Step step, final InputData var) {
+        return this.materialize(var).isHandle(testRun, step, var);
     }
 
     @Override

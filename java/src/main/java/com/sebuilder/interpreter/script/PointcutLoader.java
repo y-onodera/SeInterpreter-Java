@@ -1,8 +1,10 @@
 package com.sebuilder.interpreter.script;
 
+import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.Locator;
 import com.sebuilder.interpreter.Pointcut;
 import com.sebuilder.interpreter.pointcut.*;
+import com.sebuilder.interpreter.step.Verify;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -12,7 +14,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public record PointcutLoader(ImportLoader importLoader) {
@@ -73,6 +78,8 @@ public record PointcutLoader(ImportLoader importLoader) {
             return Optional.of(new SkipFilter(json.getBoolean(key)));
         } else if (key.startsWith("locator")) {
             return this.getLocatorFilter(json, key);
+        } else if (key.startsWith("verify")) {
+            return this.getVerifyFilter(json, key);
         }
         return this.getStringFilter(json, key);
     }
@@ -125,4 +132,31 @@ public record PointcutLoader(ImportLoader importLoader) {
         }
         return Optional.of(new TypeFilter(pointcutJSON.getString(key)));
     }
+
+    public Optional<Pointcut> getVerifyFilter(final JSONObject pointcutJSON, final String name) {
+        if (pointcutJSON.get(name) instanceof JSONArray) {
+            final JSONArray type = pointcutJSON.getJSONArray(name);
+            return IntStream.range(0, type.length())
+                    .mapToObj(k -> (Pointcut) this.toVerifyFilter(type.getJSONObject(k), name))
+                    .reduce(Pointcut::or);
+        }
+        return Optional.of(this.toVerifyFilter(pointcutJSON, name));
+    }
+
+    public VerifyFilter toVerifyFilter(final JSONObject pointcutJSON, final String name) {
+        if (pointcutJSON.get(name) instanceof JSONObject) {
+            final Verify verify = (Verify) Context.getStepTypeFactory().getStepTypeOfName(name);
+            final JSONObject condition = pointcutJSON.getJSONObject(name);
+            final Map<String, String> params = condition.keySet()
+                    .stream()
+                    .filter(key -> !key.equals("handleNoLocator"))
+                    .collect(Collectors.toMap(key -> key, condition::getString));
+            return new VerifyFilter(Boolean.parseBoolean(condition.optString("handleNoLocator")), verify, params);
+        }
+        final Verify verify = (Verify) Context.getStepTypeFactory().getStepTypeOfName(name);
+        final Map<String, String> params = new HashMap<>();
+        params.put("negated", Boolean.toString(!Boolean.parseBoolean(pointcutJSON.getString(name))));
+        return new VerifyFilter(false, verify, params);
+    }
+
 }

@@ -21,6 +21,9 @@ import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.StepElement;
 import com.sebuilder.interpreter.TestRun;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Interface to plug into the generic Assert/Verify/Store steps that does the work of actually
  * getting the relevant variable.
@@ -93,4 +96,11 @@ public interface Getter extends StepElement {
         return o;
     }
 
+    default Map<String, String> params() {
+        final HashMap<String, String> result = new HashMap<>();
+        if (this.cmpParamName() != null) {
+            result.put(this.cmpParamName(), "");
+        }
+        return result;
+    }
 }

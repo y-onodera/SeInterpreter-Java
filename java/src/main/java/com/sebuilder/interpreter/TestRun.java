@@ -210,8 +210,8 @@ public class TestRun implements WebDriverWrapper {
 
     public Step.Result runStep() {
         this.toNextStepIndex();
-        if (this.includeFilter.isHandle(this.currentStep(), this.vars)
-                && !this.excludeFilter.isHandle(this.currentStep(), this.vars)) {
+        if (this.includeFilter.isHandle(this, this.currentStep(), this.vars)
+                && !this.excludeFilter.isHandle(this, this.currentStep(), this.vars)) {
             return this.currentStep().execute(this);
         }
         return new Step.Result(true, 0);
@@ -312,7 +312,7 @@ public class TestRun implements WebDriverWrapper {
                     .add(Context.getAspect())
                     .build();
         }
-        return weaver.advice(this.currentStep(), this.vars());
+        return weaver.advice(this, this.currentStep(), this.vars());
     }
 
     protected boolean chainRun() {

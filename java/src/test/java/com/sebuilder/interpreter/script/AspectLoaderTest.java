@@ -38,13 +38,13 @@ public class AspectLoaderTest {
         }
 
         protected void assertNotWeaver(final Step step, final InputData inputData) {
-            final var advice = this.result.advice(step, inputData)
+            final var advice = this.result.advice(null, step, inputData)
                     .advices();
             assertEquals(0, advice.size());
         }
 
         protected void assertWeaver(final Step step, final InputData inputData) {
-            final var advice = this.result.advice(step, inputData)
+            final var advice = this.result.advice(null, step, inputData)
                     .advices();
             assertEquals(1, advice.size());
             assertEquals(1, getInterceptor(advice, 0).beforeStep().steps().size());
@@ -177,7 +177,7 @@ public class AspectLoaderTest {
 
         @Test
         public void adviceWeaverPointcutValue() {
-            final var advice = this.result.advice(new ClickElement().toStep()
+            final var advice = this.result.advice(null, new ClickElement().toStep()
                             .negated(true)
                             .skip("true")
                             .locator(new Locator("id", "id1"))
@@ -234,7 +234,7 @@ public class AspectLoaderTest {
 
         @Override
         protected void assertWeaver(final Step step, final InputData inputData) {
-            final var advice = this.result.advice(step, inputData)
+            final var advice = this.result.advice(null, step, inputData)
                     .advices();
             assertEquals(1, advice.size());
             assertEquals(2, getInterceptor(advice, 0).beforeStep().steps().size());

@@ -31,9 +31,9 @@ public record Aspect(Iterable<Interceptor> interceptors) implements Iterable<Int
         return new Builder(this.interceptors);
     }
 
-    public Advice advice(final Step step, final InputData vars) {
+    public Advice advice(final TestRun testRun, final Step step, final InputData vars) {
         return new Advice(this.getStream()
-                .filter(interceptor -> interceptor.isPointcut(step, vars))
+                .filter(interceptor -> interceptor.isPointcut(testRun, step, vars))
                 .toList());
     }
 

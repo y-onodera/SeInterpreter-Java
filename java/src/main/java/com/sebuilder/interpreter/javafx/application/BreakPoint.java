@@ -10,7 +10,7 @@ import java.util.function.Predicate;
 
 public record BreakPoint(Map<Integer, Pointcut> condition, Debugger debugger) implements Interceptor {
 
-    public static Pointcut STEP_BY_STEP = (step, vars) -> true;
+    public static Pointcut STEP_BY_STEP = (testRun, step, vars) -> true;
 
     public static Predicate<Interceptor> typeMatch() {
         return interceptor -> interceptor instanceof BreakPoint;
@@ -29,17 +29,17 @@ public record BreakPoint(Map<Integer, Pointcut> condition, Debugger debugger) im
     }
 
     @Override
-    public boolean isPointcut(final Step step, final InputData vars) {
+    public boolean isPointcut(final TestRun testRun, final Step step, final InputData vars) {
         switch (this.debugger.getDebugStatus()) {
             case stepOver:
             case stop:
             case pause:
-                return STEP_BY_STEP.isHandle(step, vars);
+                return STEP_BY_STEP.isHandle(testRun, step, vars);
             case await:
             case resume:
         }
         final Integer stepIndex = vars.stepIndex();
-        return this.condition.containsKey(stepIndex) && this.condition.get(stepIndex).isHandle(step, vars);
+        return this.condition.containsKey(stepIndex) && this.condition.get(stepIndex).isHandle(testRun, step, vars);
     }
 
     @Override

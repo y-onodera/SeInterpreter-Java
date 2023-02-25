@@ -59,7 +59,9 @@
                 "path": "typeFilter.json",
                 "where": "target/test-classes/com/sebuilder/interpreter/script/pointcut"
               },
-              "skip": "false"
+              "skip": "false",
+              "verifyElementEnable": {},
+              "verifyElementPresent": "true"
             }
           ],
           "exclude": {

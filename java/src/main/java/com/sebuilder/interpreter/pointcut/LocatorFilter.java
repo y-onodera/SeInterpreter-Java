@@ -1,9 +1,6 @@
 package com.sebuilder.interpreter.pointcut;
 
-import com.sebuilder.interpreter.InputData;
-import com.sebuilder.interpreter.Locator;
-import com.sebuilder.interpreter.Pointcut;
-import com.sebuilder.interpreter.Step;
+import com.sebuilder.interpreter.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,7 +12,7 @@ public record LocatorFilter(String key, Locator target, String method) implement
     }
 
     @Override
-    public boolean isHandle(final Step step, final InputData vars) {
+    public boolean isHandle(final TestRun testRun, final Step step, final InputData vars) {
         return step.locatorContains(this.key)
                 && vars.evaluateString(step.getLocator(this.key).type()).equals(this.target.type())
                 && METHODS.get(this.method).apply(vars.evaluateString(step.getLocator(this.key).value()), this.target.value());

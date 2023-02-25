@@ -25,7 +25,7 @@ public interface Pointcut {
 
     Pointcut NONE = new Pointcut() {
         @Override
-        public boolean isHandle(final Step step, final InputData vars) {
+        public boolean isHandle(final TestRun testRun, final Step step, final InputData vars) {
             return false;
         }
 
@@ -37,7 +37,7 @@ public interface Pointcut {
 
     Pointcut ANY = new Pointcut() {
         @Override
-        public boolean isHandle(final Step step, final InputData vars) {
+        public boolean isHandle(final TestRun testRun, final Step step, final InputData vars) {
             return true;
         }
 
@@ -47,7 +47,7 @@ public interface Pointcut {
         }
     };
 
-    boolean isHandle(Step step, InputData var);
+    boolean isHandle(TestRun testRun, Step step, InputData var);
 
     default Pointcut materialize(final InputData var) {
         return this;
@@ -71,8 +71,8 @@ public interface Pointcut {
     record Or(Pointcut origin, Pointcut other) implements Pointcut {
 
         @Override
-        public boolean isHandle(final Step step, final InputData vars) {
-            return this.origin.isHandle(step, vars) || this.other.isHandle(step, vars);
+        public boolean isHandle(final TestRun testRun, final Step step, final InputData vars) {
+            return this.origin.isHandle(testRun, step, vars) || this.other.isHandle(testRun, step, vars);
         }
 
         @Override
@@ -109,8 +109,8 @@ public interface Pointcut {
     record And(Pointcut origin, Pointcut other) implements Pointcut {
 
         @Override
-        public boolean isHandle(final Step step, final InputData vars) {
-            return this.origin.isHandle(step, vars) && this.other.isHandle(step, vars);
+        public boolean isHandle(final TestRun testRun, final Step step, final InputData vars) {
+            return this.origin.isHandle(testRun, step, vars) && this.other.isHandle(testRun, step, vars);
         }
 
         @Override

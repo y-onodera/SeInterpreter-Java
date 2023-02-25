@@ -21,13 +21,13 @@ public record ExtraStepExecutor(Pointcut pointcut,
     }
 
     @Override
-    public boolean isPointcut(final Step step, final InputData vars) {
+    public boolean isPointcut(final TestRun testRun, final Step step, final InputData vars) {
         if (this.pointcut == Pointcut.NONE) {
             return this.beforeStep.steps().size() == 0
                     && this.afterStep.steps().size() == 0
                     && this.failureStep.steps().size() > 0;
         }
-        return this.pointcut.isHandle(step, vars);
+        return this.pointcut.isHandle(testRun, step, vars);
     }
 
     @Override

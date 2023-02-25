@@ -3,6 +3,7 @@ package com.sebuilder.interpreter.pointcut;
 import com.sebuilder.interpreter.InputData;
 import com.sebuilder.interpreter.Pointcut;
 import com.sebuilder.interpreter.Step;
+import com.sebuilder.interpreter.TestRun;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,7 +15,7 @@ public record TypeFilter(String target, String method) implements Pointcut.Expor
     }
 
     @Override
-    public boolean isHandle(final Step step, final InputData vars) {
+    public boolean isHandle(final TestRun testRun, final Step step, final InputData vars) {
         return METHODS.get(this.method).apply(step.type().getStepTypeName(), this.target);
     }
 
