@@ -20,4 +20,9 @@ public abstract class AbstractStepType implements StepType {
         return this.getClass().getSimpleName().hashCode();
     }
 
+    @Override
+    public String toString() {
+        return this.getStepTypeName();
+    }
+
 }

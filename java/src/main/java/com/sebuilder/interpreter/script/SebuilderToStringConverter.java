@@ -225,15 +225,27 @@ public class SebuilderToStringConverter implements TestCaseConverter {
     protected void mergeAndCondition(final JSONObject result, final JSONObject origin, final String key) {
         if (result.has(key)) {
             final Object obj = result.get(key);
-            if (obj instanceof JSONObject valueObj) {
-                final JSONObject addObj = origin.getJSONObject(key);
-                addObj.names().toList()
-                        .stream()
-                        .map(Object::toString)
-                        .filter(it -> valueObj.has(it) && !valueObj.get(it).equals(addObj.get(it)))
-                        .forEach(it -> this.mergeListableValue(valueObj, addObj, it, valueObj.get(it)));
+            if (key.startsWith("verify")) {
+                if (obj instanceof JSONArray arrayObj) {
+                    arrayObj.put(origin.get(key));
+                } else {
+                    result.remove(key);
+                    final JSONArray newArray = new JSONArray();
+                    newArray.put(obj);
+                    newArray.put(origin.get(key));
+                    result.put(key, newArray);
+                }
             } else {
-                this.mergeListableValue(result, origin, key, obj);
+                if (obj instanceof JSONObject valueObj) {
+                    final JSONObject addObj = origin.getJSONObject(key);
+                    addObj.names().toList()
+                            .stream()
+                            .map(Object::toString)
+                            .filter(it -> valueObj.has(it) && !valueObj.get(it).equals(addObj.get(it)))
+                            .forEach(it -> this.mergeListableValue(valueObj, addObj, it, valueObj.get(it)));
+                } else {
+                    this.mergeListableValue(result, origin, key, obj);
+                }
             }
         } else {
             result.put(key, origin.get(key));

@@ -140,23 +140,23 @@ public record PointcutLoader(ImportLoader importLoader) {
                     .mapToObj(k -> (Pointcut) this.toVerifyFilter(type.getJSONObject(k), name))
                     .reduce(Pointcut::or);
         }
-        return Optional.of(this.toVerifyFilter(pointcutJSON, name));
-    }
-
-    public VerifyFilter toVerifyFilter(final JSONObject pointcutJSON, final String name) {
         if (pointcutJSON.get(name) instanceof JSONObject) {
-            final Verify verify = (Verify) Context.getStepTypeFactory().getStepTypeOfName(name);
             final JSONObject condition = pointcutJSON.getJSONObject(name);
-            final Map<String, String> params = condition.keySet()
-                    .stream()
-                    .filter(key -> !key.equals("handleNoLocator"))
-                    .collect(Collectors.toMap(key -> key, condition::getString));
-            return new VerifyFilter(Boolean.parseBoolean(condition.optString("handleNoLocator")), verify, params);
+            return Optional.of(this.toVerifyFilter(condition, name));
         }
         final Verify verify = (Verify) Context.getStepTypeFactory().getStepTypeOfName(name);
         final Map<String, String> params = new HashMap<>();
         params.put("negated", Boolean.toString(!Boolean.parseBoolean(pointcutJSON.getString(name))));
-        return new VerifyFilter(false, verify, params);
+        return Optional.of(new VerifyFilter(false, verify, params));
+    }
+
+    public VerifyFilter toVerifyFilter(final JSONObject json, final String name) {
+        final Verify verify = (Verify) Context.getStepTypeFactory().getStepTypeOfName(name);
+        final Map<String, String> params = json.keySet()
+                .stream()
+                .filter(key -> !key.equals("handleNoLocator"))
+                .collect(Collectors.toMap(key -> key, json::getString));
+        return new VerifyFilter(Boolean.parseBoolean(json.optString("handleNoLocator")), verify, params);
     }
 
 }

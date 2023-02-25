@@ -61,7 +61,18 @@
               },
               "skip": "false",
               "verifyElementEnable": {},
-              "verifyElementPresent": "true"
+              "verifyElementPresent": "true",
+              "verifyElementAttribute": [
+                {
+                  "attributeName": "class",
+                  "value": "table"
+                },
+                {
+                  "attributeName": "id",
+                  "value": "id1",
+                  "handleNoLocator": "true"
+                }
+              ]
             }
           ],
           "exclude": {

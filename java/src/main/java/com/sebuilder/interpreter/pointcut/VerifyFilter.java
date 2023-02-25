@@ -34,7 +34,9 @@ public record VerifyFilter(boolean handleNoLocator, Verify verify,
     @Override
     public Map<String, String> params() {
         final Map<String, String> result = ExportablePointcut.super.params();
-        result.put("handleNoLocator", String.valueOf(this.handleNoLocator));
+        if (this.verify.getter instanceof LocatorHolder) {
+            result.put("handleNoLocator", String.valueOf(this.handleNoLocator));
+        }
         result.putAll(this.param());
         return result;
     }

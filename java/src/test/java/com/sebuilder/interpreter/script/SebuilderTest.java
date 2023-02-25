@@ -8,6 +8,7 @@ import com.sebuilder.interpreter.datasource.Manual;
 import com.sebuilder.interpreter.datasource.None;
 import com.sebuilder.interpreter.pointcut.*;
 import com.sebuilder.interpreter.step.StepTypeFactoryImpl;
+import com.sebuilder.interpreter.step.getter.ElementAttribute;
 import com.sebuilder.interpreter.step.getter.ElementEnable;
 import com.sebuilder.interpreter.step.getter.ElementPresent;
 import com.sebuilder.interpreter.step.type.Get;
@@ -492,6 +493,15 @@ public class SebuilderTest {
                                                     .or(new TypeFilter("SetElementSelected"))
                                                     .and(new VerifyFilter(false, new ElementEnable().toVerify(), new HashMap<>()))
                                                     .and(new SkipFilter(false))
+                                                    .and(new VerifyFilter(false, new ElementAttribute().toVerify(), new HashMap<>() {{
+                                                        this.put("attributeName", "class");
+                                                        this.put("value", "table");
+                                                    }}).or(
+                                                            new VerifyFilter(true, new ElementAttribute().toVerify(), new HashMap<>() {{
+                                                                this.put("attributeName", "id");
+                                                                this.put("value", "id1");
+                                                            }})
+                                                    ))
                                                     .and(new VerifyFilter(false, new ElementPresent().toVerify(), new HashMap<>() {{
                                                         this.put("negated", "false");
                                                     }}))
