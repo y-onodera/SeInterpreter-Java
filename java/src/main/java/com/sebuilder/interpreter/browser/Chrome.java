@@ -9,6 +9,7 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class Chrome implements WebDriverFactory {
 
@@ -32,7 +33,11 @@ public class Chrome implements WebDriverFactory {
             } else if (key.startsWith("experimental.")) {
                 prefs.put(key.substring("experimental.".length()), value);
             } else if (key.startsWith("chrome.arguments.")) {
-                option.addArguments("--" + key.substring("chrome.arguments.".length()));
+                if (!Optional.ofNullable(config.get(key)).orElse("").isBlank()) {
+                    option.addArguments("--" + key.substring("chrome.arguments.".length()) + "=" + config.get(key));
+                } else {
+                    option.addArguments("--" + key.substring("chrome.arguments.".length()));
+                }
             } else {
                 caps.put(key, value);
             }

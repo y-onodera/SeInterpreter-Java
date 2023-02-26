@@ -9,6 +9,7 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class Edge implements WebDriverFactory {
 
@@ -28,7 +29,11 @@ public class Edge implements WebDriverFactory {
             } else if (key.startsWith("experimental.")) {
                 prefs.put(key.substring("experimental.".length()), value);
             } else if (key.startsWith("edge.arguments.")) {
-                option.addArguments("--" + key.substring("edge.arguments.".length()));
+                if (!Optional.ofNullable(config.get(key)).orElse("").isBlank()) {
+                    option.addArguments("--" + key.substring("edge.arguments.".length()) + "=" + config.get(key));
+                } else {
+                    option.addArguments("--" + key.substring("edge.arguments.".length()));
+                }
             } else {
                 caps.put(key, value);
             }

@@ -25,6 +25,7 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.io.File;
 import java.util.Map;
+import java.util.Optional;
 
 public class Firefox implements WebDriverFactory {
 
@@ -49,8 +50,12 @@ public class Firefox implements WebDriverFactory {
                 option.setBinary(new FirefoxBinary(new File(value)));
             } else if (key.equals("profile")) {
                 option.setProfile(new FirefoxProfile(new File(value)));
-            } else if (key.startsWith("firefox.options.")) {
-                option.addArguments("--" + key.substring("firefox.options.".length()));
+            } else if (key.startsWith("firefox.arguments.")) {
+                if (!Optional.ofNullable(config.get(key)).orElse("").isBlank()) {
+                    option.addArguments("--" + key.substring("firefox.arguments.".length()) + "=" + config.get(key));
+                } else {
+                    option.addArguments("--" + key.substring("firefox.arguments.".length()));
+                }
             } else {
                 option.addPreference(key, value);
             }
