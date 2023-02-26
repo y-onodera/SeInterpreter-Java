@@ -157,7 +157,7 @@ public class Sebuilder extends AbstractJsonScriptParser {
             }));
         }
         return this.importLoader.load(script, (path, where) ->
-                this.loadScriptIfExists(this.toFile(suiteWhere, where, path), script));
+                this.loadScriptIfExists(suiteWhere, this.toFile(suiteWhere, where, path), script));
     }
 
     protected void loadScriptChain(final JSONArray scriptArrays, final TestCaseBuilder builder) {
@@ -165,8 +165,8 @@ public class Sebuilder extends AbstractJsonScriptParser {
         builder.addChain(chainLoader.load());
     }
 
-    protected TestCase loadScriptIfExists(final File wherePath, final JSONObject script) {
-        return this.overrideSettingLoader.load(script, wherePath.getParentFile(), this.load(wherePath));
+    protected TestCase loadScriptIfExists(final File suiteWhere, final File wherePath, final JSONObject script) {
+        return this.overrideSettingLoader.load(script, suiteWhere, this.load(wherePath));
     }
 
     protected File toFile(final File baseDir, final String where, final String path) {
