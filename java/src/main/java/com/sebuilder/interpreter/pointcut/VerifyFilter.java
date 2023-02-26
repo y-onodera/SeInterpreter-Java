@@ -1,27 +1,26 @@
 package com.sebuilder.interpreter.pointcut;
 
 import com.sebuilder.interpreter.*;
-import com.sebuilder.interpreter.step.LocatorHolder;
 import com.sebuilder.interpreter.step.Verify;
 
 import java.util.Map;
 
-public record VerifyFilter(boolean handleNoLocator, Verify verify,
-                           Map<String, String> param) implements Pointcut.ExportablePointcut {
+public record VerifyFilter(Verify verify,
+                           Map<String, String> stringCondition,
+                           Map<String, Locator> locatorCondition) implements Pointcut.ExportablePointcut {
 
     @Override
     public boolean isHandle(final TestRun testRun, final Step step, final InputData var) {
-        if (this.verify.getter instanceof LocatorHolder && step.locatorParams().size() == 0) {
-            return this.handleNoLocator;
-        }
         final StepBuilder verifyStep = this.verify.toStep();
-        step.locatorParams().forEach(verifyStep::put);
-        this.param.forEach(verifyStep::put);
-        if (this.param.containsKey("negated")) {
-            verifyStep.negated(Boolean.parseBoolean(this.param.get("negated")));
+        this.stringCondition.entrySet().stream()
+                .filter(it -> !it.getKey().equals("negated"))
+                .forEach(entry -> verifyStep.put(entry.getKey(), entry.getValue()));
+        this.locatorCondition.forEach(verifyStep::put);
+        if (this.stringCondition.containsKey("negated")) {
+            verifyStep.negated(Boolean.parseBoolean(this.stringCondition.get("negated")));
         }
         final TestRun ctx = new TestRunBuilder(verifyStep.build().toTestCase())
-                .createTestRun(var, testRun, testRun.currentStepIndex());
+                .createTestRun(testRun.varWithCurrentStepInfo(), testRun, testRun.currentStepIndex());
         ctx.forwardStepIndex(1);
         return this.verify.test(ctx);
     }
@@ -32,12 +31,17 @@ public record VerifyFilter(boolean handleNoLocator, Verify verify,
     }
 
     @Override
-    public Map<String, String> params() {
-        final Map<String, String> result = ExportablePointcut.super.params();
-        if (this.verify.getter instanceof LocatorHolder) {
-            result.put("handleNoLocator", String.valueOf(this.handleNoLocator));
-        }
-        result.putAll(this.param());
+    public Map<String, String> stringParams() {
+        final Map<String, String> result = ExportablePointcut.super.stringParams();
+        result.putAll(this.stringCondition());
         return result;
     }
+
+    @Override
+    public Map<String, Locator> locatorParams() {
+        final Map<String, Locator> result = ExportablePointcut.super.locatorParams();
+        result.putAll(this.locatorCondition());
+        return result;
+    }
+
 }

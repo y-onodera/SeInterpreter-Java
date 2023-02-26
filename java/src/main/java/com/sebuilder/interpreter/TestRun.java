@@ -21,6 +21,8 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 
 import javax.annotation.Nonnull;
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Predicate;
 
 /**
@@ -103,6 +105,14 @@ public class TestRun implements WebDriverWrapper {
 
     public InputData vars() {
         return this.vars;
+    }
+
+    public InputData varWithCurrentStepInfo() {
+        final Map<String, String> joinStepInfo = new HashMap<>();
+        this.currentStep()
+                .toMap()
+                .forEach((key, value) -> joinStepInfo.put("_target." + key, value));
+        return this.vars().add(joinStepInfo).add("_target.currentStepIndex", String.valueOf(this.currentStepIndex()));
     }
 
     public Aspect getAspect() {
@@ -336,6 +346,7 @@ public class TestRun implements WebDriverWrapper {
             }
         }
     }
+
 
     protected static class ChainRunner implements TestRunner {
         private final TestRun parent;

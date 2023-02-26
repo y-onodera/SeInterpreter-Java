@@ -19,7 +19,7 @@ public record LocatorFilter(String key, Locator target, String method) implement
     }
 
     @Override
-    public Map<String, String> params() {
+    public Map<String, String> stringParams() {
         final Map<String, String> result = new HashMap<>();
         result.put("type", this.target.type());
         result.put("value", this.target.value());

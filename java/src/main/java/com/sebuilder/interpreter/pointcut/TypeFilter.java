@@ -20,7 +20,7 @@ public record TypeFilter(String target, String method) implements Pointcut.Expor
     }
 
     @Override
-    public Map<String, String> params() {
+    public Map<String, String> stringParams() {
         final Map<String, String> result = new HashMap<>();
         if (!this.method.equals("equals")) {
             result.put("value", this.target);

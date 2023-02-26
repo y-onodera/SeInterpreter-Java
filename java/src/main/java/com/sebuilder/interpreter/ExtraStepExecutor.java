@@ -1,8 +1,5 @@
 package com.sebuilder.interpreter;
 
-import com.google.common.collect.Maps;
-
-import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -106,15 +103,7 @@ public record ExtraStepExecutor(Pointcut pointcut,
     TestRun createInterceptorRun(final TestRun testRun, final TestCase invokeCase) {
         return new TestRunBuilder(invokeCase.map(it -> it.isPreventContextAspect(true)))
                 .addTestRunNamePrefix(this.getInterceptCaseName(testRun))
-                .createTestRun(testRun.log(), testRun.driver(), this.extendsStepVar(testRun), this.createAdviseListener(testRun));
-    }
-
-    InputData extendsStepVar(final TestRun testRun) {
-        final Map<String, String> joinStepInfo = Maps.newHashMap();
-        testRun.currentStep()
-                .toMap()
-                .forEach((key, value) -> joinStepInfo.put("_target." + key, value));
-        return testRun.vars().add(joinStepInfo).add("_target.currentStepIndex", String.valueOf(testRun.currentStepIndex()));
+                .createTestRun(testRun.log(), testRun.driver(), testRun.varWithCurrentStepInfo(), this.createAdviseListener(testRun));
     }
 
     String getInterceptCaseName(final TestRun testRun) {

@@ -21,7 +21,7 @@ public record StringParamFilter(String key, String target, String method) implem
     }
 
     @Override
-    public Map<String, String> params() {
+    public Map<String, String> stringParams() {
         final Map<String, String> result = new HashMap<>();
         if (!this.method.equals("equals")) {
             result.put("value", this.target);

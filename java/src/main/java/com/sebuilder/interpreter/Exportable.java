@@ -6,7 +6,11 @@ import java.util.Map;
 public interface Exportable {
     String key();
 
-    default Map<String, String> params() {
+    default Map<String, String> stringParams() {
+        return new HashMap<>();
+    }
+
+    default Map<String, Locator> locatorParams() {
         return new HashMap<>();
     }
 

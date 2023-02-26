@@ -11,6 +11,7 @@ import com.sebuilder.interpreter.step.StepTypeFactoryImpl;
 import com.sebuilder.interpreter.step.getter.ElementAttribute;
 import com.sebuilder.interpreter.step.getter.ElementEnable;
 import com.sebuilder.interpreter.step.getter.ElementPresent;
+import com.sebuilder.interpreter.step.getter.ElementVisible;
 import com.sebuilder.interpreter.step.type.Get;
 import com.sebuilder.interpreter.step.type.SetElementSelected;
 import com.sebuilder.interpreter.step.type.SetElementText;
@@ -491,19 +492,22 @@ public class SebuilderTest {
                                             new TypeFilter("SetElementText")
                                                     .or(new TypeFilter("SelectElementValue"))
                                                     .or(new TypeFilter("SetElementSelected"))
-                                                    .and(new VerifyFilter(false, new ElementEnable().toVerify(), new HashMap<>()))
+                                                    .and(new VerifyFilter(new ElementEnable().toVerify(), new HashMap<>(), new HashMap<>()))
                                                     .and(new SkipFilter(false))
-                                                    .and(new VerifyFilter(false, new ElementAttribute().toVerify(), new HashMap<>() {{
+                                                    .and(new VerifyFilter(new ElementAttribute().toVerify(), new HashMap<>() {{
                                                         this.put("attributeName", "class");
                                                         this.put("value", "table");
-                                                    }}).or(
-                                                            new VerifyFilter(true, new ElementAttribute().toVerify(), new HashMap<>() {{
+                                                    }}, new HashMap<>())
+                                                            .or(new VerifyFilter(new ElementAttribute().toVerify(), new HashMap<>() {{
                                                                 this.put("attributeName", "id");
                                                                 this.put("value", "id1");
-                                                            }})
-                                                    ))
-                                                    .and(new VerifyFilter(false, new ElementPresent().toVerify(), new HashMap<>() {{
+                                                            }}, new HashMap<>()
+                                                            )))
+                                                    .and(new VerifyFilter(new ElementPresent().toVerify(), new HashMap<>() {{
                                                         this.put("negated", "false");
+                                                    }}, new HashMap<>()))
+                                                    .and(new VerifyFilter(new ElementVisible().toVerify(), new HashMap<>(), new HashMap<>() {{
+                                                        this.put("locator", new Locator("name", "name1"));
                                                     }}))
                                             , it))
                                     .assertExcludeTestRun(it -> assertEquals(

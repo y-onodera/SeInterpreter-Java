@@ -147,16 +147,23 @@ public record PointcutLoader(ImportLoader importLoader) {
         final Verify verify = (Verify) Context.getStepTypeFactory().getStepTypeOfName(name);
         final Map<String, String> params = new HashMap<>();
         params.put("negated", Boolean.toString(!Boolean.parseBoolean(pointcutJSON.getString(name))));
-        return Optional.of(new VerifyFilter(false, verify, params));
+        return Optional.of(new VerifyFilter(verify, params, new HashMap<>()));
     }
 
     public VerifyFilter toVerifyFilter(final JSONObject json, final String name) {
         final Verify verify = (Verify) Context.getStepTypeFactory().getStepTypeOfName(name);
         final Map<String, String> params = json.keySet()
                 .stream()
-                .filter(key -> !key.equals("handleNoLocator"))
+                .filter(key -> !key.startsWith("locator"))
                 .collect(Collectors.toMap(key -> key, json::getString));
-        return new VerifyFilter(Boolean.parseBoolean(json.optString("handleNoLocator")), verify, params);
+        final Map<String, Locator> locatorParams = json.keySet()
+                .stream()
+                .filter(key -> key.startsWith("locator"))
+                .collect(Collectors.toMap(key -> key, key -> {
+                    final JSONObject locator = json.getJSONObject(key);
+                    return new Locator(locator.getString("type"), locator.getString("value"));
+                }));
+        return new VerifyFilter(verify, params, locatorParams);
     }
 
 }

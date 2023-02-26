@@ -30,7 +30,7 @@ public record ImportFilter(String path, String where,
     }
 
     @Override
-    public Map<String, String> params() {
+    public Map<String, String> stringParams() {
         final Map<String, String> result = new HashMap<>();
         if (!this.where.isBlank()) {
             result.put("path", this.path);
