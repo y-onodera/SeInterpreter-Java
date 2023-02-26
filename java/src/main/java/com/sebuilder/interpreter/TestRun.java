@@ -356,7 +356,7 @@ public class TestRun implements WebDriverWrapper {
             this.chainIndex = 0;
             boolean success = true;
             for (final TestCase nextChain : this.chains) {
-                success = nextChain.map(it -> it.addAspect(this.parent.getAspect(Interceptor::isTargetingChain))
+                success = nextChain.map(it -> it.addAspect(this.parent.getAspect(Interceptor::isTakeOverChain))
                                 .setShareInput(this.lastRunVar))
                         .run(this, this.parent.getListener()) && success;
                 this.chainIndex++;

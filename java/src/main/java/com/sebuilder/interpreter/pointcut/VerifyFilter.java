@@ -22,8 +22,8 @@ public record VerifyFilter(boolean handleNoLocator, Verify verify,
         }
         final TestRun ctx = new TestRunBuilder(verifyStep.build().toTestCase())
                 .createTestRun(var, testRun, testRun.currentStepIndex());
-        ctx.forwardStepIndex(0);
-        return ctx.currentStep().type().run(ctx);
+        ctx.forwardStepIndex(1);
+        return this.verify.test(ctx);
     }
 
     @Override

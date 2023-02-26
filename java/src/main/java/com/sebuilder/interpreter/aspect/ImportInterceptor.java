@@ -11,7 +11,23 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public record ImportInterceptor(String path, String where,
-                                Function<File, Iterable<Interceptor>> loadFunction) implements Interceptor.ExportableInterceptor {
+                                Function<File, Iterable<Interceptor>> loadFunction,
+                                boolean takeOverChain) implements Interceptor.ExportableInterceptor {
+
+    public ImportInterceptor(final String path, final String where,
+                             final Function<File, Iterable<Interceptor>> loadFunction) {
+        this(path, where, loadFunction, true);
+    }
+
+    @Override
+    public boolean isTakeOverChain() {
+        return this.takeOverChain;
+    }
+
+    @Override
+    public Interceptor takeOverChain(final boolean newValue) {
+        return new ImportInterceptor(this.path, this.where, this.loadFunction, newValue);
+    }
 
     @Override
     public Stream<Interceptor> materialize(final InputData shareInput) {
@@ -22,7 +38,7 @@ public record ImportInterceptor(String path, String where,
             f = new File(runtimePath);
         }
         return StreamSupport.stream(this.loadFunction.apply(f).spliterator(), false)
-                .flatMap(it -> it.materialize(shareInput));
+                .flatMap(it -> it.takeOverChain(this.takeOverChain).materialize(shareInput));
     }
 
     @Override

@@ -131,7 +131,11 @@ public class ExtentReportsTestRunListener extends TestRunListenerImpl {
 
     @Override
     public void info(final String s) {
-        this.extentTest.info(s);
+        if (this.extentTest != null) {
+            this.extentTest.info(s);
+        } else {
+            this.log.info(s);
+        }
     }
 
     @Override

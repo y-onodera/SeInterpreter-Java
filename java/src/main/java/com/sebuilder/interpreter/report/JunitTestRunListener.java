@@ -195,12 +195,12 @@ public class JunitTestRunListener extends TestRunListenerImpl {
         delete.execute();
     }
 
-    static class ResultReportableTestCase extends junit.framework.TestCase {
+    class ResultReportableTestCase extends junit.framework.TestCase {
         private String downloadPath = "";
         private String screenshotPath = "";
         private String expectScreenshotPath = "";
 
-        public ResultReportableTestCase(final String testName) {
+        private ResultReportableTestCase(final String testName) {
             super(testName);
         }
 

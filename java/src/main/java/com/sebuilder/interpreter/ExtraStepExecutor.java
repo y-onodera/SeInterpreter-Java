@@ -9,7 +9,15 @@ import java.util.stream.Stream;
 public record ExtraStepExecutor(Pointcut pointcut,
                                 TestCase beforeStep,
                                 TestCase afterStep,
-                                TestCase failureStep) implements Interceptor {
+                                TestCase failureStep,
+                                boolean takeOverChain) implements Interceptor {
+
+    public ExtraStepExecutor(final Pointcut pointcut,
+                             final TestCase beforeStep,
+                             final TestCase afterStep,
+                             final TestCase failureStep) {
+        this(pointcut, beforeStep, afterStep, failureStep, true);
+    }
 
     @Override
     public Stream<Interceptor> materialize(final InputData shareInput) {
@@ -17,6 +25,7 @@ public record ExtraStepExecutor(Pointcut pointcut,
                 , this.beforeStep.mapWhen(TestCase::isLazyLoad, it -> it.setShareInput(shareInput).build().execLazyLoad().builder())
                 , this.afterStep.mapWhen(TestCase::isLazyLoad, it -> it.setShareInput(shareInput).build().execLazyLoad().builder())
                 , this.failureStep.mapWhen(TestCase::isLazyLoad, it -> it.setShareInput(shareInput).build().execLazyLoad().builder())
+                , this.takeOverChain
         ));
     }
 
@@ -43,6 +52,19 @@ public record ExtraStepExecutor(Pointcut pointcut,
     @Override
     public boolean invokeFailure(final TestRun testRun) {
         return this.invokeAdvise(testRun, this.failureStep, "failure");
+    }
+
+    @Override
+    public boolean isTakeOverChain() {
+        return this.takeOverChain;
+    }
+
+    @Override
+    public Interceptor takeOverChain(final boolean newValue) {
+        if (newValue == this.takeOverChain) {
+            return this;
+        }
+        return new ExtraStepExecutor(this.pointcut, this.beforeStep, this.afterStep, this.failureStep, newValue);
     }
 
     public TestRunListener createAdviseListener(final TestRun testRun) {
@@ -109,6 +131,8 @@ public record ExtraStepExecutor(Pointcut pointcut,
 
         private TestCase failureStep = new TestCaseBuilder().build();
 
+        private boolean takeOverChain = true;
+
         public Builder setPointcut(final Pointcut pointcut) {
             this.pointcut = pointcut;
             return this;
@@ -129,9 +153,15 @@ public record ExtraStepExecutor(Pointcut pointcut,
             return this;
         }
 
+        public Builder setTakeOverChain(final boolean takeOverChain) {
+            this.takeOverChain = takeOverChain;
+            return this;
+        }
+
         @Override
         public Interceptor get() {
-            return new ExtraStepExecutor(this.pointcut, this.beforeStep, this.afterStep, this.failureStep);
+            return new ExtraStepExecutor(this.pointcut, this.beforeStep, this.afterStep, this.failureStep, this.takeOverChain);
         }
+
     }
 }

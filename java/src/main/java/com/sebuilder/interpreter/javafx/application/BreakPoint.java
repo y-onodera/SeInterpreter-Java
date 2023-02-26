@@ -48,8 +48,13 @@ public record BreakPoint(Map<Integer, Pointcut> condition, Debugger debugger) im
     }
 
     @Override
-    public boolean isTargetingChain() {
+    public boolean isTakeOverChain() {
         return false;
+    }
+
+    @Override
+    public Interceptor takeOverChain(final boolean newValue) {
+        return this;
     }
 
     public Collection<Integer> targetStepIndex() {

@@ -55,6 +55,10 @@ public record Aspect(Iterable<Interceptor> interceptors) implements Iterable<Int
         return from(this.getStream().flatMap(it -> it.materialize(shareInput)));
     }
 
+    public Aspect takeOverChain(final boolean newValue) {
+        return from(this.getStream().map(it -> it.takeOverChain(newValue)));
+    }
+
     public record Advice(List<Interceptor> advices) {
 
         public boolean invokeBefore(final TestRun testRun) {

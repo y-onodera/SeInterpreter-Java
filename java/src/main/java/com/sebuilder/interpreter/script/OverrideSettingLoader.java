@@ -44,7 +44,7 @@ public class OverrideSettingLoader {
         }
         final Aspect aspect;
         if (script.has("aspect")) {
-            aspect = this.aspectLoader.load(script, baseDir);
+            aspect = this.aspectLoader.load(script, baseDir).takeOverChain(false);
         } else {
             aspect = new Aspect();
         }

@@ -28,9 +28,9 @@ public interface Interceptor {
         return true;
     }
 
-    default boolean isTargetingChain() {
-        return true;
-    }
+    boolean isTakeOverChain();
+
+    Interceptor takeOverChain(boolean newValue);
 
     interface ExportableInterceptor extends Interceptor, Exportable {
         @Override
