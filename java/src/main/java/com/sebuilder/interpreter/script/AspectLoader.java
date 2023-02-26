@@ -38,7 +38,11 @@ public record AspectLoader(Sebuilder sebuilder, PointcutLoader pointcutLoader) {
     public Aspect load(final JSONObject o, final File baseDir) {
         Aspect result = new Aspect();
         if (o.has("aspect")) {
-            if (o.get("aspect") instanceof JSONObject aspectObject) {
+            if (o.get("aspect") instanceof String) {
+                final Interceptor imported = this.pointcutLoader.importLoader().load(o, "aspect"
+                        , (value, where) -> new ImportInterceptor(value, where, (path) -> this.load(path, baseDir)));
+                result = new Aspect(List.of(imported));
+            } else if (o.get("aspect") instanceof JSONObject aspectObject) {
                 result = new Aspect(List.of(this.toInterceptor(aspectObject, baseDir)));
             } else {
                 final Aspect.Builder builder = result.builder();
