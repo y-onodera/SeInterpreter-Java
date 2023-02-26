@@ -19,7 +19,10 @@
             "path": "script/formInput.json"
         },
         {"path": "script/agree.json"},
-        {"lazyLoad": "script/${decide}.json"}
+        {
+            "lazyLoad": "script/${decide}.json",
+            "aspect":"aspect/saveErrorPage.json"
+        }
     ]}],
     "shareState": true,
     "type": "suite"

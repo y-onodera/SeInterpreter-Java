@@ -1,0 +1,21 @@
+{
+  "aspect": [
+    {
+      "pointcut": {
+          "verifyEval": {
+            "script": "return document.getElementById('errorcheck_result') != null && document.getElementById('errorcheck_result').innerText.length > 0",
+            "value": "true"
+          }
+      },
+      "before": {
+        "steps": [
+          {
+            "file": "errorPage.png",
+            "type": "SaveScreenshot",
+            "verify": "true"
+          }
+        ]
+      }
+    }
+  ]
+}
