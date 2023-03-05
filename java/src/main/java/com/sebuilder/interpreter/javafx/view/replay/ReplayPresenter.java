@@ -113,7 +113,7 @@ public class ReplayPresenter {
         this.resume.disableProperty().bind(this.debugger.debugStatusProperty().isNotEqualTo(Debugger.STATUS.await));
         this.pause.disableProperty().bind(this.debugger.debugStatusProperty().isEqualTo(Debugger.STATUS.await)
                 .or(this.debugger.debugStatusProperty().isEqualTo(Debugger.STATUS.stepOver)));
-        this.stop.disableProperty().bind(this.debugger.debugStatusProperty().isEqualTo(Debugger.STATUS.stepOver));
+        this.stop.disableProperty().bind(this.debugger.debugStatusProperty().isNotEqualTo(Debugger.STATUS.await));
         this.resultOperation.visibleProperty().bind(taskRunning.not());
         this.lastRunResultDir.bind(task.valueProperty());
     }
