@@ -15,7 +15,6 @@ import javafx.scene.layout.HBox;
 import javax.inject.Inject;
 import java.awt.*;
 import java.io.File;
-import java.io.IOException;
 
 import static javafx.concurrent.Worker.State.RUNNING;
 
@@ -28,13 +27,15 @@ public class ReplayPresenter {
     public HBox runOperation;
 
     @FXML
+    public Button pause;
+
+    @FXML
+    public Button screenshot;
+    @FXML
     public Button stepOver;
 
     @FXML
     public Button resume;
-
-    @FXML
-    public Button pause;
 
     @FXML
     private Button stop;
@@ -72,13 +73,18 @@ public class ReplayPresenter {
     }
 
     @FXML
-    public void handleStepOver() {
-        this.application.executeAndLoggingCaseWhenThrowException(() -> this.debugger.stepOver());
+    public void handlePause() {
+        this.application.executeAndLoggingCaseWhenThrowException(() -> this.debugger.pause());
     }
 
     @FXML
-    public void handlePause() {
-        this.application.executeAndLoggingCaseWhenThrowException(() -> this.debugger.pause());
+    public void handleTakeScreenshot() {
+        new ScreenshotView().open(this.scriptDataSetProgress.getScene().getWindow());
+    }
+
+    @FXML
+    public void handleStepOver() {
+        this.application.executeAndLoggingCaseWhenThrowException(() -> this.debugger.stepOver());
     }
 
     @FXML
@@ -88,18 +94,20 @@ public class ReplayPresenter {
 
     @FXML
     void handleReplayStop() {
-        this.application.executeAndLoggingCaseWhenThrowException(() -> this.debugger.stop());
         this.application.stopReplay();
+        this.application.executeAndLoggingCaseWhenThrowException(() -> this.debugger.stop());
     }
 
     @FXML
-    void handleOpenReplayLog() throws IOException {
-        Desktop.getDesktop().open(new File(this.lastRunResultDir.get(), this.application.getReportFileName()));
+    void handleOpenReplayLog() {
+        this.application.executeAndLoggingCaseWhenThrowException(() ->
+                Desktop.getDesktop().open(new File(this.lastRunResultDir.get(), this.application.getReportFileName())));
     }
 
     @FXML
-    void handleOpenDirectory() throws IOException {
-        Desktop.getDesktop().open(new File(this.lastRunResultDir.get()));
+    void handleOpenDirectory() {
+        this.application.executeAndLoggingCaseWhenThrowException(() ->
+                Desktop.getDesktop().open(new File(this.lastRunResultDir.get())));
     }
 
     public void populate(final SeInterpreterRunTask task) {
@@ -109,10 +117,11 @@ public class ReplayPresenter {
         this.runStatus.textProperty().bind(task.stateProperty().asString());
         final BooleanBinding taskRunning = task.stateProperty().isEqualTo(RUNNING);
         this.runOperation.visibleProperty().bind(taskRunning);
-        this.stepOver.disableProperty().bind(this.debugger.debugStatusProperty().isNotEqualTo(Debugger.STATUS.await));
-        this.resume.disableProperty().bind(this.debugger.debugStatusProperty().isNotEqualTo(Debugger.STATUS.await));
         this.pause.disableProperty().bind(this.debugger.debugStatusProperty().isEqualTo(Debugger.STATUS.await)
                 .or(this.debugger.debugStatusProperty().isEqualTo(Debugger.STATUS.stepOver)));
+        this.screenshot.disableProperty().bind(this.debugger.debugStatusProperty().isNotEqualTo(Debugger.STATUS.await));
+        this.stepOver.disableProperty().bind(this.debugger.debugStatusProperty().isNotEqualTo(Debugger.STATUS.await));
+        this.resume.disableProperty().bind(this.debugger.debugStatusProperty().isNotEqualTo(Debugger.STATUS.await));
         this.stop.disableProperty().bind(this.debugger.debugStatusProperty().isNotEqualTo(Debugger.STATUS.await));
         this.resultOperation.visibleProperty().bind(taskRunning.not());
         this.lastRunResultDir.bind(task.valueProperty());

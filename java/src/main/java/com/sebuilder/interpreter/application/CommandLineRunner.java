@@ -17,6 +17,10 @@ public abstract class CommandLineRunner {
     protected TestRunListener testRunListener;
     protected Logger log;
 
+    protected CommandLineRunner(final Logger log) {
+        this.log = log;
+    }
+
     protected CommandLineRunner(final String[] args, final Logger log) {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             if (this.lastRun != null) {
@@ -91,7 +95,7 @@ public abstract class CommandLineRunner {
         this.log.info("setUp finish");
     }
 
-    protected TestRun getTestRun(final TestRunBuilder script, final InputData data, final TestRunListener testRunListener) {
+    public TestRun getTestRun(final TestRunBuilder script, final InputData data, final TestRunListener testRunListener) {
         return script.createTestRun(testRunListener.getLog()
                 , Context.getWebDriverFactory()
                 , Context.getDriverConfig()

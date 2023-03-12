@@ -11,6 +11,10 @@ import java.util.Scanner;
 public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
     private int execCount = 1;
 
+    public SeInterpreterREPL(final Logger log) {
+        super(log);
+    }
+
     public SeInterpreterREPL(final String[] args, final Logger log) {
         super(args, log);
     }
@@ -114,6 +118,12 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
             this.log.info("stop execute test");
             this.lastRun.stop();
         }
+    }
+
+    public SeInterpreterREPL copy() {
+        final SeInterpreterREPL result = new SeInterpreterREPL(this.log);
+        result.lastRun = this.lastRun;
+        return result;
     }
 
     @Override

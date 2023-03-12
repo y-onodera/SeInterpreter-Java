@@ -10,7 +10,6 @@ import com.sebuilder.interpreter.javafx.view.main.ErrorDialog;
 import com.sebuilder.interpreter.javafx.view.main.MainView;
 import com.sebuilder.interpreter.javafx.view.replay.ReplayView;
 import com.sebuilder.interpreter.step.type.Get;
-import com.sebuilder.interpreter.step.type.HighLightElement;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 import io.netty.util.internal.logging.Log4J2LoggerFactory;
 import javafx.application.Application;
@@ -304,16 +303,15 @@ public class SeInterpreterApplication extends Application {
     }
 
     public void highLightElement(final String locatorType, final String value) {
-        final Step highLightElement = new HighLightElement()
-                .toStep()
-                .locator(new Locator(locatorType, value))
-                .build();
-        this.runner.run(highLightElement.toTestCase()
-                .map(it -> it.isPreventContextAspect(true)));
+        this.runner.highlightElement(locatorType, value);
     }
 
     public TestCase exportTemplate(final Locator locator, final List<String> targetTags, final boolean withDataSource) {
         return this.runner.exportTemplate(locator, targetTags, withDataSource);
+    }
+
+    public File takeScreenShot(final StepBuilder stepBuilder) {
+        return this.runner.screenShot(stepBuilder);
     }
 
     public void runSuite() {

@@ -4,7 +4,7 @@ import com.google.common.base.Strings;
 import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
 import com.sebuilder.interpreter.javafx.view.replay.InputView;
-import javafx.event.ActionEvent;
+import com.sebuilder.interpreter.javafx.view.replay.ScreenshotView;
 import javafx.fxml.FXML;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
@@ -37,7 +37,7 @@ public class MenuPresenter {
     }
 
     @FXML
-    public void handleImportSeleniumIDEScript(final ActionEvent actionEvent) {
+    public void handleImportSeleniumIDEScript() {
         final File file = this.openFileChooser("Import SeleniumIDE Script", "side format (*.side)", "*.side");
         if (file != null) {
             this.application.scriptReLoad(file, "SeleniumIDE");
@@ -86,6 +86,11 @@ public class MenuPresenter {
     @FXML
     void handleReplayScript() {
         new InputView().open(this.paneSeInterpreterMenu.getScene().getWindow());
+    }
+
+    @FXML
+    public void handleTakeScreenshot() {
+        new ScreenshotView().open(this.paneSeInterpreterMenu.getScene().getWindow());
     }
 
     @FXML

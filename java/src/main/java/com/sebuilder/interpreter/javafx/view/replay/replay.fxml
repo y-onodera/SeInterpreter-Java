@@ -25,12 +25,14 @@
             <Label fx:id="runStatus" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
         </GridPane>
         <HBox fx:id="runOperation" alignment="TOP_RIGHT" prefHeight="50.0" prefWidth="200.0" spacing="10.0">
+            <Button fx:id="pause" alignment="CENTER" mnemonicParsing="false" onAction="#handlePause"
+                    text="pause"/>
+            <Button fx:id="screenshot" alignment="CENTER" mnemonicParsing="false" onAction="#handleTakeScreenshot"
+                    text="take screenshot"/>
             <Button fx:id="stepOver" alignment="CENTER" mnemonicParsing="false" onAction="#handleStepOver"
                     text="step over"/>
             <Button fx:id="resume" alignment="CENTER" mnemonicParsing="false" onAction="#handleResume"
                     text="resume"/>
-            <Button fx:id="pause" alignment="CENTER" mnemonicParsing="false" onAction="#handlePause"
-                    text="pause"/>
             <Button fx:id="stop" alignment="CENTER" mnemonicParsing="false" onAction="#handleReplayStop"
                     text="Stop"/>
         </HBox>

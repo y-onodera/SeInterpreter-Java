@@ -51,7 +51,10 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
         final RemoteWebDriver wd = ctx.driver();
         wd.switchTo().defaultContent();
         try {
-            final String fileName = ctx.getTestRunName() + "_" + ctx.string("file");
+            String fileName = ctx.string("file");
+            if (!ctx.containsKey("addPrefix") || ctx.getBoolean("addPrefix")) {
+                fileName = ctx.getTestRunName() + "_" + fileName;
+            }
             final File file = ctx.getListener().addScreenshot(fileName);
             final BufferedImage actual;
             if (ctx.containsKey("scroll") && !ctx.getBoolean("scroll")) {
@@ -86,17 +89,20 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
         if (!o.containsStringParam("file")) {
             o.put("file", "");
         }
-        if (!o.containsStringParam("verify")) {
-            o.put("verify", "false");
-        }
-        if (!o.containsStringParam("expect")) {
-            o.put("expect", "");
+        if (!o.containsStringParam("addPrefix")) {
+            o.put("addPrefix", "true");
         }
         if (!o.containsStringParam("scroll")) {
             o.put("scroll", "true");
         }
         if (!o.containsLocatorParam("locatorHeader")) {
             LocatorHolder.super.addDefaultParam("locatorHeader", o);
+        }
+        if (!o.containsStringParam("verify")) {
+            o.put("verify", "false");
+        }
+        if (!o.containsStringParam("expect")) {
+            o.put("expect", "");
         }
         if (!o.containsLocatorParam("locatorExclude")) {
             LocatorHolder.super.addDefaultParam("locatorExclude", o);

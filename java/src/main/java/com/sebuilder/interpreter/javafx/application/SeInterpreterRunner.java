@@ -5,6 +5,7 @@ import com.sebuilder.interpreter.*;
 import com.sebuilder.interpreter.application.CommandLineArgument;
 import com.sebuilder.interpreter.application.SeInterpreterREPL;
 import com.sebuilder.interpreter.step.type.ExportTemplate;
+import com.sebuilder.interpreter.step.type.HighLightElement;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -17,6 +18,7 @@ public class SeInterpreterRunner {
 
     private int exportCount;
 
+    private int screenshotCount;
     private SeInterpreterREPL repl;
 
     private final Logger log = LogManager.getLogger(SeInterpreterRunner.class);
@@ -64,6 +66,15 @@ public class SeInterpreterRunner {
         this.repl.execute(testCase, listener);
     }
 
+    public void highlightElement(final String locatorType, final String value) {
+        final Step highLightElement = new HighLightElement()
+                .toStep()
+                .locator(new Locator(locatorType, value))
+                .build();
+        final TestRunListener listener = Context.getTestListener(this.log);
+        this.repl.copy().execute(highLightElement.toTestCase().map(it -> it.isPreventContextAspect(true)), listener);
+    }
+
     public TestCase exportTemplate(final Locator locator, final List<String> targetTags, final boolean withDataSource) {
         if (!this.isOpen()) {
             this.setUp();
@@ -85,7 +96,7 @@ public class SeInterpreterRunner {
                 .toTestCase()
                 .map(it -> it.isPreventContextAspect(true));
         final TestRunListener listener = Context.getTestListener(this.log);
-        this.repl.execute(get, listener);
+        this.repl.copy().execute(get, listener);
         final File exported = new File(listener.getTemplateOutputDirectory(), fileName);
         if (!exported.exists()) {
             return new TestCaseBuilder().build();
@@ -106,6 +117,24 @@ public class SeInterpreterRunner {
                 .associateWith(null)
                 .setName(result.name())
                 .build();
+    }
+
+    public File screenShot(final StepBuilder stepBuilder) {
+        final String result = String.format("%04d", this.screenshotCount++) + "_" + stepBuilder.getStringParams().get("file");
+        final TestCase saveScreenshot = stepBuilder.put("file", result)
+                .put("addPrefix", "false")
+                .build()
+                .toTestCase().map(it -> it.isPreventContextAspect(true));
+        final TestRunListener listener = Context.getTestListener(this.log);
+        this.repl.copy().execute(saveScreenshot, listener);
+        final File saved = new File(listener.getScreenShotOutputDirectory(), result);
+        final File copyTo = new File(this.globalListener.getScreenShotOutputDirectory(), result);
+        try {
+            Files.copy(saved, copyTo);
+        } catch (final IOException e) {
+            this.log.error(e);
+        }
+        return copyTo;
     }
 
     public SeInterpreterRunTask createRunScriptTask(final TestCase currentDisplay, final Debugger debugger, final Function<Logger, TestRunListener> listenerFactory) {

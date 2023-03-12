@@ -17,7 +17,7 @@
             <SearchableComboBox fx:id="stepTypeSelect" onAction="#selectType" MigPane.cc="wrap"/>
         </MigPane>
         <MigPane cols="[grow]" rows="[30]" maxHeight="40" prefWidth="420.0">
-            <Button fx:id="apply" mnemonicParsing="false" text="apply" onAction="#stepApply" MigPane.cc="align right"/>
+            <Button id="apply" mnemonicParsing="false" text="apply" onAction="#stepApply" MigPane.cc="align right"/>
         </MigPane>
     </SplitPane>
 </AnchorPane>

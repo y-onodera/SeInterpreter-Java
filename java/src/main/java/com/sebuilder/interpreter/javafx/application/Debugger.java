@@ -34,9 +34,6 @@ public class Debugger {
             this.debugStatus.set(STATUS.await);
             final STATUS lastOperation = STATUS.valueOf(this.exchanger.exchange(this.debugStatus.get().name()));
             this.debugStatus.set(lastOperation);
-            if (this.debugStatus.get() == STATUS.stop) {
-                testRun.stop();
-            }
             return true;
         } catch (final InterruptedException e) {
             return false;
@@ -48,7 +45,6 @@ public class Debugger {
     }
 
     public void stop() throws InterruptedException {
-        this.pause();
         this.exchanger.exchange(STATUS.stop.name());
     }
 

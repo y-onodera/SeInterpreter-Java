@@ -239,9 +239,6 @@ public class StepPresenter {
     @FXML
     private Label labelSelectType;
 
-    @FXML
-    private Button apply;
-
     private String selectedStepType;
 
     private ComboBox<String> locatorTypeSelect;
