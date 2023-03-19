@@ -125,7 +125,7 @@ jobs:
         include:
           - browser: chrome
             expect: test/suite/expect/Chrome_screenshot
-            arguments: --driver=chrome --resultoutput=chrome
+            arguments: --driver=chrome --resultoutput=chrome --driver.chrome.arguments.remote-allow-origins=*
           - browser: edge
             expect: test/suite/expect/Edge_screenshot
             arguments: --driver=edge --resultoutput=edge --driver.edge.arguments.disable-features=msHubApps
