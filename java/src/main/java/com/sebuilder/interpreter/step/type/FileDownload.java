@@ -4,39 +4,18 @@ import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.step.AbstractStepType;
 import com.sebuilder.interpreter.step.LocatorHolder;
-import io.netty.handler.codec.http.cookie.CookieHeaderNames;
-import io.netty.handler.codec.http.cookie.DefaultCookie;
-import io.netty.util.HashedWheelTimer;
-import io.netty.util.Timer;
-import io.netty.util.concurrent.DefaultThreadFactory;
-import org.asynchttpclient.*;
-import org.asynchttpclient.config.AsyncHttpClientConfigDefaults;
-import org.asynchttpclient.cookie.CookieStore;
-import org.asynchttpclient.cookie.ThreadSafeCookieStore;
-import org.asynchttpclient.uri.Uri;
-import org.asynchttpclient.util.HttpConstants;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.remote.HttpCommandExecutor;
+import org.openqa.selenium.remote.http.HttpClient;
+import org.openqa.selenium.remote.http.HttpMethod;
+import org.openqa.selenium.remote.http.HttpRequest;
+import org.openqa.selenium.remote.http.HttpResponse;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
+import java.io.*;
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
 
 public class FileDownload extends AbstractStepType implements ConditionalStep, LocatorHolder {
-    private static final Timer TIMER;
-
-    static {
-        final ThreadFactory threadFactory = new DefaultThreadFactory("netty-client-timer", true);
-        TIMER = new HashedWheelTimer(threadFactory, AsyncHttpClientConfigDefaults.defaultHashedWheelTimerTickDuration(), TimeUnit.MILLISECONDS, AsyncHttpClientConfigDefaults.defaultHashedWheelTimerSize());
-    }
 
     @Override
     public boolean doRun(final TestRun ctx) {
@@ -44,43 +23,6 @@ public class FileDownload extends AbstractStepType implements ConditionalStep, L
             return this.post(ctx);
         }
         return this.get(ctx);
-    }
-
-    public boolean get(final TestRun ctx) {
-        final WebElement el = ctx.locator().find(ctx);
-        try {
-            this.getDownloadFile(ctx, el.getAttribute("href"), ctx.string("filepath"));
-        } catch (final Throwable e) {
-            ctx.log().error(e);
-            return false;
-        }
-        return true;
-    }
-
-    public boolean post(final TestRun ctx) {
-        try {
-            this.postDownloadFile(ctx, ctx.string("postURL"), ctx.string("filepath"));
-        } catch (final Throwable e) {
-            ctx.log().error(e);
-            return false;
-        }
-        return true;
-    }
-
-    public void postDownloadFile(final TestRun ctx, final String downloadUrl, final String outputFilePath) throws IOException, ExecutionException, InterruptedException {
-        final AsyncHttpClient client = this.getHttpClient(ctx, downloadUrl);
-        final Charset charset = Charset.forName(StandardCharsets.UTF_8.name());
-        final List<Param> param = new ArrayList<>();
-        ctx.locator()
-                .findElements(ctx)
-                .forEach(element ->
-                        param.add(new Param(element.getAttribute("name"), element.getAttribute("value")))
-                );
-        final ListenableFuture<Response> whenResponse = client.executeRequest(new RequestBuilder(HttpConstants.Methods.POST)
-                .setUri(Uri.create(downloadUrl))
-                .setCharset(charset)
-                .setFormParams(param));
-        this.downLoadFile(ctx, outputFilePath, whenResponse.get());
     }
 
     @Override
@@ -97,20 +39,49 @@ public class FileDownload extends AbstractStepType implements ConditionalStep, L
         return o.apply(LocatorHolder.super::addDefaultParam);
     }
 
-    public void getDownloadFile(final TestRun ctx, final String downloadUrl, final String outputFilePath) throws IOException, ExecutionException, InterruptedException {
-        final AsyncHttpClient client = this.getHttpClient(ctx, downloadUrl);
-        final ListenableFuture<Response> whenResponse = client.executeRequest(new RequestBuilder().setUri(Uri.create(downloadUrl)));
-        this.downLoadFile(ctx, outputFilePath, whenResponse.get());
+    public boolean get(final TestRun ctx) {
+        final WebElement el = ctx.locator().find(ctx);
+        try {
+            this.getDownloadFile(ctx, el.getAttribute("href"));
+        } catch (final Throwable e) {
+            ctx.log().error(e);
+            return false;
+        }
+        return true;
     }
 
-    public void downLoadFile(final TestRun ctx, final String outputFilePath, final Response response) throws IOException {
+    public boolean post(final TestRun ctx) {
+        try {
+            this.postDownloadFile(ctx, ctx.string("postURL"));
+        } catch (final Throwable e) {
+            ctx.log().error(e);
+            return false;
+        }
+        return true;
+    }
+
+    protected void postDownloadFile(final TestRun ctx, final String downloadUrl) throws IOException {
+        final HttpRequest req = new HttpRequest(HttpMethod.POST, downloadUrl)
+                .addHeader("Content-Type", "application/x-www-from-urlencoded");
+        req.setContent(() -> new ByteArrayInputStream(ctx.driver().getPageSource().getBytes(StandardCharsets.UTF_8)));
+        final HttpResponse res = this.getClient(ctx).execute(req);
+        this.downLoadFile(ctx, res);
+    }
+
+    protected void getDownloadFile(final TestRun ctx, final String downloadUrl) throws IOException {
+        final HttpRequest req = new HttpRequest(HttpMethod.GET, downloadUrl);
+        final HttpResponse res = this.getClient(ctx).execute(req);
+        this.downLoadFile(ctx, res);
+    }
+
+    protected void downLoadFile(final TestRun ctx, final HttpResponse response) throws IOException {
         final File outputFile;
         if (ctx.getBoolean("fixedPath")) {
-            outputFile = ctx.getListener().addDownloadFile(outputFilePath);
+            outputFile = ctx.getListener().addDownloadFile(ctx.string("filepath"));
         } else {
-            outputFile = ctx.getListener().addDownloadFile(ctx.getTestRunName() + "_" + outputFilePath);
+            outputFile = ctx.getListener().addDownloadFile(ctx.getTestRunName() + "_" + ctx.string("filepath"));
         }
-        try (final InputStream inputStream = response.getResponseBodyAsStream(); final FileOutputStream fileOutputStream = new FileOutputStream(outputFile)) {
+        try (final InputStream inputStream = response.getContent().get(); final FileOutputStream fileOutputStream = new FileOutputStream(outputFile)) {
             int read;
             final byte[] bytes = new byte[1024];
             while ((read = inputStream.read(bytes)) != -1) {
@@ -119,41 +90,16 @@ public class FileDownload extends AbstractStepType implements ConditionalStep, L
         }
     }
 
-    public AsyncHttpClient getHttpClient(final TestRun ctx, final String downloadUrl) {
-        final Set<org.openqa.selenium.Cookie> seleniumCookies = ctx.driver().manage().getCookies();
-        final CookieStore cookies = new ThreadSafeCookieStore();
-        final Uri uri = Uri.create(downloadUrl);
-        for (final org.openqa.selenium.Cookie seleniumCookie : seleniumCookies) {
-            final DefaultCookie cookie = new DefaultCookie(seleniumCookie.getName(), seleniumCookie.getValue());
-            String domain = seleniumCookie.getDomain();
-            if (domain.startsWith(".")) {
-                domain = domain.substring(1);
-            }
-            cookie.setDomain(domain);
-            if (seleniumCookie.getExpiry() != null) {
-                cookie.setMaxAge(seleniumCookie.getExpiry().getTime());
-            }
-            cookie.setSecure(seleniumCookie.isSecure());
-            cookie.setHttpOnly(seleniumCookie.isHttpOnly());
-            if (seleniumCookie.getPath() != null) {
-                cookie.setPath(seleniumCookie.getPath());
-            }
-            if (seleniumCookie.getSameSite() != null) {
-                cookie.setSameSite(CookieHeaderNames.SameSite.valueOf(seleniumCookie.getSameSite()));
-            }
-            cookies.add(uri, cookie);
+    protected HttpClient getClient(final TestRun ctx) {
+        final HttpCommandExecutor executor = (HttpCommandExecutor) ctx.driver().getCommandExecutor();
+        final Field clientField;
+        try {
+            clientField = HttpCommandExecutor.class.getDeclaredField("client");
+            clientField.setAccessible(true);
+            return (HttpClient) clientField.get(executor);
+        } catch (final NoSuchFieldException | IllegalAccessException e) {
+            throw new AssertionError(e);
         }
-        final DefaultAsyncHttpClientConfig.Builder builder = (new DefaultAsyncHttpClientConfig.Builder())
-                .setThreadFactory(new DefaultThreadFactory("AsyncHttpClient", true))
-                .setUseInsecureTrustManager(true)
-                .setAggregateWebSocketFrameFragments(true)
-                .setWebSocketMaxBufferSize(2147483647)
-                .setWebSocketMaxFrameSize(2147483647)
-                .setNettyTimer(TIMER)
-                .setCookieStore(cookies)
-                .setUseProxyProperties(true)
-                .setUseProxySelector(true);
-        return Dsl.asyncHttpClient(builder);
     }
 
 }
