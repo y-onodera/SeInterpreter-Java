@@ -13,7 +13,9 @@ import org.openqa.selenium.remote.http.HttpResponse;
 
 import java.io.*;
 import java.lang.reflect.Field;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.stream.Collectors;
 
 public class FileDownload extends AbstractStepType implements ConditionalStep, LocatorHolder {
 
@@ -63,7 +65,16 @@ public class FileDownload extends AbstractStepType implements ConditionalStep, L
     protected void postDownloadFile(final TestRun ctx, final String downloadUrl) throws IOException {
         final HttpRequest req = new HttpRequest(HttpMethod.POST, downloadUrl)
                 .addHeader("Content-Type", "application/x-www-from-urlencoded");
-        req.setContent(() -> new ByteArrayInputStream(ctx.driver().getPageSource().getBytes(StandardCharsets.UTF_8)));
+        final String contents = ctx.locator()
+                .findElements(ctx)
+                .stream()
+                .filter(element -> element.getAttribute("name") != null)
+                .map(element ->
+                        URLEncoder.encode(element.getAttribute("name"), StandardCharsets.UTF_8)
+                                + "=" +
+                                URLEncoder.encode(element.getAttribute("value"), StandardCharsets.UTF_8))
+                .collect(Collectors.joining("&"));
+        req.setContent(() -> new ByteArrayInputStream(contents.getBytes(StandardCharsets.UTF_8)));
         final HttpResponse res = this.getClient(ctx).execute(req);
         this.downLoadFile(ctx, res);
     }
