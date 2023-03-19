@@ -125,10 +125,13 @@ jobs:
         include:
           - browser: chrome
             expect: test/suite/expect/Chrome_screenshot
+            arguments: --driver=chrome --resultoutput=chrome
           - browser: edge
             expect: test/suite/expect/Edge_screenshot
+            arguments: --driver=edge --resultoutput=edge --driver.edge.arguments.disable-features=msHubApps
           - browser: firefox
             expect: test/suite/expect/Firefox_screenshot
+            arguments: --driver=firefox --resultoutput=firefox
     steps:
       - uses: actions/checkout@v3
       - name: Download jre
@@ -144,7 +147,7 @@ jobs:
           rd /s /q %CHROMEWEBDRIVER%
           rd /s /q %EDGEWEBDRIVER%
           rd /s /q %GECKOWEBDRIVER%
-          bin\java -cp sebuilder-interpreter-2.0.0-SNAPSHOT-jar-with-dependencies.jar com.sebuilder.interpreter.application.SeInterpreter --env.verifyImage=true --expectScreenshotDirectory=${{matrix.expect}} --driver=${{matrix.browser}} --driver.edge.arguments.disable-features=msHubApps　--resultoutput=${{matrix.browser}} --datasource.directory=test/suite/input --aspectFile=test/suite/aspect/saveScreenshot.json test/suite/testsuite.json
+          bin\java -cp sebuilder-interpreter-2.0.0-SNAPSHOT-jar-with-dependencies.jar com.sebuilder.interpreter.application.SeInterpreter --env.verifyImage=true --expectScreenshotDirectory=${{matrix.expect}} ${{matrix.arguments}} --datasource.directory=test/suite/input --aspectFile=test/suite/aspect/saveScreenshot.json test/suite/testsuite.json
         shell: cmd
       - name: Upload result
         uses: actions/upload-artifact@v3
