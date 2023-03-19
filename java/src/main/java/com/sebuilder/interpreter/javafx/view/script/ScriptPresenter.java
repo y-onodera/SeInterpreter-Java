@@ -1,6 +1,7 @@
 package com.sebuilder.interpreter.javafx.view.script;
 
 import com.google.common.base.Strings;
+import com.sebuilder.interpreter.Pointcut;
 import com.sebuilder.interpreter.Step;
 import com.sebuilder.interpreter.TestCase;
 import com.sebuilder.interpreter.javafx.application.BreakPoint;
@@ -9,6 +10,8 @@ import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
 import com.sebuilder.interpreter.javafx.application.ViewType;
 import com.sebuilder.interpreter.javafx.control.DragAndDropTableViewRowFactory;
 import com.sebuilder.interpreter.javafx.view.replay.InputView;
+import com.sebuilder.interpreter.pointcut.VerifyFilter;
+import com.sebuilder.interpreter.step.Verify;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -111,17 +114,17 @@ public class ScriptPresenter {
 
     @FXML
     void handleStepInsert() {
-        this.initStepEditDialog(StepView.Action.INSERT);
+        this.initStepEditDialog(Action.INSERT);
     }
 
     @FXML
     void handleStepAdd() {
-        this.initStepEditDialog(StepView.Action.ADD);
+        this.initStepEditDialog(Action.ADD);
     }
 
     @FXML
     void handleStepEdit() {
-        final StepView stepView = this.initStepEditDialog(StepView.Action.EDIT);
+        final StepView stepView = this.initStepEditDialog(Action.EDIT);
         final StepDefine item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
         stepView.refresh(this.application.getDisplayTestCase()
                 .steps()
@@ -162,7 +165,15 @@ public class ScriptPresenter {
     @FXML
     public void handleAddBreakPoint() {
         final StepDefine item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
-        new BreakPointView().open(this.currentWindow(), item.index());
+        new StepView(s -> s.startsWith("verify"), key -> !key.equals("skip"))
+                .open(this.currentWindow(), (application, step) -> {
+                    if (step != null) {
+                        final VerifyFilter pointcut = new VerifyFilter((Verify) step.type(), step.stringParams(), step.locatorParams());
+                        application.addBreakPoint(item.index(), pointcut);
+                    } else {
+                        application.addBreakPoint(item.index(), Pointcut.ANY);
+                    }
+                });
     }
 
     @FXML
@@ -212,14 +223,23 @@ public class ScriptPresenter {
                 .ifPresent(target -> target.setRunningResult(result.name()));
     }
 
-    private StepView initStepEditDialog(final StepView.Action action) {
+    private StepView initStepEditDialog(final Action action) {
         final StepDefine item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
-        int no = 0;
-        if (item != null) {
-            no = item.index();
-        }
+        final int no = item != null ? item.index() : 0;
         final StepView stepView = new StepView();
-        stepView.open(this.currentWindow(), no, action);
+        stepView.open(this.currentWindow(), (application, step) -> {
+            if (step != null) {
+                final TestCase newCase;
+                if (action == Action.EDIT) {
+                    newCase = application.getDisplayTestCase().replaceSteps(no, step);
+                } else if (action == Action.INSERT) {
+                    newCase = application.getDisplayTestCase().insertStep(no, step);
+                } else {
+                    newCase = application.getDisplayTestCase().addStep(no, step);
+                }
+                application.replaceDisplayCase(newCase);
+            }
+        });
         return stepView;
     }
 
@@ -295,4 +315,7 @@ public class ScriptPresenter {
         }
     }
 
+    private enum Action {
+        INSERT, ADD, EDIT
+    }
 }

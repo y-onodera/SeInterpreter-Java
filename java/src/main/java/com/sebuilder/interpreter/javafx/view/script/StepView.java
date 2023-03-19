@@ -2,18 +2,34 @@ package com.sebuilder.interpreter.javafx.view.script;
 
 import com.airhacks.afterburner.views.FXMLView;
 import com.sebuilder.interpreter.Step;
+import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
+import java.util.function.BiConsumer;
+import java.util.function.Predicate;
+
 public class StepView extends FXMLView {
 
+    private final Predicate<String> stepTypeFilter;
 
-    public void open(final Window window, final int no, final Action action) {
+    private final Predicate<String> textParamFilter;
+
+    public StepView() {
+        this(s -> true, s -> true);
+    }
+
+    public StepView(final Predicate<String> stepTypeFilter, final Predicate<String> textParamFilter) {
+        this.stepTypeFilter = stepTypeFilter;
+        this.textParamFilter = textParamFilter;
+    }
+
+    public void open(final Window window, final BiConsumer<SeInterpreterApplication, Step> applyStep) {
         final Scene scene = new Scene(this.getView());
         final Stage dialog = new Stage();
-        this.presenter().populate(dialog, no, action);
+        this.presenter().populate(dialog, this.stepTypeFilter, this.textParamFilter, applyStep);
         dialog.setScene(scene);
         dialog.initOwner(window);
         dialog.initModality(Modality.WINDOW_MODAL);
@@ -30,8 +46,5 @@ public class StepView extends FXMLView {
         return (StepPresenter) this.getPresenter();
     }
 
-    public enum Action {
-        INSERT, ADD, EDIT
-    }
 
 }

@@ -20,7 +20,8 @@ public interface GetterUseStep extends StepType {
 
     @Override
     default StepBuilder addDefaultParam(final StepBuilder o) {
-        return this.getGetter().addDefaultParam(o);
+        return this.getGetter().addDefaultParam(o)
+                .put("negated", Boolean.toString(o.isNegated()));
     }
 
 }
