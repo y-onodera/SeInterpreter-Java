@@ -35,6 +35,8 @@ public class SeInterpreterApplication extends Application {
 
     private SeInterpreterRunner runner;
 
+    private Step takeScreenshotTemplate;
+
     private final Debugger debugger = new Debugger();
 
     private ErrorDialog errorDialog;
@@ -71,6 +73,12 @@ public class SeInterpreterApplication extends Application {
         }
         this.mainView = new MainView();
         this.mainView.open(stage);
+        if (parameters.getNamed().containsKey("takeScreenshotTemplate")) {
+            this.takeScreenshotTemplate = this.getScriptParser()
+                    .load(new File(parameters.getNamed().get("takeScreenshotTemplate")))
+                    .steps()
+                    .get(0);
+        }
     }
 
     @Override
@@ -308,6 +316,13 @@ public class SeInterpreterApplication extends Application {
 
     public TestCase exportTemplate(final Locator locator, final List<String> targetTags, final boolean withDataSource) {
         return this.runner.exportTemplate(locator, targetTags, withDataSource);
+    }
+
+    public Step takeScreenshotTemplate() {
+        if (this.takeScreenshotTemplate != null) {
+            return this.takeScreenshotTemplate.withAllParam();
+        }
+        return this.createStep("saveScreenshot").withAllParam();
     }
 
     public File takeScreenShot(final StepBuilder stepBuilder) {

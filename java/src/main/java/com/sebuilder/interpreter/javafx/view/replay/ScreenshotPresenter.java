@@ -34,7 +34,7 @@ public class ScreenshotPresenter {
     private final Map<String, TextField> locatorValues = Maps.newHashMap();
 
     void populate() {
-        final Step stepWithAllParam = this.application.createStep("saveScreenshot").withAllParam();
+        final Step stepWithAllParam = this.application.takeScreenshotTemplate();
         this.application.executeAndLoggingCaseWhenThrowException(() -> {
             int row = 1;
             row = this.addLocator(stepWithAllParam, row, "locator");
