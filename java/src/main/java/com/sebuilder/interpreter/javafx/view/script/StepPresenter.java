@@ -251,7 +251,9 @@ public class StepPresenter {
 
     private final Map<String, Node> inputs = Maps.newHashMap();
 
-    private final Map<String, Map<String, Node>> locatorInputs = Maps.newHashMap();
+    private final Map<String, ComboBox<String>> locatorTypes = Maps.newHashMap();
+
+    private final Map<String, TextField> locatorValues = Maps.newHashMap();
 
     private Stage dialog;
 
@@ -304,10 +306,10 @@ public class StepPresenter {
                     }
                 }
             });
-            this.locatorInputs.forEach((key, value1) -> {
-                final String type = ((ComboBox<String>) value1.get("type")).getSelectionModel().getSelectedItem();
+            this.locatorTypes.forEach((key, value1) -> {
+                final String type = value1.getSelectionModel().getSelectedItem();
                 if (!Strings.isNullOrEmpty(type)) {
-                    final String value = ((TextField) value1.get("value")).getText();
+                    final String value = this.locatorValues.get(key).getText();
                     step.put(key, new Locator(type, value));
                 }
             });
@@ -324,7 +326,7 @@ public class StepPresenter {
             row = this.addTextBox(stepWithAllParam, row, "skip");
             row = this.addLocator(stepWithAllParam, row, "locator");
             row = this.constructStringParamView(stepWithAllParam, row, typeName);
-            row = this.constructLocatorParamView(stepWithAllParam, row);
+            this.constructLocatorParamView(stepWithAllParam, row);
             this.stepEditGrid.getScene().getWindow().sizeToScene();
         });
     }
@@ -337,14 +339,13 @@ public class StepPresenter {
         return key.equals("locator");
     }
 
-    private int constructLocatorParamView(final Step step, int row) {
+    private void constructLocatorParamView(final Step step, int row) {
         for (final String key : step.locatorKeys()) {
             if (this.isDefaultLocator(key)) {
                 continue;
             }
             row = this.addLocator(step, row, key);
         }
-        return row;
     }
 
     private int constructStringParamView(final Step step, int row, final String typeName) {
@@ -375,7 +376,8 @@ public class StepPresenter {
     private void clearInputFields() {
         this.backupBeforeLocator();
         this.inputs.clear();
-        this.locatorInputs.clear();
+        this.locatorTypes.clear();
+        this.locatorValues.clear();
         this.stepEditGrid.getChildren().removeIf(node -> !this.stepTypeSelect.equals(node) && !this.labelSelectType.equals(node));
     }
 
@@ -411,10 +413,8 @@ public class StepPresenter {
             button.setOnAction(ae -> this.application.highLightElement(select.getSelectionModel().getSelectedItem(), text.getText()));
             this.stepEditGrid.add(text, "width 150,cell 1 " + row);
             this.stepEditGrid.add(button, "cell 2 " + row++);
-            final Map<String, Node> input = Maps.newHashMap();
-            input.put("type", select);
-            input.put("value", text);
-            this.locatorInputs.put(locator, input);
+            this.locatorTypes.put(locator, select);
+            this.locatorValues.put(locator, text);
         } else if (this.isDefaultLocator(locator)) {
             this.locatorTypeSelect = null;
             this.locatorText = null;
