@@ -1,7 +1,6 @@
 package com.sebuilder.interpreter.javafx.view.replay;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Maps;
 import com.sebuilder.interpreter.Locator;
 import com.sebuilder.interpreter.Step;
 import com.sebuilder.interpreter.StepBuilder;
@@ -21,20 +20,52 @@ import org.tbee.javafx.scene.layout.fxml.MigPane;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class ScreenshotPresenter {
     @FXML
-    public MigPane stepEditGrid;
+    private MigPane stepEditGrid;
+
+    @FXML
+    private ComboBox<String> templateSelect;
+
+    @FXML
+    private Label labelTemplateSelect;
+
     @Inject
     private SeInterpreterApplication application;
-    private final Map<String, Node> inputs = Maps.newHashMap();
 
-    private final Map<String, ComboBox<String>> locatorTypes = Maps.newHashMap();
-    private final Map<String, TextField> locatorValues = Maps.newHashMap();
+    private final Map<String, Step> templates = new LinkedHashMap<>();
+
+    private final Map<String, Node> inputs = new HashMap<>();
+
+    private final Map<String, ComboBox<String>> locatorTypes = new HashMap<>();
+
+    private final Map<String, TextField> locatorValues = new HashMap<>();
+
+    private String currentSelected;
 
     void populate() {
-        final Step stepWithAllParam = this.application.takeScreenshotTemplate();
+        this.templates.putAll(this.application.takeScreenshotTemplates());
+        this.templateSelect.getItems().setAll(this.templates.keySet());
+        this.templateSelect.getSelectionModel().select(0);
+    }
+
+    @FXML
+    public void selectTemplate() {
+        final String selected = this.templateSelect.getSelectionModel().getSelectedItem();
+        if (Objects.equals(this.currentSelected, selected)) {
+            return;
+        }
+        final Step stepWithAllParam = this.templates.get(selected);
+        this.currentSelected = selected;
+        this.inputs.clear();
+        this.locatorTypes.clear();
+        this.locatorValues.clear();
+        this.stepEditGrid.getChildren().removeIf(node -> !this.templateSelect.equals(node) && !this.labelTemplateSelect.equals(node));
         this.application.executeAndLoggingCaseWhenThrowException(() -> {
             int row = 1;
             row = this.addLocator(stepWithAllParam, row, "locator");
@@ -129,4 +160,5 @@ public class ScreenshotPresenter {
         inputMap.put(key, text);
         return row;
     }
+
 }

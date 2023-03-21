@@ -10,6 +10,7 @@ import com.sebuilder.interpreter.javafx.view.main.ErrorDialog;
 import com.sebuilder.interpreter.javafx.view.main.MainView;
 import com.sebuilder.interpreter.javafx.view.replay.ReplayView;
 import com.sebuilder.interpreter.step.type.Get;
+import com.sebuilder.interpreter.step.type.SaveScreenshot;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 import io.netty.util.internal.logging.Log4J2LoggerFactory;
 import javafx.application.Application;
@@ -25,7 +26,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
@@ -35,7 +38,7 @@ public class SeInterpreterApplication extends Application {
 
     private SeInterpreterRunner runner;
 
-    private Step takeScreenshotTemplate;
+    private final Map<String, Step> takeScreenshotTemplate = new LinkedHashMap<>();
 
     private final Debugger debugger = new Debugger();
 
@@ -73,11 +76,20 @@ public class SeInterpreterApplication extends Application {
         }
         this.mainView = new MainView();
         this.mainView.open(stage);
+        this.takeScreenshotTemplate.put("", this.createStep("saveScreenshot").withAllParam());
         if (parameters.getNamed().containsKey("takeScreenshotTemplate")) {
-            this.takeScreenshotTemplate = this.getScriptParser()
+            int noName = 0;
+            for (final Step step : this.getScriptParser()
                     .load(new File(parameters.getNamed().get("takeScreenshotTemplate")))
-                    .steps()
-                    .get(0);
+                    .steps()) {
+                if (step.type() instanceof SaveScreenshot) {
+                    if (step.containsParam("optionValue")) {
+                        this.takeScreenshotTemplate.put(step.getParam("optionValue"), step.withAllParam());
+                    } else {
+                        this.takeScreenshotTemplate.put(String.format("has no optionValue#%s", noName++), step.withAllParam());
+                    }
+                }
+            }
         }
     }
 
@@ -318,11 +330,8 @@ public class SeInterpreterApplication extends Application {
         return this.runner.exportTemplate(locator, targetTags, withDataSource);
     }
 
-    public Step takeScreenshotTemplate() {
-        if (this.takeScreenshotTemplate != null) {
-            return this.takeScreenshotTemplate.withAllParam();
-        }
-        return this.createStep("saveScreenshot").withAllParam();
+    public Map<String, Step> takeScreenshotTemplates() {
+        return this.takeScreenshotTemplate;
     }
 
     public File takeScreenShot(final StepBuilder stepBuilder) {
