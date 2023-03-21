@@ -25,13 +25,16 @@ public class Chrome implements WebDriverFactory {
     @Override
     public ChromeOptions getOptions(final Map<String, String> config) {
         final HashMap<String, String> caps = new HashMap<>();
-        final HashMap<String, String> prefs = new HashMap<>();
+        final HashMap<String, Object> prefs = new HashMap<>();
         final ChromeOptions option = new ChromeOptions();
         config.forEach((key, value) -> {
             if (key.equals("binary")) {
                 option.setBinary(new File(value));
             } else if (key.startsWith("experimental.")) {
-                prefs.put(key.substring("experimental.".length()), value);
+                switch (value.toLowerCase()) {
+                    case "true", "false" -> prefs.put(key.substring("experimental.".length()), Boolean.valueOf(value));
+                    default -> prefs.put(key.substring("experimental.".length()), value);
+                }
             } else if (key.startsWith("chrome.arguments.")) {
                 if (!Optional.ofNullable(config.get(key)).orElse("").isBlank()) {
                     option.addArguments("--" + key.substring("chrome.arguments.".length()) + "=" + config.get(key));

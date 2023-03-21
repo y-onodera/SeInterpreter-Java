@@ -128,7 +128,7 @@ jobs:
             arguments: --driver=chrome --resultoutput=chrome
           - browser: edge
             expect: test/suite/expect/Edge_screenshot
-            arguments: --driver=edge --resultoutput=edge --driver.edge.arguments.disable-features=msHubApps
+            arguments: --driver=edge --resultoutput=edge --driver.experimental.browser.show_hub_apps_tower=false
           - browser: firefox
             expect: test/suite/expect/Firefox_screenshot
             arguments: --driver=firefox --resultoutput=firefox
