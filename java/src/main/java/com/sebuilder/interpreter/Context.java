@@ -56,6 +56,8 @@ public enum Context {
     private final Properties environmentProperties = new Properties();
     private Locale locale;
     private File localeConfDir;
+    private int waitForMaxMs;
+    private int waitForIntervalMs;
 
     Context() {
         try {
@@ -88,6 +90,14 @@ public enum Context {
 
     public static Long getPageLoadWaitTime() {
         return getInstance().pageLoadWaitTime;
+    }
+
+    public static int getWaitForMaxMs() {
+        return getInstance().waitForMaxMs;
+    }
+
+    public static int getWaitForIntervalMs() {
+        return getInstance().waitForIntervalMs;
     }
 
     public static String getBrowser() {
@@ -228,6 +238,16 @@ public enum Context {
 
     public Context setPageLoadWaitTime(final Long aLong) {
         this.pageLoadWaitTime = aLong;
+        return this;
+    }
+
+    public Context setWaitForMaxMs(final int waitForMaxMs) {
+        this.waitForMaxMs = waitForMaxMs;
+        return this;
+    }
+
+    public Context setWaitForIntervalMs(final int waitForIntervalMs) {
+        this.waitForIntervalMs = waitForIntervalMs;
         return this;
     }
 
@@ -406,6 +426,7 @@ public enum Context {
             return new HashMap<>();
         }
     }
+
 
     public enum TestNamePrefix {
         TIMESTAMP("timestamp"), RESULT_DIR("resultDir"), NONE("none");

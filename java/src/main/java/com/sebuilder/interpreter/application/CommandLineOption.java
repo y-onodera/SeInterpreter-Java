@@ -12,6 +12,8 @@ public class CommandLineOption {
 
     private Long implicitlyWait = (long) -1;
     private Long pageLoadTimeout = (long) -1;
+    private int waitForMaxMs = 30000;
+    private int waitForIntervalMs = 500;
     private String driver = "Chrome";
     private String driverPath;
     private final Map<String, String> driverConfig = new HashMap<>();
@@ -48,6 +50,10 @@ public class CommandLineOption {
                     this.implicitlyWait = Long.valueOf(kv[1]);
                 } else if (kv[0].equals(CommandLineArgument.PAGE_LOAD_TIMEOUT.key())) {
                     this.pageLoadTimeout = Long.valueOf(kv[1]);
+                } else if (kv[0].equals(CommandLineArgument.WAIT_FOR_MAX_MS.key())) {
+                    this.waitForMaxMs = Integer.valueOf(kv[1]);
+                } else if (kv[0].equals(CommandLineArgument.WAIT_FOR_INTERVAL_MS.key())) {
+                    this.waitForIntervalMs = Integer.valueOf(kv[1]);
                 } else if (kv[0].startsWith(CommandLineArgument.DRIVER_CONFIG_PREFIX.key())) {
                     this.driverConfig.put(kv[0].substring(CommandLineArgument.DRIVER_CONFIG_PREFIX.key().length()), kv[1]);
                 } else if (kv[0].equals(CommandLineArgument.DRIVER.key())) {
@@ -99,6 +105,14 @@ public class CommandLineOption {
 
     public Long getPageLoadTimeout() {
         return this.pageLoadTimeout;
+    }
+
+    public int getWaitForMaxMs() {
+        return this.waitForMaxMs;
+    }
+
+    public int getWaitForIntervalMs() {
+        return this.waitForIntervalMs;
     }
 
     public String getDriver() {

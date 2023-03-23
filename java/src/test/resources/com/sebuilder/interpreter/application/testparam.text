@@ -1,5 +1,7 @@
 --implicitlyWait=1000
 --pageLoadTimeout=5000
+--waitFor.maxMs=60000
+--waitFor.intervalMs=100
 --driver=Edge
 --driverPath=C:/driver/chromedriver.exe
 --driver.experimental=extension

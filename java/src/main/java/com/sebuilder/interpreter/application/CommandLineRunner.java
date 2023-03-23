@@ -61,6 +61,8 @@ public abstract class CommandLineRunner {
             Context.getInstance()
                     .setImplicitlyWaitTime(option.getImplicitlyWait())
                     .setPageLoadWaitTime(option.getPageLoadTimeout())
+                    .setWaitForMaxMs(option.getWaitForMaxMs())
+                    .setWaitForIntervalMs(option.getWaitForIntervalMs())
                     .setBrowser(option.getDriver())
                     .ifMatch(!Strings.isNullOrEmpty(option.getDriverPath())
                             , it -> it.setWebDriverPath(option.getDriverPath())

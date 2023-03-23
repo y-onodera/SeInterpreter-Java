@@ -4,6 +4,8 @@ public enum CommandLineArgument {
 
     IMPLICITLY_WAIT("--implicitlyWait"),
     PAGE_LOAD_TIMEOUT("--pageLoadTimeout"),
+    WAIT_FOR_MAX_MS("--waitFor.maxMs"),
+    WAIT_FOR_INTERVAL_MS("--waitFor.intervalMs"),
     DRIVER("--driver"),
     DRIVER_PATH("--driverPath"),
     DRIVER_CONFIG_PREFIX("--driver."),
