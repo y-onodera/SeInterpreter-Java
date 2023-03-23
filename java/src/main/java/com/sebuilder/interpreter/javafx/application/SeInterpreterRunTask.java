@@ -60,7 +60,7 @@ public class SeInterpreterRunTask extends Task<String> {
             });
         } catch (final Throwable ex) {
             result = false;
-            this.log.error(ex);
+            this.log.error("operation failed cause:", ex);
         }
         if (result) {
             this.log.info("operation success");

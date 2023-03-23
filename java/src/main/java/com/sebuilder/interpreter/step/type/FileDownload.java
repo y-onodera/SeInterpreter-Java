@@ -46,7 +46,7 @@ public class FileDownload extends AbstractStepType implements ConditionalStep, L
         try {
             this.getDownloadFile(ctx, el.getAttribute("href"));
         } catch (final Throwable e) {
-            ctx.log().error(e);
+            ctx.log().error("download http get failure cause:", e);
             return false;
         }
         return true;
@@ -56,7 +56,7 @@ public class FileDownload extends AbstractStepType implements ConditionalStep, L
         try {
             this.postDownloadFile(ctx, ctx.string("postURL"));
         } catch (final Throwable e) {
-            ctx.log().error(e);
+            ctx.log().error("download http post failure cause:", e);
             return false;
         }
         return true;

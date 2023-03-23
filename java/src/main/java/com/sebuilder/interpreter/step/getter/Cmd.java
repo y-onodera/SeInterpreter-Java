@@ -36,7 +36,7 @@ public class Cmd extends AbstractGetter {
             }
             return String.valueOf(process.waitFor());
         } catch (final InterruptedException | IOException e) {
-            ctx.log().error(e);
+            ctx.log().error("execute cmd failed cause:", e);
             return "false";
         }
     }

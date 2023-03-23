@@ -108,7 +108,7 @@ public class SeInterpreterRunner {
                 try {
                     Files.copy(exportedDataSource, new File(this.globalListener.getTemplateOutputDirectory(), dataSourceName));
                 } catch (final IOException e) {
-                    this.log.error(e);
+                    this.log.error("export datasource failed cause:", e);
                 }
             }
         }

@@ -79,7 +79,7 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
             ImageIO.write(actual, "PNG", file);
             return file.exists();
         } catch (final IOException e) {
-            ctx.log().error(e);
+            ctx.log().error("save image file failed cause:", e);
             return false;
         }
     }

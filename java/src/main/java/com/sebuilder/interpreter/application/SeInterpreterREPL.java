@@ -82,7 +82,7 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
         try {
             return Context.getScriptParser().load(new File(file));
         } catch (final Throwable e) {
-            this.log.error(e);
+            this.log.error("load script failed cause:", e);
         }
         return new TestCaseBuilder().build();
     }
@@ -137,7 +137,7 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
         try {
             result = Context.getScriptParser().load(cmdInput);
         } catch (final Throwable e) {
-            this.log.error(e);
+            this.log.error("parse input failed cause:", e);
         }
         if (result == null) {
             this.log.error("invalid input:" + cmdInput);

@@ -180,7 +180,7 @@ public abstract class TestRunListenerImpl implements TestRunListener {
     @Override
     public void addError(final Throwable throwable) {
         this.log.info("result error:" + this.testName);
-        this.log.error(throwable);
+        this.log.error("cause :", throwable);
     }
 
     @Override
