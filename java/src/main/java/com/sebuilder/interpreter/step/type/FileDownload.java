@@ -4,17 +4,18 @@ import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.step.AbstractStepType;
 import com.sebuilder.interpreter.step.LocatorHolder;
+import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.remote.HttpCommandExecutor;
-import org.openqa.selenium.remote.http.HttpClient;
-import org.openqa.selenium.remote.http.HttpMethod;
-import org.openqa.selenium.remote.http.HttpRequest;
-import org.openqa.selenium.remote.http.HttpResponse;
 
 import java.io.*;
-import java.lang.reflect.Field;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
+import java.net.CookieManager;
+import java.net.HttpCookie;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class FileDownload extends AbstractStepType implements ConditionalStep, LocatorHolder {
@@ -62,37 +63,36 @@ public class FileDownload extends AbstractStepType implements ConditionalStep, L
         return true;
     }
 
-    protected void postDownloadFile(final TestRun ctx, final String downloadUrl) throws IOException {
-        final HttpRequest req = new HttpRequest(HttpMethod.POST, downloadUrl)
-                .addHeader("Content-Type", "application/x-www-from-urlencoded");
+    protected void postDownloadFile(final TestRun ctx, final String downloadUrl) throws IOException, URISyntaxException, InterruptedException {
         final String contents = ctx.locator()
                 .findElements(ctx)
                 .stream()
                 .filter(element -> element.getAttribute("name") != null)
-                .map(element ->
-                        URLEncoder.encode(element.getAttribute("name"), StandardCharsets.UTF_8)
-                                + "=" +
-                                URLEncoder.encode(element.getAttribute("value"), StandardCharsets.UTF_8))
+                .map(element -> element.getAttribute("name") + "=" + element.getAttribute("value"))
                 .collect(Collectors.joining("&"));
-        req.setContent(() -> new ByteArrayInputStream(contents.getBytes(StandardCharsets.UTF_8)));
-        final HttpResponse res = this.getClient(ctx).execute(req);
-        this.downLoadFile(ctx, res);
+        this.downLoadFile(ctx, HttpRequest.newBuilder()
+                .uri(URI.create(downloadUrl))
+                .setHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8")
+                .POST(HttpRequest.BodyPublishers.ofString(contents))
+                .build());
     }
 
-    protected void getDownloadFile(final TestRun ctx, final String downloadUrl) throws IOException {
-        final HttpRequest req = new HttpRequest(HttpMethod.GET, downloadUrl);
-        final HttpResponse res = this.getClient(ctx).execute(req);
-        this.downLoadFile(ctx, res);
+    protected void getDownloadFile(final TestRun ctx, final String downloadUrl) throws IOException, URISyntaxException, InterruptedException {
+        this.downLoadFile(ctx, HttpRequest.newBuilder()
+                .uri(URI.create(downloadUrl))
+                .GET().build());
     }
 
-    protected void downLoadFile(final TestRun ctx, final HttpResponse response) throws IOException {
+    protected void downLoadFile(final TestRun ctx, final HttpRequest req) throws IOException, URISyntaxException, InterruptedException {
+        final HttpClient client = this.getHttpClient(ctx);
+        final HttpResponse<byte[]> res = client.send(req, java.net.http.HttpResponse.BodyHandlers.ofByteArray());
         final File outputFile;
         if (ctx.getBoolean("fixedPath")) {
             outputFile = ctx.getListener().addDownloadFile(ctx.string("filepath"));
         } else {
             outputFile = ctx.getListener().addDownloadFile(ctx.getTestRunName() + "_" + ctx.string("filepath"));
         }
-        try (final InputStream inputStream = response.getContent().get(); final FileOutputStream fileOutputStream = new FileOutputStream(outputFile)) {
+        try (final InputStream inputStream = new ByteArrayInputStream(res.body()); final FileOutputStream fileOutputStream = new FileOutputStream(outputFile)) {
             int read;
             final byte[] bytes = new byte[1024];
             while ((read = inputStream.read(bytes)) != -1) {
@@ -101,16 +101,33 @@ public class FileDownload extends AbstractStepType implements ConditionalStep, L
         }
     }
 
-    protected HttpClient getClient(final TestRun ctx) {
-        final HttpCommandExecutor executor = (HttpCommandExecutor) ctx.driver().getCommandExecutor();
-        final Field clientField;
-        try {
-            clientField = HttpCommandExecutor.class.getDeclaredField("client");
-            clientField.setAccessible(true);
-            return (HttpClient) clientField.get(executor);
-        } catch (final NoSuchFieldException | IllegalAccessException e) {
-            throw new AssertionError(e);
+    protected HttpClient getHttpClient(final TestRun ctx) throws URISyntaxException {
+        final URI currentUri = new URI(ctx.driver().getCurrentUrl());
+        final URI uri = new URI(currentUri.toString().replace(currentUri.getPath(), ""));
+        final Set<Cookie> seleniumCookies = ctx.driver().manage().getCookies();
+        final var cookieManager = new CookieManager();
+        for (final Cookie seleniumCookie : seleniumCookies) {
+            final HttpCookie cookie = new HttpCookie(seleniumCookie.getName(), seleniumCookie.getValue());
+            String domain = seleniumCookie.getDomain();
+            if (domain.startsWith(".")) {
+                domain = domain.substring(1);
+            }
+            cookie.setDomain(domain);
+            if (seleniumCookie.getExpiry() != null) {
+                cookie.setMaxAge(seleniumCookie.getExpiry().getTime());
+            }
+            cookie.setSecure(seleniumCookie.isSecure());
+            cookie.setHttpOnly(seleniumCookie.isHttpOnly());
+            if (seleniumCookie.getPath() != null) {
+                cookie.setPath(seleniumCookie.getPath());
+            }
+            cookie.setVersion(0);
+            cookieManager.getCookieStore().add(uri, cookie);
         }
+        return HttpClient.newBuilder()
+                .cookieHandler(cookieManager)
+                .followRedirects(HttpClient.Redirect.NORMAL)
+                .build();
     }
 
 }

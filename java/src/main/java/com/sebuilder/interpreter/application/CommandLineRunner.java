@@ -23,6 +23,10 @@ public abstract class CommandLineRunner {
 
     protected CommandLineRunner(final String[] args, final Logger log) {
         System.setProperty("webdriver.http.factory", "jdk-http-client");
+        if (System.getProperty("os.name").toLowerCase().startsWith("win")) {
+            System.setProperty("javax.net.ssl.trustStore", "NUL");
+            System.setProperty("javax.net.ssl.trustStoreType", "WINDOWS-ROOT");
+        }
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             if (this.lastRun != null) {
                 this.lastRun.driver().quit();
