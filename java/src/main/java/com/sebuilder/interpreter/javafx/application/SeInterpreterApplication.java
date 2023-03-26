@@ -395,7 +395,7 @@ public class SeInterpreterApplication extends Application {
     }
 
     public String getReportFileName() {
-        return this.runner.getGlobalListener().getReportFileName();
+        return this.runner.getTestListener().getReportFileName();
     }
 
     protected ScriptParser getScriptParser() {

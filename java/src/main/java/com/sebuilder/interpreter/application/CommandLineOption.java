@@ -51,9 +51,9 @@ public class CommandLineOption {
                 } else if (kv[0].equals(CommandLineArgument.PAGE_LOAD_TIMEOUT.key())) {
                     this.pageLoadTimeout = Long.valueOf(kv[1]);
                 } else if (kv[0].equals(CommandLineArgument.WAIT_FOR_MAX_MS.key())) {
-                    this.waitForMaxMs = Integer.valueOf(kv[1]);
+                    this.waitForMaxMs = Integer.parseInt(kv[1]);
                 } else if (kv[0].equals(CommandLineArgument.WAIT_FOR_INTERVAL_MS.key())) {
-                    this.waitForIntervalMs = Integer.valueOf(kv[1]);
+                    this.waitForIntervalMs = Integer.parseInt(kv[1]);
                 } else if (kv[0].startsWith(CommandLineArgument.DRIVER_CONFIG_PREFIX.key())) {
                     this.driverConfig.put(kv[0].substring(CommandLineArgument.DRIVER_CONFIG_PREFIX.key().length()), kv[1]);
                 } else if (kv[0].equals(CommandLineArgument.DRIVER.key())) {

@@ -174,6 +174,10 @@ public enum Context {
         return new File(getInstance().resultOutputDirectory);
     }
 
+    public static TestRunListener.Factory getTestRunListenerFactory() {
+        return getInstance().testRunListenerFactory;
+    }
+
     public static String getJunitReportPrefix() {
         return switch (getInstance().junitReportPrefix) {
             case TIMESTAMP -> "start" + DateTimeFormatter

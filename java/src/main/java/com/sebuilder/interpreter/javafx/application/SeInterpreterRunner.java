@@ -23,21 +23,25 @@ public class SeInterpreterRunner {
 
     private final Logger log = LogManager.getLogger(SeInterpreterRunner.class);
 
-    private final TestRunListener globalListener;
+    private final File templateOutputDirectory;
+
+    private final File screenShotOutputDirectory;
 
     public SeInterpreterRunner(final List<String> raw) {
         this.repl = new SeInterpreterREPL(raw.toArray(new String[0]), this.log);
         this.repl.setUpREPL();
-        this.globalListener = Context.getTestListener(this.log);
-        this.globalListener.setUpDir(Context.getResultOutputDirectory());
+        final TestRunListener globalListener = this.getTestListener();
+        globalListener.setUpDir(Context.getResultOutputDirectory());
+        this.templateOutputDirectory = globalListener.getTemplateOutputDirectory();
+        this.screenShotOutputDirectory = globalListener.getScreenShotOutputDirectory();
+    }
+
+    public TestRunListener getTestListener() {
+        return Context.getTestListener(this.log);
     }
 
     public Logger getLog() {
         return this.log;
-    }
-
-    public TestRunListener getGlobalListener() {
-        return this.globalListener;
     }
 
     public File getDataSourceDirectory() {
@@ -45,7 +49,11 @@ public class SeInterpreterRunner {
     }
 
     public File getTemplateOutputDirectory() {
-        return this.globalListener.getTemplateOutputDirectory();
+        return this.templateOutputDirectory;
+    }
+
+    public File getScreenShotOutputDirectory() {
+        return this.screenShotOutputDirectory;
     }
 
     public void reloadSetting(final String browserName, final String driverPath, final String binaryPath) {
@@ -62,8 +70,7 @@ public class SeInterpreterRunner {
     }
 
     public void run(final TestCase testCase) {
-        final TestRunListener listener = Context.getTestListener(this.log);
-        this.repl.execute(testCase, listener);
+        this.repl.execute(testCase, this.getTestListener());
     }
 
     public void highlightElement(final String locatorType, final String value) {
@@ -71,8 +78,7 @@ public class SeInterpreterRunner {
                 .toStep()
                 .locator(new Locator(locatorType, value))
                 .build();
-        final TestRunListener listener = Context.getTestListener(this.log);
-        this.repl.copy().execute(highLightElement.toTestCase().map(it -> it.isPreventContextAspect(true)), listener);
+        this.repl.copy().execute(highLightElement.toTestCase().map(it -> it.isPreventContextAspect(true)), this.getTestListener());
     }
 
     public TestCase exportTemplate(final Locator locator, final List<String> targetTags, final boolean withDataSource) {
@@ -95,8 +101,8 @@ public class SeInterpreterRunner {
         final TestCase get = export.build()
                 .toTestCase()
                 .map(it -> it.isPreventContextAspect(true));
-        final TestRunListener listener = Context.getTestListener(this.log);
-        this.repl.copy().execute(get, listener);
+        final TestRunListener listener = this.getTestListener();
+        this.repl.copy().execute(get, this.getTestListener());
         final File exported = new File(listener.getTemplateOutputDirectory(), fileName);
         if (!exported.exists()) {
             return new TestCaseBuilder().build();
@@ -106,7 +112,7 @@ public class SeInterpreterRunner {
             final File exportedDataSource = new File(listener.getTemplateOutputDirectory(), dataSourceName);
             if (exportedDataSource.exists()) {
                 try {
-                    Files.copy(exportedDataSource, new File(this.globalListener.getTemplateOutputDirectory(), dataSourceName));
+                    Files.copy(exportedDataSource, new File(this.getTemplateOutputDirectory(), dataSourceName));
                 } catch (final IOException e) {
                     this.log.error("export datasource failed cause:", e);
                 }
@@ -125,10 +131,10 @@ public class SeInterpreterRunner {
                 .put("addPrefix", "false")
                 .build()
                 .toTestCase().map(it -> it.isPreventContextAspect(true));
-        final TestRunListener listener = Context.getTestListener(this.log);
+        final TestRunListener listener = this.getTestListener();
         this.repl.copy().execute(saveScreenshot, listener);
         final File saved = new File(listener.getScreenShotOutputDirectory(), result);
-        final File copyTo = new File(this.globalListener.getScreenShotOutputDirectory(), result);
+        final File copyTo = new File(this.getScreenShotOutputDirectory(), result);
         try {
             Files.copy(saved, copyTo);
         } catch (final IOException e) {
