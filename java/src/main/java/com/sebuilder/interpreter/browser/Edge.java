@@ -37,6 +37,8 @@ public class Edge implements WebDriverFactory {
                 } else {
                     option.addArguments("--" + key.substring("edge.arguments.".length()));
                 }
+            } else if (key.startsWith("edge.extensions.")) {
+                option.addExtensions(new File(value));
             } else {
                 caps.put(key, value);
             }

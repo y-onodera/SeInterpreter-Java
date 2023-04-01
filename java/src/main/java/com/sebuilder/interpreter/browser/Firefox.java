@@ -39,7 +39,10 @@ public class Firefox implements WebDriverFactory {
      */
     @Override
     public RemoteWebDriver createLocaleDriver(final Map<String, String> config) {
-        return new FirefoxDriver(this.getOptions(config));
+        final FirefoxDriver driver = new FirefoxDriver(this.getOptions(config));
+        config.keySet().stream().filter(it -> it.startsWith("firefox.extensions")).forEach(key ->
+                driver.installExtension(new File(config.get(key)).toPath(), true));
+        return driver;
     }
 
     @Override
@@ -56,7 +59,7 @@ public class Firefox implements WebDriverFactory {
                 } else {
                     option.addArguments("--" + key.substring("firefox.arguments.".length()));
                 }
-            } else {
+            } else if (!key.startsWith("firefox.extensions.")) {
                 option.addPreference(key, value);
             }
         });

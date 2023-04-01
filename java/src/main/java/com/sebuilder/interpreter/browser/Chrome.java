@@ -41,6 +41,8 @@ public class Chrome implements WebDriverFactory {
                 } else {
                     option.addArguments("--" + key.substring("chrome.arguments.".length()));
                 }
+            } else if (key.startsWith("chrome.extensions.")) {
+                option.addExtensions(new File(value));
             } else {
                 caps.put(key, value);
             }
