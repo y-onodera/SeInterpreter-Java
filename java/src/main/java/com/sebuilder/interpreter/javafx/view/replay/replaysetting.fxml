@@ -6,19 +6,19 @@
            xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="com.sebuilder.interpreter.javafx.view.replay.ReplaySettingPresenter"
            dividerPositions="0.5" orientation="VERTICAL">
-    <MigPane cols="[80][200][45]" rows="[30]" maxHeight="40" prefWidth="600.0">
+    <MigPane cols="[fill][grow][fill]" rows="[30]" maxHeight="40" prefWidth="500.0">
         <Label text="waitFor.maxWaitMs"/>
-        <TextField fx:id="maxWaitMsText" MigPane.cc="wrap"/>
+        <TextField fx:id="maxWaitMsText" alignment="CENTER_RIGHT" MigPane.cc="w 50,wrap"/>
         <Label text="waitFor.intervalMs"/>
-        <TextField fx:id="intervalMsText" MigPane.cc="wrap"/>
+        <TextField fx:id="intervalMsText" alignment="CENTER_RIGHT" MigPane.cc="w 50,wrap"/>
         <Label text="datasource.directory"/>
         <TextField fx:id="datasourceText" MigPane.cc="grow"/>
         <Button id="datasourceSearchButton" onAction="#dataSourceSearch" mnemonicParsing="false" text="search"
-                MigPane.cc="right,wrap"/>
+                MigPane.cc="align right,wrap"/>
         <Label text="reportFormat"/>
         <ComboBox fx:id="reportFormatSelect" MigPane.cc="wrap"/>
     </MigPane>
-    <MigPane cols="[grow]" rows="[30]" prefHeight="40" prefWidth="600.0">
+    <MigPane cols="[grow]" rows="[30]" prefHeight="40" prefWidth="400.0">
         <Button id="editButton" onAction="#settingEdit" mnemonicParsing="false" text="Edit"
                 MigPane.cc="align right"/>
     </MigPane>
