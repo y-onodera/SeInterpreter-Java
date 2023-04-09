@@ -1,20 +1,21 @@
 package com.sebuilder.interpreter.javafx.view.replay;
 
 import com.google.common.base.Strings;
+import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.Locator;
 import com.sebuilder.interpreter.Step;
 import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
 import com.sebuilder.interpreter.javafx.view.SuccessDialog;
+import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import org.tbee.javafx.scene.layout.fxml.MigPane;
 
 import javax.inject.Inject;
@@ -28,6 +29,9 @@ import java.util.Objects;
 public class ScreenshotPresenter {
     @FXML
     private MigPane stepEditGrid;
+
+    @FXML
+    private MenuItem menuSaveFile;
 
     @FXML
     private ComboBox<String> templateSelect;
@@ -49,9 +53,56 @@ public class ScreenshotPresenter {
     private String currentSelected;
 
     void populate() {
+        this.templates.clear();
+        this.templateSelect.getItems().clear();
+        this.currentSelected = null;
         this.templates.putAll(this.application.takeScreenshotTemplates());
         this.templateSelect.getItems().setAll(this.templates.keySet());
         this.templateSelect.getSelectionModel().select(0);
+        this.menuSaveFile.disableProperty().bind(Bindings.size(this.templateSelect.getItems()).lessThan(2));
+    }
+
+    @FXML
+    public void loadTemplate() {
+        final FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Open Resource File");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("json format (*.json)", "*.json"));
+        fileChooser.setInitialDirectory(Context.getBaseDirectory());
+        final Stage stage = new Stage();
+        stage.initOwner(this.templateSelect.getScene().getWindow());
+        final File file = fileChooser.showOpenDialog(stage);
+        if (file != null) {
+            this.application.reloadScreenshotTemplate(file);
+            this.populate();
+        }
+    }
+
+    @FXML
+    public void addTemplate() {
+        final TextInputDialog dialog = new TextInputDialog();
+        dialog.initOwner(this.templateSelect.getScene().getWindow());
+        dialog.setTitle("new template name");
+        dialog.setHeaderText(null);
+        dialog.setGraphic(null);
+        dialog.getDialogPane().lookupButton(ButtonType.OK)
+                .disableProperty()
+                .bind(dialog.getEditor().textProperty().isEmpty());
+        dialog.showAndWait().ifPresent(response -> {
+            this.application.addScreenshotTemplates(this.inputToStep().put("displayName", response).build());
+            this.populate();
+        });
+    }
+
+    @FXML
+    public void saveTemplate() {
+        final FileChooser fileSave = new FileChooser();
+        fileSave.setTitle("Save TestCase File");
+        fileSave.getExtensionFilters().add(new FileChooser.ExtensionFilter("json format (*.json)", "*.json"));
+        fileSave.setInitialDirectory(Context.getBaseDirectory());
+        final File file = fileSave.showSaveDialog(this.templateSelect.getScene().getWindow());
+        if (file != null) {
+            this.application.saveScreenshotTemplate(file);
+        }
     }
 
     @FXML
@@ -61,19 +112,21 @@ public class ScreenshotPresenter {
             return;
         }
         final Step stepWithAllParam = this.templates.get(selected);
-        this.currentSelected = selected;
-        this.inputs.clear();
-        this.locatorTypes.clear();
-        this.locatorValues.clear();
-        this.stepEditGrid.getChildren().removeIf(node -> !this.templateSelect.equals(node) && !this.labelTemplateSelect.equals(node));
-        this.application.executeAndLoggingCaseWhenThrowException(() -> {
-            int row = 1;
-            row = this.addLocator(stepWithAllParam, row, "locator");
-            row = this.addLocator(stepWithAllParam, row, "locatorHeader");
-            row = this.addTextBox(stepWithAllParam, row, "file");
-            this.addTextBox(stepWithAllParam, row, "scroll");
-            this.stepEditGrid.getScene().getWindow().sizeToScene();
-        });
+        if (stepWithAllParam != null) {
+            this.currentSelected = selected;
+            this.inputs.clear();
+            this.locatorTypes.clear();
+            this.locatorValues.clear();
+            this.stepEditGrid.getChildren().removeIf(node -> !this.templateSelect.equals(node) && !this.labelTemplateSelect.equals(node));
+            this.application.executeAndLoggingCaseWhenThrowException(() -> {
+                int row = 0;
+                row = this.addLocator(stepWithAllParam, row, "locator");
+                row = this.addLocator(stepWithAllParam, row, "locatorHeader");
+                row = this.addTextBox(stepWithAllParam, row, "file");
+                this.addTextBox(stepWithAllParam, row, "scroll");
+                this.stepEditGrid.getScene().getWindow().sizeToScene();
+            });
+        }
     }
 
     @FXML
@@ -131,7 +184,7 @@ public class ScreenshotPresenter {
         select.getItems().add("xpath");
         select.getItems().add("link text");
         String type = "";
-        if (step.containsParam(locator)) {
+        if (step.locatorContains(locator)) {
             type = step.getLocator(locator).type();
         }
         select.getSelectionModel().select(type);
@@ -140,7 +193,7 @@ public class ScreenshotPresenter {
 
     private TextField resetLocatorText(final Step step, final String locator) {
         final TextField textField = new TextField();
-        if (step.containsParam(locator)) {
+        if (step.locatorContains(locator)) {
             textField.setText(step.getLocator(locator).value());
         }
         return textField;

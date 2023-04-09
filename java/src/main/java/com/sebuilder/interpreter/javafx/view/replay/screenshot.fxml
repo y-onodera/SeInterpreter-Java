@@ -1,25 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.SplitPane?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import org.tbee.javafx.scene.layout.fxml.MigPane?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import org.tbee.javafx.scene.layout.fxml.*?>
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.sebuilder.interpreter.javafx.view.replay.ScreenshotPresenter"
             maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="420.0">
-    <SplitPane orientation="VERTICAL" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-               minWidth="-Infinity"
-               xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
-        <MigPane fx:id="stepEditGrid" cols="[75][grow][45,right]" rows="[]" prefWidth="400.0">
-            <Label fx:id="labelTemplateSelect" text="template"/>
-            <ComboBox fx:id="templateSelect" onAction="#selectTemplate" MigPane.cc="wrap"/>
-        </MigPane>
-        <MigPane cols="[grow]" rows="[30]" maxHeight="40" prefWidth="420.0">
-            <Button mnemonicParsing="false" text="take screenshot" onAction="#takeScreenshot" MigPane.cc="align right"/>
-        </MigPane>
-    </SplitPane>
-
+    <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <top>
+            <AnchorPane>
+                <MenuBar id="menuBar" prefWidth="Infinity"
+                         AnchorPane.bottomAnchor="0.0"
+                         AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                         AnchorPane.topAnchor="0.0">
+                    <Menu id="menuFile" mnemonicParsing="false" text="File">
+                        <MenuItem id="menuOpenFile" mnemonicParsing="false" onAction="#loadTemplate" text="Reload"/>
+                        <MenuItem fx:id="menuSaveFile" mnemonicParsing="false" onAction="#saveTemplate" text="Save"/>
+                    </Menu>
+                </MenuBar>
+            </AnchorPane>
+        </top>
+        <bottom>
+            <AnchorPane>
+                <SplitPane orientation="VERTICAL" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                           minWidth="-Infinity"
+                           xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+                    <MigPane cols="[fill][grow][]" rows="[]" maxHeight="40" prefWidth="420.0">
+                        <Label fx:id="labelTemplateSelect" text="template"/>
+                        <ComboBox fx:id="templateSelect" onAction="#selectTemplate"/>
+                    </MigPane>
+                    <MigPane fx:id="stepEditGrid" cols="[fill][grow][fill,right]" rows="[]" prefWidth="400.0">
+                    </MigPane>
+                    <MigPane cols="[grow]" rows="[]" maxHeight="40" prefWidth="420.0">
+                        <Button mnemonicParsing="false" onAction="#addTemplate" text="Add Input To Template" MigPane.cc="align right"/>
+                    </MigPane>
+                    <MigPane cols="[grow]" rows="[]" maxHeight="40" prefWidth="420.0">
+                        <Button mnemonicParsing="false" text="take screenshot" onAction="#takeScreenshot" MigPane.cc="align right"/>
+                    </MigPane>
+                </SplitPane>
+            </AnchorPane>
+        </bottom>
+    </BorderPane>
 </AnchorPane>
