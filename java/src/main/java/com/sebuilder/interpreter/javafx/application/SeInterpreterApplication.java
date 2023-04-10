@@ -353,6 +353,10 @@ public class SeInterpreterApplication extends Application {
         }
     }
 
+    public void removeScreenshotTemplate(final String displayName) {
+        this.takeScreenshotTemplate.remove(displayName);
+    }
+
     public File takeScreenShot(final StepBuilder stepBuilder) {
         return this.runner.screenShot(stepBuilder);
     }
