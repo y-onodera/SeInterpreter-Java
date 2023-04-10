@@ -27,6 +27,10 @@ import java.util.Map;
 import java.util.Objects;
 
 public class ScreenshotPresenter {
+
+    @FXML
+    public Button remove;
+
     @FXML
     private MigPane stepEditGrid;
 
@@ -52,14 +56,19 @@ public class ScreenshotPresenter {
 
     private String currentSelected;
 
-    void populate() {
+    void populate(final String selected) {
         this.templates.clear();
         this.templateSelect.getItems().clear();
         this.currentSelected = null;
         this.templates.putAll(this.application.takeScreenshotTemplates());
         this.templateSelect.getItems().setAll(this.templates.keySet());
-        this.templateSelect.getSelectionModel().select(0);
+        if (selected == null) {
+            this.templateSelect.getSelectionModel().select(0);
+        } else {
+            this.templateSelect.getSelectionModel().select(selected);
+        }
         this.menuSaveFile.disableProperty().bind(Bindings.size(this.templateSelect.getItems()).lessThan(2));
+        this.remove.disableProperty().bind(this.templateSelect.getSelectionModel().selectedIndexProperty().isEqualTo(0));
     }
 
     @FXML
@@ -73,7 +82,7 @@ public class ScreenshotPresenter {
         final File file = fileChooser.showOpenDialog(stage);
         if (file != null) {
             this.application.reloadScreenshotTemplate(file);
-            this.populate();
+            this.populate(null);
         }
     }
 
@@ -89,8 +98,13 @@ public class ScreenshotPresenter {
                 .bind(dialog.getEditor().textProperty().isEmpty());
         dialog.showAndWait().ifPresent(response -> {
             this.application.addScreenshotTemplates(this.inputToStep().put("displayName", response).build());
-            this.populate();
+            this.populate(response);
         });
+    }
+
+    public void removeTemplate() {
+        this.application.removeScreenshotTemplate(this.templateSelect.getSelectionModel().getSelectedItem());
+        this.populate(null);
     }
 
     @FXML

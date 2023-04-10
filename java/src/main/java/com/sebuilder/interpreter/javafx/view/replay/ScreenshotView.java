@@ -16,7 +16,7 @@ public class ScreenshotView extends FXMLView {
         screenshotSettingDialog.setResizable(false);
         screenshotSettingDialog.setTitle("screenshot config");
         screenshotSettingDialog.show();
-        this.presenter().populate();
+        this.presenter().populate(null);
     }
 
     private ScreenshotPresenter presenter() {

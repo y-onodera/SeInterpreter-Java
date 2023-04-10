@@ -16,7 +16,7 @@
                          AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
                          AnchorPane.topAnchor="0.0">
                     <Menu id="menuFile" mnemonicParsing="false" text="File">
-                        <MenuItem id="menuOpenFile" mnemonicParsing="false" onAction="#loadTemplate" text="Reload"/>
+                        <MenuItem id="menuOpenFile" mnemonicParsing="false" onAction="#loadTemplate" text="open"/>
                         <MenuItem fx:id="menuSaveFile" mnemonicParsing="false" onAction="#saveTemplate" text="Save"/>
                     </Menu>
                 </MenuBar>
@@ -27,14 +27,15 @@
                 <SplitPane orientation="VERTICAL" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
                            minWidth="-Infinity"
                            xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
-                    <MigPane cols="[fill][grow][]" rows="[]" maxHeight="40" prefWidth="420.0">
+                    <MigPane cols="[fill][grow][fill,right]" rows="[]" maxHeight="40" prefWidth="420.0">
                         <Label fx:id="labelTemplateSelect" text="template"/>
                         <ComboBox fx:id="templateSelect" onAction="#selectTemplate"/>
+                        <Button fx:id="remove" onAction="#removeTemplate" text="Remove" MigPane.cc="align right"/>
                     </MigPane>
                     <MigPane fx:id="stepEditGrid" cols="[fill][grow][fill,right]" rows="[]" prefWidth="400.0">
                     </MigPane>
                     <MigPane cols="[grow]" rows="[]" maxHeight="40" prefWidth="420.0">
-                        <Button mnemonicParsing="false" onAction="#addTemplate" text="Add Input To Template" MigPane.cc="align right"/>
+                        <Button mnemonicParsing="false" onAction="#addTemplate" text="Add" MigPane.cc="align right"/>
                     </MigPane>
                     <MigPane cols="[grow]" rows="[]" maxHeight="40" prefWidth="420.0">
                         <Button mnemonicParsing="false" text="take screenshot" onAction="#takeScreenshot" MigPane.cc="align right"/>
