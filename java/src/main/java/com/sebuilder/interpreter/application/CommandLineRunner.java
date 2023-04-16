@@ -80,7 +80,7 @@ public abstract class CommandLineRunner {
                     .setExpectScreenShotDirectory(option.getExpectScreenshotDirectory())
                     .setTemplateOutputDirectory(option.getTemplateoutput())
                     .setResultOutputDirectory(option.getResultoutput())
-                    .setJunitReportPrefix(option.getJunitReportPrefix())
+                    .setReportPrefix(option.getJunitReportPrefix())
                     .setTestRunListenerFactory(option.getReportFormat())
                     .setDownloadDirectory(option.getDownloadoutput())
                     .ifMatch(!Strings.isNullOrEmpty(option.getAspectFile())

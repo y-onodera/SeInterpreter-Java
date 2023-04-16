@@ -1,14 +1,17 @@
 package com.sebuilder.interpreter.javafx.view.replay;
 
 import com.sebuilder.interpreter.Context;
+import com.sebuilder.interpreter.InputData;
 import com.sebuilder.interpreter.report.ReportFormat;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 
 import java.io.File;
+import java.util.Arrays;
 
 public class ReplaySettingPresenter {
 
@@ -23,6 +26,11 @@ public class ReplaySettingPresenter {
     public ComboBox<String> reportFormatSelect;
 
     @FXML
+    public ComboBox<String> reportPrefixSelect;
+
+    private InputData envProperties;
+
+    @FXML
     void initialize() {
         this.maxWaitMsText.setText(String.valueOf(Context.getWaitForMaxMs()));
         this.intervalMsText.setText(String.valueOf(Context.getWaitForIntervalMs()));
@@ -31,9 +39,15 @@ public class ReplaySettingPresenter {
         } else {
             this.datasourceText.setText(Context.getBaseDirectory().getAbsolutePath());
         }
-        this.reportFormatSelect.getItems().add(ReportFormat.EXTENT_REPORTS.getName());
-        this.reportFormatSelect.getItems().add(ReportFormat.JUNIT.getName());
+        Arrays.stream(ReportFormat.values()).forEach(it -> this.reportFormatSelect.getItems().add(it.getName()));
         this.reportFormatSelect.getSelectionModel().select(ReportFormat.valueOf(Context.getTestRunListenerFactory().toString()).getName());
+        Arrays.stream(Context.ReportPrefix.values()).forEach(it ->
+                this.reportPrefixSelect.getItems().add(it.getName())
+        );
+        this.reportPrefixSelect.getSelectionModel().select(Context.getReportPrefix().getName());
+        this.envProperties = Context.settings()
+                .filter(entry -> entry.getKey().startsWith("env."))
+                .replaceKey(entry -> entry.getKey().replace("env.", ""));
     }
 
     @FXML
@@ -42,22 +56,37 @@ public class ReplaySettingPresenter {
         directoryChooser.setTitle("Choose Directory Where DataSource File at");
         directoryChooser.setInitialDirectory(new File(this.datasourceText.getText()));
         final Stage stage = new Stage();
-        stage.initOwner(this.datasourceText.getScene().getWindow());
+        stage.initOwner(this.currentWindow());
         final File file = directoryChooser.showDialog(stage);
         if (file != null && file.exists()) {
             this.datasourceText.setText(file.getAbsolutePath());
         }
     }
 
+    @FXML
+    public void envSetting() {
+        VariableView.builder()
+                .setTitle("env setting")
+                .setOnclick(result -> this.envProperties = result)
+                .setTarget(this.envProperties)
+                .setWindow(this.currentWindow())
+                .build();
+    }
 
     @FXML
     void settingEdit() {
-        Context.getInstance().setDataSourceDirectory(this.datasourceText.getText())
-                .setTestRunListenerFactory(ReportFormat.fromName(this.reportFormatSelect.getSelectionModel().getSelectedItem()))
+        Context.getInstance()
                 .setWaitForMaxMs(Integer.parseInt(this.maxWaitMsText.getText()))
                 .setWaitForIntervalMs(Integer.parseInt(this.intervalMsText.getText()))
+                .setDataSourceDirectory(this.datasourceText.getText())
+                .setTestRunListenerFactory(ReportFormat.fromName(this.reportFormatSelect.getSelectionModel().getSelectedItem()))
+                .setReportPrefix(Context.ReportPrefix.fromName(this.reportPrefixSelect.getSelectionModel().getSelectedItem()))
+                .setEnvProperties(this.envProperties)
         ;
-        this.datasourceText.getScene().getWindow().hide();
+        this.currentWindow().hide();
     }
 
+    protected Window currentWindow() {
+        return this.datasourceText.getScene().getWindow();
+    }
 }

@@ -11,13 +11,13 @@
 --screenshotoutput=saveImage
 --templateoutput=reverse
 --resultoutput=report
---junitReportPrefix=none
+--reportFormat=ExtentReports
+--reportPrefix=none
 --downloadoutput=file
 --aspectFile=test.json
 --env=some_environment.properties
 --env.locale=dn
 --locale=ja
 --locale.conf=locale_text.properties
---reportFormat=ExtentReports
 test.script
 test2.script

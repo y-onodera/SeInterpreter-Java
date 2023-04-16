@@ -17,6 +17,10 @@
                 MigPane.cc="align right,wrap"/>
         <Label text="reportFormat"/>
         <ComboBox fx:id="reportFormatSelect" MigPane.cc="wrap"/>
+        <Label text="reportPrefix"/>
+        <ComboBox fx:id="reportPrefixSelect" MigPane.cc="wrap"/>
+        <Label text="env"/>
+        <Button id="envButton" onAction="#envSetting" text="setting" MigPane.cc="wrap"/>
     </MigPane>
     <MigPane cols="[grow]" rows="[30]" prefHeight="40" prefWidth="400.0">
         <Button id="editButton" onAction="#settingEdit" mnemonicParsing="false" text="Edit"

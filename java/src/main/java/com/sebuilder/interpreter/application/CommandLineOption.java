@@ -20,7 +20,7 @@ public class CommandLineOption {
     private String datasourceEncoding = "UTF-8";
     private String datasourceDirectory = "input";
     private String resultoutput = "result";
-    private Context.TestNamePrefix junitReportPrefix = Context.TestNamePrefix.TIMESTAMP;
+    private Context.ReportPrefix junitReportPrefix = Context.ReportPrefix.TIMESTAMP;
     private String downloadoutput = "download";
     private String screenshotoutput = "screenshot";
     private String templateoutput = "template";
@@ -72,8 +72,8 @@ public class CommandLineOption {
                     this.resultoutput = kv[1];
                 } else if (kv[0].equals(CommandLineArgument.EXPECT_SCREENSHOT_DIRECTORY.key())) {
                     this.expectScreenshotDirectory = kv[1];
-                } else if (kv[0].equals(CommandLineArgument.JUNIT_REPORT_PREFIX.key())) {
-                    this.junitReportPrefix = Context.TestNamePrefix.fromName(kv[1]);
+                } else if (kv[0].equals(CommandLineArgument.REPORT_PREFIX.key())) {
+                    this.junitReportPrefix = Context.ReportPrefix.fromName(kv[1]);
                 } else if (kv[0].equals(CommandLineArgument.REPORT_FORMAT.key())) {
                     this.reportFormat = ReportFormat.fromName(kv[1]);
                 } else if (kv[0].equals(CommandLineArgument.DOWNLOAD_OUTPUT.key())) {
@@ -147,7 +147,7 @@ public class CommandLineOption {
         return this.resultoutput;
     }
 
-    public Context.TestNamePrefix getJunitReportPrefix() {
+    public Context.ReportPrefix getJunitReportPrefix() {
         return this.junitReportPrefix;
     }
 

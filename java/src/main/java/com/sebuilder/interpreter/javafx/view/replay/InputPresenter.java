@@ -82,15 +82,18 @@ public class InputPresenter {
                     this.setGraphic(null);
                 } else {
                     final Button btn = new Button("edit");
-                    btn.setOnAction((ActionEvent event) -> {
+                    btn.setOnAction((final ActionEvent event) -> {
                         final InputResource data = this.getTableView().getItems().get(this.getIndex());
-                        final VariableView variableView = new VariableView();
-                        variableView.onClick(result -> {
-                            data.setRuntimeVariable(result);
-                            InputPresenter.this.shareInputs.put(data.getResourceName(), new Pair<>(data.getRow(), data.getRuntimeVariable()));
-                            InputPresenter.this.refreshTable();
-                        });
-                        variableView.open(data.getRuntimeVariable(), InputPresenter.this.currentWindow());
+                        VariableView.builder()
+                                .setTitle("runtime variable")
+                                .setOnclick(result -> {
+                                    data.setRuntimeVariable(result);
+                                    InputPresenter.this.shareInputs.put(data.getResourceName(), new Pair<>(data.getRow(), data.getRuntimeVariable()));
+                                    InputPresenter.this.refreshTable();
+                                })
+                                .setTarget(data.getRuntimeVariable())
+                                .setWindow(InputPresenter.this.currentWindow())
+                                .build();
                     });
                     this.setGraphic(btn);
                 }
@@ -217,7 +220,7 @@ public class InputPresenter {
                 return null;
             }
             final Button btn = new Button("open");
-            btn.setOnAction((ActionEvent event) -> {
+            btn.setOnAction((final ActionEvent event) -> {
                 final InputResource data = this;
                 InputPresenter.this.application.executeAndLoggingCaseWhenThrowException(() -> {
                     final DataSetView dataSetView = new DataSetView();

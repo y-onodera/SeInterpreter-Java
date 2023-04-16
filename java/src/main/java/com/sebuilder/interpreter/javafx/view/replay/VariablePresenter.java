@@ -32,7 +32,7 @@ public class VariablePresenter {
         grid.getColumnHeaders().addAll("key", "value");
         final ObservableList<ObservableList<SpreadsheetCell>> rows = FXCollections.observableArrayList();
         int i = 0;
-        for (final Map.Entry<String, String> entry : var.input().entrySet()) {
+        for (final Map.Entry<String, String> entry : this.resource.input().entrySet()) {
             final ObservableList<SpreadsheetCell> dataRow = FXCollections.observableArrayList();
             dataRow.add(TEXT_AREA.createCell(i, 0, 1, 1, entry.getKey()));
             dataRow.add(TEXT_AREA.createCell(i, 1, 1, 1, entry.getValue()));

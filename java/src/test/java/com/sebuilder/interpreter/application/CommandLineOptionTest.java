@@ -32,7 +32,7 @@ public class CommandLineOptionTest {
                 CommandLineArgument.SCREENSHOT_OUTPUT.createArgument("saveImage"),
                 CommandLineArgument.TEMPLATE_OUTPUT.createArgument("reverse"),
                 CommandLineArgument.RESULT_OUTPUT.createArgument("report"),
-                CommandLineArgument.JUNIT_REPORT_PREFIX.createArgument("timestamp"),
+                CommandLineArgument.REPORT_PREFIX.createArgument("timestamp"),
                 CommandLineArgument.DOWNLOAD_OUTPUT.createArgument("file"),
                 CommandLineArgument.ASPECT.createArgument("test.json"),
                 CommandLineArgument.ENVIRONMENT_PROPERTIES.createArgument("some_environment.properties"),
@@ -55,7 +55,7 @@ public class CommandLineOptionTest {
         assertEquals("saveImage", this.target.getScreenshotoutput());
         assertEquals("reverse", this.target.getTemplateoutput());
         assertEquals("report", this.target.getResultoutput());
-        assertEquals(Context.TestNamePrefix.TIMESTAMP, this.target.getJunitReportPrefix());
+        assertEquals(Context.ReportPrefix.TIMESTAMP, this.target.getJunitReportPrefix());
         assertEquals("file", this.target.getDownloadoutput());
         assertEquals("test.json", this.target.getAspectFile());
         assertEquals("some_environment.properties", this.target.getEnvironmentProperties());
@@ -85,7 +85,7 @@ public class CommandLineOptionTest {
         assertEquals("saveImage", this.target.getScreenshotoutput());
         assertEquals("reverse", this.target.getTemplateoutput());
         assertEquals("report", this.target.getResultoutput());
-        assertEquals(Context.TestNamePrefix.NONE, this.target.getJunitReportPrefix());
+        assertEquals(Context.ReportPrefix.NONE, this.target.getJunitReportPrefix());
         assertEquals("file", this.target.getDownloadoutput());
         assertEquals("test.json", this.target.getAspectFile());
         assertEquals("some_environment.properties", this.target.getEnvironmentProperties());
@@ -114,7 +114,7 @@ public class CommandLineOptionTest {
                 CommandLineArgument.SCREENSHOT_OUTPUT.createArgument("saveImage2"),
                 CommandLineArgument.TEMPLATE_OUTPUT.createArgument("reverse2"),
                 CommandLineArgument.RESULT_OUTPUT.createArgument("report2"),
-                CommandLineArgument.JUNIT_REPORT_PREFIX.createArgument("resultDir"),
+                CommandLineArgument.REPORT_PREFIX.createArgument("resultDir"),
                 CommandLineArgument.DOWNLOAD_OUTPUT.createArgument("file2"),
                 CommandLineArgument.ASPECT.createArgument("test2.json"),
                 CommandLineArgument.ENVIRONMENT_PROPERTIES.createArgument("some_environment2.properties"),
@@ -137,7 +137,7 @@ public class CommandLineOptionTest {
         assertEquals("saveImage2", this.target.getScreenshotoutput());
         assertEquals("reverse2", this.target.getTemplateoutput());
         assertEquals("report2", this.target.getResultoutput());
-        assertEquals(Context.TestNamePrefix.RESULT_DIR, this.target.getJunitReportPrefix());
+        assertEquals(Context.ReportPrefix.RESULT_DIR, this.target.getJunitReportPrefix());
         assertEquals("file2", this.target.getDownloadoutput());
         assertEquals("test2.json", this.target.getAspectFile());
         assertEquals("some_environment2.properties", this.target.getEnvironmentProperties());

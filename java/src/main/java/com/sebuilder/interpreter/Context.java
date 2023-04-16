@@ -37,7 +37,7 @@ public enum Context {
     private String dataSourceDirectory;
     private String dataSourceEncoding;
     private String resultOutputDirectory;
-    private TestNamePrefix junitReportPrefix;
+    private ReportPrefix reportPrefix;
     private TestRunListener.Factory testRunListenerFactory;
     private String downloadDirectory;
     private String screenShotOutputDirectory;
@@ -178,8 +178,8 @@ public enum Context {
         return getInstance().testRunListenerFactory;
     }
 
-    public static String getJunitReportPrefix() {
-        return switch (getInstance().junitReportPrefix) {
+    public static String getReportPrefixValue() {
+        return switch (getReportPrefix()) {
             case TIMESTAMP -> "start" + DateTimeFormatter
                     .ofPattern("yyyyMMddHHmmss")
                     .format(LocalDateTime.now()) + ".";
@@ -188,6 +188,10 @@ public enum Context {
                     .replace("\\", "_") + ".";
             default -> "";
         };
+    }
+
+    public static ReportPrefix getReportPrefix() {
+        return getInstance().reportPrefix;
     }
 
     public static String getDownloadDirectory() {
@@ -232,6 +236,12 @@ public enum Context {
         if (condition) {
             return modifier.apply(this);
         }
+        return this;
+    }
+
+    public Context setEnvProperties(final InputData result) {
+        this.environmentProperties.clear();
+        this.environmentProperties.putAll(result.row());
         return this;
     }
 
@@ -338,8 +348,8 @@ public enum Context {
         return this;
     }
 
-    public Context setJunitReportPrefix(final TestNamePrefix junitReportPrefix) {
-        this.junitReportPrefix = junitReportPrefix;
+    public Context setReportPrefix(final ReportPrefix reportPrefix) {
+        this.reportPrefix = reportPrefix;
         return this;
     }
 
@@ -432,19 +442,23 @@ public enum Context {
     }
 
 
-    public enum TestNamePrefix {
+    public enum ReportPrefix {
         TIMESTAMP("timestamp"), RESULT_DIR("resultDir"), NONE("none");
         private final String name;
 
-        TestNamePrefix(final String name) {
+        ReportPrefix(final String name) {
             this.name = name;
         }
 
-        public static TestNamePrefix fromName(final String name) {
-            return Stream.of(TestNamePrefix.values())
+        public static ReportPrefix fromName(final String name) {
+            return Stream.of(ReportPrefix.values())
                     .filter(it -> it.name.equals(name))
                     .findFirst()
                     .orElse(NONE);
+        }
+
+        public String getName() {
+            return this.name;
         }
     }
 
