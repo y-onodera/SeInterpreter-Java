@@ -8,14 +8,16 @@
     <MigPane cols="[fill][grow][fill]" rows="[30][30][30][30]" prefHeight="150" prefWidth="400.0">
         <Label text="browser"/>
         <ComboBox fx:id="browserSelect" onAction="#selectBrowser" MigPane.cc="wrap"/>
-        <Label text="server url"/>
+        <Label text="driver.remote-url"/>
         <TextField fx:id="remoteUrl" MigPane.cc="wrap,grow"/>
-        <Label text="driver"/>
+        <Label text="driverPath"/>
         <TextField fx:id="driverText" onAction="#setDriverPath" MigPane.cc="grow"/>
         <Button id="driverSearchButton" mnemonicParsing="false" onAction="#driverSearch" text="search" MigPane.cc="wrap,align right"/>
-        <Label text="binary"/>
+        <Label text="driver.binary"/>
         <TextField fx:id="binaryText" MigPane.cc="grow"/>
         <Button fx:id="binarySearchButton" mnemonicParsing="false" onAction="#binarySearch" text="search" MigPane.cc="wrap,align right"/>
+        <Label text="driver."/>
+        <Button id="envButton" onAction="#driverConfig" text="config"/>
     </MigPane>
     <MigPane cols="[grow]" rows="[30]" prefHeight="40" prefWidth="400.0">
         <Button id="editButton" mnemonicParsing="false" onAction="#settingEdit" text="Edit" MigPane.cc="align right"/>

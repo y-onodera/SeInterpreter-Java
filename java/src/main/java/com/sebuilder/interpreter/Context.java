@@ -303,6 +303,7 @@ public enum Context {
     }
 
     public Context setDriverConfig(final Map<String, String> config) {
+        this.driverConfig.clear();
         this.driverConfig.putAll(config);
         return this;
     }
