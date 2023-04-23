@@ -133,7 +133,11 @@ public class BrowserPresenter {
         }
         this.remoteUrl.setText(Context.getRemoteUrl());
         if (Strings.isNullOrEmpty(this.remoteUrl.getText())) {
-            this.driverText.setText(new File(this.parentDir, driverName).getAbsolutePath());
+            if (new File(this.parentDir, driverName).exists()) {
+                this.driverText.setText(new File(this.parentDir, driverName).getAbsolutePath());
+            } else {
+                this.driverText.setText("");
+            }
             if (Objects.equals(this.selectedBrowser, Context.getWebDriverFactory().targetBrowser())) {
                 this.binaryText.setText(Context.getWebDriverFactory().getBinaryPath());
             } else {
