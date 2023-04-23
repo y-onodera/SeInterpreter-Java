@@ -29,10 +29,10 @@
                       onAction="#handleReplayScript" text="Run Script"/>
             <MenuItem id="menuTakeScreenshot" mnemonicParsing="false"
                       onAction="#handleTakeScreenshot" text="Take Screenshot"/>
-            <MenuItem id="menuOpenResult" mnemonicParsing="false" onAction="#handleOpenResult"
-                      text="Open Result"/>
             <MenuItem id="menuReplaySetting" mnemonicParsing="false" onAction="#handleReplaySetting"
                       text="Setting"/>
+            <MenuItem id="menuOpenResult" mnemonicParsing="false" onAction="#handleOpenResult"
+                      text="Open Result"/>
         </Menu>
         <Menu id="menuBrowser" mnemonicParsing="false" text="Browser">
             <MenuItem id="menuBrowserOpen" mnemonicParsing="false" onAction="#handleBrowserOpen"
