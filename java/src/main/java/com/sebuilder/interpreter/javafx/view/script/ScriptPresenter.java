@@ -163,7 +163,7 @@ public class ScriptPresenter {
     }
 
     @FXML
-    public void handleAddBreakPoint() {
+    void handleAddBreakPoint() {
         final StepDefine item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
         new StepView(s -> s.startsWith("verify"), key -> !key.equals("skip"))
                 .open(this.currentWindow(), (application, step) -> {
@@ -177,7 +177,7 @@ public class ScriptPresenter {
     }
 
     @FXML
-    public void handleRemoveBreakPoint() {
+    void handleRemoveBreakPoint() {
         final StepDefine item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
         this.application.removeBreakPoint(item.index());
     }

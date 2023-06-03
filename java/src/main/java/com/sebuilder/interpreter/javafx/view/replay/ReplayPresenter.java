@@ -24,24 +24,24 @@ public class ReplayPresenter {
     private SeInterpreterApplication application;
 
     @FXML
-    public HBox runOperation;
+    private HBox runOperation;
 
     @FXML
-    public Button pause;
+    private Button pause;
 
     @FXML
-    public Button screenshot;
+    private Button screenshot;
     @FXML
-    public Button stepOver;
+    private Button stepOver;
 
     @FXML
-    public Button resume;
+    private Button resume;
 
     @FXML
     private Button stop;
 
     @FXML
-    public HBox resultOperation;
+    private HBox resultOperation;
 
     @FXML
     private Button openLog;
@@ -62,6 +62,23 @@ public class ReplayPresenter {
 
     private Debugger debugger;
 
+    void populate(final SeInterpreterRunTask task) {
+        this.debugger = task.getDebugger();
+        this.scriptName.textProperty().bind(task.messageProperty());
+        this.scriptDataSetProgress.progressProperty().bind(task.progressProperty());
+        this.runStatus.textProperty().bind(task.stateProperty().asString());
+        final BooleanBinding taskRunning = task.stateProperty().isEqualTo(RUNNING);
+        this.runOperation.visibleProperty().bind(taskRunning);
+        this.pause.disableProperty().bind(this.debugger.debugStatusProperty().isEqualTo(Debugger.STATUS.await)
+                .or(this.debugger.debugStatusProperty().isEqualTo(Debugger.STATUS.stepOver)));
+        this.screenshot.disableProperty().bind(this.debugger.debugStatusProperty().isNotEqualTo(Debugger.STATUS.await));
+        this.stepOver.disableProperty().bind(this.debugger.debugStatusProperty().isNotEqualTo(Debugger.STATUS.await));
+        this.resume.disableProperty().bind(this.debugger.debugStatusProperty().isNotEqualTo(Debugger.STATUS.await));
+        this.stop.disableProperty().bind(this.debugger.debugStatusProperty().isNotEqualTo(Debugger.STATUS.await));
+        this.resultOperation.visibleProperty().bind(taskRunning.not());
+        this.lastRunResultDir.bind(task.valueProperty());
+    }
+
     @FXML
     void initialize() {
         assert this.stop != null : "fx:id=\"stop\" was not injected: check your FXML file 'runprogress.fxml'.";
@@ -73,22 +90,22 @@ public class ReplayPresenter {
     }
 
     @FXML
-    public void handlePause() {
+    void handlePause() {
         this.application.executeAndLoggingCaseWhenThrowException(() -> this.debugger.pause());
     }
 
     @FXML
-    public void handleTakeScreenshot() {
+    void handleTakeScreenshot() {
         new ScreenshotView().open(this.scriptDataSetProgress.getScene().getWindow());
     }
 
     @FXML
-    public void handleStepOver() {
+    void handleStepOver() {
         this.application.executeAndLoggingCaseWhenThrowException(() -> this.debugger.stepOver());
     }
 
     @FXML
-    public void handleResume() {
+    void handleResume() {
         this.application.executeAndLoggingCaseWhenThrowException(() -> this.debugger.resume());
     }
 
@@ -108,23 +125,6 @@ public class ReplayPresenter {
     void handleOpenDirectory() {
         this.application.executeAndLoggingCaseWhenThrowException(() ->
                 Desktop.getDesktop().open(new File(this.lastRunResultDir.get())));
-    }
-
-    public void populate(final SeInterpreterRunTask task) {
-        this.debugger = task.getDebugger();
-        this.scriptName.textProperty().bind(task.messageProperty());
-        this.scriptDataSetProgress.progressProperty().bind(task.progressProperty());
-        this.runStatus.textProperty().bind(task.stateProperty().asString());
-        final BooleanBinding taskRunning = task.stateProperty().isEqualTo(RUNNING);
-        this.runOperation.visibleProperty().bind(taskRunning);
-        this.pause.disableProperty().bind(this.debugger.debugStatusProperty().isEqualTo(Debugger.STATUS.await)
-                .or(this.debugger.debugStatusProperty().isEqualTo(Debugger.STATUS.stepOver)));
-        this.screenshot.disableProperty().bind(this.debugger.debugStatusProperty().isNotEqualTo(Debugger.STATUS.await));
-        this.stepOver.disableProperty().bind(this.debugger.debugStatusProperty().isNotEqualTo(Debugger.STATUS.await));
-        this.resume.disableProperty().bind(this.debugger.debugStatusProperty().isNotEqualTo(Debugger.STATUS.await));
-        this.stop.disableProperty().bind(this.debugger.debugStatusProperty().isNotEqualTo(Debugger.STATUS.await));
-        this.resultOperation.visibleProperty().bind(taskRunning.not());
-        this.lastRunResultDir.bind(task.valueProperty());
     }
 
 }

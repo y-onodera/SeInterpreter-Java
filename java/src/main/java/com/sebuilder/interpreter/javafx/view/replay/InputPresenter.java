@@ -55,6 +55,10 @@ public class InputPresenter {
 
     private Consumer<ReplayOption> onclickReplayStart;
 
+    void setOnclickReplayStart(final Consumer<ReplayOption> onclickReplayStart) {
+        this.onclickReplayStart = onclickReplayStart;
+    }
+
     @FXML
     void initialize() {
         this.onclickReplayStart = (it) -> this.application.runScript(it);
@@ -103,12 +107,8 @@ public class InputPresenter {
     }
 
     @FXML
-    public void handleReplayStart() {
+    void handleReplayStart() {
         this.onclickReplayStart.accept(this.createReplayOption());
-    }
-
-    public void setOnclickReplayStart(final Consumer<ReplayOption> onclickReplayStart) {
-        this.onclickReplayStart = onclickReplayStart;
     }
 
     private void refreshTable() {

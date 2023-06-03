@@ -38,7 +38,7 @@ public class MenuPresenter {
     }
 
     @FXML
-    public void handleImportSeleniumIDEScript() {
+    void handleImportSeleniumIDEScript() {
         final File file = this.openFileChooser("Import SeleniumIDE Script", "side format (*.side)", "*.side");
         if (file != null) {
             this.application.scriptReLoad(file, "SeleniumIDE");
@@ -90,7 +90,7 @@ public class MenuPresenter {
     }
 
     @FXML
-    public void handleTakeScreenshot() {
+    void handleTakeScreenshot() {
         new ScreenshotView().open(this.paneSeInterpreterMenu.getScene().getWindow());
     }
 
@@ -105,7 +105,7 @@ public class MenuPresenter {
                 .open(Context.getResultOutputDirectory()));
     }
 
-    protected File openFileChooser(final String aTitle, final String aFilterMessage, final String aFilterExtensions) {
+    private File openFileChooser(final String aTitle, final String aFilterMessage, final String aFilterExtensions) {
         final FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle(aTitle);
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(aFilterMessage, aFilterExtensions));
@@ -115,7 +115,7 @@ public class MenuPresenter {
         return fileChooser.showOpenDialog(stage);
     }
 
-    protected void saveSuiteToNewFile() {
+    private void saveSuiteToNewFile() {
         final FileChooser fileSave = new FileChooser();
         fileSave.setTitle("Save Suite File");
         fileSave.getExtensionFilters().add(new FileChooser.ExtensionFilter("json format (*.json)", "*.json"));
@@ -128,7 +128,7 @@ public class MenuPresenter {
         }
     }
 
-    protected File getBaseDirectory() {
+    private File getBaseDirectory() {
         return Optional.ofNullable(this.application.getSuite().head().relativePath())
                 .orElse(Context.getBaseDirectory());
     }

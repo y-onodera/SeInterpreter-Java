@@ -16,17 +16,17 @@ import java.util.Arrays;
 public class ReplaySettingPresenter {
 
     @FXML
-    public TextField maxWaitMsText;
+    private TextField maxWaitMsText;
     @FXML
-    public TextField intervalMsText;
+    private TextField intervalMsText;
     @FXML
     private TextField datasourceText;
 
     @FXML
-    public ComboBox<String> reportFormatSelect;
+    private ComboBox<String> reportFormatSelect;
 
     @FXML
-    public ComboBox<String> reportPrefixSelect;
+    private ComboBox<String> reportPrefixSelect;
 
     private InputData envProperties;
 
@@ -64,7 +64,7 @@ public class ReplaySettingPresenter {
     }
 
     @FXML
-    public void envSetting() {
+    void envSetting() {
         VariableView.builder()
                 .setTitle("env setting")
                 .setOnclick(result -> this.envProperties = result)
@@ -86,7 +86,7 @@ public class ReplaySettingPresenter {
         this.currentWindow().hide();
     }
 
-    protected Window currentWindow() {
+    private Window currentWindow() {
         return this.datasourceText.getScene().getWindow();
     }
 }

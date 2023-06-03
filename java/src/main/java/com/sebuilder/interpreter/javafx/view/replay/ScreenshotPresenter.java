@@ -29,7 +29,7 @@ import java.util.Objects;
 public class ScreenshotPresenter {
 
     @FXML
-    public Button remove;
+    private Button remove;
 
     @FXML
     private MigPane stepEditGrid;
@@ -72,7 +72,7 @@ public class ScreenshotPresenter {
     }
 
     @FXML
-    public void loadTemplate() {
+    void loadTemplate() {
         final FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open Resource File");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("json format (*.json)", "*.json"));
@@ -87,7 +87,7 @@ public class ScreenshotPresenter {
     }
 
     @FXML
-    public void addTemplate() {
+    void addTemplate() {
         final TextInputDialog dialog = new TextInputDialog();
         dialog.initOwner(this.templateSelect.getScene().getWindow());
         dialog.setTitle("new template name");
@@ -102,13 +102,14 @@ public class ScreenshotPresenter {
         });
     }
 
-    public void removeTemplate() {
+    @FXML
+    void removeTemplate() {
         this.application.removeScreenshotTemplate(this.templateSelect.getSelectionModel().getSelectedItem());
         this.populate(null);
     }
 
     @FXML
-    public void saveTemplate() {
+    void saveTemplate() {
         final FileChooser fileSave = new FileChooser();
         fileSave.setTitle("Save TestCase File");
         fileSave.getExtensionFilters().add(new FileChooser.ExtensionFilter("json format (*.json)", "*.json"));
@@ -120,7 +121,7 @@ public class ScreenshotPresenter {
     }
 
     @FXML
-    public void selectTemplate() {
+    void selectTemplate() {
         final String selected = this.templateSelect.getSelectionModel().getSelectedItem();
         if (Objects.equals(this.currentSelected, selected)) {
             return;
@@ -144,7 +145,7 @@ public class ScreenshotPresenter {
     }
 
     @FXML
-    public void takeScreenshot() {
+    void takeScreenshot() {
         this.application.executeAndLoggingCaseWhenThrowException(() -> {
             final ClipboardContent newContent = new ClipboardContent();
             final File screenshot = this.application.takeScreenShot(this.inputToStep());

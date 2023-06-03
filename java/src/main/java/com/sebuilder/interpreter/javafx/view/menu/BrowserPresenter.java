@@ -103,7 +103,7 @@ public class BrowserPresenter {
     }
 
     @FXML
-    public void driverConfig() {
+    void driverConfig() {
         VariableView.builder()
                 .setTitle("env setting")
                 .setOnclick(result -> this.driverConfig = result)

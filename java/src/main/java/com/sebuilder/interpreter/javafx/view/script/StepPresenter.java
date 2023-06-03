@@ -254,7 +254,7 @@ public class StepPresenter {
 
     private Predicate<String> textParamFilter = (key) -> true;
 
-    public void populate(final Stage dialog, final Predicate<String> stepTypeFilter, final Predicate<String> textParamFilter, final BiConsumer<SeInterpreterApplication, Step> applyStep) {
+    void populate(final Stage dialog, final Predicate<String> stepTypeFilter, final Predicate<String> textParamFilter, final BiConsumer<SeInterpreterApplication, Step> applyStep) {
         this.dialog = dialog;
         this.textParamFilter = textParamFilter;
         this.stepTypes = Arrays.stream(STEP_TYPES).filter(stepTypeFilter).toArray(String[]::new);
@@ -268,7 +268,7 @@ public class StepPresenter {
     }
 
     @FXML
-    public void selectType() {
+    void selectType() {
         final String stepType = this.stepTypeSelect.getSelectionModel().getSelectedItem();
         if (Objects.equals(this.selectedStepType, stepType) || Strings.isNullOrEmpty(stepType)) {
             return;
@@ -279,7 +279,7 @@ public class StepPresenter {
     }
 
     @FXML
-    public void stepApply() {
+    void stepApply() {
         this.application.executeAndLoggingCaseWhenThrowException(() -> {
             if (Optional.ofNullable(this.selectedStepType).orElse("").isBlank()) {
                 this.applyStep.accept(this.application, null);
@@ -309,7 +309,7 @@ public class StepPresenter {
         });
     }
 
-    public void refreshView(final Step step) {
+    void refreshView(final Step step) {
         final Step stepWithAllParam = step.withAllParam();
         this.application.executeAndLoggingCaseWhenThrowException(() -> {
             int row = 1;
@@ -322,15 +322,15 @@ public class StepPresenter {
         });
     }
 
-    protected String[] stepTypes() {
+    private String[] stepTypes() {
         return this.stepTypes;
     }
 
-    protected boolean isDefaultLocator(final String key) {
+    private boolean isDefaultLocator(final String key) {
         return key.equals("locator");
     }
 
-    protected void constructLocatorParamView(final Step step, int row) {
+    private void constructLocatorParamView(final Step step, int row) {
         for (final String key : step.locatorKeys()) {
             if (this.isDefaultLocator(key)) {
                 continue;
@@ -339,7 +339,7 @@ public class StepPresenter {
         }
     }
 
-    protected int constructStringParamView(final Step step, int row, final String typeName) {
+    private int constructStringParamView(final Step step, int row, final String typeName) {
         for (final String key : step.paramKeys()) {
             if (key.equals("type") || key.equals("skip")
                     || (key.equals("negated") && !this.hasGetterType(typeName))) {
@@ -354,7 +354,7 @@ public class StepPresenter {
         return row;
     }
 
-    protected boolean hasGetterType(final String typeName) {
+    private boolean hasGetterType(final String typeName) {
         return typeName.startsWith("wait")
                 || typeName.startsWith("assert")
                 || typeName.startsWith("verify")
@@ -364,7 +364,7 @@ public class StepPresenter {
                 || typeName.startsWith("store");
     }
 
-    protected void clearInputFields() {
+    private void clearInputFields() {
         this.backupBeforeLocator();
         this.inputs.clear();
         this.locatorTypes.clear();
@@ -372,7 +372,7 @@ public class StepPresenter {
         this.stepEditGrid.getChildren().removeIf(node -> !this.stepTypeSelect.equals(node) && !this.labelSelectType.equals(node));
     }
 
-    protected void backupBeforeLocator() {
+    private void backupBeforeLocator() {
         if (this.locatorTypeSelect != null && this.stepEditGrid.getChildren().contains(this.locatorTypeSelect)) {
             this.beforeLocatorType = this.locatorTypeSelect.getSelectionModel().getSelectedItem();
             this.beforeLocatorValue = this.locatorText.getText();
@@ -382,7 +382,7 @@ public class StepPresenter {
         }
     }
 
-    protected String resetStepType(final Step step) {
+    private String resetStepType(final Step step) {
         final String typeName = step.type().getStepTypeName();
         if (typeName.equals(this.selectedStepType)) {
             return this.selectedStepType;
@@ -392,7 +392,7 @@ public class StepPresenter {
         return typeName;
     }
 
-    protected int addLocator(final Step step, int row, final String locator) {
+    private int addLocator(final Step step, int row, final String locator) {
         if (step.locatorContains(locator)) {
             final Label stepEditLabel = new Label();
             stepEditLabel.setText(locator);
@@ -415,7 +415,7 @@ public class StepPresenter {
         return row;
     }
 
-    protected ComboBox<String> resetLocatorSelect(final Step step, final String locator) {
+    private ComboBox<String> resetLocatorSelect(final Step step, final String locator) {
         final ComboBox<String> select = new ComboBox<>();
         select.getItems().add("");
         select.getItems().add("id");
@@ -440,7 +440,7 @@ public class StepPresenter {
         return select;
     }
 
-    protected TextField resetLocatorText(final Step step, final String locator) {
+    private TextField resetLocatorText(final Step step, final String locator) {
         final TextField text = new TextField();
         final String value = step.getLocator(locator).value();
         if (this.isDefaultLocator(locator)) {
@@ -459,7 +459,7 @@ public class StepPresenter {
         return text;
     }
 
-    protected int addCheckBox(final Step step, final int row, final String key) {
+    private int addCheckBox(final Step step, final int row, final String key) {
         if (!this.textParamFilter.test(key)) {
             return row;
         }
@@ -473,7 +473,7 @@ public class StepPresenter {
         return row + 1;
     }
 
-    protected int addTextBox(final Step step, final int row, final String key) {
+    private int addTextBox(final Step step, final int row, final String key) {
         if (!this.textParamFilter.test(key)) {
             return row;
         }

@@ -42,7 +42,7 @@ public class DataSetPresenter {
 
     private EventHandler<ActionEvent> onclick;
 
-    public void populate(final DataSourceLoader resource) throws IOException {
+    void populate(final DataSourceLoader resource) throws IOException {
         this.resource = resource;
         final List<InputData> inputData = this.resource.loadData();
         final int row = Math.max(inputData.size(), DEFAULT_ROWS);
@@ -77,7 +77,7 @@ public class DataSetPresenter {
         this.gridParentPane.getChildren().add(this.sheet);
     }
 
-    public void setOnclick(final EventHandler<ActionEvent> onclick) {
+    void setOnclick(final EventHandler<ActionEvent> onclick) {
         this.onclick = onclick;
     }
 
@@ -90,7 +90,7 @@ public class DataSetPresenter {
     }
 
     @FXML
-    public void saveDataSet(final ActionEvent actionEvent) {
+    void saveDataSet(final ActionEvent actionEvent) {
         final ObservableList<ObservableList<SpreadsheetCell>> rows = this.sheet.getGrid().getRows();
         final List<Pair<Integer, String>> header = rows.get(0)
                 .stream()
@@ -113,7 +113,7 @@ public class DataSetPresenter {
         }
     }
 
-    protected InputData toTestData(final ObservableList<SpreadsheetCell> row, final List<Pair<Integer, String>> header) {
+    private InputData toTestData(final ObservableList<SpreadsheetCell> row, final List<Pair<Integer, String>> header) {
         return header.stream()
                 .map(it -> {
                     String value = "";
@@ -125,15 +125,15 @@ public class DataSetPresenter {
                 .reduce(new InputData(), InputData::add);
     }
 
-    protected boolean hasValue(final ObservableList<SpreadsheetCell> row, final List<Pair<Integer, String>> header) {
+    private boolean hasValue(final ObservableList<SpreadsheetCell> row, final List<Pair<Integer, String>> header) {
         return header.stream().anyMatch(it -> this.isExistsCell(row, it) && !Strings.isNullOrEmpty(row.get(it.getKey()).getText()));
     }
 
-    protected void addRow(final ObservableList<ObservableList<SpreadsheetCell>> rows, final int row, final int column, final InputData it, final Function<Map.Entry<String, String>, String> map) {
+    private void addRow(final ObservableList<ObservableList<SpreadsheetCell>> rows, final int row, final int column, final InputData it, final Function<Map.Entry<String, String>, String> map) {
         this.addRow(rows, row, column, it, map, cell -> cell);
     }
 
-    protected void addRow(final ObservableList<ObservableList<SpreadsheetCell>> rows, final int row, final int column, final InputData it, final Function<Map.Entry<String, String>, String> map, final Function<SpreadsheetCell, SpreadsheetCell> setStyle) {
+    private void addRow(final ObservableList<ObservableList<SpreadsheetCell>> rows, final int row, final int column, final InputData it, final Function<Map.Entry<String, String>, String> map, final Function<SpreadsheetCell, SpreadsheetCell> setStyle) {
         final ObservableList<SpreadsheetCell> dataRow = FXCollections.observableArrayList();
         int col = 0;
         for (final Map.Entry<String, String> entry : it.input().entrySet()) {

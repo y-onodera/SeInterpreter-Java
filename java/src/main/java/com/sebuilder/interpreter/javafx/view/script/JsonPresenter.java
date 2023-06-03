@@ -29,7 +29,7 @@ public class JsonPresenter {
                 this.showScriptAsText();
             }
         });
-        this.application.scriptViewTypeProperty().addListener((ObservableValue<? extends ViewType> observed, ViewType oldValue, ViewType newValue) -> {
+        this.application.scriptViewTypeProperty().addListener((final ObservableValue<? extends ViewType> observed, final ViewType oldValue, final ViewType newValue) -> {
             if (newValue == ViewType.TEXT) {
                 this.showScriptAsText();
             }
@@ -41,7 +41,7 @@ public class JsonPresenter {
         this.application.replaceScript(this.textAreaStep.getText());
     }
 
-    void showScriptAsText() {
+    private void showScriptAsText() {
         this.application.executeAndLoggingCaseWhenThrowException(() -> {
             this.textAreaStep.clear();
             this.textAreaStep.setText(this.application.getCurrentDisplayAsJson());

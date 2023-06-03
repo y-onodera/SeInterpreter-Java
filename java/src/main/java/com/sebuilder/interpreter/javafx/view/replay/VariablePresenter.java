@@ -26,7 +26,7 @@ public class VariablePresenter {
 
     private InputData resource;
 
-    public void populate(final InputData var) {
+    void populate(final InputData var) {
         this.resource = var;
         final GridBase grid = new GridBase(50, 2);
         grid.getColumnHeaders().addAll("key", "value");
@@ -73,7 +73,7 @@ public class VariablePresenter {
         this.populate(this.resource);
     }
 
-    public void setOnclick(final Consumer<InputData> onclick) {
+    void setOnclick(final Consumer<InputData> onclick) {
         this.onclick = onclick;
     }
 
