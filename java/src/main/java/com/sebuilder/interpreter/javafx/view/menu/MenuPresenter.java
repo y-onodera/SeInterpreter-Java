@@ -4,7 +4,7 @@ import com.google.common.base.Strings;
 import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
 import com.sebuilder.interpreter.javafx.view.replay.InputView;
-import com.sebuilder.interpreter.javafx.view.replay.ReplaySettingView;
+import com.sebuilder.interpreter.javafx.view.replay.ReplaysettingView;
 import com.sebuilder.interpreter.javafx.view.replay.ScreenshotView;
 import javafx.fxml.FXML;
 import javafx.scene.layout.Pane;
@@ -96,7 +96,7 @@ public class MenuPresenter {
 
     @FXML
     void handleReplaySetting() {
-        new ReplaySettingView().open(this.paneSeInterpreterMenu.getScene().getWindow());
+        new ReplaysettingView().open(this.paneSeInterpreterMenu.getScene().getWindow());
     }
 
     @FXML
