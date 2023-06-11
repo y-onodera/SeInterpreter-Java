@@ -13,7 +13,7 @@ import javafx.stage.Window;
 import java.io.File;
 import java.util.Arrays;
 
-public class ReplaySettingPresenter {
+public class ReplaysettingPresenter {
 
     @FXML
     private TextField maxWaitMsText;

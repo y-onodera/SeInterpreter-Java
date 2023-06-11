@@ -6,7 +6,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
-public class ReplaySettingView extends FXMLView {
+public class ReplaysettingView extends FXMLView {
 
     public void open(final Window window) {
         final Scene scene = new Scene(this.getView());
