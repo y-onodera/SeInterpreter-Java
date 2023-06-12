@@ -6,7 +6,7 @@
            xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="com.sebuilder.interpreter.javafx.view.replay.ReplaysettingPresenter"
            dividerPositions="0.5" orientation="VERTICAL">
-    <MigPane cols="[fill][grow][fill]" rows="[30]" prefHeight="180" prefWidth="500.0">
+    <MigPane cols="[fill][grow][fill]" rows="[30]" prefHeight="210" prefWidth="500.0">
         <Label text="waitFor.maxWaitMs"/>
         <TextField fx:id="maxWaitMsText" alignment="CENTER_RIGHT" MigPane.cc="w 50,wrap"/>
         <Label text="waitFor.intervalMs"/>
@@ -20,7 +20,7 @@
         <Label text="reportPrefix"/>
         <ComboBox fx:id="reportPrefixSelect" MigPane.cc="wrap"/>
         <Label text="env"/>
-        <Button id="envButton" onAction="#envSetting" text="setting" MigPane.cc="wrap"/>
+        <Button id="envButton" onAction="#envSetting" text="setting"/>
     </MigPane>
     <MigPane cols="[grow]" rows="[30]" prefHeight="40" prefWidth="400.0">
         <Button id="editButton" onAction="#settingEdit" mnemonicParsing="false" text="Edit"
