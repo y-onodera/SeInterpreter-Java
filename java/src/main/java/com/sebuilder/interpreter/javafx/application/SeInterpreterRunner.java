@@ -102,7 +102,7 @@ public class SeInterpreterRunner {
                 .toTestCase()
                 .map(it -> it.isPreventContextAspect(true));
         final TestRunListener listener = this.getTestListener();
-        this.repl.copy().execute(get, this.getTestListener());
+        this.repl.copy().execute(get, listener);
         final File exported = new File(listener.getTemplateOutputDirectory(), fileName);
         if (!exported.exists()) {
             return new TestCaseBuilder().build();
