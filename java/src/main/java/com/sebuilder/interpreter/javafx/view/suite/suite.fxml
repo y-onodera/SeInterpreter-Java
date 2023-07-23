@@ -14,6 +14,7 @@
             <ContextMenu>
                 <items>
                     <MenuItem fx:id="openDataSource" mnemonicParsing="false" onAction="#handleOpenDataSource" text="Open DataSource"/>
+                    <MenuItem mnemonicParsing="false" onAction="#handleOpenAspect" text="Open Aspect"/>
                     <MenuItem mnemonicParsing="false" onAction="#handleScriptReplay" text="Replay"/>
                     <MenuItem mnemonicParsing="false" onAction="#handleScriptInsert" text="Insert"/>
                     <MenuItem mnemonicParsing="false" onAction="#handleScriptAdd" text="Add"/>

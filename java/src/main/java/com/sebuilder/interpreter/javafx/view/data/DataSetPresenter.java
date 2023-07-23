@@ -4,7 +4,7 @@ import com.google.common.base.Strings;
 import com.sebuilder.interpreter.DataSourceLoader;
 import com.sebuilder.interpreter.InputData;
 import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
-import com.sebuilder.interpreter.javafx.control.ExcelLikeSpreadSheetView;
+import com.sebuilder.interpreter.javafx.control.spreadsheet.ExcelLikeSpreadSheetView;
 import com.sebuilder.interpreter.javafx.view.SuccessDialog;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.sebuilder.interpreter.javafx.control.ExcelLikeSpreadSheetView.TEXT_AREA;
+import static com.sebuilder.interpreter.javafx.control.spreadsheet.ExcelLikeSpreadSheetView.TEXT_AREA;
 
 public class DataSetPresenter {
 

@@ -8,23 +8,20 @@ import com.sebuilder.interpreter.javafx.application.BreakPoint;
 import com.sebuilder.interpreter.javafx.application.Result;
 import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
 import com.sebuilder.interpreter.javafx.application.ViewType;
-import com.sebuilder.interpreter.javafx.control.DragAndDropTableViewRowFactory;
+import com.sebuilder.interpreter.javafx.control.dragdrop.DragAndDropTableViewRowFactory;
+import com.sebuilder.interpreter.javafx.model.steps.Action;
+import com.sebuilder.interpreter.javafx.model.steps.StepDefine;
+import com.sebuilder.interpreter.javafx.model.steps.StepNo;
+import com.sebuilder.interpreter.javafx.model.steps.StepNoCell;
 import com.sebuilder.interpreter.javafx.view.replay.InputView;
 import com.sebuilder.interpreter.pointcut.VerifyFilter;
 import com.sebuilder.interpreter.step.Verify;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
-import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.input.MouseButton;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
 import javafx.stage.Window;
 
 import javax.inject.Inject;
@@ -38,23 +35,20 @@ public class ScriptPresenter {
     private SeInterpreterApplication application;
 
     @FXML
-    private TableColumn<StepDefine, StepNo> tableColumnScriptBodyNo;
+    private TableColumn<StepDefine, StepNo> stepNo;
 
     @FXML
-    private TableColumn<StepDefine, String> tableColumnScriptBodyStep;
+    private TableColumn<StepDefine, String> stepBody;
 
     @FXML
-    private TableView<StepDefine> tableViewScriptBody;
+    private TableView<StepDefine> steps;
 
     @FXML
     void initialize() {
-        assert this.tableColumnScriptBodyStep != null : "fx:id=\"tableColumnScriptBodyStep\" was not injected: check your FXML file 'seleniumbuilderscriptbody.fxml'.";
-        assert this.tableColumnScriptBodyNo != null : "fx:id=\"tableColumnScriptBodyNo\" was not injected: check your FXML file 'seleniumbuilderscriptbody.fxml'.";
-        assert this.tableViewScriptBody != null : "fx:id=\"tableViewScriptBody\" was not injected: check your FXML file 'seleniumbuilderscriptbody.fxml'.";
-        this.tableColumnScriptBodyNo.setCellValueFactory(body -> body.getValue().noProperty());
-        this.tableColumnScriptBodyNo.setCellFactory(cell -> new StepNoCell());
-        this.tableColumnScriptBodyStep.setCellValueFactory(body -> body.getValue().scriptProperty());
-        this.tableViewScriptBody.setRowFactory(new DragAndDropTableViewRowFactory<>() {
+        this.stepNo.setCellValueFactory(body -> body.getValue().noProperty());
+        this.stepNo.setCellFactory(cell -> new StepNoCell());
+        this.stepBody.setCellValueFactory(body -> body.getValue().scriptProperty());
+        this.steps.setRowFactory(new DragAndDropTableViewRowFactory<>() {
             @Override
             protected void updateItemCallback(final TableRow<StepDefine> tableRow, final StepDefine stepDefine, final boolean empty, final int notEmptyValCount) {
                 for (final Result result : Result.values()) {
@@ -108,7 +102,7 @@ public class ScriptPresenter {
 
     @FXML
     void handleStepDelete() {
-        final int stepIndex = this.tableViewScriptBody.getSelectionModel().getSelectedItem().index();
+        final int stepIndex = this.steps.getSelectionModel().getSelectedItem().index();
         this.application.replaceDisplayCase(this.application.getDisplayTestCase().removeStep(stepIndex));
     }
 
@@ -125,7 +119,7 @@ public class ScriptPresenter {
     @FXML
     void handleStepEdit() {
         final StepView stepView = this.initStepEditDialog(Action.EDIT);
-        final StepDefine item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
+        final StepDefine item = this.steps.getSelectionModel().getSelectedItem();
         stepView.refresh(this.application.getDisplayTestCase()
                 .steps()
                 .get(item.index())
@@ -134,7 +128,7 @@ public class ScriptPresenter {
 
     @FXML
     void handleRunStep() {
-        final StepDefine item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
+        final StepDefine item = this.steps.getSelectionModel().getSelectedItem();
         final InputView inputView = new InputView();
         inputView.setOnclickReplayStart((it) ->
                 this.application.runStep(it, (testRun, step, var) -> item.compareIndex(var.stepIndex()) == 0, false)
@@ -144,7 +138,7 @@ public class ScriptPresenter {
 
     @FXML
     void handleRunFromHere() {
-        final StepDefine item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
+        final StepDefine item = this.steps.getSelectionModel().getSelectedItem();
         final InputView inputView = new InputView();
         inputView.setOnclickReplayStart((it) ->
                 this.application.runStep(it, (testRun, step, var) -> item.compareIndex(var.stepIndex()) <= 0, true)
@@ -154,7 +148,7 @@ public class ScriptPresenter {
 
     @FXML
     void handleRunToHere() {
-        final StepDefine item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
+        final StepDefine item = this.steps.getSelectionModel().getSelectedItem();
         final InputView inputView = new InputView();
         inputView.setOnclickReplayStart((it) ->
                 this.application.runStep(it, (testRun, step, var) -> item.compareIndex(var.stepIndex()) >= 0, false)
@@ -164,7 +158,7 @@ public class ScriptPresenter {
 
     @FXML
     void handleAddBreakPoint() {
-        final StepDefine item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
+        final StepDefine item = this.steps.getSelectionModel().getSelectedItem();
         new StepView(s -> s.startsWith("verify"), key -> !key.equals("skip"))
                 .open(this.currentWindow(), (application, step) -> {
                     if (step != null) {
@@ -178,7 +172,7 @@ public class ScriptPresenter {
 
     @FXML
     void handleRemoveBreakPoint() {
-        final StepDefine item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
+        final StepDefine item = this.steps.getSelectionModel().getSelectedItem();
         this.application.removeBreakPoint(item.index());
     }
 
@@ -197,7 +191,7 @@ public class ScriptPresenter {
 
     private void refreshTable() {
         this.application.executeAndLoggingCaseWhenThrowException(() -> {
-            this.tableViewScriptBody.getItems().setAll(new ArrayList<>());
+            this.steps.getItems().setAll(new ArrayList<>());
             int no = 1;
             final List<Integer> hasBreakPoint = new ArrayList<>();
             final Optional<BreakPoint> breakPoint = BreakPoint.findFrom(this.application.getDisplayTestCase().aspect());
@@ -209,14 +203,14 @@ public class ScriptPresenter {
                 } else {
                     row = new StepDefine(new StepNo(no++), step.toPrettyString(), "");
                 }
-                this.tableViewScriptBody.getItems().add(row);
+                this.steps.getItems().add(row);
             }
-            this.tableViewScriptBody.refresh();
+            this.steps.refresh();
         });
     }
 
     private void handleStepResult(final int stepIndex, final Result result) {
-        final List<StepDefine> bodies = this.tableViewScriptBody.getItems();
+        final List<StepDefine> bodies = this.steps.getItems();
         bodies.stream()
                 .filter(item -> item.index() == stepIndex)
                 .findFirst()
@@ -224,7 +218,7 @@ public class ScriptPresenter {
     }
 
     private StepView initStepEditDialog(final Action action) {
-        final StepDefine item = this.tableViewScriptBody.getSelectionModel().getSelectedItem();
+        final StepDefine item = this.steps.getSelectionModel().getSelectedItem();
         final int no = item != null ? item.index() : 0;
         final StepView stepView = new StepView();
         stepView.open(this.currentWindow(), (application, step) -> {
@@ -244,78 +238,7 @@ public class ScriptPresenter {
     }
 
     private Window currentWindow() {
-        return this.tableViewScriptBody.getScene().getWindow();
+        return this.steps.getScene().getWindow();
     }
 
-    static class StepDefine {
-
-        private final ObjectProperty<StepNo> no;
-
-        private final StringProperty script;
-
-        private final StringProperty runningResult;
-
-        public StepDefine(final StepNo stepNo, final String step, final String runningResult) {
-            this.no = new SimpleObjectProperty<>(stepNo);
-            this.script = new SimpleStringProperty(step);
-            if (runningResult != null) {
-                this.runningResult = new SimpleStringProperty(runningResult);
-            } else {
-                this.runningResult = new SimpleStringProperty();
-            }
-        }
-
-        public ObjectProperty<StepNo> noProperty() {
-            return this.no;
-        }
-
-        public StringProperty scriptProperty() {
-            return this.script;
-        }
-
-        public StringProperty runningResultProperty() {
-            return this.runningResult;
-        }
-
-        public void setRunningResult(final String runningResult) {
-            this.runningResult.set(runningResult);
-        }
-
-        public int compareIndex(final int index) {
-            return Integer.compare(this.index(), index);
-        }
-
-        public int index() {
-            return this.no.get().no - 1;
-        }
-
-    }
-
-    private record StepNo(Integer no, Circle breakPoint) {
-        StepNo(final Integer no) {
-            this(no, null);
-        }
-
-        StepNo withBreakPoint() {
-            return new StepNo(this.no, new Circle(3, Color.RED));
-        }
-    }
-
-    private static class StepNoCell extends TableCell<StepDefine, StepNo> {
-        @Override
-        protected void updateItem(final StepNo item, final boolean empty) {
-            super.updateItem(item, empty);
-            if (empty) {
-                this.setText(null);
-                this.setGraphic(null);
-            } else {
-                this.setText(item.no.toString());
-                this.setGraphic(item.breakPoint);
-            }
-        }
-    }
-
-    private enum Action {
-        INSERT, ADD, EDIT
-    }
 }

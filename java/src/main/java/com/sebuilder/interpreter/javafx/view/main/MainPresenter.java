@@ -14,27 +14,24 @@ public class MainPresenter {
     private SeInterpreterApplication application;
 
     @FXML
-    private Tab tabStepText;
+    private Tab stepText;
 
     @FXML
-    private Tab tabStepTable;
+    private Tab stepTable;
 
     @FXML
     private TextArea textAreaScriptLog;
 
     @FXML
     void initialize() {
-        assert this.tabStepTable != null : "fx:id=\"tabStepTable\" was not injected: check your FXML file 'seleniumbuilder.fxml'.";
-        assert this.tabStepText != null : "fx:id=\"tabStepText\" was not injected: check your FXML file 'seleniumbuilder.fxml'.";
-        assert this.textAreaScriptLog != null : "fx:id=\"textAreaScriptLog\" was not injected: check your FXML file 'seleniumbuilder.fxml'.";
         TextAreaAppender.setTextArea(this.textAreaScriptLog);
-        this.tabStepText.setOnSelectionChanged(event -> {
-            if (this.tabStepText.isSelected()) {
+        this.stepText.setOnSelectionChanged(event -> {
+            if (this.stepText.isSelected()) {
                 this.application.changeScriptViewType(ViewType.TEXT);
             }
         });
-        this.tabStepTable.setOnSelectionChanged(event -> {
-            if (this.tabStepTable.isSelected()) {
+        this.stepTable.setOnSelectionChanged(event -> {
+            if (this.stepTable.isSelected()) {
                 this.application.changeScriptViewType(ViewType.TABLE);
             }
         });

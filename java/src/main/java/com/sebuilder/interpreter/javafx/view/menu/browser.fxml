@@ -20,6 +20,6 @@
         <Button id="envButton" onAction="#driverConfig" text="config"/>
     </MigPane>
     <MigPane cols="[grow]" rows="[30]" prefHeight="40" prefWidth="400.0">
-        <Button id="editButton" mnemonicParsing="false" onAction="#settingEdit" text="Edit" MigPane.cc="align right"/>
+        <Button id="editButton" mnemonicParsing="false" onAction="#settingEdit" text="Commit" MigPane.cc="align right"/>
     </MigPane>
 </SplitPane>

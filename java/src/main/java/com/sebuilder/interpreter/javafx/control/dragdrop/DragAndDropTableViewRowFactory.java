@@ -1,4 +1,4 @@
-package com.sebuilder.interpreter.javafx.control;
+package com.sebuilder.interpreter.javafx.control.dragdrop;
 
 import com.sebuilder.interpreter.javafx.Constant;
 import javafx.scene.control.TableRow;

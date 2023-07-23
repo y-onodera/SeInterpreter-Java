@@ -7,7 +7,8 @@ import com.sebuilder.interpreter.Suite;
 import com.sebuilder.interpreter.TestCase;
 import com.sebuilder.interpreter.TestCaseChains;
 import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
-import com.sebuilder.interpreter.javafx.control.DragAndDropSortTreeViewCellFactory;
+import com.sebuilder.interpreter.javafx.control.dragdrop.DragAndDropSortTreeViewCellFactory;
+import com.sebuilder.interpreter.javafx.view.aspect.AspectView;
 import com.sebuilder.interpreter.javafx.view.data.DataSetView;
 import com.sebuilder.interpreter.javafx.view.replay.InputView;
 import javafx.fxml.FXML;
@@ -39,7 +40,6 @@ public class SuitePresenter {
 
     @FXML
     void initialize() {
-        assert this.treeViewScriptName != null : "fx:id=\"treeViewScriptName\" was not injected: check your FXML file 'suite.fxml'.";
         this.treeViewScriptName.setCellFactory(new DragAndDropSortTreeViewCellFactory<>() {
             private TestCase dragged;
 
@@ -86,6 +86,11 @@ public class SuitePresenter {
     @FXML
     public void handleOpenDataSource() {
         this.application.executeAndLoggingCaseWhenThrowException(() -> new DataSetView().open(this.application.getDisplayTestCaseDataSource(), this.treeViewScriptName.getScene().getWindow()));
+    }
+
+    @FXML
+    public void handleOpenAspect() {
+        new AspectView().open(this.treeViewScriptName.getScene().getWindow(), this.application.getDisplayTestCase());
     }
 
     @FXML
@@ -215,4 +220,5 @@ public class SuitePresenter {
     private File getBaseDirectory() {
         return Optional.ofNullable(this.application.getDisplayTestCase().relativePath()).orElse(Context.getBaseDirectory());
     }
+
 }

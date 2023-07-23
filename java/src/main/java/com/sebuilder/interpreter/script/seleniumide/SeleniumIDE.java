@@ -20,14 +20,18 @@ public class SeleniumIDE extends AbstractJsonScriptParser {
     }
 
     @Override
-    public Aspect loadAspect(final File f) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     protected TestCase load(final JSONObject o, final File sourceFile) {
         final SeleniumIDEConverter converter = new SeleniumIDEConverter(o);
         return converter.getResult();
     }
 
+    @Override
+    public Aspect loadAspect(final File f) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Aspect loadAspect(final String jsonText, final File f) {
+        throw new UnsupportedOperationException();
+    }
 }

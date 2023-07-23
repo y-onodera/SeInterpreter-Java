@@ -1,4 +1,4 @@
-package com.sebuilder.interpreter.javafx.control;
+package com.sebuilder.interpreter.javafx.control.spreadsheet;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;

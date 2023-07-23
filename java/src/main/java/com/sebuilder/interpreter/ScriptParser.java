@@ -15,4 +15,6 @@ public interface ScriptParser {
     TestCase load(String jsonString, File file);
 
     Aspect loadAspect(File f);
+
+    Aspect loadAspect(String jsonText, File f);
 }

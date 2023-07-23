@@ -19,6 +19,18 @@ public class SebuilderToStringConverter implements TestCaseConverter {
         return this.toJSON(target).toString(4);
     }
 
+    @Override
+    public String toString(final Aspect target) {
+        final JSONObject result = new JSONObject();
+        final Collection<JSONObject> results = this.toJSON(target);
+        if (results.size() == 1) {
+            result.put("aspect", results.iterator().next());
+        } else if (results.size() > 0) {
+            result.put("aspect", results);
+        }
+        return result.toString(4);
+    }
+
     protected JSONObject toJSON(final TestCase target) {
         if (target.scriptFile().type() == ScriptFile.Type.SUITE) {
             return this.toJsonSuite(target);
@@ -179,6 +191,8 @@ public class SebuilderToStringConverter implements TestCaseConverter {
                 result.put("before", this.toJSON(extra.beforeStep()));
                 result.put("after", this.toJSON(extra.afterStep()));
                 result.put("failure", this.toJSON(extra.failureStep()));
+                result.put("displayName", extra.displayName());
+                result.put("displayName", extra.displayName());
                 results.add(result);
             }
         }

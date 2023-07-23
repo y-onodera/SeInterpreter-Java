@@ -59,6 +59,14 @@ public record Aspect(Iterable<Interceptor> interceptors) implements Iterable<Int
         return from(this.getStream().map(it -> it.takeOverChain(newValue)));
     }
 
+    public Aspect replace(final Interceptor currentValue, final Interceptor newValue) {
+        return from(this.getStream().map(it -> it.equals(currentValue) ? newValue : it));
+    }
+
+    public Aspect remove(final Interceptor removeItem) {
+        return from(this.getStream().filter(it -> !it.equals(removeItem)));
+    }
+
     public record Advice(List<Interceptor> advices) {
 
         public boolean invokeBefore(final TestRun testRun) {

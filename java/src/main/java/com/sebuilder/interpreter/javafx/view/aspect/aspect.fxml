@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import org.tbee.javafx.scene.layout.fxml.*?>
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.sebuilder.interpreter.javafx.view.aspect.AspectPresenter"
+            prefHeight="400.0" prefWidth="600.0">
+    <SplitPane dividerPositions="0.2">
+        <AnchorPane>
+            <TreeView fx:id="scriptNames"
+                      prefWidth="120.0" maxWidth="Infinity" minWidth="0"
+                      minHeight="0" maxHeight="Infinity" prefHeight="425.0"
+                      AnchorPane.bottomAnchor="0.0"
+                      AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                      AnchorPane.topAnchor="0.0">
+            </TreeView>
+        </AnchorPane>
+        <AnchorPane>
+            <SplitPane orientation="VERTICAL"
+                       prefWidth="500.0"
+                       maxHeight="-Infinity" maxWidth="-Infinity"
+                       minHeight="-Infinity" minWidth="-Infinity">
+                <MigPane cols="[fill][grow][fill,right][fill,right]" rows="[]" maxHeight="40" prefWidth="420.0">
+                    <Label text="interceptor"/>
+                    <ComboBox fx:id="interceptorSelect" onAction="#selectInterceptor"/>
+                    <Button onAction="#copyInterceptor" text="Copy" MigPane.cc="align right"/>
+                    <Button onAction="#removeInterceptor" text="Remove" MigPane.cc="align right"/>
+                </MigPane>
+                <TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE">
+                    <Tab id="tabBefore" text="before">
+                        <fx:include fx:id="before" source="stepTable.fxml"/>
+                    </Tab>
+                    <Tab id="tabAfter" text="after">
+                        <fx:include fx:id="after" source="stepTable.fxml"/>
+                    </Tab>
+                    <Tab id="tabFailure" text="failure">
+                        <fx:include fx:id="failure" source="stepTable.fxml"/>
+                    </Tab>
+                    <Tab id="tabJson" text="plain text(json)">
+                        <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                            <TextArea fx:id="textAreaJson" AnchorPane.bottomAnchor="1.0"
+                                      AnchorPane.leftAnchor="1.0"
+                                      AnchorPane.rightAnchor="1.0"
+                                      AnchorPane.topAnchor="0.0"/>
+                        </AnchorPane>
+                    </Tab>
+                </TabPane>
+                <MigPane cols="[grow]" rows="[]" maxHeight="40" prefWidth="420.0">
+                    <Button mnemonicParsing="false" text="Commit" onAction="#jsonCommit" MigPane.cc="align right"/>
+                </MigPane>
+            </SplitPane>
+        </AnchorPane>
+    </SplitPane>
+</AnchorPane>

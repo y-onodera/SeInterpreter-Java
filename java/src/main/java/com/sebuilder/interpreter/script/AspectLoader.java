@@ -35,6 +35,10 @@ public record AspectLoader(Sebuilder sebuilder, PointcutLoader pointcutLoader) {
         }
     }
 
+    public Aspect load(final String jsonText, final File f) {
+        return this.load(new JSONObject(new JSONTokener(jsonText)), f.getAbsoluteFile().getParentFile());
+    }
+
     public Aspect load(final JSONObject o, final File baseDir) {
         Aspect result = new Aspect();
         if (o.has("aspect")) {
@@ -65,6 +69,9 @@ public record AspectLoader(Sebuilder sebuilder, PointcutLoader pointcutLoader) {
                     new ImportInterceptor(value, where, (path) -> this.load(path, baseDir)));
         }
         final ExtraStepExecutor.Builder interceptorBuilder = new ExtraStepExecutor.Builder();
+        if (aspect.has("displayName")) {
+            interceptorBuilder.setDisplayName(aspect.getString("displayName"));
+        }
         if (aspect.has("pointcut")) {
             interceptorBuilder.setPointcut(this.pointcutLoader.load(aspect, baseDir)
                     .orElse(Pointcut.NONE));
@@ -78,7 +85,7 @@ public record AspectLoader(Sebuilder sebuilder, PointcutLoader pointcutLoader) {
         if (aspect.has("failure")) {
             interceptorBuilder.addFailure(this.sebuilder.load(aspect.getJSONObject("failure"), null));
         }
-        return interceptorBuilder.get();
+        return interceptorBuilder.build();
     }
 
 
