@@ -291,7 +291,9 @@ public enum Context {
 
     public Context setWebDriverPath(final String driverPath) {
         if (Strings.isNullOrEmpty(driverPath)) {
-            this.wdf.setDriverPath(SeleniumManager.getInstance().getDriverPath(this.wdf.getOptions(this.driverConfig)));
+            this.wdf.setDriverPath(SeleniumManager.getInstance()
+                    .getDriverPath(this.wdf.getOptions(this.driverConfig), false)
+                    .getDriverPath());
         } else {
             this.wdf.setDriverPath(driverPath);
         }
