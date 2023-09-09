@@ -30,6 +30,8 @@ public class AspectPresenter {
     @FXML
     private TabPane tabPane;
     @FXML
+    private FilterTablePresenter pointcutController;
+    @FXML
     private StepTablePresenter beforeController;
     @FXML
     private StepTablePresenter afterController;
@@ -230,6 +232,7 @@ public class AspectPresenter {
 
     private void setCurrentSelected(final ExtraStepExecutor currentSelected1) {
         this.currentSelected = currentSelected1;
+        this.pointcutController.setTarget(this.currentSelected.pointcut());
         this.beforeController.setTestCase(this.currentSelected.beforeStep());
         this.afterController.setTestCase(this.currentSelected.afterStep());
         this.failureController.setTestCase(this.currentSelected.failureStep());
