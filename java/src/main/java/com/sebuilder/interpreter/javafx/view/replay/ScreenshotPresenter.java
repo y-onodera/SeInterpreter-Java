@@ -5,7 +5,8 @@ import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.Locator;
 import com.sebuilder.interpreter.Step;
 import com.sebuilder.interpreter.StepBuilder;
-import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
+import com.sebuilder.interpreter.javafx.model.SeInterpreter;
+import com.sebuilder.interpreter.javafx.view.ErrorDialog;
 import com.sebuilder.interpreter.javafx.view.SuccessDialog;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
@@ -44,8 +45,9 @@ public class ScreenshotPresenter {
     private Label labelTemplateSelect;
 
     @Inject
-    private SeInterpreterApplication application;
-
+    private SeInterpreter application;
+    @Inject
+    private ErrorDialog errorDialog;
     private final Map<String, Step> templates = new LinkedHashMap<>();
 
     private final Map<String, Node> inputs = new HashMap<>();
@@ -73,80 +75,90 @@ public class ScreenshotPresenter {
 
     @FXML
     void loadTemplate() {
-        final FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Open Resource File");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("json format (*.json)", "*.json"));
-        fileChooser.setInitialDirectory(Context.getBaseDirectory());
-        final Stage stage = new Stage();
-        stage.initOwner(this.templateSelect.getScene().getWindow());
-        final File file = fileChooser.showOpenDialog(stage);
-        if (file != null) {
-            this.application.reloadScreenshotTemplate(file);
-            this.populate(null);
-        }
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            final FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Open Resource File");
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("json format (*.json)", "*.json"));
+            fileChooser.setInitialDirectory(Context.getBaseDirectory());
+            final Stage stage = new Stage();
+            stage.initOwner(this.templateSelect.getScene().getWindow());
+            final File file = fileChooser.showOpenDialog(stage);
+            if (file != null) {
+                this.application.reloadScreenshotTemplate(file);
+                this.populate(null);
+            }
+        });
     }
 
     @FXML
     void addTemplate() {
-        final TextInputDialog dialog = new TextInputDialog();
-        dialog.initOwner(this.templateSelect.getScene().getWindow());
-        dialog.setTitle("new template name");
-        dialog.setHeaderText(null);
-        dialog.setGraphic(null);
-        dialog.getDialogPane().lookupButton(ButtonType.OK)
-                .disableProperty()
-                .bind(dialog.getEditor().textProperty().isEmpty());
-        dialog.showAndWait().ifPresent(response -> {
-            this.application.addScreenshotTemplates(this.inputToStep().put("displayName", response).build());
-            this.populate(response);
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            final TextInputDialog dialog = new TextInputDialog();
+            dialog.initOwner(this.templateSelect.getScene().getWindow());
+            dialog.setTitle("new template name");
+            dialog.setHeaderText(null);
+            dialog.setGraphic(null);
+            dialog.getDialogPane().lookupButton(ButtonType.OK)
+                    .disableProperty()
+                    .bind(dialog.getEditor().textProperty().isEmpty());
+            dialog.showAndWait().ifPresent(response -> {
+                this.application.addScreenshotTemplates(this.inputToStep().put("displayName", response).build());
+                this.populate(response);
+            });
         });
     }
 
     @FXML
     void removeTemplate() {
-        this.application.removeScreenshotTemplate(this.templateSelect.getSelectionModel().getSelectedItem());
-        this.populate(null);
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            this.application.removeScreenshotTemplate(this.templateSelect.getSelectionModel().getSelectedItem());
+            this.populate(null);
+        });
     }
 
     @FXML
     void saveTemplate() {
-        final FileChooser fileSave = new FileChooser();
-        fileSave.setTitle("Save TestCase File");
-        fileSave.getExtensionFilters().add(new FileChooser.ExtensionFilter("json format (*.json)", "*.json"));
-        fileSave.setInitialDirectory(Context.getBaseDirectory());
-        final File file = fileSave.showSaveDialog(this.templateSelect.getScene().getWindow());
-        if (file != null) {
-            this.application.saveScreenshotTemplate(file);
-        }
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            final FileChooser fileSave = new FileChooser();
+            fileSave.setTitle("Save TestCase File");
+            fileSave.getExtensionFilters().add(new FileChooser.ExtensionFilter("json format (*.json)", "*.json"));
+            fileSave.setInitialDirectory(Context.getBaseDirectory());
+            final File file = fileSave.showSaveDialog(this.templateSelect.getScene().getWindow());
+            if (file != null) {
+                this.application.saveScreenshotTemplate(file);
+            }
+        });
     }
 
     @FXML
     void selectTemplate() {
-        final String selected = this.templateSelect.getSelectionModel().getSelectedItem();
-        if (Objects.equals(this.currentSelected, selected)) {
-            return;
-        }
-        final Step stepWithAllParam = this.templates.get(selected);
-        if (stepWithAllParam != null) {
-            this.currentSelected = selected;
-            this.inputs.clear();
-            this.locatorTypes.clear();
-            this.locatorValues.clear();
-            this.stepEditGrid.getChildren().removeIf(node -> !this.templateSelect.equals(node) && !this.labelTemplateSelect.equals(node));
-            this.application.executeAndLoggingCaseWhenThrowException(() -> {
-                int row = 0;
-                row = this.addLocator(stepWithAllParam, row, "locator");
-                row = this.addLocator(stepWithAllParam, row, "locatorHeader");
-                row = this.addTextBox(stepWithAllParam, row, "file");
-                this.addTextBox(stepWithAllParam, row, "scroll");
-                this.stepEditGrid.getScene().getWindow().sizeToScene();
-            });
-        }
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            final String selected = this.templateSelect.getSelectionModel().getSelectedItem();
+            if (Objects.equals(this.currentSelected, selected)) {
+                return;
+            }
+            final Step stepWithAllParam = this.templates.get(selected);
+            if (stepWithAllParam != null) {
+                this.currentSelected = selected;
+                this.inputs.clear();
+                this.locatorTypes.clear();
+                this.locatorValues.clear();
+                this.stepEditGrid.getChildren().removeIf(node -> !this.templateSelect.equals(node) && !this.labelTemplateSelect.equals(node));
+                this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+                    int row = 0;
+                    row = this.addLocator(stepWithAllParam, row, "locator");
+                    row = this.addLocator(stepWithAllParam, row, "locatorHeader");
+                    row = this.addTextBox(stepWithAllParam, row, "file");
+                    this.addTextBox(stepWithAllParam, row, "scroll");
+                    this.stepEditGrid.getScene().getWindow().sizeToScene();
+                });
+            }
+        });
     }
 
     @FXML
     void takeScreenshot() {
-        this.application.executeAndLoggingCaseWhenThrowException(() -> {
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
             final ClipboardContent newContent = new ClipboardContent();
             final File screenshot = this.application.takeScreenShot(this.inputToStep());
             newContent.putImage(new Image(new FileInputStream(screenshot)));

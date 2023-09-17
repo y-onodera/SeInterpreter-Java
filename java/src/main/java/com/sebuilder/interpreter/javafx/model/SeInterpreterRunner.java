@@ -1,4 +1,4 @@
-package com.sebuilder.interpreter.javafx.application;
+package com.sebuilder.interpreter.javafx.model;
 
 import com.google.common.io.Files;
 import com.sebuilder.interpreter.*;

@@ -3,13 +3,13 @@ package com.sebuilder.interpreter.javafx.view.aspect;
 import com.sebuilder.interpreter.Step;
 import com.sebuilder.interpreter.TestCase;
 import com.sebuilder.interpreter.TestCaseBuilder;
-import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
 import com.sebuilder.interpreter.javafx.control.dragdrop.DragAndDropTableViewRowFactory;
 import com.sebuilder.interpreter.javafx.model.steps.Action;
 import com.sebuilder.interpreter.javafx.model.steps.StepDefine;
 import com.sebuilder.interpreter.javafx.model.steps.StepNo;
 import com.sebuilder.interpreter.javafx.model.steps.StepNoCell;
-import com.sebuilder.interpreter.javafx.view.script.StepView;
+import com.sebuilder.interpreter.javafx.view.ErrorDialog;
+import com.sebuilder.interpreter.javafx.view.step.StepView;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -25,7 +25,7 @@ import java.util.ArrayList;
 
 public class StepTablePresenter {
     @Inject
-    private SeInterpreterApplication application;
+    private ErrorDialog errorDialog;
     @FXML
     private TableView<StepDefine> stepTable;
     @FXML
@@ -37,27 +37,29 @@ public class StepTablePresenter {
 
     @FXML
     void initialize() {
-        this.stepNo.setCellValueFactory(body -> body.getValue().noProperty());
-        this.stepNo.setCellFactory(cell -> new StepNoCell());
-        this.scriptBody.setCellValueFactory(body -> body.getValue().scriptProperty());
-        this.stepTable.setRowFactory(new DragAndDropTableViewRowFactory<>() {
-            @Override
-            protected void updateItemCallback(final TableRow<StepDefine> tableRow, final StepDefine stepDefine, final boolean empty, final int notEmptyValCount) {
-                if (!empty && !tableRow.isEmpty()) {
-                    if (notEmptyValCount == 1) {
-                        tableRow.setOnMouseClicked(ev -> {
-                            if (ev.getButton().equals(MouseButton.PRIMARY) && ev.getClickCount() == 2) {
-                                StepTablePresenter.this.handleStepEdit();
-                            }
-                        });
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            this.stepNo.setCellValueFactory(body -> body.getValue().noProperty());
+            this.stepNo.setCellFactory(cell -> new StepNoCell());
+            this.scriptBody.setCellValueFactory(body -> body.getValue().scriptProperty());
+            this.stepTable.setRowFactory(new DragAndDropTableViewRowFactory<>() {
+                @Override
+                protected void updateItemCallback(final TableRow<StepDefine> tableRow, final StepDefine stepDefine, final boolean empty, final int notEmptyValCount) {
+                    if (!empty && !tableRow.isEmpty()) {
+                        if (notEmptyValCount == 1) {
+                            tableRow.setOnMouseClicked(ev -> {
+                                if (ev.getButton().equals(MouseButton.PRIMARY) && ev.getClickCount() == 2) {
+                                    StepTablePresenter.this.handleStepEdit();
+                                }
+                            });
+                        }
                     }
                 }
-            }
 
-            @Override
-            protected void move(final int draggedIndex, final int dropIndex) {
-                StepTablePresenter.this.moveStep(draggedIndex, dropIndex);
-            }
+                @Override
+                protected void move(final int draggedIndex, final int dropIndex) {
+                    StepTablePresenter.this.moveStep(draggedIndex, dropIndex);
+                }
+            });
         });
     }
 
@@ -72,28 +74,32 @@ public class StepTablePresenter {
 
     @FXML
     void handleStepDelete() {
-        final int stepIndex = this.stepTable.getSelectionModel().getSelectedItem().index();
-        this.setTestCase(this.testCase.get().removeStep(stepIndex));
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            final int stepIndex = this.stepTable.getSelectionModel().getSelectedItem().index();
+            this.setTestCase(this.testCase.get().removeStep(stepIndex));
+        });
     }
 
     @FXML
     void handleStepInsert() {
-        this.initStepEditDialog(Action.INSERT);
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> this.initStepEditDialog(Action.INSERT));
     }
 
     @FXML
     void handleStepAdd() {
-        this.initStepEditDialog(Action.ADD);
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> this.initStepEditDialog(Action.ADD));
     }
 
     @FXML
     void handleStepEdit() {
-        final StepView stepView = this.initStepEditDialog(Action.EDIT);
-        final StepDefine item = this.stepTable.getSelectionModel().getSelectedItem();
-        stepView.refresh(this.testCase.get()
-                .steps()
-                .get(item.index())
-        );
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            final StepView stepView = this.initStepEditDialog(Action.EDIT);
+            final StepDefine item = this.stepTable.getSelectionModel().getSelectedItem();
+            stepView.refresh(this.testCase.get()
+                    .steps()
+                    .get(item.index())
+            );
+        });
     }
 
     private void moveStep(final int from, final int to) {
@@ -108,7 +114,7 @@ public class StepTablePresenter {
     }
 
     private void refreshTable() {
-        this.application.executeAndLoggingCaseWhenThrowException(() -> {
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
             this.stepTable.getItems().clear();
             this.stepTable.getItems().setAll(new ArrayList<>());
             int no = 1;

@@ -3,6 +3,7 @@ package com.sebuilder.interpreter.javafx.view.replay;
 import com.google.common.base.Strings;
 import com.sebuilder.interpreter.InputData;
 import com.sebuilder.interpreter.javafx.control.spreadsheet.ExcelLikeSpreadSheetView;
+import com.sebuilder.interpreter.javafx.view.ErrorDialog;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -11,12 +12,15 @@ import org.controlsfx.control.spreadsheet.GridBase;
 import org.controlsfx.control.spreadsheet.SpreadsheetCell;
 import org.controlsfx.control.spreadsheet.SpreadsheetView;
 
+import javax.inject.Inject;
 import java.util.Map;
 import java.util.function.Consumer;
 
 import static com.sebuilder.interpreter.javafx.control.spreadsheet.ExcelLikeSpreadSheetView.TEXT_AREA;
 
 public class VariablePresenter {
+    @Inject
+    private ErrorDialog errorDialog;
     @FXML
     private AnchorPane gridParentPane;
 
@@ -57,20 +61,24 @@ public class VariablePresenter {
 
     @FXML
     void save() {
-        this.resource = this.sheet.getGrid().getRows()
-                .stream()
-                .filter(it -> !Strings.isNullOrEmpty(it.get(0).getText()))
-                .reduce(new InputData()
-                        , (result, row) -> result.add(row.get(0).getText(), row.get(1).getText())
-                        , InputData::add);
-        this.reload();
-        this.onclick.accept(this.resource);
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            this.resource = this.sheet.getGrid().getRows()
+                    .stream()
+                    .filter(it -> !Strings.isNullOrEmpty(it.get(0).getText()))
+                    .reduce(new InputData()
+                            , (result, row) -> result.add(row.get(0).getText(), row.get(1).getText())
+                            , InputData::add);
+            this.reload();
+            this.onclick.accept(this.resource);
+        });
     }
 
     @FXML
     void reload() {
-        this.gridParentPane.getChildren().clear();
-        this.populate(this.resource);
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            this.gridParentPane.getChildren().clear();
+            this.populate(this.resource);
+        });
     }
 
     void setOnclick(final Consumer<InputData> onclick) {

@@ -1,4 +1,4 @@
-package com.sebuilder.interpreter.javafx.application;
+package com.sebuilder.interpreter.javafx.model;
 
 import com.sebuilder.interpreter.InputData;
 import com.sebuilder.interpreter.TestCase;

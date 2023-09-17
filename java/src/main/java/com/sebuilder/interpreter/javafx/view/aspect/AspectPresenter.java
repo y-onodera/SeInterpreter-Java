@@ -3,7 +3,8 @@ package com.sebuilder.interpreter.javafx.view.aspect;
 import com.google.common.base.Charsets;
 import com.sebuilder.interpreter.*;
 import com.sebuilder.interpreter.aspect.ImportInterceptor;
-import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
+import com.sebuilder.interpreter.javafx.model.SeInterpreter;
+import com.sebuilder.interpreter.javafx.view.ErrorDialog;
 import com.sebuilder.interpreter.javafx.view.SuccessDialog;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -20,7 +21,9 @@ import java.util.stream.Collectors;
 public class AspectPresenter {
 
     @Inject
-    private SeInterpreterApplication application;
+    private SeInterpreter application;
+    @Inject
+    private ErrorDialog errorDialog;
     @FXML
     private TreeView<String> scriptNames;
     @FXML
@@ -55,44 +58,46 @@ public class AspectPresenter {
 
     @FXML
     void initialize() {
-        this.beforeController.addListener((final ObservableValue<? extends TestCase> observed, final TestCase oldValue, final TestCase newValue) -> {
-            final ExtraStepExecutor replaced = this.getCurrentSelected().builder().replaceBefore(newValue).build();
-            if (this.currentProperty.get().getStream().findAny().isEmpty()) {
-                this.replaceTarget(this.currentProperty.get().builder().add(replaced).build());
-            } else {
-                this.replaceTarget(this.currentProperty.get().replace(this.currentSelected, replaced));
-            }
-            this.setCurrentSelected(replaced);
-        });
-        this.afterController.addListener((final ObservableValue<? extends TestCase> observed, final TestCase oldValue, final TestCase newValue) -> {
-            final ExtraStepExecutor replaced = this.getCurrentSelected().builder().replaceAfter(newValue).build();
-            if (this.currentProperty.get().getStream().findAny().isEmpty()) {
-                this.replaceTarget(this.currentProperty.get().builder().add(replaced).build());
-            } else {
-                this.replaceTarget(this.currentProperty.get().replace(this.currentSelected, replaced));
-            }
-            this.setCurrentSelected(replaced);
-        });
-        this.failureController.addListener((final ObservableValue<? extends TestCase> observed, final TestCase oldValue, final TestCase newValue) -> {
-            final ExtraStepExecutor replaced = this.getCurrentSelected().builder().replaceFailure(newValue).build();
-            if (this.currentProperty.get().getStream().findAny().isEmpty()) {
-                this.replaceTarget(this.currentProperty.get().builder().add(replaced).build());
-            } else {
-                this.replaceTarget(this.currentProperty.get().replace(this.currentSelected, replaced));
-            }
-            this.setCurrentSelected(replaced);
-        });
-        this.currentProperty.addListener((observed, oldValue, newValue) -> {
-            if (Optional.ofNullable(this.scriptNames.getSelectionModel().getSelectedItem())
-                    .filter(it -> it.equals(this.scriptNames.getRoot()))
-                    .isPresent()) {
-                this.rootProperty.set(newValue);
-            }
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            this.beforeController.addListener((final ObservableValue<? extends TestCase> observed, final TestCase oldValue, final TestCase newValue) -> {
+                final ExtraStepExecutor replaced = this.getCurrentSelected().builder().replaceBefore(newValue).build();
+                if (this.currentProperty.get().getStream().findAny().isEmpty()) {
+                    this.replaceTarget(this.currentProperty.get().builder().add(replaced).build());
+                } else {
+                    this.replaceTarget(this.currentProperty.get().replace(this.currentSelected, replaced));
+                }
+                this.setCurrentSelected(replaced);
+            });
+            this.afterController.addListener((final ObservableValue<? extends TestCase> observed, final TestCase oldValue, final TestCase newValue) -> {
+                final ExtraStepExecutor replaced = this.getCurrentSelected().builder().replaceAfter(newValue).build();
+                if (this.currentProperty.get().getStream().findAny().isEmpty()) {
+                    this.replaceTarget(this.currentProperty.get().builder().add(replaced).build());
+                } else {
+                    this.replaceTarget(this.currentProperty.get().replace(this.currentSelected, replaced));
+                }
+                this.setCurrentSelected(replaced);
+            });
+            this.failureController.addListener((final ObservableValue<? extends TestCase> observed, final TestCase oldValue, final TestCase newValue) -> {
+                final ExtraStepExecutor replaced = this.getCurrentSelected().builder().replaceFailure(newValue).build();
+                if (this.currentProperty.get().getStream().findAny().isEmpty()) {
+                    this.replaceTarget(this.currentProperty.get().builder().add(replaced).build());
+                } else {
+                    this.replaceTarget(this.currentProperty.get().replace(this.currentSelected, replaced));
+                }
+                this.setCurrentSelected(replaced);
+            });
+            this.currentProperty.addListener((observed, oldValue, newValue) -> {
+                if (Optional.ofNullable(this.scriptNames.getSelectionModel().getSelectedItem())
+                        .filter(it -> it.equals(this.scriptNames.getRoot()))
+                        .isPresent()) {
+                    this.rootProperty.set(newValue);
+                }
+            });
         });
     }
 
     public void setRootProperty(final TestCase testCase) {
-        this.application.executeAndLoggingCaseWhenThrowException(() -> {
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
             this.commitOnclick = () -> {
                 this.application.replaceDisplayCase(testCase.builder()
                         .setAspect(this.rootProperty.get())
@@ -106,67 +111,75 @@ public class AspectPresenter {
 
     @FXML
     void selectInterceptor() {
-        final String selectedItem = this.interceptorSelect.getSelectionModel().getSelectedItem();
-        if (selectedItem != null) {
-            this.setCurrentSelected(this.interceptors.get(selectedItem));
-        }
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            final String selectedItem = this.interceptorSelect.getSelectionModel().getSelectedItem();
+            if (selectedItem != null) {
+                this.setCurrentSelected(this.interceptors.get(selectedItem));
+            }
+        });
     }
 
     @FXML
     void removeInterceptor() {
-        this.replaceTarget(this.currentProperty.get().remove(this.currentSelected));
-        this.resetTab(this.treeViewSelect, this.currentProperty.get());
-    }
-
-    @FXML
-    void copyInterceptor() {
-        final TextInputDialog dialog = new TextInputDialog();
-        dialog.initOwner(this.interceptorSelect.getScene().getWindow());
-        dialog.setTitle("new interceptor name");
-        dialog.setHeaderText(null);
-        dialog.setGraphic(null);
-        dialog.getDialogPane().lookupButton(ButtonType.OK)
-                .disableProperty()
-                .bind(dialog.getEditor().textProperty().isEmpty());
-        dialog.showAndWait().ifPresent(response -> {
-            if (!this.interceptorSelect.getSelectionModel().getSelectedItem().isEmpty()) {
-                this.replaceTarget(this.currentProperty.get().builder()
-                        .add(this.currentSelected.builder().setDisplayName(response).build())
-                        .build());
-            } else {
-                this.replaceTarget(this.currentProperty.get()
-                        .replace(this.currentSelected, this.currentSelected.builder().setDisplayName(response).build())
-                );
-            }
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            this.replaceTarget(this.currentProperty.get().remove(this.currentSelected));
             this.resetTab(this.treeViewSelect, this.currentProperty.get());
         });
     }
 
     @FXML
-    void jsonCommit() {
-        if (Set.of("before", "after", "failure").contains(this.tabPane.getSelectionModel().getSelectedItem().getText())
-                && !this.currentSelected.hasDisplayName()) {
-            if (this.currentSelected.beforeStep().steps().size() > 0
-                    || this.currentSelected.afterStep().steps().size() > 0
-                    || this.currentSelected.failureStep().steps().size() > 0) {
-                this.copyInterceptor();
-            }
-        } else {
-            this.replaceTarget(Context.getScriptParser().loadAspect(this.textAreaJson.getText(), new File(this.treeViewSelect)));
-            this.resetTab(this.treeViewSelect, this.currentProperty.get());
-        }
-        if (Optional.ofNullable(this.scriptNames.getSelectionModel().getSelectedItem())
-                .filter(it -> it.equals(this.scriptNames.getRoot()))
-                .isPresent()) {
-            this.commitOnclick.run();
-        } else {
-            this.application.executeAndLoggingCaseWhenThrowException(() -> {
-                final File target = new File(new File(this.application.getSuite().path()).getParentFile()
-                        , this.treeViewSelect);
-                Files.writeString(target.toPath(), this.textAreaJson.getText(), Charsets.UTF_8);
+    void copyInterceptor() {
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            final TextInputDialog dialog = new TextInputDialog();
+            dialog.initOwner(this.interceptorSelect.getScene().getWindow());
+            dialog.setTitle("new interceptor name");
+            dialog.setHeaderText(null);
+            dialog.setGraphic(null);
+            dialog.getDialogPane().lookupButton(ButtonType.OK)
+                    .disableProperty()
+                    .bind(dialog.getEditor().textProperty().isEmpty());
+            dialog.showAndWait().ifPresent(response -> {
+                if (!this.interceptorSelect.getSelectionModel().getSelectedItem().isEmpty()) {
+                    this.replaceTarget(this.currentProperty.get().builder()
+                            .add(this.currentSelected.builder().setDisplayName(response).build())
+                            .build());
+                } else {
+                    this.replaceTarget(this.currentProperty.get()
+                            .replace(this.currentSelected, this.currentSelected.builder().setDisplayName(response).build())
+                    );
+                }
+                this.resetTab(this.treeViewSelect, this.currentProperty.get());
             });
-        }
-        SuccessDialog.show("commit succeed");
+        });
+    }
+
+    @FXML
+    void jsonCommit() {
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            if (Set.of("before", "after", "failure").contains(this.tabPane.getSelectionModel().getSelectedItem().getText())
+                    && !this.currentSelected.hasDisplayName()) {
+                if (this.currentSelected.beforeStep().steps().size() > 0
+                        || this.currentSelected.afterStep().steps().size() > 0
+                        || this.currentSelected.failureStep().steps().size() > 0) {
+                    this.copyInterceptor();
+                }
+            } else {
+                this.replaceTarget(Context.getScriptParser().loadAspect(this.textAreaJson.getText(), new File(this.treeViewSelect)));
+                this.resetTab(this.treeViewSelect, this.currentProperty.get());
+            }
+            if (Optional.ofNullable(this.scriptNames.getSelectionModel().getSelectedItem())
+                    .filter(it -> it.equals(this.scriptNames.getRoot()))
+                    .isPresent()) {
+                this.commitOnclick.run();
+            } else {
+                this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+                    final File target = new File(new File(this.application.getSuite().path()).getParentFile()
+                            , this.treeViewSelect);
+                    Files.writeString(target.toPath(), this.textAreaJson.getText(), Charsets.UTF_8);
+                });
+            }
+            SuccessDialog.show("commit succeed");
+        });
     }
 
     private void resetTreeView(final String target, final Aspect aspect) {

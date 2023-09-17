@@ -1,17 +1,13 @@
 package com.sebuilder.interpreter.javafx.view.main;
 
-import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
-import com.sebuilder.interpreter.javafx.application.ViewType;
+import com.sebuilder.interpreter.javafx.model.ViewType;
 import javafx.fxml.FXML;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TextArea;
 
-import javax.inject.Inject;
+import java.util.function.Consumer;
 
 public class MainPresenter {
-
-    @Inject
-    private SeInterpreterApplication application;
 
     @FXML
     private Tab stepText;
@@ -22,20 +18,21 @@ public class MainPresenter {
     @FXML
     private TextArea textAreaScriptLog;
 
-    @FXML
-    void initialize() {
+    private Consumer<ViewType> handleViewSelected;
+
+    public void setHandleViewSelected(final Consumer<ViewType> handleViewSelected) {
+        this.handleViewSelected = handleViewSelected;
         TextAreaAppender.setTextArea(this.textAreaScriptLog);
         this.stepText.setOnSelectionChanged(event -> {
             if (this.stepText.isSelected()) {
-                this.application.changeScriptViewType(ViewType.TEXT);
+                this.handleViewSelected.accept(ViewType.TEXT);
             }
         });
         this.stepTable.setOnSelectionChanged(event -> {
             if (this.stepTable.isSelected()) {
-                this.application.changeScriptViewType(ViewType.TABLE);
+                this.handleViewSelected.accept(ViewType.TABLE);
             }
         });
-        this.application.changeScriptViewType(ViewType.TABLE);
+        this.handleViewSelected.accept(ViewType.TABLE);
     }
-
 }

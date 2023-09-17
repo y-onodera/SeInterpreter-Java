@@ -2,7 +2,8 @@ package com.sebuilder.interpreter.javafx.view.menu;
 
 import com.google.common.base.Strings;
 import com.sebuilder.interpreter.Context;
-import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
+import com.sebuilder.interpreter.javafx.model.SeInterpreter;
+import com.sebuilder.interpreter.javafx.view.ErrorDialog;
 import com.sebuilder.interpreter.javafx.view.replay.InputView;
 import com.sebuilder.interpreter.javafx.view.replay.ReplaysettingView;
 import com.sebuilder.interpreter.javafx.view.replay.ScreenshotView;
@@ -19,89 +20,91 @@ import java.util.Optional;
 public class MenuPresenter {
 
     @Inject
-    private SeInterpreterApplication application;
-
+    private SeInterpreter application;
+    @Inject
+    private ErrorDialog errorDialog;
     @FXML
     private Pane paneSeInterpreterMenu;
 
     @FXML
-    void initialize() {
-        assert this.paneSeInterpreterMenu != null : "fx:id=\"paneSeInterpreterMenu\" was not injected: check your FXML file 'menu.fxml'.";
-    }
-
-    @FXML
     void handleScriptOpenFile() {
-        final File file = this.openFileChooser("Open Resource File", "json format (*.json)", "*.json");
-        if (file != null) {
-            this.application.scriptReLoad(file);
-        }
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            final File file = this.openFileChooser("Open Resource File", "json format (*.json)", "*.json");
+            if (file != null) {
+                this.application.scriptReLoad(file);
+            }
+        });
     }
 
     @FXML
     void handleImportSeleniumIDEScript() {
-        final File file = this.openFileChooser("Import SeleniumIDE Script", "side format (*.side)", "*.side");
-        if (file != null) {
-            this.application.scriptReLoad(file, "SeleniumIDE");
-        }
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            final File file = this.openFileChooser("Import SeleniumIDE Script", "side format (*.side)", "*.side");
+            if (file != null) {
+                this.application.scriptReLoad(file, "SeleniumIDE");
+            }
+        });
     }
 
     @FXML
     void handleSaveSuite() {
-        if (Strings.isNullOrEmpty(this.application.getSuite().path())) {
-            this.saveSuiteToNewFile();
-        } else {
-            this.application.saveSuite();
-        }
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            if (Strings.isNullOrEmpty(this.application.getSuite().path())) {
+                this.saveSuiteToNewFile();
+            } else {
+                this.application.saveSuite();
+            }
+        });
     }
 
     @FXML
     void handleSaveSuiteAs() {
-        this.saveSuiteToNewFile();
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(this::saveSuiteToNewFile);
     }
 
     @FXML
     void handleCreateNewSuite() {
-        this.application.reset();
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> this.application.reset());
     }
 
     @FXML
     void handleBrowserOpen() {
-        this.application.browserOpen();
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> this.application.browserOpen());
     }
 
     @FXML
     void handleBrowserClose() {
-        this.application.browserClose();
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> this.application.browserClose());
     }
 
     @FXML
     void handleBrowserSetting() {
-        new BrowserView().open(this.paneSeInterpreterMenu.getScene().getWindow());
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> new BrowserView().open(this.paneSeInterpreterMenu.getScene().getWindow()));
     }
 
     @FXML
     void handleReplaySuite() {
-        this.application.runSuite();
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> this.application.runSuite());
     }
 
     @FXML
     void handleReplayScript() {
-        new InputView().open(this.paneSeInterpreterMenu.getScene().getWindow());
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> new InputView().open(this.paneSeInterpreterMenu.getScene().getWindow()));
     }
 
     @FXML
     void handleTakeScreenshot() {
-        new ScreenshotView().open(this.paneSeInterpreterMenu.getScene().getWindow());
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> new ScreenshotView().open(this.paneSeInterpreterMenu.getScene().getWindow()));
     }
 
     @FXML
     void handleReplaySetting() {
-        new ReplaysettingView().open(this.paneSeInterpreterMenu.getScene().getWindow());
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> new ReplaysettingView().open(this.paneSeInterpreterMenu.getScene().getWindow()));
     }
 
     @FXML
     void handleOpenResult() {
-        this.application.executeAndLoggingCaseWhenThrowException(() -> Desktop.getDesktop()
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> Desktop.getDesktop()
                 .open(Context.getResultOutputDirectory()));
     }
 

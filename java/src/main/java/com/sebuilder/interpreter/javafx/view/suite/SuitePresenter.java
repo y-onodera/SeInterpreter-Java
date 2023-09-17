@@ -6,8 +6,9 @@ import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.Suite;
 import com.sebuilder.interpreter.TestCase;
 import com.sebuilder.interpreter.TestCaseChains;
-import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
 import com.sebuilder.interpreter.javafx.control.dragdrop.DragAndDropSortTreeViewCellFactory;
+import com.sebuilder.interpreter.javafx.model.SeInterpreter;
+import com.sebuilder.interpreter.javafx.view.ErrorDialog;
 import com.sebuilder.interpreter.javafx.view.aspect.AspectView;
 import com.sebuilder.interpreter.javafx.view.data.DataSetView;
 import com.sebuilder.interpreter.javafx.view.replay.InputView;
@@ -30,8 +31,9 @@ import java.util.stream.Stream;
 public class SuitePresenter {
 
     @Inject
-    private SeInterpreterApplication application;
-
+    private SeInterpreter application;
+    @Inject
+    private ErrorDialog errorDialog;
     @FXML
     private TreeView<String> treeViewScriptName;
 
@@ -40,113 +42,130 @@ public class SuitePresenter {
 
     @FXML
     void initialize() {
-        this.treeViewScriptName.setCellFactory(new DragAndDropSortTreeViewCellFactory<>() {
-            private TestCase dragged;
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            this.treeViewScriptName.setCellFactory(new DragAndDropSortTreeViewCellFactory<>() {
+                private TestCase dragged;
 
-            @Override
-            protected void updateItemCallback(final TreeCell<String> treeCell, final String s, final boolean b) {
-                if (Strings.isNullOrEmpty(s) || b) {
-                    treeCell.setText(null);
-                } else {
-                    treeCell.setText(s);
+                @Override
+                protected void updateItemCallback(final TreeCell<String> treeCell, final String s, final boolean b) {
+                    if (Strings.isNullOrEmpty(s) || b) {
+                        treeCell.setText(null);
+                    } else {
+                        treeCell.setText(s);
+                    }
                 }
-            }
 
-            @Override
-            protected void removeDragItemFromPreviousParent(final TreeItem<String> droppedItemParent) {
-                super.removeDragItemFromPreviousParent(droppedItemParent);
-                this.dragged = SuitePresenter.this.application.findTestCase(droppedItemParent.getValue(), this.getDraggedItem().getValue());
-                SuitePresenter.this.application.removeScriptFromChain(droppedItemParent.getValue(), this.getDraggedItem().getValue());
-            }
+                @Override
+                protected void removeDragItemFromPreviousParent(final TreeItem<String> droppedItemParent) {
+                    super.removeDragItemFromPreviousParent(droppedItemParent);
+                    this.dragged = SuitePresenter.this.application.findTestCase(droppedItemParent.getValue(), this.getDraggedItem().getValue());
+                    SuitePresenter.this.application.removeScriptFromChain(droppedItemParent.getValue(), this.getDraggedItem().getValue());
+                }
 
-            @Override
-            protected void addDropItemToNewParent(final TreeItem<String> droppedItemParent, final int i) {
-                super.addDropItemToNewParent(droppedItemParent, i);
-                SuitePresenter.this.application.addScript(droppedItemParent.getValue(), i, this.dragged);
-                this.dragged = null;
-            }
+                @Override
+                protected void addDropItemToNewParent(final TreeItem<String> droppedItemParent, final int i) {
+                    super.addDropItemToNewParent(droppedItemParent, i);
+                    SuitePresenter.this.application.addScript(droppedItemParent.getValue(), i, this.dragged);
+                    this.dragged = null;
+                }
 
+            });
+            this.application.suite().addListener((observed, oldValue, newValue) -> this.showScriptView());
+            this.application.displayTestCase().addListener((observed, oldValue, newValue) -> {
+                if (this.application.getSuite().name().equals(newValue.name())) {
+                    this.treeViewScriptName.getSelectionModel().selectFirst();
+                } else {
+                    this.findItem(newValue).ifPresent(it -> this.treeViewScriptName.getSelectionModel().select(it));
+                }
+                try {
+                    this.openDataSource.setDisable(!observed.getValue().runtimeDataSet().isLoadable() || observed.getValue().loadData().size() <= 0);
+                } catch (final IOException e) {
+                    this.openDataSource.setDisable(true);
+                }
+            });
+            this.showScriptView();
         });
-        this.application.suiteProperty().addListener((observed, oldValue, newValue) -> this.showScriptView());
-        this.application.displayTestCaseProperty().addListener((observed, oldValue, newValue) -> {
-            if (this.application.getSuite().name().equals(newValue.name())) {
-                this.treeViewScriptName.getSelectionModel().selectFirst();
-            } else {
-                this.findItem(newValue).ifPresent(it -> this.treeViewScriptName.getSelectionModel().select(it));
-            }
-            try {
-                this.openDataSource.setDisable(!observed.getValue().runtimeDataSet().isLoadable() || observed.getValue().loadData().size() <= 0);
-            } catch (final IOException e) {
-                this.openDataSource.setDisable(true);
-            }
-        });
-        this.showScriptView();
     }
 
     @FXML
     public void handleOpenDataSource() {
-        this.application.executeAndLoggingCaseWhenThrowException(() -> new DataSetView().open(this.application.getDisplayTestCaseDataSource(), this.treeViewScriptName.getScene().getWindow()));
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> new DataSetView()
+                .open(this.application.getDisplayTestCaseDataSource(), this.treeViewScriptName.getScene().getWindow()));
     }
 
     @FXML
     public void handleOpenAspect() {
-        new AspectView().open(this.treeViewScriptName.getScene().getWindow(), this.application.getDisplayTestCase());
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> new AspectView()
+                .open(this.treeViewScriptName.getScene().getWindow(), this.application.getDisplayTestCase()));
     }
 
     @FXML
     void handleScriptReplay() {
-        new InputView().open(this.treeViewScriptName.getScene().getWindow());
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            new InputView().open(this.treeViewScriptName.getScene().getWindow());
+        });
     }
 
     @FXML
     void handleScriptInsert() {
-        this.application.insertScript();
-        this.showScriptView();
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            this.application.insertScript();
+            this.showScriptView();
+        });
     }
 
     @FXML
     void handleScriptAdd() {
-        this.application.addScript();
-        this.showScriptView();
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            this.application.addScript();
+            this.showScriptView();
+        });
     }
 
     @FXML
     void handleScriptCreateTemplate() {
-        new TemplateView().open(this.treeViewScriptName.getScene().getWindow());
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> new TemplateView()
+                .open(this.treeViewScriptName.getScene().getWindow()));
     }
 
     @FXML
     void handleScriptImport() {
-        final FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Open Resource File");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("json format (*.json)", "*.json"));
-        fileChooser.setInitialDirectory(this.getBaseDirectory());
-        final Stage stage = new Stage();
-        stage.initOwner(this.treeViewScriptName.getScene().getWindow());
-        final File file = fileChooser.showOpenDialog(stage);
-        if (file != null) {
-            this.application.importScript(file);
-        }
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            final FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Open Resource File");
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("json format (*.json)", "*.json"));
+            fileChooser.setInitialDirectory(this.getBaseDirectory());
+            final Stage stage = new Stage();
+            stage.initOwner(this.treeViewScriptName.getScene().getWindow());
+            final File file = fileChooser.showOpenDialog(stage);
+            if (file != null) {
+                this.application.importScript(file);
+            }
+        });
     }
 
     @FXML
     void handleScriptDelete() {
-        this.application.removeScript();
-        this.showScriptView();
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            this.application.removeScript();
+            this.showScriptView();
+        });
     }
 
     @FXML
     void handleScriptSave() {
-        if (Strings.isNullOrEmpty(this.application.getDisplayTestCase().path())) {
-            this.saveTestCaseToNewFile();
-        } else {
-            this.application.saveTestCase();
-        }
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            if (Strings.isNullOrEmpty(this.application.getDisplayTestCase().path())) {
+                this.saveTestCaseToNewFile();
+            } else {
+                this.application.saveTestCase();
+            }
+        });
     }
 
     @FXML
     void handleScriptSaveAs() {
-        this.saveTestCaseToNewFile();
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(this::saveTestCaseToNewFile);
     }
 
     private void showScriptView() {

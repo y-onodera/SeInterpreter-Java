@@ -4,16 +4,18 @@ import com.google.common.base.Strings;
 import com.sebuilder.interpreter.Pointcut;
 import com.sebuilder.interpreter.Step;
 import com.sebuilder.interpreter.TestCase;
-import com.sebuilder.interpreter.javafx.application.BreakPoint;
-import com.sebuilder.interpreter.javafx.application.Result;
-import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
-import com.sebuilder.interpreter.javafx.application.ViewType;
 import com.sebuilder.interpreter.javafx.control.dragdrop.DragAndDropTableViewRowFactory;
+import com.sebuilder.interpreter.javafx.model.BreakPoint;
+import com.sebuilder.interpreter.javafx.model.Result;
+import com.sebuilder.interpreter.javafx.model.SeInterpreter;
+import com.sebuilder.interpreter.javafx.model.ViewType;
 import com.sebuilder.interpreter.javafx.model.steps.Action;
 import com.sebuilder.interpreter.javafx.model.steps.StepDefine;
 import com.sebuilder.interpreter.javafx.model.steps.StepNo;
 import com.sebuilder.interpreter.javafx.model.steps.StepNoCell;
+import com.sebuilder.interpreter.javafx.view.ErrorDialog;
 import com.sebuilder.interpreter.javafx.view.replay.InputView;
+import com.sebuilder.interpreter.javafx.view.step.StepView;
 import com.sebuilder.interpreter.pointcut.VerifyFilter;
 import com.sebuilder.interpreter.step.Verify;
 import javafx.beans.value.ObservableValue;
@@ -32,7 +34,9 @@ import java.util.Optional;
 public class ScriptPresenter {
 
     @Inject
-    private SeInterpreterApplication application;
+    private SeInterpreter application;
+    @Inject
+    private ErrorDialog errorDialog;
 
     @FXML
     private TableColumn<StepDefine, StepNo> stepNo;
@@ -45,135 +49,157 @@ public class ScriptPresenter {
 
     @FXML
     void initialize() {
-        this.stepNo.setCellValueFactory(body -> body.getValue().noProperty());
-        this.stepNo.setCellFactory(cell -> new StepNoCell());
-        this.stepBody.setCellValueFactory(body -> body.getValue().scriptProperty());
-        this.steps.setRowFactory(new DragAndDropTableViewRowFactory<>() {
-            @Override
-            protected void updateItemCallback(final TableRow<StepDefine> tableRow, final StepDefine stepDefine, final boolean empty, final int notEmptyValCount) {
-                for (final Result result : Result.values()) {
-                    tableRow.getStyleClass().remove(result.toString().toLowerCase());
-                }
-                if (!empty && !tableRow.isEmpty()) {
-                    if (notEmptyValCount == 1) {
-                        tableRow.getItem().runningResultProperty().addListener((final ObservableValue<? extends String> observed, final String oldValue, final String newValue) -> {
-                            for (final Result result : Result.values()) {
-                                tableRow.getStyleClass().remove(result.toString().toLowerCase());
-                            }
-                            if (!Strings.isNullOrEmpty(newValue)) {
-                                tableRow.getStyleClass().add(newValue.toLowerCase());
-                            }
-                        });
-                        tableRow.setOnMouseClicked(ev -> {
-                            if (ev.getButton().equals(MouseButton.PRIMARY) && ev.getClickCount() == 2) {
-                                ScriptPresenter.this.handleStepEdit();
-                            }
-                        });
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            this.stepNo.setCellValueFactory(body -> body.getValue().noProperty());
+            this.stepNo.setCellFactory(cell -> new StepNoCell());
+            this.stepBody.setCellValueFactory(body -> body.getValue().scriptProperty());
+            this.steps.setRowFactory(new DragAndDropTableViewRowFactory<>() {
+                @Override
+                protected void updateItemCallback(final TableRow<StepDefine> tableRow, final StepDefine stepDefine, final boolean empty, final int notEmptyValCount) {
+                    for (final Result result : Result.values()) {
+                        tableRow.getStyleClass().remove(result.toString().toLowerCase());
                     }
-                    final String currentStyle = tableRow.getItem().runningResultProperty().get();
-                    if (!Strings.isNullOrEmpty(currentStyle)) {
-                        tableRow.getStyleClass().add(currentStyle.toLowerCase());
+                    if (!empty && !tableRow.isEmpty()) {
+                        if (notEmptyValCount == 1) {
+                            tableRow.getItem().runningResultProperty().addListener((final ObservableValue<? extends String> observed, final String oldValue, final String newValue) -> {
+                                for (final Result result : Result.values()) {
+                                    tableRow.getStyleClass().remove(result.toString().toLowerCase());
+                                }
+                                if (!Strings.isNullOrEmpty(newValue)) {
+                                    tableRow.getStyleClass().add(newValue.toLowerCase());
+                                }
+                            });
+                            tableRow.setOnMouseClicked(ev -> {
+                                if (ev.getButton().equals(MouseButton.PRIMARY) && ev.getClickCount() == 2) {
+                                    ScriptPresenter.this.handleStepEdit();
+                                }
+                            });
+                        }
+                        final String currentStyle = tableRow.getItem().runningResultProperty().get();
+                        if (!Strings.isNullOrEmpty(currentStyle)) {
+                            tableRow.getStyleClass().add(currentStyle.toLowerCase());
+                        }
                     }
                 }
-            }
 
-            @Override
-            protected void move(final int draggedIndex, final int dropIndex) {
-                ScriptPresenter.this.moveStep(draggedIndex, dropIndex);
-            }
+                @Override
+                protected void move(final int draggedIndex, final int dropIndex) {
+                    ScriptPresenter.this.moveStep(draggedIndex, dropIndex);
+                }
+            });
+            this.application.displayTestCase().addListener((observed, oldValue, newValue) -> {
+                if (this.application.scriptViewType().get() == ViewType.TABLE) {
+                    this.refreshTable();
+                }
+            });
+            this.application.scriptViewType().addListener((final ObservableValue<? extends ViewType> observed, final ViewType oldValue, final ViewType newValue) -> {
+                if (newValue == ViewType.TABLE) {
+                    this.refreshTable();
+                }
+            });
+            this.application.replayStatus().addListener((observed, oldVar, newVar) -> {
+                if (newVar != null) {
+                    this.handleStepResult(newVar.getKey(), newVar.getValue());
+                }
+            });
+            this.refreshTable();
         });
-        this.application.displayTestCaseProperty().addListener((observed, oldValue, newValue) -> {
-            if (this.application.scriptViewTypeProperty().get() == ViewType.TABLE) {
-                this.refreshTable();
-            }
-        });
-        this.application.scriptViewTypeProperty().addListener((final ObservableValue<? extends ViewType> observed, final ViewType oldValue, final ViewType newValue) -> {
-            if (newValue == ViewType.TABLE) {
-                this.refreshTable();
-            }
-        });
-        this.application.replayStatusProperty().addListener((observed, oldVar, newVar) -> {
-            if (newVar != null) {
-                this.handleStepResult(newVar.getKey(), newVar.getValue());
-            }
-        });
-        this.refreshTable();
     }
 
     @FXML
     void handleStepDelete() {
-        final int stepIndex = this.steps.getSelectionModel().getSelectedItem().index();
-        this.application.replaceDisplayCase(this.application.getDisplayTestCase().removeStep(stepIndex));
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            final int stepIndex = this.steps.getSelectionModel().getSelectedItem().index();
+            this.application.replaceDisplayCase(this.application.getDisplayTestCase().removeStep(stepIndex));
+        });
     }
 
     @FXML
     void handleStepInsert() {
-        this.initStepEditDialog(Action.INSERT);
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> this.initStepEditDialog(Action.INSERT));
     }
 
     @FXML
     void handleStepAdd() {
-        this.initStepEditDialog(Action.ADD);
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> this.initStepEditDialog(Action.ADD));
     }
 
     @FXML
     void handleStepEdit() {
-        final StepView stepView = this.initStepEditDialog(Action.EDIT);
-        final StepDefine item = this.steps.getSelectionModel().getSelectedItem();
-        stepView.refresh(this.application.getDisplayTestCase()
-                .steps()
-                .get(item.index())
-        );
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            final StepView stepView = this.initStepEditDialog(Action.EDIT);
+            final StepDefine item = this.steps.getSelectionModel().getSelectedItem();
+            stepView.refresh(this.application.getDisplayTestCase()
+                    .steps()
+                    .get(item.index())
+            );
+        });
     }
 
     @FXML
     void handleRunStep() {
-        final StepDefine item = this.steps.getSelectionModel().getSelectedItem();
-        final InputView inputView = new InputView();
-        inputView.setOnclickReplayStart((it) ->
-                this.application.runStep(it, (testRun, step, var) -> item.compareIndex(var.stepIndex()) == 0, false)
-        );
-        inputView.open(this.currentWindow());
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            final StepDefine item = this.steps.getSelectionModel().getSelectedItem();
+            final InputView inputView = new InputView();
+            inputView.setOnclickReplayStart((it) ->
+                    this.errorDialog.executeAndLoggingCaseWhenThrowException(() ->
+                            this.application.runStep(it, (testRun, step, var) -> item.compareIndex(var.stepIndex()) == 0, false)
+                    )
+            );
+            inputView.open(this.currentWindow());
+        });
     }
 
     @FXML
     void handleRunFromHere() {
-        final StepDefine item = this.steps.getSelectionModel().getSelectedItem();
-        final InputView inputView = new InputView();
-        inputView.setOnclickReplayStart((it) ->
-                this.application.runStep(it, (testRun, step, var) -> item.compareIndex(var.stepIndex()) <= 0, true)
-        );
-        inputView.open(this.currentWindow());
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            final StepDefine item = this.steps.getSelectionModel().getSelectedItem();
+            final InputView inputView = new InputView();
+            inputView.setOnclickReplayStart((it) ->
+                    this.errorDialog.executeAndLoggingCaseWhenThrowException(() ->
+                            this.application.runStep(it, (testRun, step, var) -> item.compareIndex(var.stepIndex()) <= 0, true)
+                    )
+            );
+            inputView.open(this.currentWindow());
+        });
     }
 
     @FXML
     void handleRunToHere() {
-        final StepDefine item = this.steps.getSelectionModel().getSelectedItem();
-        final InputView inputView = new InputView();
-        inputView.setOnclickReplayStart((it) ->
-                this.application.runStep(it, (testRun, step, var) -> item.compareIndex(var.stepIndex()) >= 0, false)
-        );
-        inputView.open(this.currentWindow());
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            final StepDefine item = this.steps.getSelectionModel().getSelectedItem();
+            final InputView inputView = new InputView();
+            inputView.setOnclickReplayStart((it) ->
+                    this.errorDialog.executeAndLoggingCaseWhenThrowException(() ->
+                            this.application.runStep(it, (testRun, step, var) -> item.compareIndex(var.stepIndex()) >= 0, false)
+                    )
+            );
+            inputView.open(this.currentWindow());
+        });
     }
 
     @FXML
     void handleAddBreakPoint() {
-        final StepDefine item = this.steps.getSelectionModel().getSelectedItem();
-        new StepView(s -> s.startsWith("verify"), key -> !key.equals("skip"))
-                .open(this.currentWindow(), (application, step) -> {
-                    if (step != null) {
-                        final VerifyFilter pointcut = new VerifyFilter((Verify) step.type(), step.stringParams(), step.locatorParams());
-                        application.addBreakPoint(item.index(), pointcut);
-                    } else {
-                        application.addBreakPoint(item.index(), Pointcut.ANY);
-                    }
-                });
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            final StepDefine item = this.steps.getSelectionModel().getSelectedItem();
+            new StepView(s -> s.startsWith("verify"), key -> !key.equals("skip"))
+                    .open(this.currentWindow(), (application, step) -> {
+                        if (step != null) {
+                            final VerifyFilter pointcut = new VerifyFilter((Verify) step.type(), step.stringParams(), step.locatorParams());
+                            application.addBreakPoint(item.index(), pointcut);
+                        } else {
+                            application.addBreakPoint(item.index(), Pointcut.ANY);
+                        }
+                    });
+        });
     }
 
     @FXML
     void handleRemoveBreakPoint() {
-        final StepDefine item = this.steps.getSelectionModel().getSelectedItem();
-        this.application.removeBreakPoint(item.index());
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            final StepDefine item = this.steps.getSelectionModel().getSelectedItem();
+            this.application.removeBreakPoint(item.index());
+        });
     }
 
     private void moveStep(final int from, final int to) {
@@ -190,23 +216,21 @@ public class ScriptPresenter {
     }
 
     private void refreshTable() {
-        this.application.executeAndLoggingCaseWhenThrowException(() -> {
-            this.steps.getItems().setAll(new ArrayList<>());
-            int no = 1;
-            final List<Integer> hasBreakPoint = new ArrayList<>();
-            final Optional<BreakPoint> breakPoint = BreakPoint.findFrom(this.application.getDisplayTestCase().aspect());
-            breakPoint.ifPresent(it -> hasBreakPoint.addAll(it.targetStepIndex()));
-            for (final Step step : this.application.getDisplayTestCase().steps()) {
-                final StepDefine row;
-                if (hasBreakPoint.contains(no - 1)) {
-                    row = new StepDefine(new StepNo(no++).withBreakPoint(), step.toPrettyString(), "");
-                } else {
-                    row = new StepDefine(new StepNo(no++), step.toPrettyString(), "");
-                }
-                this.steps.getItems().add(row);
+        this.steps.getItems().setAll(new ArrayList<>());
+        int no = 1;
+        final List<Integer> hasBreakPoint = new ArrayList<>();
+        final Optional<BreakPoint> breakPoint = BreakPoint.findFrom(this.application.getDisplayTestCase().aspect());
+        breakPoint.ifPresent(it -> hasBreakPoint.addAll(it.targetStepIndex()));
+        for (final Step step : this.application.getDisplayTestCase().steps()) {
+            final StepDefine row;
+            if (hasBreakPoint.contains(no - 1)) {
+                row = new StepDefine(new StepNo(no++).withBreakPoint(), step.toPrettyString(), "");
+            } else {
+                row = new StepDefine(new StepNo(no++), step.toPrettyString(), "");
             }
-            this.steps.refresh();
-        });
+            this.steps.getItems().add(row);
+        }
+        this.steps.refresh();
     }
 
     private void handleStepResult(final int stepIndex, final Result result) {

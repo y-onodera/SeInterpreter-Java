@@ -1,5 +1,4 @@
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
@@ -14,13 +13,22 @@
         <columns>
             <TableColumn id="tableColumnLevel" fx:id="no"
                          prefWidth="45.0"
-                         style="-fx-alignment: CENTER_RIGHT;" text="no"/>
+                         style="-fx-alignment: CENTER_RIGHT;" text="No"/>
             <TableColumn id="tableColumnCombinator" fx:id="combinator"
                          prefWidth="90.0"
-                         style="-fx-alignment: CENTER_LEFT;" text="combinator"/>
+                         style="-fx-alignment: CENTER_LEFT;" text="Combinator"/>
             <TableColumn id="tableColumnScriptBody" fx:id="filter"
                          prefWidth="Infinity"
-                         style="-fx-alignment: CENTER_LEFT;" text="filter"/>
+                         style="-fx-alignment: CENTER_LEFT;" text="Filter"/>
         </columns>
+        <contextMenu>
+            <ContextMenu>
+                <items>
+                    <MenuItem mnemonicParsing="false" onAction="#handleAdd" text="add"/>
+                    <MenuItem mnemonicParsing="false" onAction="#handleDelete" text="delete"/>
+                    <MenuItem mnemonicParsing="false" onAction="#handleEdit" text="edit"/>
+                </items>
+            </ContextMenu>
+        </contextMenu>
     </TableView>
 </AnchorPane>

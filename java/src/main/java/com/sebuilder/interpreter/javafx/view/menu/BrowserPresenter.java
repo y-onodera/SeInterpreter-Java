@@ -4,7 +4,8 @@ import com.google.common.base.Strings;
 import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.InputData;
 import com.sebuilder.interpreter.WebDriverFactory;
-import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
+import com.sebuilder.interpreter.javafx.model.SeInterpreter;
+import com.sebuilder.interpreter.javafx.view.ErrorDialog;
 import com.sebuilder.interpreter.javafx.view.replay.VariableView;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -23,8 +24,9 @@ import java.util.stream.Collectors;
 public class BrowserPresenter {
 
     @Inject
-    private SeInterpreterApplication application;
-
+    private SeInterpreter application;
+    @Inject
+    private ErrorDialog errorDialog;
     @FXML
     private ComboBox<String> browserSelect;
 
@@ -50,88 +52,102 @@ public class BrowserPresenter {
 
     @FXML
     void initialize() {
-        this.init(Context.getRemoteUrl(), Context.getBrowser(), Context.getWebDriverFactory().getDriverPath());
-        this.driverConfig = new InputData().builder().add(Context.getDriverConfig()).build()
-                .filter(it -> !it.getKey().equals("binary") && !it.getKey().equals(Context.REMOTE_URL_KEY));
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            this.init(Context.getRemoteUrl(), Context.getBrowser(), Context.getWebDriverFactory().getDriverPath());
+            this.driverConfig = new InputData().builder().add(Context.getDriverConfig()).build()
+                    .filter(it -> !it.getKey().equals("binary") && !it.getKey().equals(Context.REMOTE_URL_KEY));
+        });
     }
 
     @FXML
     void selectBrowser() {
-        final String browser = this.browserSelect.getSelectionModel().getSelectedItem();
-        if (Objects.equals(this.selectedBrowser, browser)) {
-            return;
-        }
-        this.selectedBrowser = this.browserSelect.getSelectionModel().getSelectedItem();
-        this.populate();
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            final String browser = this.browserSelect.getSelectionModel().getSelectedItem();
+            if (Objects.equals(this.selectedBrowser, browser)) {
+                return;
+            }
+            this.selectedBrowser = this.browserSelect.getSelectionModel().getSelectedItem();
+            this.populate();
+        });
     }
 
     @FXML
     void setDriverPath() {
-        this.currentDriverPath = this.driverText.getText();
-        if (!Strings.isNullOrEmpty(this.currentDriverPath)) {
-            this.parentDir = new File(this.currentDriverPath).getParentFile().getAbsoluteFile();
-        }
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            this.currentDriverPath = this.driverText.getText();
+            if (!Strings.isNullOrEmpty(this.currentDriverPath)) {
+                this.parentDir = new File(this.currentDriverPath).getParentFile().getAbsoluteFile();
+            }
+        });
     }
 
     @FXML
     void driverSearch() {
-        final FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Open Resource File");
-        fileChooser.setInitialDirectory(this.parentDir);
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("select driver.exe", "*.exe"));
-        final Stage stage = new Stage();
-        stage.initOwner(this.driverText.getScene().getWindow());
-        final File file = fileChooser.showOpenDialog(stage);
-        if (file != null && file.exists()) {
-            this.parentDir = file.getParentFile().getAbsoluteFile();
-            this.driverText.setText(file.getAbsolutePath());
-        }
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            final FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Open Resource File");
+            fileChooser.setInitialDirectory(this.parentDir);
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("select driver.exe", "*.exe"));
+            final Stage stage = new Stage();
+            stage.initOwner(this.driverText.getScene().getWindow());
+            final File file = fileChooser.showOpenDialog(stage);
+            if (file != null && file.exists()) {
+                this.parentDir = file.getParentFile().getAbsoluteFile();
+                this.driverText.setText(file.getAbsolutePath());
+            }
+        });
     }
 
     @FXML
     void binarySearch() {
-        final FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Open Resource File");
-        fileChooser.setInitialDirectory(this.parentDir);
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("select browser.exe", "*.exe"));
-        final Stage stage = new Stage();
-        stage.initOwner(this.binaryText.getScene().getWindow());
-        final File file = fileChooser.showOpenDialog(stage);
-        if (file != null && file.exists()) {
-            this.binaryText.setText(file.getAbsolutePath());
-        }
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            final FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Open Resource File");
+            fileChooser.setInitialDirectory(this.parentDir);
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("select browser.exe", "*.exe"));
+            final Stage stage = new Stage();
+            stage.initOwner(this.binaryText.getScene().getWindow());
+            final File file = fileChooser.showOpenDialog(stage);
+            if (file != null && file.exists()) {
+                this.binaryText.setText(file.getAbsolutePath());
+            }
+        });
     }
 
     @FXML
     void driverConfig() {
-        VariableView.builder()
-                .setTitle("env setting")
-                .setOnclick(result -> this.driverConfig = result)
-                .setTarget(this.driverConfig)
-                .setWindow(this.browserSelect.getScene().getWindow())
-                .build();
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            VariableView.builder()
+                    .setTitle("env setting")
+                    .setOnclick(result -> this.driverConfig = result)
+                    .setTarget(this.driverConfig)
+                    .setWindow(this.browserSelect.getScene().getWindow())
+                    .build();
+        });
     }
 
     @FXML
     void settingEdit() {
-        final Map<String, String> newConfig = this.driverConfig.entrySet()
-                .stream()
-                .collect(Collectors.toMap(Map.Entry::getKey
-                        , Map.Entry::getValue
-                        , (e1, e2) -> e1
-                        , HashMap::new));
-        if (Context.getDriverConfig().containsKey("binary")) {
-            newConfig.put("binary", Context.getDriverConfig().get("binary"));
-        }
-        if (Context.getDriverConfig().containsKey(Context.REMOTE_URL_KEY)) {
-            newConfig.put(Context.REMOTE_URL_KEY, Context.getDriverConfig().get(Context.REMOTE_URL_KEY));
-        }
-        Context.getInstance().setDriverConfig(newConfig);
-        this.application.browserSetting(this.selectedBrowser
-                , this.remoteUrl.getText()
-                , this.driverText.getText()
-                , this.binaryText.getText());
-        this.driverText.getScene().getWindow().hide();
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            final Map<String, String> newConfig = this.driverConfig.entrySet()
+                    .stream()
+                    .collect(Collectors.toMap(Map.Entry::getKey
+                            , Map.Entry::getValue
+                            , (e1, e2) -> e1
+                            , HashMap::new));
+            if (Context.getDriverConfig().containsKey("binary")) {
+                newConfig.put("binary", Context.getDriverConfig().get("binary"));
+            }
+            if (Context.getDriverConfig().containsKey(Context.REMOTE_URL_KEY)) {
+                newConfig.put(Context.REMOTE_URL_KEY, Context.getDriverConfig().get(Context.REMOTE_URL_KEY));
+            }
+            Context.getInstance().setDriverConfig(newConfig);
+            this.application.browserSetting(this.selectedBrowser
+                    , this.remoteUrl.getText()
+                    , this.driverText.getText()
+                    , this.binaryText.getText());
+            this.driverText.getScene().getWindow().hide();
+        });
     }
 
     private void init(final String remoteUrl, final String aSelectedBrowser, final String aCurrentDriverPath) {

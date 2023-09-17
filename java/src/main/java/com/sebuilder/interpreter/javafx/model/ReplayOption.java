@@ -1,4 +1,4 @@
-package com.sebuilder.interpreter.javafx.application;
+package com.sebuilder.interpreter.javafx.model;
 
 import com.google.common.collect.Lists;
 import com.sebuilder.interpreter.DataSourceLoader;

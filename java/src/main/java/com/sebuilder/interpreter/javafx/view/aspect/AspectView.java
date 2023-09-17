@@ -8,6 +8,7 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 
 public class AspectView extends FXMLView {
+
     public void open(final Window window, final TestCase target) {
         final Scene scene = new Scene(this.getView());
         final Stage scriptSettingDialog = new Stage();

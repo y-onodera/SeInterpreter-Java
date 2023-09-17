@@ -1,8 +1,8 @@
-package com.sebuilder.interpreter.javafx.view.script;
+package com.sebuilder.interpreter.javafx.view.step;
 
 import com.airhacks.afterburner.views.FXMLView;
 import com.sebuilder.interpreter.Step;
-import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
+import com.sebuilder.interpreter.javafx.model.SeInterpreter;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -26,7 +26,7 @@ public class StepView extends FXMLView {
         this.textParamFilter = textParamFilter;
     }
 
-    public void open(final Window window, final BiConsumer<SeInterpreterApplication, Step> applyStep) {
+    public void open(final Window window, final BiConsumer<SeInterpreter, Step> applyStep) {
         final Scene scene = new Scene(this.getView());
         final Stage dialog = new Stage();
         this.presenter().populate(dialog, this.stepTypeFilter, this.textParamFilter, applyStep);

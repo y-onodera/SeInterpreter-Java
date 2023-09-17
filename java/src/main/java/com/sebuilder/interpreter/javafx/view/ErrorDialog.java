@@ -1,5 +1,6 @@
-package com.sebuilder.interpreter.javafx.view.main;
+package com.sebuilder.interpreter.javafx.view;
 
+import com.sebuilder.interpreter.javafx.model.SeInterpreter;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
@@ -43,4 +44,13 @@ public record ErrorDialog(Logger log) {
 
         alert.showAndWait();
     }
+
+    public void executeAndLoggingCaseWhenThrowException(final SeInterpreter.ThrowableAction action) {
+        try {
+            action.execute();
+        } catch (final Throwable th) {
+            this.show(th.getMessage(), th);
+        }
+    }
+
 }
