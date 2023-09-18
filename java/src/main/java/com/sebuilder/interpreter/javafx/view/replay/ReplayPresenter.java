@@ -46,12 +46,6 @@ public class ReplayPresenter {
     private HBox resultOperation;
 
     @FXML
-    private Button openLog;
-
-    @FXML
-    private Button openDir;
-
-    @FXML
     private ProgressBar scriptDataSetProgress;
 
     @FXML

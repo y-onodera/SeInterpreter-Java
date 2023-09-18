@@ -37,8 +37,8 @@
                     text="Stop"/>
         </HBox>
         <HBox fx:id="resultOperation" alignment="TOP_RIGHT" prefHeight="50.0" prefWidth="200.0" spacing="10.0">
-            <Button fx:id="openLog" mnemonicParsing="false" onAction="#handleOpenReplayLog" text="Report"/>
-            <Button fx:id="openDir" mnemonicParsing="false" onAction="#handleOpenDirectory" text="Result"/>
+            <Button id="openLog" mnemonicParsing="false" onAction="#handleOpenReplayLog" text="Report"/>
+            <Button id="openDir" mnemonicParsing="false" onAction="#handleOpenDirectory" text="Result"/>
         </HBox>
     </SplitPane>
 </AnchorPane>

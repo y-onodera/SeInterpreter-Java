@@ -36,7 +36,6 @@ public class SuitePresenter {
     private ErrorDialog errorDialog;
     @FXML
     private TreeView<String> treeViewScriptName;
-
     @FXML
     public MenuItem openDataSource;
 
@@ -78,7 +77,7 @@ public class SuitePresenter {
                     this.findItem(newValue).ifPresent(it -> this.treeViewScriptName.getSelectionModel().select(it));
                 }
                 try {
-                    this.openDataSource.setDisable(!observed.getValue().runtimeDataSet().isLoadable() || observed.getValue().loadData().size() <= 0);
+                    this.openDataSource.setDisable(!observed.getValue().runtimeDataSet().isLoadable() || observed.getValue().loadData().size() == 0);
                 } catch (final IOException e) {
                     this.openDataSource.setDisable(true);
                 }
@@ -101,9 +100,8 @@ public class SuitePresenter {
 
     @FXML
     void handleScriptReplay() {
-        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
-            new InputView().open(this.treeViewScriptName.getScene().getWindow());
-        });
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() ->
+                new InputView().open(this.treeViewScriptName.getScene().getWindow()));
     }
 
     @FXML

@@ -144,14 +144,14 @@ public record PointcutLoader(ImportLoader importLoader) {
             final JSONObject condition = pointcutJSON.getJSONObject(name);
             return Optional.of(this.toVerifyFilter(condition, name));
         }
-        final Verify verify = (Verify) Context.getStepTypeFactory().getStepTypeOfName(name);
+        final Verify verify = (Verify) Context.getStepTypeOfName(name);
         final Map<String, String> params = new HashMap<>();
         params.put("negated", Boolean.toString(!Boolean.parseBoolean(pointcutJSON.getString(name))));
         return Optional.of(new VerifyFilter(verify, params, new HashMap<>()));
     }
 
     public VerifyFilter toVerifyFilter(final JSONObject json, final String name) {
-        final Verify verify = (Verify) Context.getStepTypeFactory().getStepTypeOfName(name);
+        final Verify verify = (Verify) Context.getStepTypeOfName(name);
         final Map<String, String> params = json.keySet()
                 .stream()
                 .filter(key -> !key.startsWith("locator"))

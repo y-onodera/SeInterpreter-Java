@@ -98,11 +98,10 @@ public class AspectPresenter {
 
     public void setRootProperty(final TestCase testCase) {
         this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
-            this.commitOnclick = () -> {
-                this.application.replaceDisplayCase(testCase.builder()
-                        .setAspect(this.rootProperty.get())
-                        .build());
-            };
+            this.commitOnclick = () -> this.application.replaceDisplayCase(testCase
+                    .builder()
+                    .setAspect(this.rootProperty.get())
+                    .build());
             this.rootProperty.set(testCase.aspect());
             this.resetTreeView(testCase.name(), testCase.aspect());
             this.scriptNames.getSelectionModel().select(0);
@@ -254,7 +253,7 @@ public class AspectPresenter {
     private void replaceTarget(final Aspect newValue) {
         this.currentProperty.set(newValue);
         this.textAreaJson.clear();
-        this.textAreaJson.setText(Context.getTestCaseConverter().toString(this.currentProperty.get()));
+        this.textAreaJson.setText(Context.toString(this.currentProperty.get()));
     }
 
 }

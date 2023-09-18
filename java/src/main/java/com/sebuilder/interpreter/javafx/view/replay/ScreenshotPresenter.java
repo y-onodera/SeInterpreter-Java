@@ -29,6 +29,10 @@ import java.util.Objects;
 
 public class ScreenshotPresenter {
 
+    @Inject
+    private SeInterpreter application;
+    @Inject
+    private ErrorDialog errorDialog;
     @FXML
     private Button remove;
 
@@ -44,10 +48,6 @@ public class ScreenshotPresenter {
     @FXML
     private Label labelTemplateSelect;
 
-    @Inject
-    private SeInterpreter application;
-    @Inject
-    private ErrorDialog errorDialog;
     private final Map<String, Step> templates = new LinkedHashMap<>();
 
     private final Map<String, Node> inputs = new HashMap<>();
@@ -62,7 +62,7 @@ public class ScreenshotPresenter {
         this.templates.clear();
         this.templateSelect.getItems().clear();
         this.currentSelected = null;
-        this.templates.putAll(this.application.takeScreenshotTemplates());
+        this.templates.putAll(this.application.takeScreenshotTemplate());
         this.templateSelect.getItems().setAll(this.templates.keySet());
         if (selected == null) {
             this.templateSelect.getSelectionModel().select(0);
@@ -168,7 +168,7 @@ public class ScreenshotPresenter {
     }
 
     private StepBuilder inputToStep() {
-        final StepBuilder step = new StepBuilder(this.application.getStepTypeOfName("saveScreenshot"));
+        final StepBuilder step = Context.createStepBuilder("saveScreenshot");
         this.inputs.forEach((key, value) -> {
             if (value instanceof TextField text) {
                 if (!Strings.isNullOrEmpty(text.getText())) {

@@ -2,6 +2,7 @@ package com.sebuilder.interpreter.javafx.view.step;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
+import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.Locator;
 import com.sebuilder.interpreter.Step;
 import com.sebuilder.interpreter.StepBuilder;
@@ -279,7 +280,7 @@ public class StepPresenter {
             }
             this.selectedStepType = this.stepTypeSelect.getSelectionModel().getSelectedItem();
             this.clearInputFields();
-            this.refreshView(this.seInterpreter.createStep(stepType));
+            this.refreshView(Context.createStep(stepType));
         });
     }
 
@@ -289,7 +290,7 @@ public class StepPresenter {
             if (Optional.ofNullable(this.selectedStepType).orElse("").isBlank()) {
                 this.applyStep.accept(this.seInterpreter, null);
             } else {
-                final StepBuilder step = new StepBuilder(this.seInterpreter.getStepTypeOfName(this.selectedStepType));
+                final StepBuilder step = Context.createStepBuilder(this.selectedStepType);
                 this.inputs.forEach((key, value) -> {
                     if (value instanceof TextField text) {
                         if (!Strings.isNullOrEmpty(text.getText())) {

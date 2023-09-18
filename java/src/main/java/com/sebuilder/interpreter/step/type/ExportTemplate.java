@@ -20,7 +20,7 @@ public class ExportTemplate extends AbstractStepType implements LocatorHolder {
             if (toExport.hasDataSource()) {
                 toExport.outputDataSourceTemplate();
             }
-            final String result = Context.getTestCaseConverter().toString(toExport.getScript());
+            final String result = Context.toString(toExport.getScript());
             ctx.log().info(result);
             if (ctx.containsKey("file")) {
                 final String fileName = ctx.string("file");

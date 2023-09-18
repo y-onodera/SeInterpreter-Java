@@ -148,10 +148,6 @@ public enum Context {
         return getInstance().testCaseConverter;
     }
 
-    public static StepTypeFactory getStepTypeFactory() {
-        return getInstance().stepTypeFactory;
-    }
-
     public static DataSourceFactory getDataSourceFactory() {
         return getInstance().dataSourceFactory;
     }
@@ -232,6 +228,46 @@ public enum Context {
 
     public static TestRunListener getTestListener(final Logger log) {
         return getInstance().testRunListenerFactory.create(log);
+    }
+
+    public static StepType getStepTypeOfName(final String stepType) {
+        return getInstance().stepTypeFactory.getStepTypeOfName(stepType);
+    }
+
+    public static StepBuilder createStepBuilder(final String stepType) {
+        return new StepBuilder(getStepTypeOfName(stepType));
+    }
+
+    public static Step createStep(final String stepType) {
+        return getStepTypeOfName(stepType)
+                .toStep()
+                .build()
+                .toTestCase()
+                .steps().get(0);
+    }
+
+    public static String toString(final Suite suite) {
+        return getTestCaseConverter().toString(suite);
+    }
+
+    public static String toString(final TestCase displayTestCase) {
+        return getTestCaseConverter().toString(displayTestCase);
+    }
+
+    public static String toString(final Aspect interceptors) {
+        return getTestCaseConverter().toString(interceptors);
+    }
+
+    public static TestCase load(final File file) {
+        return getScriptParser().load(file);
+    }
+
+    public static TestCase load(final String text, final File toFile) {
+        return getScriptParser().load(text, toFile);
+    }
+
+    public static TestCase loadWithScriptType(final String scriptType, final File file) {
+        return getScriptParser(scriptType).load(file);
     }
 
     public Context ifMatch(final boolean condition, final Function<Context, Context> modifier) {

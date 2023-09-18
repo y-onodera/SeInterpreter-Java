@@ -26,26 +26,26 @@ import java.util.function.Predicate;
 public record SeInterpreter(
         ObjectProperty<Suite> suite
         , ObjectProperty<TestCase> displayTestCase
-        , BiConsumer<File, String> saveContents
         , ObjectProperty<ViewType> scriptViewType
+        , BiConsumer<File, String> saveContents
         , SeInterpreterRunner runner
         , Consumer<SeInterpreterRunTask> taskHandler
         , ObjectProperty<Pair<Integer, Result>> replayStatus
         , Debugger debugger
-        , Consumer<ThrowableAction> errorHandler
         , Map<String, Step> takeScreenshotTemplate
+        , Consumer<ThrowableAction> errorHandler
 ) {
     public SeInterpreter(final List<String> parameters, final BiConsumer<File, String> saveContents, final Consumer<SeInterpreterRunTask> taskHandler, final Consumer<ThrowableAction> errorHandler) {
         this(new SimpleObjectProperty<>()
                 , new SimpleObjectProperty<>()
-                , saveContents
                 , new SimpleObjectProperty<>()
+                , saveContents
                 , new SeInterpreterRunner(parameters)
                 , taskHandler
                 , new SimpleObjectProperty<>()
                 , new Debugger()
-                , errorHandler
                 , new LinkedHashMap<>()
+                , errorHandler
         );
     }
 
@@ -58,7 +58,7 @@ public record SeInterpreter(
     }
 
     public String getCurrentDisplayAsJson() {
-        return Context.getTestCaseConverter().toString(this.getDisplayTestCase());
+        return Context.toString(this.getDisplayTestCase());
     }
 
     public InputData replayShareInput() {
@@ -91,7 +91,7 @@ public record SeInterpreter(
     }
 
     public String getReportFileName() {
-        return this.runner.getTestListener().getReportFileName();
+        return this.runner().getTestListener().getReportFileName();
     }
 
     public void changeScriptViewType(final ViewType viewType) {
@@ -102,13 +102,28 @@ public record SeInterpreter(
         this.resetSuite(this.templateScript().toSuite());
     }
 
+    public void resetSuite(final File file) {
+        this.resetSuite(Context.load(file).toSuite());
+    }
+
+    public void resetSuite(final Suite newSuite) {
+        this.resetScript(newSuite, newSuite.head());
+    }
+
+    public void scriptReLoad(final File file) {
+        this.scriptReLoad(file, Context.getDefaultScript());
+    }
+
+    public void scriptReLoad(final File file, final String scriptType) {
+        this.resetSuite(Context.loadWithScriptType(scriptType, file).toSuite());
+    }
+
     public void selectScript(final String newValue) {
         this.displayTestCase().setValue(this.getSuite().get(newValue));
     }
 
     public void replaceScript(final String text) {
-        final TestCase replaced = Context.getScriptParser()
-                .load(text, this.getDisplayTestCase().scriptFile().toFile())
+        final TestCase replaced = Context.load(text, this.getDisplayTestCase().scriptFile().toFile())
                 .map(it -> it.setName(this.getDisplayTestCase().name()));
         this.replaceDisplayCase(replaced);
     }
@@ -137,6 +152,10 @@ public record SeInterpreter(
                         .findTestCase(after));
     }
 
+    public void importScript(final File file) {
+        this.addScript(Context.load(file));
+    }
+
     public void removeScript() {
         this.resetSuite(this.getSuite().map(it -> it.remove(this.getDisplayTestCase())));
     }
@@ -144,26 +163,6 @@ public record SeInterpreter(
     public void removeScriptFromChain(final String chainHeadName, final String targetName) {
         final TestCase target = this.findTestCase(chainHeadName, targetName);
         this.resetSuite(this.getSuite().map(it -> it.remove(target)));
-    }
-
-    public void resetSuite(final File file) {
-        this.resetSuite(this.getScriptParser().load(file).toSuite());
-    }
-
-    public void resetSuite(final Suite newSuite) {
-        this.resetScript(newSuite, newSuite.head());
-    }
-
-    public void scriptReLoad(final File file) {
-        this.scriptReLoad(file, Context.getDefaultScript());
-    }
-
-    public void scriptReLoad(final File file, final String scriptType) {
-        this.resetSuite(this.getScriptParser(scriptType).load(file).toSuite());
-    }
-
-    public void importScript(final File file) {
-        this.addScript(this.getScriptParser().load(file));
     }
 
     public void saveSuite(final File file) {
@@ -192,7 +191,7 @@ public record SeInterpreter(
                 }
                 final File saveTo = new File(scriptSaveTo, newName);
                 final TestCase save = this.changeAssociateFile(it.builder().associateWith(saveTo).build(), "");
-                this.saveContents().accept(saveTo, this.getTestCaseConverter().toString(save));
+                this.saveContents().accept(saveTo, Context.toString(save));
                 final Suite newSuite = this.getSuite().replace(it, save);
                 if (it == this.getDisplayTestCase()) {
                     this.resetScript(newSuite, save);
@@ -201,25 +200,11 @@ public record SeInterpreter(
                 }
             });
         });
-        this.saveContents().accept(target, this.getTestCaseConverter().toString(this.getSuite()));
-    }
-
-    public StepType getStepTypeOfName(final String stepType) {
-        return Context
-                .getStepTypeFactory()
-                .getStepTypeOfName(stepType);
-    }
-
-    public Step createStep(final String stepType) {
-        return this.getStepTypeOfName(stepType)
-                .toStep()
-                .build()
-                .toTestCase()
-                .steps().get(0);
+        this.saveContents().accept(target, Context.toString(this.getSuite()));
     }
 
     public void highLightElement(final String locatorType, final String value) {
-        this.runner.highlightElement(locatorType, value);
+        this.runner().highlightElement(locatorType, value);
     }
 
     public void replaceDisplayCase(final TestCase newCase) {
@@ -231,13 +216,13 @@ public record SeInterpreter(
             final TestCase save = this.changeAssociateFile(
                     this.getDisplayTestCase().map(builder -> builder.associateWith(target))
                     , this.getDisplayTestCase().path());
-            this.saveContents().accept(target, this.getTestCaseConverter().toString(save));
+            this.saveContents().accept(target, Context.toString(save));
             this.replaceDisplayCase(save);
         });
     }
 
     public void saveTestCase() {
-        this.saveContents().accept(new File(this.getDisplayTestCase().path()), this.getTestCaseConverter().toString(this.getDisplayTestCase()));
+        this.saveContents().accept(new File(this.getDisplayTestCase().path()), Context.toString(this.getDisplayTestCase()));
     }
 
     public void browserSetting(final String selectedBrowser, final String remoteUrl, final String driverPath, final String binaryPath) {
@@ -287,11 +272,11 @@ public record SeInterpreter(
     }
 
     public void stopReplay() {
-        this.runner.stopRunning();
+        this.runner().stopRunning();
     }
 
     public void updateReplayStatus(final int stepNo, final Result result) {
-        this.replayStatus.setValue(new Pair<>(stepNo, result));
+        this.replayStatus().setValue(new Pair<>(stepNo, result));
     }
 
     public void addBreakPoint(final int stepIndex, final Pointcut pointcut) {
@@ -317,25 +302,26 @@ public record SeInterpreter(
         });
     }
 
-    public void saveScreenshotTemplate(final File file) {
-        this.saveContents().accept(file, this.getTestCaseConverter().toString(new TestCaseBuilder()
-                .addSteps(new ArrayList<>(this.takeScreenshotTemplate.values()
-                        .stream()
-                        .toList()
-                        .subList(1, this.takeScreenshotTemplate.size())))
-                .build()));
+    public File takeScreenShot(final StepBuilder stepBuilder) {
+        return this.runner().screenShot(stepBuilder);
     }
 
-    public Map<String, Step> takeScreenshotTemplates() {
-        return this.takeScreenshotTemplate;
+    public void saveScreenshotTemplate(final File file) {
+        this.saveContents().accept(file, Context.toString(new TestCaseBuilder()
+                .addSteps(new ArrayList<>(this.takeScreenshotTemplate().values()
+                        .stream()
+                        .toList()
+                        .subList(1, this.takeScreenshotTemplate().size())))
+                .build()));
     }
 
     public void addScreenshotTemplates(final Step step) {
         if (step.type() instanceof SaveScreenshot) {
             if (step.containsParam("displayName")) {
-                this.takeScreenshotTemplate.put(step.getParam("displayName"), step.withAllParam());
+                this.takeScreenshotTemplate().put(step.getParam("displayName"), step.withAllParam());
             }
-            this.takeScreenshotTemplate.put(String.format("has no displayName#%s", this.takeScreenshotTemplate.values()
+            this.takeScreenshotTemplate().put(String.format("has no displayName#%s", this.takeScreenshotTemplate()
+                    .values()
                     .stream()
                     .filter(it -> !it.containsParam("displayName"))
                     .count()), step.withAllParam());
@@ -343,11 +329,10 @@ public record SeInterpreter(
     }
 
     public void reloadScreenshotTemplate(final File takeScreenshotTemplate1) {
-        this.takeScreenshotTemplate.clear();
-        this.takeScreenshotTemplate.put("", this.createStep("saveScreenshot").withAllParam());
+        this.takeScreenshotTemplate().clear();
+        this.takeScreenshotTemplate().put("", Context.createStep("saveScreenshot").withAllParam());
         if (takeScreenshotTemplate1 != null) {
-            for (final Step step : this.getScriptParser()
-                    .load(takeScreenshotTemplate1)
+            for (final Step step : Context.load(takeScreenshotTemplate1)
                     .steps()) {
                 this.addScreenshotTemplates(step);
             }
@@ -355,23 +340,7 @@ public record SeInterpreter(
     }
 
     public void removeScreenshotTemplate(final String displayName) {
-        this.takeScreenshotTemplate.remove(displayName);
-    }
-
-    public File takeScreenShot(final StepBuilder stepBuilder) {
-        return this.runner().screenShot(stepBuilder);
-    }
-
-    private ScriptParser getScriptParser() {
-        return this.getScriptParser(Context.getDefaultScript());
-    }
-
-    private ScriptParser getScriptParser(final String scriptType) {
-        return Context.getScriptParser(scriptType);
-    }
-
-    private TestCaseConverter getTestCaseConverter() {
-        return Context.getTestCaseConverter();
+        this.takeScreenshotTemplate().remove(displayName);
     }
 
     private void resetScript(final Suite aSuite, final TestCase toSelect) {
@@ -404,13 +373,15 @@ public record SeInterpreter(
 
     private TestCase copyDataSourceTemplate(final TestCase it) throws IOException {
         if (it.dataSourceLoader().dataSourceConfig().containsKey("path")) {
-            final File src = new File(this.runner.getTemplateOutputDirectory(), it.dataSourceLoader().dataSourceConfig().get("path"));
+            final File src = new File(this.runner().getTemplateOutputDirectory(), it.dataSourceLoader()
+                    .dataSourceConfig()
+                    .get("path"));
             if (src.exists()) {
                 final String newDataSourceName = it.name().replace(".json", "");
-                File newDataSource = new File(this.runner.getDataSourceDirectory(), newDataSourceName + ".csv");
+                File newDataSource = new File(this.runner().getDataSourceDirectory(), newDataSourceName + ".csv");
                 int suffix = 1;
                 while (newDataSource.exists()) {
-                    newDataSource = new File(this.runner.getDataSourceDirectory(), newDataSourceName + suffix + ".csv");
+                    newDataSource = new File(this.runner().getDataSourceDirectory(), newDataSourceName + suffix + ".csv");
                     suffix++;
                 }
                 final File dest = newDataSource;

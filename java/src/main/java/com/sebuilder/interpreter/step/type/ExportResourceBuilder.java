@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ExportResourceBuilder {
-    private final StepTypeFactory stepTypeFactory = Context.getStepTypeFactory();
     private final DataSourceFactory dataSourceFactory = Context.getDataSourceFactory();
     private final TestRun ctx;
     private final Map<String, String> variables;
@@ -141,7 +140,7 @@ public class ExportResourceBuilder {
     }
 
     public ExportResourceBuilder addStep(final String typeName) {
-        this.currentStep = new StepBuilder(this.stepTypeFactory.getStepTypeOfName(typeName));
+        this.currentStep = Context.createStepBuilder(typeName);
         this.steps.add(this.currentStep);
         return this;
     }
