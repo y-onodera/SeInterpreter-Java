@@ -6,13 +6,13 @@ import com.sebuilder.interpreter.InputData;
 import com.sebuilder.interpreter.WebDriverFactory;
 import com.sebuilder.interpreter.javafx.model.SeInterpreter;
 import com.sebuilder.interpreter.javafx.view.ErrorDialog;
+import com.sebuilder.interpreter.javafx.view.HasFileChooser;
 import com.sebuilder.interpreter.javafx.view.replay.VariableView;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
-import javafx.stage.FileChooser;
-import javafx.stage.Stage;
+import javafx.stage.Window;
 
 import javax.inject.Inject;
 import java.io.File;
@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class BrowserPresenter {
+public class BrowserPresenter implements HasFileChooser {
 
     @Inject
     private SeInterpreter application;
@@ -84,13 +84,7 @@ public class BrowserPresenter {
     @FXML
     void driverSearch() {
         this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
-            final FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("Open Resource File");
-            fileChooser.setInitialDirectory(this.parentDir);
-            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("select driver.exe", "*.exe"));
-            final Stage stage = new Stage();
-            stage.initOwner(this.driverText.getScene().getWindow());
-            final File file = fileChooser.showOpenDialog(stage);
+            final File file = this.openDialog("Open Resource File", "select driver.exe", "*.exe");
             if (file != null && file.exists()) {
                 this.parentDir = file.getParentFile().getAbsoluteFile();
                 this.driverText.setText(file.getAbsolutePath());
@@ -101,13 +95,7 @@ public class BrowserPresenter {
     @FXML
     void binarySearch() {
         this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
-            final FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("Open Resource File");
-            fileChooser.setInitialDirectory(this.parentDir);
-            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("select browser.exe", "*.exe"));
-            final Stage stage = new Stage();
-            stage.initOwner(this.binaryText.getScene().getWindow());
-            final File file = fileChooser.showOpenDialog(stage);
+            final File file = this.openDialog("Open Resource File", "select browser.exe", "*.exe");
             if (file != null && file.exists()) {
                 this.binaryText.setText(file.getAbsolutePath());
             }
@@ -148,6 +136,16 @@ public class BrowserPresenter {
                     , this.binaryText.getText());
             this.driverText.getScene().getWindow().hide();
         });
+    }
+
+    @Override
+    public Window currentWindow() {
+        return this.browserSelect.getScene().getWindow();
+    }
+
+    @Override
+    public File getBaseDirectory() {
+        return this.parentDir;
     }
 
     private void init(final String remoteUrl, final String aSelectedBrowser, final String aCurrentDriverPath) {

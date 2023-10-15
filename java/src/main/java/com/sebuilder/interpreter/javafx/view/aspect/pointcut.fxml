@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import org.tbee.javafx.scene.layout.fxml.MigPane?>
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="670.0"
+            xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.sebuilder.interpreter.javafx.view.aspect.PointcutPresenter">
+    <SplitPane orientation="VERTICAL" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+               minWidth="-Infinity"
+               xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+        <MigPane fx:id="pointcutGrid" cols="[75][105][120][120][120]" rows="[]" prefWidth="670.0"/>
+        <AnchorPane prefWidth="670.0">
+            <fx:include fx:id="stepEditor" source="../step/step.fxml" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"/>
+        </AnchorPane>
+    </SplitPane>
+</AnchorPane>

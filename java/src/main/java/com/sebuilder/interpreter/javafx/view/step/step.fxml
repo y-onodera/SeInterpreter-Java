@@ -11,8 +11,9 @@
             fx:controller="com.sebuilder.interpreter.javafx.view.step.StepPresenter">
     <SplitPane orientation="VERTICAL" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
                minWidth="-Infinity"
-               xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
-        <MigPane fx:id="stepEditGrid" cols="[75][grow][45,right]" rows="[]" prefWidth="400.0">
+               xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+               AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+        <MigPane fx:id="stepEditGrid" cols="[50,left][160,left][45,grow]" rows="[]" prefWidth="400.0">
             <Label fx:id="labelSelectType" text="type"/>
             <SearchableComboBox fx:id="stepTypeSelect" onAction="#selectType" MigPane.cc="wrap"/>
         </MigPane>

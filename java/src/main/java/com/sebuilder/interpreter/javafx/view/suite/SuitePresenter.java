@@ -9,6 +9,7 @@ import com.sebuilder.interpreter.TestCaseChains;
 import com.sebuilder.interpreter.javafx.control.dragdrop.DragAndDropSortTreeViewCellFactory;
 import com.sebuilder.interpreter.javafx.model.SeInterpreter;
 import com.sebuilder.interpreter.javafx.view.ErrorDialog;
+import com.sebuilder.interpreter.javafx.view.HasFileChooser;
 import com.sebuilder.interpreter.javafx.view.aspect.AspectView;
 import com.sebuilder.interpreter.javafx.view.data.DataSetView;
 import com.sebuilder.interpreter.javafx.view.replay.InputView;
@@ -17,8 +18,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
-import javafx.stage.FileChooser;
-import javafx.stage.Stage;
+import javafx.stage.Window;
 
 import javax.inject.Inject;
 import java.io.File;
@@ -28,7 +28,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-public class SuitePresenter {
+public class SuitePresenter implements HasFileChooser {
 
     @Inject
     private SeInterpreter application;
@@ -129,13 +129,7 @@ public class SuitePresenter {
     @FXML
     void handleScriptImport() {
         this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
-            final FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("Open Resource File");
-            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("json format (*.json)", "*.json"));
-            fileChooser.setInitialDirectory(this.getBaseDirectory());
-            final Stage stage = new Stage();
-            stage.initOwner(this.treeViewScriptName.getScene().getWindow());
-            final File file = fileChooser.showOpenDialog(stage);
+            final File file = this.openDialog("Open Resource File", "json format (*.json)", "*.json");
             if (file != null) {
                 this.application.importScript(file);
             }
@@ -164,6 +158,16 @@ public class SuitePresenter {
     @FXML
     void handleScriptSaveAs() {
         this.errorDialog.executeAndLoggingCaseWhenThrowException(this::saveTestCaseToNewFile);
+    }
+
+    @Override
+    public File getBaseDirectory() {
+        return Optional.ofNullable(this.application.getDisplayTestCase().relativePath()).orElse(Context.getBaseDirectory());
+    }
+
+    @Override
+    public Window currentWindow() {
+        return this.treeViewScriptName.getScene().getWindow();
     }
 
     private void showScriptView() {
@@ -224,18 +228,10 @@ public class SuitePresenter {
     }
 
     private void saveTestCaseToNewFile() {
-        final FileChooser fileSave = new FileChooser();
-        fileSave.setTitle("Save TestCase File");
-        fileSave.getExtensionFilters().add(new FileChooser.ExtensionFilter("json format (*.json)", "*.json"));
-        fileSave.setInitialDirectory(this.getBaseDirectory());
-        final File file = fileSave.showSaveDialog(this.treeViewScriptName.getScene().getWindow());
+        final File file = this.saveDialog("Save TestCase File", "json format (*.json)", "*.json");
         if (file != null) {
             this.application.saveTestCase(file);
         }
-    }
-
-    private File getBaseDirectory() {
-        return Optional.ofNullable(this.application.getDisplayTestCase().relativePath()).orElse(Context.getBaseDirectory());
     }
 
 }

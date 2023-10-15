@@ -1,4 +1,4 @@
-package com.sebuilder.interpreter.javafx.model.steps;
+package com.sebuilder.interpreter.javafx.view.step;
 
 import javafx.scene.control.TableCell;
 

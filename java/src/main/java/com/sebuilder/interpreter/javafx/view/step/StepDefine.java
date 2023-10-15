@@ -1,4 +1,4 @@
-package com.sebuilder.interpreter.javafx.model.steps;
+package com.sebuilder.interpreter.javafx.view.step;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;

@@ -4,7 +4,7 @@
 <?import javafx.scene.layout.*?>
 <AnchorPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.sebuilder.interpreter.javafx.view.script.ScriptPresenter">
-    <TableView id="tableViewScriptBody" fx:id="steps" stylesheets="@script.css"
+    <TableView id="tableViewScriptBody" fx:id="stepTable" stylesheets="@script.css"
                prefWidth="480.0" prefHeight="425.0" minWidth="0" maxWidth="Infinity"
                minHeight="0" maxHeight="Infinity"
                AnchorPane.bottomAnchor="0.0"
@@ -14,7 +14,7 @@
             <TableColumn id="tableColumnScriptBodyNo" fx:id="stepNo"
                          prefWidth="30.0"
                          style="-fx-alignment: CENTER_RIGHT;" text="No"/>
-            <TableColumn id="tableColumnScriptBodyStep" fx:id="stepBody"
+            <TableColumn id="tableColumnScriptBodyStep" fx:id="scriptBody"
                          prefWidth="Infinity"
                          style="-fx-alignment: CENTER_LEFT;" text="Step"/>
         </columns>

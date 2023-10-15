@@ -6,6 +6,7 @@ import com.sebuilder.interpreter.aspect.ImportInterceptor;
 import com.sebuilder.interpreter.javafx.model.SeInterpreter;
 import com.sebuilder.interpreter.javafx.view.ErrorDialog;
 import com.sebuilder.interpreter.javafx.view.SuccessDialog;
+import com.sebuilder.interpreter.javafx.view.step.StepTablePresenter;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
@@ -33,7 +34,7 @@ public class AspectPresenter {
     @FXML
     private TabPane tabPane;
     @FXML
-    private FilterTablePresenter pointcutController;
+    private PointcutTablePresenter pointcutController;
     @FXML
     private StepTablePresenter beforeController;
     @FXML
@@ -59,6 +60,15 @@ public class AspectPresenter {
     @FXML
     void initialize() {
         this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            this.pointcutController.addListener((final ObservableValue<? extends Pointcut> observed, final Pointcut oldValue, final Pointcut newValue) -> {
+                final ExtraStepExecutor replaced = this.getCurrentSelected().builder().setPointcut(newValue).build();
+                if (this.currentProperty.get().getStream().findAny().isEmpty()) {
+                    this.replaceTarget(this.currentProperty.get().builder().add(replaced).build());
+                } else {
+                    this.replaceTarget(this.currentProperty.get().replace(this.currentSelected, replaced));
+                }
+                this.setCurrentSelected(replaced);
+            });
             this.beforeController.addListener((final ObservableValue<? extends TestCase> observed, final TestCase oldValue, final TestCase newValue) -> {
                 final ExtraStepExecutor replaced = this.getCurrentSelected().builder().replaceBefore(newValue).build();
                 if (this.currentProperty.get().getStream().findAny().isEmpty()) {

@@ -1,6 +1,8 @@
 package com.sebuilder.interpreter;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 
@@ -59,6 +61,28 @@ public interface Pointcut {
 
     default Pointcut and(final Pointcut other) {
         return new And(this, other);
+    }
+
+    default List<Pointcut> toListTopLevelCondition() {
+        final ArrayList<Pointcut> result = new ArrayList<>();
+        if (this instanceof Or or) {
+            result.addAll(or.origin.toListTopLevelCondition());
+            result.addAll(or.other.toListTopLevelCondition());
+        } else {
+            result.add(this);
+        }
+        return result;
+    }
+
+    default List<Pointcut> getLeafCondition() {
+        final ArrayList<Pointcut> result = new ArrayList<>();
+        if (this instanceof And and) {
+            result.addAll(and.origin.getLeafCondition());
+            result.addAll(and.other.getLeafCondition());
+        } else {
+            result.add(this);
+        }
+        return result;
     }
 
     interface ExportablePointcut extends Pointcut, Exportable {

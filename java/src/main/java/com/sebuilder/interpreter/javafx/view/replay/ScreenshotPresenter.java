@@ -7,6 +7,7 @@ import com.sebuilder.interpreter.Step;
 import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.javafx.model.SeInterpreter;
 import com.sebuilder.interpreter.javafx.view.ErrorDialog;
+import com.sebuilder.interpreter.javafx.view.HasFileChooser;
 import com.sebuilder.interpreter.javafx.view.SuccessDialog;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
@@ -15,8 +16,7 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
-import javafx.stage.FileChooser;
-import javafx.stage.Stage;
+import javafx.stage.Window;
 import org.tbee.javafx.scene.layout.fxml.MigPane;
 
 import javax.inject.Inject;
@@ -27,7 +27,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public class ScreenshotPresenter {
+public class ScreenshotPresenter implements HasFileChooser {
 
     @Inject
     private SeInterpreter application;
@@ -76,13 +76,7 @@ public class ScreenshotPresenter {
     @FXML
     void loadTemplate() {
         this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
-            final FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("Open Resource File");
-            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("json format (*.json)", "*.json"));
-            fileChooser.setInitialDirectory(Context.getBaseDirectory());
-            final Stage stage = new Stage();
-            stage.initOwner(this.templateSelect.getScene().getWindow());
-            final File file = fileChooser.showOpenDialog(stage);
+            final File file = this.openDialog("Open Resource File", "json format (*.json)", "*.json");
             if (file != null) {
                 this.application.reloadScreenshotTemplate(file);
                 this.populate(null);
@@ -94,7 +88,7 @@ public class ScreenshotPresenter {
     void addTemplate() {
         this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
             final TextInputDialog dialog = new TextInputDialog();
-            dialog.initOwner(this.templateSelect.getScene().getWindow());
+            dialog.initOwner(this.currentWindow());
             dialog.setTitle("new template name");
             dialog.setHeaderText(null);
             dialog.setGraphic(null);
@@ -119,11 +113,7 @@ public class ScreenshotPresenter {
     @FXML
     void saveTemplate() {
         this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
-            final FileChooser fileSave = new FileChooser();
-            fileSave.setTitle("Save TestCase File");
-            fileSave.getExtensionFilters().add(new FileChooser.ExtensionFilter("json format (*.json)", "*.json"));
-            fileSave.setInitialDirectory(Context.getBaseDirectory());
-            final File file = fileSave.showSaveDialog(this.templateSelect.getScene().getWindow());
+            final File file = this.saveDialog("Save TestCase File", "json format (*.json)", "*.json");
             if (file != null) {
                 this.application.saveScreenshotTemplate(file);
             }
@@ -165,6 +155,11 @@ public class ScreenshotPresenter {
             Clipboard.getSystemClipboard().setContent(newContent);
             SuccessDialog.show(String.format("copy clipboard and save to:%s", screenshot.getAbsolutePath()));
         });
+    }
+
+    @Override
+    public Window currentWindow() {
+        return this.templateSelect.getScene().getWindow();
     }
 
     private StepBuilder inputToStep() {
