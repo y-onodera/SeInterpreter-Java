@@ -56,10 +56,20 @@ public interface Pointcut {
     }
 
     default Pointcut or(final Pointcut other) {
+        if (this == NONE) {
+            return other;
+        } else if (other == NONE) {
+            return this;
+        }
         return new Or(this, other);
     }
 
     default Pointcut and(final Pointcut other) {
+        if (this == ANY) {
+            return other;
+        } else if (other == ANY) {
+            return this;
+        }
         return new And(this, other);
     }
 

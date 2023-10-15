@@ -156,7 +156,7 @@ public class PointcutPresenter implements StepSelectable {
     private Pointcut createPointcut() {
         return this.inputs.stream()
                 .map(PointCutValues::toPointcut)
-                .reduce(Pointcut.NONE, Pointcut::and);
+                .reduce(Pointcut.ANY, Pointcut::and);
     }
 
     private Window currentWindow() {
