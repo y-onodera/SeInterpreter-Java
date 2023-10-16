@@ -7,8 +7,6 @@ import com.sebuilder.interpreter.javafx.view.ErrorDialog;
 import com.sebuilder.interpreter.javafx.view.SuccessDialog;
 import com.sebuilder.interpreter.javafx.view.main.MainView;
 import com.sebuilder.interpreter.javafx.view.replay.ReplayView;
-import io.netty.util.internal.logging.InternalLoggerFactory;
-import io.netty.util.internal.logging.Log4J2LoggerFactory;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
@@ -32,7 +30,6 @@ public class SeInterpreterApplication extends Application {
     @Override
     public void start(final Stage stage) throws Exception {
         System.setProperty("log4j.configurationFile", "log4j2-gui.xml");
-        InternalLoggerFactory.setDefaultFactory(Log4J2LoggerFactory.INSTANCE);
         final Parameters parameters = this.getParameters();
         this.seInterpreter = new SeInterpreter(parameters.getRaw()
                 , (final File target, final String content) ->
