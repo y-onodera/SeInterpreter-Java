@@ -15,6 +15,10 @@
         <TextField fx:id="datasourceText" MigPane.cc="grow"/>
         <Button id="datasourceSearchButton" onAction="#dataSourceSearch" mnemonicParsing="false" text="search"
                 MigPane.cc="align right,wrap"/>
+        <Label text="expectScreenshotDirectory"/>
+        <TextField fx:id="expectScreenshotText" MigPane.cc="grow"/>
+        <Button id="expectScreenshotSearchButton" onAction="#expectScreenshotSearch" mnemonicParsing="false" text="search"
+                MigPane.cc="align right,wrap"/>
         <Label text="reportFormat"/>
         <ComboBox fx:id="reportFormatSelect" MigPane.cc="wrap"/>
         <Label text="reportPrefix"/>
