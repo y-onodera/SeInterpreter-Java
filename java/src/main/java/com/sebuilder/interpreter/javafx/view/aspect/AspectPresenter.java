@@ -6,6 +6,7 @@ import com.sebuilder.interpreter.aspect.ImportInterceptor;
 import com.sebuilder.interpreter.javafx.model.SeInterpreter;
 import com.sebuilder.interpreter.javafx.view.ErrorDialog;
 import com.sebuilder.interpreter.javafx.view.SuccessDialog;
+import com.sebuilder.interpreter.javafx.view.filter.FilterTablePresenter;
 import com.sebuilder.interpreter.javafx.view.step.StepTablePresenter;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -34,14 +35,13 @@ public class AspectPresenter {
     @FXML
     private TabPane tabPane;
     @FXML
-    private PointcutTablePresenter pointcutController;
+    private FilterTablePresenter pointcutController;
     @FXML
     private StepTablePresenter beforeController;
     @FXML
     private StepTablePresenter afterController;
     @FXML
     private StepTablePresenter failureController;
-
     private final ObjectProperty<Aspect> rootProperty = new SimpleObjectProperty<>();
 
     private Map<String, ImportInterceptor> imports = new HashMap<>();
@@ -165,15 +165,17 @@ public class AspectPresenter {
     @FXML
     void jsonCommit() {
         this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
-            if (Set.of("before", "after", "failure").contains(this.tabPane.getSelectionModel().getSelectedItem().getText())
-                    && !this.currentSelected.hasDisplayName()) {
+            if (Set.of("pointcut", "before", "after", "failure").contains(this.tabPane.getSelectionModel().getSelectedItem().getText())) {
                 if (this.currentSelected.beforeStep().steps().size() > 0
                         || this.currentSelected.afterStep().steps().size() > 0
                         || this.currentSelected.failureStep().steps().size() > 0) {
-                    this.copyInterceptor();
+                    if (!this.currentSelected.hasDisplayName()) {
+                        this.copyInterceptor();
+                    }
                 }
             } else {
-                this.replaceTarget(Context.getScriptParser().loadAspect(this.textAreaJson.getText(), new File(this.treeViewSelect)));
+                this.replaceTarget(Context.getScriptParser()
+                        .loadAspect(this.textAreaJson.getText(), this.getImportTargetFile()));
                 this.resetTab(this.treeViewSelect, this.currentProperty.get());
             }
             if (Optional.ofNullable(this.scriptNames.getSelectionModel().getSelectedItem())
@@ -264,6 +266,11 @@ public class AspectPresenter {
         this.currentProperty.set(newValue);
         this.textAreaJson.clear();
         this.textAreaJson.setText(Context.toString(this.currentProperty.get()));
+    }
+
+    private File getImportTargetFile() {
+        return this.application.getSuite().path().isEmpty() ? Context.getBaseDirectory()
+                : new File(this.application.getSuite().path());
     }
 
 }

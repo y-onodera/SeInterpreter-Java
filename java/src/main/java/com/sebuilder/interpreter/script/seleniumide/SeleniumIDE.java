@@ -37,7 +37,7 @@ public class SeleniumIDE extends AbstractJsonScriptParser {
     }
 
     @Override
-    public Pointcut loadPointCut(final File path) {
+    public Pointcut loadPointCut(final File path, final File parentDir) {
         throw new UnsupportedOperationException();
     }
 }

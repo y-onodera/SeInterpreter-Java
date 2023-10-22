@@ -1,4 +1,4 @@
-package com.sebuilder.interpreter.javafx.view.aspect;
+package com.sebuilder.interpreter.javafx.view.filter;
 
 import com.airhacks.afterburner.views.FXMLView;
 import com.sebuilder.interpreter.Pointcut;
@@ -9,7 +9,7 @@ import javafx.stage.Window;
 
 import java.util.function.Consumer;
 
-public class PointcutView extends FXMLView {
+public class FilterView extends FXMLView {
     public void open(final Window window, final Consumer<Pointcut> applyAction) {
         final Scene scene = new Scene(this.getView());
         final Stage dialog = new Stage();
@@ -26,7 +26,7 @@ public class PointcutView extends FXMLView {
         this.presenter().refreshView(pointcut);
     }
 
-    protected PointcutPresenter presenter() {
-        return (PointcutPresenter) this.getPresenter();
+    protected FilterPresenter presenter() {
+        return (FilterPresenter) this.getPresenter();
     }
 }

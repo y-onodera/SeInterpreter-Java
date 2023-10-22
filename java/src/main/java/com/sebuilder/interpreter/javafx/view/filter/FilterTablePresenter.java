@@ -1,4 +1,4 @@
-package com.sebuilder.interpreter.javafx.view.aspect;
+package com.sebuilder.interpreter.javafx.view.filter;
 
 import com.sebuilder.interpreter.Exportable;
 import com.sebuilder.interpreter.Pointcut;
@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class PointcutTablePresenter {
+public class FilterTablePresenter {
     @Inject
     private ErrorDialog errorDialog;
     @FXML
@@ -61,7 +61,7 @@ public class PointcutTablePresenter {
                         if (this.notEmptyValCount == 1) {
                             this.setOnMouseClicked(ev -> {
                                 if (ev.getButton().equals(MouseButton.PRIMARY) && ev.getClickCount() == 2) {
-                                    PointcutTablePresenter.this.handleEdit();
+                                    FilterTablePresenter.this.handleEdit();
                                 }
                             });
                         }
@@ -79,10 +79,10 @@ public class PointcutTablePresenter {
     @FXML
     public void handleEdit() {
         this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
-            final PointcutView pointcutView = this.initStepEditDialog(Action.EDIT);
+            final FilterView filterView = this.initStepEditDialog(Action.EDIT);
             final PointcutDefine item = this.pointcutTable.getSelectionModel().getSelectedItem();
             final Pointcut pointcut = this.target.get().toListTopLevelCondition().get(item.index());
-            pointcutView.refresh(pointcut);
+            filterView.refresh(pointcut);
         });
     }
 
@@ -151,9 +151,9 @@ public class PointcutTablePresenter {
         return results;
     }
 
-    private PointcutView initStepEditDialog(final Action action) {
-        final PointcutView pointcutView = new PointcutView();
-        pointcutView.open(this.currentWindow(), it -> {
+    private FilterView initStepEditDialog(final Action action) {
+        final FilterView filterView = new FilterView();
+        filterView.open(this.currentWindow(), it -> {
             if (action == Action.ADD) {
                 this.setTarget(this.target.get().or(it));
             } else {
@@ -166,7 +166,7 @@ public class PointcutTablePresenter {
                         .reduce(Pointcut.NONE, Pointcut::or));
             }
         });
-        return pointcutView;
+        return filterView;
     }
 
     private Window currentWindow() {

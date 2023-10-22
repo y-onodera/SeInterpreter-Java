@@ -1,4 +1,4 @@
-package com.sebuilder.interpreter.javafx.view.aspect;
+package com.sebuilder.interpreter.javafx.view.filter;
 
 import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.Locator;
@@ -26,7 +26,7 @@ import java.util.function.Consumer;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class PointcutPresenter implements StepSelectable {
+public class FilterPresenter implements StepSelectable {
     private static final String[] FILTER_TYPES = {
             ""
             , "type"
@@ -466,7 +466,8 @@ public class PointcutPresenter implements StepSelectable {
 
         @Override
         public Pointcut toPointcut() {
-            return new ImportFilter(this.path.getText(), this.baseDir, (path) -> Context.getScriptParser().loadPointCut(path));
+            return new ImportFilter(this.path.getText(), this.baseDir, (path) -> Context.getScriptParser()
+                    .loadPointCut(path, new File(this.getSuiteParent())));
         }
 
         @Override
@@ -493,8 +494,12 @@ public class PointcutPresenter implements StepSelectable {
         public File getBaseDirectory() {
             final String result = Optional.ofNullable(this.baseDir)
                     .filter(it -> !it.isEmpty())
-                    .orElse(this.suite.path().isEmpty() ? "" : new File(this.suite.path()).getParent());
+                    .orElse(this.getSuiteParent());
             return result.isEmpty() ? HasFileChooser.super.getBaseDirectory() : new File(result);
+        }
+
+        private String getSuiteParent() {
+            return this.suite.path().isEmpty() ? "" : new File(this.suite.path()).getParent();
         }
     }
 }

@@ -77,8 +77,8 @@ public class Sebuilder extends AbstractJsonScriptParser {
     }
 
     @Override
-    public Pointcut loadPointCut(final File path) {
-        return this.pointcutLoader.load(path).orElse(Pointcut.NONE);
+    public Pointcut loadPointCut(final File path, final File parentDir) {
+        return this.pointcutLoader.load(path, parentDir).orElse(Pointcut.NONE);
     }
 
     @Override

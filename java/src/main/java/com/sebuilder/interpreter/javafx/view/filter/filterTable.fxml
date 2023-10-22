@@ -2,8 +2,8 @@
 <?import javafx.scene.layout.*?>
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
-            fx:controller="com.sebuilder.interpreter.javafx.view.aspect.PointcutTablePresenter">
-    <TableView id="tableViewScriptBody" fx:id="pointcutTable" stylesheets="@pointcutTable.css"
+            fx:controller="com.sebuilder.interpreter.javafx.view.filter.FilterTablePresenter">
+    <TableView id="tableViewScriptBody" fx:id="pointcutTable" stylesheets="@filterTable.css"
                prefWidth="600.0" prefHeight="425.0"
                minWidth="0" maxWidth="Infinity"
                minHeight="0" maxHeight="Infinity"
