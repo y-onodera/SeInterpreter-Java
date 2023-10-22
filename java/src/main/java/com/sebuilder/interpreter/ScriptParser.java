@@ -17,4 +17,6 @@ public interface ScriptParser {
     Aspect loadAspect(File f);
 
     Aspect loadAspect(String jsonText, File f);
+
+    Pointcut loadPointCut(File path);
 }

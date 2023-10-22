@@ -1,28 +1,27 @@
 package com.sebuilder.interpreter.javafx.view.aspect;
 
+import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.Locator;
 import com.sebuilder.interpreter.Pointcut;
+import com.sebuilder.interpreter.Suite;
+import com.sebuilder.interpreter.javafx.model.SeInterpreter;
 import com.sebuilder.interpreter.javafx.view.ErrorDialog;
+import com.sebuilder.interpreter.javafx.view.HasFileChooser;
 import com.sebuilder.interpreter.javafx.view.StepSelectable;
 import com.sebuilder.interpreter.javafx.view.step.StepPresenter;
 import com.sebuilder.interpreter.pointcut.*;
 import com.sebuilder.interpreter.step.Verify;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.util.Pair;
 import org.tbee.javafx.scene.layout.fxml.MigPane;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.io.File;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -35,7 +34,10 @@ public class PointcutPresenter implements StepSelectable {
             , "stringParam"
             , "skip"
             , "negated"
+            , "import"
     };
+    @Inject
+    private SeInterpreter seInterpreter;
     @Inject
     private ErrorDialog errorDialog;
     @FXML
@@ -57,7 +59,7 @@ public class PointcutPresenter implements StepSelectable {
     void setApplyAction(final Stage dialog, final Consumer<Pointcut> applyAction) {
         this.applyPointcut = applyAction;
         this.stepEditorController.populate(dialog, s -> s.startsWith("verify"), key -> !key.equals("skip")
-                , (interpreter, step) -> {
+                , step -> {
                     Pointcut result = this.createPointcut();
                     if (step != null) {
                         result = result.and(new VerifyFilter((Verify) step.type()
@@ -82,6 +84,11 @@ public class PointcutPresenter implements StepSelectable {
                 values = new NegatedValues(negated, row);
             } else if (it instanceof StringParamFilter stringParam) {
                 values = new StringParamValues(stringParam, row);
+            } else if (it instanceof ImportFilter imported) {
+                values = new ImportValues(imported, row, this.seInterpreter.getSuite());
+            } else if (it instanceof VerifyFilter verify) {
+                this.stepEditorController.refreshView(verify.toStep());
+                values = null;
             } else {
                 values = null;
             }
@@ -103,9 +110,10 @@ public class PointcutPresenter implements StepSelectable {
                 case "stringParam" -> this.inputs.add(new StringParamValues(rowIndex));
                 case "skip" -> this.inputs.add(new SkipValues(rowIndex));
                 case "negated" -> this.inputs.add(new NegatedValues(rowIndex));
+                case "import" -> this.inputs.add(new ImportValues(rowIndex, this.seInterpreter.getSuite()));
             }
             this.inputs.forEach(it -> {
-                if (!"stringParam".equals(it.filterType())) {
+                if (!"stringParam".equals(it.filterType()) && !"import".equals(it.filterType())) {
                     this.selectableTypes.remove(it.filterType());
                 }
             });
@@ -415,6 +423,78 @@ public class PointcutPresenter implements StepSelectable {
         @Override
         public String filterType() {
             return "stringParam";
+        }
+    }
+
+    static class ImportValues implements PointCutValues, HasFileChooser {
+
+        private final TextField path = new TextField();
+        private final Button find = new Button("find");
+        private final List<Pair<Node, String>> result = new ArrayList<>();
+        private final int lastRow;
+        private final Suite suite;
+        private final String baseDir;
+
+        public ImportValues(final int row, final Suite suite, final String baseDir) {
+            this.suite = suite;
+            this.baseDir = baseDir;
+            this.path.setPromptText("path");
+            this.result.add(new Pair<>(this.path, "grow,span 2,cell 2 " + row));
+            this.find.setOnAction(ev -> {
+                final File file = this.openDialog("Open Resource File", "json format (*.json)", "*.json");
+                if (file != null) {
+                    this.path.setText(this.getBaseDirectory().toPath().relativize(file.toPath()).toString().replace("\\", "/"));
+                }
+            });
+            this.result.add(new Pair<>(this.find, "align left,cell 4 " + row));
+            this.lastRow = row;
+        }
+
+        public ImportValues(final ImportFilter importFilter, final int row, final Suite suite) {
+            this(row, suite, importFilter.where());
+            this.path.setText(importFilter.path());
+        }
+
+        public ImportValues(final int row, final Suite suite) {
+            this(row, suite, "");
+        }
+
+        @Override
+        public List<Pair<Node, String>> toInputNode() {
+            return this.result;
+        }
+
+        @Override
+        public Pointcut toPointcut() {
+            return new ImportFilter(this.path.getText(), this.baseDir, (path) -> Context.getScriptParser().loadPointCut(path));
+        }
+
+        @Override
+        public int lastRow() {
+            return this.lastRow;
+        }
+
+        @Override
+        public int startRow() {
+            return this.lastRow;
+        }
+
+        @Override
+        public String filterType() {
+            return "import";
+        }
+
+        @Override
+        public Window currentWindow() {
+            return this.find.getScene().getWindow();
+        }
+
+        @Override
+        public File getBaseDirectory() {
+            final String result = Optional.ofNullable(this.baseDir)
+                    .filter(it -> !it.isEmpty())
+                    .orElse(this.suite.path().isEmpty() ? "" : new File(this.suite.path()).getParent());
+            return result.isEmpty() ? HasFileChooser.super.getBaseDirectory() : new File(result);
         }
     }
 }

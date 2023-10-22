@@ -182,24 +182,22 @@ public record SeInterpreter(
         if (notAssociateFile.size() > 0 && !scriptSaveTo.exists()) {
             this.errorHandler().accept(() -> Files.createDirectories(scriptSaveTo.toPath()));
         }
-        notAssociateFile.forEach(it -> {
-            this.errorHandler().accept(() -> {
-                final String oldName = it.name();
-                String newName = oldName;
-                if (!oldName.endsWith(".json")) {
-                    newName = newName + ".json";
-                }
-                final File saveTo = new File(scriptSaveTo, newName);
-                final TestCase save = this.changeAssociateFile(it.builder().associateWith(saveTo).build(), "");
-                this.saveContents().accept(saveTo, Context.toString(save));
-                final Suite newSuite = this.getSuite().replace(it, save);
-                if (it == this.getDisplayTestCase()) {
-                    this.resetScript(newSuite, save);
-                } else {
-                    this.resetScript(newSuite, this.getDisplayTestCase());
-                }
-            });
-        });
+        notAssociateFile.forEach(it -> this.errorHandler().accept(() -> {
+            final String oldName = it.name();
+            String newName = oldName;
+            if (!oldName.endsWith(".json")) {
+                newName = newName + ".json";
+            }
+            final File saveTo = new File(scriptSaveTo, newName);
+            final TestCase save = this.changeAssociateFile(it.builder().associateWith(saveTo).build(), "");
+            this.saveContents().accept(saveTo, Context.toString(save));
+            final Suite newSuite = this.getSuite().replace(it, save);
+            if (it == this.getDisplayTestCase()) {
+                this.resetScript(newSuite, save);
+            } else {
+                this.resetScript(newSuite, this.getDisplayTestCase());
+            }
+        }));
         this.saveContents().accept(target, Context.toString(this.getSuite()));
     }
 

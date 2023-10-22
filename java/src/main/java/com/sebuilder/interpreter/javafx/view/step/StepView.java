@@ -2,13 +2,12 @@ package com.sebuilder.interpreter.javafx.view.step;
 
 import com.airhacks.afterburner.views.FXMLView;
 import com.sebuilder.interpreter.Step;
-import com.sebuilder.interpreter.javafx.model.SeInterpreter;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class StepView extends FXMLView {
@@ -26,7 +25,7 @@ public class StepView extends FXMLView {
         this.textParamFilter = textParamFilter;
     }
 
-    public void open(final Window window, final BiConsumer<SeInterpreter, Step> applyStep) {
+    public void open(final Window window, final Consumer<Step> applyStep) {
         final Scene scene = new Scene(this.getView());
         final Stage dialog = new Stage();
         this.presenter().populate(dialog, this.stepTypeFilter, this.textParamFilter, applyStep);

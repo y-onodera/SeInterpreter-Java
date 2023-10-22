@@ -21,14 +21,11 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class StepPresenter implements StepSelectable {
 
-    private final Map<String, Node> inputs = Maps.newHashMap();
-    private final Map<String, ComboBox<String>> locatorTypes = Maps.newHashMap();
-    private final Map<String, TextField> locatorValues = Maps.newHashMap();
     @Inject
     private SeInterpreter seInterpreter;
     @Inject
@@ -45,14 +42,14 @@ public class StepPresenter implements StepSelectable {
     private String beforeLocatorType;
     private String beforeLocatorValue;
     private Stage dialog;
-
     private String[] stepTypes;
-
-    private BiConsumer<SeInterpreter, Step> applyStep;
-
+    private Consumer<Step> applyStep;
     private Predicate<String> textParamFilter = (key) -> true;
+    private final Map<String, Node> inputs = Maps.newHashMap();
+    private final Map<String, ComboBox<String>> locatorTypes = Maps.newHashMap();
+    private final Map<String, TextField> locatorValues = Maps.newHashMap();
 
-    public void populate(final Stage dialog, final Predicate<String> stepTypeFilter, final Predicate<String> textParamFilter, final BiConsumer<SeInterpreter, Step> applyStep) {
+    public void populate(final Stage dialog, final Predicate<String> stepTypeFilter, final Predicate<String> textParamFilter, final Consumer<Step> applyStep) {
         this.dialog = dialog;
         this.textParamFilter = textParamFilter;
         this.stepTypes = Arrays.stream(STEP_TYPES).filter(stepTypeFilter).toArray(String[]::new);
@@ -78,11 +75,24 @@ public class StepPresenter implements StepSelectable {
         });
     }
 
+    public void refreshView(final Step step) {
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            final Step stepWithAllParam = step.withAllParam();
+            int row = 1;
+            final String typeName = this.resetStepType(stepWithAllParam);
+            row = this.addTextBox(stepWithAllParam, row, "skip");
+            row = this.addLocator(stepWithAllParam, row, "locator");
+            row = this.constructStringParamView(stepWithAllParam, row, typeName);
+            this.constructLocatorParamView(stepWithAllParam, row);
+            this.stepEditGrid.getScene().getWindow().sizeToScene();
+        });
+    }
+
     @FXML
     void stepApply() {
         this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
             if (Optional.ofNullable(this.selectedStepType).orElse("").isBlank()) {
-                this.applyStep.accept(this.seInterpreter, null);
+                this.applyStep.accept(null);
             } else {
                 final StepBuilder step = Context.createStepBuilder(this.selectedStepType);
                 this.inputs.forEach((key, value) -> {
@@ -103,22 +113,9 @@ public class StepPresenter implements StepSelectable {
                         step.put(key, new Locator(type, value));
                     }
                 });
-                this.applyStep.accept(this.seInterpreter, step.build());
+                this.applyStep.accept(step.build());
             }
             this.dialog.close();
-        });
-    }
-
-    void refreshView(final Step step) {
-        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
-            final Step stepWithAllParam = step.withAllParam();
-            int row = 1;
-            final String typeName = this.resetStepType(stepWithAllParam);
-            row = this.addTextBox(stepWithAllParam, row, "skip");
-            row = this.addLocator(stepWithAllParam, row, "locator");
-            row = this.constructStringParamView(stepWithAllParam, row, typeName);
-            this.constructLocatorParamView(stepWithAllParam, row);
-            this.stepEditGrid.getScene().getWindow().sizeToScene();
         });
     }
 

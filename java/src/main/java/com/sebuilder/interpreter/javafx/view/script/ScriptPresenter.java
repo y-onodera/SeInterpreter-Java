@@ -103,12 +103,12 @@ public class ScriptPresenter extends StepTablePresenter {
         this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
             final StepDefine item = this.stepTable.getSelectionModel().getSelectedItem();
             new StepView(s -> s.startsWith("verify"), key -> !key.equals("skip"))
-                    .open(this.currentWindow(), (application, step) -> {
+                    .open(this.currentWindow(), step -> {
                         if (step != null) {
                             final VerifyFilter pointcut = new VerifyFilter((Verify) step.type(), step.stringParams(), step.locatorParams());
-                            application.addBreakPoint(item.index(), pointcut);
+                            this.application.addBreakPoint(item.index(), pointcut);
                         } else {
-                            application.addBreakPoint(item.index(), Pointcut.ANY);
+                            this.application.addBreakPoint(item.index(), Pointcut.ANY);
                         }
                     });
         });

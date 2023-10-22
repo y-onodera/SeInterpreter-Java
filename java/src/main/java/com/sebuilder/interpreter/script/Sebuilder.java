@@ -67,14 +67,6 @@ public class Sebuilder extends AbstractJsonScriptParser {
     }
 
     @Override
-    protected TestCase load(final JSONObject o, final File sourceFile) {
-        if (o.optString("type", "script").equals("suite")) {
-            return this.parseSuite(o, sourceFile);
-        }
-        return this.parseScript(o, sourceFile);
-    }
-
-    @Override
     public Aspect loadAspect(final File f) {
         return this.aspectLoader.load(f);
     }
@@ -82,6 +74,19 @@ public class Sebuilder extends AbstractJsonScriptParser {
     @Override
     public Aspect loadAspect(final String jsonText, final File f) {
         return this.aspectLoader.load(jsonText, f);
+    }
+
+    @Override
+    public Pointcut loadPointCut(final File path) {
+        return this.pointcutLoader.load(path).orElse(Pointcut.NONE);
+    }
+
+    @Override
+    protected TestCase load(final JSONObject o, final File sourceFile) {
+        if (o.optString("type", "script").equals("suite")) {
+            return this.parseSuite(o, sourceFile);
+        }
+        return this.parseScript(o, sourceFile);
     }
 
     /**

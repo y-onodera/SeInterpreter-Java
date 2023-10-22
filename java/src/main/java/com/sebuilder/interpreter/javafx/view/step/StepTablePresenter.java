@@ -139,7 +139,7 @@ public class StepTablePresenter {
         final StepDefine item = this.stepTable.getSelectionModel().getSelectedItem();
         final int no = item != null ? item.index() : 0;
         final StepView stepView = new StepView();
-        stepView.open(this.currentWindow(), (application, step) -> {
+        stepView.open(this.currentWindow(), step -> {
             if (step != null) {
                 if (action == Action.EDIT) {
                     this.replaceTestCase(this.testCase.get().replaceSteps(no, step));

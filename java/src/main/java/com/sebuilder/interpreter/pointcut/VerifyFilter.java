@@ -11,6 +11,13 @@ public record VerifyFilter(Verify verify,
 
     @Override
     public boolean isHandle(final TestRun testRun, final Step step, final InputData var) {
+        final TestRun ctx = new TestRunBuilder(this.toStep().toTestCase())
+                .createTestRun(testRun.varWithCurrentStepInfo(), testRun, testRun.currentStepIndex());
+        ctx.forwardStepIndex(1);
+        return this.verify.test(ctx);
+    }
+
+    public Step toStep() {
         final StepBuilder verifyStep = this.verify.toStep();
         this.stringCondition.entrySet().stream()
                 .filter(it -> !it.getKey().equals("negated"))
@@ -19,10 +26,7 @@ public record VerifyFilter(Verify verify,
         if (this.stringCondition.containsKey("negated")) {
             verifyStep.negated(Boolean.parseBoolean(this.stringCondition.get("negated")));
         }
-        final TestRun ctx = new TestRunBuilder(verifyStep.build().toTestCase())
-                .createTestRun(testRun.varWithCurrentStepInfo(), testRun, testRun.currentStepIndex());
-        ctx.forwardStepIndex(1);
-        return this.verify.test(ctx);
+        return verifyStep.build();
     }
 
     @Override
