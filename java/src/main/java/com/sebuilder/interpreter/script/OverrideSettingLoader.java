@@ -1,13 +1,11 @@
 package com.sebuilder.interpreter.script;
 
-import com.sebuilder.interpreter.Aspect;
-import com.sebuilder.interpreter.DataSource;
 import com.sebuilder.interpreter.Pointcut;
 import com.sebuilder.interpreter.TestCase;
+import com.sebuilder.interpreter.TestCaseBuilder;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.util.HashMap;
 
 public class OverrideSettingLoader {
 
@@ -24,40 +22,25 @@ public class OverrideSettingLoader {
     }
 
     public TestCase load(final JSONObject script, final File baseDir, final TestCase resultTestCase) {
-        final DataSource dataSource = this.dataSourceConfigLoader.getDataSource(script);
-        final HashMap<String, String> config = this.dataSourceConfigLoader.getDataSourceConfig(script);
-        final String skip = this.getSkip(script);
-        final boolean nestedChain = this.isNestedChain(script);
-        final boolean breakNestedChain = this.isBreakNestedChain(script);
-        final boolean preventContextAspect = this.isPreventContextAspect(script);
-        final Pointcut includeTestRun;
-        if (script.has("include")) {
-            includeTestRun = this.pointcutLoader.load(script, "include", baseDir).orElse(Pointcut.ANY);
-        } else {
-            includeTestRun = Pointcut.ANY;
-        }
-        final Pointcut excludeTestRun;
-        if (script.has("exclude")) {
-            excludeTestRun = this.pointcutLoader.load(script, "exclude", baseDir).orElse(Pointcut.NONE);
-        } else {
-            excludeTestRun = Pointcut.NONE;
-        }
-        final Aspect aspect;
-        if (script.has("aspect")) {
-            aspect = this.aspectLoader.load(script, baseDir).takeOverChain(false);
-        } else {
-            aspect = new Aspect();
-        }
-        return resultTestCase.map(it -> it.setSkip(skip)
-                .mapWhen(target -> dataSource != null
-                        , matches -> matches.setOverrideTestDataSet(dataSource, config)
+        return resultTestCase.map(builder -> builder.setOverrideSetting(
+                        new TestCaseBuilder()
+                                .setOverrideTestDataSet(this.dataSourceConfigLoader.getDataSource(script)
+                                        , this.dataSourceConfigLoader.getDataSourceConfig(script))
+                                .setSkip(this.getSkip(script))
+                                .isNestedChain(this.isNestedChain(script))
+                                .isBreakNestedChain(this.isBreakNestedChain(script))
+                                .isPreventContextAspect(this.isPreventContextAspect(script))
+                                .mapWhen(it -> script.has("include")
+                                        , it -> it.setIncludeTestRun(this.pointcutLoader.load(script, "include", baseDir)
+                                                .orElse(Pointcut.ANY)))
+                                .mapWhen(it -> script.has("exclude")
+                                        , it -> it.setExcludeTestRun(this.pointcutLoader.load(script, "exclude", baseDir)
+                                                .orElse(Pointcut.NONE)))
+                                .mapWhen(it -> script.has("aspect")
+                                        , it -> it.setAspect(this.aspectLoader.load(script, baseDir)
+                                                .takeOverChain(false)))
+                                .build()
                 )
-                .setIncludeTestRun(includeTestRun)
-                .setExcludeTestRun(excludeTestRun)
-                .setAspect(aspect)
-                .isNestedChain(nestedChain)
-                .isBreakNestedChain(breakNestedChain)
-                .isPreventContextAspect(preventContextAspect)
         );
     }
 

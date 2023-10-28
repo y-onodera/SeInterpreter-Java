@@ -124,7 +124,12 @@ public record SeInterpreter(
 
     public void replaceScript(final String text) {
         final TestCase replaced = Context.load(text, this.getDisplayTestCase().scriptFile().toFile())
-                .map(it -> it.setName(this.getDisplayTestCase().name()));
+                .map(it -> it.setName(this.getDisplayTestCase().name())
+                        .mapWhen(builder -> this.getDisplayTestCase().scriptFile().type() == ScriptFile.Type.TEST
+                                , builder -> builder.setOverrideSetting(this.getDisplayTestCase())
+                                        .setChains(this.getDisplayTestCase().chains())
+                        )
+                );
         this.replaceDisplayCase(replaced);
     }
 

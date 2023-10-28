@@ -319,4 +319,18 @@ public class TestCaseBuilder {
         return this;
     }
 
+    public TestCaseBuilder setOverrideSetting(final TestCase copyFrom) {
+        return this.setSkip(copyFrom.skip())
+                .mapWhen(target -> copyFrom.overrideDataSourceLoader().dataSource() != null
+                        , matches -> matches.setOverrideTestDataSet(copyFrom.overrideDataSourceLoader().dataSource()
+                                , copyFrom.overrideDataSourceLoader().dataSourceConfig())
+                )
+                .setIncludeTestRun(copyFrom.includeTestRun())
+                .setExcludeTestRun(copyFrom.excludeTestRun())
+                .setAspect(copyFrom.aspect())
+                .isNestedChain(copyFrom.nestedChain())
+                .isBreakNestedChain(copyFrom.breakNestedChain())
+                .isPreventContextAspect(copyFrom.preventContextAspect())
+                ;
+    }
 }
