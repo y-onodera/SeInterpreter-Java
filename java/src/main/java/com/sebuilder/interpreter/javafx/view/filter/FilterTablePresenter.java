@@ -17,6 +17,7 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -33,6 +34,7 @@ public class FilterTablePresenter {
     private TableColumn<PointcutDefine, String> filter;
 
     private final ObjectProperty<Pointcut> target = new SimpleObjectProperty<>(Pointcut.NONE);
+    private Pointcut defaultValue = Pointcut.NONE;
 
     public void setTarget(final Pointcut pointcut) {
         this.target.set(pointcut);
@@ -43,6 +45,10 @@ public class FilterTablePresenter {
         this.target.addListener(listener);
     }
 
+    public void setDefaultValue(final Pointcut defaultValue) {
+        this.defaultValue = defaultValue;
+    }
+
     @FXML
     public void initialize() {
         this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
@@ -50,21 +56,14 @@ public class FilterTablePresenter {
             this.combinator.setCellValueFactory(body -> body.getValue().combinatorProperty());
             this.filter.setCellValueFactory(body -> body.getValue().scriptProperty());
             this.pointcutTable.setRowFactory((tableView) -> new TableRow<>() {
-                int notEmptyValCount = 0;
-
                 @Override
                 protected void updateItem(final PointcutDefine tableRow, final boolean empty) {
                     if (!empty) {
-                        this.notEmptyValCount++;
-                    }
-                    if (!empty && !this.isEmpty()) {
-                        if (this.notEmptyValCount == 1) {
-                            this.setOnMouseClicked(ev -> {
-                                if (ev.getButton().equals(MouseButton.PRIMARY) && ev.getClickCount() == 2) {
-                                    FilterTablePresenter.this.handleEdit();
-                                }
-                            });
-                        }
+                        this.setOnMouseClicked(ev -> {
+                            if (ev.getButton().equals(MouseButton.PRIMARY) && ev.getClickCount() == 2) {
+                                FilterTablePresenter.this.handleEdit();
+                            }
+                        });
                     }
                 }
             });
@@ -92,8 +91,12 @@ public class FilterTablePresenter {
             final int pointcutIndex = this.pointcutTable.getSelectionModel().getSelectedItem().index();
             final List<Pointcut> conditions = this.target.get().toListTopLevelCondition();
             conditions.remove(pointcutIndex);
-            this.setTarget(conditions.stream().reduce(Pointcut.NONE, Pointcut::or));
+            this.setTarget(conditions.stream().reduce(this.defaultValue, this.defaultValueCombinator()));
         });
+    }
+
+    private BinaryOperator<Pointcut> defaultValueCombinator() {
+        return this.defaultValue == Pointcut.NONE ? Pointcut::or : Pointcut::and;
     }
 
     private void refreshTable() {
@@ -155,7 +158,11 @@ public class FilterTablePresenter {
         final FilterView filterView = new FilterView();
         filterView.open(this.currentWindow(), it -> {
             if (action == Action.ADD) {
-                this.setTarget(this.target.get().or(it));
+                if (this.target.get() == Pointcut.ANY) {
+                    this.setTarget(it);
+                } else {
+                    this.setTarget(this.target.get().or(it));
+                }
             } else {
                 final Pointcut current = this.target.get();
                 final PointcutDefine item = this.pointcutTable.getSelectionModel().getSelectedItem();

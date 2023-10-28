@@ -2,10 +2,7 @@ package com.sebuilder.interpreter.javafx.view.suite;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.sebuilder.interpreter.Context;
-import com.sebuilder.interpreter.Suite;
-import com.sebuilder.interpreter.TestCase;
-import com.sebuilder.interpreter.TestCaseChains;
+import com.sebuilder.interpreter.*;
 import com.sebuilder.interpreter.javafx.control.dragdrop.DragAndDropSortTreeViewCellFactory;
 import com.sebuilder.interpreter.javafx.model.SeInterpreter;
 import com.sebuilder.interpreter.javafx.view.ErrorDialog;
@@ -96,6 +93,28 @@ public class SuitePresenter implements HasFileChooser {
     public void handleOpenAspect() {
         this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> new AspectView()
                 .open(this.treeViewScriptName.getScene().getWindow(), this.application.getDisplayTestCase()));
+    }
+
+    @FXML
+    public void handleAddExcludeFilter() {
+        new StepFilterView(Pointcut.NONE).open(this.currentWindow()
+                , this.application.getDisplayTestCase().excludeTestRun()
+                , (pointcut -> this.application.replaceDisplayCase(this.application
+                        .getDisplayTestCase()
+                        .builder()
+                        .setExcludeTestRun(pointcut)
+                        .build())));
+    }
+
+    @FXML
+    public void handleAddIncludeFilter() {
+        new StepFilterView(Pointcut.ANY).open(this.currentWindow()
+                , this.application.getDisplayTestCase().includeTestRun()
+                , (pointcut -> this.application.replaceDisplayCase(this.application
+                        .getDisplayTestCase()
+                        .builder()
+                        .setIncludeTestRun(pointcut)
+                        .build())));
     }
 
     @FXML

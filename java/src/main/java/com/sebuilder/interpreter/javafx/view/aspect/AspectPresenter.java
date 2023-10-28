@@ -60,6 +60,7 @@ public class AspectPresenter {
     @FXML
     void initialize() {
         this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            this.pointcutController.setDefaultValue(Pointcut.ANY);
             this.pointcutController.addListener((final ObservableValue<? extends Pointcut> observed, final Pointcut oldValue, final Pointcut newValue) -> {
                 final ExtraStepExecutor replaced = this.getCurrentSelected().builder().setPointcut(newValue).build();
                 if (this.currentProperty.get().getStream().findAny().isEmpty()) {
@@ -97,9 +98,7 @@ public class AspectPresenter {
                 this.setCurrentSelected(replaced);
             });
             this.currentProperty.addListener((observed, oldValue, newValue) -> {
-                if (Optional.ofNullable(this.scriptNames.getSelectionModel().getSelectedItem())
-                        .filter(it -> it.equals(this.scriptNames.getRoot()))
-                        .isPresent()) {
+                if (this.isRootSelect()) {
                     this.rootProperty.set(newValue);
                 }
             });
@@ -165,22 +164,25 @@ public class AspectPresenter {
     @FXML
     void jsonCommit() {
         this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
-            if (Set.of("pointcut", "before", "after", "failure").contains(this.tabPane.getSelectionModel().getSelectedItem().getText())) {
-                if (this.currentSelected.beforeStep().steps().size() > 0
-                        || this.currentSelected.afterStep().steps().size() > 0
-                        || this.currentSelected.failureStep().steps().size() > 0) {
+            if (this.isRootSelect()
+                    && Set.of("pointcut", "before", "after", "failure").contains(this.tabPane.getSelectionModel().getSelectedItem().getText())) {
+                if (this.existsExtraStep()) {
+                    if (this.currentSelected.pointcut() == Pointcut.NONE) {
+                        this.replaceTarget(this.currentProperty.get()
+                                .replace(this.currentSelected, this.currentSelected.builder().setPointcut(Pointcut.ANY).build()));
+                    }
                     if (!this.currentSelected.hasDisplayName()) {
                         this.copyInterceptor();
                     }
+                } else {
+                    this.replaceTarget(new Aspect());
                 }
             } else {
                 this.replaceTarget(Context.getScriptParser()
                         .loadAspect(this.textAreaJson.getText(), this.getImportTargetFile()));
                 this.resetTab(this.treeViewSelect, this.currentProperty.get());
             }
-            if (Optional.ofNullable(this.scriptNames.getSelectionModel().getSelectedItem())
-                    .filter(it -> it.equals(this.scriptNames.getRoot()))
-                    .isPresent()) {
+            if (this.isRootSelect()) {
                 this.commitOnclick.run();
             } else {
                 this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
@@ -191,6 +193,12 @@ public class AspectPresenter {
             }
             SuccessDialog.show("commit succeed");
         });
+    }
+
+    private boolean existsExtraStep() {
+        return this.currentSelected.beforeStep().steps().size() > 0
+                || this.currentSelected.afterStep().steps().size() > 0
+                || this.currentSelected.failureStep().steps().size() > 0;
     }
 
     private void resetTreeView(final String target, final Aspect aspect) {
@@ -266,6 +274,12 @@ public class AspectPresenter {
         this.currentProperty.set(newValue);
         this.textAreaJson.clear();
         this.textAreaJson.setText(Context.toString(this.currentProperty.get()));
+    }
+
+    private boolean isRootSelect() {
+        return Optional.ofNullable(this.scriptNames.getSelectionModel().getSelectedItem())
+                .filter(it -> it.equals(this.scriptNames.getRoot()))
+                .isPresent();
     }
 
     private File getImportTargetFile() {
