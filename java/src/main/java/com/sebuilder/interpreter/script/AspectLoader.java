@@ -36,7 +36,7 @@ public record AspectLoader(Sebuilder sebuilder, PointcutLoader pointcutLoader) {
     }
 
     public Aspect load(final String jsonText, final File f) {
-        return this.load(new JSONObject(new JSONTokener(jsonText)), f.getAbsoluteFile().getParentFile());
+        return this.load(new JSONObject(new JSONTokener(jsonText)), f.getAbsoluteFile());
     }
 
     public Aspect load(final JSONObject o, final File baseDir) {

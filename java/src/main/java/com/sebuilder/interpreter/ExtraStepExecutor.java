@@ -70,6 +70,10 @@ public record ExtraStepExecutor(Pointcut pointcut,
         return !Optional.ofNullable(this.displayName()).orElse("").isEmpty();
     }
 
+    public boolean hasStep() {
+        return this.beforeStep().steps().size() > 0 || this.afterStep().steps().size() > 0 || this.failureStep().steps().size() > 0;
+    }
+
     public TestRunListener createAdviseListener(final TestRun testRun) {
         return new TestRunListenerWrapper(testRun.getListener()) {
             String testName;

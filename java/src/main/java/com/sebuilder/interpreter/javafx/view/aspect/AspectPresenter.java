@@ -5,6 +5,7 @@ import com.sebuilder.interpreter.*;
 import com.sebuilder.interpreter.aspect.ImportInterceptor;
 import com.sebuilder.interpreter.javafx.model.SeInterpreter;
 import com.sebuilder.interpreter.javafx.view.ErrorDialog;
+import com.sebuilder.interpreter.javafx.view.HasFileChooser;
 import com.sebuilder.interpreter.javafx.view.SuccessDialog;
 import com.sebuilder.interpreter.javafx.view.filter.FilterTablePresenter;
 import com.sebuilder.interpreter.javafx.view.step.StepTablePresenter;
@@ -13,6 +14,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.stage.Window;
 
 import javax.inject.Inject;
 import java.io.File;
@@ -20,7 +22,7 @@ import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class AspectPresenter {
+public class AspectPresenter implements HasFileChooser {
 
     @Inject
     private SeInterpreter application;
@@ -56,6 +58,29 @@ public class AspectPresenter {
 
     private Runnable commitOnclick = () -> {
     };
+
+    public void setRootProperty(final TestCase testCase) {
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            this.commitOnclick = () -> this.application.replaceDisplayCase(testCase
+                    .builder()
+                    .setAspect(this.rootProperty.get())
+                    .build());
+            final TreeItem<String> root = new TreeItem<>(testCase.name());
+            root.setExpanded(true);
+            this.scriptNames.setRoot(root);
+            this.rootProperty.set(testCase.aspect());
+        });
+    }
+
+    @Override
+    public Window currentWindow() {
+        return this.scriptNames.getScene().getWindow();
+    }
+
+    @Override
+    public File getBaseDirectory() {
+        return this.application.getCurrentRootDir();
+    }
 
     @FXML
     void initialize() {
@@ -97,6 +122,10 @@ public class AspectPresenter {
                 }
                 this.setCurrentSelected(replaced);
             });
+            this.rootProperty.addListener((observed, oldValue, newValue) -> {
+                this.resetTreeView();
+                this.scriptNames.getSelectionModel().select(0);
+            });
             this.currentProperty.addListener((observed, oldValue, newValue) -> {
                 if (this.isRootSelect()) {
                     this.rootProperty.set(newValue);
@@ -105,16 +134,25 @@ public class AspectPresenter {
         });
     }
 
-    public void setRootProperty(final TestCase testCase) {
-        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
-            this.commitOnclick = () -> this.application.replaceDisplayCase(testCase
-                    .builder()
-                    .setAspect(this.rootProperty.get())
+    @FXML
+    void handleImport() {
+        final File toImport = this.openDialog("choose import aspect", "select aspect file", "*.json");
+        if (toImport != null) {
+            this.rootProperty.set(this.rootProperty.get().builder()
+                    .add(new ImportInterceptor(this.getBaseDirectory().toPath()
+                            .relativize(toImport.toPath())
+                            .toString().replace("\\", "/")
+                            , ""
+                            , (path) -> Context.getScriptParser().loadAspect(toImport)))
                     .build());
-            this.rootProperty.set(testCase.aspect());
-            this.resetTreeView(testCase.name(), testCase.aspect());
-            this.scriptNames.getSelectionModel().select(0);
-        });
+        }
+    }
+
+    @FXML
+    void handleRemove() {
+        if (!this.isRootSelect()) {
+            this.rootProperty.set(this.rootProperty.get().remove(this.imports.get(this.treeViewSelect)));
+        }
     }
 
     @FXML
@@ -166,7 +204,7 @@ public class AspectPresenter {
         this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
             if (this.isRootSelect()
                     && Set.of("pointcut", "before", "after", "failure").contains(this.tabPane.getSelectionModel().getSelectedItem().getText())) {
-                if (this.existsExtraStep()) {
+                if (this.currentSelected.hasStep()) {
                     if (this.currentSelected.pointcut() == Pointcut.NONE) {
                         this.replaceTarget(this.currentProperty.get()
                                 .replace(this.currentSelected, this.currentSelected.builder().setPointcut(Pointcut.ANY).build()));
@@ -179,15 +217,14 @@ public class AspectPresenter {
                 }
             } else {
                 this.replaceTarget(Context.getScriptParser()
-                        .loadAspect(this.textAreaJson.getText(), this.getImportTargetFile()));
+                        .loadAspect(this.textAreaJson.getText(), this.application.getCurrentRootDir()));
                 this.resetTab(this.treeViewSelect, this.currentProperty.get());
             }
             if (this.isRootSelect()) {
                 this.commitOnclick.run();
             } else {
                 this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
-                    final File target = new File(new File(this.application.getSuite().path()).getParentFile()
-                            , this.treeViewSelect);
+                    final File target = new File(this.application.getCurrentRootDir(), this.treeViewSelect);
                     Files.writeString(target.toPath(), this.textAreaJson.getText(), Charsets.UTF_8);
                 });
             }
@@ -195,19 +232,11 @@ public class AspectPresenter {
         });
     }
 
-    private boolean existsExtraStep() {
-        return this.currentSelected.beforeStep().steps().size() > 0
-                || this.currentSelected.afterStep().steps().size() > 0
-                || this.currentSelected.failureStep().steps().size() > 0;
-    }
-
-    private void resetTreeView(final String target, final Aspect aspect) {
-        this.replaceTarget(aspect);
-        final TreeItem<String> root = new TreeItem<>(target);
-        root.setExpanded(true);
-        this.scriptNames.setRoot(root);
-        this.scriptNames.getRoot().getChildren().clear();
-        this.imports = aspect.getStream().filter(it -> it instanceof ImportInterceptor)
+    private void resetTreeView() {
+        this.replaceTarget(this.rootProperty.get());
+        final TreeItem<String> root = this.scriptNames.getRoot();
+        root.getChildren().clear();
+        this.imports = this.rootProperty.get().getStream().filter(it -> it instanceof ImportInterceptor)
                 .map(it -> (ImportInterceptor) it)
                 .collect(Collectors.toMap(ImportInterceptor::path, it -> it));
         this.imports.forEach((key, value) -> {
@@ -280,11 +309,6 @@ public class AspectPresenter {
         return Optional.ofNullable(this.scriptNames.getSelectionModel().getSelectedItem())
                 .filter(it -> it.equals(this.scriptNames.getRoot()))
                 .isPresent();
-    }
-
-    private File getImportTargetFile() {
-        return this.application.getSuite().path().isEmpty() ? Context.getBaseDirectory()
-                : new File(this.application.getSuite().path());
     }
 
 }

@@ -49,6 +49,10 @@ public record SeInterpreter(
         );
     }
 
+    public File getCurrentRootDir() {
+        return this.getSuite().path().isEmpty() ? Context.getBaseDirectory() : new File(this.getSuite().path()).getParentFile();
+    }
+
     public Suite getSuite() {
         return this.suite().getValue();
     }

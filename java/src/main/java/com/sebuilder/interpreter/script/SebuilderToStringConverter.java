@@ -185,13 +185,12 @@ public class SebuilderToStringConverter implements TestCaseConverter {
         for (final Interceptor interceptor : aspect) {
             if (interceptor instanceof Exportable exportable) {
                 results.add(this.toJSON(exportable));
-            } else if (interceptor instanceof ExtraStepExecutor extra) {
+            } else if (interceptor instanceof ExtraStepExecutor extra && extra.hasStep()) {
                 final JSONObject result = new JSONObject();
                 result.put("pointcut", this.toJSON(extra.pointcut()));
                 result.put("before", this.toJSON(extra.beforeStep()));
                 result.put("after", this.toJSON(extra.afterStep()));
                 result.put("failure", this.toJSON(extra.failureStep()));
-                result.put("displayName", extra.displayName());
                 result.put("displayName", extra.displayName());
                 results.add(result);
             }

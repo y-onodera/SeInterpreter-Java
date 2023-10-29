@@ -12,6 +12,14 @@
         <TreeView fx:id="scriptNames"
                   prefWidth="120.0" prefHeight="425.0"
                   maxHeight="Infinity" minHeight="0">
+            <contextMenu>
+                <ContextMenu>
+                    <items>
+                        <MenuItem mnemonicParsing="false" onAction="#handleImport" text="Import"/>
+                        <MenuItem mnemonicParsing="false" onAction="#handleRemove" text="Remove"/>
+                    </items>
+                </ContextMenu>
+            </contextMenu>
         </TreeView>
         <SplitPane orientation="VERTICAL"
                    prefWidth="500.0"
