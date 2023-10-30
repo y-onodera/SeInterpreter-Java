@@ -52,8 +52,9 @@
                     </AnchorPane>
                 </Tab>
             </TabPane>
-            <MigPane cols="[grow]" rows="[]" maxHeight="40" prefWidth="420.0">
-                <Button mnemonicParsing="false" text="Commit" onAction="#jsonCommit" MigPane.cc="align right"/>
+            <MigPane fx:id="buttonArea" cols="[grow,right][fill,right][fill,right]" rows="[]" maxHeight="40" prefWidth="420.0">
+                <Button mnemonicParsing="false" text="Commit" onAction="#commit" MigPane.cc="align right"/>
+                <Button mnemonicParsing="false" text="Save" onAction="#save" MigPane.cc="align right"/>
             </MigPane>
         </SplitPane>
     </SplitPane>

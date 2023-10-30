@@ -11,15 +11,18 @@ import com.sebuilder.interpreter.javafx.view.filter.FilterTablePresenter;
 import com.sebuilder.interpreter.javafx.view.step.StepTablePresenter;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Window;
+import org.tbee.javafx.scene.layout.fxml.MigPane;
 
 import javax.inject.Inject;
 import java.io.File;
 import java.nio.file.Files;
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 public class AspectPresenter implements HasFileChooser {
@@ -44,17 +47,20 @@ public class AspectPresenter implements HasFileChooser {
     private StepTablePresenter afterController;
     @FXML
     private StepTablePresenter failureController;
+    @FXML
+    private MigPane buttonArea;
+    private final List<Button> buttons = new ArrayList<>();
     private final ObjectProperty<Aspect> rootProperty = new SimpleObjectProperty<>();
 
     private Map<String, ImportInterceptor> imports = new HashMap<>();
 
-    private String treeViewSelect;
+    private String selectedTree;
 
     private final ObjectProperty<Aspect> currentProperty = new SimpleObjectProperty<>();
 
     private final Map<String, ExtraStepExecutor> interceptors = new LinkedHashMap<>();
 
-    private ExtraStepExecutor currentSelected;
+    private ExtraStepExecutor selectedInterceptor;
 
     private Runnable commitOnclick = () -> {
     };
@@ -84,46 +90,19 @@ public class AspectPresenter implements HasFileChooser {
 
     @FXML
     void initialize() {
+        this.buttons.addAll(this.buttonArea.getChildren().stream().map(it -> (Button) it).toList());
         this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
             this.pointcutController.setDefaultValue(Pointcut.ANY);
-            this.pointcutController.addListener((final ObservableValue<? extends Pointcut> observed, final Pointcut oldValue, final Pointcut newValue) -> {
-                final ExtraStepExecutor replaced = this.getCurrentSelected().builder().setPointcut(newValue).build();
-                if (this.currentProperty.get().getStream().findAny().isEmpty()) {
-                    this.replaceTarget(this.currentProperty.get().builder().add(replaced).build());
-                } else {
-                    this.replaceTarget(this.currentProperty.get().replace(this.currentSelected, replaced));
-                }
-                this.setCurrentSelected(replaced);
-            });
-            this.beforeController.addListener((final ObservableValue<? extends TestCase> observed, final TestCase oldValue, final TestCase newValue) -> {
-                final ExtraStepExecutor replaced = this.getCurrentSelected().builder().replaceBefore(newValue).build();
-                if (this.currentProperty.get().getStream().findAny().isEmpty()) {
-                    this.replaceTarget(this.currentProperty.get().builder().add(replaced).build());
-                } else {
-                    this.replaceTarget(this.currentProperty.get().replace(this.currentSelected, replaced));
-                }
-                this.setCurrentSelected(replaced);
-            });
-            this.afterController.addListener((final ObservableValue<? extends TestCase> observed, final TestCase oldValue, final TestCase newValue) -> {
-                final ExtraStepExecutor replaced = this.getCurrentSelected().builder().replaceAfter(newValue).build();
-                if (this.currentProperty.get().getStream().findAny().isEmpty()) {
-                    this.replaceTarget(this.currentProperty.get().builder().add(replaced).build());
-                } else {
-                    this.replaceTarget(this.currentProperty.get().replace(this.currentSelected, replaced));
-                }
-                this.setCurrentSelected(replaced);
-            });
-            this.failureController.addListener((final ObservableValue<? extends TestCase> observed, final TestCase oldValue, final TestCase newValue) -> {
-                final ExtraStepExecutor replaced = this.getCurrentSelected().builder().replaceFailure(newValue).build();
-                if (this.currentProperty.get().getStream().findAny().isEmpty()) {
-                    this.replaceTarget(this.currentProperty.get().builder().add(replaced).build());
-                } else {
-                    this.replaceTarget(this.currentProperty.get().replace(this.currentSelected, replaced));
-                }
-                this.setCurrentSelected(replaced);
-            });
+            this.pointcutController.addListener((observed, oldValue, newValue) ->
+                    this.convertSelected(builder -> builder.setPointcut(newValue).build()));
+            this.beforeController.addListener((observed, oldValue, newValue) ->
+                    this.convertSelected(builder -> builder.replaceBefore(newValue).build()));
+            this.afterController.addListener((observed, oldValue, newValue) ->
+                    this.convertSelected(builder -> builder.replaceAfter(newValue).build()));
+            this.failureController.addListener((observed, oldValue, newValue) ->
+                    this.convertSelected(builder -> builder.replaceFailure(newValue).build()));
             this.rootProperty.addListener((observed, oldValue, newValue) -> {
-                this.resetTreeView();
+                this.refreshTreeView();
                 this.scriptNames.getSelectionModel().select(0);
             });
             this.currentProperty.addListener((observed, oldValue, newValue) -> {
@@ -151,7 +130,7 @@ public class AspectPresenter implements HasFileChooser {
     @FXML
     void handleRemove() {
         if (!this.isRootSelect()) {
-            this.rootProperty.set(this.rootProperty.get().remove(this.imports.get(this.treeViewSelect)));
+            this.rootProperty.set(this.rootProperty.get().remove(this.imports.get(this.selectedTree)));
         }
     }
 
@@ -160,7 +139,7 @@ public class AspectPresenter implements HasFileChooser {
         this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
             final String selectedItem = this.interceptorSelect.getSelectionModel().getSelectedItem();
             if (selectedItem != null) {
-                this.setCurrentSelected(this.interceptors.get(selectedItem));
+                this.selectInterceptor(this.interceptors.get(selectedItem));
             }
         });
     }
@@ -168,72 +147,42 @@ public class AspectPresenter implements HasFileChooser {
     @FXML
     void removeInterceptor() {
         this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
-            this.replaceTarget(this.currentProperty.get().remove(this.currentSelected));
-            this.resetTab(this.treeViewSelect, this.currentProperty.get());
+            this.replaceInterceptors(current -> current.remove(this.selectedInterceptor));
+            this.refreshTab();
         });
     }
 
     @FXML
     void copyInterceptor() {
-        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
-            final TextInputDialog dialog = new TextInputDialog();
-            dialog.initOwner(this.interceptorSelect.getScene().getWindow());
-            dialog.setTitle("new interceptor name");
-            dialog.setHeaderText(null);
-            dialog.setGraphic(null);
-            dialog.getDialogPane().lookupButton(ButtonType.OK)
-                    .disableProperty()
-                    .bind(dialog.getEditor().textProperty().isEmpty());
-            dialog.showAndWait().ifPresent(response -> {
-                if (!this.interceptorSelect.getSelectionModel().getSelectedItem().isEmpty()) {
-                    this.replaceTarget(this.currentProperty.get().builder()
-                            .add(this.currentSelected.builder().setDisplayName(response).build())
-                            .build());
-                } else {
-                    this.replaceTarget(this.currentProperty.get()
-                            .replace(this.currentSelected, this.currentSelected.builder().setDisplayName(response).build())
-                    );
-                }
-                this.resetTab(this.treeViewSelect, this.currentProperty.get());
-            });
+        this.setNameAnd(response -> {
+            final ExtraStepExecutor named = this.selectedInterceptor.builder().setDisplayName(response).build();
+            this.replaceInterceptors(current -> current.builder().add(named).build());
+            this.selectInterceptor(named);
+            this.refreshTab();
         });
     }
 
     @FXML
-    void jsonCommit() {
+    void commit() {
         this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
-            if (this.isRootSelect()
-                    && Set.of("pointcut", "before", "after", "failure").contains(this.tabPane.getSelectionModel().getSelectedItem().getText())) {
-                if (this.currentSelected.hasStep()) {
-                    if (this.currentSelected.pointcut() == Pointcut.NONE) {
-                        this.replaceTarget(this.currentProperty.get()
-                                .replace(this.currentSelected, this.currentSelected.builder().setPointcut(Pointcut.ANY).build()));
-                    }
-                    if (!this.currentSelected.hasDisplayName()) {
-                        this.copyInterceptor();
-                    }
-                } else {
-                    this.replaceTarget(new Aspect());
-                }
-            } else {
-                this.replaceTarget(Context.getScriptParser()
-                        .loadAspect(this.textAreaJson.getText(), this.application.getCurrentRootDir()));
-                this.resetTab(this.treeViewSelect, this.currentProperty.get());
-            }
-            if (this.isRootSelect()) {
-                this.commitOnclick.run();
-            } else {
-                this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
-                    final File target = new File(this.application.getCurrentRootDir(), this.treeViewSelect);
-                    Files.writeString(target.toPath(), this.textAreaJson.getText(), Charsets.UTF_8);
-                });
-            }
+            this.applyChangeToCurrent();
+            this.commitOnclick.run();
             SuccessDialog.show("commit succeed");
         });
     }
 
-    private void resetTreeView() {
-        this.replaceTarget(this.rootProperty.get());
+    @FXML
+    void save() {
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            this.applyChangeToCurrent();
+            final File target = new File(this.application.getCurrentRootDir(), this.selectedTree);
+            Files.writeString(target.toPath(), this.textAreaJson.getText(), Charsets.UTF_8);
+            SuccessDialog.show("save succeed");
+        });
+    }
+
+    private void refreshTreeView() {
+        this.replaceCurrent(this.rootProperty.get());
         final TreeItem<String> root = this.scriptNames.getRoot();
         root.getChildren().clear();
         this.imports = this.rootProperty.get().getStream().filter(it -> it instanceof ImportInterceptor)
@@ -242,31 +191,66 @@ public class AspectPresenter implements HasFileChooser {
         this.imports.forEach((key, value) -> {
             final TreeItem<String> item = new TreeItem<>(key);
             root.getChildren().add(item);
-            if (key.equals(this.treeViewSelect)) {
+            if (key.equals(this.selectedTree)) {
                 this.scriptNames.getSelectionModel().select(item);
             }
         });
         this.scriptNames.getSelectionModel()
                 .selectedItemProperty()
                 .addListener((observable, oldValue, newValue) -> {
-                    if (newValue != null && !newValue.getValue().equals(this.treeViewSelect)) {
+                    if (newValue != null && !newValue.getValue().equals(this.selectedTree)) {
+                        this.buttonArea.getChildren().clear();
                         if (newValue.getValue().equals(root.getValue())) {
-                            this.resetTab(root.getValue(), this.rootProperty.get());
+                            this.buttonArea.add(this.buttons.get(0));
+                            this.selectTree(root.getValue(), this.rootProperty.get());
                         } else {
-                            this.resetTab(newValue.getValue()
+                            this.buttonArea.add(this.buttons.get(1));
+                            this.selectTree(newValue.getValue()
                                     , this.imports.get(newValue.getValue()).toAspect().materialize(new InputData()));
                         }
                     }
                 });
     }
 
-    private void resetTab(final String name, final Aspect selected) {
-        this.treeViewSelect = name;
-        this.resetInterceptorSelect(selected);
-        this.replaceTarget(selected);
+    private void selectTree(final String name, final Aspect selected) {
+        this.selectedTree = name;
+        this.replaceCurrent(selected);
+        this.refreshInterceptors(selected);
     }
 
-    private void resetInterceptorSelect(final Aspect aspect) {
+    private void replaceCurrent(final Aspect newValue) {
+        this.currentProperty.set(newValue);
+        this.textAreaJson.clear();
+        this.textAreaJson.setText(Context.toString(this.currentProperty.get()));
+    }
+
+    private void applyChangeToCurrent() {
+        if ("plain text(json)".equals(this.tabPane.getSelectionModel().getSelectedItem().getText())) {
+            this.replaceCurrent(Context.getScriptParser()
+                    .loadAspect(this.textAreaJson.getText(), this.application.getCurrentRootDir()));
+            this.refreshTab();
+        } else {
+            if (this.selectedInterceptor.hasStep()) {
+                if (this.selectedInterceptor.pointcut() == Pointcut.NONE) {
+                    this.convertSelected(builder -> builder.setPointcut(Pointcut.ANY).build());
+                }
+                if (!this.selectedInterceptor.hasDisplayName()) {
+                    this.setNameAnd(response -> {
+                        this.convertSelected(builder -> builder.setDisplayName(response).build());
+                        this.refreshTab();
+                    });
+                }
+            } else {
+                this.removeInterceptor();
+            }
+        }
+    }
+
+    private void refreshTab() {
+        this.selectTree(this.selectedTree, this.currentProperty.get());
+    }
+
+    private void refreshInterceptors(final Aspect aspect) {
         this.interceptors.clear();
         this.interceptorSelect.getItems().clear();
         int interceptorCount = 0;
@@ -284,25 +268,43 @@ public class AspectPresenter implements HasFileChooser {
         }
         this.interceptorSelect.getItems().setAll(this.interceptors.keySet());
         this.interceptorSelect.getSelectionModel().select(0);
-        this.setCurrentSelected(this.interceptors.get(this.interceptorSelect.getSelectionModel().getSelectedItem()));
+        this.selectInterceptor(this.interceptors.get(this.interceptorSelect.getSelectionModel().getSelectedItem()));
     }
 
-    private ExtraStepExecutor getCurrentSelected() {
-        return this.currentSelected;
+    private void setNameAnd(final Consumer<String> stringConsumer) {
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            final TextInputDialog dialog = new TextInputDialog();
+            dialog.initOwner(this.interceptorSelect.getScene().getWindow());
+            dialog.setTitle("new interceptor name");
+            dialog.setHeaderText(null);
+            dialog.setGraphic(null);
+            dialog.getDialogPane().lookupButton(ButtonType.OK)
+                    .disableProperty()
+                    .bind(dialog.getEditor().textProperty().isEmpty());
+            dialog.showAndWait().ifPresent(stringConsumer);
+        });
     }
 
-    private void setCurrentSelected(final ExtraStepExecutor currentSelected1) {
-        this.currentSelected = currentSelected1;
-        this.pointcutController.setTarget(this.currentSelected.pointcut());
-        this.beforeController.setTestCase(this.currentSelected.beforeStep());
-        this.afterController.setTestCase(this.currentSelected.afterStep());
-        this.failureController.setTestCase(this.currentSelected.failureStep());
+    private void convertSelected(final Function<ExtraStepExecutor.Builder, ExtraStepExecutor> function) {
+        final ExtraStepExecutor replaced = function.apply(this.selectedInterceptor.builder());
+        if (this.currentProperty.get().getStream().filter(this.selectedInterceptor::equals).findAny().isEmpty()) {
+            this.replaceInterceptors(current -> current.builder().add(replaced).build());
+        } else {
+            this.replaceInterceptors(current -> current.replace(this.selectedInterceptor, replaced));
+        }
+        this.selectInterceptor(replaced);
     }
 
-    private void replaceTarget(final Aspect newValue) {
-        this.currentProperty.set(newValue);
-        this.textAreaJson.clear();
-        this.textAreaJson.setText(Context.toString(this.currentProperty.get()));
+    private void replaceInterceptors(final UnaryOperator<Aspect> function) {
+        this.replaceCurrent(function.apply(this.currentProperty.get()));
+    }
+
+    private void selectInterceptor(final ExtraStepExecutor toSelect) {
+        this.selectedInterceptor = toSelect;
+        this.pointcutController.setTarget(this.selectedInterceptor.pointcut());
+        this.beforeController.setTestCase(this.selectedInterceptor.beforeStep());
+        this.afterController.setTestCase(this.selectedInterceptor.afterStep());
+        this.failureController.setTestCase(this.selectedInterceptor.failureStep());
     }
 
     private boolean isRootSelect() {
