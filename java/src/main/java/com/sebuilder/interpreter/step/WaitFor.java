@@ -52,7 +52,7 @@ public class WaitFor extends AbstractStepType implements GetterUseStep {
         final long stopBy = System.currentTimeMillis() + maxWaitMs;
         // NB: If the step is negated, a result of "true"  means that we haven't succeeded yet.
         //     If the step is normal,  a result of "false" means that we haven't succeeded yet.
-        while (!this.test(ctx) && System.currentTimeMillis() < stopBy) {
+        while (!this.test(ctx) && System.currentTimeMillis() < stopBy && !ctx.isStopped()) {
             try {
                 Thread.sleep(intervalMs);
             } catch (final InterruptedException e) {
