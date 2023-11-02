@@ -50,6 +50,7 @@ public enum Context {
     private Aspect aspect = new Aspect().builder()
             .add(new ExtraStepExecutor
                     .Builder()
+                    .setDisplayName("default")
                     .setPointcut(new TypeFilter(SaveScreenshot.class.getSimpleName(), "!equals"))
                     .addFailure(new SaveScreenshot().toStep().put("file", "failure.png").build().toTestCase())
                     .build()

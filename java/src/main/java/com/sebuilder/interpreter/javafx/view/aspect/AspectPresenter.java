@@ -14,6 +14,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Window;
+import javafx.util.Pair;
 import org.tbee.javafx.scene.layout.fxml.MigPane;
 
 import javax.inject.Inject;
@@ -62,20 +63,20 @@ public class AspectPresenter implements HasFileChooser {
 
     private ExtraStepExecutor selectedInterceptor;
 
-    private Runnable commitOnclick = () -> {
+    private Consumer<Aspect> commitOnclick = (aspect) -> {
     };
 
-    public void setRootProperty(final TestCase testCase) {
+    public void setRootProperty(final Pair<String, Aspect> target) {
         this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
-            this.commitOnclick = () -> this.application.replaceDisplayCase(testCase
-                    .builder()
-                    .setAspect(this.rootProperty.get())
-                    .build());
-            final TreeItem<String> root = new TreeItem<>(testCase.name());
+            final TreeItem<String> root = new TreeItem<>(target.getKey());
             root.setExpanded(true);
             this.scriptNames.setRoot(root);
-            this.rootProperty.set(testCase.aspect());
+            this.rootProperty.set(target.getValue());
         });
+    }
+
+    public void setOnClickCommit(final Consumer<Aspect> onClickCommit) {
+        this.commitOnclick = onClickCommit;
     }
 
     @Override
@@ -166,7 +167,7 @@ public class AspectPresenter implements HasFileChooser {
     void commit() {
         this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
             this.applyChangeToCurrent();
-            this.commitOnclick.run();
+            this.commitOnclick.accept(this.rootProperty.get());
             SuccessDialog.show("commit succeed");
         });
     }
@@ -176,6 +177,16 @@ public class AspectPresenter implements HasFileChooser {
         this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
             this.applyChangeToCurrent();
             final File target = new File(this.application.getCurrentRootDir(), this.selectedTree);
+            Files.writeString(target.toPath(), this.textAreaJson.getText(), Charsets.UTF_8);
+            SuccessDialog.show("save succeed");
+        });
+    }
+
+    @FXML
+    void saveAs() {
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            this.applyChangeToCurrent();
+            final File target = this.saveDialog("Save Aspect File", "json format (*.json)", "*.json");
             Files.writeString(target.toPath(), this.textAreaJson.getText(), Charsets.UTF_8);
             SuccessDialog.show("save succeed");
         });
@@ -202,9 +213,11 @@ public class AspectPresenter implements HasFileChooser {
                         this.buttonArea.getChildren().clear();
                         if (newValue.getValue().equals(root.getValue())) {
                             this.buttonArea.add(this.buttons.get(0));
+                            this.buttonArea.add(this.buttons.get(2));
                             this.selectTree(root.getValue(), this.rootProperty.get());
                         } else {
                             this.buttonArea.add(this.buttons.get(1));
+                            this.buttonArea.add(this.buttons.get(2));
                             this.selectTree(newValue.getValue()
                                     , this.imports.get(newValue.getValue()).toAspect().materialize(new InputData()));
                         }

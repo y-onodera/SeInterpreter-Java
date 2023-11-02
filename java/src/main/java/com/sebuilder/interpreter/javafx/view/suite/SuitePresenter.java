@@ -91,30 +91,25 @@ public class SuitePresenter implements HasFileChooser {
 
     @FXML
     public void handleOpenAspect() {
-        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> new AspectView()
-                .open(this.treeViewScriptName.getScene().getWindow(), this.application.getDisplayTestCase()));
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> AspectView.builder()
+                .setWindow(this.treeViewScriptName.getScene().getWindow())
+                .setTarget(this.application.getDisplayTestCase())
+                .setOnclick(aspect -> this.application.replaceDisplayCase(builder -> builder.setAspect(aspect)))
+                .build());
     }
 
     @FXML
     public void handleAddExcludeFilter() {
         new StepFilterView(Pointcut.NONE).open(this.currentWindow()
                 , this.application.getDisplayTestCase().excludeTestRun()
-                , (pointcut -> this.application.replaceDisplayCase(this.application
-                        .getDisplayTestCase()
-                        .builder()
-                        .setExcludeTestRun(pointcut)
-                        .build())));
+                , (pointcut -> this.application.replaceDisplayCase(builder -> builder.setExcludeTestRun(pointcut))));
     }
 
     @FXML
     public void handleAddIncludeFilter() {
         new StepFilterView(Pointcut.ANY).open(this.currentWindow()
                 , this.application.getDisplayTestCase().includeTestRun()
-                , (pointcut -> this.application.replaceDisplayCase(this.application
-                        .getDisplayTestCase()
-                        .builder()
-                        .setIncludeTestRun(pointcut)
-                        .build())));
+                , (pointcut -> this.application.replaceDisplayCase(builder -> builder.setIncludeTestRun(pointcut))));
     }
 
     @FXML

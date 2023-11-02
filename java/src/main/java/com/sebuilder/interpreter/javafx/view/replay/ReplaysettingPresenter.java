@@ -3,6 +3,7 @@ package com.sebuilder.interpreter.javafx.view.replay;
 import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.InputData;
 import com.sebuilder.interpreter.javafx.view.ErrorDialog;
+import com.sebuilder.interpreter.javafx.view.aspect.AspectView;
 import com.sebuilder.interpreter.report.ReportFormat;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
@@ -10,6 +11,7 @@ import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import javafx.util.Pair;
 
 import javax.inject.Inject;
 import java.io.File;
@@ -98,6 +100,15 @@ public class ReplaysettingPresenter {
                 .setOnclick(result -> this.envProperties = result)
                 .setTarget(this.envProperties)
                 .setWindow(this.currentWindow())
+                .build());
+    }
+
+    @FXML
+    public void aspectSetting() {
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> AspectView.builder()
+                .setWindow(this.currentWindow())
+                .setTarget(new Pair<>("global", Context.getAspect()))
+                .setOnclick(aspect -> Context.getInstance().setAspect(aspect))
                 .build());
     }
 

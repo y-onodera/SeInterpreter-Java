@@ -18,10 +18,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
+import java.util.function.*;
 
 public record SeInterpreter(
         ObjectProperty<Suite> suite
@@ -214,6 +211,10 @@ public record SeInterpreter(
         this.runner().highlightElement(locatorType, value);
     }
 
+    public void replaceDisplayCase(final UnaryOperator<TestCaseBuilder> currentFunction) {
+        this.replaceDisplayCase(currentFunction.apply(this.getDisplayTestCase().builder()).build());
+    }
+
     public void replaceDisplayCase(final TestCase newCase) {
         this.resetScript(this.getSuite().replace(this.getDisplayTestCase(), newCase), newCase);
     }
@@ -290,21 +291,20 @@ public record SeInterpreter(
         final BreakPoint breakPoint = BreakPoint.findFrom(this.getDisplayTestCase().aspect())
                 .orElseGet(() -> new BreakPoint(new HashMap<>(), this.debugger))
                 .addCondition(stepIndex, pointcut);
-        this.replaceDisplayCase(this.getDisplayTestCase().map(it ->
-                it.filterAspect(BreakPoint.typeMatch().negate())
-                        .insertAspect(breakPoint.toAspect())));
+        this.replaceDisplayCase(it -> it
+                .filterAspect(BreakPoint.typeMatch().negate())
+                .insertAspect(breakPoint.toAspect()));
     }
 
     public void removeBreakPoint(final int stepIndex) {
         BreakPoint.findFrom(this.getDisplayTestCase().aspect()).ifPresent(current -> {
             final BreakPoint breakPoint = current.removeCondition(stepIndex);
             if (breakPoint.condition().size() == 0) {
-                this.replaceDisplayCase(this.getDisplayTestCase().map(it ->
-                        it.filterAspect(BreakPoint.typeMatch().negate())));
+                this.replaceDisplayCase(it -> it.filterAspect(BreakPoint.typeMatch().negate()));
             } else {
-                this.replaceDisplayCase(this.getDisplayTestCase().map(it ->
-                        it.filterAspect(BreakPoint.typeMatch().negate())
-                                .insertAspect(breakPoint.toAspect())));
+                this.replaceDisplayCase(it -> it
+                        .filterAspect(BreakPoint.typeMatch().negate())
+                        .insertAspect(breakPoint.toAspect()));
             }
         });
     }
