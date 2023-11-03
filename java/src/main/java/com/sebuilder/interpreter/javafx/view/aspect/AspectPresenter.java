@@ -148,7 +148,7 @@ public class AspectPresenter implements HasFileChooser {
     @FXML
     void removeInterceptor() {
         this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
-            this.replaceInterceptors(current -> current.remove(this.selectedInterceptor));
+            this.replaceCurrent(current -> current.remove(this.selectedInterceptor));
             this.refreshTab();
         });
     }
@@ -157,7 +157,7 @@ public class AspectPresenter implements HasFileChooser {
     void copyInterceptor() {
         this.setNameAnd(response -> {
             final ExtraStepExecutor named = this.selectedInterceptor.builder().setDisplayName(response).build();
-            this.replaceInterceptors(current -> current.builder().add(named).build());
+            this.replaceCurrent(current -> current.builder().add(named).build());
             this.selectInterceptor(named);
             this.refreshTab();
         });
@@ -188,6 +188,19 @@ public class AspectPresenter implements HasFileChooser {
             this.applyChangeToCurrent();
             final File target = this.saveDialog("Save Aspect File", "json format (*.json)", "*.json");
             Files.writeString(target.toPath(), this.textAreaJson.getText(), Charsets.UTF_8);
+            this.rootProperty.set(this.rootProperty.get()
+                    .remove(it -> this.isRootSelect() && this.currentProperty.get().contains(it))
+                    .remove(it -> !this.isRootSelect()
+                            && it instanceof ImportInterceptor imported
+                            && this.scriptNames.getSelectionModel().getSelectedItem().getValue().equals(imported.path()))
+                    .builder()
+                    .add(new ImportInterceptor(this.getBaseDirectory().toPath()
+                            .relativize(target.toPath())
+                            .toString().replace("\\", "/")
+                            , ""
+                            , (path) -> Context.getScriptParser().loadAspect(target)))
+                    .build());
+            this.refreshTab();
             SuccessDialog.show("save succeed");
         });
     }
@@ -195,6 +208,7 @@ public class AspectPresenter implements HasFileChooser {
     private void refreshTreeView() {
         this.replaceCurrent(this.rootProperty.get());
         final TreeItem<String> root = this.scriptNames.getRoot();
+        this.scriptNames.getSelectionModel().clearSelection();
         root.getChildren().clear();
         this.imports = this.rootProperty.get().getStream().filter(it -> it instanceof ImportInterceptor)
                 .map(it -> (ImportInterceptor) it)
@@ -301,14 +315,14 @@ public class AspectPresenter implements HasFileChooser {
     private void convertSelected(final Function<ExtraStepExecutor.Builder, ExtraStepExecutor> function) {
         final ExtraStepExecutor replaced = function.apply(this.selectedInterceptor.builder());
         if (this.currentProperty.get().getStream().filter(this.selectedInterceptor::equals).findAny().isEmpty()) {
-            this.replaceInterceptors(current -> current.builder().add(replaced).build());
+            this.replaceCurrent(current -> current.builder().add(replaced).build());
         } else {
-            this.replaceInterceptors(current -> current.replace(this.selectedInterceptor, replaced));
+            this.replaceCurrent(current -> current.replace(this.selectedInterceptor, replaced));
         }
         this.selectInterceptor(replaced);
     }
 
-    private void replaceInterceptors(final UnaryOperator<Aspect> function) {
+    private void replaceCurrent(final UnaryOperator<Aspect> function) {
         this.replaceCurrent(function.apply(this.currentProperty.get()));
     }
 

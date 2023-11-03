@@ -37,6 +37,10 @@ public record Aspect(Iterable<Interceptor> interceptors) implements Iterable<Int
                 .toList());
     }
 
+    public boolean contains(final Interceptor target) {
+        return this.getStream().anyMatch(interceptor -> interceptor.equals(target));
+    }
+
     public Stream<Interceptor> getStream() {
         return this.toStream(this.interceptors);
     }
@@ -65,6 +69,10 @@ public record Aspect(Iterable<Interceptor> interceptors) implements Iterable<Int
 
     public Aspect remove(final Interceptor removeItem) {
         return from(this.getStream().filter(it -> !it.equals(removeItem)));
+    }
+
+    public Aspect remove(final Predicate<Interceptor> filter) {
+        return from(this.getStream().filter(it -> !filter.test(it)));
     }
 
     public record Advice(List<Interceptor> advices) {
