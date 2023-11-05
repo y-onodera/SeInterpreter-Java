@@ -6,7 +6,7 @@ import static org.junit.Assert.*;
 
 public class InputDataTest {
 
-    private InputData target = new InputData()
+    private final InputData target = new InputData()
             .add("aTrue", "true")
             .add("aFalse", "false")
             .add("number", "1")
