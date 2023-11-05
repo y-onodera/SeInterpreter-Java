@@ -12,11 +12,15 @@ public record InputData(LinkedHashMap<String, String> row, boolean lastRow) {
 
     public static final String ROW_NUMBER = "_rowNumber";
     private static final LinkedHashMap<String, String> EMPTY = new LinkedHashMap<>();
-    private static final String REGEX_EXPRESSION = ".*\\$\\{(.+)}.*";
+    private static final String REGEX_EXPRESSION = ".*\\$\\{([^}]+)}.*";
     private static final String STEP_INDEX = "_stepIndex";
 
     private static String extractExpression(final String result) {
         return result.replaceAll(REGEX_EXPRESSION, "$1");
+    }
+
+    public static boolean hasExpression(final String target) {
+        return target.matches(REGEX_EXPRESSION);
     }
 
     public InputData() {
@@ -116,6 +120,7 @@ public record InputData(LinkedHashMap<String, String> row, boolean lastRow) {
             final JexlContext jc = new MapContext(new HashMap<>(this.row));
             return Optional.ofNullable(expression.evaluate(jc))
                     .map(it -> result.replace("${" + exp + "}", it.toString()))
+                    .map(this::evaluateString)
                     .orElse(result);
         } catch (final JexlException ex) {
             return result;
