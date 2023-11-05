@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
+import java.util.function.UnaryOperator;
 
 public interface Pointcut {
 
@@ -95,6 +96,10 @@ public interface Pointcut {
         return result;
     }
 
+    default Pointcut convert(final UnaryOperator<Pointcut> function) {
+        return function.apply(this);
+    }
+
     interface ExportablePointcut extends Pointcut, Exportable {
         @Override
         default String key() {
@@ -112,6 +117,11 @@ public interface Pointcut {
         @Override
         public Pointcut materialize(final InputData var) {
             return new Or(this.origin.materialize(var), this.other.materialize(var));
+        }
+
+        @Override
+        public Pointcut convert(final UnaryOperator<Pointcut> function) {
+            return new Pointcut.Or(function.apply(this.origin), function.apply(this.other));
         }
 
         @Override
@@ -150,6 +160,11 @@ public interface Pointcut {
         @Override
         public Pointcut materialize(final InputData var) {
             return new And(this.origin.materialize(var), this.other.materialize(var));
+        }
+
+        @Override
+        public Pointcut convert(final UnaryOperator<Pointcut> function) {
+            return new Pointcut.And(function.apply(this.origin), function.apply(this.other));
         }
 
         @Override

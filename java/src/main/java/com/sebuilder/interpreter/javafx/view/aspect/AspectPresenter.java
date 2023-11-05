@@ -9,6 +9,7 @@ import com.sebuilder.interpreter.javafx.view.HasFileChooser;
 import com.sebuilder.interpreter.javafx.view.SuccessDialog;
 import com.sebuilder.interpreter.javafx.view.filter.FilterTablePresenter;
 import com.sebuilder.interpreter.javafx.view.step.StepTablePresenter;
+import com.sebuilder.interpreter.pointcut.ImportFilter;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
@@ -185,8 +186,15 @@ public class AspectPresenter implements HasFileChooser {
     @FXML
     void saveAs() {
         this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
-            this.applyChangeToCurrent();
             final File target = this.saveDialog("Save Aspect File", "json format (*.json)", "*.json");
+            this.replaceCurrent(current -> current.convert(it -> {
+                if (it instanceof ExtraStepExecutor extra) {
+                    return extra.map(builder -> builder.convertPointcut(this.replaceAssociateFileTo(target)));
+                } else {
+                    return it;
+                }
+            }));
+            this.applyChangeToCurrent();
             Files.writeString(target.toPath(), this.textAreaJson.getText(), Charsets.UTF_8);
             this.rootProperty.set(this.rootProperty.get()
                     .remove(it -> this.isRootSelect() && this.currentProperty.get().contains(it))
@@ -203,6 +211,24 @@ public class AspectPresenter implements HasFileChooser {
             this.refreshTab();
             SuccessDialog.show("save succeed");
         });
+    }
+
+    private UnaryOperator<Pointcut> replaceAssociateFileTo(final File target) {
+        return pointcut -> {
+            if (pointcut instanceof ImportFilter imported) {
+                if (InputData.hasExpression(imported.path()) || InputData.hasExpression(imported.where())) {
+                    return new ImportFilter(imported.path(), imported.where(), (path) -> Context.getScriptParser()
+                            .loadPointCut(path, target.getParentFile()));
+                }
+                return new ImportFilter(target.getParentFile().toPath()
+                        .relativize(new File(new File(".").getAbsoluteFile().toPath()
+                                .relativize(this.application.getCurrentRootDir().toPath()).toString()
+                                , new File(imported.path(), imported.where()).getPath())
+                                .getAbsoluteFile().toPath()).toString().replace("\\", "/")
+                        , "", (path) -> Context.getScriptParser().loadPointCut(path, target.getParentFile()));
+            }
+            return pointcut;
+        };
     }
 
     private void refreshTreeView() {

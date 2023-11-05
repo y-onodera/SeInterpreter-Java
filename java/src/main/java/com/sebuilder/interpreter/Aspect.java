@@ -7,6 +7,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -64,7 +65,7 @@ public record Aspect(Iterable<Interceptor> interceptors) implements Iterable<Int
     }
 
     public Aspect replace(final Interceptor currentValue, final Interceptor newValue) {
-        return from(this.getStream().map(it -> it.equals(currentValue) ? newValue : it));
+        return this.convert(it -> currentValue.equals(it) ? newValue : it);
     }
 
     public Aspect remove(final Interceptor removeItem) {
@@ -73,6 +74,10 @@ public record Aspect(Iterable<Interceptor> interceptors) implements Iterable<Int
 
     public Aspect remove(final Predicate<Interceptor> filter) {
         return from(this.getStream().filter(it -> !filter.test(it)));
+    }
+
+    public Aspect convert(final UnaryOperator<Interceptor> function) {
+        return from(this.getStream().map(function));
     }
 
     public record Advice(List<Interceptor> advices) {

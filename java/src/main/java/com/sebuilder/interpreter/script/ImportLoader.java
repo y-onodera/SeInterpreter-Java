@@ -5,7 +5,7 @@ import org.json.JSONObject;
 
 import java.util.function.BiFunction;
 
-public class ImportLoader {
+public record ImportLoader() {
 
     public <R> R load(final JSONObject src, final String key, final BiFunction<String, String, R> loadFunction) {
         if (src.get(key) instanceof String value) {

@@ -17,6 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -86,7 +87,7 @@ public record PointcutLoader(ImportLoader importLoader) {
 
     public Optional<Pointcut> importScript(final JSONObject src, final String key, final File baseDir) {
         return this.importLoader.load(src, key, (value, where) ->
-                Optional.of(new ImportFilter(value, where, (path) -> this.load(path, baseDir).orElseThrow())));
+                Optional.of(new ImportFilter(value, where, new ImportFunction(this, baseDir))));
     }
 
     public Optional<Pointcut> getStringFilter(final JSONObject pointcutJSON, final String key) {
@@ -166,4 +167,10 @@ public record PointcutLoader(ImportLoader importLoader) {
         return new VerifyFilter(verify, params, locatorParams);
     }
 
+    public record ImportFunction(PointcutLoader loader, File baseDir) implements Function<File, Pointcut> {
+        @Override
+        public Pointcut apply(final File file) {
+            return this.loader.load(file, this.baseDir).orElseThrow();
+        }
+    }
 }

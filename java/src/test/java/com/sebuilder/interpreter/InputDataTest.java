@@ -22,6 +22,7 @@ public class InputDataTest {
         assertTrue(InputData.hasExpression("${var1 == '${nestedVar}'}"));
         assertFalse(InputData.hasExpression("{aTrue == true}"));
         assertFalse(InputData.hasExpression("aTrue == true"));
+        assertFalse(InputData.hasExpression(""));
     }
 
     @Test

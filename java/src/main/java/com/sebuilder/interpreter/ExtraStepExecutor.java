@@ -1,6 +1,7 @@
 package com.sebuilder.interpreter;
 
 import java.util.Optional;
+import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 public record ExtraStepExecutor(Pointcut pointcut,
@@ -59,7 +60,7 @@ public record ExtraStepExecutor(Pointcut pointcut,
     }
 
     @Override
-    public Interceptor takeOverChain(final boolean newValue) {
+    public ExtraStepExecutor takeOverChain(final boolean newValue) {
         if (newValue == this.takeOverChain) {
             return this;
         }
@@ -92,6 +93,10 @@ public record ExtraStepExecutor(Pointcut pointcut,
                 this.isAspectRunning(false);
             }
         };
+    }
+
+    public ExtraStepExecutor map(final UnaryOperator<ExtraStepExecutor.Builder> function) {
+        return function.apply(this.builder()).build();
     }
 
     public Builder builder() {
@@ -141,6 +146,10 @@ public record ExtraStepExecutor(Pointcut pointcut,
         public Builder setPointcut(final Pointcut pointcut) {
             this.pointcut = pointcut;
             return this;
+        }
+
+        public Builder convertPointcut(final UnaryOperator<Pointcut> function) {
+            return this.setPointcut(this.pointcut.convert(function));
         }
 
         public Builder addBefore(final TestCase testCase) {

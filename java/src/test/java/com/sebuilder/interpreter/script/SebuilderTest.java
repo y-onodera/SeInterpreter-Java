@@ -488,10 +488,10 @@ public class SebuilderTest {
                             .assertChainCase(1, new ParseScriptTypeWithDataSource().getTestCaseAssert()
                                     .builder()
                                     .assertOverrideDataSource(TestCaseAssert.assertEqualsOverrideDataSst(DATA_SET_NONE))
-                                    .assertIncludeTestRun(it -> assertEquals(
-                                            new TypeFilter("SetElementText")
-                                                    .or(new TypeFilter("SelectElementValue"))
-                                                    .or(new TypeFilter("SetElementSelected"))
+                                    .assertIncludeTestRun(it -> assertEquals(new ImportFilter("typeFilter.json"
+                                                    , "target/test-classes/com/sebuilder/interpreter/script/pointcut"
+                                                    , new PointcutLoader.ImportFunction(new PointcutLoader(new ImportLoader())
+                                                    , new File(baseDir).getAbsoluteFile()))
                                                     .and(new VerifyFilter(new ElementEnable().toVerify(), new HashMap<>(), new HashMap<>()))
                                                     .and(new SkipFilter(false))
                                                     .and(new VerifyFilter(new ElementAttribute().toVerify(), new HashMap<>() {{
@@ -510,10 +510,10 @@ public class SebuilderTest {
                                                         this.put("locator", new Locator("name", "name1"));
                                                     }}))
                                             , it))
-                                    .assertExcludeTestRun(it -> assertEquals(
-                                            new LocatorFilter("locator", new Locator("id", "id1"))
-                                                    .or(new LocatorFilter("locator", new Locator("id", "id2")))
-                                                    .or(new LocatorFilter("locator", new Locator("id", "id3")))
+                                    .assertExcludeTestRun(it -> assertEquals(new ImportFilter("pointcut/locatorFilter.json"
+                                                    , ""
+                                                    , new PointcutLoader.ImportFunction(new PointcutLoader(new ImportLoader())
+                                                    , new File(baseDir).getAbsoluteFile()))
                                             , it))
                                     .build())
                             .build())
@@ -541,12 +541,10 @@ public class SebuilderTest {
                             .builder()
                             .assertAspect(it -> Assert.assertEquals(new Aspect().builder()
                                     .add(new ExtraStepExecutor.Builder()
-                                            .setPointcut(new TypeFilter("SetElementText")
-                                                    .or(new TypeFilter("SelectElementValue"))
-                                                    .or(new TypeFilter("SetElementSelected"))
-                                                    .and(new LocatorFilter("locator", new Locator("id", "id1"))
-                                                            .or(new LocatorFilter("locator", new Locator("id", "id2")))
-                                                            .or(new LocatorFilter("locator", new Locator("id", "id3"))))
+                                            .setPointcut(new ImportFilter("../pointcut/multiFilter.json"
+                                                    , ""
+                                                    , new PointcutLoader.ImportFunction(new PointcutLoader(new ImportLoader())
+                                                    , new File(baseDir, "aspect").getAbsoluteFile()))
                                                     .and(new SkipFilter(false))
                                             ).addAfter(new TestCaseBuilder()
                                                     .addStep(new SetElementText().toStep().put("text", "after step").build())
