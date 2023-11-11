@@ -52,7 +52,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>31.1-jre</version>
+            <version>32.1.2-jre</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.google.guava</groupId>
@@ -64,6 +64,12 @@
             <groupId>org.apache.ant</groupId>
             <artifactId>ant-junit</artifactId>
             <version>1.10.13</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>junit</groupId>
+                    <artifactId>junit</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
@@ -109,7 +115,7 @@
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-java</artifactId>
-            <version>4.14.1</version>
+            <version>4.15.0</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.seleniumhq.selenium</groupId>
@@ -117,7 +123,7 @@
                 </exclusion>
                 <exclusion>
                     <groupId>org.seleniumhq.selenium</groupId>
-                    <artifactId>selenium-devtools-v116</artifactId>
+                    <artifactId>selenium-devtools-v119</artifactId>
                 </exclusion>
                 <exclusion>
                     <groupId>org.seleniumhq.selenium</groupId>
@@ -171,6 +177,10 @@
                 <exclusion>
                     <groupId>org.openjfx</groupId>
                     <artifactId>javafx-swing</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.openjfx</groupId>
+                    <artifactId>javafx-controls</artifactId>
                 </exclusion>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -236,6 +246,12 @@
             <artifactId>mockito-core</artifactId>
             <version>5.2.0</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>net.bytebuddy</groupId>
+                    <artifactId>byte-buddy</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
