@@ -43,7 +43,7 @@ public record Aspect(Iterable<Interceptor> interceptors) implements Iterable<Int
     }
 
     public Stream<Interceptor> getStream() {
-        return this.toStream(this.interceptors);
+        return StreamSupport.stream(this.interceptors.spliterator(), false);
     }
 
     @Override
@@ -107,10 +107,6 @@ public record Aspect(Iterable<Interceptor> interceptors) implements Iterable<Int
                 }
             }
         }
-    }
-
-    private Stream<Interceptor> toStream(final Iterable<Interceptor> materialize) {
-        return StreamSupport.stream(materialize.spliterator(), false);
     }
 
     public static class Builder {
