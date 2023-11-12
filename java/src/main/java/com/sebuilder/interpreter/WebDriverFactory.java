@@ -56,16 +56,16 @@ public interface WebDriverFactory {
     String getDriverPath();
 
     default String getBinaryPath() {
-        return Context.getDriverConfig().getOrDefault("binary", null);
+        return Context.getDriverConfig().getOrDefault(Context.BROWSER_BINARY_KEY, null);
     }
 
     void setDriverPath(String driverPath);
 
     default void setBinaryPath(final String binaryPath) {
         if (Strings.isNullOrEmpty(binaryPath)) {
-            Context.getDriverConfig().remove("binary");
+            Context.getDriverConfig().remove(Context.BROWSER_BINARY_KEY);
         } else {
-            Context.getDriverConfig().put("binary", binaryPath);
+            Context.getDriverConfig().put(Context.BROWSER_BINARY_KEY, binaryPath);
         }
     }
 }

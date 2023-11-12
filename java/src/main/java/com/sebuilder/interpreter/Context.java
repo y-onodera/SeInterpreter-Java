@@ -1,10 +1,10 @@
 package com.sebuilder.interpreter;
 
-import com.google.common.base.Strings;
 import com.sebuilder.interpreter.pointcut.TypeFilter;
 import com.sebuilder.interpreter.step.type.SaveScreenshot;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.manager.SeleniumManager;
+import org.openqa.selenium.manager.SeleniumManagerOutput;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -26,6 +26,8 @@ public enum Context {
 
     INSTANCE;
 
+    public static final String BROWSER_BINARY_KEY = "binary";
+    public static final String BROWSER_VERSION_KEY = "browserVersion";
     public static final String REMOTE_URL_KEY = "remote-url";
     private final File baseDirectory = Paths.get(".").toAbsolutePath().normalize().toFile();
     private String browser;
@@ -305,11 +307,8 @@ public enum Context {
     }
 
     public void setBrowser(final String browserName, final String driverPath, final String binaryPath) {
-        this.setBrowser(browserName, driverPath).wdf.setBinaryPath(binaryPath);
-    }
-
-    public Context setBrowser(final String browserName, final String driverPath) {
-        return this.setBrowser(browserName)
+        this.wdf.setBinaryPath(binaryPath);
+        this.setBrowser(browserName)
                 .setWebDriverPath(driverPath);
     }
 
@@ -318,7 +317,7 @@ public enum Context {
     }
 
     public Context setRemoteUrl(final String remoteUrl) {
-        if (Strings.isNullOrEmpty(remoteUrl)) {
+        if (this.isNullOrEmpty(remoteUrl)) {
             this.driverConfig.remove(REMOTE_URL_KEY);
         } else {
             this.driverConfig.put(REMOTE_URL_KEY, remoteUrl);
@@ -327,10 +326,11 @@ public enum Context {
     }
 
     public Context setWebDriverPath(final String driverPath) {
-        if (Strings.isNullOrEmpty(driverPath)) {
-            this.wdf.setDriverPath(SeleniumManager.getInstance()
-                    .getDriverPath(this.wdf.getOptions(this.driverConfig), false)
-                    .getDriverPath());
+        if (this.isNullOrEmpty(driverPath)) {
+            final SeleniumManagerOutput.Result mangerResult = SeleniumManager.getInstance()
+                    .getDriverPath(this.wdf.getOptions(this.driverConfig), false);
+            this.wdf.setDriverPath(mangerResult.getDriverPath());
+            this.wdf.setBinaryPath(mangerResult.getBrowserPath());
         } else {
             this.wdf.setDriverPath(driverPath);
         }
@@ -502,6 +502,10 @@ public enum Context {
         public String getName() {
             return this.name;
         }
+    }
+
+    private boolean isNullOrEmpty(final String driverPath) {
+        return Optional.ofNullable(driverPath).filter(it -> !it.isEmpty()).isEmpty();
     }
 
 }

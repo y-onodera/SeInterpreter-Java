@@ -8,6 +8,8 @@
     <MigPane cols="[fill][grow][fill]" rows="[30][30][30][30]" prefHeight="150" prefWidth="400.0">
         <Label text="browser"/>
         <ComboBox fx:id="browserSelect" onAction="#selectBrowser" MigPane.cc="wrap"/>
+        <Label text="driver.browserVersion"/>
+        <TextField fx:id="browserVersionText" MigPane.cc="wrap,grow"/>
         <Label text="driver.remote-url"/>
         <TextField fx:id="remoteUrl" MigPane.cc="wrap,grow"/>
         <Label text="driverPath"/>

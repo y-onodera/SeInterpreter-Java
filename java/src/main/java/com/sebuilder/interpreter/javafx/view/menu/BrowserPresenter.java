@@ -19,6 +19,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class BrowserPresenter implements HasFileChooser {
@@ -29,16 +30,14 @@ public class BrowserPresenter implements HasFileChooser {
     private ErrorDialog errorDialog;
     @FXML
     private ComboBox<String> browserSelect;
-
+    @FXML
+    private TextField browserVersionText;
     @FXML
     private TextField remoteUrl;
-
     @FXML
     private TextField driverText;
-
     @FXML
     private TextField binaryText;
-
     @FXML
     private Button binarySearchButton;
 
@@ -53,9 +52,28 @@ public class BrowserPresenter implements HasFileChooser {
     @FXML
     void initialize() {
         this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
-            this.init(Context.getRemoteUrl(), Context.getBrowser(), Context.getWebDriverFactory().getDriverPath());
+            this.browserSelect.getItems().add("Chrome");
+            this.browserSelect.getItems().add("Firefox");
+            this.browserSelect.getItems().add("InternetExplorer");
+            this.browserSelect.getItems().add("Edge");
+            if (!Strings.isNullOrEmpty(Context.getBrowser())) {
+                this.browserSelect.getSelectionModel().select(Context.getBrowser());
+            } else {
+                this.browserSelect.getSelectionModel().select(0);
+            }
+            this.selectBrowser();
+            this.browserVersionText.setText(Context.getDriverConfig().get(Context.BROWSER_VERSION_KEY));
+            this.remoteUrl.setText(Context.getRemoteUrl());
+            if (Strings.isNullOrEmpty(Context.getRemoteUrl()) && !Strings.isNullOrEmpty(Context.getWebDriverFactory().getDriverPath())) {
+                this.currentDriverPath = Context.getWebDriverFactory().getDriverPath();
+                this.driverText.setText(this.currentDriverPath);
+                this.parentDir = new File(this.currentDriverPath).getParentFile().getAbsoluteFile();
+            }
             this.driverConfig = new InputData().builder().add(Context.getDriverConfig()).build()
-                    .filter(it -> !it.getKey().equals("binary") && !it.getKey().equals(Context.REMOTE_URL_KEY));
+                    .filter(it -> !it.getKey().equals(Context.BROWSER_BINARY_KEY)
+                            && !it.getKey().equals(Context.BROWSER_VERSION_KEY)
+                            && !it.getKey().equals(Context.REMOTE_URL_KEY)
+                    );
         });
     }
 
@@ -123,9 +141,14 @@ public class BrowserPresenter implements HasFileChooser {
                             , Map.Entry::getValue
                             , (e1, e2) -> e1
                             , HashMap::new));
-            if (Context.getDriverConfig().containsKey("binary")) {
-                newConfig.put("binary", Context.getDriverConfig().get("binary"));
+            if (Context.getDriverConfig().containsKey(Context.BROWSER_BINARY_KEY)) {
+                newConfig.put(Context.BROWSER_BINARY_KEY, Context.getDriverConfig().get(Context.BROWSER_BINARY_KEY));
             }
+            Optional.ofNullable(this.browserVersionText.getText())
+                    .filter(it -> !it.isEmpty())
+                    .ifPresent(it ->
+                            newConfig.put(Context.BROWSER_VERSION_KEY, it)
+                    );
             if (Context.getDriverConfig().containsKey(Context.REMOTE_URL_KEY)) {
                 newConfig.put(Context.REMOTE_URL_KEY, Context.getDriverConfig().get(Context.REMOTE_URL_KEY));
             }
@@ -146,25 +169,6 @@ public class BrowserPresenter implements HasFileChooser {
     @Override
     public File getBaseDirectory() {
         return this.parentDir;
-    }
-
-    private void init(final String remoteUrl, final String aSelectedBrowser, final String aCurrentDriverPath) {
-        this.browserSelect.getItems().add("Chrome");
-        this.browserSelect.getItems().add("Firefox");
-        this.browserSelect.getItems().add("InternetExplorer");
-        this.browserSelect.getItems().add("Edge");
-        if (!Strings.isNullOrEmpty(aSelectedBrowser)) {
-            this.browserSelect.getSelectionModel().select(aSelectedBrowser);
-        } else {
-            this.browserSelect.getSelectionModel().select(0);
-        }
-        this.selectBrowser();
-        this.remoteUrl.setText(remoteUrl);
-        if (Strings.isNullOrEmpty(remoteUrl) && !Strings.isNullOrEmpty(aCurrentDriverPath)) {
-            this.currentDriverPath = aCurrentDriverPath;
-            this.driverText.setText(this.currentDriverPath);
-            this.parentDir = new File(this.currentDriverPath).getParentFile().getAbsoluteFile();
-        }
     }
 
     private void populate() {
