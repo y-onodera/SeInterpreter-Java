@@ -17,7 +17,7 @@
 package com.sebuilder.interpreter;
 
 import com.google.common.base.Strings;
-import org.openqa.selenium.Capabilities;
+import org.openqa.selenium.remote.AbstractDriverOptions;
 import org.openqa.selenium.remote.LocalFileDetector;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
@@ -45,7 +45,7 @@ public interface WebDriverFactory {
 
     RemoteWebDriver createLocaleDriver(Map<String, String> config);
 
-    Capabilities getOptions(Map<String, String> config);
+    AbstractDriverOptions<?> getOptions(Map<String, String> config);
 
     default String targetBrowser() {
         return this.getClass().getSimpleName();

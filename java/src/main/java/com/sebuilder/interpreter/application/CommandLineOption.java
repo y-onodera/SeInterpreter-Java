@@ -15,6 +15,7 @@ public class CommandLineOption {
     private int waitForMaxMs = 30000;
     private int waitForIntervalMs = 500;
     private String driver = "Chrome";
+    private String browserVersion;
     private String driverPath;
     private final Map<String, String> driverConfig = new HashMap<>();
     private String datasourceEncoding = "UTF-8";
@@ -55,7 +56,11 @@ public class CommandLineOption {
                 } else if (kv[0].equals(CommandLineArgument.WAIT_FOR_INTERVAL_MS.key())) {
                     this.waitForIntervalMs = Integer.parseInt(kv[1]);
                 } else if (kv[0].startsWith(CommandLineArgument.DRIVER_CONFIG_PREFIX.key())) {
-                    this.driverConfig.put(kv[0].substring(CommandLineArgument.DRIVER_CONFIG_PREFIX.key().length()), kv[1]);
+                    if (kv[0].equals(CommandLineArgument.DRIVER_CONFIG_BROWSER_VERSION.key())) {
+                        this.browserVersion = kv[1];
+                    } else {
+                        this.driverConfig.put(kv[0].substring(CommandLineArgument.DRIVER_CONFIG_PREFIX.key().length()), kv[1]);
+                    }
                 } else if (kv[0].equals(CommandLineArgument.DRIVER.key())) {
                     this.driver = kv[1];
                 } else if (kv[0].equals(CommandLineArgument.DRIVER_PATH.key())) {
@@ -117,6 +122,10 @@ public class CommandLineOption {
 
     public String getDriver() {
         return this.driver;
+    }
+
+    public String getBrowserVersion() {
+        return this.browserVersion;
     }
 
     public String getDriverPath() {

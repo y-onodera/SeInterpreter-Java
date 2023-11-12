@@ -56,13 +56,13 @@ public class SeInterpreterRunner {
         return this.screenShotOutputDirectory;
     }
 
-    public void reloadSetting(final String browserName, final String driverPath, final String binaryPath) {
+    public void reloadSetting(final String browserName, final String browserVersion, final String driverPath, final String binaryPath) {
         if (this.isOpen()) {
             this.close();
         } else {
             this.setUp();
         }
-        this.repl.reloadBrowserSetting(browserName, driverPath, binaryPath);
+        this.repl.reloadBrowserSetting(browserName, browserVersion, driverPath, binaryPath);
     }
 
     public boolean isOpen() {

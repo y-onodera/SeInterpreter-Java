@@ -5,6 +5,7 @@ import com.sebuilder.interpreter.step.type.SaveScreenshot;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.manager.SeleniumManager;
 import org.openqa.selenium.manager.SeleniumManagerOutput;
+import org.openqa.selenium.remote.AbstractDriverOptions;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -27,10 +28,10 @@ public enum Context {
     INSTANCE;
 
     public static final String BROWSER_BINARY_KEY = "binary";
-    public static final String BROWSER_VERSION_KEY = "browserVersion";
     public static final String REMOTE_URL_KEY = "remote-url";
     private final File baseDirectory = Paths.get(".").toAbsolutePath().normalize().toFile();
     private String browser;
+    private String browserVersion;
     private final HashMap<String, String> driverConfig = new HashMap<>();
     private WebDriverFactory wdf;
     private Long implicitlyWaitTime;
@@ -107,6 +108,10 @@ public enum Context {
 
     public static String getBrowser() {
         return getInstance().browser;
+    }
+
+    public static String getBrowserVersion() {
+        return getInstance().browserVersion;
     }
 
     public static boolean isRemote() {
@@ -306,14 +311,20 @@ public enum Context {
         return this;
     }
 
-    public void setBrowser(final String browserName, final String driverPath, final String binaryPath) {
+    public void setBrowser(final String browserName, final String browserVersion, final String driverPath, final String binaryPath) {
         this.wdf.setBinaryPath(binaryPath);
         this.setBrowser(browserName)
+                .setBrowserVersion(browserVersion)
                 .setWebDriverPath(driverPath);
     }
 
     public Context setBrowser(final String browser) {
         return this.setWebDriverFactory(getWebDriverFactory(browser));
+    }
+
+    public Context setBrowserVersion(final String browserVersion) {
+        this.browserVersion = browserVersion;
+        return this;
     }
 
     public Context setRemoteUrl(final String remoteUrl) {
@@ -327,8 +338,12 @@ public enum Context {
 
     public Context setWebDriverPath(final String driverPath) {
         if (this.isNullOrEmpty(driverPath)) {
+            final AbstractDriverOptions<?> options = this.wdf.getOptions(this.driverConfig);
+            if (!this.isNullOrEmpty(this.browserVersion)) {
+                options.setBrowserVersion(this.browserVersion);
+            }
             final SeleniumManagerOutput.Result mangerResult = SeleniumManager.getInstance()
-                    .getDriverPath(this.wdf.getOptions(this.driverConfig), false);
+                    .getDriverPath(options, false);
             this.wdf.setDriverPath(mangerResult.getDriverPath());
             this.wdf.setBinaryPath(mangerResult.getBrowserPath());
         } else {

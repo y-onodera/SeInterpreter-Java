@@ -233,8 +233,8 @@ public record SeInterpreter(
         this.saveContents().accept(new File(this.getDisplayTestCase().path()), Context.toString(this.getDisplayTestCase()));
     }
 
-    public void browserSetting(final String selectedBrowser, final String remoteUrl, final String driverPath, final String binaryPath) {
-        this.runner().reloadSetting(selectedBrowser, driverPath, binaryPath);
+    public void browserSetting(final String selectedBrowser, final String browserVersion, final String remoteUrl, final String driverPath, final String binaryPath) {
+        this.runner().reloadSetting(selectedBrowser, browserVersion, driverPath, binaryPath);
         if (!Strings.isNullOrEmpty(remoteUrl)) {
             Context.getInstance().setRemoteUrl(remoteUrl);
         } else {

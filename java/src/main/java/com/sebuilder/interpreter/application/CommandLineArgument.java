@@ -9,6 +9,7 @@ public enum CommandLineArgument {
     DRIVER("--driver"),
     DRIVER_PATH("--driverPath"),
     DRIVER_CONFIG_PREFIX("--driver."),
+    DRIVER_CONFIG_BROWSER_VERSION("--driver.browserVersion"),
     DATASOURCE_ENCODING("--datasource.encoding"),
     DATASOURCE_DIRECTORY("--datasource.directory"),
     RESULT_OUTPUT("--resultoutput"),

@@ -31,7 +31,7 @@ public class BrowserPresenter implements HasFileChooser {
     @FXML
     private ComboBox<String> browserSelect;
     @FXML
-    private TextField browserVersionText;
+    private ComboBox<String> browserVersion;
     @FXML
     private TextField remoteUrl;
     @FXML
@@ -62,19 +62,32 @@ public class BrowserPresenter implements HasFileChooser {
                 this.browserSelect.getSelectionModel().select(0);
             }
             this.selectBrowser();
-            this.browserVersionText.setText(Context.getDriverConfig().get(Context.BROWSER_VERSION_KEY));
-            this.remoteUrl.setText(Context.getRemoteUrl());
-            if (Strings.isNullOrEmpty(Context.getRemoteUrl()) && !Strings.isNullOrEmpty(Context.getWebDriverFactory().getDriverPath())) {
-                this.currentDriverPath = Context.getWebDriverFactory().getDriverPath();
-                this.driverText.setText(this.currentDriverPath);
-                this.parentDir = new File(this.currentDriverPath).getParentFile().getAbsoluteFile();
-            }
-            this.driverConfig = new InputData().builder().add(Context.getDriverConfig()).build()
-                    .filter(it -> !it.getKey().equals(Context.BROWSER_BINARY_KEY)
-                            && !it.getKey().equals(Context.BROWSER_VERSION_KEY)
-                            && !it.getKey().equals(Context.REMOTE_URL_KEY)
-                    );
+            this.browserVersion.setEditable(true);
+            this.browserVersion.getItems().add("");
+            this.browserVersion.getItems().add("stable");
+            this.browserVersion.getItems().add("beta");
+            this.browserVersion.getItems().add("dev");
+            this.browserVersion.getItems().add("canary");
+            this.browserVersion.getItems().add("nightly");
+            this.browserVersion.setValue(Context.getBrowserVersion());
+            this.browserVersion.getSelectionModel().selectedItemProperty().addListener((observed, oldValue, newValue) ->
+                    Optional.ofNullable(newValue).ifPresent(it -> {
+                        if (!Objects.equals(oldValue, newValue) && !it.isEmpty()) {
+                            this.driverText.setText(null);
+                            this.binaryText.setText(null);
+                        }
+                    }));
         });
+        this.remoteUrl.setText(Context.getRemoteUrl());
+        if (Strings.isNullOrEmpty(Context.getRemoteUrl()) && !Strings.isNullOrEmpty(Context.getWebDriverFactory().getDriverPath())) {
+            this.currentDriverPath = Context.getWebDriverFactory().getDriverPath();
+            this.driverText.setText(this.currentDriverPath);
+            this.parentDir = new File(this.currentDriverPath).getParentFile().getAbsoluteFile();
+        }
+        this.driverConfig = new InputData().builder().add(Context.getDriverConfig()).build()
+                .filter(it -> !it.getKey().equals(Context.BROWSER_BINARY_KEY)
+                        && !it.getKey().equals(Context.REMOTE_URL_KEY)
+                );
     }
 
     @FXML
@@ -122,14 +135,13 @@ public class BrowserPresenter implements HasFileChooser {
 
     @FXML
     void driverConfig() {
-        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
-            VariableView.builder()
-                    .setTitle("env setting")
-                    .setOnclick(result -> this.driverConfig = result)
-                    .setTarget(this.driverConfig)
-                    .setWindow(this.browserSelect.getScene().getWindow())
-                    .build();
-        });
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() ->
+                VariableView.builder()
+                        .setTitle("env setting")
+                        .setOnclick(result -> this.driverConfig = result)
+                        .setTarget(this.driverConfig)
+                        .setWindow(this.browserSelect.getScene().getWindow())
+                        .build());
     }
 
     @FXML
@@ -141,19 +153,12 @@ public class BrowserPresenter implements HasFileChooser {
                             , Map.Entry::getValue
                             , (e1, e2) -> e1
                             , HashMap::new));
-            if (Context.getDriverConfig().containsKey(Context.BROWSER_BINARY_KEY)) {
-                newConfig.put(Context.BROWSER_BINARY_KEY, Context.getDriverConfig().get(Context.BROWSER_BINARY_KEY));
-            }
-            Optional.ofNullable(this.browserVersionText.getText())
-                    .filter(it -> !it.isEmpty())
-                    .ifPresent(it ->
-                            newConfig.put(Context.BROWSER_VERSION_KEY, it)
-                    );
             if (Context.getDriverConfig().containsKey(Context.REMOTE_URL_KEY)) {
                 newConfig.put(Context.REMOTE_URL_KEY, Context.getDriverConfig().get(Context.REMOTE_URL_KEY));
             }
             Context.getInstance().setDriverConfig(newConfig);
             this.application.browserSetting(this.selectedBrowser
+                    , this.browserVersion.getValue()
                     , this.remoteUrl.getText()
                     , this.driverText.getText()
                     , this.binaryText.getText());
