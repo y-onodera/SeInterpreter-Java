@@ -234,12 +234,12 @@ public record SeInterpreter(
     }
 
     public void browserSetting(final String selectedBrowser, final String browserVersion, final String remoteUrl, final String driverPath, final String binaryPath) {
-        this.runner().reloadSetting(selectedBrowser, browserVersion, driverPath, binaryPath);
         if (!Strings.isNullOrEmpty(remoteUrl)) {
             Context.getInstance().setRemoteUrl(remoteUrl);
         } else {
             Context.getInstance().setRemoteUrl(null);
         }
+        this.runner().reloadSetting(selectedBrowser, browserVersion, driverPath, binaryPath);
         this.browserOpen();
     }
 

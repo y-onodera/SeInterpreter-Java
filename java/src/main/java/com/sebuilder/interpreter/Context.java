@@ -114,6 +114,10 @@ public enum Context {
         return getInstance().browserVersion;
     }
 
+    public static boolean hasBrowserVersion() {
+        return !isNullOrEmpty(getBrowserVersion());
+    }
+
     public static boolean isRemote() {
         return getInstance().driverConfig.containsKey(REMOTE_URL_KEY);
     }
@@ -328,7 +332,7 @@ public enum Context {
     }
 
     public Context setRemoteUrl(final String remoteUrl) {
-        if (this.isNullOrEmpty(remoteUrl)) {
+        if (isNullOrEmpty(remoteUrl)) {
             this.driverConfig.remove(REMOTE_URL_KEY);
         } else {
             this.driverConfig.put(REMOTE_URL_KEY, remoteUrl);
@@ -337,9 +341,9 @@ public enum Context {
     }
 
     public Context setWebDriverPath(final String driverPath) {
-        if (this.isNullOrEmpty(driverPath)) {
+        if (isNullOrEmpty(driverPath)) {
             final AbstractDriverOptions<?> options = this.wdf.getOptions(this.driverConfig);
-            if (!this.isNullOrEmpty(this.browserVersion)) {
+            if (!isNullOrEmpty(this.browserVersion)) {
                 options.setBrowserVersion(this.browserVersion);
             }
             final SeleniumManagerOutput.Result mangerResult = SeleniumManager.getInstance()
@@ -519,7 +523,7 @@ public enum Context {
         }
     }
 
-    private boolean isNullOrEmpty(final String driverPath) {
+    private static boolean isNullOrEmpty(final String driverPath) {
         return Optional.ofNullable(driverPath).filter(it -> !it.isEmpty()).isEmpty();
     }
 
