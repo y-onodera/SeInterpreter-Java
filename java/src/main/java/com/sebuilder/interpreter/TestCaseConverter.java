@@ -7,4 +7,6 @@ public interface TestCaseConverter {
     String toString(TestCase target);
 
     String toString(Aspect target);
+
+    String toString(Pointcut target);
 }

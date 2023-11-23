@@ -1,19 +1,30 @@
 package com.sebuilder.interpreter.javafx.view.suite;
 
+import com.google.common.base.Charsets;
+import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.Pointcut;
+import com.sebuilder.interpreter.javafx.model.SeInterpreter;
 import com.sebuilder.interpreter.javafx.view.ErrorDialog;
+import com.sebuilder.interpreter.javafx.view.HasFileChooser;
+import com.sebuilder.interpreter.javafx.view.SuccessDialog;
 import com.sebuilder.interpreter.javafx.view.filter.FilterTablePresenter;
+import com.sebuilder.interpreter.pointcut.ImportFilter;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 
 import javax.inject.Inject;
+import java.io.File;
+import java.nio.file.Files;
 import java.util.function.Consumer;
 
-public class StepFilterPresenter {
+public class StepFilterPresenter implements HasFileChooser {
 
+    @Inject
+    private SeInterpreter application;
     @Inject
     private ErrorDialog errorDialog;
     @FXML
@@ -53,4 +64,21 @@ public class StepFilterPresenter {
         this.dialog.close();
     }
 
+    @FXML
+    public void saveAs() {
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            final File target = this.saveDialog("Save Filter File", "json format (*.json)", "*.json");
+            Files.writeString(target.toPath(), Context.getTestCaseConverter().toString(this.currentProperty.get()), Charsets.UTF_8);
+            this.currentProperty.set(new ImportFilter(this.application.getCurrentRootDir().toPath()
+                    .relativize(target.toPath()).toString().replace("\\", "/")
+                    , "", (path) -> Context.getScriptParser().loadPointCut(path, this.application.getCurrentRootDir())));
+            this.filterTableController.setTarget(this.currentProperty.get());
+            SuccessDialog.show("save succeed");
+        });
+    }
+
+    @Override
+    public Window currentWindow() {
+        return this.dialog.getOwner();
+    }
 }

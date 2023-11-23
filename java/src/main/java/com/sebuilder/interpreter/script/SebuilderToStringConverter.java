@@ -31,6 +31,18 @@ public class SebuilderToStringConverter implements TestCaseConverter {
         return result.toString(4);
     }
 
+    @Override
+    public String toString(final Pointcut target) {
+        final JSONObject result = new JSONObject();
+        final Collection<JSONObject> results = this.toJSON(target);
+        if (results.size() == 1) {
+            result.put("pointcut", results.iterator().next());
+        } else if (results.size() > 0) {
+            result.put("pointcut", results);
+        }
+        return result.toString(4);
+    }
+
     protected JSONObject toJSON(final TestCase target) {
         if (target.scriptFile().type() == ScriptFile.Type.SUITE) {
             return this.toJsonSuite(target);
