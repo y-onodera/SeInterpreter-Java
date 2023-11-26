@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import org.tbee.javafx.scene.layout.fxml.MigPane?>
@@ -11,8 +12,9 @@
                minWidth="-Infinity"
                xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
         <MigPane fx:id="pointcutGrid" cols="[75][105][120][120][120]" rows="[]" prefWidth="670.0"/>
-        <AnchorPane prefWidth="670.0">
-            <fx:include fx:id="stepEditor" source="../step/step.fxml" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"/>
-        </AnchorPane>
+        <MigPane cols="[grow]" rows="[30]" maxHeight="40" prefWidth="670.0"
+                 AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.bottomAnchor="0.0">
+            <Button id="apply" mnemonicParsing="false" text="apply" onAction="#filterApply" MigPane.cc="align right"/>
+        </MigPane>
     </SplitPane>
 </AnchorPane>

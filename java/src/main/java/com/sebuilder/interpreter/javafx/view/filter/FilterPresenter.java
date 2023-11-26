@@ -1,14 +1,11 @@
 package com.sebuilder.interpreter.javafx.view.filter;
 
-import com.sebuilder.interpreter.Context;
-import com.sebuilder.interpreter.Locator;
-import com.sebuilder.interpreter.Pointcut;
-import com.sebuilder.interpreter.Suite;
+import com.sebuilder.interpreter.*;
 import com.sebuilder.interpreter.javafx.model.SeInterpreter;
 import com.sebuilder.interpreter.javafx.view.ErrorDialog;
 import com.sebuilder.interpreter.javafx.view.HasFileChooser;
 import com.sebuilder.interpreter.javafx.view.StepSelectable;
-import com.sebuilder.interpreter.javafx.view.step.StepPresenter;
+import com.sebuilder.interpreter.javafx.view.step.StepView;
 import com.sebuilder.interpreter.pointcut.*;
 import com.sebuilder.interpreter.step.Verify;
 import javafx.fxml.FXML;
@@ -35,6 +32,7 @@ public class FilterPresenter implements StepSelectable {
             , "skip"
             , "negated"
             , "import"
+            , "verify"
     };
     @Inject
     private SeInterpreter seInterpreter;
@@ -42,8 +40,6 @@ public class FilterPresenter implements StepSelectable {
     private ErrorDialog errorDialog;
     @FXML
     private MigPane pointcutGrid;
-    @FXML
-    private StepPresenter stepEditorController;
 
     private final List<String> selectableTypes = new ArrayList<>(Arrays.asList(FILTER_TYPES));
 
@@ -51,23 +47,23 @@ public class FilterPresenter implements StepSelectable {
 
     private Consumer<Pointcut> applyPointcut;
 
+    private Stage dialog;
+
     @FXML
     public void initialize() {
         this.refreshView("", 0);
     }
 
+    @FXML
+    public void filterApply() {
+        final Pointcut result = this.createPointcut();
+        this.applyPointcut.accept(result);
+        this.dialog.close();
+    }
+
     void setApplyAction(final Stage dialog, final Consumer<Pointcut> applyAction) {
         this.applyPointcut = applyAction;
-        this.stepEditorController.populate(dialog, s -> s.startsWith("verify"), key -> !key.equals("skip")
-                , step -> {
-                    Pointcut result = this.createPointcut();
-                    if (step != null) {
-                        result = result.and(new VerifyFilter((Verify) step.type()
-                                , step.stringParams()
-                                , step.locatorParams()));
-                    }
-                    this.applyPointcut.accept(result);
-                });
+        this.dialog = dialog;
     }
 
     void refreshView(final Pointcut pointcut) {
@@ -87,8 +83,7 @@ public class FilterPresenter implements StepSelectable {
             } else if (it instanceof ImportFilter imported) {
                 values = new ImportValues(imported, row, this.seInterpreter.getSuite());
             } else if (it instanceof VerifyFilter verify) {
-                this.stepEditorController.refreshView(verify.toStep());
-                values = null;
+                values = new VerifyValues(verify, row);
             } else {
                 values = null;
             }
@@ -111,9 +106,10 @@ public class FilterPresenter implements StepSelectable {
                 case "skip" -> this.inputs.add(new SkipValues(rowIndex));
                 case "negated" -> this.inputs.add(new NegatedValues(rowIndex));
                 case "import" -> this.inputs.add(new ImportValues(rowIndex, this.seInterpreter.getSuite()));
+                case "verify" -> this.inputs.add(new VerifyValues(rowIndex));
             }
             this.inputs.forEach(it -> {
-                if (!"stringParam".equals(it.filterType()) && !"import".equals(it.filterType())) {
+                if (!"stringParam".equals(it.filterType()) && !"import".equals(it.filterType()) && !"verify".equals(it.filterType())) {
                     this.selectableTypes.remove(it.filterType());
                 }
             });
@@ -500,6 +496,70 @@ public class FilterPresenter implements StepSelectable {
 
         private String getSuiteParent() {
             return this.suite.path().isEmpty() ? "" : new File(this.suite.path()).getParent();
+        }
+    }
+
+    private class VerifyValues implements PointCutValues {
+        private final List<Pair<Node, String>> result = new ArrayList<>();
+        private final Label label = new Label();
+        private final int lastRow;
+        private Step step;
+
+        public VerifyValues(final int row) {
+            this.lastRow = row;
+            final Button edit = new Button("edit");
+            this.result.add(new Pair<>(this.label, "grow,span 2,cell 2 " + row));
+            this.result.add(new Pair<>(edit, "align left,cell 4 " + row));
+            edit.setOnAction(ev -> {
+                final StepView stepView = new StepView(s -> s.startsWith("verify"), key -> !key.equals("skip"));
+                stepView.open(FilterPresenter.this.currentWindow(), step -> {
+                    if (step != null) {
+                        final VerifyFilter pointcut = new VerifyFilter((Verify) step.type(), step.stringParams(), step.locatorParams());
+                        this.setStep(pointcut.toStep());
+                    }
+                });
+                if (this.step != null) {
+                    stepView.refresh(this.step);
+                }
+            });
+
+        }
+
+        public VerifyValues(final VerifyFilter verify, final int row) {
+            this(row);
+            this.setStep(verify.toStep());
+        }
+
+        @Override
+        public List<Pair<Node, String>> toInputNode() {
+            return this.result;
+        }
+
+        @Override
+        public Pointcut toPointcut() {
+            return new VerifyFilter((Verify) this.step.type()
+                    , this.step.stringParams()
+                    , this.step.locatorParams());
+        }
+
+        @Override
+        public int startRow() {
+            return this.lastRow;
+        }
+
+        @Override
+        public int lastRow() {
+            return this.lastRow;
+        }
+
+        @Override
+        public String filterType() {
+            return "verify";
+        }
+
+        private void setStep(final Step step) {
+            this.step = step;
+            this.label.setText(this.step.toPrettyString());
         }
     }
 }
