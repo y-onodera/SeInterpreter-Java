@@ -195,7 +195,7 @@
         <dependency>
             <groupId>org.controlsfx</groupId>
             <artifactId>controlsfx</artifactId>
-            <version>11.1.2</version>
+            <version>11.2.0</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.openjfx</groupId>
@@ -414,8 +414,7 @@
                                     </mainClass>
                                     <manifestEntries>
                                         <Multi-Release>true</Multi-Release>
-                                        <Add-Exports>javafx.base/com.sun.javafx.event
-                                            javafx.controls/com.sun.javafx.scene.control.behavior
+                                        <Add-Exports>javafx.base/com.sun.javafx.event javafx.controls/com.sun.javafx.scene.control.behavior
                                         </Add-Exports>
                                     </manifestEntries>
                                 </transformer>
