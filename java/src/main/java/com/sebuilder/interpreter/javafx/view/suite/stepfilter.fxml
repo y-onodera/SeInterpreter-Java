@@ -11,7 +11,7 @@
     <SplitPane orientation="VERTICAL"
                prefWidth="420.0"
                maxHeight="Infinity" minHeight="0">
-        <fx:include fx:id="filterTable" source="../filter/filterTable.fxml"/>
+        <fx:include fx:id="filterTable" source="../filter/filtertable.fxml"/>
         <MigPane cols="[grow,right][fill,right]" rows="[]" maxHeight="40" prefWidth="420.0">
             <Button mnemonicParsing="false" text="Commit" onAction="#commit" MigPane.cc="align right"/>
             <Button mnemonicParsing="false" text="Save As" onAction="#saveAs" MigPane.cc="align right"/>

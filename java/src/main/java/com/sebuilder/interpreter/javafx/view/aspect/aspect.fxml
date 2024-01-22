@@ -32,16 +32,16 @@
             </MigPane>
             <TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE">
                 <Tab id="tabPointcut" text="pointcut">
-                    <fx:include fx:id="pointcut" source="../filter/filterTable.fxml"/>
+                    <fx:include fx:id="pointcut" source="../filter/filtertable.fxml"/>
                 </Tab>
                 <Tab id="tabBefore" text="before">
-                    <fx:include fx:id="before" source="../step/stepTable.fxml"/>
+                    <fx:include fx:id="before" source="../step/steptable.fxml"/>
                 </Tab>
                 <Tab id="tabAfter" text="after">
-                    <fx:include fx:id="after" source="../step/stepTable.fxml"/>
+                    <fx:include fx:id="after" source="../step/steptable.fxml"/>
                 </Tab>
                 <Tab id="tabFailure" text="failure">
-                    <fx:include fx:id="failure" source="../step/stepTable.fxml"/>
+                    <fx:include fx:id="failure" source="../step/steptable.fxml"/>
                 </Tab>
                 <Tab id="tabJson" text="plain text(json)">
                     <AnchorPane prefHeight="200.0" prefWidth="200.0">
