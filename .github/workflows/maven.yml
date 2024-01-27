@@ -71,7 +71,7 @@ jobs:
         with:
           name: unitTestReport
       - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@v4.4.1
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
           folder: 'allure-maven-plugin'
@@ -157,7 +157,7 @@ jobs:
           rd /s /q %CHROMEWEBDRIVER%
           rd /s /q %EDGEWEBDRIVER%
           rd /s /q %GECKOWEBDRIVER%
-          bin\java -cp sebuilder-interpreter-2.0.0-SNAPSHOT-jar-with-dependencies.jar com.sebuilder.interpreter.application.SeInterpreter --env.verifyImage=false --expectScreenshotDirectory=${{matrix.expect}} ${{matrix.arguments}} --driver.browserVersion=stable --datasource.directory=test/suite/input --aspectFile=test/suite/aspect/saveScreenshot.json test/suite/testsuite.json
+          bin\java -cp sebuilder-interpreter-2.0.0-SNAPSHOT-jar-with-dependencies.jar com.sebuilder.interpreter.application.SeInterpreter --env.verifyImage=true --expectScreenshotDirectory=${{matrix.expect}} ${{matrix.arguments}} --driver.browserVersion=stable --datasource.directory=test/suite/input --aspectFile=test/suite/aspect/saveScreenshot.json test/suite/testsuite.json
         shell: cmd
       - name: Upload result
         uses: actions/upload-artifact@v4
