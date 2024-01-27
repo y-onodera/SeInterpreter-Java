@@ -17,7 +17,6 @@
 package com.sebuilder.interpreter.browser;
 
 import com.sebuilder.interpreter.WebDriverFactory;
-import org.openqa.selenium.firefox.FirefoxBinary;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.firefox.FirefoxProfile;
@@ -55,7 +54,7 @@ public class Firefox implements WebDriverFactory {
                     final String key = entry.getKey();
                     final String value = entry.getValue();
                     if (key.equals("binary")) {
-                        option.setBinary(new FirefoxBinary(new File(value)));
+                        option.setBinary(new File(value).toPath());
                     } else if (key.equals("profile")) {
                         option.setProfile(new FirefoxProfile(new File(value)));
                     } else if (key.startsWith("firefox.arguments.")) {
