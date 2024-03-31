@@ -41,7 +41,7 @@ jobs:
         os: [windows-latest ,ubuntu-latest]
         include:
           - os: windows-latest
-            os-module: jdk`.crypto`.mscapi,
+            os-module: jdk.crypto.mscapi,
     runs-on: ${{matrix.os}}
     steps:
       - uses: actions/checkout@v4
