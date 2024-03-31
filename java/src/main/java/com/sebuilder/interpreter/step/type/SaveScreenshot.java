@@ -114,11 +114,11 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
     }
 
     protected boolean compare(final File file, final BufferedImage actual, final BufferedImage expect, final TestRun ctx) throws IOException {
-        BufferedImage actualResize = actual;
+        BufferedImage expectResize = expect;
         if (this.isSizeMissMatch(actual, expect)) {
-            actualResize = ImageComparisonUtil.resize(actual, expect.getWidth(), expect.getHeight());
+            expectResize = ImageComparisonUtil.resize(expect, actual.getWidth(), actual.getHeight());
         }
-        final ImageComparisonResult result = this.getComparisonResult(file, actualResize, expect, ctx);
+        final ImageComparisonResult result = this.getComparisonResult(file, actual, expectResize, ctx);
         if (result.getRectangles() != null) {
             final StringBuilder sb = new StringBuilder();
             result.getRectangles()
