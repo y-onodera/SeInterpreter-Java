@@ -5,7 +5,6 @@ import com.sebuilder.interpreter.step.type.SaveScreenshot;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.manager.SeleniumManager;
 import org.openqa.selenium.manager.SeleniumManagerOutput;
-import org.openqa.selenium.remote.AbstractDriverOptions;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -342,12 +341,15 @@ public enum Context {
 
     public Context setWebDriverPath(final String driverPath) {
         if (isNullOrEmpty(driverPath)) {
-            final AbstractDriverOptions<?> options = this.wdf.getOptions(this.driverConfig);
+            final List<String> args = new ArrayList<>();
+            args.add("--browser");
+            args.add(this.wdf.targetBrowser().toLowerCase());
             if (!isNullOrEmpty(this.browserVersion)) {
-                options.setBrowserVersion(this.browserVersion);
+                args.add("--browser-version");
+                args.add(this.browserVersion);
             }
             final SeleniumManagerOutput.Result mangerResult = SeleniumManager.getInstance()
-                    .getDriverPath(options, false);
+                    .getBinaryPaths(args);
             this.wdf.setDriverPath(mangerResult.getDriverPath());
             this.wdf.setBinaryPath(mangerResult.getBrowserPath());
         } else {
