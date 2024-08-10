@@ -60,6 +60,12 @@
                 "where": "target/test-classes/com/sebuilder/interpreter/script/pointcut"
               },
               "skip": "false",
+              "verifyElementVisible": {
+                "locator": {
+                  "type": "name",
+                  "value": "name1"
+                }
+              },
               "verifyElementEnable": {},
               "verifyElementPresent": "true",
               "verifyElementAttribute": [
@@ -69,8 +75,7 @@
                 },
                 {
                   "attributeName": "id",
-                  "value": "id1",
-                  "handleNoLocator": "true"
+                  "value": "id1"
                 }
               ]
             }

@@ -2,129 +2,127 @@ package com.sebuilder.interpreter.javafx.view.menu;
 
 import com.google.common.base.Strings;
 import com.sebuilder.interpreter.Context;
-import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
+import com.sebuilder.interpreter.javafx.model.SeInterpreter;
+import com.sebuilder.interpreter.javafx.view.ErrorDialog;
+import com.sebuilder.interpreter.javafx.view.HasFileChooser;
 import com.sebuilder.interpreter.javafx.view.replay.InputView;
-import javafx.event.ActionEvent;
+import com.sebuilder.interpreter.javafx.view.replay.ReplaysettingView;
+import com.sebuilder.interpreter.javafx.view.replay.ScreenshotView;
 import javafx.fxml.FXML;
 import javafx.scene.layout.Pane;
-import javafx.stage.FileChooser;
-import javafx.stage.Stage;
 
 import javax.inject.Inject;
 import java.awt.*;
 import java.io.File;
 import java.util.Optional;
 
-public class MenuPresenter {
+public class MenuPresenter implements HasFileChooser {
 
     @Inject
-    private SeInterpreterApplication application;
-
+    private SeInterpreter application;
+    @Inject
+    private ErrorDialog errorDialog;
     @FXML
     private Pane paneSeInterpreterMenu;
 
     @FXML
-    void initialize() {
-        assert this.paneSeInterpreterMenu != null : "fx:id=\"paneSeInterpreterMenu\" was not injected: check your FXML file 'menu.fxml'.";
-    }
-
-    @FXML
     void handleScriptOpenFile() {
-        final File file = this.openFileChooser("Open Resource File", "json format (*.json)", "*.json");
-        if (file != null) {
-            this.application.scriptReLoad(file);
-        }
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            final File file = this.openDialog("Open Resource File", "json format (*.json)", "*.json");
+            if (file != null) {
+                this.application.scriptReLoad(file);
+            }
+        });
     }
 
     @FXML
-    public void handleImportSeleniumIDEScript(final ActionEvent actionEvent) {
-        final File file = this.openFileChooser("Import SeleniumIDE Script", "side format (*.side)", "*.side");
-        if (file != null) {
-            this.application.scriptReLoad(file, "SeleniumIDE");
-        }
+    void handleImportSeleniumIDEScript() {
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            final File file = this.openDialog("Import SeleniumIDE Script", "side format (*.side)", "*.side");
+            if (file != null) {
+                this.application.scriptReLoad(file, "SeleniumIDE");
+            }
+        });
     }
 
     @FXML
     void handleSaveSuite() {
-        if (Strings.isNullOrEmpty(this.application.getSuite().path())) {
-            this.saveSuiteToNewFile();
-        } else {
-            this.application.saveSuite();
-        }
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            if (Strings.isNullOrEmpty(this.application.getSuite().path())) {
+                this.saveSuiteToNewFile();
+            } else {
+                this.application.saveSuite();
+            }
+        });
     }
 
     @FXML
     void handleSaveSuiteAs() {
-        this.saveSuiteToNewFile();
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(this::saveSuiteToNewFile);
     }
 
     @FXML
     void handleCreateNewSuite() {
-        this.application.reset();
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> this.application.reset());
     }
 
     @FXML
     void handleBrowserOpen() {
-        this.application.browserOpen();
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> this.application.browserOpen());
     }
 
     @FXML
     void handleBrowserClose() {
-        this.application.browserClose();
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> this.application.browserClose());
     }
 
     @FXML
     void handleBrowserSetting() {
-        new BrowserView().open(this.paneSeInterpreterMenu.getScene().getWindow());
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> new BrowserView().open(this.currentWindow()));
     }
 
     @FXML
     void handleReplaySuite() {
-        this.application.runSuite();
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> this.application.runSuite());
     }
 
     @FXML
     void handleReplayScript() {
-        new InputView().open(this.paneSeInterpreterMenu.getScene().getWindow());
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> new InputView().open(this.currentWindow()));
+    }
+
+    @FXML
+    void handleTakeScreenshot() {
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> new ScreenshotView().open(this.currentWindow()));
     }
 
     @FXML
     void handleReplaySetting() {
-        new DatasourceView().open(this.paneSeInterpreterMenu.getScene().getWindow());
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> new ReplaysettingView().open(this.currentWindow()));
     }
 
     @FXML
     void handleOpenResult() {
-        this.application.executeAndLoggingCaseWhenThrowException(() -> Desktop.getDesktop()
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> Desktop.getDesktop()
                 .open(Context.getResultOutputDirectory()));
     }
 
-    protected File openFileChooser(final String aTitle, final String aFilterMessage, final String aFilterExtensions) {
-        final FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle(aTitle);
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(aFilterMessage, aFilterExtensions));
-        fileChooser.setInitialDirectory(this.getBaseDirectory());
-        final Stage stage = new Stage();
-        stage.initOwner(this.paneSeInterpreterMenu.getScene().getWindow());
-        return fileChooser.showOpenDialog(stage);
+    @Override
+    public javafx.stage.Window currentWindow() {
+        return this.paneSeInterpreterMenu.getScene().getWindow();
     }
 
-    protected void saveSuiteToNewFile() {
-        final FileChooser fileSave = new FileChooser();
-        fileSave.setTitle("Save Suite File");
-        fileSave.getExtensionFilters().add(new FileChooser.ExtensionFilter("json format (*.json)", "*.json"));
-        fileSave.setInitialDirectory(this.getBaseDirectory());
-        final Stage stage = new Stage();
-        stage.initOwner(this.paneSeInterpreterMenu.getScene().getWindow());
-        final File file = fileSave.showSaveDialog(stage);
+    @Override
+    public File getBaseDirectory() {
+        return Optional.ofNullable(this.application.getSuite().head().relativePath())
+                .orElse(Context.getBaseDirectory());
+    }
+
+    private void saveSuiteToNewFile() {
+        final File file = this.saveDialog("Save Suite File", "json format (*.json)", "*.json");
         if (file != null) {
             this.application.saveSuite(file);
         }
-    }
-
-    protected File getBaseDirectory() {
-        return Optional.ofNullable(this.application.getSuite().head().relativePath())
-                .orElse(Context.getBaseDirectory());
     }
 
 }

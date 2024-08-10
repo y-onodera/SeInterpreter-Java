@@ -1,7 +1,7 @@
 package com.sebuilder.interpreter.javafx.view.replay;
 
 import com.airhacks.afterburner.views.FXMLView;
-import com.sebuilder.interpreter.javafx.application.SeInterpreterRunTask;
+import com.sebuilder.interpreter.javafx.model.SeInterpreterRunTask;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;

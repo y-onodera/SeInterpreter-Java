@@ -12,13 +12,16 @@ public class CommandLineOption {
 
     private Long implicitlyWait = (long) -1;
     private Long pageLoadTimeout = (long) -1;
+    private int waitForMaxMs = 30000;
+    private int waitForIntervalMs = 500;
     private String driver = "Chrome";
+    private String browserVersion;
     private String driverPath;
     private final Map<String, String> driverConfig = new HashMap<>();
     private String datasourceEncoding = "UTF-8";
     private String datasourceDirectory = "input";
     private String resultoutput = "result";
-    private Context.TestNamePrefix junitReportPrefix = Context.TestNamePrefix.TIMESTAMP;
+    private Context.ReportPrefix junitReportPrefix = Context.ReportPrefix.TIMESTAMP;
     private String downloadoutput = "download";
     private String screenshotoutput = "screenshot";
     private String templateoutput = "template";
@@ -48,8 +51,16 @@ public class CommandLineOption {
                     this.implicitlyWait = Long.valueOf(kv[1]);
                 } else if (kv[0].equals(CommandLineArgument.PAGE_LOAD_TIMEOUT.key())) {
                     this.pageLoadTimeout = Long.valueOf(kv[1]);
+                } else if (kv[0].equals(CommandLineArgument.WAIT_FOR_MAX_MS.key())) {
+                    this.waitForMaxMs = Integer.parseInt(kv[1]);
+                } else if (kv[0].equals(CommandLineArgument.WAIT_FOR_INTERVAL_MS.key())) {
+                    this.waitForIntervalMs = Integer.parseInt(kv[1]);
                 } else if (kv[0].startsWith(CommandLineArgument.DRIVER_CONFIG_PREFIX.key())) {
-                    this.driverConfig.put(kv[0].substring(CommandLineArgument.DRIVER_CONFIG_PREFIX.key().length()), kv[1]);
+                    if (kv[0].equals(CommandLineArgument.DRIVER_CONFIG_BROWSER_VERSION.key())) {
+                        this.browserVersion = kv[1];
+                    } else {
+                        this.driverConfig.put(kv[0].substring(CommandLineArgument.DRIVER_CONFIG_PREFIX.key().length()), kv[1]);
+                    }
                 } else if (kv[0].equals(CommandLineArgument.DRIVER.key())) {
                     this.driver = kv[1];
                 } else if (kv[0].equals(CommandLineArgument.DRIVER_PATH.key())) {
@@ -66,8 +77,8 @@ public class CommandLineOption {
                     this.resultoutput = kv[1];
                 } else if (kv[0].equals(CommandLineArgument.EXPECT_SCREENSHOT_DIRECTORY.key())) {
                     this.expectScreenshotDirectory = kv[1];
-                } else if (kv[0].equals(CommandLineArgument.JUNIT_REPORT_PREFIX.key())) {
-                    this.junitReportPrefix = Context.TestNamePrefix.fromName(kv[1]);
+                } else if (kv[0].equals(CommandLineArgument.REPORT_PREFIX.key())) {
+                    this.junitReportPrefix = Context.ReportPrefix.fromName(kv[1]);
                 } else if (kv[0].equals(CommandLineArgument.REPORT_FORMAT.key())) {
                     this.reportFormat = ReportFormat.fromName(kv[1]);
                 } else if (kv[0].equals(CommandLineArgument.DOWNLOAD_OUTPUT.key())) {
@@ -101,8 +112,20 @@ public class CommandLineOption {
         return this.pageLoadTimeout;
     }
 
+    public int getWaitForMaxMs() {
+        return this.waitForMaxMs;
+    }
+
+    public int getWaitForIntervalMs() {
+        return this.waitForIntervalMs;
+    }
+
     public String getDriver() {
         return this.driver;
+    }
+
+    public String getBrowserVersion() {
+        return this.browserVersion;
     }
 
     public String getDriverPath() {
@@ -133,7 +156,7 @@ public class CommandLineOption {
         return this.resultoutput;
     }
 
-    public Context.TestNamePrefix getJunitReportPrefix() {
+    public Context.ReportPrefix getJunitReportPrefix() {
         return this.junitReportPrefix;
     }
 

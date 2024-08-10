@@ -13,7 +13,7 @@ public interface LocatorHolder extends StepElement {
 
     default StepBuilder addDefaultParam(final String key, final StepBuilder o) {
         if (!o.containsLocatorParam(key)) {
-            o.put(key, new Locator("id", ""));
+            o.put(key, new Locator("", ""));
         }
         return o;
     }

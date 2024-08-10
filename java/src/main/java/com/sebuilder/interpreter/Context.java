@@ -1,10 +1,10 @@
 package com.sebuilder.interpreter;
 
-import com.google.common.base.Strings;
 import com.sebuilder.interpreter.pointcut.TypeFilter;
 import com.sebuilder.interpreter.step.type.SaveScreenshot;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.manager.SeleniumManager;
+import org.openqa.selenium.manager.SeleniumManagerOutput;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -26,9 +26,11 @@ public enum Context {
 
     INSTANCE;
 
+    public static final String BROWSER_BINARY_KEY = "binary";
     public static final String REMOTE_URL_KEY = "remote-url";
     private final File baseDirectory = Paths.get(".").toAbsolutePath().normalize().toFile();
     private String browser;
+    private String browserVersion;
     private final HashMap<String, String> driverConfig = new HashMap<>();
     private WebDriverFactory wdf;
     private Long implicitlyWaitTime;
@@ -37,7 +39,7 @@ public enum Context {
     private String dataSourceDirectory;
     private String dataSourceEncoding;
     private String resultOutputDirectory;
-    private TestNamePrefix junitReportPrefix;
+    private ReportPrefix reportPrefix;
     private TestRunListener.Factory testRunListenerFactory;
     private String downloadDirectory;
     private String screenShotOutputDirectory;
@@ -48,14 +50,19 @@ public enum Context {
     private TestCaseConverter testCaseConverter;
     private StepTypeFactory stepTypeFactory;
     private Aspect aspect = new Aspect().builder()
-            .add(new ExtraStepExecutor.Builder()
+            .add(new ExtraStepExecutor
+                    .Builder()
+                    .setDisplayName("default")
                     .setPointcut(new TypeFilter(SaveScreenshot.class.getSimpleName(), "!equals"))
                     .addFailure(new SaveScreenshot().toStep().put("file", "failure.png").build().toTestCase())
+                    .build()
             )
             .build();
     private final Properties environmentProperties = new Properties();
     private Locale locale;
     private File localeConfDir;
+    private int waitForMaxMs;
+    private int waitForIntervalMs;
 
     Context() {
         try {
@@ -90,8 +97,24 @@ public enum Context {
         return getInstance().pageLoadWaitTime;
     }
 
+    public static int getWaitForMaxMs() {
+        return getInstance().waitForMaxMs;
+    }
+
+    public static int getWaitForIntervalMs() {
+        return getInstance().waitForIntervalMs;
+    }
+
     public static String getBrowser() {
         return getInstance().browser;
+    }
+
+    public static String getBrowserVersion() {
+        return getInstance().browserVersion;
+    }
+
+    public static boolean hasBrowserVersion() {
+        return !isNullOrEmpty(getBrowserVersion());
     }
 
     public static boolean isRemote() {
@@ -136,10 +159,6 @@ public enum Context {
         return getInstance().testCaseConverter;
     }
 
-    public static StepTypeFactory getStepTypeFactory() {
-        return getInstance().stepTypeFactory;
-    }
-
     public static DataSourceFactory getDataSourceFactory() {
         return getInstance().dataSourceFactory;
     }
@@ -164,8 +183,12 @@ public enum Context {
         return new File(getInstance().resultOutputDirectory);
     }
 
-    public static String getJunitReportPrefix() {
-        return switch (getInstance().junitReportPrefix) {
+    public static TestRunListener.Factory getTestRunListenerFactory() {
+        return getInstance().testRunListenerFactory;
+    }
+
+    public static String getReportPrefixValue() {
+        return switch (getReportPrefix()) {
             case TIMESTAMP -> "start" + DateTimeFormatter
                     .ofPattern("yyyyMMddHHmmss")
                     .format(LocalDateTime.now()) + ".";
@@ -174,6 +197,10 @@ public enum Context {
                     .replace("\\", "_") + ".";
             default -> "";
         };
+    }
+
+    public static ReportPrefix getReportPrefix() {
+        return getInstance().reportPrefix;
     }
 
     public static String getDownloadDirectory() {
@@ -214,10 +241,56 @@ public enum Context {
         return getInstance().testRunListenerFactory.create(log);
     }
 
+    public static StepType getStepTypeOfName(final String stepType) {
+        return getInstance().stepTypeFactory.getStepTypeOfName(stepType);
+    }
+
+    public static StepBuilder createStepBuilder(final String stepType) {
+        return new StepBuilder(getStepTypeOfName(stepType));
+    }
+
+    public static Step createStep(final String stepType) {
+        return getStepTypeOfName(stepType)
+                .toStep()
+                .build()
+                .toTestCase()
+                .steps().get(0);
+    }
+
+    public static String toString(final Suite suite) {
+        return getTestCaseConverter().toString(suite);
+    }
+
+    public static String toString(final TestCase displayTestCase) {
+        return getTestCaseConverter().toString(displayTestCase);
+    }
+
+    public static String toString(final Aspect interceptors) {
+        return getTestCaseConverter().toString(interceptors);
+    }
+
+    public static TestCase load(final File file) {
+        return getScriptParser().load(file);
+    }
+
+    public static TestCase load(final String text, final File toFile) {
+        return getScriptParser().load(text, toFile);
+    }
+
+    public static TestCase loadWithScriptType(final String scriptType, final File file) {
+        return getScriptParser(scriptType).load(file);
+    }
+
     public Context ifMatch(final boolean condition, final Function<Context, Context> modifier) {
         if (condition) {
             return modifier.apply(this);
         }
+        return this;
+    }
+
+    public Context setEnvProperties(final InputData result) {
+        this.environmentProperties.clear();
+        this.environmentProperties.putAll(result.row());
         return this;
     }
 
@@ -231,12 +304,20 @@ public enum Context {
         return this;
     }
 
-    public void setBrowser(final String browserName, final String driverPath, final String binaryPath) {
-        this.setBrowser(browserName, driverPath).wdf.setBinaryPath(binaryPath);
+    public Context setWaitForMaxMs(final int waitForMaxMs) {
+        this.waitForMaxMs = waitForMaxMs;
+        return this;
     }
 
-    public Context setBrowser(final String browserName, final String driverPath) {
-        return this.setBrowser(browserName)
+    public Context setWaitForIntervalMs(final int waitForIntervalMs) {
+        this.waitForIntervalMs = waitForIntervalMs;
+        return this;
+    }
+
+    public void setBrowser(final String browserName, final String browserVersion, final String driverPath, final String binaryPath) {
+        this.wdf.setBinaryPath(binaryPath);
+        this.setBrowser(browserName)
+                .setBrowserVersion(browserVersion)
                 .setWebDriverPath(driverPath);
     }
 
@@ -244,8 +325,13 @@ public enum Context {
         return this.setWebDriverFactory(getWebDriverFactory(browser));
     }
 
+    public Context setBrowserVersion(final String browserVersion) {
+        this.browserVersion = browserVersion;
+        return this;
+    }
+
     public Context setRemoteUrl(final String remoteUrl) {
-        if (Strings.isNullOrEmpty(remoteUrl)) {
+        if (isNullOrEmpty(remoteUrl)) {
             this.driverConfig.remove(REMOTE_URL_KEY);
         } else {
             this.driverConfig.put(REMOTE_URL_KEY, remoteUrl);
@@ -254,8 +340,18 @@ public enum Context {
     }
 
     public Context setWebDriverPath(final String driverPath) {
-        if (Strings.isNullOrEmpty(driverPath)) {
-            this.wdf.setDriverPath(SeleniumManager.getInstance().getDriverPath(this.wdf.getDriverName()));
+        if (isNullOrEmpty(driverPath)) {
+            final List<String> args = new ArrayList<>();
+            args.add("--browser");
+            args.add(this.wdf.targetBrowser().toLowerCase());
+            if (!isNullOrEmpty(this.browserVersion)) {
+                args.add("--browser-version");
+                args.add(this.browserVersion);
+            }
+            final SeleniumManagerOutput.Result mangerResult = SeleniumManager.getInstance()
+                    .getBinaryPaths(args);
+            this.wdf.setDriverPath(mangerResult.getDriverPath());
+            this.wdf.setBinaryPath(mangerResult.getBrowserPath());
         } else {
             this.wdf.setDriverPath(driverPath);
         }
@@ -269,6 +365,7 @@ public enum Context {
     }
 
     public Context setDriverConfig(final Map<String, String> config) {
+        this.driverConfig.clear();
         this.driverConfig.putAll(config);
         return this;
     }
@@ -314,8 +411,8 @@ public enum Context {
         return this;
     }
 
-    public Context setJunitReportPrefix(final TestNamePrefix junitReportPrefix) {
-        this.junitReportPrefix = junitReportPrefix;
+    public Context setReportPrefix(final ReportPrefix reportPrefix) {
+        this.reportPrefix = reportPrefix;
         return this;
     }
 
@@ -407,20 +504,29 @@ public enum Context {
         }
     }
 
-    public enum TestNamePrefix {
+
+    public enum ReportPrefix {
         TIMESTAMP("timestamp"), RESULT_DIR("resultDir"), NONE("none");
         private final String name;
 
-        TestNamePrefix(final String name) {
+        ReportPrefix(final String name) {
             this.name = name;
         }
 
-        public static TestNamePrefix fromName(final String name) {
-            return Stream.of(TestNamePrefix.values())
+        public static ReportPrefix fromName(final String name) {
+            return Stream.of(ReportPrefix.values())
                     .filter(it -> it.name.equals(name))
                     .findFirst()
                     .orElse(NONE);
         }
+
+        public String getName() {
+            return this.name;
+        }
+    }
+
+    private static boolean isNullOrEmpty(final String driverPath) {
+        return Optional.ofNullable(driverPath).filter(it -> !it.isEmpty()).isEmpty();
     }
 
 }

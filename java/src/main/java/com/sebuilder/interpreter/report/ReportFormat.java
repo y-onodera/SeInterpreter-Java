@@ -27,4 +27,8 @@ public enum ReportFormat implements TestRunListener.Factory {
         }
         return new JunitTestRunListener(log);
     }
+
+    public String getName() {
+        return this.name;
+    }
 }

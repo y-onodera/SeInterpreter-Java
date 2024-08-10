@@ -9,6 +9,7 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class Edge implements WebDriverFactory {
 
@@ -20,19 +21,34 @@ public class Edge implements WebDriverFactory {
     @Override
     public EdgeOptions getOptions(final Map<String, String> config) {
         final HashMap<String, String> caps = new HashMap<>();
-        final HashMap<String, String> prefs = new HashMap<>();
+        final HashMap<String, Object> prefs = new HashMap<>();
         final EdgeOptions option = new EdgeOptions();
-        config.forEach((key, value) -> {
-            if (key.equals("binary")) {
-                option.setBinary(new File(value));
-            } else if (key.startsWith("experimental.")) {
-                prefs.put(key.substring("experimental.".length()), value);
-            } else if (key.startsWith("edge.arguments.")) {
-                option.addArguments("--" + key.substring("edge.arguments.".length()));
-            } else {
-                caps.put(key, value);
-            }
-        });
+        config.entrySet()
+                .stream()
+                .filter(entry -> !entry.getKey().startsWith("firefox") && !entry.getKey().startsWith("chrome"))
+                .forEach(entry -> {
+                    final String key = entry.getKey();
+                    final String value = entry.getValue();
+                    if (key.equals("binary")) {
+                        option.setBinary(new File(value));
+                    } else if (key.startsWith("experimental.")) {
+                        switch (value.toLowerCase()) {
+                            case "true", "false" ->
+                                    prefs.put(key.substring("experimental.".length()), Boolean.valueOf(value));
+                            default -> prefs.put(key.substring("experimental.".length()), value);
+                        }
+                    } else if (key.startsWith("edge.arguments.")) {
+                        if (!Optional.ofNullable(config.get(key)).orElse("").isBlank()) {
+                            option.addArguments("--" + key.substring("edge.arguments.".length()) + "=" + config.get(key));
+                        } else {
+                            option.addArguments("--" + key.substring("edge.arguments.".length()));
+                        }
+                    } else if (key.startsWith("edge.extensions.")) {
+                        option.addExtensions(new File(value));
+                    } else {
+                        caps.put(key, value);
+                    }
+                });
         option.setExperimentalOption("prefs", prefs);
         return option.merge(new DesiredCapabilities(caps));
     }

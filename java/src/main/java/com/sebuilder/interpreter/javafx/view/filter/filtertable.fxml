@@ -1,0 +1,34 @@
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.sebuilder.interpreter.javafx.view.filter.FilterTablePresenter">
+    <TableView id="tableViewScriptBody" fx:id="pointcutTable" stylesheets="@filtertable.css"
+               prefWidth="600.0" prefHeight="425.0"
+               minWidth="0" maxWidth="Infinity"
+               minHeight="0" maxHeight="Infinity"
+               AnchorPane.bottomAnchor="0.0"
+               AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+               AnchorPane.topAnchor="0.0">
+        <columns>
+            <TableColumn id="tableColumnLevel" fx:id="no"
+                         prefWidth="45.0"
+                         style="-fx-alignment: CENTER_RIGHT;" text="No"/>
+            <TableColumn id="tableColumnCombinator" fx:id="combinator"
+                         prefWidth="90.0"
+                         style="-fx-alignment: CENTER_LEFT;" text="Combinator"/>
+            <TableColumn id="tableColumnScriptBody" fx:id="filter"
+                         prefWidth="Infinity"
+                         style="-fx-alignment: CENTER_LEFT;" text="Filter"/>
+        </columns>
+        <contextMenu>
+            <ContextMenu>
+                <items>
+                    <MenuItem mnemonicParsing="false" onAction="#handleAdd" text="add"/>
+                    <MenuItem mnemonicParsing="false" onAction="#handleDelete" text="delete"/>
+                    <MenuItem mnemonicParsing="false" onAction="#handleEdit" text="edit"/>
+                </items>
+            </ContextMenu>
+        </contextMenu>
+    </TableView>
+</AnchorPane>

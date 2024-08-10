@@ -17,7 +17,7 @@
 package com.sebuilder.interpreter;
 
 import com.google.common.base.Strings;
-import org.openqa.selenium.Capabilities;
+import org.openqa.selenium.remote.AbstractDriverOptions;
 import org.openqa.selenium.remote.LocalFileDetector;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
@@ -45,7 +45,7 @@ public interface WebDriverFactory {
 
     RemoteWebDriver createLocaleDriver(Map<String, String> config);
 
-    Capabilities getOptions(Map<String, String> config);
+    AbstractDriverOptions<?> getOptions(Map<String, String> config);
 
     default String targetBrowser() {
         return this.getClass().getSimpleName();
@@ -56,16 +56,16 @@ public interface WebDriverFactory {
     String getDriverPath();
 
     default String getBinaryPath() {
-        return Context.getDriverConfig().getOrDefault("binary", null);
+        return Context.getDriverConfig().getOrDefault(Context.BROWSER_BINARY_KEY, null);
     }
 
     void setDriverPath(String driverPath);
 
     default void setBinaryPath(final String binaryPath) {
         if (Strings.isNullOrEmpty(binaryPath)) {
-            Context.getDriverConfig().remove("binary");
+            Context.getDriverConfig().remove(Context.BROWSER_BINARY_KEY);
         } else {
-            Context.getDriverConfig().put("binary", binaryPath);
+            Context.getDriverConfig().put(Context.BROWSER_BINARY_KEY, binaryPath);
         }
     }
 }

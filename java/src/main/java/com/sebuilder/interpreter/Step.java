@@ -163,7 +163,7 @@ public record Step(
         return this.stringParams.containsKey(KEY_NAME_SKIP);
     }
 
-    public static record Result(boolean success, int execSteps) {
+    public record Result(boolean success, int execSteps) {
     }
 
 }

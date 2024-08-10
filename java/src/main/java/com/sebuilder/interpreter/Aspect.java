@@ -7,6 +7,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -37,8 +38,12 @@ public record Aspect(Iterable<Interceptor> interceptors) implements Iterable<Int
                 .toList());
     }
 
+    public boolean contains(final Interceptor target) {
+        return this.getStream().anyMatch(interceptor -> interceptor.equals(target));
+    }
+
     public Stream<Interceptor> getStream() {
-        return this.toStream(this.interceptors);
+        return StreamSupport.stream(this.interceptors.spliterator(), false);
     }
 
     @Override
@@ -57,6 +62,22 @@ public record Aspect(Iterable<Interceptor> interceptors) implements Iterable<Int
 
     public Aspect takeOverChain(final boolean newValue) {
         return from(this.getStream().map(it -> it.takeOverChain(newValue)));
+    }
+
+    public Aspect replace(final Interceptor currentValue, final Interceptor newValue) {
+        return this.convert(it -> currentValue.equals(it) ? newValue : it);
+    }
+
+    public Aspect remove(final Interceptor removeItem) {
+        return from(this.getStream().filter(it -> !it.equals(removeItem)));
+    }
+
+    public Aspect remove(final Predicate<Interceptor> filter) {
+        return from(this.getStream().filter(it -> !filter.test(it)));
+    }
+
+    public Aspect convert(final UnaryOperator<Interceptor> function) {
+        return from(this.getStream().map(function));
     }
 
     public record Advice(List<Interceptor> advices) {
@@ -86,10 +107,6 @@ public record Aspect(Iterable<Interceptor> interceptors) implements Iterable<Int
                 }
             }
         }
-    }
-
-    private Stream<Interceptor> toStream(final Iterable<Interceptor> materialize) {
-        return StreamSupport.stream(materialize.spliterator(), false);
     }
 
     public static class Builder {

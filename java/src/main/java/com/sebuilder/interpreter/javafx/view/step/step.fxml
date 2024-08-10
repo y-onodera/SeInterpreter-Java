@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import org.controlsfx.control.SearchableComboBox?>
+<?import org.tbee.javafx.scene.layout.fxml.MigPane?>
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="420.0"
+            xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.sebuilder.interpreter.javafx.view.step.StepPresenter">
+    <SplitPane orientation="VERTICAL" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+               minWidth="-Infinity"
+               xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+               AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+        <MigPane fx:id="stepEditGrid" cols="[50,left][160,left][45,grow]" rows="[]" prefWidth="400.0">
+            <Label fx:id="labelSelectType" text="type"/>
+            <SearchableComboBox fx:id="stepTypeSelect" onAction="#selectType" MigPane.cc="wrap"/>
+        </MigPane>
+        <MigPane cols="[grow]" rows="[30]" maxHeight="40" prefWidth="420.0">
+            <Button id="apply" mnemonicParsing="false" text="apply" onAction="#stepApply" MigPane.cc="align right"/>
+        </MigPane>
+    </SplitPane>
+</AnchorPane>

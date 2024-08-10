@@ -4,8 +4,9 @@ import com.google.common.collect.Maps;
 import com.sebuilder.interpreter.DataSource;
 import com.sebuilder.interpreter.DataSourceLoader;
 import com.sebuilder.interpreter.InputData;
-import com.sebuilder.interpreter.javafx.application.ReplayOption;
-import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
+import com.sebuilder.interpreter.javafx.model.ReplayOption;
+import com.sebuilder.interpreter.javafx.model.SeInterpreter;
+import com.sebuilder.interpreter.javafx.view.ErrorDialog;
 import com.sebuilder.interpreter.javafx.view.data.DataSetView;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -33,7 +34,9 @@ public class InputPresenter {
     static private final Pair<Integer, InputData> DEFAULT = new Pair<>(1, new InputData());
     public static final DataSourceLoader NO_DATASOURCE = new DataSourceLoader(DataSource.NONE, Maps.newHashMap(), null);
     @Inject
-    private SeInterpreterApplication application;
+    private SeInterpreter application;
+    @Inject
+    private ErrorDialog errorDialog;
     @FXML
     private TableView<InputResource> inputResourceTableView;
     @FXML
@@ -55,62 +58,67 @@ public class InputPresenter {
 
     private Consumer<ReplayOption> onclickReplayStart;
 
-    @FXML
-    void initialize() {
-        this.onclickReplayStart = (it) -> this.application.runScript(it);
-        this.resourceName.setCellValueFactory(body -> body.getValue().resourceNameProperty());
-        this.row.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
-        this.row.setCellValueFactory(body -> body.getValue().rowValue());
-        this.slash.setCellValueFactory(body -> new SimpleStringProperty("/"));
-        this.rows.setCellValueFactory(body -> body.getValue().rowsValue());
-        this.buttonOpen.setCellFactory(inputResourceStringTableColumn -> new TableCell<>() {
-            @Override
-            public void updateItem(final Void item, final boolean empty) {
-                super.updateItem(item, empty);
-                if (empty) {
-                    this.setGraphic(null);
-                } else {
-                    this.setGraphic(this.getTableView().getItems().get(this.getIndex()).createOpenButton());
-                }
-            }
-        });
-        this.buttonEdit.setCellFactory(inputResourceStringTableColumn -> new TableCell<>() {
-            @Override
-            public void updateItem(final Void item, final boolean empty) {
-                super.updateItem(item, empty);
-                if (empty) {
-                    this.setGraphic(null);
-                } else {
-                    final Button btn = new Button("edit");
-                    btn.setOnAction((ActionEvent event) -> {
-                        final InputResource data = this.getTableView().getItems().get(this.getIndex());
-                        final VariableView variableView = new VariableView();
-                        variableView.onClick(result -> {
-                            data.setRuntimeVariable(result);
-                            InputPresenter.this.shareInputs.put(data.getResourceName(), new Pair<>(data.getRow(), data.getRuntimeVariable()));
-                            InputPresenter.this.refreshTable();
-                        });
-                        variableView.open(data.getRuntimeVariable(), InputPresenter.this.currentWindow());
-                    });
-                    this.setGraphic(btn);
-                }
-            }
-        });
-        this.refreshTable();
-    }
-
-    @FXML
-    public void handleReplayStart() {
-        this.onclickReplayStart.accept(this.createReplayOption());
-    }
-
-    public void setOnclickReplayStart(final Consumer<ReplayOption> onclickReplayStart) {
+    void setOnclickReplayStart(final Consumer<ReplayOption> onclickReplayStart) {
         this.onclickReplayStart = onclickReplayStart;
     }
 
+    @FXML
+    void initialize() {
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            this.onclickReplayStart = (it) -> this.application.runScript(it);
+            this.resourceName.setCellValueFactory(body -> body.getValue().resourceNameProperty());
+            this.row.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
+            this.row.setCellValueFactory(body -> body.getValue().rowValue());
+            this.slash.setCellValueFactory(body -> new SimpleStringProperty("/"));
+            this.rows.setCellValueFactory(body -> body.getValue().rowsValue());
+            this.buttonOpen.setCellFactory(inputResourceStringTableColumn -> new TableCell<>() {
+                @Override
+                public void updateItem(final Void item, final boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty) {
+                        this.setGraphic(null);
+                    } else {
+                        this.setGraphic(this.getTableView().getItems().get(this.getIndex()).createOpenButton());
+                    }
+                }
+            });
+            this.buttonEdit.setCellFactory(inputResourceStringTableColumn -> new TableCell<>() {
+                @Override
+                public void updateItem(final Void item, final boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty) {
+                        this.setGraphic(null);
+                    } else {
+                        final Button btn = new Button("edit");
+                        btn.setOnAction((final ActionEvent event) -> {
+                            final InputResource data = this.getTableView().getItems().get(this.getIndex());
+                            VariableView.builder()
+                                    .setTitle("runtime variable")
+                                    .setOnclick(result -> {
+                                        data.setRuntimeVariable(result);
+                                        InputPresenter.this.shareInputs.put(data.getResourceName(), new Pair<>(data.getRow(), data.getRuntimeVariable()));
+                                        InputPresenter.this.refreshTable();
+                                    })
+                                    .setTarget(data.getRuntimeVariable())
+                                    .setWindow(InputPresenter.this.currentWindow())
+                                    .build();
+                        });
+                        this.setGraphic(btn);
+                    }
+                }
+            });
+            this.refreshTable();
+        });
+    }
+
+    @FXML
+    void handleReplayStart() {
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> this.onclickReplayStart.accept(this.createReplayOption()));
+    }
+
     private void refreshTable() {
-        this.inputResourceTableView.getItems().setAll(new ArrayList<>());
-        this.application.executeAndLoggingCaseWhenThrowException(() -> {
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
+            this.inputResourceTableView.getItems().setAll(new ArrayList<>());
             for (final DataSourceLoader loadable : this.createReplayOption().filterLoadableSource(this.application.replayShareInput(), this.application.getDisplayTestCaseDataSources())) {
                 this.inputResourceTableView.getItems().add(new InputResource(loadable));
             }
@@ -217,9 +225,9 @@ public class InputPresenter {
                 return null;
             }
             final Button btn = new Button("open");
-            btn.setOnAction((ActionEvent event) -> {
+            btn.setOnAction((final ActionEvent event) -> {
                 final InputResource data = this;
-                InputPresenter.this.application.executeAndLoggingCaseWhenThrowException(() -> {
+                InputPresenter.this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
                     final DataSetView dataSetView = new DataSetView();
                     dataSetView.onClick(e -> InputPresenter.this.refreshTable());
                     dataSetView.open(data.getLoader(), InputPresenter.this.currentWindow());

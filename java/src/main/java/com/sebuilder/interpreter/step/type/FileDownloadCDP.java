@@ -7,6 +7,7 @@ import com.sebuilder.interpreter.step.LocatorHolder;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.devtools.NetworkInterceptor;
 import org.openqa.selenium.remote.HttpCommandExecutor;
+import org.openqa.selenium.remote.http.HttpClient;
 import org.openqa.selenium.remote.http.HttpRequest;
 import org.openqa.selenium.remote.http.HttpResponse;
 
@@ -14,17 +15,15 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
+import java.lang.reflect.Field;
 
 public class FileDownloadCDP extends AbstractStepType implements ConditionalStep, LocatorHolder {
 
     @Override
     public boolean doRun(final TestRun ctx) {
-        final NetworkInterceptor interceptor = new NetworkInterceptor(ctx.driver(), (HttpRequest req) -> {
+        final NetworkInterceptor interceptor = new NetworkInterceptor(ctx.driver(), (final HttpRequest req) -> {
             try {
-                final HttpResponse res = HttpCommandExecutor.getDefaultClientFactory()
-                        .createClient(new URL(req.getUri()))
-                        .execute(req);
+                final HttpResponse res = this.getClient(ctx).execute(req);
                 this.downLoadFile(ctx, res);
             } catch (final IOException e) {
                 throw new RuntimeException(e);
@@ -64,4 +63,15 @@ public class FileDownloadCDP extends AbstractStepType implements ConditionalStep
         }
     }
 
+    protected HttpClient getClient(final TestRun ctx) {
+        final HttpCommandExecutor executor = (HttpCommandExecutor) ctx.driver().getCommandExecutor();
+        final Field clientField;
+        try {
+            clientField = HttpCommandExecutor.class.getDeclaredField("client");
+            clientField.setAccessible(true);
+            return (HttpClient) clientField.get(executor);
+        } catch (final NoSuchFieldException | IllegalAccessException e) {
+            throw new AssertionError(e);
+        }
+    }
 }

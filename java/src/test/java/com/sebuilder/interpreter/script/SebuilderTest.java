@@ -11,6 +11,7 @@ import com.sebuilder.interpreter.step.StepTypeFactoryImpl;
 import com.sebuilder.interpreter.step.getter.ElementAttribute;
 import com.sebuilder.interpreter.step.getter.ElementEnable;
 import com.sebuilder.interpreter.step.getter.ElementPresent;
+import com.sebuilder.interpreter.step.getter.ElementVisible;
 import com.sebuilder.interpreter.step.type.Get;
 import com.sebuilder.interpreter.step.type.SetElementSelected;
 import com.sebuilder.interpreter.step.type.SetElementText;
@@ -487,29 +488,32 @@ public class SebuilderTest {
                             .assertChainCase(1, new ParseScriptTypeWithDataSource().getTestCaseAssert()
                                     .builder()
                                     .assertOverrideDataSource(TestCaseAssert.assertEqualsOverrideDataSst(DATA_SET_NONE))
-                                    .assertIncludeTestRun(it -> assertEquals(
-                                            new TypeFilter("SetElementText")
-                                                    .or(new TypeFilter("SelectElementValue"))
-                                                    .or(new TypeFilter("SetElementSelected"))
-                                                    .and(new VerifyFilter(false, new ElementEnable().toVerify(), new HashMap<>()))
+                                    .assertIncludeTestRun(it -> assertEquals(new ImportFilter("typeFilter.json"
+                                                    , "target/test-classes/com/sebuilder/interpreter/script/pointcut"
+                                                    , new PointcutLoader.ImportFunction(new PointcutLoader(new ImportLoader())
+                                                    , new File(baseDir).getAbsoluteFile()))
+                                                    .and(new VerifyFilter(new ElementEnable().toVerify(), new HashMap<>(), new HashMap<>()))
                                                     .and(new SkipFilter(false))
-                                                    .and(new VerifyFilter(false, new ElementAttribute().toVerify(), new HashMap<>() {{
+                                                    .and(new VerifyFilter(new ElementAttribute().toVerify(), new HashMap<>() {{
                                                         this.put("attributeName", "class");
                                                         this.put("value", "table");
-                                                    }}).or(
-                                                            new VerifyFilter(true, new ElementAttribute().toVerify(), new HashMap<>() {{
+                                                    }}, new HashMap<>())
+                                                            .or(new VerifyFilter(new ElementAttribute().toVerify(), new HashMap<>() {{
                                                                 this.put("attributeName", "id");
                                                                 this.put("value", "id1");
-                                                            }})
-                                                    ))
-                                                    .and(new VerifyFilter(false, new ElementPresent().toVerify(), new HashMap<>() {{
+                                                            }}, new HashMap<>()
+                                                            )))
+                                                    .and(new VerifyFilter(new ElementPresent().toVerify(), new HashMap<>() {{
                                                         this.put("negated", "false");
+                                                    }}, new HashMap<>()))
+                                                    .and(new VerifyFilter(new ElementVisible().toVerify(), new HashMap<>(), new HashMap<>() {{
+                                                        this.put("locator", new Locator("name", "name1"));
                                                     }}))
                                             , it))
-                                    .assertExcludeTestRun(it -> assertEquals(
-                                            new LocatorFilter("locator", new Locator("id", "id1"))
-                                                    .or(new LocatorFilter("locator", new Locator("id", "id2")))
-                                                    .or(new LocatorFilter("locator", new Locator("id", "id3")))
+                                    .assertExcludeTestRun(it -> assertEquals(new ImportFilter("pointcut/locatorFilter.json"
+                                                    , ""
+                                                    , new PointcutLoader.ImportFunction(new PointcutLoader(new ImportLoader())
+                                                    , new File(baseDir).getAbsoluteFile()))
                                             , it))
                                     .build())
                             .build())
@@ -537,12 +541,10 @@ public class SebuilderTest {
                             .builder()
                             .assertAspect(it -> Assert.assertEquals(new Aspect().builder()
                                     .add(new ExtraStepExecutor.Builder()
-                                            .setPointcut(new TypeFilter("SetElementText")
-                                                    .or(new TypeFilter("SelectElementValue"))
-                                                    .or(new TypeFilter("SetElementSelected"))
-                                                    .and(new LocatorFilter("locator", new Locator("id", "id1"))
-                                                            .or(new LocatorFilter("locator", new Locator("id", "id2")))
-                                                            .or(new LocatorFilter("locator", new Locator("id", "id3"))))
+                                            .setPointcut(new ImportFilter("../pointcut/multiFilter.json"
+                                                    , ""
+                                                    , new PointcutLoader.ImportFunction(new PointcutLoader(new ImportLoader())
+                                                    , new File(baseDir, "aspect").getAbsoluteFile()))
                                                     .and(new SkipFilter(false))
                                             ).addAfter(new TestCaseBuilder()
                                                     .addStep(new SetElementText().toStep().put("text", "after step").build())
@@ -557,6 +559,7 @@ public class SebuilderTest {
                                                     .addStep(new SetElementText().toStep().put("text", "failure step").build())
                                                     .build()
                                             ).setTakeOverChain(false)
+                                            .build()
                                     )
                                     .build(), it))
                             .assertChainCaseCounts(2)
@@ -600,6 +603,7 @@ public class SebuilderTest {
                                                                     .build())
                                                             .build()
                                                     ).setTakeOverChain(false)
+                                                    .build()
                                             )
                                             .build(), it))
                                     .build()

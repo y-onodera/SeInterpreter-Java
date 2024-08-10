@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import org.tbee.javafx.scene.layout.fxml.*?>
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.sebuilder.interpreter.javafx.view.replay.ScreenshotPresenter"
+            maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="420.0">
+    <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <top>
+            <AnchorPane>
+                <MenuBar id="menuBar" prefWidth="Infinity"
+                         AnchorPane.bottomAnchor="0.0"
+                         AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                         AnchorPane.topAnchor="0.0">
+                    <Menu id="menuFile" mnemonicParsing="false" text="File">
+                        <MenuItem id="menuOpenFile" mnemonicParsing="false" onAction="#loadTemplate" text="open"/>
+                        <MenuItem fx:id="menuSaveFile" mnemonicParsing="false" onAction="#saveTemplate" text="Save"/>
+                    </Menu>
+                </MenuBar>
+            </AnchorPane>
+        </top>
+        <bottom>
+            <AnchorPane>
+                <SplitPane orientation="VERTICAL" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                           minWidth="-Infinity"
+                           xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+                    <MigPane cols="[fill][grow][fill,right]" rows="[]" maxHeight="40" prefWidth="420.0">
+                        <Label fx:id="labelTemplateSelect" text="template"/>
+                        <ComboBox fx:id="templateSelect" onAction="#selectTemplate"/>
+                        <Button fx:id="remove" onAction="#removeTemplate" text="Remove" MigPane.cc="align right"/>
+                    </MigPane>
+                    <MigPane fx:id="stepEditGrid" cols="[fill][grow][fill,right]" rows="[]" prefWidth="400.0">
+                    </MigPane>
+                    <MigPane cols="[grow]" rows="[]" maxHeight="40" prefWidth="420.0">
+                        <Button mnemonicParsing="false" onAction="#addTemplate" text="Add" MigPane.cc="align right"/>
+                    </MigPane>
+                    <MigPane cols="[grow]" rows="[]" maxHeight="40" prefWidth="420.0">
+                        <Button mnemonicParsing="false" text="take screenshot" onAction="#takeScreenshot" MigPane.cc="align right"/>
+                    </MigPane>
+                </SplitPane>
+            </AnchorPane>
+        </bottom>
+    </BorderPane>
+</AnchorPane>

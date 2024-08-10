@@ -108,7 +108,7 @@ public abstract class TestRunListenerImpl implements TestRunListener {
 
     @Override
     public void setUpDir(final File dest) {
-        this.reportPrefix = Context.getJunitReportPrefix();
+        this.reportPrefix = Context.getReportPrefixValue();
         // create directory result save in
         this.resultDir = dest;
         final Mkdir mkdir = new Mkdir();
@@ -180,7 +180,7 @@ public abstract class TestRunListenerImpl implements TestRunListener {
     @Override
     public void addError(final Throwable throwable) {
         this.log.info("result error:" + this.testName);
-        this.log.error(throwable);
+        this.log.error("cause :", throwable);
     }
 
     @Override

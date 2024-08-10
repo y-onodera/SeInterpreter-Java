@@ -17,6 +17,7 @@
 package com.sebuilder.interpreter.step.type;
 
 import com.github.romankh3.image.comparison.ImageComparison;
+import com.github.romankh3.image.comparison.ImageComparisonUtil;
 import com.github.romankh3.image.comparison.model.ImageComparisonResult;
 import com.github.romankh3.image.comparison.model.ImageComparisonState;
 import com.github.romankh3.image.comparison.model.Rectangle;
@@ -33,7 +34,6 @@ import com.sebuilder.interpreter.step.LocatorHolder;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -51,7 +51,10 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
         final RemoteWebDriver wd = ctx.driver();
         wd.switchTo().defaultContent();
         try {
-            final String fileName = ctx.getTestRunName() + "_" + ctx.string("file");
+            String fileName = ctx.string("file");
+            if (!ctx.containsKey("addPrefix") || ctx.getBoolean("addPrefix")) {
+                fileName = ctx.getTestRunName() + "_" + fileName;
+            }
             final File file = ctx.getListener().addScreenshot(fileName);
             final BufferedImage actual;
             if (ctx.containsKey("scroll") && !ctx.getBoolean("scroll")) {
@@ -76,7 +79,7 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
             ImageIO.write(actual, "PNG", file);
             return file.exists();
         } catch (final IOException e) {
-            ctx.log().error(e);
+            ctx.log().error("save image file failed cause:", e);
             return false;
         }
     }
@@ -86,17 +89,20 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
         if (!o.containsStringParam("file")) {
             o.put("file", "");
         }
-        if (!o.containsStringParam("verify")) {
-            o.put("verify", "false");
-        }
-        if (!o.containsStringParam("expect")) {
-            o.put("expect", "");
+        if (!o.containsStringParam("addPrefix")) {
+            o.put("addPrefix", "true");
         }
         if (!o.containsStringParam("scroll")) {
             o.put("scroll", "true");
         }
         if (!o.containsLocatorParam("locatorHeader")) {
             LocatorHolder.super.addDefaultParam("locatorHeader", o);
+        }
+        if (!o.containsStringParam("verify")) {
+            o.put("verify", "false");
+        }
+        if (!o.containsStringParam("expect")) {
+            o.put("expect", "");
         }
         if (!o.containsLocatorParam("locatorExclude")) {
             LocatorHolder.super.addDefaultParam("locatorExclude", o);
@@ -108,11 +114,11 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
     }
 
     protected boolean compare(final File file, final BufferedImage actual, final BufferedImage expect, final TestRun ctx) throws IOException {
-        BufferedImage actualResize = actual;
+        BufferedImage expectResize = expect;
         if (this.isSizeMissMatch(actual, expect)) {
-            actualResize = this.toSameSize(actual, expect);
+            expectResize = ImageComparisonUtil.resize(expect, actual.getWidth(), actual.getHeight());
         }
-        final ImageComparisonResult result = this.getComparisonResult(file, actualResize, expect, ctx);
+        final ImageComparisonResult result = this.getComparisonResult(file, actual, expectResize, ctx);
         if (result.getRectangles() != null) {
             final StringBuilder sb = new StringBuilder();
             result.getRectangles()
@@ -123,14 +129,6 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
         }
         ImageIO.write(result.getResult(), "PNG", file);
         return result.getImageComparisonState() == ImageComparisonState.MATCH;
-    }
-
-    protected BufferedImage toSameSize(final BufferedImage actual, final BufferedImage expect) {
-        final BufferedImage finalImage = new BufferedImage(expect.getWidth(), expect.getHeight(), BufferedImage.TYPE_3BYTE_BGR);
-        final Graphics2D graphics = finalImage.createGraphics();
-        graphics.drawImage(actual.getScaledInstance(expect.getWidth(), expect.getHeight(), Image.SCALE_AREA_AVERAGING), 0, 0, expect.getWidth(), expect.getHeight(), null);
-        graphics.dispose();
-        return finalImage;
     }
 
     protected ImageComparisonResult getComparisonResult(final File file, final BufferedImage actual, final BufferedImage expect, final TestRun ctx) {

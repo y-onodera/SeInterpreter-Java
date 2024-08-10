@@ -8,6 +8,7 @@ import com.sebuilder.interpreter.TestRun;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 public record ImportFilter(String path, String where,
@@ -15,22 +16,18 @@ public record ImportFilter(String path, String where,
 
     @Override
     public boolean isHandle(final TestRun testRun, final Step step, final InputData var) {
-        return this.materialize(var).isHandle(testRun, step, var);
+        return this.materialize(var).load().isHandle(testRun, step, var);
     }
 
     @Override
-    public Pointcut materialize(final InputData var) {
+    public ImportFilter materialize(final InputData var) {
         final String runtimePath = var.evaluateString(this.path);
         final String runtimeBaseDir = var.evaluateString(this.where);
-        File f = new File(runtimeBaseDir, runtimePath);
-        if (!f.exists()) {
-            f = new File(runtimePath);
-        }
-        return this.loadFunction.apply(f);
+        return new ImportFilter(runtimePath, runtimeBaseDir, this.loadFunction);
     }
 
     @Override
-    public Map<String, String> params() {
+    public Map<String, String> stringParams() {
         final Map<String, String> result = new HashMap<>();
         if (!this.where.isBlank()) {
             result.put("path", this.path);
@@ -45,6 +42,13 @@ public record ImportFilter(String path, String where,
             return this.path;
         }
         return ExportablePointcut.super.value();
+    }
+
+    public Pointcut load() {
+        return this.loadFunction.apply(Optional.ofNullable(this.where)
+                .filter(it -> !"".equals(it))
+                .map(it -> new File(it, this.path))
+                .orElse(new File(this.path)));
     }
 
 }

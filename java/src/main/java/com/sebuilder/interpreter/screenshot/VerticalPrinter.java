@@ -3,7 +3,6 @@ package com.sebuilder.interpreter.screenshot;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.Comparator;
-import java.util.stream.Collectors;
 
 public class VerticalPrinter {
 
@@ -76,7 +75,7 @@ public class VerticalPrinter {
         int printFrom = from;
         for (final Integer pointY : printTarget.getInnerScrollableElement().keySet().stream()
                 .sorted(Comparator.comparing(Integer::intValue))
-                .collect(Collectors.toList())) {
+                .toList()) {
             final InnerElement scrollElement = printTarget.getInnerScrollableElement().get(pointY);
             if (printTarget.convertDocumentHeight(this.getPrintedHeight()) < pointY
                     && pointY < printTarget.convertDocumentHeight(this.getPrintedHeight()) + printTarget.getViewportHeight()) {
@@ -169,8 +168,8 @@ public class VerticalPrinter {
         return this.verticallyScrollOut(printTarget, printTarget.convertDocumentHeight(printedHeight + prePrintedHeight));
     }
 
-    protected int verticallyScrollOutPrintedPart(final Printable printTarget, final int printedHeight) {
-        return this.verticallyScrollOutPrintedPart(printTarget, printedHeight, 0);
+    protected void verticallyScrollOutPrintedPart(final Printable printTarget, final int printedHeight) {
+        this.verticallyScrollOutPrintedPart(printTarget, printedHeight, 0);
     }
 
     protected int verticallyScrollOut(final Printable printTarget, final int toBeScroll) {

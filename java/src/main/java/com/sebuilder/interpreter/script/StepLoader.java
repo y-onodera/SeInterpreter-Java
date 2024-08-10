@@ -34,7 +34,7 @@ public class StepLoader {
      * @throws JSONException If anything goes wrong with interpreting the JSON.
      */
     protected Step createStep(final JSONObject stepO) {
-        final StepType type = Context.getStepTypeFactory().getStepTypeOfName(stepO.getString("type"));
+        final StepType type = Context.getStepTypeOfName(stepO.getString("type"));
         final boolean isNegated = stepO.optBoolean("negated", false);
         final String name = stepO.optString("step_name", null);
         final StepBuilder step = new StepBuilder(name, type, isNegated);

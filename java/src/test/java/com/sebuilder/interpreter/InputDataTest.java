@@ -2,12 +2,11 @@ package com.sebuilder.interpreter;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class InputDataTest {
 
-    private InputData target = new InputData()
+    private final InputData target = new InputData()
             .add("aTrue", "true")
             .add("aFalse", "false")
             .add("number", "1")
@@ -16,40 +15,59 @@ public class InputDataTest {
             .add("nestedVar", "${var1}");
 
     @Test
+    public void hasExpression() {
+        assertTrue(InputData.hasExpression("${aTrue == true}"));
+        assertTrue(InputData.hasExpression("${(number * 1) + 5 == var1.length()}"));
+        assertTrue(InputData.hasExpression("${aTrue == true} && ${aTrue == false}"));
+        assertTrue(InputData.hasExpression("${var1 == '${nestedVar}'}"));
+        assertFalse(InputData.hasExpression("{aTrue == true}"));
+        assertFalse(InputData.hasExpression("aTrue == true"));
+        assertFalse(InputData.hasExpression(""));
+    }
+
+    @Test
     public void lastRow() {
-        assertTrue(target.isLastRow());
-        assertTrue(target.lastRow(true).isLastRow());
-        assertFalse(target.lastRow(false).isLastRow());
+        assertTrue(this.target.isLastRow());
+        assertTrue(this.target.lastRow(true).isLastRow());
+        assertFalse(this.target.lastRow(false).isLastRow());
     }
 
     @Test
     public void evaluateLiteralIsBooleanValueOf() {
-        assertTrue(target.evaluate("true"));
-        assertTrue(target.evaluate("TRUE"));
-        assertTrue(target.evaluate("True"));
-        assertFalse(target.evaluate("false"));
-        assertFalse(target.evaluate("FALSE"));
-        assertFalse(target.evaluate("False"));
-        assertFalse(target.evaluate("1"));
-        assertFalse(target.evaluate("0"));
+        assertTrue(this.target.evaluate("true"));
+        assertTrue(this.target.evaluate("TRUE"));
+        assertTrue(this.target.evaluate("True"));
+        assertFalse(this.target.evaluate("false"));
+        assertFalse(this.target.evaluate("FALSE"));
+        assertFalse(this.target.evaluate("False"));
+        assertFalse(this.target.evaluate("1"));
+        assertFalse(this.target.evaluate("0"));
     }
 
     @Test
     public void evaluateLiteralAfterReplaceKeyValue() {
-        assertTrue(target.evaluate("${aTrue}"));
-        assertFalse(target.evaluate("${aFalse}"));
+        assertTrue(this.target.evaluate("${aTrue}"));
+        assertFalse(this.target.evaluate("${aFalse}"));
     }
 
     @Test
     public void evaluateExpression() {
-        assertTrue(target.evaluate("${aTrue == true}"));
-        assertTrue(target.evaluate("${(number * 1) + 5 == var1.length()}"));
+        assertTrue(this.target.evaluate("${aTrue == true}"));
+        assertTrue(this.target.evaluate("${(number * 1) + 5 == var1.length()}"));
     }
 
     @Test
     public void evaluateReplaceAndEval() {
-        assertTrue(target.evaluate("${'${var1}' == '${nestedVar}'}"));
-        assertTrue(target.evaluate("${'string' == '${nestedVar}'}"));
-        assertTrue(target.evaluate("${var1 == '${nestedVar}'}"));
+        assertTrue(this.target.evaluate("${'${var1}' == '${nestedVar}'}"));
+        assertTrue(this.target.evaluate("${'string' == '${nestedVar}'}"));
+        assertTrue(this.target.evaluate("${var1 == '${nestedVar}'}"));
     }
+
+    @Test
+    public void evaluateString() {
+        assertEquals("true && true", this.target.evaluateString("${aTrue == true} && ${aFalse == false}"));
+        assertEquals("true", this.target.evaluateString("${aTrue == true && aFalse == false}"));
+        assertEquals("true", this.target.evaluateString("${${aTrue == true} && ${aFalse == false}}"));
+    }
+
 }

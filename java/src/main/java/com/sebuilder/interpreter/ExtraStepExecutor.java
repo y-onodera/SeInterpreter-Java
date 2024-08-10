@@ -1,22 +1,21 @@
 package com.sebuilder.interpreter;
 
-import com.google.common.collect.Maps;
-
-import java.util.Map;
-import java.util.function.Supplier;
+import java.util.Optional;
+import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 public record ExtraStepExecutor(Pointcut pointcut,
                                 TestCase beforeStep,
                                 TestCase afterStep,
                                 TestCase failureStep,
-                                boolean takeOverChain) implements Interceptor {
+                                boolean takeOverChain,
+                                String displayName) implements Interceptor {
 
     public ExtraStepExecutor(final Pointcut pointcut,
                              final TestCase beforeStep,
                              final TestCase afterStep,
                              final TestCase failureStep) {
-        this(pointcut, beforeStep, afterStep, failureStep, true);
+        this(pointcut, beforeStep, afterStep, failureStep, true, null);
     }
 
     @Override
@@ -26,6 +25,7 @@ public record ExtraStepExecutor(Pointcut pointcut,
                 , this.afterStep.mapWhen(TestCase::isLazyLoad, it -> it.setShareInput(shareInput).build().execLazyLoad().builder())
                 , this.failureStep.mapWhen(TestCase::isLazyLoad, it -> it.setShareInput(shareInput).build().execLazyLoad().builder())
                 , this.takeOverChain
+                , this.displayName
         ));
     }
 
@@ -60,11 +60,19 @@ public record ExtraStepExecutor(Pointcut pointcut,
     }
 
     @Override
-    public Interceptor takeOverChain(final boolean newValue) {
+    public ExtraStepExecutor takeOverChain(final boolean newValue) {
         if (newValue == this.takeOverChain) {
             return this;
         }
-        return new ExtraStepExecutor(this.pointcut, this.beforeStep, this.afterStep, this.failureStep, newValue);
+        return new ExtraStepExecutor(this.pointcut, this.beforeStep, this.afterStep, this.failureStep, newValue, this.displayName);
+    }
+
+    public boolean hasDisplayName() {
+        return !Optional.ofNullable(this.displayName()).orElse("").isEmpty();
+    }
+
+    public boolean hasStep() {
+        return this.beforeStep().steps().size() > 0 || this.afterStep().steps().size() > 0 || this.failureStep().steps().size() > 0;
     }
 
     public TestRunListener createAdviseListener(final TestRun testRun) {
@@ -87,6 +95,20 @@ public record ExtraStepExecutor(Pointcut pointcut,
         };
     }
 
+    public ExtraStepExecutor map(final UnaryOperator<ExtraStepExecutor.Builder> function) {
+        return function.apply(this.builder()).build();
+    }
+
+    public Builder builder() {
+        return new Builder()
+                .setPointcut(this.pointcut)
+                .addBefore(this.beforeStep)
+                .addAfter(this.afterStep)
+                .addFailure(this.failureStep)
+                .setTakeOverChain(this.takeOverChain)
+                .setDisplayName(this.displayName);
+    }
+
     boolean invokeAdvise(final TestRun testRun, final TestCase steps, final String testRunName) {
         if (steps.steps().size() == 0) {
             return true;
@@ -106,50 +128,57 @@ public record ExtraStepExecutor(Pointcut pointcut,
     TestRun createInterceptorRun(final TestRun testRun, final TestCase invokeCase) {
         return new TestRunBuilder(invokeCase.map(it -> it.isPreventContextAspect(true)))
                 .addTestRunNamePrefix(this.getInterceptCaseName(testRun))
-                .createTestRun(testRun.log(), testRun.driver(), this.extendsStepVar(testRun), this.createAdviseListener(testRun));
-    }
-
-    InputData extendsStepVar(final TestRun testRun) {
-        final Map<String, String> joinStepInfo = Maps.newHashMap();
-        testRun.currentStep()
-                .toMap()
-                .forEach((key, value) -> joinStepInfo.put("_target." + key, value));
-        return testRun.vars().add(joinStepInfo).add("_target.currentStepIndex", String.valueOf(testRun.currentStepIndex()));
+                .createTestRun(testRun.log(), testRun.driver(), testRun.varWithCurrentStepInfo(), this.createAdviseListener(testRun));
     }
 
     String getInterceptCaseName(final TestRun testRun) {
         return testRun.getTestRunName() + "_" + testRun.formatStepIndex() + "_" + testRun.currentStep().type().getStepTypeName() + "_";
     }
 
-
-    public static class Builder implements Supplier<Interceptor> {
+    public static class Builder {
         private Pointcut pointcut = Pointcut.NONE;
-
         private TestCase beforeStep = new TestCaseBuilder().build();
-
         private TestCase afterStep = new TestCaseBuilder().build();
-
         private TestCase failureStep = new TestCaseBuilder().build();
-
         private boolean takeOverChain = true;
+        private String displayName;
 
         public Builder setPointcut(final Pointcut pointcut) {
             this.pointcut = pointcut;
             return this;
         }
 
+        public Builder convertPointcut(final UnaryOperator<Pointcut> function) {
+            return this.setPointcut(this.pointcut.convert(function));
+        }
+
         public Builder addBefore(final TestCase testCase) {
-            this.beforeStep = testCase;
+            this.beforeStep = this.beforeStep.builder().addSteps(testCase.steps()).build();
+            return this;
+        }
+
+        public Builder replaceBefore(final TestCase newValue) {
+            this.beforeStep = newValue;
             return this;
         }
 
         public Builder addAfter(final TestCase testCase) {
-            this.afterStep = testCase;
+            this.afterStep = this.afterStep.builder().addSteps(testCase.steps()).build();
+            return this;
+        }
+
+        public Builder replaceAfter(final TestCase newValue) {
+            this.afterStep = newValue;
             return this;
         }
 
         public Builder addFailure(final TestCase testCase) {
-            this.failureStep = testCase;
+            this.failureStep = this.failureStep.builder().addSteps(testCase.steps()).build();
+            return this;
+        }
+
+        public Builder replaceFailure(final TestCase newValue) {
+            this.failureStep = newValue;
             return this;
         }
 
@@ -158,9 +187,18 @@ public record ExtraStepExecutor(Pointcut pointcut,
             return this;
         }
 
-        @Override
-        public Interceptor get() {
-            return new ExtraStepExecutor(this.pointcut, this.beforeStep, this.afterStep, this.failureStep, this.takeOverChain);
+        public Builder setDisplayName(final String displayName) {
+            this.displayName = displayName;
+            return this;
+        }
+
+        public ExtraStepExecutor build() {
+            return new ExtraStepExecutor(this.pointcut
+                    , this.beforeStep
+                    , this.afterStep
+                    , this.failureStep
+                    , this.takeOverChain
+                    , this.displayName);
         }
 
     }

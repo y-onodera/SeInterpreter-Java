@@ -13,7 +13,7 @@ public class Loop extends AbstractStepType implements FlowStep {
         ctx.processTestSuccess(false);
         final int actions = this.getSubSteps(ctx);
         final int count = Integer.parseInt(ctx.string("count"));
-        for (int i = 0; i < count; i++) {
+        for (int i = 0; i < count && !ctx.isStopped(); i++) {
             ctx.putVars("_index", String.valueOf(i + 1));
             success = this.runSubStep(ctx, actions) && success;
             if (i + 1 < count) {

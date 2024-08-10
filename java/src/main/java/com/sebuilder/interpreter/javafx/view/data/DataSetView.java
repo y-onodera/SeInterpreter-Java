@@ -8,11 +8,9 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
-import java.io.IOException;
-
 public class DataSetView extends FXMLView {
 
-    public void open(final DataSourceLoader resource, final Window parentWindow) throws IOException {
+    public void open(final DataSourceLoader resource, final Window parentWindow) {
         final Scene scene = new Scene(this.getView());
         final Stage stage = new Stage();
         this.presenter().populate(resource);

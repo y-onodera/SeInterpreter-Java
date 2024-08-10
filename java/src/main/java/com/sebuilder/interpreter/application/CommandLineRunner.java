@@ -1,6 +1,5 @@
 package com.sebuilder.interpreter.application;
 
-import com.google.common.base.Strings;
 import com.sebuilder.interpreter.*;
 import com.sebuilder.interpreter.datasource.DataSourceFactoryImpl;
 import com.sebuilder.interpreter.script.Sebuilder;
@@ -8,8 +7,8 @@ import com.sebuilder.interpreter.script.SebuilderToStringConverter;
 import com.sebuilder.interpreter.script.seleniumide.SeleniumIDE;
 import com.sebuilder.interpreter.step.StepTypeFactoryImpl;
 import org.apache.logging.log4j.Logger;
-import org.openqa.selenium.manager.SeleniumManager;
 
+import java.util.Optional;
 import java.util.Set;
 
 public abstract class CommandLineRunner {
@@ -17,7 +16,16 @@ public abstract class CommandLineRunner {
     protected TestRunListener testRunListener;
     protected Logger log;
 
+    protected CommandLineRunner(final Logger log) {
+        this.log = log;
+    }
+
     protected CommandLineRunner(final String[] args, final Logger log) {
+        System.setProperty("webdriver.http.factory", "jdk-http-client");
+        if (System.getProperty("os.name").toLowerCase().startsWith("win")) {
+            System.setProperty("javax.net.ssl.trustStore", "NUL");
+            System.setProperty("javax.net.ssl.trustStoreType", "WINDOWS-ROOT");
+        }
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             if (this.lastRun != null) {
                 this.lastRun.driver().quit();
@@ -38,8 +46,8 @@ public abstract class CommandLineRunner {
         this.testRunListener = testRunListener;
     }
 
-    public void reloadBrowserSetting(final String browserName, final String driverPath, final String binaryPath) {
-        Context.getInstance().setBrowser(browserName, driverPath, binaryPath);
+    public void reloadBrowserSetting(final String browserName, final String browserVersion, final String driverPath, final String binaryPath) {
+        Context.getInstance().setBrowser(browserName, browserVersion, driverPath, binaryPath);
     }
 
     public void setUp(final String[] args) {
@@ -56,26 +64,29 @@ public abstract class CommandLineRunner {
             Context.getInstance()
                     .setImplicitlyWaitTime(option.getImplicitlyWait())
                     .setPageLoadWaitTime(option.getPageLoadTimeout())
+                    .setWaitForMaxMs(option.getWaitForMaxMs())
+                    .setWaitForIntervalMs(option.getWaitForIntervalMs())
                     .setBrowser(option.getDriver())
-                    .ifMatch(!Strings.isNullOrEmpty(option.getDriverPath())
+                    .setDriverConfig(option.getDriverConfig())
+                    .ifMatch(!this.isNullOrEmpty(option.getBrowserVersion())
+                            , it -> it.setBrowserVersion(option.getBrowserVersion())
+                    )
+                    .ifMatch(!Context.isRemote()
                             , it -> it.setWebDriverPath(option.getDriverPath())
                     )
-                    .setDriverConfig(option.getDriverConfig())
-                    .ifMatch(!Context.isRemote() && Strings.isNullOrEmpty(Context.getWebDriverFactory().getDriverPath())
-                            , it -> it.setWebDriverPath(SeleniumManager.getInstance().getDriverPath(Context.getWebDriverFactory().getDriverName())))
                     .setDataSourceEncoding(option.getDatasourceEncoding())
                     .setDataSourceDirectory(option.getDatasourceDirectory())
                     .setScreenShotOutputDirectory(option.getScreenshotoutput())
                     .setExpectScreenShotDirectory(option.getExpectScreenshotDirectory())
                     .setTemplateOutputDirectory(option.getTemplateoutput())
                     .setResultOutputDirectory(option.getResultoutput())
-                    .setJunitReportPrefix(option.getJunitReportPrefix())
+                    .setReportPrefix(option.getJunitReportPrefix())
                     .setTestRunListenerFactory(option.getReportFormat())
                     .setDownloadDirectory(option.getDownloadoutput())
-                    .ifMatch(!Strings.isNullOrEmpty(option.getAspectFile())
+                    .ifMatch(!this.isNullOrEmpty(option.getAspectFile())
                             , it -> it.setAspect(option.getAspectFile())
                     )
-                    .ifMatch(!Strings.isNullOrEmpty(option.getEnvironmentProperties())
+                    .ifMatch(!this.isNullOrEmpty(option.getEnvironmentProperties())
                             , it -> it.setEnvironmentProperties(option.getEnvironmentProperties())
                     )
                     .setEnvironmentProperty(option.getEnvVar())
@@ -91,7 +102,7 @@ public abstract class CommandLineRunner {
         this.log.info("setUp finish");
     }
 
-    protected TestRun getTestRun(final TestRunBuilder script, final InputData data, final TestRunListener testRunListener) {
+    public TestRun getTestRun(final TestRunBuilder script, final InputData data, final TestRunListener testRunListener) {
         return script.createTestRun(testRunListener.getLog()
                 , Context.getWebDriverFactory()
                 , Context.getDriverConfig()
@@ -110,5 +121,9 @@ public abstract class CommandLineRunner {
     }
 
     protected void setScripts(final Set<String> scripts) {
+    }
+
+    protected boolean isNullOrEmpty(final String target) {
+        return Optional.ofNullable(target).filter(it -> !it.isEmpty()).isEmpty();
     }
 }

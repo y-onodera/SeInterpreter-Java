@@ -12,7 +12,9 @@
           {
             "file": "errorPage.png",
             "type": "SaveScreenshot",
-            "verify": "true"
+            "verify": "${env.verifyImage}",
+            "pixelToleranceLevel": "0.3",
+            "allowingPercentOfDifferentPixels": "0.1"
           }
         ]
       }

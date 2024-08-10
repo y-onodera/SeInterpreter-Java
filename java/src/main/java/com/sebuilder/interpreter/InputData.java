@@ -4,22 +4,23 @@ import org.apache.commons.jexl3.*;
 import org.openqa.selenium.Keys;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public record InputData(LinkedHashMap<String, String> row, boolean lastRow) {
 
     public static final String ROW_NUMBER = "_rowNumber";
     private static final LinkedHashMap<String, String> EMPTY = new LinkedHashMap<>();
-    private static final String REGEX_EXPRESSION = ".*\\$\\{(.+)}.*";
+    private static final String REGEX_EXPRESSION = ".*\\$\\{([^}]+)}.*";
     private static final String STEP_INDEX = "_stepIndex";
-
-    public static boolean isVariable(final String target) {
-        final String exp = extractExpression(target);
-        return !Objects.equals(target, exp);
-    }
 
     private static String extractExpression(final String result) {
         return result.replaceAll(REGEX_EXPRESSION, "$1");
+    }
+
+    public static boolean hasExpression(final String target) {
+        return target.matches(REGEX_EXPRESSION);
     }
 
     public InputData() {
@@ -86,6 +87,19 @@ public record InputData(LinkedHashMap<String, String> row, boolean lastRow) {
         return result;
     }
 
+    public InputData filter(final Predicate<Map.Entry<String, String>> predicate) {
+        return new InputData(new LinkedHashMap<>(this.row.entrySet()
+                .stream()
+                .filter(predicate)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))));
+    }
+
+    public InputData replaceKey(final Function<Map.Entry<String, String>, String> function) {
+        return new InputData(new LinkedHashMap<>(this.row.entrySet()
+                .stream()
+                .collect(Collectors.toMap(function, Map.Entry::getValue))));
+    }
+
     public InputData lastRow(final boolean isLastRow) {
         return new InputData(this.row, isLastRow);
     }
@@ -106,6 +120,7 @@ public record InputData(LinkedHashMap<String, String> row, boolean lastRow) {
             final JexlContext jc = new MapContext(new HashMap<>(this.row));
             return Optional.ofNullable(expression.evaluate(jc))
                     .map(it -> result.replace("${" + exp + "}", it.toString()))
+                    .map(this::evaluateString)
                     .orElse(result);
         } catch (final JexlException ex) {
             return result;

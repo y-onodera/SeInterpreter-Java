@@ -17,7 +17,6 @@
 package com.sebuilder.interpreter.browser;
 
 import com.sebuilder.interpreter.WebDriverFactory;
-import org.openqa.selenium.firefox.FirefoxBinary;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.firefox.FirefoxProfile;
@@ -25,6 +24,7 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.io.File;
 import java.util.Map;
+import java.util.Optional;
 
 public class Firefox implements WebDriverFactory {
 
@@ -38,23 +38,35 @@ public class Firefox implements WebDriverFactory {
      */
     @Override
     public RemoteWebDriver createLocaleDriver(final Map<String, String> config) {
-        return new FirefoxDriver(this.getOptions(config));
+        final FirefoxDriver driver = new FirefoxDriver(this.getOptions(config));
+        config.keySet().stream().filter(it -> it.startsWith("firefox.extensions")).forEach(key ->
+                driver.installExtension(new File(config.get(key)).toPath(), true));
+        return driver;
     }
 
     @Override
     public FirefoxOptions getOptions(final Map<String, String> config) {
         final FirefoxOptions option = new FirefoxOptions();
-        config.forEach((key, value) -> {
-            if (key.equals("binary")) {
-                option.setBinary(new FirefoxBinary(new File(value)));
-            } else if (key.equals("profile")) {
-                option.setProfile(new FirefoxProfile(new File(value)));
-            } else if (key.startsWith("firefox.options.")) {
-                option.addArguments("--" + key.substring("firefox.options.".length()));
-            } else {
-                option.addPreference(key, value);
-            }
-        });
+        config.entrySet()
+                .stream()
+                .filter(entry -> !entry.getKey().startsWith("edge") && !entry.getKey().startsWith("chrome"))
+                .forEach(entry -> {
+                    final String key = entry.getKey();
+                    final String value = entry.getValue();
+                    if (key.equals("binary")) {
+                        option.setBinary(new File(value).toPath());
+                    } else if (key.equals("profile")) {
+                        option.setProfile(new FirefoxProfile(new File(value)));
+                    } else if (key.startsWith("firefox.arguments.")) {
+                        if (!Optional.ofNullable(config.get(key)).orElse("").isBlank()) {
+                            option.addArguments("--" + key.substring("firefox.arguments.".length()) + "=" + config.get(key));
+                        } else {
+                            option.addArguments("--" + key.substring("firefox.arguments.".length()));
+                        }
+                    } else if (!key.startsWith("firefox.extensions.")) {
+                        option.addPreference(key, value);
+                    }
+                });
         return option;
     }
 

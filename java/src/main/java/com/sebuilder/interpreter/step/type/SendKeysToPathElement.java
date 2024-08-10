@@ -34,7 +34,7 @@ public class SendKeysToPathElement extends AbstractStepType implements Condition
             el.sendKeys(new File(ctx.text()).getCanonicalPath());
             return true;
         } catch (final IOException ex) {
-            ctx.log().error(ex);
+            ctx.log().error("get file path failed cause:", ex);
             return false;
         }
     }

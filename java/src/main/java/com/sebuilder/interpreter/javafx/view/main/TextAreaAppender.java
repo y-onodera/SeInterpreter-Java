@@ -21,19 +21,12 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 /**
  * TextAreaAppender for Log4j 2
  */
-@Plugin(
-        name = "TextAreaAppender",
-        category = "Core",
-        elementType = "appender",
-        printObject = true)
+@Plugin(name = "TextAreaAppender", category = "Core", elementType = "appender", printObject = true)
 public final class TextAreaAppender extends AbstractAppender {
 
     private static TextArea textArea;
-
-
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
     private final Lock readLock = this.rwLock.readLock();
-
 
     TextAreaAppender(final String name, final Filter filter,
                      final Layout<? extends Serializable> layout,
@@ -66,13 +59,11 @@ public final class TextAreaAppender extends AbstractAppender {
                         }
                     }
                 } catch (final Throwable t) {
-                    System.out.println("Error while append to TextArea: "
-                            + t.getMessage());
+                    System.out.println("Error while append to TextArea: " + t.getMessage());
                 }
             });
         } catch (final IllegalStateException ex) {
             ex.printStackTrace();
-
         } finally {
             this.readLock.unlock();
         }
@@ -102,7 +93,6 @@ public final class TextAreaAppender extends AbstractAppender {
         }
         return new TextAreaAppender(name, filter, layout, true);
     }
-
 
     /**
      * Set TextArea to append

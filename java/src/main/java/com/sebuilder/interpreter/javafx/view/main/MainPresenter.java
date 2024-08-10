@@ -1,44 +1,38 @@
 package com.sebuilder.interpreter.javafx.view.main;
 
-import com.sebuilder.interpreter.javafx.application.SeInterpreterApplication;
-import com.sebuilder.interpreter.javafx.application.ViewType;
+import com.sebuilder.interpreter.javafx.model.ViewType;
 import javafx.fxml.FXML;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TextArea;
 
-import javax.inject.Inject;
+import java.util.function.Consumer;
 
 public class MainPresenter {
 
-    @Inject
-    private SeInterpreterApplication application;
+    @FXML
+    private Tab stepText;
 
     @FXML
-    private Tab tabStepText;
-
-    @FXML
-    private Tab tabStepTable;
+    private Tab stepTable;
 
     @FXML
     private TextArea textAreaScriptLog;
 
-    @FXML
-    void initialize() {
-        assert this.tabStepTable != null : "fx:id=\"tabStepTable\" was not injected: check your FXML file 'seleniumbuilder.fxml'.";
-        assert this.tabStepText != null : "fx:id=\"tabStepText\" was not injected: check your FXML file 'seleniumbuilder.fxml'.";
-        assert this.textAreaScriptLog != null : "fx:id=\"textAreaScriptLog\" was not injected: check your FXML file 'seleniumbuilder.fxml'.";
-        TextAreaAppender.setTextArea(this.textAreaScriptLog);
-        this.tabStepText.setOnSelectionChanged(event -> {
-            if (this.tabStepText.isSelected()) {
-                this.application.changeScriptViewType(ViewType.TEXT);
-            }
-        });
-        this.tabStepTable.setOnSelectionChanged(event -> {
-            if (this.tabStepTable.isSelected()) {
-                this.application.changeScriptViewType(ViewType.TABLE);
-            }
-        });
-        this.application.changeScriptViewType(ViewType.TABLE);
-    }
+    private Consumer<ViewType> handleViewSelected;
 
+    public void setHandleViewSelected(final Consumer<ViewType> handleViewSelected) {
+        this.handleViewSelected = handleViewSelected;
+        TextAreaAppender.setTextArea(this.textAreaScriptLog);
+        this.stepText.setOnSelectionChanged(event -> {
+            if (this.stepText.isSelected()) {
+                this.handleViewSelected.accept(ViewType.TEXT);
+            }
+        });
+        this.stepTable.setOnSelectionChanged(event -> {
+            if (this.stepTable.isSelected()) {
+                this.handleViewSelected.accept(ViewType.TABLE);
+            }
+        });
+        this.handleViewSelected.accept(ViewType.TABLE);
+    }
 }

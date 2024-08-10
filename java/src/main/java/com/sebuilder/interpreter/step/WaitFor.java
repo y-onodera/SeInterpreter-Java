@@ -16,6 +16,7 @@
 
 package com.sebuilder.interpreter.step;
 
+import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
 
@@ -40,18 +41,18 @@ public class WaitFor extends AbstractStepType implements GetterUseStep {
 
     @Override
     public boolean run(final TestRun ctx) {
-        int maxWaitMs = 60000; // qqDPS Eventually get this from somewhere.
+        int maxWaitMs = Context.getWaitForMaxMs();
         if (ctx.containsKey("maxWait")) {
             maxWaitMs = Integer.parseInt(ctx.string("maxWait"));
         }
-        int intervalMs = 500; // qqDPS Eventually get this from somewhere.
+        int intervalMs = Context.getWaitForIntervalMs(); //
         if (ctx.containsKey("interval")) {
             intervalMs = Integer.parseInt(ctx.string("interval"));
         }
         final long stopBy = System.currentTimeMillis() + maxWaitMs;
         // NB: If the step is negated, a result of "true"  means that we haven't succeeded yet.
         //     If the step is normal,  a result of "false" means that we haven't succeeded yet.
-        while (!this.test(ctx) && System.currentTimeMillis() < stopBy) {
+        while (!this.test(ctx) && System.currentTimeMillis() < stopBy && !ctx.isStopped()) {
             try {
                 Thread.sleep(intervalMs);
             } catch (final InterruptedException e) {

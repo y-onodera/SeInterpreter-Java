@@ -20,7 +20,7 @@ public class ExportTemplate extends AbstractStepType implements LocatorHolder {
             if (toExport.hasDataSource()) {
                 toExport.outputDataSourceTemplate();
             }
-            final String result = Context.getTestCaseConverter().toString(toExport.getScript());
+            final String result = Context.toString(toExport.getScript());
             ctx.log().info(result);
             if (ctx.containsKey("file")) {
                 final String fileName = ctx.string("file");
@@ -29,7 +29,7 @@ public class ExportTemplate extends AbstractStepType implements LocatorHolder {
             }
             return true;
         } catch (final IOException e) {
-            ctx.log().error(e);
+            ctx.log().error("output file failed cause:", e);
             return false;
         }
     }
@@ -53,7 +53,7 @@ public class ExportTemplate extends AbstractStepType implements LocatorHolder {
             Files.createFile(outputTo.toPath());
             Files.writeString(outputTo.toPath(), result, Charsets.UTF_8);
         } catch (final IOException e) {
-            ctx.log().error(e);
+            ctx.log().error("output file failed cause:", e);
             return false;
         }
         return true;

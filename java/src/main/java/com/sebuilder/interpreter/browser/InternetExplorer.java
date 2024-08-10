@@ -24,11 +24,8 @@ public class InternetExplorer implements WebDriverFactory {
     public InternetExplorerOptions getOptions(final Map<String, String> config) {
         final HashMap<String, String> caps = new HashMap<>();
         final DesiredCapabilities capabilities = new DesiredCapabilities();
-        capabilities.setCapability("javascriptEnabled", true);
         final InternetExplorerOptions ieOptions = new InternetExplorerOptions(capabilities)
                 .attachToEdgeChrome();
-        ieOptions.setCapability(InternetExplorerDriver.UNEXPECTED_ALERT_BEHAVIOR, "accept");
-        ieOptions.setCapability("disable-popup-blocking", true);
         config.forEach((key, value) -> {
             if (key.startsWith("ieoption.")) {
                 if (value.toLowerCase().equals(Boolean.TRUE.toString())) {

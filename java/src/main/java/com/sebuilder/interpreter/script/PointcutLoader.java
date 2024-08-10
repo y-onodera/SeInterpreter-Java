@@ -17,6 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -86,7 +87,7 @@ public record PointcutLoader(ImportLoader importLoader) {
 
     public Optional<Pointcut> importScript(final JSONObject src, final String key, final File baseDir) {
         return this.importLoader.load(src, key, (value, where) ->
-                Optional.of(new ImportFilter(value, where, (path) -> this.load(path, baseDir).orElseThrow())));
+                Optional.of(new ImportFilter(value, where, new ImportFunction(this, baseDir))));
     }
 
     public Optional<Pointcut> getStringFilter(final JSONObject pointcutJSON, final String key) {
@@ -144,19 +145,32 @@ public record PointcutLoader(ImportLoader importLoader) {
             final JSONObject condition = pointcutJSON.getJSONObject(name);
             return Optional.of(this.toVerifyFilter(condition, name));
         }
-        final Verify verify = (Verify) Context.getStepTypeFactory().getStepTypeOfName(name);
+        final Verify verify = (Verify) Context.getStepTypeOfName(name);
         final Map<String, String> params = new HashMap<>();
         params.put("negated", Boolean.toString(!Boolean.parseBoolean(pointcutJSON.getString(name))));
-        return Optional.of(new VerifyFilter(false, verify, params));
+        return Optional.of(new VerifyFilter(verify, params, new HashMap<>()));
     }
 
     public VerifyFilter toVerifyFilter(final JSONObject json, final String name) {
-        final Verify verify = (Verify) Context.getStepTypeFactory().getStepTypeOfName(name);
+        final Verify verify = (Verify) Context.getStepTypeOfName(name);
         final Map<String, String> params = json.keySet()
                 .stream()
-                .filter(key -> !key.equals("handleNoLocator"))
+                .filter(key -> !key.startsWith("locator"))
                 .collect(Collectors.toMap(key -> key, json::getString));
-        return new VerifyFilter(Boolean.parseBoolean(json.optString("handleNoLocator")), verify, params);
+        final Map<String, Locator> locatorParams = json.keySet()
+                .stream()
+                .filter(key -> key.startsWith("locator"))
+                .collect(Collectors.toMap(key -> key, key -> {
+                    final JSONObject locator = json.getJSONObject(key);
+                    return new Locator(locator.getString("type"), locator.getString("value"));
+                }));
+        return new VerifyFilter(verify, params, locatorParams);
     }
 
+    public record ImportFunction(PointcutLoader loader, File baseDir) implements Function<File, Pointcut> {
+        @Override
+        public Pointcut apply(final File file) {
+            return this.loader.load(file, this.baseDir).orElseThrow();
+        }
+    }
 }

@@ -2,14 +2,15 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<SplitPane id="ancorSeInterpleter" dividerPositions="0.85" maxHeight="-Infinity" maxWidth="-Infinity"
+<SplitPane id="anchorSeInterpreter" dividerPositions="0.85" maxHeight="-Infinity" maxWidth="-Infinity"
            minHeight="-Infinity" minWidth="-Infinity" orientation="VERTICAL" prefHeight="500.0" prefWidth="600.0"
            xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="com.sebuilder.interpreter.javafx.view.main.MainPresenter">
     <AnchorPane>
-        <BorderPane id="borderSeInterpleter" maxHeight="Infinity" minHeight="0" prefHeight="425.0"
-                    prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                    AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <BorderPane id="borderSeInterpreter"
+                    maxHeight="Infinity" minHeight="0" prefHeight="425.0" prefWidth="600.0"
+                    AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0"
+                    AnchorPane.rightAnchor="0.0" AnchorPane.bottomAnchor="0.0">
             <top>
                 <fx:include source="../menu/menu.fxml"/>
             </top>
@@ -17,10 +18,10 @@
                 <SplitPane dividerPositions="0.2">
                     <fx:include source="../suite/suite.fxml"/>
                     <TabPane prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE">
-                        <Tab fx:id="tabStepTable" text="steps">
+                        <Tab fx:id="stepTable" text="steps">
                             <fx:include source="../script/script.fxml"/>
                         </Tab>
-                        <Tab fx:id="tabStepText" text="testCase(plain json)">
+                        <Tab fx:id="stepText" text="testCase(plain json)">
                             <fx:include source="../script/json.fxml"/>
                         </Tab>
                     </TabPane>

@@ -11,6 +11,10 @@ import java.util.Scanner;
 public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
     private int execCount = 1;
 
+    public SeInterpreterREPL(final Logger log) {
+        super(log);
+    }
+
     public SeInterpreterREPL(final String[] args, final Logger log) {
         super(args, log);
     }
@@ -78,7 +82,7 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
         try {
             return Context.getScriptParser().load(new File(file));
         } catch (final Throwable e) {
-            this.log.error(e);
+            this.log.error("load script failed cause:", e);
         }
         return new TestCaseBuilder().build();
     }
@@ -116,6 +120,12 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
         }
     }
 
+    public SeInterpreterREPL copy() {
+        final SeInterpreterREPL result = new SeInterpreterREPL(this.log);
+        result.lastRun = this.lastRun;
+        return result;
+    }
+
     @Override
     protected boolean validateArgs(final String[] args) {
         return true;
@@ -127,7 +137,7 @@ public class SeInterpreterREPL extends CommandLineRunner implements TestRunner {
         try {
             result = Context.getScriptParser().load(cmdInput);
         } catch (final Throwable e) {
-            this.log.error(e);
+            this.log.error("parse input failed cause:", e);
         }
         if (result == null) {
             this.log.error("invalid input:" + cmdInput);
