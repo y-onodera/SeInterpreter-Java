@@ -2,16 +2,16 @@
   "steps": [
     {
       "negated": false,
-      "skip": "false",
-      "type": "Get",
-      "url": "http://example.selenium.jp/reserveApp_Renewal/"
-    },
-    {
-      "negated": false,
       "width": "1024",
       "skip": "false",
       "type": "SetWindowSize",
       "height": "768"
+    },
+    {
+      "negated": false,
+      "skip": "false",
+      "type": "Get",
+      "url": "http://example.selenium.jp/reserveApp_Renewal/"
     }
   ]
 }
