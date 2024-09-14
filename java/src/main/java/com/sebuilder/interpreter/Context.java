@@ -1,5 +1,7 @@
 package com.sebuilder.interpreter;
 
+import com.sebuilder.interpreter.browser.Edge;
+import com.sebuilder.interpreter.browser.InternetExplorer;
 import com.sebuilder.interpreter.pointcut.TypeFilter;
 import com.sebuilder.interpreter.step.type.SaveScreenshot;
 import org.apache.logging.log4j.Logger;
@@ -341,17 +343,16 @@ public enum Context {
 
     public Context setWebDriverPath(final String driverPath) {
         if (isNullOrEmpty(driverPath)) {
-            final List<String> args = new ArrayList<>();
-            args.add("--browser");
-            args.add(this.wdf.targetBrowser().toLowerCase());
-            if (!isNullOrEmpty(this.browserVersion)) {
-                args.add("--browser-version");
-                args.add(this.browserVersion);
-            }
             final SeleniumManagerOutput.Result mangerResult = SeleniumManager.getInstance()
-                    .getBinaryPaths(args);
+                    .getBinaryPaths(this.getSeleniumManagerArgs(this.wdf.targetBrowser().toLowerCase()));
             this.wdf.setDriverPath(mangerResult.getDriverPath());
-            this.wdf.setBinaryPath(mangerResult.getBrowserPath());
+            if (this.wdf.targetBrowser().equals(InternetExplorer.class.getSimpleName())) {
+                this.wdf.setBinaryPath(SeleniumManager.getInstance()
+                        .getBinaryPaths(this.getSeleniumManagerArgs(new Edge().targetBrowser().toLowerCase()))
+                        .getBrowserPath());
+            } else {
+                this.wdf.setBinaryPath(mangerResult.getBrowserPath());
+            }
         } else {
             this.wdf.setDriverPath(driverPath);
         }
@@ -474,6 +475,17 @@ public enum Context {
     public Context setLocaleConfDir(final File path) {
         this.localeConfDir = path;
         return this;
+    }
+
+    private List<String> getSeleniumManagerArgs(final String browser) {
+        final List<String> args = new ArrayList<>();
+        args.add("--browser");
+        args.add(browser);
+        if (!isNullOrEmpty(this.browserVersion)) {
+            args.add("--browser-version");
+            args.add(this.browserVersion);
+        }
+        return args;
     }
 
     private static Map<String, String> environmentVariables() {

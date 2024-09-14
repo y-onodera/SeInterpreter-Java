@@ -26,21 +26,24 @@ public class InternetExplorer implements WebDriverFactory {
         final DesiredCapabilities capabilities = new DesiredCapabilities();
         final InternetExplorerOptions ieOptions = new InternetExplorerOptions(capabilities)
                 .attachToEdgeChrome();
-        config.forEach((key, value) -> {
-            if (key.startsWith("ieoption.")) {
-                if (value.toLowerCase().equals(Boolean.TRUE.toString())) {
-                    ieOptions.setCapability(key.substring("ieoption.".length()), true);
-                } else if (value.toLowerCase().equals(Boolean.FALSE.toString())) {
-                    ieOptions.setCapability(key.substring("ieoption.".length()), false);
-                } else {
-                    ieOptions.setCapability(key.substring("ieoption.".length()), value);
-                }
-            } else if (key.equals("binary")) {
-                ieOptions.withEdgeExecutablePath(value);
-            } else {
-                caps.put(key, value);
-            }
-        });
+        config.entrySet()
+                .stream()
+                .filter(entry -> !entry.getKey().startsWith("firefox") && !entry.getKey().startsWith("edge") && !entry.getKey().startsWith("chrome"))
+                .forEach(entry -> {
+                    if (entry.getKey().startsWith("ieoption.")) {
+                        if (entry.getValue().toLowerCase().equals(Boolean.TRUE.toString())) {
+                            ieOptions.setCapability(entry.getKey().substring("ieoption.".length()), true);
+                        } else if (entry.getValue().toLowerCase().equals(Boolean.FALSE.toString())) {
+                            ieOptions.setCapability(entry.getKey().substring("ieoption.".length()), false);
+                        } else {
+                            ieOptions.setCapability(entry.getKey().substring("ieoption.".length()), entry.getValue());
+                        }
+                    } else if (entry.getKey().equals("binary")) {
+                        ieOptions.withEdgeExecutablePath(entry.getValue());
+                    } else {
+                        caps.put(entry.getKey(), entry.getValue());
+                    }
+                });
         caps.forEach(ieOptions::setCapability);
         return ieOptions;
     }
