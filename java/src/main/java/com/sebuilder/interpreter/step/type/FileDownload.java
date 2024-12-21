@@ -110,7 +110,7 @@ public class FileDownload extends AbstractStepType implements ConditionalStep, L
         return getClient(getJdkHttpClient(ctx));
     }
 
-    private static HttpClient getClient(JdkHttpClient client) throws URISyntaxException {
+    private static HttpClient getClient(JdkHttpClient client) {
         try {
             Field clientField = JdkHttpClient.class.getDeclaredField("client");
             clientField.setAccessible(true);
@@ -120,7 +120,7 @@ public class FileDownload extends AbstractStepType implements ConditionalStep, L
         }
     }
 
-    private static JdkHttpClient getJdkHttpClient(final TestRun ctx) throws URISyntaxException {
+    private static JdkHttpClient getJdkHttpClient(final TestRun ctx) {
         final HttpCommandExecutor executor = getHttpCommandExecutor(ctx);
         try {
             Field clientField = HttpCommandExecutor.class.getDeclaredField("client");
