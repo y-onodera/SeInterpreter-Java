@@ -4,18 +4,17 @@ import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.step.AbstractStepType;
 import com.sebuilder.interpreter.step.LocatorHolder;
-import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.remote.HttpCommandExecutor;
+import org.openqa.selenium.remote.http.jdk.JdkHttpClient;
 
 import java.io.*;
-import java.net.CookieManager;
-import java.net.HttpCookie;
+import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class FileDownload extends AbstractStepType implements ConditionalStep, LocatorHolder {
@@ -45,7 +44,13 @@ public class FileDownload extends AbstractStepType implements ConditionalStep, L
     public boolean get(final TestRun ctx) {
         final WebElement el = ctx.locator().find(ctx);
         try {
-            this.getDownloadFile(ctx, el.getDomAttribute("href"));
+            String uri = el.getDomAttribute("href");
+            URI uri1 = new URI(ctx.driver().getCurrentUrl());
+            String baseURL = uri1.toString().replace(uri1.getRawPath(), "");
+            if (!uri.startsWith(baseURL)) {
+                uri = baseURL + uri;
+            }
+            this.getDownloadFile(ctx, uri);
         } catch (final Throwable e) {
             ctx.log().error("download http get failure cause:", e);
             return false;
@@ -84,7 +89,7 @@ public class FileDownload extends AbstractStepType implements ConditionalStep, L
     }
 
     protected void downLoadFile(final TestRun ctx, final HttpRequest req) throws IOException, URISyntaxException, InterruptedException {
-        final HttpClient client = this.getHttpClient(ctx);
+        final HttpClient client = getHttpClient(ctx);
         final HttpResponse<byte[]> res = client.send(req, java.net.http.HttpResponse.BodyHandlers.ofByteArray());
         final File outputFile;
         if (ctx.getBoolean("fixedPath")) {
@@ -101,33 +106,33 @@ public class FileDownload extends AbstractStepType implements ConditionalStep, L
         }
     }
 
-    protected HttpClient getHttpClient(final TestRun ctx) throws URISyntaxException {
-        final URI currentUri = new URI(ctx.driver().getCurrentUrl());
-        final URI uri = new URI(currentUri.toString().replace(currentUri.getPath(), ""));
-        final Set<Cookie> seleniumCookies = ctx.driver().manage().getCookies();
-        final var cookieManager = new CookieManager();
-        for (final Cookie seleniumCookie : seleniumCookies) {
-            final HttpCookie cookie = new HttpCookie(seleniumCookie.getName(), seleniumCookie.getValue());
-            String domain = seleniumCookie.getDomain();
-            if (domain.startsWith(".")) {
-                domain = domain.substring(1);
-            }
-            cookie.setDomain(domain);
-            if (seleniumCookie.getExpiry() != null) {
-                cookie.setMaxAge(seleniumCookie.getExpiry().getTime());
-            }
-            cookie.setSecure(seleniumCookie.isSecure());
-            cookie.setHttpOnly(seleniumCookie.isHttpOnly());
-            if (seleniumCookie.getPath() != null) {
-                cookie.setPath(seleniumCookie.getPath());
-            }
-            cookie.setVersion(0);
-            cookieManager.getCookieStore().add(uri, cookie);
+    private static HttpClient getHttpClient(final TestRun ctx) throws URISyntaxException {
+        return getClient(getJdkHttpClient(ctx));
+    }
+
+    private static HttpClient getClient(JdkHttpClient client) throws URISyntaxException {
+        try {
+            Field clientField = JdkHttpClient.class.getDeclaredField("client");
+            clientField.setAccessible(true);
+            return (HttpClient) clientField.get(client);
+        } catch (final NoSuchFieldException | IllegalAccessException e) {
+            throw new AssertionError(e);
         }
-        return HttpClient.newBuilder()
-                .cookieHandler(cookieManager)
-                .followRedirects(HttpClient.Redirect.NORMAL)
-                .build();
+    }
+
+    private static JdkHttpClient getJdkHttpClient(final TestRun ctx) throws URISyntaxException {
+        final HttpCommandExecutor executor = getHttpCommandExecutor(ctx);
+        try {
+            Field clientField = HttpCommandExecutor.class.getDeclaredField("client");
+            clientField.setAccessible(true);
+            return (JdkHttpClient) clientField.get(executor);
+        } catch (final NoSuchFieldException | IllegalAccessException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    private static HttpCommandExecutor getHttpCommandExecutor(TestRun ctx) {
+        return (HttpCommandExecutor) ctx.driver().getCommandExecutor();
     }
 
 }
