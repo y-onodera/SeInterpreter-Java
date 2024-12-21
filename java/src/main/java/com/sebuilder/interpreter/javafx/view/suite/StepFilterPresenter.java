@@ -1,6 +1,5 @@
 package com.sebuilder.interpreter.javafx.view.suite;
 
-import com.google.common.base.Charsets;
 import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.Pointcut;
 import com.sebuilder.interpreter.javafx.model.SeInterpreter;
@@ -11,13 +10,13 @@ import com.sebuilder.interpreter.javafx.view.filter.FilterTablePresenter;
 import com.sebuilder.interpreter.pointcut.ImportFilter;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
 import javax.inject.Inject;
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.function.Consumer;
 
@@ -49,13 +48,12 @@ public class StepFilterPresenter implements HasFileChooser {
 
     @FXML
     void initialize() {
-        this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
-            this.filterTableController.addListener((final ObservableValue<? extends Pointcut> observed, final Pointcut oldValue, final Pointcut newValue) -> {
-                if (newValue != null) {
-                    this.currentProperty.set(newValue);
-                }
-            });
-        });
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() ->
+                this.filterTableController.addListener((observed, oldValue, newValue) -> {
+                    if (newValue != null) {
+                        this.currentProperty.set(newValue);
+                    }
+                }));
     }
 
     @FXML
@@ -68,7 +66,7 @@ public class StepFilterPresenter implements HasFileChooser {
     public void saveAs() {
         this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
             final File target = this.saveDialog("Save Filter File", "json format (*.json)", "*.json");
-            Files.writeString(target.toPath(), Context.getTestCaseConverter().toString(this.currentProperty.get()), Charsets.UTF_8);
+            Files.writeString(target.toPath(), Context.getTestCaseConverter().toString(this.currentProperty.get()), StandardCharsets.UTF_8);
             this.currentProperty.set(new ImportFilter(this.application.getCurrentRootDir().toPath()
                     .relativize(target.toPath()).toString().replace("\\", "/")
                     , "", (path) -> Context.getScriptParser().loadPointCut(path, this.application.getCurrentRootDir())));

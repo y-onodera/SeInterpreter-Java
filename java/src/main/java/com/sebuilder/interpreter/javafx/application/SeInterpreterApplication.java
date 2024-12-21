@@ -1,7 +1,6 @@
 package com.sebuilder.interpreter.javafx.application;
 
 import com.airhacks.afterburner.injection.Injector;
-import com.google.common.base.Charsets;
 import com.sebuilder.interpreter.javafx.model.SeInterpreter;
 import com.sebuilder.interpreter.javafx.view.ErrorDialog;
 import com.sebuilder.interpreter.javafx.view.SuccessDialog;
@@ -11,6 +10,7 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Optional;
@@ -37,7 +37,7 @@ public class SeInterpreterApplication extends Application {
                     if (!target.exists()) {
                         Files.createFile(target.toPath());
                     }
-                    Files.writeString(target.toPath(), content, Charsets.UTF_8);
+                    Files.writeString(target.toPath(), content, StandardCharsets.UTF_8);
                     SuccessDialog.show("save succeed:" + target.getAbsolutePath());
                 })
                 , (task) -> new ReplayView().open(this.mainView.getMainWindow(), task)

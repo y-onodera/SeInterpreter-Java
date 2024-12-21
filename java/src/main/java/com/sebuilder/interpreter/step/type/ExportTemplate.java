@@ -1,6 +1,5 @@
 package com.sebuilder.interpreter.step.type;
 
-import com.google.common.base.Charsets;
 import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
@@ -9,6 +8,7 @@ import com.sebuilder.interpreter.step.LocatorHolder;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
 public class ExportTemplate extends AbstractStepType implements LocatorHolder {
@@ -51,7 +51,7 @@ public class ExportTemplate extends AbstractStepType implements LocatorHolder {
                 Files.delete(outputTo.toPath());
             }
             Files.createFile(outputTo.toPath());
-            Files.writeString(outputTo.toPath(), result, Charsets.UTF_8);
+            Files.writeString(outputTo.toPath(), result, StandardCharsets.UTF_8);
         } catch (final IOException e) {
             ctx.log().error("output file failed cause:", e);
             return false;

@@ -1,6 +1,5 @@
 package com.sebuilder.interpreter.javafx.view.aspect;
 
-import com.google.common.base.Charsets;
 import com.sebuilder.interpreter.*;
 import com.sebuilder.interpreter.aspect.ImportInterceptor;
 import com.sebuilder.interpreter.javafx.model.SeInterpreter;
@@ -20,6 +19,7 @@ import org.tbee.javafx.scene.layout.fxml.MigPane;
 
 import javax.inject.Inject;
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.function.Consumer;
@@ -178,7 +178,7 @@ public class AspectPresenter implements HasFileChooser {
         this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> {
             this.applyChangeToCurrent();
             final File target = new File(this.application.getCurrentRootDir(), this.selectedTree);
-            Files.writeString(target.toPath(), this.textAreaJson.getText(), Charsets.UTF_8);
+            Files.writeString(target.toPath(), this.textAreaJson.getText(), StandardCharsets.UTF_8);
             SuccessDialog.show("save succeed");
         });
     }
@@ -195,7 +195,7 @@ public class AspectPresenter implements HasFileChooser {
                 }
             }));
             this.applyChangeToCurrent();
-            Files.writeString(target.toPath(), this.textAreaJson.getText(), Charsets.UTF_8);
+            Files.writeString(target.toPath(), this.textAreaJson.getText(), StandardCharsets.UTF_8);
             this.rootProperty.set(this.rootProperty.get()
                     .remove(it -> this.isRootSelect() && this.currentProperty.get().contains(it))
                     .remove(it -> !this.isRootSelect()
