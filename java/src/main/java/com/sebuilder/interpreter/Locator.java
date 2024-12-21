@@ -31,13 +31,13 @@ import java.util.List;
 public record Locator(String type, String value) {
 
     static Locator of(final WebDriverWrapper driver, final WebElement element) {
-        final String id = element.getAttribute("id");
+        final String id = element.getDomAttribute("id");
         if (!Strings.isNullOrEmpty(id)) {
             return new Locator("id", id);
         } else if ("a".equals(element.getTagName())) {
             return new Locator("link text", element.getText());
         }
-        final String name = element.getAttribute("name");
+        final String name = element.getDomAttribute("name");
         if (!Strings.isNullOrEmpty(name)) {
             return new Locator("name", name);
         }

@@ -25,7 +25,7 @@ public class ElementAttribute extends AbstractGetter implements LocatorHolder {
     @Override
     public String get(final TestRun ctx) {
         return ctx.locator()
-                .find(ctx).getAttribute(ctx.string("attributeName"));
+                .find(ctx).getDomAttribute(ctx.string("attributeName"));
     }
 
     @Override

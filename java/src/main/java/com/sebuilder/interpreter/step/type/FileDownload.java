@@ -45,7 +45,7 @@ public class FileDownload extends AbstractStepType implements ConditionalStep, L
     public boolean get(final TestRun ctx) {
         final WebElement el = ctx.locator().find(ctx);
         try {
-            this.getDownloadFile(ctx, el.getAttribute("href"));
+            this.getDownloadFile(ctx, el.getDomAttribute("href"));
         } catch (final Throwable e) {
             ctx.log().error("download http get failure cause:", e);
             return false;
@@ -67,8 +67,8 @@ public class FileDownload extends AbstractStepType implements ConditionalStep, L
         final String contents = ctx.locator()
                 .findElements(ctx)
                 .stream()
-                .filter(element -> element.getAttribute("name") != null)
-                .map(element -> element.getAttribute("name") + "=" + element.getAttribute("value"))
+                .filter(element -> element.getDomAttribute("name") != null)
+                .map(element -> element.getDomAttribute("name") + "=" + element.getDomAttribute("value"))
                 .collect(Collectors.joining("&"));
         this.downLoadFile(ctx, HttpRequest.newBuilder()
                 .uri(URI.create(downloadUrl))

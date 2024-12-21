@@ -45,7 +45,7 @@ public class SetElementText extends AbstractStepType implements ConditionalStep,
     public void addElement(final ExportResourceBuilder builder, final RemoteWebDriver driver, final WebElement element) {
         String text = element.getText();
         if (text.isEmpty()) {
-            text = element.getAttribute("value");
+            text = element.getDomAttribute("value");
         }
         builder.stepOption("text", text);
     }

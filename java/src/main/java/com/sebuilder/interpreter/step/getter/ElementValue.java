@@ -23,7 +23,7 @@ import com.sebuilder.interpreter.step.LocatorHolder;
 public class ElementValue extends AbstractGetter implements LocatorHolder {
     @Override
     public String get(final TestRun ctx) {
-        return ctx.locator().find(ctx).getAttribute("value");
+        return ctx.locator().find(ctx).getDomAttribute("value");
     }
 
     @Override

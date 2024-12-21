@@ -34,10 +34,10 @@ public class LocatorInnerScrollElementHandler implements InnerScrollElementHandl
         elements.stream()
                 .filter(element -> !element.getTagName().equals("iframe"))
                 .filter(element -> {
-                    final int scrollHeight = Integer.parseInt(element.getAttribute("scrollHeight"));
-                    final int clientHeight = Integer.parseInt(element.getAttribute("clientHeight"));
-                    final int scrollWidth = Integer.parseInt(element.getAttribute("scrollWidth"));
-                    final int clientWidth = Integer.parseInt(element.getAttribute("clientWidth"));
+                    final int scrollHeight = Integer.parseInt(element.getDomAttribute("scrollHeight"));
+                    final int clientHeight = Integer.parseInt(element.getDomAttribute("clientHeight"));
+                    final int scrollWidth = Integer.parseInt(element.getDomAttribute("scrollWidth"));
+                    final int clientWidth = Integer.parseInt(element.getDomAttribute("clientWidth"));
                     return (scrollHeight > clientHeight) || (scrollWidth > clientWidth);
                 })
                 .filter(element -> {

@@ -25,7 +25,7 @@ public class SelectElementValue extends AbstractStepType implements ConditionalS
                 .stream()
                 .filter(WebElement::isSelected)
                 .findFirst()
-                .ifPresent(option -> builder.stepOption("value", option.getAttribute("value")));
+                .ifPresent(option -> builder.stepOption("value", option.getDomAttribute("value")));
     }
 
     @Override

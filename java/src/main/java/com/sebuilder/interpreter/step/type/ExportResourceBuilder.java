@@ -61,7 +61,7 @@ public class ExportResourceBuilder {
         this.extractFrom
                 .findElements(By.tagName("input"))
                 .forEach(element -> {
-                    final String type = element.getAttribute("type");
+                    final String type = element.getDomAttribute("type");
                     switch (type) {
                         case "checkbox":
                         case "radio":

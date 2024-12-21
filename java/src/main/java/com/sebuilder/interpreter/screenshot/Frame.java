@@ -53,7 +53,7 @@ public class Frame extends AbstractInnerElement {
     public static ScrollableWidth getWidth(final Printable parent, final RemoteWebDriver wd, final WebElement targetFrame) {
         final int borderWidth = ((Number) parent.executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('border-left-width'));", targetFrame)).intValue();
         final int pointX = targetFrame.getLocation().getX() + borderWidth;
-        final int viewportWidth = Integer.parseInt(targetFrame.getAttribute("clientWidth"));
+        final int viewportWidth = Integer.parseInt(targetFrame.getDomAttribute("clientWidth"));
         wd.switchTo().frame(targetFrame);
         final int scrollableWidth = parent.getFullWidth();
         wd.switchTo().parentFrame();
@@ -73,9 +73,9 @@ public class Frame extends AbstractInnerElement {
 
     protected static int getClientHeight(final WebElement target, final int border, final RemoteWebDriver wd) {
         if (wd instanceof FirefoxDriver || wd instanceof InternetExplorerDriver) {
-            return Integer.parseInt(target.getAttribute("clientHeight")) - border;
+            return Integer.parseInt(target.getDomAttribute("clientHeight")) - border;
         }
-        return Integer.parseInt(target.getAttribute("clientHeight"));
+        return Integer.parseInt(target.getDomAttribute("clientHeight"));
     }
 
     protected static int getScrollHeight(final int scrollHeight, final int border, final RemoteWebDriver wd) {

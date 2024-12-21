@@ -28,8 +28,8 @@ public class ScrollableTag extends AbstractInnerElement {
     public static ScrollableHeight getHeight(final TestRun testRun, final WebElement targetDiv) {
         final Point framePoint = targetDiv.getLocation();
         int pointY = framePoint.getY();
-        int viewportHeight = Integer.parseInt(targetDiv.getAttribute("clientHeight"));
-        int scrollableHeight = Integer.parseInt(targetDiv.getAttribute("scrollHeight"));
+        int viewportHeight = Integer.parseInt(targetDiv.getDomAttribute("clientHeight"));
+        int scrollableHeight = Integer.parseInt(targetDiv.getDomAttribute("scrollHeight"));
 
         final int paddingTop = ((Number) testRun.executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-top') || document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding'));", targetDiv)).intValue();
         final int paddingBottom = ((Number) testRun.executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-bottom') || document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding'));", targetDiv)).intValue();
@@ -48,8 +48,8 @@ public class ScrollableTag extends AbstractInnerElement {
     public static ScrollableWidth getWidth(final TestRun testRun, final WebElement targetDiv) {
         final Point framePoint = targetDiv.getLocation();
         int pointX = framePoint.getX();
-        int viewportWidth = Integer.parseInt(targetDiv.getAttribute("clientWidth"));
-        int scrollableWidth = Integer.parseInt(targetDiv.getAttribute("scrollWidth"));
+        int viewportWidth = Integer.parseInt(targetDiv.getDomAttribute("clientWidth"));
+        int scrollableWidth = Integer.parseInt(targetDiv.getDomAttribute("scrollWidth"));
 
         final int paddingLeft = ((Number) testRun.executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-left') || document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding'));", targetDiv)).intValue();
         final int paddingRight = ((Number) testRun.executeScript("return parseInt(document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding-right') || document.defaultView.getComputedStyle(arguments[0],null).getPropertyValue('padding'));", targetDiv)).intValue();

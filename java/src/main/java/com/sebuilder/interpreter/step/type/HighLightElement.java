@@ -32,7 +32,7 @@ public class HighLightElement extends AbstractStepType implements LocatorHolder 
     }
 
     private static boolean isChangeOutline(final WebElement element) {
-        final String type = element.getAttribute("type");
+        final String type = element.getDomAttribute("type");
         return Objects.equals(type, "checkbox") || Objects.equals(type, "radio");
     }
 
