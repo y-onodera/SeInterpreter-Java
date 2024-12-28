@@ -57,6 +57,8 @@ public class Firefox implements WebDriverFactory {
                         option.setBinary(new File(value).toPath());
                     } else if (key.equals("profile")) {
                         option.setProfile(new FirefoxProfile(new File(value)));
+                    } else if (key.endsWith("enableBiDi") && Boolean.parseBoolean(value)) {
+                        option.enableBiDi();
                     } else if (key.startsWith("firefox.arguments.")) {
                         if (!Optional.ofNullable(config.get(key)).orElse("").isBlank()) {
                             option.addArguments("--" + key.substring("firefox.arguments.".length()) + "=" + config.get(key));

@@ -1,5 +1,7 @@
 package com.sebuilder.interpreter;
 
+import org.openqa.selenium.bidi.network.BytesValue;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -10,6 +12,7 @@ public class StepBuilder {
     private final StepType stepType;
     private final Map<String, String> stringParams = new HashMap<>();
     private final Map<String, Locator> locatorParams = new HashMap<>();
+    private final Map<String, BytesValue> headerParams = new HashMap<>();
 
     public StepBuilder(final StepType stepType) {
         this(null, stepType, false);
@@ -41,6 +44,10 @@ public class StepBuilder {
         return this.locatorParams;
     }
 
+    public Map<String, BytesValue> getHeaderParams() {
+        return headerParams;
+    }
+
     public boolean containsStringParam(final String paramKey) {
         return this.stringParams.containsKey(paramKey);
     }
@@ -68,6 +75,11 @@ public class StepBuilder {
         return this;
     }
 
+    public StepBuilder put(final String key, final BytesValue value) {
+        this.headerParams.put(key, value);
+        return this;
+    }
+
     public StepBuilder put(final String key, final Locator value) {
         this.locatorParams.put(key, value);
         return this;
@@ -85,6 +97,11 @@ public class StepBuilder {
 
     public StepBuilder locatorParams(final Map<String, Locator> locatorParams) {
         this.locatorParams.putAll(locatorParams);
+        return this;
+    }
+
+    public StepBuilder headerParams(Map<String, BytesValue> headerParams) {
+        this.headerParams.putAll(headerParams);
         return this;
     }
 

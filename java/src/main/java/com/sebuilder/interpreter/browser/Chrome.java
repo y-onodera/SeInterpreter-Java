@@ -35,6 +35,8 @@ public class Chrome implements WebDriverFactory {
                     final String value = entry.getValue();
                     if (key.equals("binary")) {
                         option.setBinary(new File(value));
+                    } else if (key.endsWith("enableBiDi") && Boolean.parseBoolean(value)) {
+                        option.enableBiDi();
                     } else if (key.startsWith("experimental.")) {
                         switch (value.toLowerCase()) {
                             case "true", "false" ->

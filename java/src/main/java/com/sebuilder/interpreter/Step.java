@@ -16,10 +16,10 @@
 package com.sebuilder.interpreter;
 
 import com.sebuilder.interpreter.step.GetterUseStep;
+import org.openqa.selenium.bidi.module.Network;
+import org.openqa.selenium.bidi.network.*;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * A Selenium 2 step.
@@ -31,7 +31,8 @@ public record Step(
         StepType type,
         boolean negated,
         Map<String, String> stringParams,
-        Map<String, Locator> locatorParams
+        Map<String, Locator> locatorParams,
+        Map<String, BytesValue> headerParams
 ) {
     public static final String KEY_NAME_SKIP = "skip";
 
@@ -40,7 +41,7 @@ public record Step(
     }
 
     public Step(final String name, final StepType type, final boolean isNegated) {
-        this(name, type, isNegated, new HashMap<>(), new HashMap<>());
+        this(name, type, isNegated, new HashMap<>(), new HashMap<>(), new HashMap<>());
     }
 
     public Step(final StepBuilder stepBuilder) {
@@ -49,6 +50,7 @@ public record Step(
                 , stepBuilder.isNegated()
                 , new HashMap<>(stepBuilder.getStringParams())
                 , new HashMap<>(stepBuilder.getLocatorParams())
+                , new HashMap<>(stepBuilder.getHeaderParams())
         );
     }
 
@@ -68,6 +70,21 @@ public record Step(
     public boolean run(final TestRun testRun) {
         if (this.isSkip(testRun.vars())) {
             return true;
+        }
+        if (Context.getBrowser().equals("Firefox") && headerParams().size() > 0) {
+            try (Network network = new Network(testRun.driver())) {
+                network.addIntercept(new AddInterceptParameters(InterceptPhase.BEFORE_REQUEST_SENT));
+                network.onBeforeRequestSent(
+                        beforeRequestSent -> {
+                            List<Header> newHeaders = new ArrayList<>(beforeRequestSent.getRequest().getHeaders());
+                            headerParams().forEach((key, value) -> newHeaders.add(new Header(key, value)));
+                            network.continueRequest(
+                                    new ContinueRequestParameters(beforeRequestSent.getRequest().getRequestId())
+                                            .headers(newHeaders)
+                            );
+                        });
+                return this.type.run(testRun);
+            }
         }
         return this.type.run(testRun);
     }
@@ -117,6 +134,7 @@ public record Step(
                 .negated(this.negated)
                 .stringParams(this.stringParams)
                 .locatorParams(this.locatorParams)
+                .headerParams(this.headerParams)
                 ;
     }
 

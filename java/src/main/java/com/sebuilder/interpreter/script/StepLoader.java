@@ -4,6 +4,7 @@ import com.sebuilder.interpreter.*;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.openqa.selenium.bidi.network.BytesValue;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;
@@ -43,7 +44,12 @@ public class StepLoader {
                 .mapToObj(keysA::getString)
                 .filter(key -> !key.equals("type") && !key.equals("negated"))
                 .forEach(key -> {
-                    if (stepO.optJSONObject(key) != null && key.startsWith("locator")) {
+                    if (stepO.optJSONArray(key) != null && key.equals("httpHeader")) {
+                        JSONArray headers = stepO.getJSONArray(key);
+                        IntStream.range(0, headers.length())
+                                .mapToObj(headers::getJSONObject)
+                                .forEach(obj -> step.put(obj.getString("key"), new BytesValue(BytesValue.Type.valueOf(obj.getString("type").toUpperCase()), obj.getString("value"))));
+                    } else if (stepO.optJSONObject(key) != null && key.startsWith("locator")) {
                         step.put(key, new Locator(stepO.getJSONObject(key).getString("type"), stepO.getJSONObject(key).getString("value")));
                     } else {
                         step.put(key, stepO.getString(key));
