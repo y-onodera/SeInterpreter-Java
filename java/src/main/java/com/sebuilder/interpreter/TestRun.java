@@ -17,6 +17,7 @@
 package com.sebuilder.interpreter;
 
 import org.apache.logging.log4j.Logger;
+import org.openqa.selenium.bidi.HasBiDi;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import javax.annotation.Nonnull;
@@ -290,6 +291,10 @@ public class TestRun implements WebDriverWrapper {
         return this.bindRuntimeVariables(this.currentStep().toPrettyString());
     }
 
+    public boolean enableBiDi() {
+        return this.driver() instanceof HasBiDi && ((HasBiDi) this.driver()).maybeGetBiDi().isPresent();
+    }
+
     protected boolean start() {
         this.testRunStatus = this.testRunStatus.start();
         return this.getListener().openTestSuite(this.testCase, this.testRunName, this.vars);
@@ -346,7 +351,6 @@ public class TestRun implements WebDriverWrapper {
             }
         }
     }
-
 
     protected static class ChainRunner implements TestRunner {
         private final TestRun parent;
