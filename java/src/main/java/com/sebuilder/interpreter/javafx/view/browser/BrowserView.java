@@ -1,4 +1,4 @@
-package com.sebuilder.interpreter.javafx.view.menu;
+package com.sebuilder.interpreter.javafx.view.browser;
 
 import com.airhacks.afterburner.views.FXMLView;
 import javafx.scene.Scene;

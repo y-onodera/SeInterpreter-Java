@@ -5,6 +5,7 @@ import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.javafx.model.SeInterpreter;
 import com.sebuilder.interpreter.javafx.view.ErrorDialog;
 import com.sebuilder.interpreter.javafx.view.HasFileChooser;
+import com.sebuilder.interpreter.javafx.view.browser.BrowserView;
 import com.sebuilder.interpreter.javafx.view.replay.InputView;
 import com.sebuilder.interpreter.javafx.view.replay.ReplaysettingView;
 import com.sebuilder.interpreter.javafx.view.replay.ScreenshotView;

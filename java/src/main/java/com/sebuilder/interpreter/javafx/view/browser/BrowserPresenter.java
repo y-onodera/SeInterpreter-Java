@@ -1,4 +1,4 @@
-package com.sebuilder.interpreter.javafx.view.menu;
+package com.sebuilder.interpreter.javafx.view.browser;
 
 import com.google.common.base.Strings;
 import com.sebuilder.interpreter.Context;
