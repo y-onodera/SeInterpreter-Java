@@ -83,6 +83,17 @@ public class SebuilderToStringConverter implements TestCaseConverter {
         o.put("negated", s.negated());
         s.paramKeys().forEach(key -> o.put(key, s.getParam(key)));
         s.locatorKeys().forEach(key -> o.put(key, this.toJSON(s.getLocator(key))));
+        if (s.headerParams().size() > 0) {
+            JSONArray headerParam = new JSONArray();
+            s.headerParams().forEach((key, value) -> {
+                JSONObject param = new JSONObject();
+                param.put("key", key);
+                param.put("type", value.getType());
+                param.put("value", value.getValue());
+                headerParam.put(param);
+            });
+            o.put("httpHeader", headerParam);
+        }
         if (!s.containsParam("skip")) {
             o.put("skip", "false");
         }

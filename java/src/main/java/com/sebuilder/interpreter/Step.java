@@ -57,11 +57,11 @@ public record Step(
     public Result execute(final TestRun ctx) {
         try {
             final boolean aspectSuccess = ctx.startTest();
-            final int execSteps = this.type.getExecSteps(ctx);
+            final int execSteps = this.type().getExecSteps(ctx);
             if (this.run(ctx)) {
-                return new Result(ctx.processTestSuccess(this.type.isAcceptEndAdvice()) && aspectSuccess, execSteps);
+                return new Result(ctx.processTestSuccess(this.type().isAcceptEndAdvice()) && aspectSuccess, execSteps);
             }
-            return new Result(ctx.processTestFailure(this.type.isAcceptEndAdvice()), execSteps);
+            return new Result(ctx.processTestFailure(this.type().isAcceptEndAdvice()), execSteps);
         } catch (final Throwable e) {
             throw ctx.processTestError(e);
         }
@@ -71,7 +71,7 @@ public record Step(
         if (this.isSkip(testRun.vars())) {
             return true;
         }
-        if (Context.getBrowser().equals("Firefox") && headerParams().size() > 0) {
+        if (testRun.enableBiDi() && headerParams().size() > 0) {
             try (Network network = new Network(testRun.driver())) {
                 network.addIntercept(new AddInterceptParameters(InterceptPhase.BEFORE_REQUEST_SENT));
                 network.onBeforeRequestSent(
@@ -83,10 +83,10 @@ public record Step(
                                             .headers(newHeaders)
                             );
                         });
-                return this.type.run(testRun);
+                return this.type().run(testRun);
             }
         }
-        return this.type.run(testRun);
+        return this.type().run(testRun);
     }
 
     public boolean isSkip(final InputData vars) {
@@ -97,27 +97,27 @@ public record Step(
     }
 
     public Collection<String> paramKeys() {
-        return this.stringParams.keySet();
+        return this.stringParams().keySet();
     }
 
     public String getParam(final String paramName) {
-        return this.stringParams.get(paramName);
+        return this.stringParams().get(paramName);
     }
 
     public boolean containsParam(final String paramKey) {
-        return this.stringParams.containsKey(paramKey);
+        return this.stringParams().containsKey(paramKey);
     }
 
     public Collection<String> locatorKeys() {
-        return this.locatorParams.keySet();
+        return this.locatorParams().keySet();
     }
 
     public Locator getLocator(final String key) {
-        return this.locatorParams.get(key);
+        return this.locatorParams().get(key);
     }
 
     public boolean locatorContains(final String key) {
-        return this.locatorParams.containsKey(key);
+        return this.locatorParams().containsKey(key);
     }
 
     public Step copy() {
@@ -129,18 +129,18 @@ public record Step(
     }
 
     public StepBuilder builder() {
-        return new StepBuilder(this.type)
-                .name(this.name)
-                .negated(this.negated)
-                .stringParams(this.stringParams)
-                .locatorParams(this.locatorParams)
-                .headerParams(this.headerParams)
+        return new StepBuilder(this.type())
+                .name(this.name())
+                .negated(this.negated())
+                .stringParams(this.stringParams())
+                .locatorParams(this.locatorParams())
+                .headerParams(this.headerParams())
                 ;
     }
 
     public Step withAllParam() {
         final StepBuilder o = this.builder();
-        this.type.addDefaultParam(o);
+        this.type().addDefaultParam(o);
         return o.build();
     }
 
@@ -151,28 +151,35 @@ public record Step(
 
     public String toPrettyString() {
         final StringBuilder sb = new StringBuilder();
-        if (this.name != null) {
-            sb.append(this.name).append(": ");
+        if (this.name() != null) {
+            sb.append(this.name()).append(": ");
         }
-        sb.append(this.type.getStepTypeName());
-        if (this.type instanceof GetterUseStep) {
-            sb.append(" negated=").append(this.negated);
+        sb.append(this.type().getStepTypeName());
+        if (this.type() instanceof GetterUseStep) {
+            sb.append(" negated=").append(this.negated());
         }
-        this.stringParams.forEach((key, value) -> sb.append(" ").append(key).append("=").append(value));
-        this.locatorParams.forEach((key, value) -> sb.append(" ").append(key).append("=").append(value.toPrettyString()));
+        this.stringParams().forEach((key, value) -> sb.append(" ").append(key).append("=").append(value));
+        this.locatorParams().forEach((key, value) -> sb.append(" ").append(key).append("=").append(value.toPrettyString()));
+        this.headerParams().forEach((key, value) -> sb.append(" ").append("httpHeader.").append(key)
+                .append("=").append(value.getType()).append("@").append(value.getValue()));
         return sb.toString();
     }
 
     public Map<String, String> toMap() {
         final Map<String, String> result = new HashMap<>();
-        if (this.name != null) {
-            result.put("name", this.name);
+        if (this.name() != null) {
+            result.put("name", this.name());
         }
-        result.put("type", this.type.getStepTypeName());
-        result.putAll(this.stringParams);
-        this.locatorParams.forEach((key, value) -> {
+        result.put("type", this.type().getStepTypeName());
+        result.putAll(this.stringParams());
+        this.locatorParams().forEach((key, value) -> {
             result.put(key + ".type", value.type());
             result.put(key + ".value", value.value());
+        });
+        this.headerParams().forEach((key, value) -> {
+            result.put("httpHeader." + key, key);
+            result.put("httpHeader." + key + ".type", value.getType().toString());
+            result.put("httpHeader." + key + ".value", value.getValue());
         });
         return result;
     }
