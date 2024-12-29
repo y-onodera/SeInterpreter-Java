@@ -48,6 +48,7 @@ public class StepPresenter implements StepSelectable {
     private final Map<String, Node> inputs = Maps.newHashMap();
     private final Map<String, ComboBox<String>> locatorTypes = Maps.newHashMap();
     private final Map<String, TextField> locatorValues = Maps.newHashMap();
+    private HttpHeaders headers;
 
     public void populate(final Stage dialog, final Predicate<String> stepTypeFilter, final Predicate<String> textParamFilter, final Consumer<Step> applyStep) {
         this.dialog = dialog;
@@ -82,8 +83,9 @@ public class StepPresenter implements StepSelectable {
             final String typeName = this.resetStepType(stepWithAllParam);
             row = this.addTextBox(stepWithAllParam, row, "skip");
             row = this.addLocator(stepWithAllParam, row, "locator");
-            row = this.constructStringParamView(stepWithAllParam, row, typeName);
-            this.constructLocatorParamView(stepWithAllParam, row);
+            row = this.addStringParamView(stepWithAllParam, row, typeName);
+            row = this.addLocatorParamView(stepWithAllParam, row);
+            this.addHttpHeaderView(stepWithAllParam, row);
             this.stepEditGrid.getScene().getWindow().sizeToScene();
         });
     }
@@ -113,6 +115,7 @@ public class StepPresenter implements StepSelectable {
                         step.put(key, new Locator(type, value));
                     }
                 });
+                this.headers.params().forEach(step::put);
                 this.applyStep.accept(step.build());
             }
             this.dialog.close();
@@ -127,16 +130,17 @@ public class StepPresenter implements StepSelectable {
         return key.equals("locator");
     }
 
-    private void constructLocatorParamView(final Step step, int row) {
+    private int addLocatorParamView(final Step step, int row) {
         for (final String key : step.locatorKeys()) {
             if (this.isDefaultLocator(key)) {
                 continue;
             }
             row = this.addLocator(step, row, key);
         }
+        return row;
     }
 
-    private int constructStringParamView(final Step step, int row, final String typeName) {
+    private int addStringParamView(final Step step, int row, final String typeName) {
         for (final String key : step.paramKeys()) {
             if (key.equals("type") || key.equals("skip")
                     || (key.equals("negated") && !this.hasGetterType(typeName))) {
@@ -149,6 +153,26 @@ public class StepPresenter implements StepSelectable {
             }
         }
         return row;
+    }
+
+    private void addHttpHeaderView(Step stepWithAllParam, int row) {
+        this.headers = new HttpHeaders(stepWithAllParam.headerParams());
+        final Label httpHeaderLabel = new Label();
+        httpHeaderLabel.setText("httpHeader");
+        this.stepEditGrid.add(httpHeaderLabel, "cell 0 " + row);
+        final Button button = new Button("edit");
+        button.setOnAction(ae -> this.editHttpHeader());
+        this.stepEditGrid.add(button, "cell 1 " + row++);
+    }
+
+    private void editHttpHeader() {
+        this.errorDialog.executeAndLoggingCaseWhenThrowException(() ->
+                HttpHeaderView.builder()
+                        .setTitle("env setting")
+                        .setOnclick(result -> this.headers = result)
+                        .setTarget(this.headers)
+                        .setWindow(this.stepTypeSelect.getScene().getWindow())
+                        .build());
     }
 
     private boolean hasGetterType(final String typeName) {
