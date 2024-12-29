@@ -410,9 +410,10 @@ public record SeInterpreter(
 
     private void executeTask(final TestCase replayCase, final Function<Logger, TestRunListener> listenerFactory) {
         final SeInterpreterRunTask task = this.runner.createRunScriptTask(replayCase, this.debugger.reset(), listenerFactory);
-        final ExecutorService executor = Executors.newSingleThreadExecutor();
-        task.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED, wse -> executor.shutdown());
-        executor.submit(task);
+        try (ExecutorService executor = Executors.newSingleThreadExecutor()) {
+            task.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED, wse -> executor.shutdown());
+            executor.submit(task);
+        }
         this.taskHandler().accept(task);
     }
 
