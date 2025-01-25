@@ -81,7 +81,7 @@ public class TestRunTest {
 
     }
 
-    public static class FieldAccessor extends AbstractTestRunTest {
+    public static class FieldAccessorTest extends AbstractTestRunTest {
 
         @Before
         public void setUp() {
@@ -105,7 +105,7 @@ public class TestRunTest {
 
     }
 
-    public static class VarDefault extends AbstractTestRunTest {
+    public static class VarDefaultTest extends AbstractTestRunTest {
 
         @Before
         public void setUp() {
@@ -138,7 +138,7 @@ public class TestRunTest {
         }
     }
 
-    public static class VarWithDataSource extends AbstractTestRunTest {
+    public static class VarWithDataSourceTest extends AbstractTestRunTest {
 
         @Before
         public void setUp() {
@@ -161,7 +161,7 @@ public class TestRunTest {
         }
     }
 
-    public static class CurrentStep extends AbstractTestRunTest {
+    public static class CurrentStepTest extends AbstractTestRunTest {
 
         private Step currentStep;
 
@@ -250,7 +250,7 @@ public class TestRunTest {
 
     }
 
-    public static class TestRunName extends AbstractTestRunTest {
+    public static class TestRunNameTest extends AbstractTestRunTest {
 
         @Test
         public void getTestRunName_noName() {
@@ -288,7 +288,7 @@ public class TestRunTest {
 
     }
 
-    public static class StateChange extends AbstractTestRunTest {
+    public static class StateChangeTest extends AbstractTestRunTest {
 
         @Before
         public void setUp() {
@@ -310,7 +310,7 @@ public class TestRunTest {
 
     }
 
-    public static class WithNoStep extends AbstractTestRunTest {
+    public static class WithNoStepTest extends AbstractTestRunTest {
 
         @Before
         public void setUp() {
@@ -389,7 +389,7 @@ public class TestRunTest {
 
     }
 
-    public static class WithStep extends AbstractTestRunTest {
+    public static class WithStepTest extends AbstractTestRunTest {
 
         private Step step;
 
@@ -557,7 +557,7 @@ public class TestRunTest {
         }
     }
 
-    public static class WithStepNoName extends AbstractTestRunTest {
+    public static class WithStepNoNameTest extends AbstractTestRunTest {
 
         private Step step;
 
@@ -616,7 +616,7 @@ public class TestRunTest {
         }
     }
 
-    public static class WithChainRun extends AbstractTestRunTest {
+    public static class WithChainRunTest extends AbstractTestRunTest {
 
         private Step chainStep;
 
@@ -747,7 +747,7 @@ public class TestRunTest {
         }
     }
 
-    public static class WithAspect extends AbstractTestRunTest {
+    public static class WithAspectTest extends AbstractTestRunTest {
 
         private Step chainStep;
 
@@ -845,7 +845,7 @@ public class TestRunTest {
 
     }
 
-    public static class WithContextAspect extends AbstractTestRunTest {
+    public static class WithContextAspectTest extends AbstractTestRunTest {
 
         private Step chainStep;
 
@@ -948,7 +948,7 @@ public class TestRunTest {
 
     }
 
-    public static class WithAspectAndContextAspect extends AbstractTestRunTest {
+    public static class WithAspectAndContextAspectTest extends AbstractTestRunTest {
 
         private Step chainStep;
 
@@ -1101,7 +1101,7 @@ public class TestRunTest {
 
     }
 
-    public static class WithSkippableChainRun extends AbstractTestRunTest {
+    public static class WithShippableChainRunTest extends AbstractTestRunTest {
 
         private TestCase chainCase;
 
@@ -1199,7 +1199,7 @@ public class TestRunTest {
         }
     }
 
-    public static class WithDataDrivenChainRun extends AbstractTestRunTest {
+    public static class WithDataDrivenChainRunTest extends AbstractTestRunTest {
 
         private Step chainStep;
 
@@ -1258,7 +1258,7 @@ public class TestRunTest {
 
     }
 
-    public static class WithChainRuns extends AbstractTestRunTest {
+    public static class WithChainRunsTest extends AbstractTestRunTest {
 
         private TestCase chainCase;
 
@@ -1540,7 +1540,7 @@ public class TestRunTest {
 
     }
 
-    public static class WithNestedChainRun extends AbstractTestRunTest {
+    public static class WithNestedChainRunTest extends AbstractTestRunTest {
 
         private TestCase chainCase;
 
@@ -1836,7 +1836,7 @@ public class TestRunTest {
 
     }
 
-    public static class WithBreakNestedChainRun extends AbstractTestRunTest {
+    public static class WithBreakNestedChainRunTest extends AbstractTestRunTest {
 
         private TestCase chainCase;
 
@@ -1963,7 +1963,7 @@ public class TestRunTest {
         }
     }
 
-    public static class WithChainIncludeSuiteRun extends AbstractTestRunTest {
+    public static class WithChainIncludeSuiteRunTest extends AbstractTestRunTest {
 
         private TestCase chainCase;
 
@@ -2091,7 +2091,7 @@ public class TestRunTest {
         }
     }
 
-    public static class Quit extends AbstractTestRunTest {
+    public static class QuitTest extends AbstractTestRunTest {
         @Test
         public void quit() {
             final TestRunBuilder builder = new TestRunBuilder(this.head.map(it -> it.setChains(this.chains)));
