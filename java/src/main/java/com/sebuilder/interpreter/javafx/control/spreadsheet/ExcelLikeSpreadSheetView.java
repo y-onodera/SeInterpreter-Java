@@ -10,6 +10,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.input.*;
 import org.controlsfx.control.spreadsheet.*;
 
+import java.io.IOException;
 import java.io.StringReader;
 import java.util.*;
 
@@ -101,9 +102,9 @@ public class ExcelLikeSpreadSheetView extends SpreadsheetView {
         });
         this.undoKeypad = new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN);
         this.redoKeypad = new KeyCodeCombination(KeyCode.Y, KeyCombination.SHORTCUT_DOWN);
-        this.getChildren().get(0).addEventFilter(KeyEvent.KEY_PRESSED, (keyEvent) -> {
+        this.getChildren().getFirst().addEventFilter(KeyEvent.KEY_PRESSED, (keyEvent) -> {
             if (this.undoKeypad.match(keyEvent)) {
-                if (this.undoStack.size() > 0) {
+                if (!this.undoStack.isEmpty()) {
                     final GridChange change = this.undoStack.pop();
                     this.redoStack.push(change);
                     final SpreadsheetCell cell = this.getGrid().getRows().get(change.getRow()).get(change.getColumn());
@@ -112,7 +113,7 @@ public class ExcelLikeSpreadSheetView extends SpreadsheetView {
                     this.getSelectionModel().focus(cell.getRow(), this.getColumns().get(cell.getColumn()));
                 }
             } else if (this.redoKeypad.match(keyEvent)) {
-                if (this.redoStack.size() > 0) {
+                if (!this.redoStack.isEmpty()) {
                     final GridChange change = this.redoStack.pop();
                     this.undoStack.push(change);
                     final SpreadsheetCell cell = this.getGrid().getRows().get(change.getRow()).get(change.getColumn());
@@ -166,15 +167,18 @@ public class ExcelLikeSpreadSheetView extends SpreadsheetView {
     protected List<ClipboardCell> toClipboardCell(final String content) {
         int rowNo = 0;
         final List<ClipboardCell> pasteContents = Lists.newArrayList();
-        final CSVReader csvR = new CSVReaderBuilder(new StringReader(content)).withCSVParser(new CSVParserBuilder().withSeparator('\t').build()).build();
-        for (final String[] row : csvR) {
-            int columnNo = 0;
-            for (final String column : row) {
-                final SpreadsheetCell cell = TEXT_AREA.createCell(rowNo, columnNo, 1, 1, column);
-                pasteContents.add(new ClipboardCell(rowNo, columnNo, cell));
-                columnNo++;
+        try (final CSVReader csvR = new CSVReaderBuilder(new StringReader(content)).withCSVParser(new CSVParserBuilder().withSeparator('\t').build()).build()) {
+            for (final String[] row : csvR) {
+                int columnNo = 0;
+                for (final String column : row) {
+                    final SpreadsheetCell cell = TEXT_AREA.createCell(rowNo, columnNo, 1, 1, column);
+                    pasteContents.add(new ClipboardCell(rowNo, columnNo, cell));
+                    columnNo++;
+                }
+                rowNo++;
             }
-            rowNo++;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
         return pasteContents;
     }
