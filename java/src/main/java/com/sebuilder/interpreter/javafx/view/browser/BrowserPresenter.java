@@ -8,6 +8,8 @@ import com.sebuilder.interpreter.javafx.model.SeInterpreter;
 import com.sebuilder.interpreter.javafx.view.ErrorDialog;
 import com.sebuilder.interpreter.javafx.view.HasFileChooser;
 import com.sebuilder.interpreter.javafx.view.replay.VariableView;
+import javafx.concurrent.Task;
+import javafx.concurrent.WorkerStateEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -20,6 +22,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 public class BrowserPresenter implements HasFileChooser {
@@ -157,11 +161,22 @@ public class BrowserPresenter implements HasFileChooser {
                 newConfig.put(Context.REMOTE_URL_KEY, Context.getDriverConfig().get(Context.REMOTE_URL_KEY));
             }
             Context.getInstance().setDriverConfig(newConfig);
-            this.application.browserSetting(this.selectedBrowser
-                    , this.browserVersion.getValue()
-                    , this.remoteUrl.getText()
-                    , this.driverText.getText()
-                    , this.binaryText.getText());
+            Task<Void> task = new Task<>() {
+                @Override
+                protected Void call() {
+                    application.browserSetting(selectedBrowser
+                            , browserVersion.getValue()
+                            , remoteUrl.getText()
+                            , driverText.getText()
+                            , binaryText.getText());
+                    return null;
+                }
+            };
+            try (ExecutorService executor = Executors.newSingleThreadExecutor()) {
+                task.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED, wse -> executor.shutdown());
+                executor.submit(task);
+            }
+            new SpinnerView().open(this.driverText.getScene().getWindow(), task);
             this.driverText.getScene().getWindow().hide();
         });
     }
