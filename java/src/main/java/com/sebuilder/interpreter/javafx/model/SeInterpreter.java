@@ -185,7 +185,7 @@ public record SeInterpreter(
             }
         });
         final File scriptSaveTo = new File(target.getParentFile(), "script");
-        if (notAssociateFile.size() > 0 && !scriptSaveTo.exists()) {
+        if (!notAssociateFile.isEmpty() && !scriptSaveTo.exists()) {
             this.errorHandler().accept(() -> Files.createDirectories(scriptSaveTo.toPath()));
         }
         notAssociateFile.forEach(it -> this.errorHandler().accept(() -> {
@@ -299,7 +299,7 @@ public record SeInterpreter(
     public void removeBreakPoint(final int stepIndex) {
         BreakPoint.findFrom(this.getDisplayTestCase().aspect()).ifPresent(current -> {
             final BreakPoint breakPoint = current.removeCondition(stepIndex);
-            if (breakPoint.condition().size() == 0) {
+            if (breakPoint.condition().isEmpty()) {
                 this.replaceDisplayCase(it -> it.filterAspect(BreakPoint.typeMatch().negate()));
             } else {
                 this.replaceDisplayCase(it -> it
