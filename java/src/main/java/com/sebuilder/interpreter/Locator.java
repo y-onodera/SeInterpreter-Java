@@ -114,7 +114,7 @@ public record Locator(String type, String value) {
             return elements.stream()
                     .filter(WebElement::isDisplayed)
                     .findFirst()
-                    .orElse(elements.get(0));
+                    .orElse(elements.getFirst());
         }
 
         public abstract List<WebElement> findElements(String value, WebDriver driver);

@@ -46,8 +46,8 @@ public class SeInterpreterApplication extends Application {
         Injector.setModelOrService(SeInterpreter.class, this.seInterpreter);
         Injector.setModelOrService(ErrorDialog.class, this.errorDialog);
         final List<String> unnamed = parameters.getUnnamed();
-        if (unnamed.size() > 0) {
-            this.seInterpreter.resetSuite(new File(unnamed.get(0)));
+        if (!unnamed.isEmpty()) {
+            this.seInterpreter.resetSuite(new File(unnamed.getFirst()));
         } else {
             this.seInterpreter.reset();
         }

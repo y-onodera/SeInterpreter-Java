@@ -25,7 +25,7 @@ public class SebuilderToStringConverter implements TestCaseConverter {
         final Collection<JSONObject> results = this.toJSON(target);
         if (results.size() == 1) {
             result.put("aspect", results.iterator().next());
-        } else if (results.size() > 0) {
+        } else if (!results.isEmpty()) {
             result.put("aspect", results);
         }
         return result.toString(4);
@@ -37,7 +37,7 @@ public class SebuilderToStringConverter implements TestCaseConverter {
         final Collection<JSONObject> results = this.toJSON(target);
         if (results.size() == 1) {
             result.put("pointcut", results.iterator().next());
-        } else if (results.size() > 0) {
+        } else if (!results.isEmpty()) {
             result.put("pointcut", results);
         }
         return result.toString(4);
@@ -83,7 +83,7 @@ public class SebuilderToStringConverter implements TestCaseConverter {
         o.put("negated", s.negated());
         s.paramKeys().forEach(key -> o.put(key, s.getParam(key)));
         s.locatorKeys().forEach(key -> o.put(key, this.toJSON(s.getLocator(key))));
-        if (s.headerParams().size() > 0) {
+        if (!s.headerParams().isEmpty()) {
             JSONArray headerParam = new JSONArray();
             s.headerParams().forEach((key, value) -> {
                 JSONObject param = new JSONObject();
@@ -180,7 +180,7 @@ public class SebuilderToStringConverter implements TestCaseConverter {
             final Collection<JSONObject> results = this.toJSON(testCase.includeTestRun());
             if (results.size() == 1) {
                 scriptPath.put("include", results.iterator().next());
-            } else if (results.size() > 0) {
+            } else if (!results.isEmpty()) {
                 scriptPath.put("include", results);
             }
         }
@@ -188,7 +188,7 @@ public class SebuilderToStringConverter implements TestCaseConverter {
             final Collection<JSONObject> results = this.toJSON(testCase.excludeTestRun());
             if (results.size() == 1) {
                 scriptPath.put("exclude", results.iterator().next());
-            } else if (results.size() > 0) {
+            } else if (!results.isEmpty()) {
                 scriptPath.put("exclude", results);
             }
         }
@@ -196,7 +196,7 @@ public class SebuilderToStringConverter implements TestCaseConverter {
             final Collection<JSONObject> results = this.toJSON(testCase.aspect());
             if (results.size() == 1) {
                 scriptPath.put("aspect", results.iterator().next());
-            } else if (results.size() > 0) {
+            } else if (!results.isEmpty()) {
                 scriptPath.put("aspect", results);
             }
         }
@@ -223,21 +223,21 @@ public class SebuilderToStringConverter implements TestCaseConverter {
 
     protected Collection<JSONObject> toJSON(final Pointcut pointcut) {
         final List<JSONObject> results = new ArrayList<>();
-        if (pointcut instanceof Pointcut.Or or) {
-            results.addAll(this.toJSON(or.origin()));
-            results.addAll(this.toJSON(or.other()));
+        if (pointcut instanceof Pointcut.Or(Pointcut origin, Pointcut other)) {
+            results.addAll(this.toJSON(origin));
+            results.addAll(this.toJSON(other));
             return results;
-        } else if (pointcut instanceof Pointcut.And and) {
+        } else if (pointcut instanceof Pointcut.And(Pointcut origin, Pointcut other)) {
             final JSONObject result = new JSONObject();
-            for (final JSONObject origin : this.toJSON(and.origin())) {
-                final JSONArray keys = origin.names();
+            for (final JSONObject originJson : this.toJSON(origin)) {
+                final JSONArray keys = originJson.names();
                 IntStream.range(0, keys.length())
-                        .forEach(i -> this.mergeAndCondition(result, origin, keys.getString(i)));
+                        .forEach(i -> this.mergeAndCondition(result, originJson, keys.getString(i)));
             }
-            for (final JSONObject other : this.toJSON(and.other())) {
-                final JSONArray keys = other.names();
+            for (final JSONObject otherJson : this.toJSON(other)) {
+                final JSONArray keys = otherJson.names();
                 IntStream.range(0, keys.length())
-                        .forEach(i -> this.mergeAndCondition(result, other, keys.getString(i)));
+                        .forEach(i -> this.mergeAndCondition(result, otherJson, keys.getString(i)));
             }
             return List.of(result);
         } else if (pointcut instanceof Exportable target) {
@@ -248,7 +248,7 @@ public class SebuilderToStringConverter implements TestCaseConverter {
 
     protected JSONObject toJSON(final Exportable target) {
         final JSONObject result = new JSONObject();
-        if (target.stringParams().size() == 0 && target.locatorParams().size() == 0) {
+        if (target.stringParams().isEmpty() && target.locatorParams().isEmpty()) {
             if (target.value().isBlank()) {
                 result.put(target.key(), new JSONObject());
             } else {

@@ -71,7 +71,7 @@ public record Step(
         if (this.isSkip(testRun.vars())) {
             return true;
         }
-        if (testRun.enableBiDi() && headerParams().size() > 0) {
+        if (testRun.enableBiDi() && !headerParams().isEmpty()) {
             try (Network network = new Network(testRun.driver())) {
                 network.addIntercept(new AddInterceptParameters(InterceptPhase.BEFORE_REQUEST_SENT));
                 network.onBeforeRequestSent(

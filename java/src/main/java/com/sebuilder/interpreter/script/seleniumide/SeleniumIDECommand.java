@@ -7,7 +7,7 @@ import org.json.JSONObject;
 import java.util.Map;
 import java.util.stream.IntStream;
 
-record SeleniumIDECommand(JSONObject source) {
+public record SeleniumIDECommand(JSONObject source) {
 
     public String command() {
         return this.source.get("command").toString();

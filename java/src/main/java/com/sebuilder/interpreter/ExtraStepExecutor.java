@@ -32,9 +32,9 @@ public record ExtraStepExecutor(Pointcut pointcut,
     @Override
     public boolean isPointcut(final TestRun testRun, final Step step, final InputData vars) {
         if (this.pointcut == Pointcut.NONE) {
-            return this.beforeStep.steps().size() == 0
-                    && this.afterStep.steps().size() == 0
-                    && this.failureStep.steps().size() > 0;
+            return this.beforeStep.steps().isEmpty()
+                    && this.afterStep.steps().isEmpty()
+                    && !this.failureStep.steps().isEmpty();
         }
         return this.pointcut.isHandle(testRun, step, vars);
     }
@@ -72,7 +72,7 @@ public record ExtraStepExecutor(Pointcut pointcut,
     }
 
     public boolean hasStep() {
-        return this.beforeStep().steps().size() > 0 || this.afterStep().steps().size() > 0 || this.failureStep().steps().size() > 0;
+        return !this.beforeStep().steps().isEmpty() || !this.afterStep().steps().isEmpty() || !this.failureStep().steps().isEmpty();
     }
 
     public TestRunListener createAdviseListener(final TestRun testRun) {
@@ -110,7 +110,7 @@ public record ExtraStepExecutor(Pointcut pointcut,
     }
 
     boolean invokeAdvise(final TestRun testRun, final TestCase steps, final String testRunName) {
-        if (steps.steps().size() == 0) {
+        if (steps.steps().isEmpty()) {
             return true;
         }
         final TestCase adviseCase = this.createAdviseCase(steps, testRunName);
