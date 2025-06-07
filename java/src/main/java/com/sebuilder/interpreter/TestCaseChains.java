@@ -3,7 +3,6 @@ package com.sebuilder.interpreter;
 import com.google.common.base.Strings;
 import org.apache.commons.lang3.tuple.Pair;
 
-import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -17,7 +16,6 @@ public record TestCaseChains(ArrayList<TestCase> testCases, boolean takeOverLast
     }
 
     @Override
-    @Nonnull
     public Iterator<TestCase> iterator() {
         return this.testCases.iterator();
     }

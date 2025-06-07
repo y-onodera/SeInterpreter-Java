@@ -1,6 +1,5 @@
 package com.sebuilder.interpreter;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -47,7 +46,6 @@ public record Aspect(Iterable<Interceptor> interceptors) implements Iterable<Int
     }
 
     @Override
-    @Nonnull
     public Iterator<Interceptor> iterator() {
         return this.interceptors.iterator();
     }

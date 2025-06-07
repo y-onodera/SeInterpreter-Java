@@ -20,7 +20,6 @@ import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.bidi.HasBiDi;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
-import javax.annotation.Nonnull;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -79,7 +78,7 @@ public class TestRun implements WebDriverWrapper {
         return this.testCase.relativePath();
     }
 
-    public void putVars(@Nonnull final String key, final String value) {
+    public void putVars(final String key, final String value) {
         this.vars = this.vars.add(key, value);
     }
 
@@ -144,7 +143,7 @@ public class TestRun implements WebDriverWrapper {
         return this.vars.evaluateString(value);
     }
 
-    public boolean getBoolean(@Nonnull final String key) {
+    public boolean getBoolean(final String key) {
         return this.containsKey(key) && this.vars().evaluate(this.currentStep().getParam(key));
     }
 
@@ -152,7 +151,7 @@ public class TestRun implements WebDriverWrapper {
         return this.string("text");
     }
 
-    public String string(@Nonnull final String key) {
+    public String string(final String key) {
         final String s = this.currentStep().getParam(key);
         if (s == null) {
             throw new RuntimeException("Missing parameter \"" + key + "\" at step #" + this.currentStepIndex() + ".");
@@ -172,7 +171,7 @@ public class TestRun implements WebDriverWrapper {
         return this.locator("locator");
     }
 
-    public Locator locator(@Nonnull final String key) {
+    public Locator locator(final String key) {
         final Locator l = this.currentStep().getLocator(key);
         return new Locator(this.bindRuntimeVariables(l.type()), this.bindRuntimeVariables(l.value()));
     }
