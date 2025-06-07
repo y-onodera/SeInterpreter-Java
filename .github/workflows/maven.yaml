@@ -136,7 +136,7 @@ jobs:
         include:
           - browser: chrome
             expect: test/suite/expect/Chrome_screenshot
-            arguments: --driver=chrome --resultoutput=chrome
+            arguments: --driver=chrome --resultoutput=chrome --chrome.arguments.ignore-certificate-errors --chrome.arguments.disable-blink-features=BlockCredentialedSubresources
           - browser: edge
             expect: test/suite/expect/Edge_screenshot
             arguments: --driver=edge --resultoutput=edge --driver.experimental.browser.show_hub_apps_tower_pinned=false
