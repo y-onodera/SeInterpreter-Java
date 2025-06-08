@@ -88,8 +88,10 @@ public class SebuilderToStringConverter implements TestCaseConverter {
             s.headerParams().forEach((key, value) -> {
                 JSONObject param = new JSONObject();
                 param.put("key", key);
-                param.put("type", value.getType());
-                param.put("value", value.getValue());
+                param.put("type", value.type());
+                param.put("value", value.value());
+                param.put("filePath", value.filePath());
+                param.put("needEncoding", value.needEncoding());
                 headerParam.put(param);
             });
             o.put("httpHeader", headerParam);

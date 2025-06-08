@@ -1,6 +1,7 @@
 package com.sebuilder.interpreter.javafx.view.step;
 
 import com.google.common.base.Strings;
+import com.sebuilder.interpreter.BytesValueSource;
 import com.sebuilder.interpreter.javafx.control.spreadsheet.ExcelLikeSpreadSheetView;
 import com.sebuilder.interpreter.javafx.view.ErrorDialog;
 import javafx.collections.FXCollections;
@@ -15,6 +16,7 @@ import org.openqa.selenium.bidi.network.BytesValue;
 
 import javax.inject.Inject;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -25,6 +27,8 @@ public class HttpHeaderPresenter {
     public static final SpreadsheetCellType.ListType TYPE_SELECT =
             new SpreadsheetCellType.ListType(Stream.concat(Stream.of(""), Arrays.stream(BytesValue.Type.values())
                     .map(BytesValue.Type::name)).toList());
+    public static final SpreadsheetCellType.ListType BOOLEAN_SELECT =
+            new SpreadsheetCellType.ListType(List.of("", "true", "false"));
     @Inject
     private ErrorDialog errorDialog;
     @FXML
@@ -38,15 +42,17 @@ public class HttpHeaderPresenter {
 
     void populate(final HttpHeaders var) {
         this.resource = var;
-        final GridBase grid = new GridBase(50, 3);
-        grid.getColumnHeaders().addAll("key", "type", "value");
+        final GridBase grid = new GridBase(50, 5);
+        grid.getColumnHeaders().addAll("key", "type", "value", "filePath", "needEncoding");
         final ObservableList<ObservableList<SpreadsheetCell>> rows = FXCollections.observableArrayList();
         int i = 0;
-        for (final Map.Entry<String, BytesValue> entry : this.resource.params().entrySet()) {
+        for (final Map.Entry<String, BytesValueSource> entry : this.resource.params().entrySet()) {
             final ObservableList<SpreadsheetCell> dataRow = FXCollections.observableArrayList();
             dataRow.add(TEXT_AREA.createCell(i, 0, 1, 1, entry.getKey()));
-            dataRow.add(TYPE_SELECT.createCell(i, 1, 1, 1, entry.getValue().getType().name()));
-            dataRow.add(TEXT_AREA.createCell(i, 2, 1, 1, entry.getValue().getValue()));
+            dataRow.add(TYPE_SELECT.createCell(i, 1, 1, 1, entry.getValue().type().name()));
+            dataRow.add(TEXT_AREA.createCell(i, 2, 1, 1, entry.getValue().value()));
+            dataRow.add(TEXT_AREA.createCell(i, 3, 1, 1, entry.getValue().filePath()));
+            dataRow.add(BOOLEAN_SELECT.createCell(i, 4, 1, 1, String.valueOf(entry.getValue().needEncoding())));
             rows.add(dataRow);
             i++;
         }
@@ -55,6 +61,8 @@ public class HttpHeaderPresenter {
             dataRow.add(TEXT_AREA.createCell(i, 0, 1, 1, ""));
             dataRow.add(TYPE_SELECT.createCell(i, 1, 1, 1, ""));
             dataRow.add(TEXT_AREA.createCell(i, 2, 1, 1, ""));
+            dataRow.add(TEXT_AREA.createCell(i, 3, 1, 1, ""));
+            dataRow.add(BOOLEAN_SELECT.createCell(i, 4, 1, 1, ""));
             rows.add(dataRow);
         }
         grid.setRows(rows);
@@ -62,6 +70,8 @@ public class HttpHeaderPresenter {
         this.sheet.getColumns().get(0).setMinWidth(175);
         this.sheet.getColumns().get(1).setMinWidth(100);
         this.sheet.getColumns().get(2).setMinWidth(175);
+        this.sheet.getColumns().get(3).setMinWidth(175);
+        this.sheet.getColumns().get(4).setMinWidth(100);
         AnchorPane.setTopAnchor(this.sheet, 0.0);
         AnchorPane.setBottomAnchor(this.sheet, 0.0);
         AnchorPane.setRightAnchor(this.sheet, 0.0);
@@ -78,7 +88,10 @@ public class HttpHeaderPresenter {
                     .reduce(new HttpHeaders()
                             , (result, row) -> result.add(row.get(0).getText()
                                     , row.get(1).getText()
-                                    , row.get(2).getText())
+                                    , row.get(2).getText()
+                                    , row.get(3).getText()
+                                    , Boolean.parseBoolean(row.get(4).getText())
+                            )
                             , HttpHeaders::add);
             this.reload();
             this.onclick.accept(this.resource);

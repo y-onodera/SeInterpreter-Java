@@ -17,7 +17,10 @@ package com.sebuilder.interpreter;
 
 import com.sebuilder.interpreter.step.GetterUseStep;
 import org.openqa.selenium.bidi.module.Network;
-import org.openqa.selenium.bidi.network.*;
+import org.openqa.selenium.bidi.network.AddInterceptParameters;
+import org.openqa.selenium.bidi.network.ContinueRequestParameters;
+import org.openqa.selenium.bidi.network.Header;
+import org.openqa.selenium.bidi.network.InterceptPhase;
 
 import java.util.*;
 
@@ -32,7 +35,7 @@ public record Step(
         boolean negated,
         Map<String, String> stringParams,
         Map<String, Locator> locatorParams,
-        Map<String, BytesValue> headerParams
+        Map<String, BytesValueSource> headerParams
 ) {
     public static final String KEY_NAME_SKIP = "skip";
 
@@ -77,7 +80,7 @@ public record Step(
                 network.onBeforeRequestSent(
                         beforeRequestSent -> {
                             List<Header> newHeaders = new ArrayList<>(beforeRequestSent.getRequest().getHeaders());
-                            headerParams().forEach((key, value) -> newHeaders.add(new Header(key, value)));
+                            headerParams().forEach((key, value) -> newHeaders.add(new Header(key, value.byteValue())));
                             network.continueRequest(
                                     new ContinueRequestParameters(beforeRequestSent.getRequest().getRequestId())
                                             .headers(newHeaders)
@@ -161,7 +164,7 @@ public record Step(
         this.stringParams().forEach((key, value) -> sb.append(" ").append(key).append("=").append(value));
         this.locatorParams().forEach((key, value) -> sb.append(" ").append(key).append("=").append(value.toPrettyString()));
         this.headerParams().forEach((key, value) -> sb.append(" ").append("httpHeader.").append(key)
-                .append("=").append(value.getType()).append("@").append(value.getValue()));
+                .append("=").append(value.toPrettyString()));
         return sb.toString();
     }
 
@@ -178,8 +181,8 @@ public record Step(
         });
         this.headerParams().forEach((key, value) -> {
             result.put("httpHeader." + key, key);
-            result.put("httpHeader." + key + ".type", value.getType().toString());
-            result.put("httpHeader." + key + ".value", value.getValue());
+            result.put("httpHeader." + key + ".type", value.type().toString());
+            result.put("httpHeader." + key + ".value", value.value());
         });
         return result;
     }

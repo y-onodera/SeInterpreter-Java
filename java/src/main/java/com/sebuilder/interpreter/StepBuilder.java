@@ -1,7 +1,5 @@
 package com.sebuilder.interpreter;
 
-import org.openqa.selenium.bidi.network.BytesValue;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -12,7 +10,7 @@ public class StepBuilder {
     private final StepType stepType;
     private final Map<String, String> stringParams = new HashMap<>();
     private final Map<String, Locator> locatorParams = new HashMap<>();
-    private final Map<String, BytesValue> headerParams = new HashMap<>();
+    private final Map<String, BytesValueSource> headerParams = new HashMap<>();
 
     public StepBuilder(final StepType stepType) {
         this(null, stepType, false);
@@ -44,7 +42,7 @@ public class StepBuilder {
         return this.locatorParams;
     }
 
-    public Map<String, BytesValue> getHeaderParams() {
+    public Map<String, BytesValueSource> getHeaderParams() {
         return headerParams;
     }
 
@@ -75,7 +73,7 @@ public class StepBuilder {
         return this;
     }
 
-    public StepBuilder put(final String key, final BytesValue value) {
+    public StepBuilder put(final String key, final BytesValueSource value) {
         this.headerParams.put(key, value);
         return this;
     }
@@ -100,7 +98,7 @@ public class StepBuilder {
         return this;
     }
 
-    public StepBuilder headerParams(Map<String, BytesValue> headerParams) {
+    public StepBuilder headerParams(Map<String, BytesValueSource> headerParams) {
         this.headerParams.putAll(headerParams);
         return this;
     }

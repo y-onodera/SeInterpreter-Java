@@ -48,7 +48,11 @@ public class StepLoader {
                         JSONArray headers = stepO.getJSONArray(key);
                         IntStream.range(0, headers.length())
                                 .mapToObj(headers::getJSONObject)
-                                .forEach(obj -> step.put(obj.getString("key"), new BytesValue(BytesValue.Type.valueOf(obj.getString("type").toUpperCase()), obj.getString("value"))));
+                                .forEach(obj -> step.put(obj.getString("key"), new BytesValueSource(BytesValue.Type.valueOf(obj.getString("type").toUpperCase())
+                                        , obj.optString("value", "")
+                                        , obj.optString("filePath", "")
+                                        , obj.optBoolean("needEncoding", false)
+                                )));
                     } else if (stepO.optJSONObject(key) != null && key.startsWith("locator")) {
                         step.put(key, new Locator(stepO.getJSONObject(key).getString("type"), stepO.getJSONObject(key).getString("value")));
                     } else {
