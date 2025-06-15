@@ -15,6 +15,7 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class FileDownload extends AbstractStepType implements ConditionalStep, LocatorHolder {
@@ -45,9 +46,9 @@ public class FileDownload extends AbstractStepType implements ConditionalStep, L
         final WebElement el = ctx.locator().find(ctx);
         try {
             String uri = el.getDomAttribute("href");
-            URI uri1 = new URI(ctx.driver().getCurrentUrl());
+            URI uri1 = new URI(Objects.requireNonNull(ctx.driver().getCurrentUrl()));
             String baseURL = uri1.toString().replace(uri1.getRawPath(), "");
-            if (!uri.startsWith(baseURL)) {
+            if (!Objects.requireNonNull(uri).startsWith(baseURL)) {
                 uri = baseURL + uri;
             }
             this.getDownloadFile(ctx, uri);
