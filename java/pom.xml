@@ -120,11 +120,19 @@
             <exclusions>
                 <exclusion>
                     <groupId>org.seleniumhq.selenium</groupId>
+                    <artifactId>selenium-devtools-v85</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.seleniumhq.selenium</groupId>
                     <artifactId>selenium-devtools-v140</artifactId>
                 </exclusion>
                 <exclusion>
                     <groupId>org.seleniumhq.selenium</groupId>
                     <artifactId>selenium-devtools-v141</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.seleniumhq.selenium</groupId>
+                    <artifactId>selenium-devtools-v142</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
