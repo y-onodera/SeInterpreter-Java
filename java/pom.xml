@@ -116,23 +116,19 @@
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-java</artifactId>
-            <version>4.38.0</version>
+            <version>4.41.0</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.seleniumhq.selenium</groupId>
-                    <artifactId>selenium-devtools-v85</artifactId>
+                    <artifactId>selenium-devtools-v143</artifactId>
                 </exclusion>
                 <exclusion>
                     <groupId>org.seleniumhq.selenium</groupId>
-                    <artifactId>selenium-devtools-v140</artifactId>
+                    <artifactId>selenium-devtools-v144</artifactId>
                 </exclusion>
                 <exclusion>
                     <groupId>org.seleniumhq.selenium</groupId>
-                    <artifactId>selenium-devtools-v141</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.seleniumhq.selenium</groupId>
-                    <artifactId>selenium-devtools-v142</artifactId>
+                    <artifactId>selenium-devtools-v145</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
