@@ -169,7 +169,7 @@ jobs:
           path: ${{matrix.browser}}
 
   capture-locale-baseline:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' }}
+    if: ${{ github.event_name == 'workflow_dispatch' }}
     needs: [build ,jlink]
     runs-on: windows-latest
     strategy:
@@ -209,7 +209,7 @@ jobs:
           path: ${{matrix.browser}}/${{matrix.screenshotdir}}
 
   capture-remote-baseline:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' }}
+    if: ${{ github.event_name == 'workflow_dispatch' }}
     needs: [build ,jlink]
     runs-on: ubuntu-latest
     strategy:
@@ -262,7 +262,7 @@ jobs:
           path: ${{matrix.browser}}/${{matrix.screenshotdir}}
 
   commit-baseline:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' }}
+    if: ${{ github.event_name == 'workflow_dispatch' }}
     needs: [capture-locale-baseline ,capture-remote-baseline]
     runs-on: ubuntu-latest
     permissions:
