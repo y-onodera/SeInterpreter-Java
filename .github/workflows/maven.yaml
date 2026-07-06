@@ -8,6 +8,7 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -166,3 +167,132 @@ jobs:
         with:
           name: locale-${{matrix.browser}}-result
           path: ${{matrix.browser}}
+
+  capture-locale-baseline:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    needs: [build ,jlink]
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        browser: [chrome ,edge ,firefox]
+        include:
+          - browser: chrome
+            screenshotdir: Chrome_screenshot
+            arguments: --driver=chrome --resultoutput=chrome --driver.chrome.arguments.ignore-certificate-errors=true --driver.chrome.arguments.disable-blink-features=BlockCredentialedSubresources
+          - browser: edge
+            screenshotdir: Edge_screenshot
+            arguments: --driver=edge --resultoutput=edge --driver.experimental.browser.show_hub_apps_tower_pinned=false
+          - browser: firefox
+            screenshotdir: Firefox_screenshot
+            arguments: --driver=firefox --resultoutput=firefox
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download jre
+        uses: actions/download-artifact@v4
+        with:
+          name: jre-windows-latest
+      - name: Download executableJar
+        uses: actions/download-artifact@v4
+        with:
+          name: executableJar
+      - name: capture-screenshot
+        run: |
+          rd /s /q %CHROMEWEBDRIVER%
+          rd /s /q %EDGEWEBDRIVER%
+          rd /s /q %GECKOWEBDRIVER%
+          bin\java -cp sebuilder-interpreter-2.0.0-SNAPSHOT-jar-with-dependencies.jar com.sebuilder.interpreter.application.SeInterpreter --env.verifyImage=false ${{matrix.arguments}} --driver.browserVersion=stable --datasource.directory=test/suite/input --aspectFile=test/suite/aspect/saveScreenshot.json test/suite/testsuite.json
+        shell: cmd
+      - name: Upload baseline
+        uses: actions/upload-artifact@v4
+        with:
+          name: locale-${{matrix.browser}}-baseline
+          path: ${{matrix.browser}}/${{matrix.screenshotdir}}
+
+  capture-remote-baseline:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    needs: [build ,jlink]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        browser: [chrome ,edge ,firefox]
+        include:
+          - browser: chrome
+            screenshotdir: Chrome_screenshot
+            arguments: --driver=chrome --resultoutput=chrome
+          - browser: edge
+            screenshotdir: Edge_screenshot
+            arguments: --driver=edge --resultoutput=edge --driver.experimental.browser.show_hub_apps_tower_pinned=false
+          - browser: firefox
+            screenshotdir: Firefox_screenshot
+            arguments: --driver=firefox --resultoutput=firefox
+    services:
+      selenium-hub:
+        image: selenium/hub
+        ports:
+          - 4442:4442
+          - 4443:4443
+          - 4444:4444
+      selenium-node:
+        image: selenium/node-${{matrix.browser}}
+        env:
+          SE_EVENT_BUS_HOST: selenium-hub
+          SE_EVENT_BUS_PUBLISH_PORT: 4442
+          SE_EVENT_BUS_SUBSCRIBE_PORT: 4443
+        options :
+          --shm-size=2gb
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Download jre
+        uses: actions/download-artifact@v4
+        with:
+          name: jre-ubuntu-latest
+      - name: permmit access
+        run:  chmod +x ./bin/java
+      - name: Download executableJar
+        uses: actions/download-artifact@v4
+        with:
+          name: executableJar
+      - name: capture-screenshot
+        run: ./bin/java -cp sebuilder-interpreter-2.0.0-SNAPSHOT-jar-with-dependencies.jar com.sebuilder.interpreter.application.SeInterpreter --env=test/suite/env.properties --env.verifyImage=false ${{matrix.arguments}} --driver.remote-url=http://localhost:4444/ --datasource.directory=test/suite/input --reportFormat=ExtentReports --aspectFile=test/suite/aspect/saveScreenshot.json test/suite/testsuite.json
+      - name: Upload baseline
+        uses: actions/upload-artifact@v4
+        with:
+          name: remote-${{matrix.browser}}-baseline
+          path: ${{matrix.browser}}/${{matrix.screenshotdir}}
+
+  commit-baseline:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    needs: [capture-locale-baseline ,capture-remote-baseline]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref }}
+      - name: Download baseline artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: '*-baseline'
+          path: baseline-artifacts
+      - name: Apply baselines
+        shell: bash
+        run: |
+          set -e
+          for browser in Chrome Edge Firefox; do
+            lower=$(echo "$browser" | tr '[:upper:]' '[:lower:]')
+            cp -f "baseline-artifacts/locale-${lower}-baseline/"*.png "test/suite/expect/${browser}_screenshot/"
+            cp -f "baseline-artifacts/remote-${lower}-baseline/"*.png "test/suite/input/${browser}_screenshot/"
+          done
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add test/suite/expect test/suite/input
+          if git diff --cached --quiet; then
+            echo "No baseline changes"
+          else
+            git commit -m "Regenerate screenshot baselines with current browser versions"
+            git push
+          fi
