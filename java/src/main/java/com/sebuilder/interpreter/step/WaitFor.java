@@ -59,6 +59,12 @@ public class WaitFor extends AbstractStepType implements GetterUseStep {
                 Thread.currentThread().interrupt();
             }
         }
+        if (ctx.isStopped()) {
+            // The test run was stopped (e.g. cancelled from the UI) while we were polling.
+            // The driver may already be closing, so avoid another round trip and just report
+            // that the wait did not succeed.
+            return false;
+        }
         return this.test(ctx);
     }
 
