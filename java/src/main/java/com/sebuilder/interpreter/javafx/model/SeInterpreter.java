@@ -5,9 +5,9 @@ import com.google.common.collect.Lists;
 import com.sebuilder.interpreter.*;
 import com.sebuilder.interpreter.step.type.Get;
 import com.sebuilder.interpreter.step.type.SaveScreenshot;
+import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.concurrent.WorkerStateEvent;
 import javafx.util.Pair;
 import org.apache.logging.log4j.Logger;
 
@@ -284,7 +284,12 @@ public record SeInterpreter(
     }
 
     public void updateReplayStatus(final int stepNo, final Result result) {
-        this.replayStatus().setValue(new Pair<>(stepNo, result));
+        final Pair<Integer, Result> status = new Pair<>(stepNo, result);
+        if (Platform.isFxApplicationThread()) {
+            this.replayStatus().setValue(status);
+        } else {
+            Platform.runLater(() -> this.replayStatus().setValue(status));
+        }
     }
 
     public void addBreakPoint(final int stepIndex, final Pointcut pointcut) {
@@ -410,10 +415,10 @@ public record SeInterpreter(
 
     private void executeTask(final TestCase replayCase, final Function<Logger, TestRunListener> listenerFactory) {
         final SeInterpreterRunTask task = this.runner.createRunScriptTask(replayCase, this.debugger.reset(), listenerFactory);
-        try (ExecutorService executor = Executors.newSingleThreadExecutor()) {
-            task.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED, wse -> executor.shutdown());
-            executor.submit(task);
-        }
+        // close() waits for the task to finish and blocks the FX thread, so only shutdown() here
+        final ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.submit(task);
+        executor.shutdown();
         this.taskHandler().accept(task);
     }
 
