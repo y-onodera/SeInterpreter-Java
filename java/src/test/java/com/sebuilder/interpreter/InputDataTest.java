@@ -70,4 +70,11 @@ public class InputDataTest {
         assertEquals("true", this.target.evaluateString("${${aTrue == true} && ${aFalse == false}}"));
     }
 
+    @Test
+    public void evaluateContextFunction() {
+        assertEquals("input1.png", this.target.evaluateString("input${has('number') ? get('number') : ''}.png"));
+        assertEquals("input.png", this.target.evaluateString("input${has('_index') ? get('_index') : ''}.png"));
+        assertTrue(this.target.evaluate("${get('var1') == 'string'}"));
+    }
+
 }
