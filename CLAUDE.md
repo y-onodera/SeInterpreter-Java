@@ -29,4 +29,5 @@ Java 25 が必要（JavaFX 27 の要件）。web 環境では `.claude/settings.
 
 ## 依存関係の更新
 - `selenium-java` は同梱される番号付き `selenium-devtools-vNNN` を全て exclusion し、`selenium-devtools-latest` だけ残す。更新時は `mvn dependency:tree -Dincludes=org.seleniumhq.selenium` で同梱バージョンを確認して exclusion を差し替える
+- `commons-jexl3` は 3.6.1 に固定。3.7.0 以降はスクリプト内の `has('x')`/`get('x')`（`MapContext` のメソッド呼び出し）が解決できず `${...}` が展開されなくなる（`InputDataTest.evaluateContextFunction` で検知）
 - JavaFX/Java のバージョンを変えるときは `maven-compiler-plugin` の source/target、`.github/workflows/maven.yaml` の `java-version`（build・jlink の 2 か所）、`.claude/start-maven-proxy.sh` の `REQUIRED_JAVA_VERSION` を揃える

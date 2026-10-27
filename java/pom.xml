@@ -95,7 +95,8 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-jexl3</artifactId>
-            <version>3.7.1</version>
+            <!-- 3.7.0以降はコンテキストのhas()/get()を関数として呼べなくなるため3.6系に留める -->
+            <version>3.6.1</version>
             <exclusions>
                 <exclusion>
                     <groupId>commons-logging</groupId>
