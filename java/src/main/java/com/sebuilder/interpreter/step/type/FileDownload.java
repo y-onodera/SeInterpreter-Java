@@ -21,11 +21,11 @@ import java.util.stream.Collectors;
 public class FileDownload extends AbstractStepType implements ConditionalStep, LocatorHolder {
 
     @Override
-    public boolean doRun(final TestRun ctx) {
+    public boolean doRun(final TestRun ctx, final WebElement element) {
         if (ctx.containsKey("postURL")) {
             return this.post(ctx);
         }
-        return this.get(ctx);
+        return this.get(ctx, element);
     }
 
     @Override
@@ -42,8 +42,7 @@ public class FileDownload extends AbstractStepType implements ConditionalStep, L
         return o.apply(LocatorHolder.super::addDefaultParam);
     }
 
-    public boolean get(final TestRun ctx) {
-        final WebElement el = ctx.locator().find(ctx);
+    public boolean get(final TestRun ctx, final WebElement el) {
         try {
             String uri = el.getDomAttribute("href");
             URI uri1 = new URI(Objects.requireNonNull(ctx.driver().getCurrentUrl()));

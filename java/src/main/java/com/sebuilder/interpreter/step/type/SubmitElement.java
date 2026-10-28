@@ -19,11 +19,12 @@ package com.sebuilder.interpreter.step.type;
 import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.step.AbstractStepType;
 import com.sebuilder.interpreter.step.LocatorHolder;
+import org.openqa.selenium.WebElement;
 
 public class SubmitElement extends AbstractStepType implements ConditionalStep, LocatorHolder {
     @Override
-    public boolean doRun(final TestRun ctx) {
-        ctx.locator().find(ctx).submit();
+    public boolean doRun(final TestRun ctx, final WebElement element) {
+        element.submit();
         return true;
     }
 

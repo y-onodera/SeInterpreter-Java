@@ -27,8 +27,7 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 public class SetElementText extends AbstractStepType implements ConditionalStep, Exportable, LocatorHolder {
 
     @Override
-    public boolean doRun(final TestRun ctx) {
-        final WebElement el = ctx.locator().find(ctx);
+    public boolean doRun(final TestRun ctx, final WebElement el) {
         el.click();
         el.clear();
         final String input = ctx.text();

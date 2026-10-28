@@ -32,6 +32,10 @@ public class ConditionalStepTest {
     @Mock
     WebElement staleElement;
     @Mock
+    WebElement hiddenElement;
+    @Mock
+    WebElement disabledElement;
+    @Mock
     WebElement element;
 
     private TestRun target;
@@ -72,16 +76,41 @@ public class ConditionalStepTest {
     }
 
     @Test
-    public void elementRemovedBeforeActionIsRetried() {
-        // WaitFor evaluates visible+enable twice when ready (loop condition and final result),
-        // so the first four lookups belong to the readiness check and the fifth to doRun().
+    public void staleDuringActionIsRetriedWithFreshElement() {
         Mockito.when(this.driver.findElements(By.id("target")))
-                .thenReturn(List.of(this.element), List.of(this.element), List.of(this.element), List.of(this.element))
-                .thenReturn(List.of())
+                .thenReturn(List.of(this.staleElement))
                 .thenReturn(List.of(this.element));
+        Mockito.reset(this.staleElement);
+        Mockito.doReturn(true).when(this.staleElement).isDisplayed();
+        Mockito.doReturn(true).when(this.staleElement).isEnabled();
+        Mockito.doThrow(new StaleElementReferenceException("stale")).when(this.staleElement).click();
 
         assertTrue(new ClickElement().run(this.target));
+        Mockito.verify(this.staleElement).click();
         Mockito.verify(this.element).click();
+    }
+
+    @Test
+    public void actsOnElementThatIsBothVisibleAndEnabled() {
+        Mockito.doReturn(false).when(this.hiddenElement).isDisplayed();
+        Mockito.doReturn(true).when(this.disabledElement).isDisplayed();
+        Mockito.doReturn(false).when(this.disabledElement).isEnabled();
+        Mockito.when(this.driver.findElements(By.id("target")))
+                .thenReturn(List.of(this.hiddenElement, this.disabledElement, this.element));
+
+        assertTrue(new ClickElement().run(this.target));
+        Mockito.verify(this.hiddenElement, Mockito.never()).click();
+        Mockito.verify(this.disabledElement, Mockito.never()).click();
+        Mockito.verify(this.element).click();
+    }
+
+    @Test
+    public void returnsFalseWhenNoElementBecomesActive() {
+        Mockito.doReturn(false).when(this.hiddenElement).isDisplayed();
+        Mockito.when(this.driver.findElements(By.id("target"))).thenReturn(List.of(this.hiddenElement));
+
+        assertFalse(new ClickElement().run(this.target));
+        Mockito.verify(this.hiddenElement, Mockito.never()).click();
     }
 
     @Test

@@ -20,7 +20,7 @@ import java.lang.reflect.Field;
 public class FileDownloadCDP extends AbstractStepType implements ConditionalStep, LocatorHolder {
 
     @Override
-    public boolean doRun(final TestRun ctx) {
+    public boolean doRun(final TestRun ctx, final WebElement el) {
         final NetworkInterceptor interceptor = new NetworkInterceptor(ctx.driver(), (final HttpRequest req) -> {
             try {
                 final HttpResponse res = this.getClient(ctx).execute(req);
@@ -30,7 +30,6 @@ public class FileDownloadCDP extends AbstractStepType implements ConditionalStep
             }
             return new HttpResponse().setStatus(204);
         });
-        final WebElement el = ctx.locator().find(ctx);
         el.click();
         interceptor.close();
         return true;

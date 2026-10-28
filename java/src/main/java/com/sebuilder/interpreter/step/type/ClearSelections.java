@@ -19,12 +19,13 @@ package com.sebuilder.interpreter.step.type;
 import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.step.AbstractStepType;
 import com.sebuilder.interpreter.step.LocatorHolder;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 
 public class ClearSelections extends AbstractStepType implements ConditionalStep, LocatorHolder {
     @Override
-    public boolean doRun(final TestRun ctx) {
-        new Select(ctx.locator().find(ctx)).deselectAll();
+    public boolean doRun(final TestRun ctx, final WebElement element) {
+        new Select(element).deselectAll();
         return true;
     }
 
