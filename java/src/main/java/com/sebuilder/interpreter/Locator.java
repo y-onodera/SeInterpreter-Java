@@ -18,6 +18,7 @@ package com.sebuilder.interpreter;
 
 import com.google.common.base.Strings;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -111,6 +112,9 @@ public record Locator(String type, String value) {
 
         public WebElement find(final String value, final WebDriver driver) {
             final List<WebElement> elements = this.findElements(value, driver);
+            if (elements.isEmpty()) {
+                throw new NoSuchElementException("no such element: " + this + ":" + value);
+            }
             return elements.stream()
                     .filter(WebElement::isDisplayed)
                     .findFirst()

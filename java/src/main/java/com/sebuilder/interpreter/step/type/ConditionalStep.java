@@ -3,19 +3,22 @@ package com.sebuilder.interpreter.step.type;
 import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
+import com.sebuilder.interpreter.step.Getter;
 import com.sebuilder.interpreter.step.WaitFor;
+import com.sebuilder.interpreter.step.getter.AbstractGetter;
 import com.sebuilder.interpreter.step.getter.ComplexCondition;
 import com.sebuilder.interpreter.step.getter.ElementEnable;
 import com.sebuilder.interpreter.step.getter.ElementVisible;
 import org.openqa.selenium.ElementNotInteractableException;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 
 public interface ConditionalStep extends StepType {
 
-    WaitFor WAIT_FOR_ACTIVE = ComplexCondition.builder()
+    WaitFor WAIT_FOR_ACTIVE = new ReadyCondition(ComplexCondition.builder()
             .addCondition(new ElementVisible())
             .addCondition(new ElementEnable())
-            .build()
+            .build())
             .toWaitFor();
 
     /**
@@ -60,7 +63,8 @@ public interface ConditionalStep extends StepType {
         while (true) {
             try {
                 return this.doRun(ctx);
-            } catch (final StaleElementReferenceException | ElementNotInteractableException e) {
+            } catch (final StaleElementReferenceException | NoSuchElementException |
+                           ElementNotInteractableException e) {
                 if (ctx.isStopped() || System.currentTimeMillis() >= stopBy) {
                     throw e;
                 }
@@ -74,6 +78,38 @@ public interface ConditionalStep extends StepType {
                     throw e;
                 }
             }
+        }
+    }
+
+    /**
+     * The element can be re-rendered or removed while the readiness check is inspecting it, which
+     * makes the check itself throw. Treat that as "not ready yet" so WaitFor keeps polling instead
+     * of failing the step.
+     */
+    final class ReadyCondition extends AbstractGetter {
+        private final Getter delegate;
+
+        ReadyCondition(final Getter delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public String get(final TestRun ctx) {
+            try {
+                return this.delegate.get(ctx);
+            } catch (final StaleElementReferenceException | NoSuchElementException e) {
+                return "false";
+            }
+        }
+
+        @Override
+        public boolean equals(final Object o) {
+            return o instanceof final ReadyCondition that && this.delegate.equals(that.delegate);
+        }
+
+        @Override
+        public int hashCode() {
+            return this.delegate.hashCode();
         }
     }
 }
