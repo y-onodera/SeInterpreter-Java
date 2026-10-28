@@ -174,8 +174,15 @@ public class BrowserPresenter implements HasFileChooser {
             };
             final Window window = this.driverText.getScene().getWindow();
             // hiding the owner window also closes the spinner, so wait for the task to finish
-            task.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED, wse -> window.hide());
-            task.addEventHandler(WorkerStateEvent.WORKER_STATE_FAILED, wse -> window.hide());
+            task.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED, wse -> {
+                window.hide();
+                // browserOpen() opens the replay dialog, so it must run on the FX thread
+                this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> this.application.browserOpen());
+            });
+            task.addEventHandler(WorkerStateEvent.WORKER_STATE_FAILED, wse -> {
+                window.hide();
+                this.errorDialog.show(task.getException().getMessage(), task.getException());
+            });
             new SpinnerView().open(window, task);
             Thread.ofVirtual().start(task);
         });

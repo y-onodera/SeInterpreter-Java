@@ -238,7 +238,6 @@ public record SeInterpreter(
             Context.getInstance().setRemoteUrl(null);
         }
         this.runner().reloadSetting(selectedBrowser, browserVersion, driverPath, binaryPath);
-        this.browserOpen();
     }
 
     public void browserOpen() {
