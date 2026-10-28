@@ -1,0 +1,163 @@
+package com.sebuilder.interpreter.step.type;
+
+import com.sebuilder.interpreter.*;
+import org.apache.logging.log4j.Logger;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
+import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.Rectangle;
+import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.remote.RemoteWebDriver;
+
+import java.io.File;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.junit.Assert.*;
+
+public class ConditionalStepTest {
+    @Rule
+    public MockitoRule rule = MockitoJUnit.rule();
+    @Mock
+    RemoteWebDriver driver;
+    @Mock
+    Logger log;
+    @Mock
+    TestRunListener listener;
+    @Mock
+    WebElement staleElement;
+    @Mock
+    WebElement hiddenElement;
+    @Mock
+    WebElement disabledElement;
+    @Mock
+    WebElement element;
+
+    private TestRun target;
+
+    @Before
+    public void setUp() {
+        Context.getInstance().setBrowser("Chrome");
+        Context.getInstance().setDataSourceDirectory("datasource");
+        Context.getInstance().setDataSourceEncoding("UTF-8");
+        Context.getInstance().setAspect(new Aspect());
+        Mockito.doReturn(new File(".", "result")).when(this.listener).getResultDir();
+        Mockito.doReturn(new File(".", "screenshot")).when(this.listener).getScreenShotOutputDirectory();
+        Mockito.doReturn(new File(".", "template")).when(this.listener).getTemplateOutputDirectory();
+        Mockito.doReturn(new File(".", "download")).when(this.listener).getDownloadDirectory();
+        Mockito.doThrow(new StaleElementReferenceException("stale")).when(this.staleElement).isDisplayed();
+        Mockito.doReturn(true).when(this.element).isDisplayed();
+        Mockito.doReturn(true).when(this.element).isEnabled();
+        this.target = this.createTestRun(new StepBuilder(new ClickElement()));
+    }
+
+    private TestRun createTestRun(final StepBuilder stepBuilder) {
+        final TestCase head = new TestCaseBuilder()
+                .addStep(stepBuilder
+                        .put("locator", new Locator("id", "target"))
+                        .put("maxWait", "1000")
+                        .put("interval", "10")
+                        .build())
+                .build();
+        final TestRun result = new TestRunBuilder(head)
+                .createTestRun(this.log, this.driver, new InputData(), this.listener);
+        result.toNextStepIndex();
+        return result;
+    }
+
+    @Test
+    public void staleDuringReadyCheckKeepsWaiting() {
+        Mockito.when(this.driver.findElements(By.id("target")))
+                .thenReturn(List.of(this.staleElement))
+                .thenReturn(List.of(this.element));
+
+        assertTrue(new ClickElement().run(this.target));
+        Mockito.verify(this.element).click();
+    }
+
+    @Test
+    public void staleDuringActionIsRetriedWithFreshElement() {
+        Mockito.when(this.driver.findElements(By.id("target")))
+                .thenReturn(List.of(this.staleElement))
+                .thenReturn(List.of(this.element));
+        Mockito.reset(this.staleElement);
+        Mockito.doReturn(true).when(this.staleElement).isDisplayed();
+        Mockito.doReturn(true).when(this.staleElement).isEnabled();
+        Mockito.doThrow(new StaleElementReferenceException("stale")).when(this.staleElement).click();
+
+        assertTrue(new ClickElement().run(this.target));
+        Mockito.verify(this.staleElement).click();
+        Mockito.verify(this.element).click();
+    }
+
+    @Test
+    public void actsOnElementThatIsBothVisibleAndEnabled() {
+        Mockito.doReturn(false).when(this.hiddenElement).isDisplayed();
+        Mockito.doReturn(true).when(this.disabledElement).isDisplayed();
+        Mockito.doReturn(false).when(this.disabledElement).isEnabled();
+        Mockito.when(this.driver.findElements(By.id("target")))
+                .thenReturn(List.of(this.hiddenElement, this.disabledElement, this.element));
+
+        assertTrue(new ClickElement().run(this.target));
+        Mockito.verify(this.hiddenElement, Mockito.never()).click();
+        Mockito.verify(this.disabledElement, Mockito.never()).click();
+        Mockito.verify(this.element).click();
+    }
+
+    @Test
+    public void returnsFalseWhenNoElementBecomesActive() {
+        Mockito.doReturn(false).when(this.hiddenElement).isDisplayed();
+        Mockito.when(this.driver.findElements(By.id("target"))).thenReturn(List.of(this.hiddenElement));
+
+        assertFalse(new ClickElement().run(this.target));
+        Mockito.verify(this.hiddenElement, Mockito.never()).click();
+    }
+
+    @Test
+    public void movingElementIsActedOnAfterItStops() {
+        Mockito.when(this.driver.findElements(By.id("target"))).thenReturn(List.of(this.element));
+        Mockito.when(this.element.getRect())
+                .thenReturn(new Rectangle(0, 0, 10, 10))
+                .thenReturn(new Rectangle(0, 50, 10, 10));
+
+        assertTrue(new ClickElement().run(this.target));
+        Mockito.verify(this.element, Mockito.times(4)).getRect();
+        Mockito.verify(this.element).click();
+    }
+
+    @Test
+    public void returnsFalseWhileElementKeepsMoving() {
+        Mockito.when(this.driver.findElements(By.id("target"))).thenReturn(List.of(this.element));
+        final AtomicInteger y = new AtomicInteger();
+        Mockito.when(this.element.getRect()).thenAnswer(it -> new Rectangle(0, y.incrementAndGet(), 10, 10));
+
+        assertFalse(new ClickElement().run(this.target));
+        Mockito.verify(this.element, Mockito.never()).click();
+    }
+
+    @Test
+    public void stableWaitZeroSkipsMovementCheck() {
+        Mockito.when(this.driver.findElements(By.id("target"))).thenReturn(List.of(this.element));
+        final TestRun noStableWait = this.createTestRun(new StepBuilder(new ClickElement()).put("stableWait", "0"));
+
+        assertTrue(new ClickElement().run(noStableWait));
+        Mockito.verify(this.element, Mockito.never()).getRect();
+        Mockito.verify(this.element).click();
+    }
+
+    @Test
+    public void findThrowsNoSuchElementWhenNothingMatches() {
+        Mockito.when(this.driver.findElements(By.id("target"))).thenReturn(List.of());
+
+        final NoSuchElementException actual = assertThrows(NoSuchElementException.class
+                , () -> new Locator("id", "target").find(this.driver));
+        assertTrue(actual.getMessage().startsWith("no such element: id:target"));
+    }
+}

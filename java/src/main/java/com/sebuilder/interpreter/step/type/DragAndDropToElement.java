@@ -21,13 +21,14 @@ import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.step.AbstractStepType;
 import com.sebuilder.interpreter.step.LocatorHolder;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
 public class DragAndDropToElement extends AbstractStepType implements ConditionalStep, LocatorHolder {
     @Override
-    public boolean doRun(final TestRun ctx) {
+    public boolean doRun(final TestRun ctx, final WebElement element) {
         new Actions(ctx.driver()).dragAndDrop(
-                ctx.locator().find(ctx),
+                element,
                 ctx.locator("locator2").find(ctx)).build().perform();
         return true;
     }

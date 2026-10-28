@@ -25,8 +25,7 @@ import org.openqa.selenium.WebElement;
 public class SendKeysToElement extends AbstractStepType implements ConditionalStep, LocatorHolder {
 
     @Override
-    public boolean doRun(final TestRun ctx) {
-        final WebElement el = ctx.locator().find(ctx);
+    public boolean doRun(final TestRun ctx, final WebElement el) {
         el.sendKeys(ctx.text());
         return true;
     }

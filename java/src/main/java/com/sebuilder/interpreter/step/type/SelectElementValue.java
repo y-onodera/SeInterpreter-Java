@@ -12,8 +12,7 @@ import org.openqa.selenium.support.ui.Select;
 public class SelectElementValue extends AbstractStepType implements ConditionalStep, Exportable, LocatorHolder {
 
     @Override
-    public boolean doRun(final TestRun ctx) {
-        final WebElement e = ctx.locator().find(ctx);
+    public boolean doRun(final TestRun ctx, final WebElement e) {
         final Select select = new Select(e);
         select.selectByValue(ctx.string("value"));
         return true;

@@ -26,8 +26,7 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 public class SetElementSelected extends AbstractStepType implements ConditionalStep, Exportable, LocatorHolder {
 
     @Override
-    public boolean doRun(final TestRun ctx) {
-        final WebElement e = ctx.locator().find(ctx);
+    public boolean doRun(final TestRun ctx, final WebElement e) {
         if (ctx.containsKey("check") && !ctx.getBoolean("check")) {
             if (e.isSelected()) {
                 e.click();

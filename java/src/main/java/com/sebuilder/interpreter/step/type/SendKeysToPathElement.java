@@ -28,9 +28,8 @@ import java.io.IOException;
 public class SendKeysToPathElement extends AbstractStepType implements ConditionalStep, LocatorHolder {
 
     @Override
-    public boolean doRun(final TestRun ctx) {
+    public boolean doRun(final TestRun ctx, final WebElement el) {
         try {
-            final WebElement el = ctx.locator().find(ctx);
             el.sendKeys(new File(ctx.text()).getCanonicalPath());
             return true;
         } catch (final IOException ex) {
