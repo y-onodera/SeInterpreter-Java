@@ -22,8 +22,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 public class BrowserPresenter implements HasFileChooser {
@@ -161,23 +159,32 @@ public class BrowserPresenter implements HasFileChooser {
                 newConfig.put(Context.REMOTE_URL_KEY, Context.getDriverConfig().get(Context.REMOTE_URL_KEY));
             }
             Context.getInstance().setDriverConfig(newConfig);
-            Task<Void> task = new Task<>() {
+            // read UI values on the FX thread before handing them to the background task
+            final String browser = this.selectedBrowser;
+            final String version = this.browserVersion.getValue();
+            final String remote = this.remoteUrl.getText();
+            final String driverPath = this.driverText.getText();
+            final String binaryPath = this.binaryText.getText();
+            final Task<Void> task = new Task<>() {
                 @Override
                 protected Void call() {
-                    application.browserSetting(selectedBrowser
-                            , browserVersion.getValue()
-                            , remoteUrl.getText()
-                            , driverText.getText()
-                            , binaryText.getText());
+                    application.browserSetting(browser, version, remote, driverPath, binaryPath);
                     return null;
                 }
             };
-            try (ExecutorService executor = Executors.newSingleThreadExecutor()) {
-                task.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED, wse -> executor.shutdown());
-                executor.submit(task);
-            }
-            new SpinnerView().open(this.driverText.getScene().getWindow(), task);
-            this.driverText.getScene().getWindow().hide();
+            final Window window = this.driverText.getScene().getWindow();
+            // hiding the owner window also closes the spinner, so wait for the task to finish
+            task.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED, wse -> {
+                window.hide();
+                // browserOpen() opens the replay dialog, so it must run on the FX thread
+                this.errorDialog.executeAndLoggingCaseWhenThrowException(() -> this.application.browserOpen());
+            });
+            task.addEventHandler(WorkerStateEvent.WORKER_STATE_FAILED, wse -> {
+                window.hide();
+                this.errorDialog.show(task.getException().getMessage(), task.getException());
+            });
+            new SpinnerView().open(window, task);
+            Thread.ofVirtual().start(task);
         });
     }
 

@@ -16,8 +16,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.function.*;
 
 public record SeInterpreter(
@@ -240,7 +238,6 @@ public record SeInterpreter(
             Context.getInstance().setRemoteUrl(null);
         }
         this.runner().reloadSetting(selectedBrowser, browserVersion, driverPath, binaryPath);
-        this.browserOpen();
     }
 
     public void browserOpen() {
@@ -415,10 +412,7 @@ public record SeInterpreter(
 
     private void executeTask(final TestCase replayCase, final Function<Logger, TestRunListener> listenerFactory) {
         final SeInterpreterRunTask task = this.runner.createRunScriptTask(replayCase, this.debugger.reset(), listenerFactory);
-        // close() waits for the task to finish and blocks the FX thread, so only shutdown() here
-        final ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.submit(task);
-        executor.shutdown();
+        Thread.ofVirtual().start(task);
         this.taskHandler().accept(task);
     }
 
