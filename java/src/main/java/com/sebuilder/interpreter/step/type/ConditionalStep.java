@@ -5,12 +5,16 @@ import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
 import org.openqa.selenium.ElementNotInteractableException;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.Rectangle;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 
+import java.util.Objects;
 import java.util.Optional;
 
 public interface ConditionalStep extends StepType {
+
+    int DEFAULT_STABLE_WAIT_MS = 100;
 
     /**
      * Perform the action this step consists of.
@@ -29,11 +33,15 @@ public interface ConditionalStep extends StepType {
         if (ctx.containsKey("interval")) {
             intervalMs = Integer.parseInt(ctx.string("interval"));
         }
+        int stableWaitMs = DEFAULT_STABLE_WAIT_MS;
+        if (ctx.containsKey("stableWait")) {
+            stableWaitMs = Integer.parseInt(ctx.string("stableWait"));
+        }
         final long stopBy = System.currentTimeMillis() + maxWaitMs;
         RuntimeException lastFailure = null;
         while (true) {
             final Optional<WebElement> active = this.findActiveElement(ctx);
-            if (active.isPresent()) {
+            if (active.isPresent() && isStable(active.get(), stableWaitMs)) {
                 try {
                     return this.doRun(ctx, active.get());
                 } catch (final StaleElementReferenceException | NoSuchElementException |
@@ -79,6 +87,27 @@ public interface ConditionalStep extends StepType {
                 .stream()
                 .filter(ConditionalStep::isActive)
                 .findFirst();
+    }
+
+    /**
+     * An element in the middle of an animation (slide-in, expanding menu, scroll into place) is
+     * visible and enabled but an action on it lands somewhere else or is intercepted. Treat it as
+     * ready only once its position and size are the same across stableWaitMs; 0 or less skips it.
+     */
+    private static boolean isStable(final WebElement element, final int stableWaitMs) {
+        if (stableWaitMs <= 0) {
+            return true;
+        }
+        try {
+            final Rectangle before = element.getRect();
+            Thread.sleep(stableWaitMs);
+            return Objects.equals(before, element.getRect());
+        } catch (final StaleElementReferenceException e) {
+            return false;
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return true;
+        }
     }
 
     private static boolean isActive(final WebElement element) {

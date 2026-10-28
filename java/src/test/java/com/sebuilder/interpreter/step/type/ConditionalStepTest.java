@@ -11,12 +11,14 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.Rectangle;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.io.File;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.*;
 
@@ -53,16 +55,21 @@ public class ConditionalStepTest {
         Mockito.doThrow(new StaleElementReferenceException("stale")).when(this.staleElement).isDisplayed();
         Mockito.doReturn(true).when(this.element).isDisplayed();
         Mockito.doReturn(true).when(this.element).isEnabled();
+        this.target = this.createTestRun(new StepBuilder(new ClickElement()));
+    }
+
+    private TestRun createTestRun(final StepBuilder stepBuilder) {
         final TestCase head = new TestCaseBuilder()
-                .addStep(new StepBuilder(new ClickElement())
+                .addStep(stepBuilder
                         .put("locator", new Locator("id", "target"))
                         .put("maxWait", "1000")
                         .put("interval", "10")
                         .build())
                 .build();
-        this.target = new TestRunBuilder(head)
+        final TestRun result = new TestRunBuilder(head)
                 .createTestRun(this.log, this.driver, new InputData(), this.listener);
-        this.target.toNextStepIndex();
+        result.toNextStepIndex();
+        return result;
     }
 
     @Test
@@ -111,6 +118,38 @@ public class ConditionalStepTest {
 
         assertFalse(new ClickElement().run(this.target));
         Mockito.verify(this.hiddenElement, Mockito.never()).click();
+    }
+
+    @Test
+    public void movingElementIsActedOnAfterItStops() {
+        Mockito.when(this.driver.findElements(By.id("target"))).thenReturn(List.of(this.element));
+        Mockito.when(this.element.getRect())
+                .thenReturn(new Rectangle(0, 0, 10, 10))
+                .thenReturn(new Rectangle(0, 50, 10, 10));
+
+        assertTrue(new ClickElement().run(this.target));
+        Mockito.verify(this.element, Mockito.times(4)).getRect();
+        Mockito.verify(this.element).click();
+    }
+
+    @Test
+    public void returnsFalseWhileElementKeepsMoving() {
+        Mockito.when(this.driver.findElements(By.id("target"))).thenReturn(List.of(this.element));
+        final AtomicInteger y = new AtomicInteger();
+        Mockito.when(this.element.getRect()).thenAnswer(it -> new Rectangle(0, y.incrementAndGet(), 10, 10));
+
+        assertFalse(new ClickElement().run(this.target));
+        Mockito.verify(this.element, Mockito.never()).click();
+    }
+
+    @Test
+    public void stableWaitZeroSkipsMovementCheck() {
+        Mockito.when(this.driver.findElements(By.id("target"))).thenReturn(List.of(this.element));
+        final TestRun noStableWait = this.createTestRun(new StepBuilder(new ClickElement()).put("stableWait", "0"));
+
+        assertTrue(new ClickElement().run(noStableWait));
+        Mockito.verify(this.element, Mockito.never()).getRect();
+        Mockito.verify(this.element).click();
     }
 
     @Test
