@@ -21,18 +21,14 @@ public final class StaleElementRetry {
 
     /**
      * Runs the operation up to {@link #RETRY_COUNT} times, waiting {@link #RETRY_INTERVAL_MS}
-     * between attempts. Rethrows the last exception if every attempt is stale.
+     * between attempts. Rethrows the last exception if every attempt is stale (an interrupted
+     * thread counts as running out of attempts, the same as in {@link Polling}).
      */
     public static <T> T get(final Supplier<T> operation) {
         StaleElementReferenceException lastFailure = null;
         for (int i = 0; i < RETRY_COUNT; i++) {
-            if (i > 0) {
-                try {
-                    Thread.sleep(RETRY_INTERVAL_MS);
-                } catch (final InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    break;
-                }
+            if (i > 0 && !sleep(RETRY_INTERVAL_MS)) {
+                break;
             }
             try {
                 return operation.get();
@@ -41,5 +37,21 @@ public final class StaleElementRetry {
             }
         }
         throw lastFailure;
+    }
+
+    /**
+     * Sleeps between attempts. An interrupt is the caller's cue to give up: it is passed on (the
+     * thread stays interrupted) and the caller treats it as running out of time or attempts.
+     *
+     * @return false if the thread was interrupted.
+     */
+    static boolean sleep(final long ms) {
+        try {
+            Thread.sleep(ms);
+            return true;
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return false;
+        }
     }
 }

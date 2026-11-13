@@ -19,8 +19,8 @@ public final class Polling {
      * @param attempt Returns the step's result once it can decide it, or empty to poll again.
      * @param retryOn Exceptions that mean "not ready yet" rather than a failure: an attempt that
      *                throws one of them is tried again on the next poll.
-     * @return The attempt's result; false when the time runs out, the test run is stopped or the
-     * thread is interrupted.
+     * @return The attempt's result; false when the test run is stopped, or when the time runs out
+     * (an interrupted thread counts as running out of time).
      * @throws RuntimeException The exception from the last attempt, if that attempt threw one of
      *                          the retryOn exceptions and the time then ran out.
      */
@@ -48,16 +48,10 @@ public final class Polling {
                 return false;
             }
             final long remainingMs = stopBy - System.currentTimeMillis();
-            if (remainingMs <= 0) {
+            if (remainingMs <= 0 || !StaleElementRetry.sleep(Math.min(intervalMs, remainingMs))) {
                 if (failure != null) {
                     throw failure;
                 }
-                return false;
-            }
-            try {
-                Thread.sleep(Math.min(intervalMs, remainingMs));
-            } catch (final InterruptedException e) {
-                Thread.currentThread().interrupt();
                 return false;
             }
         }

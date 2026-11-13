@@ -162,6 +162,38 @@ public class StaleElementRetryTest {
     }
 
     @Test
+    public void waitForRethrowsStaleWhenInterrupted() {
+        Mockito.doThrow(new StaleElementReferenceException("stale")).when(this.staleElement).isDisplayed();
+        Mockito.when(this.driver.findElements(By.id("target"))).thenReturn(List.of(this.staleElement));
+        final TestRun ctx = this.createTestRun(new StepBuilder(new ElementVisible().toWaitFor())
+                .put("maxWait", "5000")
+                .put("interval", "10"));
+        Thread.currentThread().interrupt();
+        try {
+            // Interrupted counts as running out of time: the last attempt was stale, so it is rethrown.
+            assertThrows(StaleElementReferenceException.class, () -> this.run(ctx));
+            Mockito.verify(this.driver, Mockito.times(1)).findElements(By.id("target"));
+        } finally {
+            Thread.interrupted();
+        }
+    }
+
+    @Test
+    public void retryRethrowsStaleWhenInterrupted() {
+        final int[] calls = {0};
+        Thread.currentThread().interrupt();
+        try {
+            assertThrows(StaleElementReferenceException.class, () -> StaleElementRetry.get(() -> {
+                calls[0]++;
+                throw new StaleElementReferenceException("stale");
+            }));
+            assertEquals(1, calls[0]);
+        } finally {
+            Thread.interrupted();
+        }
+    }
+
+    @Test
     public void stepRunRetriesStepTypeThatAllowsIt() {
         final FlakyStep step = new FlakyStep(true);
         assertTrue(this.run(this.createTestRun(new StepBuilder(step))));
