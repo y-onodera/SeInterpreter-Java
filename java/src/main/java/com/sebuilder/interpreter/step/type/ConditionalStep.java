@@ -25,17 +25,16 @@ public interface ConditionalStep extends StepType {
      */
     @Override
     default boolean run(final TestRun ctx) {
-        final int stableWaitMs = ctx.containsKey("stableWait")
-                ? Integer.parseInt(ctx.string("stableWait")) : DEFAULT_STABLE_WAIT_MS;
+        final int stableWaitMs = ctx.getInt("stableWait", DEFAULT_STABLE_WAIT_MS);
         // On a fast-rendering page, the element can pass the readiness check and then be replaced,
         // moved or briefly covered (re-render, animation, overlay) before doRun() actually reaches
         // it. Look it up again on the next poll instead of failing on that transient exception.
-        return Polling.from(ctx)
-                .retryOn(StaleElementReferenceException.class, NoSuchElementException.class,
-                        ElementNotInteractableException.class)
-                .until(() -> this.findActiveElement(ctx)
+        return Polling.until(ctx,
+                () -> this.findActiveElement(ctx)
                         .filter(element -> isStable(element, stableWaitMs))
-                        .map(element -> this.doRun(ctx, element)));
+                        .map(element -> this.doRun(ctx, element)),
+                StaleElementReferenceException.class, NoSuchElementException.class,
+                ElementNotInteractableException.class);
     }
 
     /**

@@ -46,9 +46,9 @@ public class WaitFor extends AbstractStepType implements GetterUseStep {
         // A stale element means the page is still re-rendering it. That is neither a pass nor a
         // fail (whether negated or not), so keep polling; the poll also replaces the getter's own
         // retry, which is why testOnce() is used.
-        return Polling.from(ctx)
-                .retryOn(StaleElementReferenceException.class)
-                .until(() -> this.getGetter().testOnce(ctx) != negated ? Optional.of(true) : Optional.empty());
+        return Polling.until(ctx,
+                () -> this.getGetter().testOnce(ctx) != negated ? Optional.of(true) : Optional.empty(),
+                StaleElementReferenceException.class);
     }
 
     @Override

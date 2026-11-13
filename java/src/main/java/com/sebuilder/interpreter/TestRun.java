@@ -147,6 +147,10 @@ public class TestRun implements WebDriverWrapper {
         return this.containsKey(key) && this.vars().evaluate(this.currentStep().getParam(key));
     }
 
+    public int getInt(final String key, final int defaultValue) {
+        return this.containsKey(key) ? Integer.parseInt(this.string(key)) : defaultValue;
+    }
+
     public String text() {
         return this.string("text");
     }

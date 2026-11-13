@@ -60,10 +60,14 @@ public class ConditionalStepTest {
     }
 
     private TestRun createTestRun(final StepBuilder stepBuilder) {
+        return this.createTestRun(stepBuilder, 1000);
+    }
+
+    private TestRun createTestRun(final StepBuilder stepBuilder, final int maxWaitMs) {
         final TestCase head = new TestCaseBuilder()
                 .addStep(stepBuilder
                         .put("locator", new Locator("id", "target"))
-                        .put("maxWait", "1000")
+                        .put("maxWait", String.valueOf(maxWaitMs))
                         .put("interval", "10")
                         .build())
                 .build();
@@ -169,9 +173,10 @@ public class ConditionalStepTest {
                 .thenReturn(List.of(this.element))
                 .thenReturn(List.of());
         Mockito.doThrow(new ElementNotInteractableException("covered")).when(this.element).click();
+        final TestRun shortWait = this.createTestRun(new StepBuilder(new ClickElement()), 200);
 
         // Only the last attempt decides: the element is gone, so this is "not found", not an error.
-        assertFalse(new ClickElement().run(this.target));
+        assertFalse(new ClickElement().run(shortWait));
     }
 
     @Test
