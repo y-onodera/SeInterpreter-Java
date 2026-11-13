@@ -14,6 +14,11 @@ import java.nio.file.Files;
 public class ExportTemplate extends AbstractStepType implements LocatorHolder {
 
     @Override
+    public boolean isRetryOnStale() {
+        return true;
+    }
+
+    @Override
     public boolean run(final TestRun ctx) {
         try {
             final ExportResource toExport = this.getExportResource(ctx);

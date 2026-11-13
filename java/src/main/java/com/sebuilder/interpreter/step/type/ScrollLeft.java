@@ -10,6 +10,11 @@ import com.sebuilder.interpreter.step.LocatorHolder;
 public class ScrollLeft extends AbstractStepType implements Exportable, LocatorHolder {
 
     @Override
+    public boolean isRetryOnStale() {
+        return true;
+    }
+
+    @Override
     public boolean run(final TestRun ctx) {
         final ScrollableWidth width;
         if (ctx.hasLocator()) {

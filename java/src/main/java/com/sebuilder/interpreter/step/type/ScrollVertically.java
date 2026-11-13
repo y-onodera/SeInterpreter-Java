@@ -11,6 +11,11 @@ import com.sebuilder.interpreter.step.LocatorHolder;
 public class ScrollVertically extends AbstractStepType implements Exportable, LocatorHolder {
 
     @Override
+    public boolean isRetryOnStale() {
+        return true;
+    }
+
+    @Override
     public boolean run(final TestRun ctx) {
         final ScrollableHeight height;
         if (ctx.hasLocator()) {

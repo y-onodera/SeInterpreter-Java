@@ -15,6 +15,7 @@
  */
 package com.sebuilder.interpreter;
 
+import com.sebuilder.interpreter.step.StaleElementRetry;
 import com.sebuilder.interpreter.step.GetterUseStep;
 import org.openqa.selenium.bidi.module.Network;
 import org.openqa.selenium.bidi.network.AddInterceptParameters;
@@ -86,8 +87,15 @@ public record Step(
                                             .headers(newHeaders)
                             );
                         });
-                return this.type().run(testRun);
+                return this.runType(testRun);
             }
+        }
+        return this.runType(testRun);
+    }
+
+    private boolean runType(final TestRun testRun) {
+        if (this.type().isRetryOnStale()) {
+            return StaleElementRetry.get(() -> this.type().run(testRun));
         }
         return this.type().run(testRun);
     }

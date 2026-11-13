@@ -49,6 +49,16 @@ public interface StepType extends StepElement {
         return true;
     }
 
+    /**
+     * Whether {@link Step#run} may run this step again from the start when an element goes stale
+     * (see {@link com.sebuilder.interpreter.step.StaleElementRetry}). Only for steps that look up
+     * their elements on every run and set absolute values, so a second run has the same effect;
+     * never for steps that run sub steps or act on the page in a way that cannot be repeated.
+     */
+    default boolean isRetryOnStale() {
+        return false;
+    }
+
     default int getExecSteps(final TestRun ctx) {
         return 1;
     }

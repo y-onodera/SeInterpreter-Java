@@ -13,6 +13,11 @@ import java.util.Objects;
 public class HighLightElement extends AbstractStepType implements LocatorHolder {
 
     @Override
+    public boolean isRetryOnStale() {
+        return true;
+    }
+
+    @Override
     public boolean run(final TestRun ctx) {
         Cache.refresh(ctx);
         boolean result = false;

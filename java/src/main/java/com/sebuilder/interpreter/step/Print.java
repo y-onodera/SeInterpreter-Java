@@ -19,7 +19,7 @@ public class Print extends AbstractStepType implements GetterUseStep {
 
     @Override
     public boolean run(final TestRun ctx) {
-        String value = this.getter.get(ctx);
+        String value = StaleElementRetry.get(() -> this.getter.get(ctx));
         if (ctx.currentStep().negated()) {
             value = String.valueOf(!Boolean.parseBoolean(value));
         }

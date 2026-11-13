@@ -40,7 +40,7 @@ public class Store extends AbstractStepType implements GetterUseStep {
 
     @Override
     public boolean run(final TestRun ctx) {
-        String value = this.getter.get(ctx);
+        String value = StaleElementRetry.get(() -> this.getter.get(ctx));
         if (ctx.currentStep().containsParam("regex")) {
             value = value.replaceAll(ctx.string("regex"), ctx.string("replacement"));
         }

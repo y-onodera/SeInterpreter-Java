@@ -86,7 +86,7 @@ jobs:
         browser: [chrome ,edge ,firefox]
         include:
           - browser: chrome
-            arguments: --driver=chrome --resultoutput=chrome
+            arguments: --driver=chrome --resultoutput=chrome --driver.chrome.arguments.disable-features=HttpsUpgrades,HttpsFirstBalancedModeAutoEnable --driver.chrome.arguments.unsafely-treat-insecure-origin-as-secure=http://example.selenium.jp
           - browser: edge
             arguments: --driver=edge --resultoutput=edge --driver.experimental.browser.show_hub_apps_tower_pinned=false
           - browser: firefox
@@ -137,7 +137,7 @@ jobs:
         include:
           - browser: chrome
             expect: test/suite/expect/Chrome_screenshot
-            arguments: --driver=chrome --resultoutput=chrome --driver.chrome.arguments.ignore-certificate-errors=true --driver.chrome.arguments.disable-blink-features=BlockCredentialedSubresources
+            arguments: --driver=chrome --resultoutput=chrome --driver.chrome.arguments.ignore-certificate-errors=true --driver.chrome.arguments.disable-blink-features=BlockCredentialedSubresources --driver.chrome.arguments.disable-features=HttpsUpgrades,HttpsFirstBalancedModeAutoEnable --driver.chrome.arguments.unsafely-treat-insecure-origin-as-secure=http://example.selenium.jp
           - browser: edge
             expect: test/suite/expect/Edge_screenshot
             arguments: --driver=edge --resultoutput=edge --driver.experimental.browser.show_hub_apps_tower_pinned=false
@@ -178,7 +178,7 @@ jobs:
         include:
           - browser: chrome
             screenshotdir: Chrome_screenshot
-            arguments: --driver=chrome --resultoutput=chrome --driver.chrome.arguments.ignore-certificate-errors=true --driver.chrome.arguments.disable-blink-features=BlockCredentialedSubresources
+            arguments: --driver=chrome --resultoutput=chrome --driver.chrome.arguments.ignore-certificate-errors=true --driver.chrome.arguments.disable-blink-features=BlockCredentialedSubresources --driver.chrome.arguments.disable-features=HttpsUpgrades,HttpsFirstBalancedModeAutoEnable --driver.chrome.arguments.unsafely-treat-insecure-origin-as-secure=http://example.selenium.jp
           - browser: edge
             screenshotdir: Edge_screenshot
             arguments: --driver=edge --resultoutput=edge --driver.experimental.browser.show_hub_apps_tower_pinned=false
@@ -218,7 +218,7 @@ jobs:
         include:
           - browser: chrome
             screenshotdir: Chrome_screenshot
-            arguments: --driver=chrome --resultoutput=chrome
+            arguments: --driver=chrome --resultoutput=chrome --driver.chrome.arguments.disable-features=HttpsUpgrades,HttpsFirstBalancedModeAutoEnable --driver.chrome.arguments.unsafely-treat-insecure-origin-as-secure=http://example.selenium.jp
           - browser: edge
             screenshotdir: Edge_screenshot
             arguments: --driver=edge --resultoutput=edge --driver.experimental.browser.show_hub_apps_tower_pinned=false

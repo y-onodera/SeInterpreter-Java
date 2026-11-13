@@ -10,6 +10,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.openqa.selenium.By;
+import org.openqa.selenium.ElementNotInteractableException;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.Rectangle;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -59,10 +60,14 @@ public class ConditionalStepTest {
     }
 
     private TestRun createTestRun(final StepBuilder stepBuilder) {
+        return this.createTestRun(stepBuilder, 1000);
+    }
+
+    private TestRun createTestRun(final StepBuilder stepBuilder, final int maxWaitMs) {
         final TestCase head = new TestCaseBuilder()
                 .addStep(stepBuilder
                         .put("locator", new Locator("id", "target"))
-                        .put("maxWait", "1000")
+                        .put("maxWait", String.valueOf(maxWaitMs))
                         .put("interval", "10")
                         .build())
                 .build();
@@ -76,6 +81,16 @@ public class ConditionalStepTest {
     public void staleDuringReadyCheckKeepsWaiting() {
         Mockito.when(this.driver.findElements(By.id("target")))
                 .thenReturn(List.of(this.staleElement))
+                .thenReturn(List.of(this.element));
+
+        assertTrue(new ClickElement().run(this.target));
+        Mockito.verify(this.element).click();
+    }
+
+    @Test
+    public void staleFromFindElementsKeepsWaiting() {
+        Mockito.when(this.driver.findElements(By.id("target")))
+                .thenThrow(new StaleElementReferenceException("stale"))
                 .thenReturn(List.of(this.element));
 
         assertTrue(new ClickElement().run(this.target));
@@ -149,6 +164,30 @@ public class ConditionalStepTest {
 
         assertTrue(new ClickElement().run(noStableWait));
         Mockito.verify(this.element, Mockito.never()).getRect();
+        Mockito.verify(this.element).click();
+    }
+
+    @Test
+    public void returnsFalseWhenElementDisappearsAfterEarlierFailure() {
+        Mockito.when(this.driver.findElements(By.id("target")))
+                .thenReturn(List.of(this.element))
+                .thenReturn(List.of());
+        Mockito.doThrow(new ElementNotInteractableException("covered")).when(this.element).click();
+        final TestRun shortWait = this.createTestRun(new StepBuilder(new ClickElement()), 200);
+
+        // Only the last attempt decides: the element is gone, so this is "not found", not an error.
+        assertFalse(new ClickElement().run(shortWait));
+    }
+
+    @Test
+    public void returnsFalseWhenStoppedAfterFailure() {
+        Mockito.when(this.driver.findElements(By.id("target"))).thenReturn(List.of(this.element));
+        Mockito.doAnswer(it -> {
+            this.target.stop();
+            throw new ElementNotInteractableException("covered");
+        }).when(this.element).click();
+
+        assertFalse(new ClickElement().run(this.target));
         Mockito.verify(this.element).click();
     }
 

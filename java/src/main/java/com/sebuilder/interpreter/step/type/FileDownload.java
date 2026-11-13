@@ -1,5 +1,6 @@
 package com.sebuilder.interpreter.step.type;
 
+import org.openqa.selenium.StaleElementReferenceException;
 import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.step.AbstractStepType;
@@ -51,6 +52,8 @@ public class FileDownload extends AbstractStepType implements ConditionalStep, L
                 uri = baseURL + uri;
             }
             this.getDownloadFile(ctx, uri);
+        } catch (final StaleElementReferenceException e) {
+            throw e;
         } catch (final Throwable e) {
             ctx.log().error("download http get failure cause:", e);
             return false;
@@ -61,6 +64,8 @@ public class FileDownload extends AbstractStepType implements ConditionalStep, L
     public boolean post(final TestRun ctx) {
         try {
             this.postDownloadFile(ctx, ctx.string("postURL"));
+        } catch (final StaleElementReferenceException e) {
+            throw e;
         } catch (final Throwable e) {
             ctx.log().error("download http post failure cause:", e);
             return false;

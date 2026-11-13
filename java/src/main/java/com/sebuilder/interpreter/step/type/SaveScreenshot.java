@@ -16,6 +16,7 @@
 
 package com.sebuilder.interpreter.step.type;
 
+import com.sebuilder.interpreter.step.StaleElementRetry;
 import com.github.romankh3.image.comparison.ImageComparison;
 import com.github.romankh3.image.comparison.ImageComparisonUtil;
 import com.github.romankh3.image.comparison.model.ImageComparisonResult;
@@ -119,6 +120,12 @@ public class SaveScreenshot extends AbstractStepType implements LocatorHolder {
     }
 
     protected BufferedImage takeScreenShot(final TestRun ctx) {
+        // A capture only reads the page (and scrolls to absolute positions), so redo it from the
+        // start when an element it measures is re-rendered midway.
+        return StaleElementRetry.get(() -> this.capture(ctx));
+    }
+
+    private BufferedImage capture(final TestRun ctx) {
         final BufferedImage actual;
         if (ctx.containsKey("scroll") && !ctx.getBoolean("scroll")) {
             if (ctx.hasLocator()) {
