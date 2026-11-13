@@ -16,12 +16,12 @@
 
 package com.sebuilder.interpreter.step;
 
-import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
 import org.openqa.selenium.StaleElementReferenceException;
 
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Generic Wait that wraps a getter.
@@ -42,47 +42,13 @@ public class WaitFor extends AbstractStepType implements GetterUseStep {
 
     @Override
     public boolean run(final TestRun ctx) {
-        int maxWaitMs = Context.getWaitForMaxMs();
-        if (ctx.containsKey("maxWait")) {
-            maxWaitMs = Integer.parseInt(ctx.string("maxWait"));
-        }
-        int intervalMs = Context.getWaitForIntervalMs(); //
-        if (ctx.containsKey("interval")) {
-            intervalMs = Integer.parseInt(ctx.string("interval"));
-        }
-        final long stopBy = System.currentTimeMillis() + maxWaitMs;
-        // NB: If the step is negated, a result of "true"  means that we haven't succeeded yet.
-        //     If the step is normal,  a result of "false" means that we haven't succeeded yet.
-        while (true) {
-            StaleElementReferenceException staleFailure = null;
-            try {
-                // Polling already covers a stale element, so skip the getter's own retry.
-                if (this.getGetter().testOnce(ctx) != ctx.currentStep().negated()) {
-                    return true;
-                }
-            } catch (final StaleElementReferenceException e) {
-                // The page is still re-rendering the element. That is neither a pass nor a fail
-                // (whether negated or not), so keep polling until maxWait.
-                staleFailure = e;
-            }
-            if (ctx.isStopped()) {
-                // The test run was stopped (e.g. cancelled from the UI) while we were polling.
-                // The driver may already be closing, so avoid another round trip and just report
-                // that the wait did not succeed.
-                return false;
-            }
-            if (System.currentTimeMillis() >= stopBy) {
-                if (staleFailure != null) {
-                    throw staleFailure;
-                }
-                return false;
-            }
-            try {
-                Thread.sleep(intervalMs);
-            } catch (final InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }
+        final boolean negated = ctx.currentStep().negated();
+        // A stale element means the page is still re-rendering it. That is neither a pass nor a
+        // fail (whether negated or not), so keep polling; the poll also replaces the getter's own
+        // retry, which is why testOnce() is used.
+        return Polling.from(ctx)
+                .retryOn(StaleElementReferenceException.class)
+                .until(() -> this.getGetter().testOnce(ctx) != negated ? Optional.of(true) : Optional.empty());
     }
 
     @Override

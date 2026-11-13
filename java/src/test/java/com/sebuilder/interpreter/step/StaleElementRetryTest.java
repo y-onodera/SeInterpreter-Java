@@ -145,6 +145,23 @@ public class StaleElementRetryTest {
     }
 
     @Test
+    public void waitForStopsPollingWhenInterrupted() {
+        Mockito.doReturn(false).when(this.element).isDisplayed();
+        Mockito.when(this.driver.findElements(By.id("target"))).thenReturn(List.of(this.element));
+        final TestRun ctx = this.createTestRun(new StepBuilder(new ElementVisible().toWaitFor())
+                .put("maxWait", "5000")
+                .put("interval", "10"));
+        final long start = System.currentTimeMillis();
+        Thread.currentThread().interrupt();
+        try {
+            assertFalse(this.run(ctx));
+            assertTrue(System.currentTimeMillis() - start < 1000);
+        } finally {
+            Thread.interrupted();
+        }
+    }
+
+    @Test
     public void stepRunRetriesStepTypeThatAllowsIt() {
         final FlakyStep step = new FlakyStep(true);
         assertTrue(this.run(this.createTestRun(new StepBuilder(step))));

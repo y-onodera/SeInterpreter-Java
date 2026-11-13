@@ -10,6 +10,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.openqa.selenium.By;
+import org.openqa.selenium.ElementNotInteractableException;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.Rectangle;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -159,6 +160,29 @@ public class ConditionalStepTest {
 
         assertTrue(new ClickElement().run(noStableWait));
         Mockito.verify(this.element, Mockito.never()).getRect();
+        Mockito.verify(this.element).click();
+    }
+
+    @Test
+    public void returnsFalseWhenElementDisappearsAfterEarlierFailure() {
+        Mockito.when(this.driver.findElements(By.id("target")))
+                .thenReturn(List.of(this.element))
+                .thenReturn(List.of());
+        Mockito.doThrow(new ElementNotInteractableException("covered")).when(this.element).click();
+
+        // Only the last attempt decides: the element is gone, so this is "not found", not an error.
+        assertFalse(new ClickElement().run(this.target));
+    }
+
+    @Test
+    public void returnsFalseWhenStoppedAfterFailure() {
+        Mockito.when(this.driver.findElements(By.id("target"))).thenReturn(List.of(this.element));
+        Mockito.doAnswer(it -> {
+            this.target.stop();
+            throw new ElementNotInteractableException("covered");
+        }).when(this.element).click();
+
+        assertFalse(new ClickElement().run(this.target));
         Mockito.verify(this.element).click();
     }
 

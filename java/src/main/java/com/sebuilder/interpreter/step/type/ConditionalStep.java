@@ -1,8 +1,8 @@
 package com.sebuilder.interpreter.step.type;
 
-import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.StepType;
 import com.sebuilder.interpreter.TestRun;
+import com.sebuilder.interpreter.step.Polling;
 import org.openqa.selenium.ElementNotInteractableException;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.Rectangle;
@@ -25,50 +25,17 @@ public interface ConditionalStep extends StepType {
      */
     @Override
     default boolean run(final TestRun ctx) {
-        int maxWaitMs = Context.getWaitForMaxMs();
-        if (ctx.containsKey("maxWait")) {
-            maxWaitMs = Integer.parseInt(ctx.string("maxWait"));
-        }
-        int intervalMs = Context.getWaitForIntervalMs();
-        if (ctx.containsKey("interval")) {
-            intervalMs = Integer.parseInt(ctx.string("interval"));
-        }
-        int stableWaitMs = DEFAULT_STABLE_WAIT_MS;
-        if (ctx.containsKey("stableWait")) {
-            stableWaitMs = Integer.parseInt(ctx.string("stableWait"));
-        }
-        final long stopBy = System.currentTimeMillis() + maxWaitMs;
-        RuntimeException lastFailure = null;
-        while (true) {
-            final Optional<WebElement> active = this.findActiveElement(ctx);
-            if (active.isPresent() && isStable(active.get(), stableWaitMs)) {
-                try {
-                    return this.doRun(ctx, active.get());
-                } catch (final StaleElementReferenceException | NoSuchElementException |
-                               ElementNotInteractableException e) {
-                    // On a fast-rendering page, the element can pass the check above and then be
-                    // replaced, moved or briefly covered (re-render, animation, overlay) before
-                    // doRun() actually reaches it. Look it up again instead of failing on that
-                    // first transient exception.
-                    lastFailure = e;
-                }
-            }
-            if (ctx.isStopped() || System.currentTimeMillis() >= stopBy) {
-                if (lastFailure != null) {
-                    throw lastFailure;
-                }
-                return false;
-            }
-            try {
-                Thread.sleep(intervalMs);
-            } catch (final InterruptedException ie) {
-                Thread.currentThread().interrupt();
-                if (lastFailure != null) {
-                    throw lastFailure;
-                }
-                return false;
-            }
-        }
+        final int stableWaitMs = ctx.containsKey("stableWait")
+                ? Integer.parseInt(ctx.string("stableWait")) : DEFAULT_STABLE_WAIT_MS;
+        // On a fast-rendering page, the element can pass the readiness check and then be replaced,
+        // moved or briefly covered (re-render, animation, overlay) before doRun() actually reaches
+        // it. Look it up again on the next poll instead of failing on that transient exception.
+        return Polling.from(ctx)
+                .retryOn(StaleElementReferenceException.class, NoSuchElementException.class,
+                        ElementNotInteractableException.class)
+                .until(() -> this.findActiveElement(ctx)
+                        .filter(element -> isStable(element, stableWaitMs))
+                        .map(element -> this.doRun(ctx, element)));
     }
 
     /**
