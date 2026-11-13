@@ -1,5 +1,6 @@
 package com.sebuilder.interpreter.step.type;
 
+import com.sebuilder.interpreter.step.StaleElementRetry;
 import com.google.common.collect.Maps;
 import com.sebuilder.interpreter.Locator;
 import com.sebuilder.interpreter.TestRun;
@@ -14,6 +15,11 @@ public class HighLightElement extends AbstractStepType implements LocatorHolder 
 
     @Override
     public boolean run(final TestRun ctx) {
+        // Every attempt finds the element again and sets an absolute value, so a retry is safe.
+        return StaleElementRetry.get(() -> this.highlight(ctx));
+    }
+
+    private boolean highlight(final TestRun ctx) {
         Cache.refresh(ctx);
         boolean result = false;
         for (final WebElement element : ctx.locator().findElements(ctx)) {

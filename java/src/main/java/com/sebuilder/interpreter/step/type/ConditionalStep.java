@@ -83,10 +83,15 @@ public interface ConditionalStep extends StepType {
      * while being inspected is just skipped: it is being re-rendered and is not ready yet.
      */
     default Optional<WebElement> findActiveElement(final TestRun ctx) {
-        return ctx.locator().findElements(ctx)
-                .stream()
-                .filter(ConditionalStep::isActive)
-                .findFirst();
+        try {
+            return ctx.locator().findElements(ctx)
+                    .stream()
+                    .filter(ConditionalStep::isActive)
+                    .findFirst();
+        } catch (final StaleElementReferenceException e) {
+            // The driver can throw from findElements() itself while the DOM is changing.
+            return Optional.empty();
+        }
     }
 
     /**

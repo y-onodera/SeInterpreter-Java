@@ -1,6 +1,7 @@
 package com.sebuilder.interpreter.step.getter;
 
 import com.sebuilder.interpreter.*;
+import com.sebuilder.interpreter.step.StaleElementRetry;
 import org.apache.logging.log4j.Logger;
 import org.junit.Before;
 import org.junit.Rule;
@@ -105,7 +106,7 @@ public class StaleElementGetterTest {
         Mockito.when(this.driver.findElements(By.id("target"))).thenReturn(List.of(this.staleElement));
         final TestRun ctx = this.createTestRun(new ElementVisible());
         assertThrows(StaleElementReferenceException.class, () -> new ElementVisible().get(ctx));
-        Mockito.verify(this.driver, Mockito.times(AbstractGetter.STALE_RETRY_COUNT)).findElements(By.id("target"));
+        Mockito.verify(this.driver, Mockito.times(StaleElementRetry.RETRY_COUNT)).findElements(By.id("target"));
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.sebuilder.interpreter.step.type;
 
+import com.sebuilder.interpreter.step.StaleElementRetry;
 import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
@@ -16,7 +17,7 @@ public class ExportTemplate extends AbstractStepType implements LocatorHolder {
     @Override
     public boolean run(final TestRun ctx) {
         try {
-            final ExportResource toExport = this.getExportResource(ctx);
+            final ExportResource toExport = StaleElementRetry.get(() -> this.getExportResource(ctx));
             if (toExport.hasDataSource()) {
                 toExport.outputDataSourceTemplate();
             }

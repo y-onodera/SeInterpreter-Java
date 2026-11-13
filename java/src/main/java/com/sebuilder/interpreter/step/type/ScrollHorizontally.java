@@ -1,5 +1,6 @@
 package com.sebuilder.interpreter.step.type;
 
+import com.sebuilder.interpreter.step.StaleElementRetry;
 import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.screenshot.Page;
@@ -12,6 +13,11 @@ public class ScrollHorizontally extends AbstractStepType implements Exportable, 
 
     @Override
     public boolean run(final TestRun ctx) {
+        // Every attempt finds the element again and sets an absolute value, so a retry is safe.
+        return StaleElementRetry.get(() -> this.scroll(ctx));
+    }
+
+    private boolean scroll(final TestRun ctx) {
         final ScrollableWidth width;
         if (ctx.hasLocator()) {
             width = ScrollableTag.getWidth(ctx, ctx.locator().find(ctx));

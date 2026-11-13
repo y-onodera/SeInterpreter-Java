@@ -30,8 +30,11 @@ public class FileDownloadCDP extends AbstractStepType implements ConditionalStep
             }
             return new HttpResponse().setStatus(204);
         });
-        el.click();
-        interceptor.close();
+        try {
+            el.click();
+        } finally {
+            interceptor.close();
+        }
         return true;
     }
 

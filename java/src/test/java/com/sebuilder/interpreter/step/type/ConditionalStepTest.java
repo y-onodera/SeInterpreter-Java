@@ -83,6 +83,16 @@ public class ConditionalStepTest {
     }
 
     @Test
+    public void staleFromFindElementsKeepsWaiting() {
+        Mockito.when(this.driver.findElements(By.id("target")))
+                .thenThrow(new StaleElementReferenceException("stale"))
+                .thenReturn(List.of(this.element));
+
+        assertTrue(new ClickElement().run(this.target));
+        Mockito.verify(this.element).click();
+    }
+
+    @Test
     public void staleDuringActionIsRetriedWithFreshElement() {
         Mockito.when(this.driver.findElements(By.id("target")))
                 .thenReturn(List.of(this.staleElement))
