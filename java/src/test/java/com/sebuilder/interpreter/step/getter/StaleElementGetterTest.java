@@ -18,7 +18,9 @@ import java.io.File;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 public class StaleElementGetterTest {
     @Rule
@@ -47,8 +49,19 @@ public class StaleElementGetterTest {
     }
 
     private TestRun createTestRun(final AbstractGetter getter) {
+        return this.createTestRun(new StepBuilder(getter.toAssert()));
+    }
+
+    private TestRun createWaitForRun(final AbstractGetter getter, final boolean negated) {
+        return this.createTestRun(new StepBuilder(getter.toWaitFor())
+                .negated(negated)
+                .put("maxWait", "1000")
+                .put("interval", "10"));
+    }
+
+    private TestRun createTestRun(final StepBuilder stepBuilder) {
         final TestCase head = new TestCaseBuilder()
-                .addStep(new StepBuilder(getter.toAssert())
+                .addStep(stepBuilder
                         .put("locator", new Locator("id", "target"))
                         .build())
                 .build();
@@ -93,5 +106,50 @@ public class StaleElementGetterTest {
         final TestRun ctx = this.createTestRun(new ElementVisible());
         assertThrows(StaleElementReferenceException.class, () -> new ElementVisible().get(ctx));
         Mockito.verify(this.driver, Mockito.times(AbstractGetter.STALE_RETRY_COUNT)).findElements(By.id("target"));
+    }
+
+    @Test
+    public void textLooksUpAgainWhenElementGoesStale() {
+        Mockito.doReturn(true).when(this.staleElement).isDisplayed();
+        Mockito.doThrow(new StaleElementReferenceException("stale")).when(this.staleElement).getText();
+        Mockito.doReturn(true).when(this.element).isDisplayed();
+        Mockito.doReturn("hello").when(this.element).getText();
+        Mockito.when(this.driver.findElements(By.id("target")))
+                .thenReturn(List.of(this.staleElement))
+                .thenReturn(List.of(this.element));
+        assertEquals("hello", new Text().get(this.createTestRun(new Text())));
+    }
+
+    @Test
+    public void waitForKeepsWaitingWhileElementIsStale() {
+        Mockito.doThrow(new StaleElementReferenceException("stale")).when(this.staleElement).isDisplayed();
+        Mockito.doReturn(true).when(this.element).isDisplayed();
+        Mockito.when(this.driver.findElements(By.id("target")))
+                .thenReturn(List.of(this.staleElement), List.of(this.staleElement), List.of(this.staleElement),
+                        List.of(this.staleElement))
+                .thenReturn(List.of(this.element));
+        final TestRun ctx = this.createWaitForRun(new ElementVisible(), false);
+        assertTrue(ctx.currentStep().type().run(ctx));
+    }
+
+    @Test
+    public void negatedWaitForDoesNotPassOnStale() {
+        Mockito.doThrow(new StaleElementReferenceException("stale")).when(this.staleElement).isDisplayed();
+        Mockito.doReturn(true).when(this.element).isDisplayed();
+        Mockito.when(this.driver.findElements(By.id("target")))
+                .thenReturn(List.of(this.staleElement), List.of(this.staleElement), List.of(this.staleElement))
+                .thenReturn(List.of(this.element));
+        final TestRun ctx = this.createWaitForRun(new ElementVisible(), true);
+        assertFalse(ctx.currentStep().type().run(ctx));
+    }
+
+    @Test
+    public void waitForRethrowsStaleAtMaxWait() {
+        Mockito.doThrow(new StaleElementReferenceException("stale")).when(this.staleElement).isDisplayed();
+        Mockito.when(this.driver.findElements(By.id("target"))).thenReturn(List.of(this.staleElement));
+        final TestRun ctx = this.createWaitForRun(new ElementVisible(), false);
+        final long start = System.currentTimeMillis();
+        assertThrows(StaleElementReferenceException.class, () -> ctx.currentStep().type().run(ctx));
+        assertTrue(System.currentTimeMillis() - start >= 1000);
     }
 }

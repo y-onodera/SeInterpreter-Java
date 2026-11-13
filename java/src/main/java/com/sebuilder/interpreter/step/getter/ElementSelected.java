@@ -23,7 +23,7 @@ import com.sebuilder.interpreter.step.LocatorHolder;
 public class ElementSelected extends AbstractGetter implements LocatorHolder {
     @Override
     public String get(final TestRun ctx) {
-        final boolean selected = ctx.locator().find(ctx).isSelected();
+        final boolean selected = Boolean.parseBoolean(retryOnStale(() -> "" + ctx.locator().find(ctx).isSelected()));
         if (ctx.containsKey("check") && !ctx.getBoolean("check")) {
             return "" + !selected;
         }

@@ -7,7 +7,7 @@ import com.sebuilder.interpreter.step.LocatorHolder;
 public class PointX extends AbstractGetter implements LocatorHolder {
     @Override
     public String get(final TestRun ctx) {
-        return String.valueOf(ctx.locator().find(ctx).getRect().getX());
+        return retryOnStale(() -> String.valueOf(ctx.locator().find(ctx).getRect().getX()));
     }
 
     @Override

@@ -8,7 +8,7 @@ public class ClientHeight extends AbstractGetter implements LocatorHolder {
     @Override
     public String get(final TestRun ctx) {
         if (ctx.hasLocator()) {
-            return String.valueOf(ctx.locator().find(ctx).getCssValue("clientHeight"));
+            return retryOnStale(() -> String.valueOf(ctx.locator().find(ctx).getCssValue("clientHeight")));
         }
         return String.valueOf(ctx.getClientHeight());
     }

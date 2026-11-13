@@ -19,6 +19,7 @@ package com.sebuilder.interpreter.step;
 import com.sebuilder.interpreter.Context;
 import com.sebuilder.interpreter.StepBuilder;
 import com.sebuilder.interpreter.TestRun;
+import org.openqa.selenium.StaleElementReferenceException;
 
 import java.util.Objects;
 
@@ -52,20 +53,35 @@ public class WaitFor extends AbstractStepType implements GetterUseStep {
         final long stopBy = System.currentTimeMillis() + maxWaitMs;
         // NB: If the step is negated, a result of "true"  means that we haven't succeeded yet.
         //     If the step is normal,  a result of "false" means that we haven't succeeded yet.
-        while (!this.test(ctx) && System.currentTimeMillis() < stopBy && !ctx.isStopped()) {
+        while (true) {
+            StaleElementReferenceException staleFailure = null;
+            try {
+                if (this.test(ctx)) {
+                    return true;
+                }
+            } catch (final StaleElementReferenceException e) {
+                // The page is still re-rendering the element. That is neither a pass nor a fail
+                // (whether negated or not), so keep polling until maxWait.
+                staleFailure = e;
+            }
+            if (ctx.isStopped()) {
+                // The test run was stopped (e.g. cancelled from the UI) while we were polling.
+                // The driver may already be closing, so avoid another round trip and just report
+                // that the wait did not succeed.
+                return false;
+            }
+            if (System.currentTimeMillis() >= stopBy) {
+                if (staleFailure != null) {
+                    throw staleFailure;
+                }
+                return false;
+            }
             try {
                 Thread.sleep(intervalMs);
             } catch (final InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }
-        if (ctx.isStopped()) {
-            // The test run was stopped (e.g. cancelled from the UI) while we were polling.
-            // The driver may already be closing, so avoid another round trip and just report
-            // that the wait did not succeed.
-            return false;
-        }
-        return this.test(ctx);
     }
 
     @Override
