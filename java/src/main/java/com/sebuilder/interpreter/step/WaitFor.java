@@ -56,7 +56,8 @@ public class WaitFor extends AbstractStepType implements GetterUseStep {
         while (true) {
             StaleElementReferenceException staleFailure = null;
             try {
-                if (this.test(ctx)) {
+                // Polling already covers a stale element, so skip the getter's own retry.
+                if (this.getGetter().testOnce(ctx) != ctx.currentStep().negated()) {
                     return true;
                 }
             } catch (final StaleElementReferenceException e) {

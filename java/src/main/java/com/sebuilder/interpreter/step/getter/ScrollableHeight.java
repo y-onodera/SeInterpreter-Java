@@ -8,7 +8,7 @@ public class ScrollableHeight extends AbstractGetter implements LocatorHolder {
     @Override
     public String get(final TestRun ctx) {
         if (ctx.hasLocator()) {
-            return retryOnStale(() -> String.valueOf(ctx.locator().find(ctx).getCssValue("scrollHeight")));
+            return String.valueOf(ctx.locator().find(ctx).getCssValue("scrollHeight"));
         }
         return String.valueOf(ctx.getContentHeight());
     }

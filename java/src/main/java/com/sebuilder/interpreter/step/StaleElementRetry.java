@@ -14,7 +14,7 @@ import java.util.function.Supplier;
 public final class StaleElementRetry {
 
     public static final int RETRY_COUNT = 3;
-    public static final int RETRY_INTERVAL_MS = 100;
+    private static final int RETRY_INTERVAL_MS = 100;
 
     private StaleElementRetry() {
     }

@@ -23,7 +23,7 @@ import com.sebuilder.interpreter.step.LocatorHolder;
 public class ElementPresent extends AbstractGetter implements LocatorHolder {
     @Override
     public String get(final TestRun ctx) {
-        return retryOnStale(() -> "" + (!ctx.locator().findElements(ctx).isEmpty()));
+        return "" + (!ctx.locator().findElements(ctx).isEmpty());
     }
 
     @Override

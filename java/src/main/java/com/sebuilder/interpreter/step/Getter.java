@@ -35,7 +35,17 @@ public interface Getter extends StepElement {
      */
     String get(TestRun ctx);
 
+    /**
+     * {@link #testOnce} that looks the elements up again when one goes stale.
+     */
     default boolean test(final TestRun ctx) {
+        return StaleElementRetry.get(() -> this.testOnce(ctx));
+    }
+
+    /**
+     * For callers that already poll (e.g. {@link WaitFor}) and handle a stale element themselves.
+     */
+    default boolean testOnce(final TestRun ctx) {
         final String got = this.get(ctx);
         final boolean result;
         if (this.cmpParamName() == null) {

@@ -11,13 +11,11 @@ public class ElementEnable extends AbstractGetter implements LocatorHolder {
 
     @Override
     public String get(final TestRun ctx) {
-        return retryOnStale(() -> {
-            final List<WebElement> result = ctx.locator().findElements(ctx);
-            if (result.isEmpty()) {
-                return "false";
-            }
-            return "" + result.getFirst().isEnabled();
-        });
+        final List<WebElement> result = ctx.locator().findElements(ctx);
+        if (result.size() == 0) {
+            return "false";
+        }
+        return "" + result.get(0).isEnabled();
     }
 
     @Override

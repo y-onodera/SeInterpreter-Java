@@ -23,7 +23,7 @@ import com.sebuilder.interpreter.step.LocatorHolder;
 public class Text extends AbstractGetter implements LocatorHolder {
     @Override
     public String get(final TestRun ctx) {
-        return retryOnStale(() -> ctx.locator().find(ctx).getText());
+        return ctx.locator().find(ctx).getText();
     }
 
     @Override

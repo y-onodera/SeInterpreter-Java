@@ -23,7 +23,7 @@ import com.sebuilder.interpreter.step.LocatorHolder;
 public class ElementStyle extends AbstractGetter implements LocatorHolder {
     @Override
     public String get(final TestRun ctx) {
-        return retryOnStale(() -> ctx.locator().find(ctx).getCssValue(ctx.string("propertyName")));
+        return ctx.locator().find(ctx).getCssValue(ctx.string("propertyName"));
     }
 
     @Override

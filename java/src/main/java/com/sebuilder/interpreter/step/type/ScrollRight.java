@@ -1,6 +1,5 @@
 package com.sebuilder.interpreter.step.type;
 
-import com.sebuilder.interpreter.step.StaleElementRetry;
 import com.sebuilder.interpreter.TestRun;
 import com.sebuilder.interpreter.screenshot.Page;
 import com.sebuilder.interpreter.screenshot.ScrollableTag;
@@ -11,12 +10,12 @@ import com.sebuilder.interpreter.step.LocatorHolder;
 public class ScrollRight extends AbstractStepType implements Exportable, LocatorHolder {
 
     @Override
-    public boolean run(final TestRun ctx) {
-        // Every attempt finds the element again and sets an absolute value, so a retry is safe.
-        return StaleElementRetry.get(() -> this.scroll(ctx));
+    public boolean isRetryOnStale() {
+        return true;
     }
 
-    private boolean scroll(final TestRun ctx) {
+    @Override
+    public boolean run(final TestRun ctx) {
         final ScrollableWidth width;
         if (ctx.hasLocator()) {
             width = ScrollableTag.getWidth(ctx, ctx.locator().find(ctx));
