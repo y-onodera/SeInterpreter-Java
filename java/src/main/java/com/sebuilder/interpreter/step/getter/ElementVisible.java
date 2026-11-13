@@ -11,11 +11,13 @@ public class ElementVisible extends AbstractGetter implements LocatorHolder {
 
     @Override
     public String get(final TestRun ctx) {
-        final List<WebElement> result = ctx.locator().findElements(ctx);
-        if (result.size() == 0) {
-            return "false";
-        }
-        return "" + result.stream().anyMatch(WebElement::isDisplayed);
+        return retryOnStale(() -> {
+            final List<WebElement> result = ctx.locator().findElements(ctx);
+            if (result.isEmpty()) {
+                return "false";
+            }
+            return "" + result.stream().anyMatch(WebElement::isDisplayed);
+        });
     }
 
     @Override
